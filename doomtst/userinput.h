@@ -1,0 +1,42 @@
+#include "iostream"
+#include <Windows.h>
+#include "dynamicarray.h"
+#include <glad/glad.h>
+#include <glm/glm.hpp>
+#ifndef Userinput_HPP
+#define Userinput_HPP
+
+namespace userinput {
+	extern glm::vec2 mouseposdt;
+	extern glm::vec2 mousepos;
+		struct inputkey
+	{
+		bool held;
+		bool relesed;
+		bool pressed;
+		inputkey() {
+
+			held = false;
+			pressed = false;
+			relesed = false;
+		}
+	};
+
+	void initiate();
+
+	void updatekey(int code, int pressedorrelesed);
+	void endupdate();
+	//inputkey Getkey(char keyval)
+	
+	int convertchartoglfwkey(const char key);
+
+		inputkey getinputkey(const char key);
+	
+
+
+
+}
+
+
+#endif // !userinp
+
