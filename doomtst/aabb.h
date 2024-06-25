@@ -28,7 +28,7 @@ struct	colrect :gameobject::component
 		//scale on each side
 		bool gridobj;
 		v3::Vector3 scale;
-
+		bool pointinbox(v3::Vector3 pos);
 		int index;
 		colrect() = default;
 		void destroy();

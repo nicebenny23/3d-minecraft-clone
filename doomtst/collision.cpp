@@ -12,6 +12,7 @@ void collision::update()
 	}
 }
 Vector3 specfloor(Vector3 inter,Vector3 center) {
+	
 	v3::Vector3 pos = zerov;
 	pos.x = iv3::floorabs((inter.x - center.x) * 2);
 	pos.y = iv3::floorabs((inter.y - center.y) * 2);

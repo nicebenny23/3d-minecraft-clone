@@ -46,6 +46,22 @@ namespace aabb {
         return v3::zerov;
     }
 
+    bool colrect::pointinbox(v3::Vector3 pos)
+    {
+        pos -= center;
+        if (abs(pos.x)<=scale.x)
+        {
+            if (abs(pos.y) <= scale.y)
+            {
+                if (abs(pos.z) <= scale.z)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     void colrect::destroy()
     {
         if (!gridobj)
