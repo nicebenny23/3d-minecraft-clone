@@ -163,9 +163,12 @@
     <ClInclude Include="collision.h" />
     <ClInclude Include="component.h" />
     <ClInclude Include="dynamicarray.h" />
+    <ClInclude Include="entity.h" />
     <ClInclude Include="gameobject.h" />
     <ClInclude Include="grid.h" />
+    <ClInclude Include="objecthelper.h" />
     <ClInclude Include="random.h" />
+    <ClInclude Include="ray.h" />
     <ClInclude Include="renderer.h" />
     <ClInclude Include="userinput.h" />
     <ClInclude Include="vector2.h" />

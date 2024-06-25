@@ -5,9 +5,10 @@
 #define grid_HPP
 #define loadamt 1
 namespace grid {
-	
+	extern chunk::chunk** chunklist;
 	bool issolidatpos(int x, int y, int z);
-	rblock* getobjatgrid(int x, int y, int z);
+	block* getobjatgrid(int x, int y, int z);
+	block* getobjatgrid2(int x, int y, int z);
 	void initgrid();
 	void load();
 	void reupdatechunkborders();

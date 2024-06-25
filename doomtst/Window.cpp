@@ -9,6 +9,10 @@ namespace window {
     {
         return false;
     }
+    void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
+    {
+        userinput::updatemousebutton(button, action);
+     }
   static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
         userinput::updatekey(key, action);
@@ -53,6 +57,7 @@ namespace window {
       
         glfwSetCursorPosCallback(awindow, cursor_position_callback);
         glfwSetFramebufferSizeCallback(awindow, framebuffer_size_callback);
+        glfwSetMouseButtonCallback(awindow, mouse_button_callback);
         glfwSetKeyCallback(awindow, key_callback);
         glfwSetInputMode(awindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }

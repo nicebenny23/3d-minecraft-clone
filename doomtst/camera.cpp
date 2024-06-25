@@ -1,5 +1,5 @@
 #include "camera.h"
-
+#include "vector3.h";
 
 namespace camera {
 	glm::vec3 campos;
@@ -11,11 +11,15 @@ namespace camera {
 		pitch = 0;
 
 	}
-	bool direction(glm::vec3 point) {
+    v3::Vector3 direction() {
 
-		glm::vec3 dir = glm::vec3(cos(yaw), sin(pitch),0);
-		return true;
+		v3::Vector3 dir = v3::zerov;
+		 dir.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		dir.y = sin(glm::radians(pitch));
+		dir.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+	return v3::normal(dir);
 	}
+	
 	void calculateyawandpitch()
 	{
 		

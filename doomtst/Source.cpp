@@ -24,8 +24,8 @@ int main()
     randominit();
     window::createcurwindow(1600,1200);
     userinput::initiate();
-    
-   
+    gameobject::initmap();
+    gameobject::initobjs();
 
     // glad: load all OpenGL function pointers
     // ---------------------------------------
@@ -81,7 +81,7 @@ int main()
         }
         if (userinput::getinputkey('z').held)
         {
-            cam -= glm::vec3(0,5, 0) * (dt * speed);
+            cam -= glm::vec3(0,1, 0) * (dt * speed);
         }
         pos.center = cam;
         //addindependent move on each axis
@@ -108,6 +108,7 @@ int main()
 
          float radius =userinput::mousepos.x;
          camera::calculateyawandpitch();
+         collision::collideraywithgrid();
          camera::setcamerapos(cam);
          camera::sendoffviewmatrix();
         
@@ -128,7 +129,7 @@ int main()
         grid::reupdatechunkborders();
         grid::load();
         grid::initdatabuffer();
-      
+        gameobject::deleteobjs();
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         // -------------------------------------------------------------------------------
     window::swapbuffer();

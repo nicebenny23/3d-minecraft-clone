@@ -7,7 +7,7 @@
 
 namespace dynamicarray {
 
-
+#define resizelen(len) (len==0)?2:2*len
 	template<class T>
 	class array
 	{
@@ -17,7 +17,7 @@ namespace dynamicarray {
 		array(T* arr, int size);
 		T& operator[](int index);
 		T getelem(int index);
-
+		
 		array(int size);
 		void destroy();
 		T& at(int ind);
@@ -29,7 +29,7 @@ namespace dynamicarray {
 		void merge(int index, const array& arr);
 		bool deleteind(int index);
 		T& gettop();
-
+		void setlist(array* arr);
 		void append(T value);
 		T* getdata();
 		array(const array& arr);
@@ -42,19 +42,32 @@ namespace dynamicarray {
 
 	};
 
+	//sets a list to another list while deleting the other said list,creates no memry as deletes fist list 
+	template<class T>
+	void array<T>::setlist(array* arr) {
+		this->destroy();
+		this->length = arr->length;
+		this->capacity = arr->capacity;
+		this->list = new T[this->capacity];
 
 
 
+		for (int i = 0; i < this->length; i++) {
+			this->list[i] = arr->list[i];
+		}
+		arr->destroy();
+	}
 
 	template<class T>
 	T array<T>::getelem(int index) {
 		if (index > length) {
 
-			index = length - 1;
+			static_assert("index for getelem greater than length ");
 		}
+		
 		if (index < 0)
 		{
-			index = 0;
+			static_assert("index for getelem less than 0");
 		}
 		return list[index];
 	}
@@ -71,7 +84,7 @@ namespace dynamicarray {
 		int otherlength = arr.length;
 		if (length + otherlength >= capacity)
 		{
-			resize(2 * (length + otherlength) + 2);
+			resize(resizelen (length + otherlength));
 		}
 
 		for (int i = index; i < length; i++)
@@ -158,7 +171,7 @@ namespace dynamicarray {
 		return true;
 	}
 
-	//copies an array
+	//copies an array and uses memory this is used when setting varybles i think
 	template<class T>
 	array<T>::array(const array& arr) {
 		length = arr.length;
@@ -182,7 +195,7 @@ namespace dynamicarray {
 	void array<T>::append(T value) {
 		if (length >= capacity)//sees if wee need more memory due to not enogh space
 		{
-			resize(2 * length + 2);
+			resize(resizelen(length));
 		}
 		list[length] = value;
 		length++;
@@ -204,7 +217,7 @@ namespace dynamicarray {
 				list[i] = list[i + 1];//this lets index be removed
 			}
 
-			list[length] = T();//sets to defailt
+			
 			return true;
 		}
 		return false;
@@ -221,15 +234,17 @@ namespace dynamicarray {
 	void array<T>::insertind(int index, T value) {
 		if (index < 0)//sees if it over 0
 		{
+			static_assert("attempted to insert an element in array below zero");
 			return;
 		}
 		if (index > length) {
 
-			index = length;
+			static_assert("attempted to insert an element in array greater than length");
+			return;
 		}
 		if (capacity <= length)//sees if wee need more memory due to not enogh space
 		{
-			resize(2 * length + 2);
+			resize(resizelen(length));
 		}
 
 
@@ -254,7 +269,7 @@ namespace dynamicarray {
 
 		if (index >= capacity)
 		{
-			if (!resize(2 * index + 2))//array resize failed
+			if (!resize(resizelen(length)))//array resize failed
 			{
 				return *list;//to avoid error in case of memory fail and derenfrence it because its cool
 			}
@@ -266,14 +281,14 @@ namespace dynamicarray {
 		}
 		if (index < 0)
 		{
-			index = 0;//to avoid error
+			static_assert("index for [] operator less than 0");
 		}
 
 
 		if (length > capacity) {
-			if (!resize(2 * length + 2))//array resize failed
+			if (!resize(resizelen(length)))//array resize failed
 			{
-				return *list;//again to avoid error in case of memory fail and derenfrence it because its cool
+				static_assert("a");//again to avoid error in case of memory fail and derenfrence it because its cool
 			}
 
 		}
@@ -286,11 +301,11 @@ namespace dynamicarray {
 	template<class T>
 	T& array<T>::at(int index) {
 		if (index >= length) {
-			index = length - 1;
+			static_assert("index for at greater than max length");
 		}
 		if (index < 0)
 		{
-			index = 0;
+			static_assert("index for at less than 0");
 		}
 
 
@@ -307,7 +322,7 @@ namespace dynamicarray {
 		int otherlength = arr.length;
 		if (length + otherlength >= capacity)
 		{
-			resize(2 * (length + otherlength) + 2);
+			resize(resizelen( (length + otherlength)) );
 		}
 
 
@@ -323,7 +338,7 @@ namespace dynamicarray {
 		
 		if (length + otherlen>= capacity)
 		{
-			resize(2 * (length + otherlen) + 2);
+			resize(resizelen( (length + otherlen)));
 		}
 
 
@@ -341,9 +356,9 @@ namespace dynamicarray {
 
 		if (list == nullptr || length == 0)
 		{
-			length = 0;
-			*this = array<T>(2);
-			return true;
+		//	length = 0;
+		//	*this = array<T>(2);
+		//	return true;
 		}
 		if (size == 0)
 		{
@@ -376,7 +391,11 @@ namespace dynamicarray {
 				newlist[i] = T();
 			}
 			//also the error here is a bug 
-			delete[] list;
+			if (list!=nullptr)
+			{
+
+				delete[] list;
+			}
 
 
 
@@ -439,7 +458,7 @@ namespace dynamicarray {
 		if (list == nullptr)
 		{
 			delete[] list;
-
+			static_assert("could not init aray due to lack of memory");
 			return;
 		}
 

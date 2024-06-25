@@ -6,6 +6,7 @@
 namespace camera {
 	extern float yaw, pitch;
 	extern glm::vec3 campos;
+	v3::Vector3 direction();
 	void initilize();
 	void calculateyawandpitch();
 	void sendoffviewmatrix();

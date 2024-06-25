@@ -119,6 +119,15 @@
     <ClInclude Include="gameobject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="objecthelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="frag1.vs">

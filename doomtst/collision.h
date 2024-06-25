@@ -6,6 +6,7 @@ using namespace aabb;
 namespace collision {
 
 	void update();
+	void collideraywithgrid();
 void collideobjwithgrid(colrect& entity);
 }
 #endif

@@ -72,16 +72,16 @@ namespace grid {
 	dynamicarray::array<float> databuffer;
 	dynamicarray::array<unsigned int> indicebuffer;
 	
-	void blockstruct(rblock block) {
-		if (block.id != minecraftair)
+	void blockstruct(block& torender) {
+		if (torender.id != minecraftair)
 		{
 
-			bool yf = (issolidatpos(block.pos.x, block.pos.y + 1, block.pos.z));
-			bool yb = (issolidatpos(block.pos.x, block.pos.y - 1, block.pos.z));
-			bool xf = (issolidatpos(block.pos.x + 1, block.pos.y, block.pos.z));
-			bool xb = (issolidatpos(block.pos.x - 1, block.pos.y , block.pos.z));
-			bool zf = (issolidatpos(block.pos.x, block.pos.y, block.pos.z + 1));
-			bool zb = (issolidatpos(block.pos.x, block.pos.y, block.pos.z - 1));
+			bool yf = (issolidatpos(torender.pos.x, torender.pos.y + 1, torender.pos.z));
+			bool yb = (issolidatpos(torender.pos.x, torender.pos.y - 1, torender.pos.z));
+			bool xf = (issolidatpos(torender.pos.x + 1, torender.pos.y, torender.pos.z));
+			bool xb = (issolidatpos(torender.pos.x - 1, torender.pos.y , torender.pos.z));
+			bool zf = (issolidatpos(torender.pos.x, torender.pos.y, torender.pos.z + 1));
+			bool zb = (issolidatpos(torender.pos.x, torender.pos.y, torender.pos.z - 1));
 		//if one of the sides around it is empty
 
 		
@@ -111,36 +111,32 @@ namespace grid {
 						break;
 						
 					}
-					if (block.pos == Vector3(-2, 13, -1))
-					{
-						
-						int l = 1;
-					}
-					if (willcontinue||block.pos == Vector3(-2, 13, -1))
+					
+					if (willcontinue)
 					{
 						//set u to length ofver 5 because now 0-first new elem of bufffer
-						int u = databuffer.length / 5;
+						int baselocation = databuffer.length / 5;
 						for (int j = 0; j < 4; j++)
 						{
 							//unique indices listed in order so you dont use all 6 only 4 indices
 						//ind this side will be on
 							
 							int ind = 6 * i+neededindice[j];
-							Vector3 offset = vert[indices[ind]] + block.pos;
+							Vector3 offset = vert[indices[ind]] + torender.pos;
 							databuffer.append(offset.x);
 							databuffer.append(offset.y);
 							databuffer.append(offset.z);
 
 							//2*j is x coord 2*j+1 is y coord
-							float xpos = cubeuv[2 * j] / texturesize + (6 * block.texture + (i%texturesize)) / static_cast<float>(texturesize);
+							float xpos = cubeuv[2 * j] / texturesize + (6 * torender.texture + (i%texturesize)) / static_cast<float>(texturesize);
 							databuffer.append(1-xpos);
-							float ypos = (cubeuv[2 * j + 1] / texturesize) + floor((i + static_cast<float>(6) * block.texture) / texturesize) / texturesize;
+							float ypos = (cubeuv[2 * j + 1] / texturesize) + floor((i + static_cast<float>(6) * torender.texture) / texturesize) / texturesize;
 							databuffer.append(1-ypos );
 						}
 						for (int j = 0; j < 6; j++)
 						{
 						
-							indicebuffer.append(u + indices[j]);
+							indicebuffer.append(baselocation + indices[j]);
 						}
 					}
 					
@@ -159,7 +155,7 @@ namespace grid {
 			int ind = 0;
 			for (int ind = 0;ind < 16*16*16;ind++) {
 				
-						rblock block3 = ((*chunklist[i]).blockstruct[ind]);
+						block& block3 = ((*chunklist[i]).blockstruct[ind]);
 						
 						block3.pos;
 							blockstruct(block3);
@@ -174,7 +170,7 @@ namespace grid {
 	}
 	
 
-	rblock* getobjatgrid(int x, int y, int z)
+	block* getobjatgrid(int x, int y, int z)
 	{
 
 			int xchunk = x>>4;
@@ -189,7 +185,7 @@ namespace grid {
 			x = modabs(x,16);
 			z = modabs(z,16);
 		
-			rblock* blockatpos = &(chunklist[xchunk + (2*loadamt+1)* zchunk])->blockstruct[256 * x + 16 * y + z];
+			block* blockatpos = &(chunklist[xchunk + (2*loadamt+1)* zchunk])->blockstruct[256 * x + 16 * y + z];
 			if (blockatpos->id !=minecraftair)
 			{
 				return blockatpos;
@@ -198,6 +194,30 @@ namespace grid {
 		}
 		return nullptr;
 		
+	}
+	block* getobjatgrid2(int x, int y, int z)
+	{
+
+		int xchunk = x >> 4;
+		int zchunk = z >> 4;
+
+		if (abs(xchunk - gridpos.x) <= loadamt && abs(zchunk - gridpos.z) <= loadamt && y < 16 && 0 <= y)
+		{
+			//normolz=
+			xchunk += loadamt - gridpos.x;
+			zchunk += loadamt - gridpos.z;
+			//get posisition in the chunk
+			x = modabs(x, 16);
+			z = modabs(z, 16);
+
+			block* blockatpos = &(chunklist[xchunk + (2 * loadamt + 1) * zchunk])->blockstruct[256 * x + 16 * y + z];
+			
+				return blockatpos;
+			
+
+		}
+		return nullptr;
+
 	}
 	bool issolidatpos(int x, int y, int z)
 	{
@@ -275,7 +295,9 @@ namespace grid {
 				//gets 
 				//	int z = floorabs((invind / static_cast<float>((2 * loadamt + 1)))) - loadamt + gridpos.z;
 					newchunklist[invind] = chunk::load(x, z);
-					delete chunklist[ind];
+
+					chunklist[ind]->destroy();
+					
 				}
 			
 				

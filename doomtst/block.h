@@ -1,34 +1,32 @@
-#include "vector3.h"
+
 #include "renderer.h"
 #include <glm/glm.hpp>
+#include "gameobject.h"
 #include "aabb.h"
 #ifndef block_HPP
 #define block_HPP
 using namespace v3;
-namespace block {
+namespace blockname {
 	enum id
 	{
 		minecraftair = 0,
 	minecraftgrass = 1,
+	minecraftdirt=2,
 	};
 	
-	struct rblock
+	struct block:gameobject::obj
 	{
 		int texture;
 		int id;
-		aabb::colrect collider;
-		Vector3 pos;
-		 virtual void render();
-		 rblock(Vector3 placment,int setid);
-		 rblock();
+		iv3::Ivector3 pos;
+		
+	
+ void render();
+		 block(iv3::Ivector3 placment,int setid);
+		 block();
 		 void createaabb();
 	};
-	struct grass :rblock {
-
-		int id = minecraftgrass;
-		 void render() override;
-
-	};
+	
 }
 
 

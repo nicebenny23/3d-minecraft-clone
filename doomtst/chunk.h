@@ -2,7 +2,7 @@
 
 #ifndef Chunk_HPP
 #define Chunk_HPP
-using namespace block;
+using namespace blockname;
 namespace chunk {
 	inline int indfrompos(int x, int y, int z);
 	struct chunk
@@ -12,7 +12,7 @@ namespace chunk {
 		void renderchunk();
 		chunk();
 		
-		rblock* blockstruct;
+		block* blockstruct;
 		void destroy();
 	};
 	chunk* load(int xind, int zind);

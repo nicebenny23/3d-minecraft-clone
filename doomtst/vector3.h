@@ -26,11 +26,14 @@ namespace iv3 {
 			return ceil(x);
 		}
 	}
+	
 	struct Ivector3
 	{
+		
 		glm::vec3 glm();
 		Ivector3(int X, int Y, int Z);
 		Ivector3(glm::vec3 glm);
+		
 		Ivector3();
 		void operator=(const Ivector3& p1);
 		bool operator==(const Ivector3& p1);
@@ -177,6 +180,7 @@ namespace iv3 {
 		return glm::vec3(x, y, z);
 	}
 
+
 	inline Ivector3::Ivector3(int X, int Y, int Z) {
 
 		x = X;
@@ -190,6 +194,7 @@ namespace iv3 {
 		z = glm.z;
 
 	}
+	
 	inline bool Ivector3::operator==(const Ivector3& p1)
 	{
 		return (p1.x == x && p1.y == y && p1.z == z);
@@ -257,7 +262,7 @@ namespace v3
 
 	inline float distance(const Vector3& p, const Vector3& p1) {
 
-		return(sqrt((p.x - p1.x) * (p.x - p1.x) + (p.y - p1.y) * (p.y - p1.y)));
+		return(sqrt((p.x - p1.x) * (p.x - p1.x) + (p.y - p1.y) * (p.y - p1.y)+(p1.z-p.z)* (p1.z - p.z)));
 	}
 
 	

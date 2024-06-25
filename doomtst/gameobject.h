@@ -3,18 +3,18 @@
 
 #include <unordered_map>
 #pragma once
-using namespace v3;
+
 
 using namespace dynamicarray;
 #ifndef gameobj_HPP
 
-
 #define gameobj_HPP
+#define entsize 16*16*16*20
 namespace gameobject {
 
 
 
-
+	//these 3 function are used to get a unique component number f
 	extern std::unordered_map<char*, int> stringtoint;
 	extern int curid;
 	inline void initmap() {
@@ -36,7 +36,7 @@ namespace gameobject {
 		return stringtoint[name];
 	}
 
-
+	
 	inline int idfromname(char* name) {
 		if (stringtoint.count(name) == 0)
 		{
@@ -51,25 +51,27 @@ namespace gameobject {
 
 
 
-	struct probguid
-	{
-		int guid1;
-		int guidcheck;
-	};
 
 
-	struct gameobj;
+
+
+	
+	struct obj;
+	
+	
+	extern array<obj*> objectfromguid;
 
 	struct component
 	{
 		//called on destroy used for deallocation
 		virtual void ondestroy();
-		gameobj* holder;
-		void setobj(gameobj* obj) {
-			holder = obj;
+		obj* holder;
+		
+		virtual void setobj(obj* object) {
+			holder = object;
 		}
 		component() {
-
+		
 
 		};
 		virtual component* copydat(component* orgin);
@@ -82,30 +84,32 @@ namespace gameobject {
 		int id;
 
 	};
-
-
-
-	struct gameobj
+	//determanes the type of object a give object is,
+	enum objtype {
+		block = 0,
+		entity = 1
+		
+	};
+	struct obj
 	{
 		int guid;
-		bool tsty;
+	
 		array<component*> complist;
 
-		gameobj(Vector3 ipos, const char* _name);
-		Vector3 pos;
-	
-		const	char* name;
-
+		obj(v3::Vector3 ipos, const char* _name  );
+		
+		
+		objtype type;
 
 		template <class T>
 		T& getcomponent();
 
 		template <class T>
 		bool hascomponent();
-
+		//removes a component
 		template <class T>
 		void removecomponent();
-
+		
 		template <class T>
 		array<T>  getcomponents();
 
@@ -114,17 +118,19 @@ namespace gameobject {
 		void addcomponent(types&&... initval);
 
 
-		gameobj();
+		obj();
 
 	};
 
 
-	void destroy(gameobj* obj);
+	void destroy(obj* object);
 	void deleteobjs();
+	int getgoid();
 	void initobjs();
 	void runupdateloop();
+
 	template <class T>
-	void gameobj::removecomponent()
+	void obj::removecomponent()
 	{
 		int id = idfromname((char*)(typeid(T).name()));
 		if (id == -1)
@@ -144,7 +150,7 @@ namespace gameobject {
 
 
 	template <class T>
-	T& gameobj::getcomponent()
+	T& obj::getcomponent()
 	{
 
 
@@ -165,7 +171,7 @@ namespace gameobject {
 	}
 
 	template <class T>
-	array<T> gameobj::getcomponents()
+	array<T> obj::getcomponents()
 	{
 
 
@@ -191,7 +197,7 @@ namespace gameobject {
 
 
 	template <class T>
-	bool gameobj::hascomponent()
+	bool obj::hascomponent()
 	{
 
 
@@ -219,7 +225,7 @@ namespace gameobject {
 	template <class T, typename... types>
 
 
-	void gameobj::addcomponent(types&&... initval)
+	void obj::addcomponent(types&&... initval)
 	{
 
 
@@ -255,23 +261,34 @@ namespace gameobject {
 	{
 		int guid;
 
-		gameobjref(gameobj& obj) {
-			guid = obj.guid;
-
-
+		gameobjref(obj& object) {
+			guid = object.guid;
 		}
-		gameobj* obj();
+		obj* toobj();
 		gameobjref() {
 
-			int guid = 0;
+			 guid = -1;
 		}
 	};
 
 
 
 
-	gameobjref gameinit(Vector3 ipos, const char* _name);
+	inline void immidiatedestroy(obj* object) {
 
+		for (size_t i = 0; i < object->complist.length; i++)
+		{
+			object->complist[i]->ondestroy();
+		//deletes component refered to by pointer
+			delete object->complist[i];
 
-}
+		}
+		//deletes pointer itsekf
+		object->complist.destroy();
+		//makes it so "object from guid is now freed"
+		objectfromguid[object->guid] = 0;
+		
+	}
+
+	}
 #endif#pragma once

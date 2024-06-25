@@ -21,10 +21,12 @@ namespace userinput {
 			relesed = false;
 		}
 	};
-
+		extern inputkey mouseleft;
+		extern inputkey mouseright;
 	void initiate();
 
 	void updatekey(int code, int pressedorrelesed);
+	void updatemousebutton(int button, int pressedorrelesed);
 	void endupdate();
 	//inputkey Getkey(char keyval)
 	
