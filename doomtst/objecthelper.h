@@ -5,16 +5,22 @@
 #ifndef gamehelper_hpp
 #define gamehelper_hpp
 //work on ptrs
+
+//returns center of object
+namespace objutil {
 #define toblock(a)(a.type==gameobject::block?(blockname::block*)(&a):nullptr)
 
 #define toentity(a)((a.type==gameobject::entity)?(entity::entity*)(&a):nullptr)
-//returns center of object
+	inline entity::entity* entity(gameobject::objref object)
+	{
 
-inline Vector3 center(gameobject::obj object) {
+		return ((entity::entity*)(object.toobj()));
+	}
+	inline Vector3 getcenter(gameobject::obj object) {
 
 	if (object.type==gameobject::block)
 	{
-		Vector3(toblock(object)->pos) + unitv / 2;
+		vec(toblock(object)->pos) + unitv / 2;
 	}
 	if (object.type==gameobject::entity)
 	{
@@ -22,20 +28,32 @@ inline Vector3 center(gameobject::obj object) {
 	}
 }
 //returns id ob object only works for block
-inline int& id(gameobject::obj object) {
+inline byte& getid(gameobject::obj& object) {
 
 
 	if (object.type==gameobject::block)
 	{
-		return (toblock(object)->id);
+		return ((block*)(&object))->id;
 	}
 	if (object.type==gameobject::entity)
 	{
 		_STATIC_ASSERT("attempted to acess id of entity");
 	}
 }
+inline byte& getid(gameobject::obj* object) {
+
+
+	if (object->type == gameobject::block)
+	{
+		return ((block*)(object))->id;
+	}
+	if (object->type == gameobject::entity)
+	{
+		_STATIC_ASSERT("attempted to acess id of entity");
+	}
+}
 //returns id ob object only works for block
-inline v3::Vector3& pos(gameobject::obj object) {
+inline v3::Vector3& getpos(gameobject::obj object) {
 
 
 	if (object.type == gameobject::block)
@@ -44,8 +62,36 @@ inline v3::Vector3& pos(gameobject::obj object) {
 	}
 	if (object.type == gameobject::entity)
 	{
-		return (toentity(object)->pos);
+		return ((entity::entity*)(&object))->pos;
 	}
+}
+inline v3::Vector3& getpos(gameobject::obj* object) {
+
+
+	if (object->type == gameobject::block)
+	{
+		_STATIC_ASSERT("attempted to acess pos of block,doesent exist");
+	}
+	if (object->type == gameobject::entity)
+	{
+		return ((entity::entity*)(object))->pos;
+	}
+}
+inline v3::Vector3& getpos(gameobject::objref object) {
+	if (object.toobj()==nullptr)
+	{
+		_STATIC_ASSERT("cannot get pos of deleted entity");
+	}
+	if (object.toobj()->type == gameobject::entity)
+	{
+		return ((entity::entity*)(object.toobj()))->pos;
+	}
+	if (object.toobj()->type == gameobject::block)
+	{
+		_STATIC_ASSERT("attempted to acess pos of block,doesent exist");
+	}
+	
+}
 }
 #endif // !gamehelper_Hpp
 

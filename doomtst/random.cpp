@@ -21,6 +21,7 @@ bool randombool() {
 
     return val % 2;
 }
+
 float random(float max)
 {
 
@@ -48,7 +49,7 @@ int randomint(float max)
 }
 void  randominit()
 {
-    int s = time(0);
+    int s = 1;
 
     val = s;
 

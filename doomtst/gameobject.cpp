@@ -25,7 +25,7 @@ void gameobject::component::ondestroy()
 
 component* gameobject::component::copydat(component* orgin)
 {
-	component newcomp = component();
+	component newcomp =*(new component());
 	return &newcomp;
 
 }
@@ -47,12 +47,14 @@ void gameobject::component::update()
 int gameobject::getgoid()
 {
 	int randomval = 0;
-	obj* valifexist = 0;
+	obj* valifexist = objectfromguid[randomval];
 
-	while (valifexist != 0)
+	while (valifexist != nullptr)
 	{
+		
 		randomval = randomint(entsize-1);
 		valifexist = objectfromguid[randomval];
+		int l = 1;
 
 	}
 
@@ -64,19 +66,23 @@ int gameobject::getgoid()
 array<obj*> gameobject::objectfromguid;
 
 //todo move over to enties as 
-array<obj*> delobjs;
+array<obj*> todelete;
 array<obj*> initobj;
 void gameobject::initobjs() {
 
 	objectfromguid = array<obj*>(entsize);
-	delobjs = array<obj*>();
+	for (int i = 0; i < entsize; i++)
+	{
+		objectfromguid[i] = nullptr;
+	}
+	todelete = array<obj*>();
 	initobj = array<obj*>();
 
 
 
 }
 
-gameobjref init(gameobjref base) {
+objref init(objref base) {
 
 
 
@@ -88,7 +94,7 @@ gameobjref init(gameobjref base) {
 
 	}
 
-	return gameobjref(clone);
+	return objref(clone);
 
 }
 
@@ -125,37 +131,37 @@ obj::obj() {
 void gameobject::destroy(obj* object) {
 
 
-	delobjs.append(object);
+	todelete.append(object);
 }
 
 void gameobject::deleteobjs()
 {
-	int len = delobjs.length;
+	int len = todelete.length;
 	for (int ind = 0;ind < len;ind++) {
 
 		
-		for (size_t i = 0; i < delobjs[ind]->complist.length; i++)
+		for (size_t i = 0; i < todelete[ind]->complist.length; i++)
 		{
-			delobjs[ind]->complist[i]->ondestroy();
+			todelete[ind]->complist[i]->ondestroy();
 
 
 		}
 		
 		
 		
-		objectfromguid[delobjs[ind]->guid] = 0;
+		objectfromguid[todelete[ind]->guid] = nullptr;
 		
 		
 //	delete delobjs[ind];
 	
 	}
-	if (delobjs.length > 0)
+	if (todelete.length > 0)
 	{
 		//deletes the pointers to the obkjects
-	delobjs.destroy();
+		todelete.destroy();
 	
-		delobjs = array<obj*>();
-		delobjs.length = 0;
+		todelete = array<obj*>();
+		todelete.length = 0;
 	}
 
 }
@@ -173,8 +179,8 @@ void gameobject::runupdateloop() {
 			for (int j = 0; j < len; j++)
 			{
 
-				component* l = objectfromguid[i]->complist[j];
-				l->update();
+			
+				objectfromguid[i]->complist[j]->update();
 			}
 		}
 		
@@ -183,16 +189,21 @@ void gameobject::runupdateloop() {
 
 
 //gets a gameobject from a refrence to it;
-obj* gameobject::gameobjref::toobj()
+bool guidchanged(objref* ref) {
+
+	return false;
+}
+//todo add a special random number to each gameobject
+obj* gameobject::objref::toobj()
 {
-	if (guid<-1)
+	if (guid==-1)
 	{
 		return nullptr;
 	}
 	obj* toreturn = objectfromguid[guid];
-	if (toreturn == 0)
+	if (guidchanged(this))
 	{
-		guid = 0;
+		guid = -1;
 	}
 	return toreturn;
 }

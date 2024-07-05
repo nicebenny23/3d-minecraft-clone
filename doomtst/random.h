@@ -8,6 +8,7 @@
 float random();
 float random(float max);
 bool randombool();
+int random(int val, int seed);
 bool randombool(float truechange);
 int randomint(float max);
 

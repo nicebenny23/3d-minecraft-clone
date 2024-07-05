@@ -9,7 +9,7 @@ using namespace dynamicarray;
 #ifndef gameobj_HPP
 
 #define gameobj_HPP
-#define entsize 16*16*16*20
+#define entsize 16*16*16*100
 namespace gameobject {
 
 
@@ -37,13 +37,14 @@ namespace gameobject {
 	}
 
 	
-	inline int idfromname(char* name) {
+	inline int compidfromname(char* name) {
 		if (stringtoint.count(name) == 0)
 		{
-
+			_STATIC_ASSERT("type in name of componenent");
 			return -1;
 		}
 
+		
 		return stringtoint[name];
 	}
 
@@ -65,14 +66,14 @@ namespace gameobject {
 	{
 		//called on destroy used for deallocation
 		virtual void ondestroy();
-		obj* holder;
+		obj* owner;
 		
 		virtual void setobj(obj* object) {
-			holder = object;
+			owner = object;
 		}
 		component() {
 		
-
+			id = -INFINITY ;
 		};
 		virtual component* copydat(component* orgin);
 		virtual void start();
@@ -132,19 +133,21 @@ namespace gameobject {
 	template <class T>
 	void obj::removecomponent()
 	{
-		int id = idfromname((char*)(typeid(T).name()));
+		int id = compidfromname((char*)(typeid(T).name()));
 		if (id == -1)
 		{
 			return;
 		}
 		for (int i = 0; i < complist.length; i++)
 		{
-			if (id = complist[i]->id) {
+			int l = complist[i]->id;
+			if (id == complist[i]->id) {
 				complist.deleteind(i);
-
-				return;
+				i--;
+				
 			}
 		}
+		return;
 	}
 
 
@@ -154,10 +157,10 @@ namespace gameobject {
 	{
 
 
-		int id = idfromname((char*)(typeid(T).name()));
+		int id = compidfromname((char*)(typeid(T).name()));
 		if (id == -1)
 		{
-
+			static_assert("", "");
 		}
 		for (int i = 0; i < complist.length; i++)
 		{
@@ -168,6 +171,7 @@ namespace gameobject {
 				return *((T*)complist[i]);
 			}
 		}
+		static_assert("", "");
 	}
 
 	template <class T>
@@ -201,10 +205,12 @@ namespace gameobject {
 	{
 
 
-		int id = idfromname((char*)(typeid(T).name()));
+		int id = compidfromname((char*)(typeid(T).name()));
 		if (id == -1)
 		{
+			//add static assert
 
+			return false;
 		}
 		for (int i = 0; i < complist.length; i++)
 		{
@@ -242,7 +248,7 @@ namespace gameobject {
 
 		comp->start();
 
-		comp->id = idfromname((char*)(typeid(T).name()));
+		comp->id = compidfromname((char*)(typeid(T).name()));
 		for (int i = 0; i < complist.length; i++)
 		{
 			if (id > complist[i]->id) {
@@ -257,15 +263,15 @@ namespace gameobject {
 	//is a guid with 2 numbers one for hashing and another for checking this basicly ellimiantes any prossiblity for collision as the other one can go to 2billion
 
 
-	struct gameobjref
+	struct objref
 	{
 		int guid;
-
-		gameobjref(obj& object) {
+		int probguid;
+		objref(obj& object) {
 			guid = object.guid;
 		}
 		obj* toobj();
-		gameobjref() {
+		objref() {
 
 			 guid = -1;
 		}
@@ -276,7 +282,7 @@ namespace gameobject {
 
 	inline void immidiatedestroy(obj* object) {
 
-		for (size_t i = 0; i < object->complist.length; i++)
+		for (int i = 0; i < object->complist.length; i++)
 		{
 			object->complist[i]->ondestroy();
 		//deletes component refered to by pointer
@@ -286,7 +292,7 @@ namespace gameobject {
 		//deletes pointer itsekf
 		object->complist.destroy();
 		//makes it so "object from guid is now freed"
-		objectfromguid[object->guid] = 0;
+		objectfromguid[object->guid] = nullptr;
 		
 	}
 

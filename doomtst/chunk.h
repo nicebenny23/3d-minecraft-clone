@@ -2,20 +2,23 @@
 
 #ifndef Chunk_HPP
 #define Chunk_HPP
+#define chunksize 16*16*16
 using namespace blockname;
 namespace chunk {
-	inline int indfrompos(int x, int y, int z);
+	
+	inline int indfromlocalpos(int x, int y, int z);
+	int indexfrompos(int x, int y, int z);
 	struct chunk
 	{
-		int xchunk;
-		int zchunk;
+		Coord loc;
 		void renderchunk();
 		chunk();
 		
 		block* blockstruct;
 		void destroy();
 	};
-	chunk* load(int xind, int zind);
+	
+	chunk* load(Coord location);
 }
 #endif // !Chunk_H
 #pragma once

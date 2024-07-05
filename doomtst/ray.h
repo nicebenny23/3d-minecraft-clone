@@ -10,10 +10,14 @@ struct ray
 
 		return (end - start) / v3::distance(end, start);
 	}
+	float length() {
+
+		return distance(start, end);
+	}
 	float distancefromray(v3::Vector3 vector) {
 		return 0;
 	}
-
+//todo get linetraversel working
 	ray(const v3::Vector3& startray, const v3::Vector3& endray)
 		
 	{

@@ -7,14 +7,16 @@
 #include "vector3.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "texture.h"
+#include "vertexobject.h"
+using namespace vobj;
 #define texturesize 6
 enum shadertype {
 	normal=0
 
 };
 namespace renderer {
-	extern unsigned int VBO, VAO,ibo;
-
+	extern vao VAO;
+	extern vbuf VBO, ibo;
 	void renderquadlist(dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist);
 	void load();
 	void setviewmatrix(glm::mat4 viewmat);

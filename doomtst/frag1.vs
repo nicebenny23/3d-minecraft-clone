@@ -2,10 +2,10 @@
 out vec4 FragColor;
 
 uniform vec4 Color;
-in vec2 ourcoord;
-uniform sampler2D tex;
+in vec3 ourcoord;
+uniform sampler2DArray tex;
 
 void main()
 {
-    FragColor =texture(tex, ourcoord);
+    FragColor =texture(tex,  vec3( ourcoord.x,ourcoord.y, ourcoord.z));
 } 

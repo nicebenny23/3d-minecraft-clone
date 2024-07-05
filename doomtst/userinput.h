@@ -9,17 +9,16 @@
 namespace userinput {
 	extern glm::vec2 mouseposdt;
 	extern glm::vec2 mousepos;
-		struct inputkey
-	{
+		struct inputkey {
 		bool held;
 		bool relesed;
 		bool pressed;
-		inputkey() {
+     		inputkey() {
 
 			held = false;
 			pressed = false;
 			relesed = false;
-		}
+	     	}
 	};
 		extern inputkey mouseleft;
 		extern inputkey mouseright;

@@ -140,6 +140,7 @@
   <ItemGroup>
     <ClCompile Include="aabb.cpp" />
     <ClCompile Include="block.cpp" />
+    <ClCompile Include="blockrender.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="chunk.cpp" />
     <ClCompile Include="collision.cpp" />
@@ -158,28 +159,34 @@
   <ItemGroup>
     <ClInclude Include="aabb.h" />
     <ClInclude Include="block.h" />
+    <ClInclude Include="blockrender.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="chunk.h" />
     <ClInclude Include="collision.h" />
     <ClInclude Include="component.h" />
+    <ClInclude Include="debug.h" />
     <ClInclude Include="dynamicarray.h" />
     <ClInclude Include="entity.h" />
     <ClInclude Include="gameobject.h" />
     <ClInclude Include="grid.h" />
+    <ClInclude Include="noise.h" />
     <ClInclude Include="objecthelper.h" />
     <ClInclude Include="random.h" />
     <ClInclude Include="ray.h" />
     <ClInclude Include="renderer.h" />
+    <ClInclude Include="time.h" />
     <ClInclude Include="userinput.h" />
     <ClInclude Include="vector2.h" />
     <ClInclude Include="vector3.h" />
     <ClInclude Include="shader.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="texture.h" />
+    <ClInclude Include="vertexobject.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="frag1.vs" />
+    <None Include="uivertex.vs" />
     <None Include="vert1.vs" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

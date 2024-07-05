@@ -16,7 +16,7 @@ shader::shader(const char* vertexpath, const char* fragpath)
 	
     if (ffs.fail()||vfs.fail())
     {
-        std::abort();
+               Assert("filestream error");
     }
 
     std::string fastr=std::string(std::istreambuf_iterator<char>(ffs), std::istreambuf_iterator<char>());
@@ -37,8 +37,9 @@ shader::shader(const char* vertexpath, const char* fragpath)
     {
 
         glGetShaderInfoLog(vertexShader, 512, NULL, infolog);
-        std::cout << "vertex shader error " << infolog << std::endl;
-        std::abort();
+      
+        std::cout << "vertex shader error ";
+            Assert(infolog);
     }
 GLint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragmentShader, 1, &fstr, NULL);
@@ -50,8 +51,8 @@ GLint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     {
       
         glGetShaderInfoLog(fragmentShader, 512, NULL, infolog);
-        std::cout << "fragment shader error " << infolog << std::endl;
-        std::abort();
+        std::cout << '/n' << "fragment shader error ";
+        Assert(infolog);
     }
   
   
@@ -64,9 +65,9 @@ GLint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     if (ssprs !=GL_TRUE)
     {
         glGetProgramInfoLog(shaderProgram, 512, NULL, infolog);
-        std::cout << "fragment shader error " << infolog << std::endl;
-        std::abort();
-        std::abort();
+        std::cout << '/n' << "fragment shader error ";
+        Assert(infolog);
+      
     }
     id = shaderProgram;
     glDeleteShader(vertexShader);

@@ -1,19 +1,9 @@
 #include "grid.h"
 #include <cmath>
+#include "vector2.h"
 using namespace v3;
+
 namespace grid {
-
-	float floorabs(float x) {
-
-		if (x < 0)
-		{
-			return -1 * floor(-1 * x);
-		}
-		else
-		{
-			return floor(x);
-		}
-	}
 	inline int modabs(int x, int m) {
 
 		if (x < 0)
@@ -32,294 +22,216 @@ namespace grid {
 			return x % m;
 		}
 	}
-   Vector3 vert[] = {
-		 Vector3(0, 0, 0),
-		 Vector3(1,0,0),
-		 Vector3(1,1,0),
-		  Vector3(0,1,0),
-		  Vector3(0,0,1),
-		  Vector3(1,0,1),
-		  Vector3(1,1,1),
-		  Vector3(0,1,1),
+	
+	float floorabs(float x) {
 
-	};
-	//uv's for cubemapping
-	const float cubeuv[] = {
-	   1, 0,
-	0, 0,
-	0, 1,
-	1, 1
-	
-	};
-	//locatiion of unique indices in each set of vertices
-	const float neededindice[] = { 
-		0,1,2,5
-		
-	};
-	//got this part on github
-	int indices[] = { 1, 0, 3, 1, 3, 2, // north (-z)
-		4, 5, 6, 4, 6, 7, // south (+z)
-		5, 1, 2, 5, 2, 6, // east (+x)
-		0, 4, 7, 0, 7, 3, // west (-x)
-		2, 3, 7, 2, 7, 6, // top (+y)
-		5, 4, 0, 5, 0, 1, }; // bottom (-y)
-	
-	
+		if (x < 0)
+		{
+			return -1 * floor(-1 * x);
+		}
+		else
+		{
+			return floor(x);
+		}
+	}
+
+
 
 	Vector3 gridpos;
 	Vector3 griddt;
 	chunk::chunk** chunklist;
-	dynamicarray::array<float> databuffer;
-	dynamicarray::array<unsigned int> indicebuffer;
-	
-	void blockstruct(block& torender) {
-		if (torender.id != minecraftair)
-		{
+	bool chunkloaded(int xchunk, int ychunk, int zchunk) {
+		if (abs(xchunk - gridpos.x) <= loadamt && abs(ychunk - gridpos.y) <= loadamt && abs(zchunk - gridpos.z) <= loadamt) {
 
-			bool yf = (issolidatpos(torender.pos.x, torender.pos.y + 1, torender.pos.z));
-			bool yb = (issolidatpos(torender.pos.x, torender.pos.y - 1, torender.pos.z));
-			bool xf = (issolidatpos(torender.pos.x + 1, torender.pos.y, torender.pos.z));
-			bool xb = (issolidatpos(torender.pos.x - 1, torender.pos.y , torender.pos.z));
-			bool zf = (issolidatpos(torender.pos.x, torender.pos.y, torender.pos.z + 1));
-			bool zb = (issolidatpos(torender.pos.x, torender.pos.y, torender.pos.z - 1));
-		//if one of the sides around it is empty
-
-		
-
-				for (int i = 0; i < 6; i++)
-				{
-					bool willcontinue = true;
-					switch (i)
-					{
-					case 0:
-						willcontinue = zb;
-						break;
-					case 1:
-						willcontinue = zf;
-						break;
-					case 2:
-						willcontinue = xf;
-						break;
-					case 3:
-						willcontinue = xb;
-						break;
-					case 4:
-						willcontinue = yf;
-						break;
-					case 5:
-						willcontinue = yb;
-						break;
-						
-					}
-					
-					if (willcontinue)
-					{
-						//set u to length ofver 5 because now 0-first new elem of bufffer
-						int baselocation = databuffer.length / 5;
-						for (int j = 0; j < 4; j++)
-						{
-							//unique indices listed in order so you dont use all 6 only 4 indices
-						//ind this side will be on
-							
-							int ind = 6 * i+neededindice[j];
-							Vector3 offset = vert[indices[ind]] + torender.pos;
-							databuffer.append(offset.x);
-							databuffer.append(offset.y);
-							databuffer.append(offset.z);
-
-							//2*j is x coord 2*j+1 is y coord
-							float xpos = cubeuv[2 * j] / texturesize + (6 * torender.texture + (i%texturesize)) / static_cast<float>(texturesize);
-							databuffer.append(1-xpos);
-							float ypos = (cubeuv[2 * j + 1] / texturesize) + floor((i + static_cast<float>(6) * torender.texture) / texturesize) / texturesize;
-							databuffer.append(1-ypos );
-						}
-						for (int j = 0; j < 6; j++)
-						{
-						
-							indicebuffer.append(baselocation + indices[j]);
-						}
-					}
-					
-				
-			}
+			return true;
 		}
-
+		return false;
 	}
+	bool chunkloaded(Coord loc) {
+		if (abs(loc.x - gridpos.x) <= loadamt && abs(loc.y - gridpos.y) <= loadamt && abs(loc.z - gridpos.z) <= loadamt) {
 
-	void initdatabuffer() {
-	
-		for (int i = 0; i < (2*loadamt + 1) * (2*loadamt + 1); i++)
-		{
-			indicebuffer = dynamicarray::array<unsigned int>();
-			databuffer = dynamicarray::array<float>();
-			int ind = 0;
-			for (int ind = 0;ind < 16*16*16;ind++) {
-				
-						block& block3 = ((*chunklist[i]).blockstruct[ind]);
-						
-						block3.pos;
-							blockstruct(block3);
-
-						
-				
-			}
-			renderer::renderquadlist(databuffer, indicebuffer);
-			indicebuffer.destroy();
-			databuffer.destroy();
+			return true;
 		}
+		return false;
+	}
+	bool normedchunkloaded(Coord loc) {
+		if (abs(loc.x) <= loadamt && abs(loc.y) <= loadamt && abs(loc.z) <= loadamt) {
+
+			return true;
+		}
+		return false;
+	}
+	int gridindfromnormedpos(int xchunk, int ychunk, int zchunk) {
+
+		return xchunk + ychunk * (2 * loadamt + 1) + zchunk * (2 * loadamt + 1) * (2 * loadamt + 1);
+	}
+	int gridindfromchunkpos(int xchunk, int ychunk, int zchunk) {
+		xchunk += loadamt - gridpos.x;
+		zchunk += loadamt - gridpos.z;
+		ychunk += loadamt - gridpos.y;
+		return gridindfromnormedpos(xchunk, ychunk, zchunk);
 	}
 	
 
-	block* getobjatgrid(int x, int y, int z)
-	{
+	
 
-			int xchunk = x>>4;
-			int zchunk = z >> 4;
 
-		if (abs(xchunk-gridpos.x)<=loadamt&& abs(zchunk - gridpos.z) <= loadamt&&y<16&&0<=y)
-		{
-			//normolz=
-			xchunk += loadamt- gridpos.x;
-			zchunk += loadamt- gridpos.z;
-			//get posisition in the chunk
-			x = modabs(x,16);
-			z = modabs(z,16);
-		
-			block* blockatpos = &(chunklist[xchunk + (2*loadamt+1)* zchunk])->blockstruct[256 * x + 16 * y + z];
-			if (blockatpos->id !=minecraftair)
-			{
-				return blockatpos;
-			}
-			
-		}
-		return nullptr;
-		
-	}
-	block* getobjatgrid2(int x, int y, int z)
+	block* getobjatgrid(int x, int y, int z,bool counttransparent)
 	{
 
 		int xchunk = x >> 4;
 		int zchunk = z >> 4;
-
-		if (abs(xchunk - gridpos.x) <= loadamt && abs(zchunk - gridpos.z) <= loadamt && y < 16 && 0 <= y)
+		int ychunk = y >> 4;
+		if (chunkloaded(xchunk, ychunk, zchunk))
 		{
-			//normolz=
-			xchunk += loadamt - gridpos.x;
-			zchunk += loadamt - gridpos.z;
-			//get posisition in the chunk
-			x = modabs(x, 16);
-			z = modabs(z, 16);
+			//normilized the chunk
 
-			block* blockatpos = &(chunklist[xchunk + (2 * loadamt + 1) * zchunk])->blockstruct[256 * x + 16 * y + z];
-			
-				return blockatpos;
-			
+			int ind = gridindfromchunkpos(xchunk, ychunk, zchunk);
+			block& blockatpos = chunklist[ind]->blockstruct[chunk::indexfrompos(x, y, z)];
+			if (counttransparent || blockatpos.id != minecraftair)
+			{
+				return &blockatpos;
+			}
 
 		}
 		return nullptr;
 
 	}
+	
+
+	block* getobjatgrid(v3::Coord pos, bool counttransparent)
+	{
+		int xchunk = pos.x >> 4;
+		int zchunk = pos.z >> 4;
+		int ychunk = pos.y>> 4;
+		if (chunkloaded(xchunk, ychunk, zchunk))
+		{
+			//normilized the chunk
+
+			int ind = gridindfromchunkpos(xchunk, ychunk, zchunk);
+			block& blockatpos = chunklist[ind]->blockstruct[chunk::indexfrompos(pos.x, pos.y, pos.z)];
+			if (counttransparent || blockatpos.id != minecraftair)
+			{
+				return &blockatpos;
+			}
+
+		}
+		return nullptr;
+
+	}
+
 	bool issolidatpos(int x, int y, int z)
 	{
-
 		int xchunk = x >> 4;
 		int zchunk = z >> 4;
-
-		if (abs(xchunk - gridpos.x) <= loadamt && abs(zchunk - gridpos.z) <= loadamt && y < 16 && 0 <= y)
+		int ychunk = y >> 4;
+		if (chunkloaded(xchunk, ychunk, zchunk))
 		{
-			//normolz=
-			xchunk += loadamt - gridpos.x;
-			zchunk += loadamt - gridpos.z;
-			//get posisition in the chunk
-			x = modabs(x, 16);
-			z = modabs(z, 16);
+			//normilized the chunk
 
-			if (chunklist[xchunk + (2 * loadamt + 1) * zchunk]->blockstruct[256 * x + 16 * y + z].id!=minecraftair)
+			int gridindex = gridindfromchunkpos(xchunk, ychunk, zchunk);
+			block& blockatpos = chunklist[gridindex]->blockstruct[chunk::indexfrompos(x, y, z)];
+			if (blockatpos.id != minecraftair&& blockatpos.id != minecraftwater)
 			{
-				return false;
+				return true;
 			}
 
 		}
-		return true;
+		return false;
 
 	}
-
+	//complete
 	void initgrid()
 	{
-		 databuffer =dynamicarray::array<float>();
+		
 		gridpos = zerov;
 		griddt = zerov;
 		const int size = (2 * loadamt + 1);
-		chunklist = new chunk::chunk*[size*size] ;
-		for (int i = -loadamt; i <=loadamt; i++)
+		
+		chunklist = new chunk::chunk * [totalgridsize];
+		for (int i = 0; i <size; i++)
 		{
-			for (int j= - loadamt; j <= loadamt;j++)
+			for (int j = 0; j < size;j++)
 			{
-				chunklist[(i + loadamt)+(j + loadamt) * size] = chunk::load(i, j);
+			   for (int k =0; k <size;k++)
+			    {
+				   Coord gridind = Coord(i - loadamt, j - loadamt, k - loadamt);
+					chunklist[gridindfromnormedpos(i,j,k)] = chunk::load( gridind);
 
+				}
 			}
 		}
 	}
+	
 	//order of storage for chunks & location-2loadamnt+1 is width and height
 	//z
-	//7,8,9
+	//7,8,9   
 	//4,5,6
 	//1,2,3 x
+	//essentially complete
+
 	void grid::load()
 	{
 		const int size = 2 * loadamt + 1;
-		chunk::chunk** newchunklist =new chunk::chunk* [size*size];
-		int indexdxchange = griddt.x + griddt.z * size;
+		
+		chunk::chunk** newchunklist = new chunk::chunk * [size * size*size];
+		int indexdxchange = gridindfromnormedpos(griddt.x, griddt.y, griddt.z);
 
 		for (int i = 0; i < size; i++)
 		{
 			for (int j = 0;j < size;j++) {
 
-				int ind = i + size * j;
-				int nornmedx = chunklist[ind]->xchunk - gridpos.x;
-				int nornmedz = chunklist[ind]->zchunk - gridpos.z;
-				if (abs(nornmedx)<=loadamt&&abs(nornmedz)<=loadamt)
-				{
-					//moves to new posi
-					newchunklist[ind - indexdxchange] = chunklist[ind];
-				
-				}
-				else
-				{
-		//inv ind subtract one so 0 will go to (2*loadamt+1)^2-1
-					int invind = (size*size)-(1 + ind);
-					
-				int x = (2 * loadamt  - i)+(gridpos.x-loadamt);
-				int z = (2 * loadamt - j )+ (gridpos.z - loadamt);
-				
-				//gets 
-				//	int z = floorabs((invind / static_cast<float>((2 * loadamt + 1)))) - loadamt + gridpos.z;
-					newchunklist[invind] = chunk::load(x, z);
+				for (int k = 0;k < size;k++) {
 
-					chunklist[ind]->destroy();
-					
+					int ind = gridindfromnormedpos(i, j,k);
+
+					if (chunkloaded(chunklist[ind]->loc))
+					{
+						//moves to new posi
+						newchunklist[ind - indexdxchange] = chunklist[ind];
+
+					}
+					else
+					{
+						
+						int invind = (totalgridsize) - (1 + ind);
+
+						int x = (2 * loadamt - i) + (gridpos.x - loadamt);
+						int y = (2 * loadamt - j) + (gridpos.y - loadamt);
+						int z = (2 * loadamt - k) + (gridpos.z - loadamt);
+						//int y = (2 * loadamt - k) + (gridpos.y - loadamt);
+						//gets 
+						//	int z = floorabs((invind / static_cast<float>((2 * loadamt + 1)))) - loadamt + gridpos.z;
+						newchunklist[invind] = chunk::load(Coord(x,y,z));
+
+						chunklist[ind]->destroy();
+
+					}
+
+
 				}
-			
+
 				
 			}
 		}
 		delete[] chunklist;
 
 		chunklist = newchunklist;
+		//get chunk space every frame
+		//(0,0)->(0,0)
+		//(16,0)->(1,0)
+
 
 	}
-	//get chunk space every frame
-	//(0,0)->(0,0)
-	//(16,0)->(1,0)
 	void reupdatechunkborders()
 	{
-	
+
 		Vector3 pos = Vector3(camera::campos);
 		pos /= 16;
-		pos.x =floor(pos.x);
+		pos.x = floor(pos.x);
+		pos.y = floor(pos.y);
 		pos.z = floor(pos.z);
-		griddt = pos-gridpos;
+		griddt = pos - gridpos;
 		gridpos = pos;
 	}
-
 }

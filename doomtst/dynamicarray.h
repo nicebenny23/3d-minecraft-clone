@@ -1,5 +1,5 @@
 #include <iomanip>
-#include <iostream>
+#include "debug.h"
 #include <stdexcept>
 
 #ifndef dynamicarray_HPP
@@ -62,12 +62,12 @@ namespace dynamicarray {
 	T array<T>::getelem(int index) {
 		if (index > length) {
 
-			static_assert("index for getelem greater than length ");
+			Assert("index for getelem greater than length ");
 		}
 		
 		if (index < 0)
 		{
-			static_assert("index for getelem less than 0");
+			Assert("index for getelem less than 0");
 		}
 		return list[index];
 	}
@@ -234,12 +234,12 @@ namespace dynamicarray {
 	void array<T>::insertind(int index, T value) {
 		if (index < 0)//sees if it over 0
 		{
-			static_assert("attempted to insert an element in array below zero");
+			Assert("attempted to insert an element in array below zero");
 			return;
 		}
 		if (index > length) {
 
-			static_assert("attempted to insert an element in array greater than length");
+			Assert("attempted to insert an element in array greater than length");
 			return;
 		}
 		if (capacity <= length)//sees if wee need more memory due to not enogh space
@@ -281,14 +281,14 @@ namespace dynamicarray {
 		}
 		if (index < 0)
 		{
-			static_assert("index for [] operator less than 0");
+			Assert("index for [] operator less than 0");
 		}
 
 
 		if (length > capacity) {
 			if (!resize(resizelen(length)))//array resize failed
 			{
-				static_assert("a");//again to avoid error in case of memory fail and derenfrence it because its cool
+				Assert("a");//again to avoid error in case of memory fail and derenfrence it because its cool
 			}
 
 		}
@@ -301,11 +301,11 @@ namespace dynamicarray {
 	template<class T>
 	T& array<T>::at(int index) {
 		if (index >= length) {
-			static_assert("index for at greater than max length");
+			Assert("index for at greater than max length");
 		}
 		if (index < 0)
 		{
-			static_assert("index for at less than 0");
+			Assert("index for at less than 0");
 		}
 
 
@@ -458,7 +458,7 @@ namespace dynamicarray {
 		if (list == nullptr)
 		{
 			delete[] list;
-			static_assert("could not init aray due to lack of memory");
+			Assert("could not init aray due to lack of memory");
 			return;
 		}
 

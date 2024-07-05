@@ -79,6 +79,7 @@ namespace aabb {
            
             while (index == -1)
             {
+                
                 int l = randomint(1000);
                 if (colrectlist[l] == nullptr)
                 {
@@ -88,5 +89,43 @@ namespace aabb {
 
             }
         }
+    }
+    aabbraycolinfo colrect::distanceonray(ray fray)
+    {
+        v3::Vector3 dir = fray.end - fray.start;
+
+        //not actually max
+        float xval1 = (center.x - scale.x - fray.start.x) / dir.x;
+        float xval2 = (center.x + scale.x - fray.start.x) / dir.x;
+        float maxxval = fmax(xval1, xval2);
+        float minxval = fmin(xval1, xval2);
+        float yval1 = (center.y - scale.y - fray.start.y) / dir.y;
+        float yval2 = (center.y + scale.y - fray.start.y) / dir.y;
+        float maxyval = fmax(yval1, yval2);
+        float minyval = fmin(yval1, yval2);
+        float zval1 = (center.z - scale.z - fray.start.z) / dir.z;
+        float zval2 = (center.z + scale.z - fray.start.z) / dir.z;
+        float maxzval = fmax(zval1, zval2);
+        float minzval = fmin(zval1, zval2);
+        float actualminval = fmax(fmax(minxval, minyval), minzval);
+        float actualmaxval = fmin(fmin(maxxval, maxyval), maxzval);
+        aabbraycolinfo toreturn = aabbraycolinfo();
+        if (actualminval < actualmaxval)
+        {
+            float closestt = actualminval;
+            if (0 < actualminval)
+            {
+                toreturn.collided = true;
+                toreturn.intersectionpoint = dir * closestt + fray.start;
+
+                toreturn.dist = v3::distance(fray.start, toreturn.intersectionpoint);
+
+
+            }
+
+        }
+
+        return toreturn;
+        
     }
 }

@@ -1,5 +1,6 @@
 #include "collision.h"
-
+#include "objecthelper.h"
+using namespace objutil;
 void collision::update()
 {
 	for (int i = 0; i < colrectlist.length; i++)
@@ -11,64 +12,92 @@ void collision::update()
 		}
 	}
 }
-Vector3 specfloor(Vector3 inter,Vector3 center) {
+
+
+collision::raycolwithgrid collision::collideraywithgrid(ray nray) {
 	
-	v3::Vector3 pos = zerov;
-	pos.x = iv3::floorabs((inter.x - center.x) * 2);
-	pos.y = iv3::floorabs((inter.y - center.y) * 2);
-	pos.z= iv3::floorabs((inter.z	- center.z) * 2);
-	return pos;
-}
-void collision::collideraywithgrid() {
-	ray cameraray = ray(v3::Vector3(camera::campos), v3::Vector3(camera::campos) + camera::direction());
-	block* closest = nullptr;
-	aabbraycollision closestblock = aabbraycollision();
-	for (int i = 0; i < (loadamt * 2 + 1) * (loadamt * 2 + 1); i++)
+	raycolwithgrid closest = raycolwithgrid();
+	closest.dist = INFINITY;
+	for (int i = 0; i < (loadamt * 2 + 1) * (loadamt * 2 + 1)*(2*loadamt+1); i++)
 	{
 		for (int j = 0;j < 16 * 16 * 16;j++) {
-			block* bl = &grid::chunklist[i]->blockstruct[j];
-			if (bl->hascomponent<colrect>()) {
+			block* blk = &grid::chunklist[i]->blockstruct[j];
 
-				aabbraycollision inter= bl->getcomponent<colrect>().distanceonray(cameraray);
-				if (inter.dist <closestblock.dist &&bl->id!=minecraftair)
+			//for now gyrantee tha it has no aabb
+			if (blk->id != minecraftair) {
+				if (distance(nray.start, blk->pos  + unitv / 2) <nray.length())
 				{
-				closestblock= inter;
-				closest = bl;
-					
+
+
+					aabbraycolinfo blkinter = blk->getcomponent<colrect>().distanceonray(nray);
+					if (blkinter.collided&&blkinter.dist < closest.dist)
+					{
+						closest.colpoint= blkinter.intersectionpoint;
+						closest.box =&( blk->getcomponent<colrect>());
+						closest.dist = blkinter.dist;
+					}
 				}
 			}
 
 		}
 	}
-	if (2< closestblock.dist) {
-		if (closest != nullptr && userinput::mouseleft.pressed && closestblock.dist < 115)
-		{
-			closest->id = minecraftair;
-			closest->removecomponent<colrect>();
-		}
-		if (closest != nullptr && userinput::mouseright.pressed && closestblock.dist < 511)
+		return closest;
+	
+	
+	
+}
+Vector3 getplaceoffset(Vector3 inter, Vector3 center,Vector3 colrectscale) {
+
+	Vector3 pos = zerov;
+	pos.x = v3::floorabs((inter.x - center.x)/colrectscale.x);
+	pos.y = v3::floorabs((inter.y - center.y) / colrectscale.y);
+	pos.z = v3::floorabs((inter.z - center.z) / colrectscale.z);
+	return pos;
+}
+void collision::collidecamray() {
+	ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
+	raycolwithgrid closest = collideraywithgrid(cameraray);
+
+	if ( closest.box != nullptr)
+	{
+
+	
+		if (interactminrange < closest.dist && closest.dist < interactmaxrange)
 		{
 
-			v3::Vector3 pointwhereblockplace = v3::Vector3(closest->pos) + specfloor(closestblock.intersectionpoint, closest->getcomponent<colrect>().center);
-			block* toplace = grid::getobjatgrid2(pointwhereblockplace.x, pointwhereblockplace.y, pointwhereblockplace.z);
-			if (toplace != nullptr)
+
+			if (userinput::mouseleft.pressed)
 			{
-				toplace->id = minecraftgrass;
-				toplace->texture = 1;
-				toplace->createaabb();
+				setair((block*)(closest.box->owner));
 			}
 
+
+			else if (userinput::mouseright.pressed)
+			{
+
+				Coord placmentpoint = getplaceoffset(closest.colpoint, closest.box->center, closest.box->scale);
+				block* plamentblock = grid::getobjatgrid(((block*)(closest.box->owner))->pos + placmentpoint);
+				if (plamentblock != nullptr)            
+				{                                         
+					plamentblock->id = minecraftstone;
+					giveblocktraits(plamentblock);
+				}
+
+			}
 		}
+
 	}
 }
+
+
 void collision::collideobjwithgrid(colrect& entity)
 {
 	v3::Vector3 lowpos= entity.center - entity.scale-unitv;
 	
-	iv3::Ivector3 lowest = iv3::Ivector3(iv3::floorabs(lowpos.x), iv3::floorabs(lowpos.y), iv3::floorabs(lowpos.z));
+	v3::Coord lowest = v3::Coord(v3::floorabs(lowpos.x), v3::floorabs(lowpos.y), v3::floorabs(lowpos.z));
 	v3::Vector3 highpos = entity.center + entity.scale+unitv;
 
-	iv3::Ivector3 highest= iv3::Ivector3(iv3::ceilabs(highpos.x), iv3::ceilabs(highpos.y), iv3::ceilabs(highpos.z));
+	v3::Coord highest= v3::Coord(v3::ceilabs(highpos.x), v3::ceilabs(highpos.y), v3::ceilabs(highpos.z));
 	for (int  i = 0; i < 3; i++)
 	{
 		Vector3 minforce = zerov;
@@ -79,7 +108,9 @@ void collision::collideobjwithgrid(colrect& entity)
 			{
 				for (int z = lowest.z; z < highest.z; z++)
 				{
-					blockname::block* tocollide = grid::getobjatgrid(x, y, z);
+					//getting solid at grid is optimization
+
+					blockname::block* tocollide = grid::getobjatgrid(x, y, z,false);
 					if (tocollide != nullptr)
 					{
 						if (tocollide->hascomponent<aabb::colrect>())

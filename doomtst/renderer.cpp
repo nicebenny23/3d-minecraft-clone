@@ -2,9 +2,10 @@
 
 namespace renderer {
 
-    unsigned int VBO;
-    unsigned int VAO;
-    unsigned int ibo;//indicebufferobject
+    vbuf VBO;
+    vao VAO;
+    
+    vbuf ibo;//indicebufferobject
     dynamicarray::array<shader> shaderlist;
     glm::mat4 proj;
     glm::mat4 view;
@@ -16,31 +17,29 @@ namespace renderer {
     void renderquadlist(dynamicarray::array<float> &pointlist,dynamicarray::array<unsigned int> &indicelist)
     {
         
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(float)*pointlist.length, pointlist.list, GL_STATIC_DRAW);
-
-        glBindVertexArray(VAO);
+        VBO.bind();
+       
+        VBO.fillbuffer<float>(pointlist);
+     
 
 
         //uv
-        glBindVertexArray(0);
-        glBindVertexArray(VAO);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int)*indicelist.length, indicelist.list, GL_STATIC_DRAW);
 
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5* sizeof(float), (void*)0);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3*sizeof(float)));
-
+        ibo.bind();
+        ibo.fillbuffer<unsigned int>(indicelist);
+         //enable position
+        VAO.bind();
+           VAO.set_attr(0,3,GL_FLOAT,6*sizeof(float),0);
+           glEnableVertexAttribArray(0);
+        //texture coords,inclusing the texture in the array 
+           VAO.set_attr(1, 3, GL_FLOAT, 6 * sizeof(float), 3*sizeof(float));
         glEnableVertexAttribArray(1);
 
-        glBindVertexArray(ibo);
+      
+ 
+        shaderlist[currshader].setmatval(proj, "projection");
+        shaderlist[currshader].setmatval(view, "view");
 
-        glBindVertexArray(VAO);
-        float g = pointlist[10];
-        shaderlist[currshader].setvalmat(proj, "projection");
-        shaderlist[currshader].setvalmat(view, "view");
         int vertexColorLocation = glGetUniformLocation(shaderlist[currshader].id, "Color");
 
      
@@ -49,29 +48,56 @@ namespace renderer {
       
 
     }
+    void createtexturearray() {
 
+
+    }
+    void setprojmatrix(float fov,float nearclipplane, float farclipplane){
+        proj = glm::perspective(glm::radians(fov), float(4 / 3), nearclipplane, farclipplane);
+    }
+    void generatetexarray() {
+
+        array<const char*> texlist = array<const char*>(0);
+        texlist[0] = "dirt.png";
+        texlist[1] = "grass.png";
+        texlist[2] = "wood.png";
+        texlist[3] = "woodint.png";
+        texlist[5] = "water.png";
+        texlist[4] = "glass.png";
+        texturearray texarr = texturearray(16, 16, texlist, png);
+        texarr.apply();
+        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+    void settextureparams() {
+        glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY, 10);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+        glCullFace(GL_BACK);
+
+        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LOD, 1000);
+    }
     void load()
     {
-        view = glm::mat4(1);
-        proj = glm::perspective(glm::radians(45.f), float(4 / 3), 0.1f, 100.0f);
+        view = glm::mat4(0);
+        setprojmatrix(70, .1, 100);
         currshader = normal;
         shaderlist = dynamicarray::array<shader>(10);
         shaderlist[normal] = shader::shader("vert1.vs", "frag1.vs");
         shaderlist[normal].attach();
         glUseProgram(shaderlist[normal].id);
-        glGenVertexArrays(1, &VAO);
-        glGenBuffers(1, &VBO);
-        glGenBuffers(1, &ibo);
-        blocktexture = texture::texture("coal.jpg", jpeg);
-        glBindTexture(GL_TEXTURE_2D, blocktexture.id);
-        glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY, 10);
-          glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      glCullFace(GL_BACK);
 
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 1000);
+        VAO.generate();
+        VBO.generate(GL_ARRAY_BUFFER);
+        ibo.generate(GL_ELEMENT_ARRAY_BUFFER);
+    
+     
+        //blocktexture = texture::texture("coal.jpg", jpeg);
+        //blocktexture.apply();
+        generatetexarray();
+        settextureparams();
 
        // GL_TEXTURE_MAX_LOD=1000;
     }

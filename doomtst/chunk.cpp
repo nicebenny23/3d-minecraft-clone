@@ -1,35 +1,44 @@
 #include "chunk.h"
+#include "noise.h"
+inline int modabs1(int x, int m) {
 
-inline int chunk::indfrompos(int x, int y, int z)
+	if (x < 0)
+	{
+		if (static_cast<double>(x) / m == int(x / m))
+		{
+			//so (-16,-16) is now a part of the correct chunk this has to bedon due to the inverse taken
+			return 0;
+		}
+		else {
+			return m - ((-x) % m);
+		}
+	}
+	else
+	{
+		return x % m;
+	}
+}
+inline int chunk::indfromlocalpos(int x, int y, int z)
 {
 return	256 * x + 16 * y + z;
 }
-void giveblocktraits(blockname::block* nullblock) {
-	switch (nullblock->id)
-	{
-	case minecraftair:
-		break;
-	case minecraftgrass:
-		nullblock->texture = 1;
+int chunk::indexfrompos(int x, int y, int z)
+{
+	x = modabs1(x, 16);
+	y = modabs1(y, 16);
+	z = modabs1(z, 16);
+	return	256 * x + 16 * y + z;
+}
 
-		nullblock->createaabb();
-		break;
-	case minecraftdirt:
-		nullblock->texture = 0;
-
-		nullblock->createaabb();
-		break;
-	}
-};
-chunk::chunk* chunk::load(int xind,int zind)
+//complete
+chunk::chunk* chunk::load(Coord location)
 {
 	chunk* retchunk = new chunk();
-	retchunk->xchunk = xind;
-	retchunk->zchunk = zind;
+	retchunk->loc =location;
 	retchunk->blockstruct = new block[16 * 16 * 16];
 	for (int i = 0; i < 16 * 16 * 16; i++)
 	{
-		retchunk->blockstruct[i] = blockname::block(iv3::zerov, 0);
+		retchunk->blockstruct[i] = blockname::block(v3::zeroiv, 0);
 		
 	
 	}
@@ -39,21 +48,38 @@ chunk::chunk* chunk::load(int xind,int zind)
 			for (int z = 0; z < 16; z++)
 			{
 				int ind = 256 * x + 16 * y + z;
-				retchunk->blockstruct[ind].pos = iv3::Ivector3(x + 16 * xind, y, z + 16 * zind);
-				
+				retchunk->blockstruct[ind].pos = v3::Coord(x , y, z )+location*16;
+				int idforblock = minecraftair;
 				//select block mechanism
-				if (y==10)
-				{
-					retchunk->blockstruct[ind].id = minecraftgrass;
-				}
-				if (y <10)
-				{
-					retchunk->blockstruct[ind].id = minecraftdirt;
-				}
-				if (10<y)
+				int ylevel = y + 16 *location.y ;
 				
+				retchunk->blockstruct[ind].id = minecraftair;
+				float noiselevel =  trueperlin(z + 16 * location.z , x  + 16 * location.x)*4+10;
+				float val = noiselevel;
+				if (noiselevel > ylevel)
 				{
-					retchunk->blockstruct[ind].id = minecraftair;
+
+
+					if (val == 13)
+					{
+						retchunk->blockstruct[ind].id = minecraftgrass;
+					}
+					if (val < 13)
+					{
+
+						retchunk->blockstruct[ind].id = minecraftdirt;
+
+					}
+					if (val < 10)
+					{
+
+						retchunk->blockstruct[ind].id = minecraftwater;
+
+					}
+					if (ylevel <= 6)
+					{
+						retchunk->blockstruct[ind].id = minecraftdirt;
+					}
 				}
 				giveblocktraits(&(retchunk->blockstruct[ind]));
 			}
@@ -82,8 +108,7 @@ void chunk::chunk::renderchunk()
 
 chunk::chunk::chunk()
 {
-	xchunk = 0;
-	zchunk = 0;
+	loc = zeroiv;
 	blockstruct = 0;
 }
 

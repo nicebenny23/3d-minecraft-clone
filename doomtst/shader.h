@@ -2,7 +2,7 @@
 #define shader_hpp
 #include <glad/glad.h>
 #include <glm/mat4x4.hpp>
- 
+#include "debug.h"
 struct shader
 {
 
@@ -14,7 +14,7 @@ struct shader
 		id = -1;
 	}
 
-	void setvalmat(glm::mat4 val, const char* name)
+	void setmatval(glm::mat4 val, const char* name)
 	{
 		int location = glGetUniformLocation(id, name);
 		glad_glUniformMatrix4fv(location, 1, GL_FALSE, &val[0][0]);
