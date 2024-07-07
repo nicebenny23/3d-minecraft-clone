@@ -62,8 +62,8 @@ namespace camera {
 
 	}
 
-	void setcamerapos(glm::vec3 newpos)
+	void setcamerapos(v3::Vector3 newpos)
 	{
-		campos = newpos;
+		campos = newpos.glm();
 	}
 }

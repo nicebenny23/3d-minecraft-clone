@@ -48,12 +48,13 @@ void texture::apply()
 {
 	glBindTexture(GL_TEXTURE_2D, id);
 }
-
-texturearray::texturearray(int width, int height, array<const char*> textures, textype imgtype)
+//only works for png
+texturearray::texturearray(int width, int height, array<const char*> textures)
 {
 	array<unsigned char*> data = array<unsigned char*>();
 
 	for (int i = 0;i < textures.length;i++) {
+		//colchannel not used but it hastto be given
 		int colchannel = 0;
 		unsigned char* datatoappend = stbi_load(textures[i], &width, &height, &colchannel, STBI_rgb_alpha);
 		if (datatoappend != nullptr)

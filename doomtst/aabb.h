@@ -34,14 +34,17 @@ struct	colrect :gameobject::component
 		v3::Vector3 scale;
 		bool pointinbox(v3::Vector3 pos);
 		int index;
+		//for entities;
+		v3::Vector3 prevpos;
 		colrect() = default;
 		void destroy();
+		~colrect() = default;
 		colrect(const v3::Vector3& objcenter, const v3::Vector3& objscale,bool gridobj);
 		aabbraycolinfo distanceonray(ray fray); 
 	};
-	
+
 	void initcolrect();
-	
+	bool aabbsintersect(colrect &p1, colrect &p2);
 	v3::Vector3 collideaabb(colrect p1, colrect p2);
 	extern dynamicarray::array<colrect*> colrectlist;
 }

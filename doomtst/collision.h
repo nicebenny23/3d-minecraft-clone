@@ -15,10 +15,10 @@ namespace collision {
 		colrect* box;
 		v3::Vector3 colpoint;
 		float dist;
-		raycolwithgrid(float dist1, colrect* closest1, v3::Vector3 intpoint) {
+		raycolwithgrid(float distance, colrect* closestbox, v3::Vector3 intpoint) {
 
-			dist = dist1;
-			box = closest1;
+			dist = distance;
+			box = closestbox;
 			colpoint = intpoint;
 		}
 		raycolwithgrid() = default;

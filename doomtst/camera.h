@@ -10,7 +10,7 @@ namespace camera {
 	void initilize();
 	void calculateyawandpitch();
 	void sendoffviewmatrix();
-	void setcamerapos(glm::vec3 newpos);
+	void setcamerapos(v3::Vector3 newpos);
 }
 
 #endif // !Camera_HPP

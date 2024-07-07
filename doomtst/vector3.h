@@ -1,31 +1,11 @@
 #include <cmath>
+#ifndef v3_HPP
+#include "mathutil.h"
 #include <Windows.h>
 #include <glm/glm.hpp>
-#ifndef v3_HPP
 #define v3_HPP
 namespace v3 {
-	inline int floorabs(float x) {
-
-		if (x < 0)
-		{
-			return -1 * floor(-1 * x);
-		}
-		else
-		{
-			return floor(x);
-		}
-	}
-	inline int ceilabs(float x) {
-
-		if (x < 0)
-		{
-			return -1 * ceil(-1 * x);
-		}
-		else
-		{
-			return ceil(x);
-		}
-	}
+	
 	struct Vector3;
 	struct Coord
 	{

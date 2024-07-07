@@ -67,19 +67,19 @@ namespace gameobject {
 		//called on destroy used for deallocation
 		virtual void ondestroy();
 		obj* owner;
-		
+		virtual ~component() = default;
 		virtual void setobj(obj* object) {
 			owner = object;
 		}
 		component() {
-		
-			id = -INFINITY ;
+			owner = nullptr;
+			id = -1;
 		};
 		virtual component* copydat(component* orgin);
 		virtual void start();
 
 		virtual void update();
-
+		virtual void blockfaceupdate(obj* blk,int face);
 
 
 		int id;
@@ -94,12 +94,12 @@ namespace gameobject {
 	struct obj
 	{
 		int guid;
-	
+
 		array<component*> complist;
 
-		obj(v3::Vector3 ipos, const char* _name  );
-		
-		
+		obj(v3::Vector3 ipos, const char* _name);
+
+
 		objtype type;
 
 		template <class T>
@@ -110,7 +110,7 @@ namespace gameobject {
 		//removes a component
 		template <class T>
 		void removecomponent();
-		
+
 		template <class T>
 		array<T>  getcomponents();
 
@@ -118,6 +118,8 @@ namespace gameobject {
 		template <class T, typename... types>
 		void addcomponent(types&&... initval);
 
+
+		void blkfaceupdate(obj* blk, int face);
 
 		obj();
 
@@ -160,7 +162,7 @@ namespace gameobject {
 		int id = compidfromname((char*)(typeid(T).name()));
 		if (id == -1)
 		{
-			static_assert("", "");
+			Assert("trying to get undefined component");
 		}
 		for (int i = 0; i < complist.length; i++)
 		{
@@ -173,7 +175,7 @@ namespace gameobject {
 		}
 		static_assert("", "");
 	}
-
+	//barely used
 	template <class T>
 	array<T> obj::getcomponents()
 	{
@@ -239,8 +241,9 @@ namespace gameobject {
 
 
 		int id = idfromnameadd((char*)(typeid(T).name()));
-		static_assert(std::is_constructible_v<T, types...>, "no constructer takes these parameters");
-		static_assert(std::is_base_of<component, T>::value, "T is not a component");
+	//fix
+		//Assert(std::is_constructible_v<T, types...>, "no constructer takes these parameters");
+	//	Assert(std::is_base_of<component, T>::value, "T is not a component");
 
 		T* comp = new T(std::forward<types>(initval)...);
 
@@ -296,5 +299,6 @@ namespace gameobject {
 		
 	}
 
+	
 	}
 #endif#pragma once

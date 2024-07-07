@@ -25,7 +25,7 @@ namespace entity {
 		entityref(entity& object) {
 			guid = object.guid;
 		}
-		entity* toobj()
+		entity* toent()
 		{
 			if (guid == -1)
 			{

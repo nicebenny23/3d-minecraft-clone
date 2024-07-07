@@ -15,9 +15,8 @@ enum shadertype {
 
 };
 namespace renderer {
-	extern vao VAO;
-	extern vbuf VBO, ibo;
-	void renderquadlist(dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist);
+
+	void renderquadlist(vao VAO, vbuf ibo, vbuf VBO, dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist);
 	void load();
 	void setviewmatrix(glm::mat4 viewmat);
 	extern glm::mat4 proj,view;

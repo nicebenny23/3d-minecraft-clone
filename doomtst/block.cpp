@@ -4,30 +4,8 @@
 
 using namespace blockname;
 
-void block::render()
-{
 
-	if (id == minecraftair)
-	{
-		return;
-
-
-	}
-	if (id == minecraftgrass)
-	{
-		glm::mat4 model = glm::mat4(1.0f);
-		model = glm::rotate(model, 0.f, glm::vec3(1.f, 0.0f, 0.0f));
-		model = glm::translate(model, (v3::vec(pos).glm()));
-
-
-
-
-	}
-
-}
-
-
-block::block(v3::Coord placment, int setid)
+block::block(v3::Coord placment, int blockid)
 {
 	
 	guid = gameobject::getgoid();
@@ -38,10 +16,10 @@ block::block(v3::Coord placment, int setid)
 	//ddcomponent<gameobject::component>();
 	gameobject::objectfromguid[guid] = this;
 	type = gameobject::block;
-	id = setid;
+	id = blockid;
 	pos = placment;
 	
-	tex = facetex();
+	createfaces(this);
 }
 
 block::block()
@@ -50,7 +28,7 @@ block::block()
 
 	id = minecraftair;
 	pos = v3::zeroiv;
-	tex = facetex(minecraftair);
+	createfaces(this);
 }
 
 void block::createaabb()
@@ -66,13 +44,9 @@ void blockname::setair(blockname::block* blk)
 	case minecraftair:
 		break;
 	case minecraftgrass:
-		
-
 		blk->removecomponent<aabb::colrect>();
 		break;
 	case minecraftdirt:
-		
-
 		blk->removecomponent<aabb::colrect>();
 		break;
 	case minecraftstone:
@@ -88,12 +62,14 @@ void blockname::setair(blockname::block* blk)
 		break;
 	case minecraftwater:
 
-
-		blk->removecomponent<aabb::colrect>();
+		
+		
 		break;
     }
+	blk->transparent = true;
+	blk->solid =false;
 	blk->id = minecraftair;
-	blk->tex = facetex(minecraftair);
+	createfaces(blk);
 }
 
 void blockname::giveblocktraits(blockname::block* nullblock)
@@ -101,29 +77,97 @@ void blockname::giveblocktraits(blockname::block* nullblock)
 	switch (nullblock->id)
 	{
 	case minecraftair:
+		nullblock->solid = false;
+		nullblock->transparent = true;
 		break;
 	case minecraftgrass:
-		
-
+		nullblock->transparent = false;
+		nullblock->solid = true;
 		nullblock->createaabb();
 		break;
 	case minecraftdirt:
-		
+		nullblock->solid = true;
 
+		nullblock->transparent = false;
 		nullblock->createaabb();
 		break;
 	case minecraftstone:
-		
+		nullblock->solid = true;
+		nullblock->transparent = false;
 		nullblock->createaabb();
 		break;
 	case minecraftglass:
-
+		nullblock->solid = true;
+		nullblock->transparent = true;
 		nullblock->createaabb();
 		break;
 	case minecraftwater:
+		nullblock->solid = false;
 
-		nullblock->createaabb();
+		nullblock->transparent = true;
 		break;
 }
-	nullblock->tex = facetex(nullblock->id);
+	createfaces(nullblock);
+}
+void setfaces(block* blk,int frontface, int backface, int leftface, int rightface, int upface, int downface) {
+
+	blk->front = face(frontface, 0, blk);
+	blk->back = face(backface, 1, blk);
+
+	blk->left = face(leftface, 2, blk);
+	blk->right = face(rightface, 3, blk);
+	blk->up = face(upface, 4, blk);
+	blk->down = face(downface, 5, blk);
+}
+void blockname::createfaces(block*blk)
+{
+	switch (blk->id)
+	{
+	case minecraftdirt:
+		setfaces(blk,0, 0, 0, 0, 0, 0);
+	
+		
+		break;
+	case minecraftgrass:
+		setfaces(blk,0, 0, 0, 0, 1, 0);
+		break;
+	case minecraftstone:
+		setfaces(blk,2, 2, 2, 2, 3, 3);
+		break;
+	case minecraftglass:
+		setfaces(blk,4,4,4,4,4,4);
+		break;
+	case minecraftwater:
+		setfaces(blk, 5, 5, 5, 5, 5, 5);
+		break;
+	case minecraftair:
+		setfaces(blk, -1,-1,-1,-1,-1,-1);
+		break;
+	}
+}
+
+blockname::face::face()
+{
+	tex = -1;
+	cameradist = -1;
+	holder = nullptr;
+	facenum = -1;
+	covered = false;	
+}
+
+blockname::face::face(byte texval, int num, block* owner)
+{
+	tex = texval;
+	facenum = num;
+	holder = owner;
+	calccameradist();
+	covered = false;
+}
+
+void blockname::face::calccameradist()
+{
+	v3::Vector3 center = holder->pos + unitv / 2 + faceoffsetfromcenter(facenum) / 2.001;
+	//todo find out why this has error when distance =0;
+	cameradist = distance(v3::Vector3(camera::campos), center)+1;
+
 }

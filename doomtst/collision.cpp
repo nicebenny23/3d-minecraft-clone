@@ -24,7 +24,7 @@ collision::raycolwithgrid collision::collideraywithgrid(ray nray) {
 			block* blk = &grid::chunklist[i]->blockstruct[j];
 
 			//for now gyrantee tha it has no aabb
-			if (blk->id != minecraftair) {
+			if (blk->solid) {
 				if (distance(nray.start, blk->pos  + unitv / 2) <nray.length())
 				{
 
@@ -49,10 +49,25 @@ collision::raycolwithgrid collision::collideraywithgrid(ray nray) {
 Vector3 getplaceoffset(Vector3 inter, Vector3 center,Vector3 colrectscale) {
 
 	Vector3 pos = zerov;
-	pos.x = v3::floorabs((inter.x - center.x)/colrectscale.x);
-	pos.y = v3::floorabs((inter.y - center.y) / colrectscale.y);
-	pos.z = v3::floorabs((inter.z - center.z) / colrectscale.z);
+	pos.x = floorabs((inter.x - center.x)/colrectscale.x);
+	pos.y = floorabs((inter.y - center.y) / colrectscale.y);
+	pos.z = floorabs((inter.z - center.z) / colrectscale.z);
 	return pos;
+}
+bool aabbcollideswithent(colrect* blk) {
+	for (int i = 0; i < colrectlist.length; i++)
+	{
+		if (colrectlist[i] != nullptr)
+		{
+
+
+			if (aabbsintersect(*(colrectlist[i]), *blk))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
 }
 void collision::collidecamray() {
 	ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
@@ -68,7 +83,7 @@ void collision::collidecamray() {
 
 			if (userinput::mouseleft.pressed)
 			{
-				setair((block*)(closest.box->owner));
+				grid::placeblockatloc(toblk(closest.box->owner).pos, minecraftair);
 			}
 
 
@@ -76,11 +91,17 @@ void collision::collidecamray() {
 			{
 
 				Coord placmentpoint = getplaceoffset(closest.colpoint, closest.box->center, closest.box->scale);
-				block* plamentblock = grid::getobjatgrid(((block*)(closest.box->owner))->pos + placmentpoint);
+				block* plamentblock = grid::getobjatgrid(  toblk(closest.box->owner).pos + placmentpoint);
 				if (plamentblock != nullptr)            
-				{                                         
-					plamentblock->id = minecraftstone;
-					giveblocktraits(plamentblock);
+				{      
+					int previd = plamentblock->id;
+					//i dont know why i create it and remove itit like this but it makes the core much simpler
+					grid::placeblockatloc(plamentblock->pos, minecraftstone);
+					if (aabbcollideswithent(&plamentblock->getcomponent<colrect>()))
+					{
+						
+						grid::placeblockatloc(plamentblock->pos, previd);
+					}
 				}
 
 			}
@@ -89,17 +110,28 @@ void collision::collidecamray() {
 	}
 }
 
-
+//todo implement movment per axis
 void collision::collideobjwithgrid(colrect& entity)
 {
 	v3::Vector3 lowpos= entity.center - entity.scale-unitv;
 	
-	v3::Coord lowest = v3::Coord(v3::floorabs(lowpos.x), v3::floorabs(lowpos.y), v3::floorabs(lowpos.z));
+	v3::Coord lowest = v3::Coord(floorabs(lowpos.x), floorabs(lowpos.y), floorabs(lowpos.z));
 	v3::Vector3 highpos = entity.center + entity.scale+unitv;
 
-	v3::Coord highest= v3::Coord(v3::ceilabs(highpos.x), v3::ceilabs(highpos.y), v3::ceilabs(highpos.z));
+	v3::Coord highest= v3::Coord(ceilabs(highpos.x), ceilabs(highpos.y), ceilabs(highpos.z));
+	std::swap(entity.center, entity.prevpos);
 	for (int  i = 0; i < 3; i++)
 	{
+		switch (i)
+		{
+
+		case 0:
+			entity.center.y= entity.prevpos.y;
+		case 1:
+			entity.center.z= entity.prevpos.z;
+		case 2:
+			entity.center.x= entity.prevpos.x;
+		}
 		Vector3 minforce = zerov;
 	
 		for (int x = lowest.x; x < highest.x; x++)
@@ -140,5 +172,7 @@ void collision::collideobjwithgrid(colrect& entity)
 			}
 		}
 		entity.center += minforce;
+		entity.prevpos+= minforce;
+		entity.prevpos = entity.center;
 	}
 }

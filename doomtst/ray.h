@@ -18,9 +18,12 @@ struct ray
 		return 0;
 	}
 //todo get linetraversel working
-	ray(const v3::Vector3& startray, const v3::Vector3& endray)
-		
+	ray(const v3::Vector3& startray, const v3::Vector3& endray)	
 	{
+		if (end==start)
+		{
+		//	Assert("end cant be equal to start in a ray");
+		}
 		start = startray;
 		end = endray;
 	}

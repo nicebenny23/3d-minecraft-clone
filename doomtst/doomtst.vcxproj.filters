@@ -66,6 +66,9 @@
     <ClCompile Include="blockrender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="chunkrender.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vector3.h">
@@ -144,6 +147,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="algorthm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mathutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="chunkrender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

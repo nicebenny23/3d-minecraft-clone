@@ -10,12 +10,18 @@ namespace vobj {
 
 
 		vao() {
-			id = 0;
+			id =0;
 		}
 		void generate() {
 			glGenVertexArrays(1, &id);
 
 		}
+		void destroy() {
+			
+			glDeleteVertexArrays(1, &id);
+
+		}
+
 		void bind() {
 
 			glBindVertexArray(id);
@@ -72,6 +78,11 @@ namespace vobj {
 
 		}
 	
+		void destroy() {
+
+			glDeleteBuffers(1, &id);
+
+		}
 
 
 		//use when data is of one type

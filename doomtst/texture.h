@@ -26,7 +26,7 @@ struct texture
 struct texturearray
 {
 	GLuint id;
-	texturearray(int width,int height, array<const char*> textures, textype imgtype);
+	texturearray(int width,int height, array<const char*> textures);
 	void apply();
 };
 

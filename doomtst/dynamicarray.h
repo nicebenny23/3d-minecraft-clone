@@ -75,7 +75,7 @@ namespace dynamicarray {
 	void array<T>::merge(int index, const array& arr) {
 		if (index < 0)
 		{
-			index = 0;
+			Assert("index for merge less than 0");
 		}
 		if (index + arr.length >= length)
 		{
@@ -275,12 +275,13 @@ namespace dynamicarray {
 			}
 		}
 		if (index >= length) {//max index is length
-
+			//i do not make it an error because this funciton is supposed to go out of bonds
 			length = index + 1;
 
 		}
 		if (index < 0)
 		{
+			
 			Assert("index for [] operator less than 0");
 		}
 
@@ -288,7 +289,7 @@ namespace dynamicarray {
 		if (length > capacity) {
 			if (!resize(resizelen(length)))//array resize failed
 			{
-				Assert("a");//again to avoid error in case of memory fail and derenfrence it because its cool
+				Assert("resize fail");//again to avoid error in case of memory fail and derenfrence it because its cool
 			}
 
 		}
@@ -388,7 +389,7 @@ namespace dynamicarray {
 			for (int i = length; i < capacity; i++)
 			{
 
-				newlist[i] = T();
+				//newlist[i] = T();
 			}
 			//also the error here is a bug 
 			if (list!=nullptr)

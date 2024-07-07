@@ -51,6 +51,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -143,6 +144,7 @@
     <ClCompile Include="blockrender.cpp" />
     <ClCompile Include="camera.cpp" />
     <ClCompile Include="chunk.cpp" />
+    <ClCompile Include="chunkrender.cpp" />
     <ClCompile Include="collision.cpp" />
     <ClCompile Include="component.cpp" />
     <ClCompile Include="gameobject.cpp" />
@@ -158,10 +160,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="aabb.h" />
+    <ClInclude Include="algorthm.h" />
     <ClInclude Include="block.h" />
     <ClInclude Include="blockrender.h" />
     <ClInclude Include="camera.h" />
     <ClInclude Include="chunk.h" />
+    <ClInclude Include="chunkrender.h" />
     <ClInclude Include="collision.h" />
     <ClInclude Include="component.h" />
     <ClInclude Include="debug.h" />
@@ -169,6 +173,7 @@
     <ClInclude Include="entity.h" />
     <ClInclude Include="gameobject.h" />
     <ClInclude Include="grid.h" />
+    <ClInclude Include="mathutil.h" />
     <ClInclude Include="noise.h" />
     <ClInclude Include="objecthelper.h" />
     <ClInclude Include="random.h" />

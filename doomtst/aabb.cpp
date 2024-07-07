@@ -12,39 +12,49 @@ namespace aabb {
             colrectlist[i] = nullptr;
         }
     }
-    v3::Vector3 collideaabb(colrect p1, colrect p2)
+    bool aabbsintersect(colrect & p1, colrect & p2)
     {
-        int sgnx = p1.center.x > p2.center.x?1 : -1;
-        int sgny = p1.center.y > p2.center.y ? 1 : -1;
-        int sgnz = p1.center.z> p2.center.z ? 1 : -1;
-        if (abs(p1.center.x-p2.center.x)<p1.scale.x+p2.scale.x)
+        if (abs(p1.center.x - p2.center.x) < p1.scale.x + p2.scale.x)
         {
             if (abs(p1.center.y - p2.center.y) < p1.scale.y + p2.scale.y)
             {
                 if (abs(p1.center.z - p2.center.z) < p1.scale.z + p2.scale.z)
                 {
-
-                    float xdepth= sgnx * (p1.scale.x + p2.scale.x)-  (p1.center.x - p2.center.x );
-                    float ydepth = sgny * (p1.scale.y + p2.scale.y)-  ( p1.center.y - p2.center.y);
-                    float zdepth = sgnz * (p1.scale.z + p2.scale.z)- (p1.center.z - p2.center.z) ;
-                    if(abs(xdepth) < abs(ydepth)) {
-                        if (abs(xdepth)<abs(zdepth))
-                        {
-                            return v3::Vector3(xdepth, 0, 0);
-                        }
-                        return v3::Vector3(0, 0, zdepth);
-                    }
-                    if (abs(ydepth) < abs(zdepth))
-                    {
-                        return v3::Vector3(0, ydepth, 0);
-                    }
-                    return v3::Vector3(0, 0, zdepth);
-                  
+                    return true;
                 }
             }
         }
-        return v3::zerov;
+        return false;
     }
+    
+    v3::Vector3 collideaabb(colrect p1, colrect p2)
+    {
+        int sgnx = p1.center.x > p2.center.x?1 : -1;
+        int sgny = p1.center.y > p2.center.y ? 1 : -1;
+        int sgnz = p1.center.z> p2.center.z ? 1 : -1;
+        if (aabbsintersect(p1, p2)) {
+
+            float xdepth = sgnx * (p1.scale.x + p2.scale.x) - (p1.center.x - p2.center.x);
+            float ydepth = sgny * (p1.scale.y + p2.scale.y) - (p1.center.y - p2.center.y);
+            float zdepth = sgnz * (p1.scale.z + p2.scale.z) - (p1.center.z - p2.center.z);
+            if (abs(xdepth) < abs(ydepth)) {
+                if (abs(xdepth) < abs(zdepth))
+                {
+                    return v3::Vector3(xdepth, 0, 0);
+                }
+                return v3::Vector3(0, 0, zdepth);
+            }
+            if (abs(ydepth) < abs(zdepth))
+            {
+                return v3::Vector3(0, ydepth, 0);
+            }
+            return v3::Vector3(0, 0, zdepth);
+        }
+        return v3::zerov;
+
+      }
+        
+
 
     bool colrect::pointinbox(v3::Vector3 pos)
     {

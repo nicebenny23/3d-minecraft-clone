@@ -3,6 +3,7 @@
 #include <glm/glm.hpp>
 #include "gameobject.h"
 #include "aabb.h"
+#include "camera.h"
 #ifndef block_HPP
 #define block_HPP
 using namespace v3;
@@ -10,11 +11,10 @@ namespace blockname {
 
 	enum id
 	{
-		minecraftair = (0),
-
-		minecraftdirt = 1,
+		minecraftair =   0,
+		minecraftdirt =  1,
 		minecraftgrass = 2,
-		minecraftstone = (3),
+		minecraftstone = 3,
 		minecraftglass = 4,
 		minecraftwater = 5,
 	};
@@ -35,40 +35,59 @@ namespace blockname {
 		case 5:
 			return v3::Vector3(0,-1, 0);
 		default:
-			assert("1");
+			Assert("atempetd to acess a nonexistant direction");
 
 			break;
 		}
 	}
+	struct block;
 	struct face {
-		
+		block* holder;
+		bool covered;
 		byte tex;
-		face() {
-			tex = -1;
+		int facenum;
+		float cameradist;
+		face();
+		face(byte texval, int num, block* owner);
+
+		
+
+		void calccameradist();
+		//only set correctly during frame of render for transparent objs
+	
+		bool operator<(face b) {
+			return b.cameradist > cameradist;
 		}
-		face(byte texval) {
-			tex = texval;
+		bool operator>(face b) {
+			return b.cameradist < cameradist;
 		}
 	};
-	struct facetex
+		
+		
+		
+		
+	
+
+	
+	struct block:gameobject::obj
 	{
+		bool transparent;
+		bool solid;
+		byte id;
+		v3::Coord pos;
 		
 		face up;
-		face left;
+	    face left;
 		face right;
-		face down;
+		face down ;
 		face front;
-		face back;
-		int texatface(int index) {
-			return (*this)[index].tex;
+		face back ;
+		face& operator[](int index) {
 
-		}
-		face operator[](int index) {
-			
 			switch (index)
 			{
 			case 0:
-				return back;
+				return front;
 			case 1:
 				return back;
 			case 2:
@@ -80,70 +99,20 @@ namespace blockname {
 			case 5:
 				return down;
 			default:
-				assert("1");
-				
+				Assert("index too high/low for faces");
+
 				break;
 			}
-		}
-		
-		facetex(int id) {
+		} 
 
-			switch (id)
-			{
-			case minecraftdirt:
-				up = face(0);
-				left =face(0);
-				right =face(0);
-				down =face(0);
-				front =face(0);
-				back =face(0);
-				break;
-			case minecraftgrass:
-				up =face(1);
-				left =face(0);
-				right =face(0);
-				down =face(0);
-				front =face(0);
-				back =face(0);
-				break;
-			case minecraftstone:
-				up =face(3);
-				left =face(2);
-				right =face(2);
-				down =face(3);
-				front =face(2);
-				back =face(2);
-				break;
-			case minecraftglass:
-				back =face(4);
-				break;
-			case minecraftwater:
-				back = face(5);
-				break;
-			case minecraftair:
-				
-					break;
-			}
-		}
 
-		facetex() = default;
-	};
-	struct block:gameobject::obj
-	{
-
-		
-		byte id;
-		v3::Coord pos;
-		facetex tex;
-	
- void render();
-
-		 block(v3::Coord placment,int setid);
+		 block(v3::Coord placment,int blockid);
 		 block();
 		 void createaabb();
 	};
 	void setair(blockname::block* blk);
 	void giveblocktraits(blockname::block* nullblock);
+	void createfaces(block*blk);
 }
 
 

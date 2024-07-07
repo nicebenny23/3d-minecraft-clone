@@ -39,6 +39,10 @@ void gameobject::component::update()
 
 }
 
+void gameobject::component::blockfaceupdate(obj* blk, int face)
+{
+}
+
 
 
 
@@ -46,18 +50,13 @@ void gameobject::component::update()
 
 int gameobject::getgoid()
 {
-	int randomval = 0;
-	obj* valifexist = objectfromguid[randomval];
-
-	while (valifexist != nullptr)
-	{
-		
-		randomval = randomint(entsize-1);
+	int randomval ;
+	obj* valifexist;
+	do {
+		randomval = randomint(entsize - 1);
 		valifexist = objectfromguid[randomval];
-		int l = 1;
-
-	}
-
+	} while (valifexist != nullptr);
+	
 	return randomval;
 
 
@@ -81,6 +80,7 @@ void gameobject::initobjs() {
 
 
 }
+//not functonal yet
 
 objref init(objref base) {
 
@@ -118,6 +118,22 @@ gameobject::obj::obj(v3::Vector3 ipos, const char* _name)
 }
 
 
+
+void gameobject::obj::blkfaceupdate(obj* blk, int face)
+{
+	if (type == block)
+	{
+		for (int i = 0; i < complist.length; i++)
+		{
+			complist[i]->blockfaceupdate(blk, face);
+		}
+	}
+	else
+	{
+		Assert("blockfaceupdateonly defined for blocks");
+
+	}
+}
 
 obj::obj() {
 

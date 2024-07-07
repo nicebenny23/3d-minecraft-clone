@@ -1,45 +1,16 @@
 #include "grid.h"
 #include <cmath>
+#include "mathutil.h"
 #include "vector2.h"
 using namespace v3;
 
 namespace grid {
-	inline int modabs(int x, int m) {
-
-		if (x < 0)
-		{
-			if (static_cast<double>(x) / m == int(x / m))
-			{
-				//so (-16,-16) is now a part of the correct chunk this has to bedon due to the inverse taken
-				return 0;
-			}
-			else {
-				return m - ((-x) % m);
-			}
-		}
-		else
-		{
-			return x % m;
-		}
-	}
-	
-	float floorabs(float x) {
-
-		if (x < 0)
-		{
-			return -1 * floor(-1 * x);
-		}
-		else
-		{
-			return floor(x);
-		}
-	}
 
 
 
 	Vector3 gridpos;
 	Vector3 griddt;
-	chunk::chunk** chunklist;
+	Chunk::chunk** chunklist;
 	bool chunkloaded(int xchunk, int ychunk, int zchunk) {
 		if (abs(xchunk - gridpos.x) <= loadamt && abs(ychunk - gridpos.y) <= loadamt && abs(zchunk - gridpos.z) <= loadamt) {
 
@@ -48,35 +19,31 @@ namespace grid {
 		return false;
 	}
 	bool chunkloaded(Coord loc) {
-		if (abs(loc.x - gridpos.x) <= loadamt && abs(loc.y - gridpos.y) <= loadamt && abs(loc.z - gridpos.z) <= loadamt) {
-
-			return true;
-		}
-		return false;
+		return chunkloaded(loc.x, loc.y, loc.z);
 	}
-	bool normedchunkloaded(Coord loc) {
-		if (abs(loc.x) <= loadamt && abs(loc.y) <= loadamt && abs(loc.z) <= loadamt) {
-
-			return true;
-		}
-		return false;
-	}
-	int gridindfromnormedpos(int xchunk, int ychunk, int zchunk) {
+	//normed pos is when pos is in the range [0...2*loadamt+1) for each direction;
+	int gridindexfromnormedchunkpos(int xchunk, int ychunk, int zchunk) {
 
 		return xchunk + ychunk * (2 * loadamt + 1) + zchunk * (2 * loadamt + 1) * (2 * loadamt + 1);
 	}
+	//normed pos is when pos is in the range [0...2*loadamt+1) for each direction;
+	int gridindexfromnormedchunkpos(Coord loc) {
+
+		return gridindexfromnormedchunkpos(loc.x, loc.y, loc.z);
+	}
+
 	int gridindfromchunkpos(int xchunk, int ychunk, int zchunk) {
 		xchunk += loadamt - gridpos.x;
 		zchunk += loadamt - gridpos.z;
 		ychunk += loadamt - gridpos.y;
-		return gridindfromnormedpos(xchunk, ychunk, zchunk);
+		return gridindexfromnormedchunkpos(xchunk, ychunk, zchunk);
 	}
-	
-
-	
 
 
-	block* getobjatgrid(int x, int y, int z,bool counttransparent)
+
+
+
+	block* getobjatgrid(int x, int y, int z, bool countnonsolids)
 	{
 
 		int xchunk = x >> 4;
@@ -84,11 +51,10 @@ namespace grid {
 		int ychunk = y >> 4;
 		if (chunkloaded(xchunk, ychunk, zchunk))
 		{
-			//normilized the chunk
 
 			int ind = gridindfromchunkpos(xchunk, ychunk, zchunk);
-			block& blockatpos = chunklist[ind]->blockstruct[chunk::indexfrompos(x, y, z)];
-			if (counttransparent || blockatpos.id != minecraftair)
+			block& blockatpos = chunklist[ind]->blockstruct[Chunk::indexfrompos(x, y, z)];
+			if (countnonsolids || blockatpos.id != minecraftair)
 			{
 				return &blockatpos;
 			}
@@ -97,30 +63,14 @@ namespace grid {
 		return nullptr;
 
 	}
-	
+
 
 	block* getobjatgrid(v3::Coord pos, bool counttransparent)
 	{
-		int xchunk = pos.x >> 4;
-		int zchunk = pos.z >> 4;
-		int ychunk = pos.y>> 4;
-		if (chunkloaded(xchunk, ychunk, zchunk))
-		{
-			//normilized the chunk
-
-			int ind = gridindfromchunkpos(xchunk, ychunk, zchunk);
-			block& blockatpos = chunklist[ind]->blockstruct[chunk::indexfrompos(pos.x, pos.y, pos.z)];
-			if (counttransparent || blockatpos.id != minecraftair)
-			{
-				return &blockatpos;
-			}
-
-		}
-		return nullptr;
-
+		return getobjatgrid(pos.x, pos.y, pos.z, counttransparent);
 	}
 
-	bool issolidatpos(int x, int y, int z)
+	bool issolidatpos(int x, int y, int z,bool countoob)
 	{
 		int xchunk = x >> 4;
 		int zchunk = z >> 4;
@@ -130,39 +80,86 @@ namespace grid {
 			//normilized the chunk
 
 			int gridindex = gridindfromchunkpos(xchunk, ychunk, zchunk);
-			block& blockatpos = chunklist[gridindex]->blockstruct[chunk::indexfrompos(x, y, z)];
-			if (blockatpos.id != minecraftair&& blockatpos.id != minecraftwater)
+			block& blockatpos = chunklist[gridindex]->blockstruct[Chunk::indexfrompos(x, y, z)];
+
+			//todo seperate for transperent,solid
+			if (!blockatpos.transparent)
 			{
 				return true;
 			}
-
+			return false;
 		}
-		return false;
+		return countoob;
 
 	}
-	//complete
-	void initgrid()
-	{
-		
-		gridpos = zerov;
-		griddt = zerov;
-		const int size = (2 * loadamt + 1);
-		
-		chunklist = new chunk::chunk * [totalgridsize];
-		for (int i = 0; i <size; i++)
+	void computecover(face* blkface) {
+		Coord pos = blkface->holder->pos + faceoffsetfromcenter(blkface->facenum);
+		blkface->covered = issolidatpos(pos.x, pos.y, pos.z,true);
+	}
+	void computeallcover() {
+
+		for (int gridind = 0; gridind < totalgridsize; gridind++)
 		{
-			for (int j = 0; j < size;j++)
+			for (int blockind = 0;blockind < chunksize; blockind++) {
+				for (int faceind = 0; faceind < 6; faceind++)
+				{
+					face& tocover = (chunklist[gridind]->blockstruct[blockind])[faceind];
+					computecover(&tocover);
+				}
+
+			}
+		}
+	}
+	void placeblockatloc(int x, int y, int z, int blockid)
+	{
+		block* location = getobjatgrid(x, y, z);
+		if (location != nullptr)
+		{
+
+			setair(location);
+			location->id = blockid;
+			giveblocktraits(location);
+			for (int blkind = 0; blkind < 6; blkind++)
 			{
-			   for (int k =0; k <size;k++)
-			    {
-				   Coord gridind = Coord(i - loadamt, j - loadamt, k - loadamt);
-					chunklist[gridindfromnormedpos(i,j,k)] = chunk::load( gridind);
+				block* blockatpos = getobjatgrid(faceoffsetfromcenter(blkind) + location->pos);
+				for (int faceind = 0;faceind < 6;faceind++) {
+					computecover(&(*blockatpos)[faceind]);
 
 				}
 			}
 		}
 	}
+
+	void placeblockatloc(Coord loc, int blockid)
+	{
+		placeblockatloc(loc.x, loc.y, loc.z, blockid);
+	}
+
+	//complete
+	void initgrid()
+	{
+
+		gridpos = zerov;
+		griddt = zerov;
+		const int size = (2 * loadamt + 1);
+
+		chunklist = new Chunk::chunk * [totalgridsize];
+		for (int i = 0; i < size; i++)
+		{
+			for (int j = 0; j < size;j++)
+			{
+				for (int k = 0; k < size;k++)
+				{
+					Coord gridind = Coord(i - loadamt, j - loadamt, k - loadamt);
+					chunklist[gridindexfromnormedchunkpos(i, j, k)] = Chunk::load(gridind);
+
+				}
+			}
+		}
+		computeallcover();
 	
+	}
+
 	//order of storage for chunks & location-2loadamnt+1 is width and height
 	//z
 	//7,8,9   
@@ -173,17 +170,17 @@ namespace grid {
 	void grid::load()
 	{
 		const int size = 2 * loadamt + 1;
-		
-		chunk::chunk** newchunklist = new chunk::chunk * [size * size*size];
-		int indexdxchange = gridindfromnormedpos(griddt.x, griddt.y, griddt.z);
 
-		for (int i = 0; i < size; i++)
+		Chunk::chunk** newchunklist = new Chunk::chunk * [totalgridsize];
+		int indexdxchange = gridindexfromnormedchunkpos(griddt);
+
+		int ind = 0;
+		for (int k = 0; k < size; k++)
 		{
 			for (int j = 0;j < size;j++) {
 
-				for (int k = 0;k < size;k++) {
+				for (int i = 0;i < size;i++) {
 
-					int ind = gridindfromnormedpos(i, j,k);
 
 					if (chunkloaded(chunklist[ind]->loc))
 					{
@@ -193,8 +190,8 @@ namespace grid {
 					}
 					else
 					{
-						
-						int invind = (totalgridsize) - (1 + ind);
+						chunklist[ind]->destroy();
+						int invind = (totalgridsize)-(1 + ind);
 
 						int x = (2 * loadamt - i) + (gridpos.x - loadamt);
 						int y = (2 * loadamt - j) + (gridpos.y - loadamt);
@@ -202,16 +199,16 @@ namespace grid {
 						//int y = (2 * loadamt - k) + (gridpos.y - loadamt);
 						//gets 
 						//	int z = floorabs((invind / static_cast<float>((2 * loadamt + 1)))) - loadamt + gridpos.z;
-						newchunklist[invind] = chunk::load(Coord(x,y,z));
+						newchunklist[invind] =Chunk::load(Coord(x, y, z));
 
-						chunklist[ind]->destroy();
+
 
 					}
 
-
+					ind++;
 				}
 
-				
+
 			}
 		}
 		delete[] chunklist;
@@ -220,8 +217,11 @@ namespace grid {
 		//get chunk space every frame
 		//(0,0)->(0,0)
 		//(16,0)->(1,0)
-
-
+		if (griddt != zeroiv)
+		{
+			computeallcover();
+		}
+		
 	}
 	void reupdatechunkborders()
 	{
