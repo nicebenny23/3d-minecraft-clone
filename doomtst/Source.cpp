@@ -1,4 +1,4 @@
-#include <glad/glad.h>
+
 #include "camera.h"
 #include "shader.h"
 #include <iostream>

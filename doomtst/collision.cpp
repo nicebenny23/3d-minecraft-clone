@@ -25,7 +25,7 @@ raycolwithgrid collision::collideraywithgrid(ray nray) {
 
 			//for now gyrantee tha it has no aabb
 			if (blk->solid) {
-				if (distance(nray.start, blk->pos  + unitv / 2) <nray.length())
+				if (distance(nray.start, blk->center()) <nray.length())
 				{
 
 
@@ -68,46 +68,6 @@ bool aabbcollideswithent(colrect* blk) {
 		}
 	}
 	return false;
-}
-void collision::collidecamray() {
-	ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
-	raycolwithgrid closest = travvox(cameraray,1000);
-
-	if ( closest.box != nullptr)
-	{
-
-	
-		if (interactminrange < closest.dist && closest.dist < interactmaxrange)
-		{
-
-
-			if (userinput::mouseleft.pressed)
-			{
-				grid::placeblockatloc(toblk(closest.box->owner).pos, minecraftair);
-			}
-
-
-			else if (userinput::mouseright.pressed)
-			{
-
-				Coord placmentpoint = getplaceoffset(closest.colpoint, closest.box->center, closest.box->scale);
-				block* plamentblock = grid::getobjatgrid(  toblk(closest.box->owner).pos + placmentpoint);
-				if (plamentblock != nullptr&&!plamentblock->solid)            
-				{      
-					int previd = plamentblock->id;
-					//i dont know why i create it and remove itit like this but it makes the core much simpler
-					grid::placeblockatloc(plamentblock->pos, minecraftglass);
-					if (aabbcollideswithent(&plamentblock->getcomponent<colrect>()))
-					{
-						
-						grid::placeblockatloc(plamentblock->pos, previd);
-					}
-				}
-
-			}
-		}
-
-	}
 }
 
 //todo implement movment per axis
@@ -174,5 +134,51 @@ void collision::collideobjwithgrid(colrect& entity)
 		entity.center += minforce;
 		entity.prevpos+= minforce;
 		entity.prevpos = entity.center;
+	}
+}
+void collision::collidecamray() {
+	ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
+	raycolwithgrid closest = travvox(cameraray, 1000);
+
+	if (closest.box != nullptr)
+	{
+
+
+
+		if (userinput::mouseleft.pressed)
+		{
+			if (interactminrange < closest.dist && closest.dist < interactmaxrange)
+			{
+
+
+				grid::placeblockatloc(toblk(closest.box->owner).pos, minecraftair);
+			}
+		}
+
+
+		else if (userinput::mouseright.pressed)
+		{
+
+			if (interactminrange < closest.dist && closest.dist < interactmaxrange)
+			{
+			
+				block* plamentblock =findprevblock(cameraray,1000);
+				if (plamentblock!= nullptr && !plamentblock->solid)
+				{
+					int previd = plamentblock->id;
+					//i dont know why i create it and remove itit like this but it makes the core much simpler
+					grid::placeblockatloc(plamentblock->pos, minecraftglass);
+					if (aabbcollideswithent(&plamentblock->getcomponent<colrect>()))
+					{
+
+						grid::placeblockatloc(plamentblock->pos, previd);
+					}
+				}
+
+			}
+
+
+		}
+
 	}
 }

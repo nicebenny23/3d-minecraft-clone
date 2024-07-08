@@ -75,6 +75,9 @@
     <ClCompile Include="voxeltraversal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="blkmesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vector3.h">
@@ -165,6 +168,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="voxeltraversal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="dir.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="blkmesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

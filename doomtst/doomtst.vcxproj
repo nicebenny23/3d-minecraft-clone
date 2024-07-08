@@ -76,7 +76,7 @@
     <LibraryPath>C:\opengl\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\opengl\include;C:\glm;$(IncludePath)</IncludePath>
+    <IncludePath>C:\opengl\include;C:\opengl;$(IncludePath)</IncludePath>
     <LibraryPath>C:\opengl\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -140,6 +140,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="aabb.cpp" />
+    <ClCompile Include="blkmesh.cpp" />
     <ClCompile Include="block.cpp" />
     <ClCompile Include="blockrender.cpp" />
     <ClCompile Include="camera.cpp" />
@@ -163,6 +164,7 @@
   <ItemGroup>
     <ClInclude Include="aabb.h" />
     <ClInclude Include="algorthm.h" />
+    <ClInclude Include="blkmesh.h" />
     <ClInclude Include="block.h" />
     <ClInclude Include="blockrender.h" />
     <ClInclude Include="camera.h" />
@@ -171,6 +173,7 @@
     <ClInclude Include="collision.h" />
     <ClInclude Include="component.h" />
     <ClInclude Include="debug.h" />
+    <ClInclude Include="dir.h" />
     <ClInclude Include="dynamicarray.h" />
     <ClInclude Include="entity.h" />
     <ClInclude Include="gameobject.h" />

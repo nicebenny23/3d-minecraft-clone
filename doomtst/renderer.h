@@ -1,13 +1,15 @@
 #ifndef Renderer_HPP
 #define Renderer_HPP
 #include "dynamicarray.h"
-#include <glad/glad.h>
+
+#include "vertexobject.h"
 #include "shader.h"
 #include <glm/mat4x4.hpp>
 #include "vector3.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "texture.h"
-#include "vertexobject.h"
+#
+
 using namespace vobj;
 #define texturesize 6
 enum shadertype {

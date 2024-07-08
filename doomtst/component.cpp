@@ -17,5 +17,5 @@ void components::component::start()
 }
 void components::component::update()
 {
-	std::cout << "3";
+	
 }

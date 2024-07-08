@@ -1,4 +1,4 @@
-#include <glad/glad.h>
+
 #include <GLFW/glfw3.h>
 #include "dynamicarray.h"
 #include "debug.h"

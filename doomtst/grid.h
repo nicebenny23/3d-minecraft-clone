@@ -3,7 +3,7 @@
 #include "vector3.h"
 #ifndef grid_HPP
 #define grid_HPP
-#define loadamt 2
+#define loadamt 1
 constexpr auto totalgridsize = (2 * loadamt + 1) * (2 * loadamt + 1) * (2 * loadamt + 1);
 namespace grid {
 	extern Chunk::chunk** chunklist;

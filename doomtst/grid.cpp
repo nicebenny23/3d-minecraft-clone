@@ -96,7 +96,7 @@ namespace grid {
 		blkface->covered = true;
 		if (blkface->holder->transparent)
 		{
-			Coord pos = blkface->holder->pos + faceoffsetfromcenter(blkface->facenum);
+			Coord pos = blkface->holder->pos + dirfromint(blkface->facenum);
 			block* blk = getobjatgrid(pos, true);
 			if (blk!=nullptr)
 			{
@@ -106,7 +106,6 @@ namespace grid {
 
 					if (blk->id != blkface->holder->id)
 					{
-
 						blkface->covered = false;
 					}
 				}
@@ -118,7 +117,7 @@ namespace grid {
 			}
 		}
 		else {
-			Coord pos = blkface->holder->pos + faceoffsetfromcenter(blkface->facenum);
+			Coord pos = blkface->holder->pos + dirfromint(blkface->facenum);
 			blkface->covered = issolidatpos(pos.x, pos.y, pos.z, true);
 		}
 	}
@@ -159,7 +158,7 @@ namespace grid {
 			}
 			for (int blkind = 0; blkind < 6; blkind++)
 			{
-				block* blockatpos = getobjatgrid(faceoffsetfromcenter(blkind) + location->pos);
+				block* blockatpos = getobjatgrid(dirfromint(blkind) + location->pos);
 				for (int faceind = 0;faceind < 6;faceind++) {
 					computecover(&(*blockatpos)[faceind]);
 

@@ -1,4 +1,4 @@
-
+#include "dir.h"
 #include "renderer.h"
 #include <glm/glm.hpp>
 #include "gameobject.h"
@@ -18,47 +18,33 @@ namespace blockname {
 		minecraftglass = 4,
 		minecraftwater = 5,
 	};
-	inline v3::Vector3 faceoffsetfromcenter(int face) {
-
-		switch (face)
-		{
-		case 0:
-			return v3::Vector3(0,0,1);
-		case 1:
-			return v3::Vector3(0, 0, -1);
-		case 2:
-			return  v3::Vector3(1, 0, 0);
-		case 3:
-			return v3::Vector3(-1, 0, 0);
-		case 4:
-			return v3::Vector3(0, 1, 0);
-		case 5:
-			return v3::Vector3(0,-1, 0);
-		default:
-			Assert("atempetd to acess a nonexistant direction");
-
-			break;
-		}
-	}
+	
 	struct block;
+	
+		
+		
 	struct face {
 		block* holder;
 		bool covered;
 		byte tex;
 		int facenum;
 		float cameradist;
-		face();
-		face(byte texval, int num, block* owner);
+		face() {
+			holder = nullptr;
+			covered = false;
+			facenum = -1;
+			cameradist = -1;
+		}
+		face(byte texval, int num, block* owner) {
+			tex = texval;
+			facenum = num;
+			holder = owner;
+			cameradist = -1;
+		}
+			Vector3 center;
+		void calccameradist();
 
-		
-
-		//only set correctly during frame of render for transparent objs
-	
 	};
-		
-		
-		
-		
 
 	
 	struct block:gameobject::obj
@@ -67,35 +53,54 @@ namespace blockname {
 		bool solid;
 		byte id;
 		v3::Coord pos;
-		
+
+		Vector3 blkoffset;
+		Vector3 scale;
+		Vector3 center() {
+			return pos + unitv / 2;
+
+		}
 		face up;
-	    face left;
+		face left;
 		face right;
-		face down ;
+		face down;
 		face front;
-		face back ;
-		face& operator[](int index) {
+		face back;
+		face& operator[](int index);
+		void createfaces();
+		Vector3 center() {
+			return pos + unitv / 2+blkoffset;
+
+		}
+	
+		face& operator[](int index)
+		{
+
 
 			switch (index)
 			{
 			case 0:
-				return front;
-			case 1:
-				return back;
-			case 2:
 				return left;
-			case 3:
+			case 1:
 				return right;
-			case 4:
+
+			case 2:
 				return up;
-			case 5:
+			case 3:
 				return down;
+			case 4:
+				return front;
+			case 5:
+				return back;
+
 			default:
 				Assert("index too high/low for faces");
 
 				break;
+
 			}
-		} 
+
+	    } 
 
 
 		 block(v3::Coord placment,int blockid);
@@ -104,18 +109,13 @@ namespace blockname {
 	};
 	void setair(blockname::block* blk);
 	void giveblocktraits(blockname::block* nullblock);
-	void createfaces(block*blk);
+
+	
+
 }
+//if you have a\
 
 
-	inline void calccameradist(blockname::face* fc) {
-
-		v3::Vector3 center = fc->holder->pos + unitv / 2 + blockname::faceoffsetfromcenter(fc->facenum)/2.001-Vector3(camera::campos) ;
-		//todo find out why this has error when distance =0;
-	//incrses accuracy
-		fc->cameradist =128*magnitude2(center);
-		int l = 1;
-
-	}
+	
 
 #endif // !block_H

@@ -3,7 +3,43 @@
 
 
 using namespace blockname;
+void setfaces(block* blk, int leftface, int rightface, int upface, int downface, int frontface, int backface) {
+	blk->left = face(leftface, 0, blk);
+	blk->right = face(rightface, 1, blk);
+	blk->up = face(upface, 2, blk);
+	blk->down = face(downface, 3, blk);
+	blk->front = face(frontface, 4, blk);
+	blk->back = face(backface, 5, blk);
 
+
+}
+
+void createfaces(block* blk)
+{
+	switch (blk->id)
+	{
+	case minecraftdirt:
+		setfaces(blk, 0, 0, 0, 0, 0, 0);
+
+
+		break;
+	case minecraftgrass:
+		setfaces(blk, 0, 0, 1, 0, 0, 0);
+		break;
+	case minecraftstone:
+		setfaces(blk, 2, 2, 3, 3, 2, 2);
+		break;
+	case minecraftglass:
+		setfaces(blk, 4, 4, 4, 4, 4, 4);
+		break;
+	case minecraftwater:
+		setfaces(blk, 5, 5, 5, 5, 5, 5);
+		break;
+	case minecraftair:
+		setfaces(blk, -1, -1, -1, -1, -1, -1);
+		break;
+	}
+}
 
 block::block(v3::Coord placment, int blockid)
 {
@@ -19,23 +55,22 @@ block::block(v3::Coord placment, int blockid)
 	id = blockid;
 	pos = placment;
 	
-	createfaces(this);
+	createfaces(t
+his);
+	blkoffset = zerov;
 }
 
 block::block()
 {
 	
-
+	scale = unitv / 2;
+	blkoffset = zerov;
 	id = minecraftair;
 	pos = v3::zeroiv;
 	createfaces(this);
 }
 
-void block::createaabb()
-{
-	this->addcomponent<aabb::colrect>(v3::Vector3( pos )+ unitv / 2, unitv / 2, true);
-	
-}
+
 
 void blockname::setair(blockname::block* blk)
 {
@@ -65,15 +100,18 @@ void blockname::setair(blockname::block* blk)
 		
 		
 		break;
+	
     }
 	blk->transparent = true;
 	blk->solid =false;
 	blk->id = minecraftair;
 	createfaces(blk);
+	blk->scale = unitv * 1 / 2;
 }
 
 void blockname::giveblocktraits(blockname::block* nullblock)
 {
+	nullblock->scale = unitv * 1 / 2;
 	switch (nullblock->id)
 	{
 	case minecraftair:
@@ -95,10 +133,14 @@ void blockname::giveblocktraits(blockname::block* nullblock)
 		nullblock->solid = true;
 		nullblock->transparent = false;
 		nullblock->createaabb();
+		nullblock->scale = unitv*1/ 3;
 		break;
 	case minecraftglass:
 		nullblock->solid = true;
 		nullblock->transparent = true;
+		
+		nullblock->scale = unitv * 1 /2;
+		nullblock->blkoffset = Vector3(1,0,0) ;
 		nullblock->createaabb();
 		break;
 	case minecraftwater:
@@ -106,44 +148,8 @@ void blockname::giveblocktraits(blockname::block* nullblock)
 
 		nullblock->transparent = true;
 		break;
-}
+
 	createfaces(nullblock);
-}
-void setfaces(block* blk,int frontface, int backface, int leftface, int rightface, int upface, int downface) {
-
-	blk->front = face(frontface, 0, blk);
-	blk->back = face(backface, 1, blk);
-
-	blk->left = face(leftface, 2, blk);
-	blk->right = face(rightface, 3, blk);
-	blk->up = face(upface, 4, blk);
-	blk->down = face(downface, 5, blk);
-}
-void blockname::createfaces(block*blk)
-{
-	switch (blk->id)
-	{
-	case minecraftdirt:
-		setfaces(blk,0, 0, 0, 0, 0, 0);
-	
-		
-		break;
-	case minecraftgrass:
-		setfaces(blk,0, 0, 0, 0, 1, 0);
-		break;
-	case minecraftstone:
-		setfaces(blk,2, 2, 2, 2, 3, 3);
-		break;
-	case minecraftglass:
-		setfaces(blk,4,4,4,4,4,4);
-		break;
-	case minecraftwater:
-		setfaces(blk, 5, 5, 5, 5, 5, 5);
-		break;
-	case minecraftair:
-		setfaces(blk, -1,-1,-1,-1,-1,-1);
-		break;
-	}
 }
 
 blockname::face::face()
@@ -155,6 +161,11 @@ blockname::face::face()
 	covered = false;	
 }
 
+void face::calccameradist()
+{
+}
+
+
 blockname::face::face(byte texval, int num, block* owner)
 {
 	tex = texval;
@@ -165,4 +176,22 @@ blockname::face::face(byte texval, int num, block* owner)
 	covered = false;
 }
 
+Vector3 blockname::face::center()
+{
+	v3::Vector3	offset = dirfromint(facenum) * holder->scale/2 * .9999;
+	return((holder)->center() );
+}
+void block::createaabb()
+{
+	this->addcomponent<aabb::colrect>(this->center(), scale, true);
 
+}
+
+block blockname::block(v3::Coord placment, int blockid)
+{
+	return block();
+}
+
+void blockname::block::createfaces()
+{
+}

@@ -24,12 +24,14 @@ const float cubeuv[] = {
 };
 //locatiion of unique indices in each set of vertices
 const float uniqueindices[] = {
+	1,2,6,5// east (+x)
+	,0,4,7,3,// west (-x)
+	2,3,7,6, // top (+y)
+	0,1,5,4,// bottom (-y)
 	4,5,6,7// south (+z)
    ,0,1,2,3// north (-z)
-	,1,2,6,5// east (+x)
-	,0,4,7,3// west (-x)
-	,2,3,7,6, // top (+y)
-	0,1,5,4// bottom (-y)
+	
+	
 };
 //0,1,2,3 are offsets from baselocation,this is a method to get the proper indices from offset
 const int indiceoffsetfrombaselocation[]{
@@ -37,8 +39,6 @@ const int indiceoffsetfrombaselocation[]{
 };
 
 void emitface(int face, block& torender,array<float>& datbuf,array<unsigned int>& indbuf) {
-	if (!torender[face].covered)
-	{
 
 
 		int baselocation = datbuf.length / 6;
@@ -48,7 +48,8 @@ void emitface(int face, block& torender,array<float>& datbuf,array<unsigned int>
 			int uniqueind = uniqueindices[4 * face + j];
 			//actual location
 			//use *.9999 so clipping does not hapepen
-			Vector3 offset = vert[uniqueind] * .9999 + torender.pos;
+			Vector3 offsetfromcenter =(vert[uniqueind] - unitv / 2) * Vector3(torender[face].holder->scale) * 2;
+			Vector3 offset =torender[face].holder->center();
 			datbuf.append(offset.x);
 			datbuf.append(offset.y);
 			datbuf.append(offset.z);
@@ -57,7 +58,7 @@ void emitface(int face, block& torender,array<float>& datbuf,array<unsigned int>
 
 			float xtexpos = cubeuv[2 * j];
 			datbuf.append( xtexpos);
-			float ytexpos = cubeuv[2 * j + 1];
+			float ytexpos = (cubeuv[2 * j + 1]);
 			datbuf.append(ytexpos);
 			int texturenumb = torender[face].tex;
 			datbuf.append(texturenumb);
@@ -68,7 +69,7 @@ void emitface(int face, block& torender,array<float>& datbuf,array<unsigned int>
 			int indicelocation = baselocation + indiceoffsetfrombaselocation[j];
 			indbuf.append(indicelocation);
 		}
-	}
+	
 }
 void emitblock(block& torender, array<float>& datbuf, array<unsigned int>& indbuf) {
 	if (torender.id != minecraftair)
@@ -83,9 +84,11 @@ void emitblock(block& torender, array<float>& datbuf, array<unsigned int>& indbu
 			//set u to length ofver 6 because now 0-first new elem of bufffer
 
 			//each vertice of the face
+			if (!torender[i].covered)
+			{
 
-			emitface(i, torender,datbuf,indbuf);
-
+				emitface(i, torender, datbuf, indbuf);
+			}
 		}
 	}
 
@@ -114,8 +117,12 @@ void recreatechunkmesh(Chunk::chunk* aschunk) {
 
 				for (int x = 0; x < 6; x++)
 				{
-					
-					aschunk->mesh->facebuf.append(face(blockatpos[x]));
+					//each vertice of the face
+					if (!face(blockatpos[x]).covered)
+					{
+
+						aschunk->mesh->facebuf.append(face(blockatpos[x]));
+					}
 			//implement sort elsewere
 				}
 			}

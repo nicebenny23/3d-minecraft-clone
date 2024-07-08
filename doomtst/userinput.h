@@ -1,7 +1,7 @@
 #include "iostream"
 #include <Windows.h>
 #include "dynamicarray.h"
-#include <glad/glad.h>
+
 #include <glm/glm.hpp>
 #ifndef Userinput_HPP
 #define Userinput_HPP

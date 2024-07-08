@@ -175,7 +175,7 @@ namespace v3 {
 		Vector3 operator+(const Coord& p1) const;
 		Vector3& operator-=(const Vector3& p1);
 		Vector3 operator-(const Vector3& p1) const;
-
+		Vector3 operator*(const Vector3& scale) const;
 		Vector3 operator*(float scale) const;
 		Vector3& operator*=(float scale);
 
@@ -271,6 +271,10 @@ namespace v3 {
 		return Vector3(x - p1.x, y - p1.y,z-p1.z);
 
 
+	}
+	inline Vector3 Vector3::operator*(const Vector3& scale) const
+	{
+		return Vector3(x*scale.x,y*scale.y,z*scale.z);
 	}
 	inline Vector3& Vector3::operator-=(const Vector3& p1) {
 
