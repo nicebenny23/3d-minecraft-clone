@@ -69,6 +69,12 @@
     <ClCompile Include="chunkrender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="debug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="voxeltraversal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="vector3.h">
@@ -156,6 +162,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="chunkrender.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="voxeltraversal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

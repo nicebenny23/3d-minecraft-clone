@@ -44,4 +44,16 @@ inline int ceilabs(float x) {
 		return ceil(x);
 	}
 }
+inline int sign(float x) {
+
+	if (x < 0)
+	{
+		return -1;
+	}
+	if (0<=x)
+	{
+		return 1;
+	}
+
+}
 #endif // !mathutil

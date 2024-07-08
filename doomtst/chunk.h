@@ -23,11 +23,10 @@ namespace Chunk {
 		float cameradist() {
 			return 	 distance(center(), camera::campos);
 		}
-		bool operator>(chunk b) {
+		bool operator<(chunk& b) {
 			return b.cameradist() < cameradist();
 		}
-		bool operator<(chunk b) {
-
+		bool operator>(chunk& b) {
 			return b.cameradist() > cameradist();
 		}
 

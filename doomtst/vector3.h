@@ -342,6 +342,10 @@ namespace v3 {
 
 		return(sqrt((p.x - p1.x) * (p.x - p1.x) + (p.y - p1.y) * (p.y - p1.y) + (p1.z - p.z) * (p1.z - p.z)));
 	}
+	inline float dist2(const Vector3& p, const Vector3& p1) {
+
+		return((p.x - p1.x) * (p.x - p1.x) + (p.y - p1.y) * (p.y - p1.y) + (p1.z - p.z) * (p1.z - p.z));
+	}
 
 
 	inline float dotproduct(const Vector3& p, const Vector3& p1) {
@@ -356,7 +360,10 @@ namespace v3 {
 
 		return(sqrt(p.x * p.x + p.y * p.y + p.z * p.z));
 	}
+	inline float magnitude2(const Vector3& p) {
 
+		return((p.x * p.x + p.y * p.y + p.z * p.z));
+	}
 	inline Vector3 normal(const Vector3& p) {
 
 		return(p / magnitude(p));

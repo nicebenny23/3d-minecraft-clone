@@ -38,6 +38,7 @@ void createchunkmesh(Chunk::chunk* aschunk)
 	aschunk->mesh = mesh;
 }
 
+
 //complete
 Chunk::chunk* Chunk::load(Coord location)
 {
@@ -47,18 +48,14 @@ Chunk::chunk* Chunk::load(Coord location)
 	retchunk->loc =location;
 	createchunkmesh(retchunk);
 	retchunk->blockstruct = new block[16 * 16 * 16];
-	for (int i = 0; i < 16 * 16 * 16; i++)
-	{
-		retchunk->blockstruct[i] = blockname::block(v3::zeroiv, 0);
-		
-	
-	}
+	int ind = 0;
 	for (int x = 0; x < 16; x++)
 	{
 		for (int y = 0;y < 16;y++) {
 			for (int z = 0; z < 16; z++)
 			{
-				int ind = 256 * x + 16 * y + z;
+				
+				retchunk->blockstruct[ind] = blockname::block(v3::zeroiv, 0);
 				retchunk->blockstruct[ind].pos = v3::Coord(x , y, z )+location*16;
 				int idforblock = minecraftair;
 				//select block mechanism
@@ -97,6 +94,7 @@ Chunk::chunk* Chunk::load(Coord location)
 				}
 				
 				giveblocktraits(&(retchunk->blockstruct[ind]));
+				ind++;
 			}
 		}
 	}

@@ -6,17 +6,29 @@ void chunkmesh::genbufs()
 	VBO.generate(GL_ARRAY_BUFFER);
 	ibo.generate(GL_ELEMENT_ARRAY_BUFFER);
 }
-void chunkmesh::sort()
-{
-	
+
+
+
+int compare(const void* b, const void* a) {
+	return sign((*(face*)a).cameradist - (*(face*)b).cameradist);
 }
-void chunkmesh::createarrays()
+void chunkmesh::sortbuf()
 {
+	for (int i = 0; i < facebuf.length; i++)
+	{
+		calccameradist(&facebuf[i]);
+	}
+	std::qsort(facebuf.getdata() , facebuf.length, sizeof(face), compare);
+
 }
+
 
 void chunkmesh::destroy()
 {
 	Voa.destroy();
 	ibo.destroy();
 	VBO.destroy();
+	datbuf.destroy();
+	indbuf.destroy();
+	facebuf.destroy();
 }

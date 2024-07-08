@@ -36,73 +36,75 @@ const int indiceoffsetfrombaselocation[]{
 	0,1,2,0,2,3
 };
 
-void emitface(int face, block& torender) {
-	int baselocation = databuffer.length / 6;
-
-	for (int j = 0; j < 4; j++)
+void emitface(int face, block& torender,array<float>& datbuf,array<unsigned int>& indbuf) {
+	if (!torender[face].covered)
 	{
-		//index of uniqe vertice's in each face
-		int uniqueind = uniqueindices[4 * face + j];
-		//actual location
-		//use *.9999 so clipping does not hapepen
-		Vector3 offset = vert[uniqueind]*.9999 + torender.pos;
-		databuffer.append(offset.x);
-		databuffer.append(offset.y);
-		databuffer.append(offset.z);
 
-		//2*j is x coord 2*j+1 is y coord
 
-		float xtexpos = cubeuv[2 * j];
-		databuffer.append(1 - xtexpos);
-		float ytexpos = cubeuv[2 * j + 1];
-		databuffer.append(1 - ytexpos);
-		int texturenumb = torender[face].tex;
-		databuffer.append(texturenumb);
+		int baselocation = datbuf.length / 6;
+		for (int j = 0; j < 4; j++)
+		{
+			//index of uniqe vertice's in each face
+			int uniqueind = uniqueindices[4 * face + j];
+			//actual location
+			//use *.9999 so clipping does not hapepen
+			Vector3 offset = vert[uniqueind] * .9999 + torender.pos;
+			datbuf.append(offset.x);
+			datbuf.append(offset.y);
+			datbuf.append(offset.z);
+
+			//2*j is x coord 2*j+1 is y coord
+
+			float xtexpos = cubeuv[2 * j];
+			datbuf.append( xtexpos);
+			float ytexpos = cubeuv[2 * j + 1];
+			datbuf.append(ytexpos);
+			int texturenumb = torender[face].tex;
+			datbuf.append(texturenumb);
+		}
+
+		for (int j = 0; j < 6; j++)
+		{
+			int indicelocation = baselocation + indiceoffsetfrombaselocation[j];
+			indbuf.append(indicelocation);
+		}
 	}
-
-	for (int j = 0; j < 6; j++)
-	{
-		int indicelocation = baselocation + indiceoffsetfrombaselocation[j];
-		indicebuffer.append(indicelocation);
-	}
-
 }
-
-void emitblock(block& torender) {
+void emitblock(block& torender, array<float>& datbuf, array<unsigned int>& indbuf) {
 	if (torender.id != minecraftair)
 	{
 
-		
+
 		for (int i = 0; i < 6; i++)
 		{
-			bool willcontinue = !torender[i].covered;
-			
-	
-			if (willcontinue)
-			{
-				//set u to length ofver 6 because now 0-first new elem of bufffer
 
-				//each vertice of the face
 
-				emitface(i, torender);
-			}
+
+			//set u to length ofver 6 because now 0-first new elem of bufffer
+
+			//each vertice of the face
+
+			emitface(i, torender,datbuf,indbuf);
+
 		}
 	}
 
 }
+void recreatechunkmesh(Chunk::chunk* aschunk) {
+	aschunk->mesh->indbuf.destroy();
+	aschunk->mesh->datbuf.destroy();
+	aschunk->mesh->facebuf.destroy();
+	aschunk->mesh->facebuf = dynamicarray::array<face>();
+	aschunk->mesh->indbuf= dynamicarray::array<unsigned int>();
+	aschunk->mesh->datbuf = dynamicarray::array<float>();
+	
 
-array<face> transparentfaces;
-void renderchunk(Chunk::chunk* rchunk) {
-	indicebuffer = dynamicarray::array<unsigned int>();
-	databuffer = dynamicarray::array<float>();
-	int lenamount = 0;
-	int startlen = transparentfaces.length;
 	for (int ind = 0;ind < chunksize;ind++) {
 
-		block& blockatpos = (rchunk->blockstruct[ind]);
-		if (blockatpos.transparent==false)
+		block& blockatpos = (aschunk->blockstruct[ind]);
+		if (blockatpos.transparent == false)
 		{
-			emitblock(blockatpos);
+			emitblock(blockatpos, aschunk->mesh->datbuf, aschunk->mesh->indbuf);
 		}
 		else
 		{
@@ -112,56 +114,82 @@ void renderchunk(Chunk::chunk* rchunk) {
 
 				for (int x = 0; x < 6; x++)
 				{
-					lenamount++;
-				
-					transparentfaces.append(face(blockatpos[x]));
-					transparentfaces.at(transparentfaces.length-1).calccameradist();
+					
+					aschunk->mesh->facebuf.append(face(blockatpos[x]));
+			//implement sort elsewere
 				}
 			}
 		}
 
 
 	}
-	renderer::renderquadlist(rchunk->mesh->Voa,rchunk->mesh->ibo,rchunk->mesh->VBO,databuffer, indicebuffer);
-	
-	oalgorithm::quicksort(transparentfaces.getdata() + startlen, lenamount);
 
-
-	indicebuffer.destroy();
-	databuffer.destroy();
 }
 
+void renderchnk(chunkmesh& mesh,bool transparent)
+{
+
+	if (!transparent)
+	{
+		renderer::renderquadlist(mesh.Voa, mesh.ibo, mesh.VBO, mesh.datbuf, mesh.indbuf);
+	}
+	else
+	{
+
+		//enable 2d render
+		array <float> datbuf = array<float>();
+		array<unsigned int> indbuf = array<unsigned int>();
+		
+		for (size_t i = 0; i < mesh.facebuf.length; i++)
+		{
+			
+			emitface(mesh.facebuf[i].facenum, *mesh.facebuf[i].holder,datbuf,indbuf);
+		}
+		renderer::renderquadlist(mesh.Voa, mesh.ibo, mesh.VBO, datbuf, indbuf);
+		datbuf.destroy();
+		indbuf.destroy();
+	}
+}
 
 
 
 void blockrender::initdatabuffer()
 {
-	array<Chunk::chunk> tosort = array < Chunk::chunk > ();
-	transparentfaces = array<face>();
+	for (int i = 0; i < totalgridsize; i++)
+	{
+		if (chunklist[i]->mesh->meshrecreateneeded) {
+			recreatechunkmesh(chunklist[i]);
+			chunklist[i]->mesh->meshrecreateneeded = false;
+		
+		}
+		chunklist[i]->mesh->sortbuf();
+	}
+	array<Chunk::chunk> tosort = array < Chunk::chunk >();
+	
 	v3::Vector3 camerapos = camera::campos;
+	
 	for (int i = 0; i < totalgridsize; i++)
 	{
 		tosort.append(*(chunklist[i]));
 
 
 	}
+oalgorithm::quicksort<Chunk::chunk>(tosort.getdata(), tosort.length);
 	
-	oalgorithm::quicksort(tosort.getdata(), tosort.length);
+
 	for (int i = 0; i < totalgridsize; i++)
 	{
-		
-		renderchunk(&tosort[i]);
+
+		renderchnk(*tosort[i].mesh, false);
 	}
 	glDisable(GL_CULL_FACE);
-	indicebuffer = dynamicarray::array<unsigned int>();
-	databuffer = dynamicarray::array<float>();
-	for (int ind = 0;ind < transparentfaces.length;ind++) {
-		emitface(transparentfaces[ind].facenum, *transparentfaces[ind].holder);
+	glDepthMask(GL_FALSE);
+	for (int i = 0; i < totalgridsize; i++)
+	{
+		renderchnk(*tosort[i].mesh, true);
 	}
-	renderer::renderquadlist(chunklist[0]->mesh->Voa, chunklist[0]->mesh->ibo, chunklist[0]->mesh->VBO,databuffer,indicebuffer);
-	indicebuffer.destroy();
-	databuffer.destroy();
-	transparentfaces.destroy();
-	tosort.destroy();  
+	glDepthMask(GL_TRUE);
+	tosort.destroy();
 
 }
+

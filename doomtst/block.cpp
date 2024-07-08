@@ -160,14 +160,9 @@ blockname::face::face(byte texval, int num, block* owner)
 	tex = texval;
 	facenum = num;
 	holder = owner;
-	calccameradist();
+	cameradist = -1;
+	calccameradist(this);
 	covered = false;
 }
 
-void blockname::face::calccameradist()
-{
-	v3::Vector3 center = holder->pos + unitv / 2 + faceoffsetfromcenter(facenum) / 2.001;
-	//todo find out why this has error when distance =0;
-	cameradist = distance(v3::Vector3(camera::campos), center)+1;
 
-}

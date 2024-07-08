@@ -9,7 +9,7 @@ using namespace dynamicarray;
 #ifndef gameobj_HPP
 
 #define gameobj_HPP
-#define entsize 16*16*16*100
+#define entsize 16*16*16*250
 namespace gameobject {
 
 
@@ -118,7 +118,7 @@ namespace gameobject {
 		template <class T, typename... types>
 		void addcomponent(types&&... initval);
 
-
+		//todo -mid proiorty implement;
 		void blkfaceupdate(obj* blk, int face);
 
 		obj();
@@ -188,16 +188,16 @@ namespace gameobject {
 		{
 
 		}
-		array<T> comps = *(new array<T>());
+		array<T> componentlist = *(new array<T>());
 		for (int i = 0; i < complist.length; i++)
 		{
 
 			if (id == complist[i]->id) {
-				comps.append(*dynamic_cast<T*>(complist[i]));
+				componentlist.append(*dynamic_cast<T*>(complist[i]));
 			}
 		}
 
-		return comps;
+		return componentlist;
 
 	}
 
@@ -210,7 +210,7 @@ namespace gameobject {
 		int id = compidfromname((char*)(typeid(T).name()));
 		if (id == -1)
 		{
-			//add static assert
+			Assert("component not defined yet");
 
 			return false;
 		}

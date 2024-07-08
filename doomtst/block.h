@@ -52,21 +52,13 @@ namespace blockname {
 
 		
 
-		void calccameradist();
 		//only set correctly during frame of render for transparent objs
 	
-		bool operator<(face b) {
-			return b.cameradist > cameradist;
-		}
-		bool operator>(face b) {
-			return b.cameradist < cameradist;
-		}
 	};
 		
 		
 		
 		
-	
 
 	
 	struct block:gameobject::obj
@@ -115,5 +107,15 @@ namespace blockname {
 	void createfaces(block*blk);
 }
 
+
+	inline void calccameradist(blockname::face* fc) {
+
+		v3::Vector3 center = fc->holder->pos + unitv / 2 + blockname::faceoffsetfromcenter(fc->facenum)/2.001-Vector3(camera::campos) ;
+		//todo find out why this has error when distance =0;
+	//incrses accuracy
+		fc->cameradist =128*magnitude2(center);
+		int l = 1;
+
+	}
 
 #endif // !block_H

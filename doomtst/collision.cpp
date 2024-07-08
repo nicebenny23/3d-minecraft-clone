@@ -1,5 +1,6 @@
 #include "collision.h"
 #include "objecthelper.h"
+
 using namespace objutil;
 void collision::update()
 {
@@ -13,8 +14,7 @@ void collision::update()
 	}
 }
 
-
-collision::raycolwithgrid collision::collideraywithgrid(ray nray) {
+raycolwithgrid collision::collideraywithgrid(ray nray) {
 	
 	raycolwithgrid closest = raycolwithgrid();
 	closest.dist = INFINITY;
@@ -71,7 +71,7 @@ bool aabbcollideswithent(colrect* blk) {
 }
 void collision::collidecamray() {
 	ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
-	raycolwithgrid closest = collideraywithgrid(cameraray);
+	raycolwithgrid closest = travvox(cameraray,1000);
 
 	if ( closest.box != nullptr)
 	{
@@ -92,11 +92,11 @@ void collision::collidecamray() {
 
 				Coord placmentpoint = getplaceoffset(closest.colpoint, closest.box->center, closest.box->scale);
 				block* plamentblock = grid::getobjatgrid(  toblk(closest.box->owner).pos + placmentpoint);
-				if (plamentblock != nullptr)            
+				if (plamentblock != nullptr&&!plamentblock->solid)            
 				{      
 					int previd = plamentblock->id;
 					//i dont know why i create it and remove itit like this but it makes the core much simpler
-					grid::placeblockatloc(plamentblock->pos, minecraftstone);
+					grid::placeblockatloc(plamentblock->pos, minecraftglass);
 					if (aabbcollideswithent(&plamentblock->getcomponent<colrect>()))
 					{
 						

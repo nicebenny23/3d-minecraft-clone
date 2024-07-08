@@ -16,15 +16,16 @@ struct chunkmesh
 	//voa vertexspec;
 	void genbufs();
 	
-	bool resortneeded;
 	bool meshrecreateneeded;
 	chunk* aschunk;
 	array<float> datbuf;
-	array<int> indbuf;
+	array<unsigned int> indbuf;
+	array<face> facebuf;
+	void sortbuf();
 
-dynamicarray::array<face> transfacarr;
-	void sort();
-	void createarrays();
+	//todo  get basic mesh and        reupdsted working
+
+
 	void destroy();
 };
 void createchunkmesh(chunk* aschunk);

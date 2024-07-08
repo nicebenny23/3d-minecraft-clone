@@ -16,7 +16,7 @@ float interpolate(float v, float v1, float w) {
 
 v2::Vector2 randomGradient(iv2::IntVector2 intvec) {
     
-    const unsigned w = 4 * sizeof(unsigned);
+    const unsigned w = 8 * sizeof(unsigned);
     const unsigned s = w / 2;
     unsigned a = intvec.x, b = intvec.y;
     a *= 3284157443; b ^= a << s | a >> w - s;

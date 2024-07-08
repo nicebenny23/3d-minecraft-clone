@@ -93,8 +93,41 @@ namespace grid {
 
 	}
 	void computecover(face* blkface) {
-		Coord pos = blkface->holder->pos + faceoffsetfromcenter(blkface->facenum);
-		blkface->covered = issolidatpos(pos.x, pos.y, pos.z,true);
+		blkface->covered = true;
+		if (blkface->holder->transparent)
+		{
+			Coord pos = blkface->holder->pos + faceoffsetfromcenter(blkface->facenum);
+			block* blk = getobjatgrid(pos, true);
+			if (blk!=nullptr)
+			{
+				if (blk->transparent)
+				{
+
+
+					if (blk->id != blkface->holder->id)
+					{
+
+						blkface->covered = false;
+					}
+				}
+
+			}
+			else
+			{
+				blkface->covered = false;
+			}
+		}
+		else {
+			Coord pos = blkface->holder->pos + faceoffsetfromcenter(blkface->facenum);
+			blkface->covered = issolidatpos(pos.x, pos.y, pos.z, true);
+		}
+	}
+	void sendrecreatemsg() {
+
+		for (int i = 0; i < totalgridsize; i++)
+		{
+			chunklist[i]->mesh->meshrecreateneeded=true;
+		}
 	}
 	void computeallcover() {
 
@@ -109,6 +142,7 @@ namespace grid {
 
 			}
 		}
+		sendrecreatemsg();
 	}
 	void placeblockatloc(int x, int y, int z, int blockid)
 	{
@@ -119,6 +153,10 @@ namespace grid {
 			setair(location);
 			location->id = blockid;
 			giveblocktraits(location);
+			for (int faceind = 0; faceind < 6; faceind++)
+			{
+				computecover(&((*location)[faceind]));
+			}
 			for (int blkind = 0; blkind < 6; blkind++)
 			{
 				block* blockatpos = getobjatgrid(faceoffsetfromcenter(blkind) + location->pos);
@@ -128,6 +166,7 @@ namespace grid {
 				}
 			}
 		}
+		sendrecreatemsg();
 	}
 
 	void placeblockatloc(Coord loc, int blockid)

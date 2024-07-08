@@ -147,6 +147,7 @@
     <ClCompile Include="chunkrender.cpp" />
     <ClCompile Include="collision.cpp" />
     <ClCompile Include="component.cpp" />
+    <ClCompile Include="debug.cpp" />
     <ClCompile Include="gameobject.cpp" />
     <ClCompile Include="glad.c" />
     <ClCompile Include="grid.cpp" />
@@ -156,6 +157,7 @@
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="userinput.cpp" />
+    <ClCompile Include="voxeltraversal.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -187,6 +189,7 @@
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="vertexobject.h" />
+    <ClInclude Include="voxeltraversal.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
   <ItemGroup>
