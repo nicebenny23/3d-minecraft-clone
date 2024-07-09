@@ -44,6 +44,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>Yes</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -139,61 +140,61 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="aabb.cpp" />
-    <ClCompile Include="blkmesh.cpp" />
-    <ClCompile Include="block.cpp" />
-    <ClCompile Include="blockrender.cpp" />
-    <ClCompile Include="camera.cpp" />
-    <ClCompile Include="chunk.cpp" />
-    <ClCompile Include="chunkrender.cpp" />
-    <ClCompile Include="collision.cpp" />
-    <ClCompile Include="component.cpp" />
-    <ClCompile Include="debug.cpp" />
-    <ClCompile Include="gameobject.cpp" />
-    <ClCompile Include="glad.c" />
-    <ClCompile Include="grid.cpp" />
-    <ClCompile Include="random.cpp" />
-    <ClCompile Include="renderer.cpp" />
-    <ClCompile Include="shader.cpp" />
+    <ClCompile Include="game\aabb.cpp" />
+    <ClCompile Include="block\blkmesh.cpp" />
+    <ClCompile Include="block\block.cpp" />
+    <ClCompile Include="renderer\blockrender.cpp" />
+    <ClCompile Include="game\camera.cpp" />
+    <ClCompile Include="world\chunk.cpp" />
+    <ClCompile Include="renderer\chunkrender.cpp" />
+    <ClCompile Include="game\collision.cpp" />
+    <ClCompile Include="game\component.cpp" />
+    <ClCompile Include="util\debug.cpp" />
+    <ClCompile Include="game\gameobject.cpp" />
+    <ClCompile Include="external\glad.c" />
+    <ClCompile Include="world\grid.cpp" />
+    <ClCompile Include="util\random.cpp" />
+    <ClCompile Include="renderer\renderer.cpp" />
+    <ClCompile Include="renderer\shader.cpp" />
     <ClCompile Include="Source.cpp" />
-    <ClCompile Include="texture.cpp" />
-    <ClCompile Include="userinput.cpp" />
-    <ClCompile Include="voxeltraversal.cpp" />
-    <ClCompile Include="Window.cpp" />
+    <ClCompile Include="renderer\texture.cpp" />
+    <ClCompile Include="util\userinput.cpp" />
+    <ClCompile Include="world\voxeltraversal.cpp" />
+    <ClCompile Include="renderer\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="aabb.h" />
-    <ClInclude Include="algorthm.h" />
-    <ClInclude Include="blkmesh.h" />
-    <ClInclude Include="block.h" />
-    <ClInclude Include="blockrender.h" />
-    <ClInclude Include="camera.h" />
-    <ClInclude Include="chunk.h" />
-    <ClInclude Include="chunkrender.h" />
-    <ClInclude Include="collision.h" />
-    <ClInclude Include="component.h" />
-    <ClInclude Include="debug.h" />
-    <ClInclude Include="dir.h" />
-    <ClInclude Include="dynamicarray.h" />
-    <ClInclude Include="entity.h" />
-    <ClInclude Include="gameobject.h" />
-    <ClInclude Include="grid.h" />
-    <ClInclude Include="mathutil.h" />
-    <ClInclude Include="noise.h" />
-    <ClInclude Include="objecthelper.h" />
-    <ClInclude Include="random.h" />
-    <ClInclude Include="ray.h" />
-    <ClInclude Include="renderer.h" />
-    <ClInclude Include="time.h" />
-    <ClInclude Include="userinput.h" />
-    <ClInclude Include="vector2.h" />
-    <ClInclude Include="vector3.h" />
-    <ClInclude Include="shader.h" />
-    <ClInclude Include="stb_image.h" />
-    <ClInclude Include="texture.h" />
-    <ClInclude Include="vertexobject.h" />
-    <ClInclude Include="voxeltraversal.h" />
-    <ClInclude Include="Window.h" />
+    <ClInclude Include="game\aabb.h" />
+    <ClInclude Include="renderer\algorthm.h" />
+    <ClInclude Include="block\blkmesh.h" />
+    <ClInclude Include="block\block.h" />
+    <ClInclude Include="renderer\blockrender.h" />
+    <ClInclude Include="game\camera.h" />
+    <ClInclude Include="world\chunk.h" />
+    <ClInclude Include="renderer\chunkrender.h" />
+    <ClInclude Include="game\collision.h" />
+    <ClInclude Include="game\component.h" />
+    <ClInclude Include="util\debug.h" />
+    <ClInclude Include="util\dir.h" />
+    <ClInclude Include="util\dynamicarray.h" />
+    <ClInclude Include="game\entity.h" />
+    <ClInclude Include="game\gameobject.h" />
+    <ClInclude Include="world\grid.h" />
+    <ClInclude Include="util\mathutil.h" />
+    <ClInclude Include="world\noise.h" />
+    <ClInclude Include="game\objecthelper.h" />
+    <ClInclude Include="util\random.h" />
+    <ClInclude Include="util\ray.h" />
+    <ClInclude Include="renderer\renderer.h" />
+    <ClInclude Include="util\time.h" />
+    <ClInclude Include="util\userinput.h" />
+    <ClInclude Include="util\vector2.h" />
+    <ClInclude Include="util\vector3.h" />
+    <ClInclude Include="renderer\shader.h" />
+    <ClInclude Include="external\stb_image.h" />
+    <ClInclude Include="renderer\texture.h" />
+    <ClInclude Include="renderer\vertexobject.h" />
+    <ClInclude Include="world\voxeltraversal.h" />
+    <ClInclude Include="renderer\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="frag1.vs" />

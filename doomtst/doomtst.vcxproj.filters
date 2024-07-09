@@ -18,162 +18,162 @@
     <ClCompile Include="Source.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="glad.c">
+    <ClCompile Include="external\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="shader.cpp">
+    <ClCompile Include="renderer\shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="texture.cpp">
+    <ClCompile Include="renderer\texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Window.cpp">
+    <ClCompile Include="renderer\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="userinput.cpp">
+    <ClCompile Include="util\userinput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="renderer.cpp">
+    <ClCompile Include="renderer\renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="camera.cpp">
+    <ClCompile Include="game\camera.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="chunk.cpp">
+    <ClCompile Include="world\chunk.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="block.cpp">
+    <ClCompile Include="block\block.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="grid.cpp">
+    <ClCompile Include="world\grid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="aabb.cpp">
+    <ClCompile Include="game\aabb.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="random.cpp">
+    <ClCompile Include="util\random.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="collision.cpp">
+    <ClCompile Include="game\collision.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="component.cpp">
+    <ClCompile Include="game\component.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="gameobject.cpp">
+    <ClCompile Include="game\gameobject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="blockrender.cpp">
+    <ClCompile Include="renderer\blockrender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="chunkrender.cpp">
+    <ClCompile Include="renderer\chunkrender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="debug.cpp">
+    <ClCompile Include="util\debug.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="voxeltraversal.cpp">
+    <ClCompile Include="world\voxeltraversal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="blkmesh.cpp">
+    <ClCompile Include="block\blkmesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="vector3.h">
+    <ClInclude Include="util\vector3.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="shader.h">
+    <ClInclude Include="renderer\shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="stb_image.h">
+    <ClInclude Include="external\stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="texture.h">
+    <ClInclude Include="renderer\texture.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Window.h">
+    <ClInclude Include="renderer\Window.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="userinput.h">
+    <ClInclude Include="util\userinput.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="dynamicarray.h">
+    <ClInclude Include="util\dynamicarray.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="camera.h">
+    <ClInclude Include="game\camera.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="renderer.h">
+    <ClInclude Include="renderer\renderer.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="block.h">
+    <ClInclude Include="block\block.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="chunk.h">
+    <ClInclude Include="world\chunk.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vector2.h">
+    <ClInclude Include="util\vector2.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="grid.h">
+    <ClInclude Include="world\grid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="aabb.h">
+    <ClInclude Include="game\aabb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="random.h">
+    <ClInclude Include="util\random.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="collision.h">
+    <ClInclude Include="game\collision.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="component.h">
+    <ClInclude Include="game\component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="gameobject.h">
+    <ClInclude Include="game\gameobject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="objecthelper.h">
+    <ClInclude Include="game\objecthelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="entity.h">
+    <ClInclude Include="game\entity.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ray.h">
+    <ClInclude Include="util\ray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="vertexobject.h">
+    <ClInclude Include="renderer\vertexobject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="noise.h">
+    <ClInclude Include="world\noise.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="time.h">
+    <ClInclude Include="util\time.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="blockrender.h">
+    <ClInclude Include="renderer\blockrender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="debug.h">
+    <ClInclude Include="util\debug.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="algorthm.h">
+    <ClInclude Include="renderer\algorthm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mathutil.h">
+    <ClInclude Include="util\mathutil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="chunkrender.h">
+    <ClInclude Include="renderer\chunkrender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="voxeltraversal.h">
+    <ClInclude Include="world\voxeltraversal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="dir.h">
+    <ClInclude Include="util\dir.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="blkmesh.h">
+    <ClInclude Include="block\blkmesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

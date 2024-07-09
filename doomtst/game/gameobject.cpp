@@ -1,0 +1,225 @@
+
+#include "gameobject.h"
+
+
+#include "../util/random.h"
+#include <type_traits>
+#include "../renderer/Renderer.h"
+
+
+
+
+
+using namespace gameobject;
+
+
+//todo make my own hashmap
+std::unordered_map<char*, int> gameobject::stringtoint;
+int gameobject::curid;
+
+
+
+void gameobject::component::ondestroy()
+{
+}
+
+component* gameobject::component::copydat(component* orgin)
+{
+	component newcomp =*(new component());
+	return &newcomp;
+
+}
+
+void gameobject::component::start()
+{
+
+}
+void gameobject::component::update()
+{
+
+}
+
+void gameobject::component::blockfaceupdate(obj* blk, int face)
+{
+}
+
+
+
+
+
+
+int gameobject::getgoid()
+{
+	int randomval ;
+	obj* valifexist;
+	do {
+		randomval = randomint(entsize - 1);
+		valifexist = objectfromguid[randomval];
+	} while (valifexist != nullptr);
+	
+	return randomval;
+
+
+}
+
+array<obj*> gameobject::objectfromguid;
+
+//todo move over to enties as 
+array<obj*> todelete;
+array<obj*> initobj;
+void gameobject::initobjs() {
+
+	objectfromguid = array<obj*>(entsize);
+	for (int i = 0; i < entsize; i++)
+	{
+		objectfromguid[i] = nullptr;
+	}
+	todelete = array<obj*>();
+	initobj = array<obj*>();
+
+
+
+}
+//not functonal yet
+
+objref init(objref base) {
+
+
+
+	obj clone = obj();
+
+	for (int i = 1; i < base.toobj()->complist.length; i++)
+	{
+
+
+	}
+
+	return objref(clone);
+
+}
+
+//dont use
+gameobject::obj::obj(v3::Vector3 ipos, const char* _name)
+{
+	
+	
+	
+	guid = getgoid();
+
+	complist = (array<component*>());
+	
+	addcomponent<component>();
+	objectfromguid[guid] = this;
+
+
+
+
+
+}
+
+
+
+void gameobject::obj::blkfaceupdate(obj* blk, int face)
+{
+	if (type == block)
+	{
+		for (int i = 0; i < complist.length; i++)
+		{
+			complist[i]->blockfaceupdate(blk, face);
+		}
+	}
+	else
+	{
+		Assert("blockfaceupdateonly defined for blocks");
+
+	}
+}
+
+obj::obj() {
+
+
+	complist.list = nullptr;
+};
+
+
+
+
+void gameobject::destroy(obj* object) {
+
+
+	todelete.append(object);
+}
+
+void gameobject::deleteobjs()
+{
+	int len = todelete.length;
+	for (int ind = 0;ind < len;ind++) {
+
+		
+		for (size_t i = 0; i < todelete[ind]->complist.length; i++)
+		{
+			todelete[ind]->complist[i]->ondestroy();
+
+
+		}
+		
+		
+		
+		objectfromguid[todelete[ind]->guid] = nullptr;
+		
+		
+//	delete delobjs[ind];
+	
+	}
+	if (todelete.length > 0)
+	{
+		//deletes the pointers to the obkjects
+		todelete.destroy();
+	
+		todelete = array<obj*>();
+		todelete.length = 0;
+	}
+
+}
+
+
+void gameobject::runupdateloop() {
+
+
+
+	for (int i = 0; i < objectfromguid.length; i++)
+	{
+		if (objectfromguid.at(i) != 0) {
+			int len = objectfromguid[i]->complist.length;
+			
+			for (int j = 0; j < len; j++)
+			{
+
+			
+				objectfromguid[i]->complist[j]->update();
+			}
+		}
+		
+	}
+}
+
+
+//gets a gameobject from a refrence to it;
+bool guidchanged(objref* ref) {
+
+	return false;
+}
+//todo add a special random number to each gameobject
+obj* gameobject::objref::toobj()
+{
+	if (guid==-1)
+	{
+		return nullptr;
+	}
+	obj* toreturn = objectfromguid[guid];
+	if (guidchanged(this))
+	{
+		guid = -1;
+	}
+	return toreturn;
+}

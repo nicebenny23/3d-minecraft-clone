@@ -1,19 +1,19 @@
+#include "game/camera.h"
 
-#include "camera.h"
-#include "shader.h"
+#include "renderer/shader.h"
 #include <iostream>
 #include <cmath>
-#include "texture.h"
-#include "Window.h"
+#include "renderer/texture.h"
+#include "renderer/Window.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include "userinput.h"
-#include "renderer.h"
-#include "chunk.h"
-#include "objecthelper.h"
-#include "grid.h"
-#include "collision.h"
-#include "blockrender.h"
+#include "util/userinput.h"
+#include "renderer/renderer.h"
+#include "world/chunk.h"
+#include "game/objecthelper.h"
+#include "world/grid.h"
+#include "game/collision.h"
+#include "renderer/blockrender.h"
 // settings
 const unsigned int SCR_WIDTH = 4000;
 const unsigned int SCR_HEIGHT = 3000;
@@ -26,6 +26,7 @@ int main()
     userinput::initiate();
     gameobject::initmap();
     gameobject::initobjs();
+    block* blk = new block(Vector3(1, 3, 4), 4);
    
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -38,10 +39,10 @@ int main()
     camera::initilize();
 
     renderer::load();
-    grid::initgrid();
+   grid::initgrid();
     glm::vec3 cam = glm::vec3(-100, 17, 200);
   
-    
+  
     userinput::endupdate();
     float time = 0;
     float dt = 0;
