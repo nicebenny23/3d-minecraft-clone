@@ -12,8 +12,27 @@ namespace renderer {
     int currshader;
     texture blocktexture ;
 
+   
+    void changerendertype(rendertype rentype) {
 
+        switch (rentype) {
+        case solid:
+            glDepthMask(GL_TRUE);
+            glCullFace(GL_BACK);
+            glEnable(GL_DEPTH_TEST);
+            glDisable(GL_BLEND);
+            break;
+        case transparent:
+            
+            glDisable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
+            glEnable(GL_DEPTH_TEST);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+            break;
+        }
+    }
     void renderquadlist(vao VAO,vbuf ibo,vbuf VBO,array<float> &pointlist,array<unsigned int> &indicelist)
     {
         
@@ -25,11 +44,13 @@ namespace renderer {
 
         //uv
         VAO.bind();
-        VAO.set_attr(0, 3, GL_FLOAT, 6 * sizeof(float), 0);
+        VAO.set_attr(0, 3, GL_FLOAT, 7 * sizeof(float), 0);
         glEnableVertexAttribArray(0);
         //texture coords,inclusing the texture in the array 
-        VAO.set_attr(1, 3, GL_FLOAT, 6 * sizeof(float), 3 * sizeof(float));
+        VAO.set_attr(1, 3, GL_FLOAT, 7 * sizeof(float), 3 * sizeof(float));
         glEnableVertexAttribArray(1);
+        VAO.set_attr(2, 1, GL_FLOAT, 7 * sizeof(float), 6 * sizeof(float));
+        glEnableVertexAttribArray(2);
         ibo.bind();
         ibo.fillbuffer<unsigned int>(indicelist);
          //enable position
@@ -41,15 +62,12 @@ namespace renderer {
         int vertexColorLocation = glGetUniformLocation(shaderlist[currshader].id, "Color");
 
      
-        glDrawElements(GL_LINES, indicelist.length, GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_TRIANGLES, indicelist.length, GL_UNSIGNED_INT, 0);
 
       
 
     }
-    void createtexturearray() {
-
-
-    }
+   
     void setprojmatrix(float fov,float nearclipplane, float farclipplane){
         proj = glm::perspective(glm::radians(fov), float(4 / 3), nearclipplane, farclipplane);
     }
@@ -60,11 +78,13 @@ namespace renderer {
         texlist[1] = "grass.png";
         texlist[2] = "wood.png";
         texlist[3] = "woodint.png";
-        texlist[5] = "water.png";
+       
         texlist[4] = "glass.png";
+        texlist[5] = "water.png";
+        texlist[6] = "torch.png";
         texturearray texarr = texturearray(16, 16, texlist);
         texarr.apply();
-        //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        
     }
     void settextureparams() {
       //  glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY, 10);
@@ -73,7 +93,7 @@ namespace renderer {
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
         glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-       glCullFace(GL_BACK);
+      
 
 //glDepthFunc(GL_LESS);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LOD, 1000);
@@ -81,7 +101,7 @@ namespace renderer {
     void load()
     {
         view = glm::mat4(0);
-        setprojmatrix(70, .01, 100);
+        setprojmatrix(70, .3, 100);
         currshader = normal;
         shaderlist = dynamicarray::array<shader>(10);
         shaderlist[normal] = shader::shader("vert1.vs", "frag1.vs");

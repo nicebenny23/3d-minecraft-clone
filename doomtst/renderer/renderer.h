@@ -25,7 +25,12 @@ namespace renderer {
 	extern int currshader;
 	extern dynamicarray::array<shader> shaderlist;
 
-
+	enum rendertype
+	{
+		solid = 0,
+		transparent=1,
+		ui=2,
+	}; void changerendertype(rendertype rentype);
 }
 #endif
 

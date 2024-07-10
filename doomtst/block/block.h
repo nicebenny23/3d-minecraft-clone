@@ -27,18 +27,21 @@ namespace blockname {
 		byte tex;
 		int facenum;
 		float cameradist;
-
+		int light;
 
 		face() {
 			mesh= nullptr;
 			covered = false;
 			facenum = -1;
 			cameradist = -1;
+			tex = 0;
+			light = 0;
 		}
 		face(byte texval, int num, blockmesh* owner) {
 			tex = texval;
 			facenum = num;
 			mesh = owner;
+			light = 0;
 			calccameradist();
 		}
 		Vector3 center();
@@ -46,6 +49,9 @@ namespace blockname {
 
 	};
 	struct block;
+
+
+
 	struct blockmesh
 	{
 
@@ -94,7 +100,10 @@ namespace blockname {
 
 	struct block:gameobject::obj
 	{
+		face& operator[](int index);
 		bool transparent;
+		int emitedlight;
+		int lightval;
 		bool solid;
 		byte id;
 		v3::Coord pos;
@@ -103,11 +112,11 @@ namespace blockname {
 		void createfaces();
 		
 		Vector3 center() {
-			return pos + unitv / 2.001;
-	}
+			return pos + unitv / 2;
+	    }
 		
-
-
+		
+		//todo externd thissso we dont hav4e to use bad function s
 		 block(v3::Coord placment,int blockid);
 		 block();
 		 void createaabb();
@@ -115,7 +124,7 @@ namespace blockname {
 	void setair(blockname::block* blk);
 	void giveblocktraits(blockname::block* nullblock);
 
-	
+	void initblockmesh(block* blk, Vector3 pos, Vector3 scale);
 
 }
 //if you have a\

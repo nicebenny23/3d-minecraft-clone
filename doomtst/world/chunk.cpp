@@ -19,10 +19,13 @@ inline int modabs1(int x, int m) {
 		return x % m;
 	}
 }
-inline int Chunk::indfromlocalpos(int x, int y, int z)
+
+block& Chunk::chunk::operator[](int index)
 {
-return	256 * x + 16 * y + z;
+	return blockstruct[index];
 }
+
+
 int Chunk::indexfrompos(int x, int y, int z)
 {
 	x = modabs1(x, 16);
@@ -43,70 +46,73 @@ void createchunkmesh(Chunk::chunk* aschunk)
 Chunk::chunk* Chunk::load(Coord location)
 {
 
-	chunk* retchunk = new chunk();
+	chunk& retchunk = *(new chunk());
 	
-	retchunk->loc =location;
-	createchunkmesh(retchunk);
-	retchunk->blockstruct = new block[16 * 16 * 16];
+	retchunk.loc =location;
+	createchunkmesh(&retchunk);
+	retchunk.blockstruct = new block[chunksize];
 	int ind = 0;
 	for (int x = 0; x < 16; x++)
 	{
 		for (int y = 0;y < 16;y++) {
 			for (int z = 0; z < 16; z++)
 			{
-				
-				retchunk->blockstruct[ind] = blockname::block(v3::Coord(x, y, z) + location * 16, 0);
-				retchunk->blockstruct[ind].solid = false;
-				
-				int idforblock = minecraftair;
+				Coord blockpos = Coord(x, y, z) +location * 16;
+				retchunk.blockstruct[ind] = blockname::block(blockpos, 0);
+				initblockmesh(&retchunk.blockstruct[ind], zerov, unitv / 2.0009);
 				//select block mechanism
-				int ylevel = y + 16 *location.y ;
+				
 				  
 				//todo fix it
-				retchunk->blockstruct[ind].id = minecraftair;
-				float noiselevel =  trueperlin(x + 16 * location.x , z  + 16 * location.z)*5+10;
-				float val = noiselevel;
-				if (noiselevel>=10)
+				retchunk.blockstruct[ind].id = minecraftair;
+				float noiselevel =  trueperlin(blockpos.x,blockpos.z)*5+10;
+			
+			
+				if (noiselevel >= 10)
 				{
-					if (ylevel == floor(noiselevel)) {
-						retchunk->blockstruct[ind].id = minecraftgrass;
+					if (blockpos.y == floor(noiselevel)) {
+						retchunk.blockstruct[ind].id = minecraftgrass;
 					}
-					if (ylevel<floor(noiselevel))
+					if (blockpos.y <floor(noiselevel))
 					{
-						retchunk->blockstruct[ind].id = minecraftdirt;
+						retchunk.blockstruct[ind].id = minecraftdirt;
 					}
-					if (ylevel < 4)
+					if (blockpos.y < 4)
 					{
-						retchunk->blockstruct[ind].id = minecraftdirt;
+						retchunk.blockstruct[ind].id = minecraftdirt;
 					}
 				}
 				if (noiselevel < 10)
 				{
 					
-						if (ylevel<=10)
+						if (blockpos.y <=10)
 						{
-							retchunk->blockstruct[ind].id = minecraftwater;
+							retchunk.blockstruct[ind].id = minecraftwater;
 						}
 						
-					if (ylevel<4)
-				{
-					retchunk->blockstruct[ind].id = minecraftdirt;
-				}
+					if (blockpos.y <4)
+				     {
+					retchunk.blockstruct[ind].id = minecraftdirt;
+				     }
 				}
 				
-			//	giveblocktraits(&(retchunk->blockstruct[ind]));
+				giveblocktraits(&(retchunk.blockstruct[ind]));
+			
+				
 				ind++;
 			}
 		}
 	}
-	return retchunk;
+	
+
+	return & retchunk;
 }
 
 
 Chunk::chunk::chunk()
 {
 	loc = zeroiv;
-	blockstruct = 0;
+	blockstruct =nullptr ;
 }
 
 void Chunk::chunk::destroy()

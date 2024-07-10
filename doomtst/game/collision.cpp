@@ -1,6 +1,6 @@
 #include "collision.h"
 #include "objecthelper.h"
-
+#include "../managegrid.h"
 using namespace objutil;
 void collision::update()
 {
@@ -151,7 +151,7 @@ void collision::collidecamray() {
 			{
 
 
-				grid::placeblockatloc(toblk(closest.box->owner).pos, minecraftair);
+				gridutil::placeblockatloc(toblk(closest.box->owner).pos, minecraftair);
 			}
 		}
 
@@ -167,11 +167,11 @@ void collision::collidecamray() {
 				{
 					int previd = plamentblock->id;
 					//i dont know why i create it and remove itit like this but it makes the core much simpler
-					grid::placeblockatloc(plamentblock->pos, minecraftglass);
+					gridutil::placeblockatloc(plamentblock->pos, minecraftglass);
 					if (aabbcollideswithent(&plamentblock->getcomponent<colrect>()))
 					{
 
-						grid::placeblockatloc(plamentblock->pos, previd);
+						gridutil::placeblockatloc(plamentblock->pos, previd);
 					}
 				}
 

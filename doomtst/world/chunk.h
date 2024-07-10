@@ -6,10 +6,10 @@
 using namespace blockname;
 namespace Chunk {
 	
-	inline int indfromlocalpos(int x, int y, int z);
 	int indexfrompos(int x, int y, int z);
 	struct chunk
 	{
+
 		Coord loc;
 		chunkmesh* mesh;
 		
@@ -17,7 +17,7 @@ namespace Chunk {
 		Coord center() {
 			return loc*16 + unitv * 8;
 		}
-	
+		block& operator[](int index);
 		block* blockstruct;
 		void destroy();
 		float cameradist() {

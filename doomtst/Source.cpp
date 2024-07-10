@@ -14,6 +14,7 @@
 #include "world/grid.h"
 #include "game/collision.h"
 #include "renderer/blockrender.h"
+#include "managegrid.h"
 // settings
 const unsigned int SCR_WIDTH = 4000;
 const unsigned int SCR_HEIGHT = 3000;
@@ -34,12 +35,14 @@ int main()
         return -1;
     }
   
-    glEnable(GL_DEPTH_TEST);
+    
     
     camera::initilize();
 
     renderer::load();
    grid::initgrid();
+  gridutil::computeallcover();
+  gridutil::redolighting();
     glm::vec3 cam = glm::vec3(-100, 17, 200);
   
   
@@ -88,11 +91,9 @@ while (!window::shouldclose())
         
         window::processInput();
       
-        glClearColor(0.2f, 0.3f, 0.3f, 0.0f);
+        glClearColor(0,0,0, 0.0f);
         glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
      
    
         glm::mat4 trans = glm::mat4(1.0f);
@@ -116,7 +117,13 @@ while (!window::shouldclose())
      
         grid::reupdatechunkborders();
         grid::load();
-      
+        if (grid::gridchanged())
+        {
+
+           gridutil::computeallcover();
+           gridutil::redolighting();
+        }
+     
             blockrender::initdatabuffer();
         
       

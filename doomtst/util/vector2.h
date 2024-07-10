@@ -210,7 +210,7 @@ namespace v2
 
 		Vector2& operator/=(float scale);
 
-		Vector2 operator*(Vector2& scale) const;
+		Vector2 operator*(const Vector2& scale);
 		Vector2& operator*=(Vector2& scale);
 
 		Vector2 operator/(Vector2& scale) const;
@@ -460,7 +460,7 @@ namespace v2
 	}
 
 
-	inline Vector2 Vector2::operator*(Vector2& scale) const {
+	inline Vector2 Vector2::operator*(const Vector2& scale)  {
 
 		return Vector2(x * scale.x, y * scale.y);
 	}

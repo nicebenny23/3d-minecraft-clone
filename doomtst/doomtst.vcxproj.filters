@@ -75,7 +75,7 @@
     <ClCompile Include="world\voxeltraversal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="block\blkmesh.cpp">
+    <ClCompile Include="managegrid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -173,7 +173,10 @@
     <ClInclude Include="util\dir.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="block\blkmesh.h">
+    <ClInclude Include="managegrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

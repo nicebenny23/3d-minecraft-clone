@@ -6,6 +6,7 @@
 #define loadamt 1
 constexpr auto totalgridsize = (2 * loadamt + 1) * (2 * loadamt + 1) * (2 * loadamt + 1);
 namespace grid {
+	bool gridchanged();
 	extern Chunk::chunk** chunklist;
 	bool issolidatpos(int x, int y, int z,bool countoob);
 	extern v3::Vector3 gridpos;
@@ -14,8 +15,7 @@ namespace grid {
 	void initgrid();
 	void load();
 	void reupdatechunkborders();
-	void placeblockatloc(int x,int y,int z,int blockid);
-	void placeblockatloc(Coord loc, int blockid);
+	Chunk::chunk* chunkatpos(int x, int y, int z);
 };
 
 

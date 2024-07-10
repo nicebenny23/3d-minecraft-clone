@@ -1,7 +1,39 @@
 #include "blockrender.h"
+#include "../util/vector2.h"
 dynamicarray::array<float> databuffer;
 dynamicarray::array<unsigned int> indicebuffer;
 using namespace grid;
+
+//uv's for cubemapping
+const float cubeuv[] = {
+   1, 0,
+0, 0,
+0, 1,
+1, 1
+
+};
+v2::Vector2 facecoordsmcent(face* fce,int ind) {
+	v3::Vector3 meshscale = fce->mesh->scale;
+	int facetype = ((fce->facenum+.001) / 2);
+	v2::Vector2 offset;
+	switch (facetype)
+	{
+		
+	case 0:
+		offset = v2::Vector2(meshscale.z, meshscale.y);
+	case 1:
+		offset = v2::Vector2(meshscale.x, meshscale.z);
+	case 2:
+		offset = v2::Vector2(meshscale.x, meshscale.y);
+	}
+	//return v2::Vector2(cubeuv[2 * ind], cubeuv[2 * ind + 1]);
+	if (fce->mesh->blk->id==minecraftglass)
+	{
+		v2::Vector2 ret=  v2::unitv / 2 + offset * (v2::Vector2(cubeuv[2 * ind], cubeuv[2 * ind + 1]) - v2::unitv / 2) * -2;
+		return ret;
+
+	}
+}
 const Vector3 vert[] = {
 		 Vector3(0, 0, 0),//vertex 0
 		 Vector3(1,0,0),//vertex 1
@@ -14,14 +46,6 @@ const Vector3 vert[] = {
 
 };
 
-//uv's for cubemapping
-const float cubeuv[] = {
-   1, 0,
-0, 0,
-0, 1,
-1, 1
-
-};
 //locatiion of unique indices in each set of vertices
 const int uniqueindices[] = {
 	1,2,6,5// east (+x)
@@ -40,29 +64,41 @@ const int indiceoffsetfrombaselocation[]{
 
 void emitface(int face, block& torender,array<float>& datbuf,array<unsigned int>& indbuf) {
 
-
-		int baselocation = datbuf.length / 6;
+	if (!torender[face].covered)
+	{
+		int baselocation = datbuf.length / 7;
 		for (int j = 0; j < 4; j++)
 		{
 			//index of uniqe vertice's in each face
 			int uniqueind = uniqueindices[4 * face + j];
 			//actual location
 			//use *.9999 so clipping does not hapepen
-			int l = 1;
-			Vector3 offsetfromcenter =(vert[uniqueind] - unitv / 2) * Vector3((torender.mesh)->scale) * 2;
-			Vector3 offset =torender.mesh->pos+offsetfromcenter;
+			Vector3 offsetfromcenter = (vert[uniqueind] - unitv / 2) * Vector3((torender.mesh)->scale) * 2;
+			Vector3 offset = torender.mesh->pos + offsetfromcenter;
 			datbuf.append(offset.x);
 			datbuf.append(offset.y);
 			datbuf.append(offset.z);
 
 			//2*j is x coord 2*j+1 is y coord
-
+			v2::Vector2 coords = facecoordsmcent(&torender[face], j);
+		
 			float xtexpos = cubeuv[2 * j];
-			datbuf.append( xtexpos);
+			datbuf.append(coords.x);
 			float ytexpos = (cubeuv[2 * j + 1]);
-			datbuf.append(ytexpos);
+			datbuf.append(coords.y);
 			int texturenumb = (*(torender).mesh)[face].tex;
 			datbuf.append(texturenumb);
+			
+				
+				if (torender.transparent) {
+					datbuf.append(torender.lightval);
+
+				}
+				else {
+
+					datbuf.append((*torender.mesh)[face].light);
+				}
+			
 		}
 
 		for (int j = 0; j < 6; j++)
@@ -70,7 +106,7 @@ void emitface(int face, block& torender,array<float>& datbuf,array<unsigned int>
 			int indicelocation = baselocation + indiceoffsetfrombaselocation[j];
 			indbuf.append(indicelocation);
 		}
-	
+	}
 }
 void emitblock(block& torender, array<float>& datbuf, array<unsigned int>& indbuf) {
 	if (torender.id != minecraftair)
@@ -80,16 +116,13 @@ void emitblock(block& torender, array<float>& datbuf, array<unsigned int>& indbu
 		for (int i = 0; i < 6; i++)
 		{
 
-
-
 			//set u to length ofver 6 because now 0-first new elem of bufffer
 
 			//each vertice of the face
-			if (!(*torender.mesh)[i].covered)
-			{
+			
 
 				emitface(i, torender, datbuf, indbuf);
-			}
+			
 		}
 	}
 
@@ -182,7 +215,7 @@ void blockrender::initdatabuffer()
 
 
 	}
-oalgorithm::quicksort<Chunk::chunk>(tosort.getdata(), tosort.length);
+   oalgorithm::quicksort<Chunk::chunk>(tosort.getdata(), tosort.length);
 	
 
 	for (int i = 0; i < totalgridsize; i++)
@@ -190,13 +223,13 @@ oalgorithm::quicksort<Chunk::chunk>(tosort.getdata(), tosort.length);
 
 		renderchnk(*tosort[i].mesh, false);
 	}
-	glDisable(GL_CULL_FACE);
-	glDepthMask(GL_FALSE);
+	
+	renderer::changerendertype(renderer::transparent);
 	for (int i = 0; i < totalgridsize; i++)
 	{
 		renderchnk(*tosort[i].mesh, true);
 	}
-	glDepthMask(GL_TRUE);
+	renderer::changerendertype(renderer::solid);
 	tosort.destroy();
 
 }

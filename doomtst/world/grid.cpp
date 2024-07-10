@@ -11,6 +11,9 @@ namespace grid {
 	Vector3 gridpos;
 	Vector3 griddt;
 	Chunk::chunk** chunklist;
+	bool gridchanged() {
+		return(griddt != zeroiv);
+	}
 	bool chunkloaded(int xchunk, int ychunk, int zchunk) {
 		if (abs(xchunk - gridpos.x) <= loadamt && abs(ychunk - gridpos.y) <= loadamt && abs(zchunk - gridpos.z) <= loadamt) {
 
@@ -41,6 +44,19 @@ namespace grid {
 
 
 
+	Chunk::chunk * chunkatpos(int x, int y, int z)
+	{
+		int xchunk = x >> 4;
+		int zchunk = z >> 4;
+		int ychunk = y >> 4;
+		if (chunkloaded(xchunk, ychunk, zchunk))
+		{
+
+			int ind = gridindfromchunkpos(xchunk, ychunk, zchunk);
+			return chunklist[ind];
+		}
+		return nullptr;
+	}
 
 
 	block* getobjatgrid(int x, int y, int z, bool countnonsolids)
@@ -92,94 +108,7 @@ namespace grid {
 		return countoob;
 
 	}
-	void computecover(face* blkface) {
-		// Ensure blkface is not null
 	
-
-	
-		
-		if (blkface->mesh->blk->pos!=zeroiv)
-		{
-			Coord pos = blkface->mesh->blk->pos + dirfromint(blkface->facenum);
-			Vector3 a = blkface->mesh->blk->pos;
-			block* blk = getobjatgrid(pos, true);
-			if (blk != nullptr)
-			{
-				if (blk->transparent)
-				{
-
-
-					if (blk->id != blkface->mesh->blk->id)
-					{
-						blkface->covered = false;
-					}
-				}
-
-			}
-			else
-			{
-				blkface->covered = false;
-			}
-		}
-		else {
-			Coord pos = blkface->mesh->blk->pos + dirfromint(blkface->facenum);
-			//std::cout << pos.x<<'\n';
-			blkface->covered = issolidatpos(pos.x, pos.y, pos.z, true);
-		}
-	
-	}
-	void sendrecreatemsg() {
-
-		for (int i = 0; i < totalgridsize; i++)
-		{
-			chunklist[i]->mesh->meshrecreateneeded=true;
-		}
-	}
-	void computeallcover() {
-
-		for (int gridind = 0; gridind < totalgridsize; gridind++)
-		{
-			for (int blockind = 0;blockind < chunksize; blockind++) {
-				for (int faceind = 0; faceind < 6; faceind++)
-				{
-					face& tocover = (*(chunklist[gridind]->blockstruct[blockind]).mesh)[faceind];
-					computecover(&tocover);
-				}
-
-			}
-		}
-		sendrecreatemsg();
-	}
-	void placeblockatloc(int x, int y, int z, int blockid)
-	{
-		block* location = getobjatgrid(x, y, z);
-		if (location != nullptr)
-		{
-
-			setair(location);
-			location->id = blockid;
-			giveblocktraits(location);
-			for (int faceind = 0; faceind < 6; faceind++)
-			{
-				computecover(&((*(*location).mesh)[faceind]));
-			}
-			for (int blkind = 0; blkind < 6; blkind++)
-			{
-				block* blockatpos = getobjatgrid(dirfromint(blkind) + location->pos);
-				for (int faceind = 0;faceind < 6;faceind++) {
-					computecover(&(*(*blockatpos).mesh)[faceind]);
-
-				}
-			}
-		}
-		sendrecreatemsg();
-	}
-
-	void placeblockatloc(Coord loc, int blockid)
-	{
-		placeblockatloc(loc.x, loc.y, loc.z, blockid);
-	}
-
 	//complete
 	void initgrid()
 	{
@@ -188,7 +117,7 @@ namespace grid {
 		griddt = zerov;
 		const int size = (2 * loadamt + 1);
 
-		chunklist = new Chunk::chunk * [totalgridsize];
+		chunklist = new Chunk::chunk *[totalgridsize];
 		for (int i = 0; i < size; i++)
 		{
 			for (int j = 0; j < size;j++)
@@ -197,11 +126,15 @@ namespace grid {
 				{
 					Coord gridind = Coord(i - loadamt, j - loadamt, k - loadamt);
 					chunklist[gridindexfromnormedchunkpos(i, j, k)] = Chunk::load(gridind);
-
+				
+				
 				}
 			}
 		}
-		computeallcover();
+		
+		
+
+	
 	
 	}
 
@@ -214,58 +147,58 @@ namespace grid {
 
 	void grid::load()
 	{
-		const int size = 2 * loadamt + 1;
-
-		Chunk::chunk** newchunklist = new Chunk::chunk * [totalgridsize];
-		int indexdxchange = gridindexfromnormedchunkpos(griddt);
-
-		int ind = 0;
-		for (int k = 0; k < size; k++)
+		
+		if (!gridchanged())
 		{
-			for (int j = 0;j < size;j++) {
+			return;
+		}
+	      	const int size = 2 * loadamt + 1;
+			Chunk::chunk** newchunklist = new Chunk::chunk * [totalgridsize];
+			int indexdxchange = gridindexfromnormedchunkpos(griddt);
 
-				for (int i = 0;i < size;i++) {
+			int ind = 0;
+			for (int k = 0; k < size; k++)
+			{
+				for (int j = 0;j < size;j++) {
+
+					for (int i = 0;i < size;i++) {
 
 
-					if (chunkloaded(chunklist[ind]->loc))
-					{
-						//moves to new posi
-						newchunklist[ind - indexdxchange] = chunklist[ind];
+						if (chunkloaded(chunklist[ind]->loc))
+						{
+							//moves to new posi
+							newchunklist[ind - indexdxchange] = chunklist[ind];
 
+						}
+						else
+						{
+							chunklist[ind]->destroy();
+							int invind = (totalgridsize)-(1 + ind);
+
+							int x = (2 * loadamt - i) + (gridpos.x - loadamt);
+							int y = (2 * loadamt - j) + (gridpos.y - loadamt);
+							int z = (2 * loadamt - k) + (gridpos.z - loadamt);
+							//int y = (2 * loadamt - k) + (gridpos.y - loadamt);
+							//gets 
+							//	int z = floorabs((invind / static_cast<float>((2 * loadamt + 1)))) - loadamt + gridpos.z;
+							newchunklist[invind] = Chunk::load(Coord(x, y, z));
+
+
+
+						}
+
+						ind++;
 					}
-					else
-					{
-						chunklist[ind]->destroy();
-						int invind = (totalgridsize)-(1 + ind);
-
-						int x = (2 * loadamt - i) + (gridpos.x - loadamt);
-						int y = (2 * loadamt - j) + (gridpos.y - loadamt);
-						int z = (2 * loadamt - k) + (gridpos.z - loadamt);
-						//int y = (2 * loadamt - k) + (gridpos.y - loadamt);
-						//gets 
-						//	int z = floorabs((invind / static_cast<float>((2 * loadamt + 1)))) - loadamt + gridpos.z;
-						newchunklist[invind] =Chunk::load(Coord(x, y, z));
 
 
-
-					}
-
-					ind++;
 				}
-
-
 			}
-		}
-		delete[] chunklist;
+			delete[] chunklist;
 
-		chunklist = newchunklist;
-		//get chunk space every frame
-		//(0,0)->(0,0)
-		//(16,0)->(1,0)
-		if (griddt != zeroiv)
-		{
-			computeallcover();
-		}
+			chunklist = newchunklist;
+			//get chunk space every frame
+			//(0,0)->(0,0)
+			//(16,0)->(1,0)
 		
 	}
 	void reupdatechunkborders()

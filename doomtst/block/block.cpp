@@ -8,7 +8,7 @@ Vector3 face::center()
 	return dirfromint(facenum) * mesh->scale + mesh->pos;
 }
 void face::calccameradist() {
-	cameradist = dist2((*this).center(), Vector3(camera::campos));
+	cameradist = 128*dist2((*this).center(), Vector3(camera::campos));
 }
 
 void blockmesh::setfaces(int leftface, int rightface, int upface, int downface, int frontface, int backface) {
@@ -53,14 +53,18 @@ face& blockmesh::operator[](int index)
 
 }
 
+face& blockname::block::operator[](int index)
+{
+	return (*mesh)[index];
+}
+
 void blockname::block::createfaces()
 {
+
 	switch (id)
 	{
 	case minecraftdirt:
 		mesh->setfaces(0, 0, 0, 0, 0, 0);
-
-
 		break;
 	case minecraftgrass:
 		mesh->setfaces( 0, 0, 1, 0, 0, 0);
@@ -69,7 +73,7 @@ void blockname::block::createfaces()
 		mesh->setfaces( 2, 2, 3, 3, 2, 2);
 		break;
 	case minecraftglass:
-		mesh->setfaces( 4, 4, 4, 4, 4, 4);
+		mesh->setfaces( 6,6,3,3,6,6);
 		break;
 	case minecraftwater:
 		mesh->setfaces( 5, 5, 5, 5, 5, 5);
@@ -79,32 +83,35 @@ void blockname::block::createfaces()
 		break;
 	}
 }
-void initblockmesh(blockname::block* blk, Vector3 pos,Vector3 scale) {
-	blk->mesh =new blockmesh();
+void blockname::initblockmesh(blockname::block* blk, Vector3 pos,Vector3 scale) {
 	
 	
-	blk->mesh->scale = scale;
-	blk->mesh->pos = blk->center();
+	
+	blockmesh* mesh=new blockmesh();
+
+
+	mesh->scale = scale;
+	mesh->pos = blk->center();
+	
+	mesh->blk = blk;
+	blk->mesh = mesh;
 	blk->createfaces();
-	blk->mesh->blk = blk;
-
-
 }
 blockname::block::block(v3::Coord placment, int blockid)
 {
 	
 	guid = gameobject::getgoid();
 
-	
+	emitedlight = 0;
 	complist = (array<gameobject::component*>());
-	//ddcomponent<gameobject::component>();
+	
 	gameobject::objectfromguid[guid] = this;
 	type = gameobject::block;
 	id = blockid;
 	pos = placment;
 	transparent = false;
 	solid = true;
-	initblockmesh(this, zerov, unitv / 2);
+	
 
 }
 
@@ -113,7 +120,7 @@ blockname::block::block()
 	transparent = false;
 	solid = false;
 	
-	id = minecraftair;
+	id = -1;
 	pos = v3::zeroiv;
 	
 }
@@ -154,26 +161,26 @@ void blockname::setair(blockname::block* blk)
 	blk->transparent = true;
 	blk->solid =false;
 	blk->id = minecraftair;
-
-	blk->mesh->scale = unitv * 1 / 2;
+	blk->emitedlight = 0;
+	blk->lightval= 0;
+	blk->mesh->scale = unitv * 1 / 2.01;
 }
 
 void blockname::giveblocktraits(blockname::block* nullblock)
 {
-	nullblock->mesh->scale = unitv * 1 / 2;
-	nullblock->solid = false;
-	nullblock->transparent = true;
-	return;
+	nullblock->emitedlight = 0;
 	switch (nullblock->id)
 	{
 	case minecraftair:
 		nullblock->solid = false;
 		nullblock->transparent = true;
+	
 		break;
 	case minecraftgrass:
 		nullblock->transparent = false;
 		nullblock->solid = true;
 		nullblock->createaabb();
+	
 		break;
 	case minecraftdirt:
 		nullblock->solid = true;
@@ -190,8 +197,9 @@ void blockname::giveblocktraits(blockname::block* nullblock)
 	case minecraftglass:
 		nullblock->solid = true;
 		nullblock->transparent = true;
-
-	
+		nullblock->emitedlight = 15;
+	nullblock->mesh->scale = v3::Vector3(1/16.f,.375,1/16.f);
+		
 		nullblock->createaabb();
 		break;
 	case minecraftwater:
@@ -202,7 +210,7 @@ void blockname::giveblocktraits(blockname::block* nullblock)
 
 		
 	}
-	nullblock->mesh->pos = (*nullblock).center();
+	nullblock->mesh->scale = unitv * 1 / 2.01;
 	(*nullblock).createfaces();
 }
 

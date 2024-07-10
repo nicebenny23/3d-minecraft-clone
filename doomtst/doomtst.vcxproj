@@ -44,7 +44,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableASAN>Yes</EnableASAN>
+    <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -78,7 +78,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>C:\opengl\include;C:\opengl;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\opengl\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\opengl\lib;C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -141,8 +141,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="game\aabb.cpp" />
-    <ClCompile Include="block\blkmesh.cpp" />
     <ClCompile Include="block\block.cpp" />
+    <ClCompile Include="managegrid.cpp" />
     <ClCompile Include="renderer\blockrender.cpp" />
     <ClCompile Include="game\camera.cpp" />
     <ClCompile Include="world\chunk.cpp" />
@@ -164,8 +164,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\aabb.h" />
+    <ClInclude Include="managegrid.h" />
+    <ClInclude Include="queue.h" />
     <ClInclude Include="renderer\algorthm.h" />
-    <ClInclude Include="block\blkmesh.h" />
     <ClInclude Include="block\block.h" />
     <ClInclude Include="renderer\blockrender.h" />
     <ClInclude Include="game\camera.h" />
