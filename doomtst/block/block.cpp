@@ -73,7 +73,7 @@ void blockname::block::createfaces()
 		mesh->setfaces( 2, 2, 3, 3, 2, 2);
 		break;
 	case minecraftglass:
-		mesh->setfaces( 6,6,3,3,6,6);
+		mesh->setfaces( 6,6,4,4,6,6);
 		break;
 	case minecraftwater:
 		mesh->setfaces( 5, 5, 5, 5, 5, 5);
@@ -210,7 +210,7 @@ void blockname::giveblocktraits(blockname::block* nullblock)
 
 		
 	}
-	nullblock->mesh->scale = unitv * 1 / 2.01;
+	//nullblock->mesh->scale = unitv * 1 / 2.01;
 	(*nullblock).createfaces();
 }
 

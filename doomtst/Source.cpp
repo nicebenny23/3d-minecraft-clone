@@ -14,7 +14,7 @@
 #include "world/grid.h"
 #include "game/collision.h"
 #include "renderer/blockrender.h"
-#include "managegrid.h"
+#include "world/managegrid.h"
 // settings
 const unsigned int SCR_WIDTH = 4000;
 const unsigned int SCR_HEIGHT = 3000;

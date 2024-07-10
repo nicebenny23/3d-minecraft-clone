@@ -26,13 +26,12 @@ v2::Vector2 facecoordsmcent(face* fce,int ind) {
 	case 2:
 		offset = v2::Vector2(meshscale.x, meshscale.y);
 	}
-	//return v2::Vector2(cubeuv[2 * ind], cubeuv[2 * ind + 1]);
-	if (fce->mesh->blk->id==minecraftglass)
-	{
-		v2::Vector2 ret=  v2::unitv / 2 + offset * (v2::Vector2(cubeuv[2 * ind], cubeuv[2 * ind + 1]) - v2::unitv / 2) * -2;
-		return ret;
+	
 
-	}
+
+			v2::Vector2 ret = v2::unitv / 2 + offset * (v2::Vector2(cubeuv[2 * ind], cubeuv[2 * ind + 1]) - v2::unitv / 2) * -2;
+			return ret;
+	
 }
 const Vector3 vert[] = {
 		 Vector3(0, 0, 0),//vertex 0
@@ -48,7 +47,7 @@ const Vector3 vert[] = {
 
 //locatiion of unique indices in each set of vertices
 const int uniqueindices[] = {
-	1,2,6,5// east (+x)
+	5,1,2,6// east (+x)
 	,0,4,7,3,// west (-x)
 	2,3,7,6, // top (+y)
 	0,1,5,4,// bottom (-y)

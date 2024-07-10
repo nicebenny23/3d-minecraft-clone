@@ -1,5 +1,5 @@
-#include "world/grid.h"
-#include "queue.h"
+#include "../world/grid.h"
+#include "../util/queue.h"
 using namespace grid;
 using namespace queuename;
 #ifndef gridmanager_HPP

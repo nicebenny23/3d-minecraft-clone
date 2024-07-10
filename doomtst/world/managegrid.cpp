@@ -18,7 +18,11 @@ void gridutil::createlightingqueue()
 void gridutil::computecover(face& blkface)
 
 	{
-
+	if (blkface.mesh->scale== Vector3(1/16.f,3/8.f,1/16.f))
+	 {
+		blkface.covered = false;
+		return;
+	}
 		Coord pos = blkface.mesh->blk->pos + dirfromint(blkface.facenum);
 		block* blk = getobjatgrid(pos, true);
 		if (blkface.mesh->blk->transparent)

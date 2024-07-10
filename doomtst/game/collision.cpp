@@ -1,6 +1,6 @@
 #include "collision.h"
 #include "objecthelper.h"
-#include "../managegrid.h"
+#include "../world/managegrid.h"
 using namespace objutil;
 void collision::update()
 {
