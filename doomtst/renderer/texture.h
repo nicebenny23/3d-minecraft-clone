@@ -28,6 +28,8 @@ struct texturearray
 	GLuint id;
 	texturearray(int width,int height, array<const char*> textures);
 	void apply();
+
+	texturearray() = default;
 };
 
 

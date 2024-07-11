@@ -13,10 +13,12 @@ namespace gridutil{
 void computeallcover();
 void emitlight();
 void placeblockatloc(int x, int y, int z, int blockid);
+void destroyblockatloc(int x, int y, int z);
 void computelightingqueue();
 void redolighting();
      
-void placeblockatloc(Coord loc, int blockid);
+
+void setblock(Coord loc, int blockid);
 //void removeblockatloc(Coord loc);
 
 }

@@ -73,7 +73,7 @@ void blockname::block::createfaces()
 		mesh->setfaces( 2, 2, 3, 3, 2, 2);
 		break;
 	case minecraftglass:
-		mesh->setfaces( 6,6,4,4,6,6);
+		mesh->setfaces( 6,6,7,4,6,6);
 		break;
 	case minecraftwater:
 		mesh->setfaces( 5, 5, 5, 5, 5, 5);
@@ -104,9 +104,10 @@ blockname::block::block(v3::Coord placment, int blockid)
 
 	emitedlight = 0;
 	complist = (array<gameobject::component*>());
+	type = gameobject::block;
 	
 	gameobject::objectfromguid[guid] = this;
-	type = gameobject::block;
+	
 	id = blockid;
 	pos = placment;
 	transparent = false;
@@ -119,10 +120,11 @@ blockname::block::block()
 {
 	transparent = false;
 	solid = false;
-	
+	complist = array<gameobject::component*>();
 	id = -1;
 	pos = v3::zeroiv;
-	
+	type = gameobject::block;
+	test = false;
 }
 
 
@@ -217,7 +219,7 @@ void blockname::giveblocktraits(blockname::block* nullblock)
 
 void blockname::block::createaabb()
 {
-	this->addcomponent<aabb::colrect>(this->mesh->pos, this->mesh->scale, true);
+	this->addcomponent<aabb::colrect>(this->mesh->pos,unitv/2, true);
 
 }
 

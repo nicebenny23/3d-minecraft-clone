@@ -116,7 +116,7 @@ void collision::collideobjwithgrid(colrect& entity)
 							{
 
 
-								if (magnitude(force) > magnitude(minforce) || magnitude(minforce) == 0)
+								if (magnitude(force) < magnitude(minforce) || magnitude(minforce) == 0)
 								{
 
 									minforce = force;
@@ -144,14 +144,20 @@ void collision::collidecamray() {
 	{
 
 
+		toblk(closest.box->owner).lightval = 14;
+		for (int i = 0;i < 6;i++)
+		{
+			(*toblk(closest.box->owner).mesh) [i] .light = 14;
 
+		}
 		if (userinput::mouseleft.pressed)
 		{
+			
 			if (interactminrange < closest.dist && closest.dist < interactmaxrange)
 			{
 
 
-				gridutil::placeblockatloc(toblk(closest.box->owner).pos, minecraftair);
+				gridutil::setblock(toblk(closest.box->owner).pos, minecraftair);
 			}
 		}
 
@@ -167,11 +173,11 @@ void collision::collidecamray() {
 				{
 					int previd = plamentblock->id;
 					//i dont know why i create it and remove itit like this but it makes the core much simpler
-					gridutil::placeblockatloc(plamentblock->pos, minecraftglass);
+					gridutil::setblock(plamentblock->pos, minecraftglass);
 					if (aabbcollideswithent(&plamentblock->getcomponent<colrect>()))
 					{
 
-						gridutil::placeblockatloc(plamentblock->pos, previd);
+						gridutil::setblock(plamentblock->pos, previd);
 					}
 				}
 

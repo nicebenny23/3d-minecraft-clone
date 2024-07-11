@@ -11,13 +11,13 @@ namespace objutil {
 #define toblock(a)(a.type==gameobject::block?(blockname::block*)(&a):nullptr)
 
 #define toentity(a)((a.type==gameobject::entity)?(entity::entity*)(&a):nullptr)
-	inline block& toblk(gameobject::obj* object) {
+	inline blockname::block& toblk(gameobject::obj* object) {
 
 		return *((block*)(object));
 	}
-	inline block& toblk(gameobject::obj& object) {
+	inline blockname::block& toblk(gameobject::obj& object) {
 
-		return *((block*)(&object));
+		return *((blockname::block*)(&object));
 	}inline entity::entity& toent(gameobject::obj* object) {
 
 		return *((entity::entity*)(object));

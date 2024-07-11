@@ -75,7 +75,10 @@
     <ClCompile Include="world\voxeltraversal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="managegrid.cpp">
+    <ClCompile Include="world\managegrid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="uirender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -173,10 +176,19 @@
     <ClInclude Include="util\dir.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="managegrid.h">
+    <ClInclude Include="playermovment.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="queue.h">
+    <ClInclude Include="world\managegrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="rigidbody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="uirender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -188,5 +200,6 @@
       <Filter>Source Files</Filter>
     </None>
     <None Include="uivertex.vs" />
+    <None Include="uifragment.vs" />
   </ItemGroup>
 </Project>

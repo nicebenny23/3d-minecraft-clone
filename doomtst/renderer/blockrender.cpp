@@ -14,17 +14,20 @@ const float cubeuv[] = {
 };
 v2::Vector2 facecoordsmcent(face* fce,int ind) {
 	v3::Vector3 meshscale = fce->mesh->scale;
-	int facetype = ((fce->facenum+.001) / 2);
+	int facetype = ((fce->facenum) / 2);
 	v2::Vector2 offset;
 	switch (facetype)
 	{
 		
 	case 0:
 		offset = v2::Vector2(meshscale.z, meshscale.y);
+		break;
 	case 1:
 		offset = v2::Vector2(meshscale.x, meshscale.z);
+		break;
 	case 2:
 		offset = v2::Vector2(meshscale.x, meshscale.y);
+		break;
 	}
 	
 
@@ -180,7 +183,7 @@ void renderchnk(chunkmesh& mesh,bool transparent)
 		array <float> datbuf = array<float>();
 		array<unsigned int> indbuf = array<unsigned int>();
 		
-		for (size_t i = 0; i < mesh.facebuf.length; i++)
+		for (int i = 0; i < mesh.facebuf.length; i++)
 		{
 			
 			emitface(mesh.facebuf[i].facenum, *(mesh.facebuf[i].mesh->blk),datbuf,indbuf);
@@ -216,7 +219,7 @@ void blockrender::initdatabuffer()
 	}
    oalgorithm::quicksort<Chunk::chunk>(tosort.getdata(), tosort.length);
 	
-
+   renderer::changerendertype(renderer::solid);
 	for (int i = 0; i < totalgridsize; i++)
 	{
 
@@ -228,7 +231,7 @@ void blockrender::initdatabuffer()
 	{
 		renderchnk(*tosort[i].mesh, true);
 	}
-	renderer::changerendertype(renderer::solid);
+
 	tosort.destroy();
 
 }

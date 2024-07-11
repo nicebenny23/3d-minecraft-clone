@@ -135,7 +135,7 @@ namespace grid {
 		
 
 	
-	
+		int l = 11;
 	}
 
 	//order of storage for chunks & location-2loadamnt+1 is width and height

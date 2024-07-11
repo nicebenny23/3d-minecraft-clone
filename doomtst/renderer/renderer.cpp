@@ -10,26 +10,45 @@ namespace renderer {
     glm::mat4 proj;
     glm::mat4 view;
     int currshader;
-    texture blocktexture ;
-
+    texturearray texarray;
    
     void changerendertype(rendertype rentype) {
 
         switch (rentype) {
         case solid:
+            glDepthFunc(GL_LESS);
             glDepthMask(GL_TRUE);
             glCullFace(GL_BACK);
             glEnable(GL_DEPTH_TEST);
             glDisable(GL_BLEND);
+            currshader = normal;
+            shaderlist[normal].attach();
+            glUseProgram(shaderlist[normal].id);
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            texarray.apply();
             break;
         case transparent:
-            
+            glDepthFunc(GL_LESS);
             glDisable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+            currshader = normal;
+            shaderlist[normal].attach();
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+            glUseProgram(shaderlist[normal].id);
+            texarray.apply();
+            
+            break;
+        case ui:
+           
+            glDisable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            currshader = uishader;
+            glUseProgram(shaderlist[currshader].id);
             break;
         }
     }
@@ -67,7 +86,29 @@ namespace renderer {
       
 
     }
-   
+    void render2dquadlist(texture tex,vao VAO, vbuf ibo, vbuf VBO, array<float>& pointlist, array<unsigned int>& indicelist)
+    {
+     
+         VBO.bind();
+       
+        VBO.fillbuffer<float>(pointlist);
+     
+
+
+        //uv
+        VAO.bind();
+        VAO.set_attr(0, 2, GL_FLOAT, 4 * sizeof(float), 0);
+        glEnableVertexAttribArray(0);
+        //texture coords,inclusing the texture in the array 
+        VAO.set_attr(1, 2, GL_FLOAT, 4 * sizeof(float), 2 * sizeof(float));
+        glEnableVertexAttribArray(1);
+        ibo.bind();
+        ibo.fillbuffer<unsigned int>(indicelist);
+         //enable position
+        glDrawElements(GL_TRIANGLES, indicelist.length, GL_UNSIGNED_INT, 0);
+
+      
+    }
     void setprojmatrix(float fov,float nearclipplane, float farclipplane){
         proj = glm::perspective(glm::radians(fov), float(4 / 3), nearclipplane, farclipplane);
     }
@@ -82,8 +123,9 @@ namespace renderer {
         texlist[4] = "glass.png";
         texlist[5] = "water.png";
         texlist[6] = "torch.png";
-        texturearray texarr = texturearray(16, 16, texlist);
-        texarr.apply();
+        texlist[7] = "torchtop.png";
+       texarray = texturearray(16, 16, texlist);
+        texarray.apply();
         
     }
     void settextureparams() {
@@ -101,13 +143,16 @@ namespace renderer {
     void load()
     {
         view = glm::mat4(0);
-        setprojmatrix(70, .3, 100);
-        currshader = normal;
+        setprojmatrix(90, .3, 100);
         shaderlist = dynamicarray::array<shader>(10);
+        shaderlist[uishader] = shader::shader("uivertex.vs", "uifragment.vs");
+        shaderlist[uishader].attach();
+
         shaderlist[normal] = shader::shader("vert1.vs", "frag1.vs");
         shaderlist[normal].attach();
+              currshader = normal;
         glUseProgram(shaderlist[normal].id);
-        glDepthFunc(GL_LESS);
+        
         
     
        // glDepthFunc(GL_LEQUAL);

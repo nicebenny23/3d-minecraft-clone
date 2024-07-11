@@ -1,24 +1,7 @@
 #include "chunk.h"
 #include "noise.h"
 #include "../renderer/chunkrender.h"
-inline int modabs1(int x, int m) {
 
-	if (x < 0)
-	{
-		if (static_cast<double>(x) / m == int(x / m))
-		{
-			//so (-16,-16) is now a part of the correct chunk this has to bedon due to the inverse taken
-			return 0;
-		}
-		else {
-			return m - ((-x) % m);
-		}
-	}
-	else
-	{
-		return x % m;
-	}
-}
 
 block& Chunk::chunk::operator[](int index)
 {
@@ -28,9 +11,9 @@ block& Chunk::chunk::operator[](int index)
 
 int Chunk::indexfrompos(int x, int y, int z)
 {
-	x = modabs1(x, 16);
-	y = modabs1(y, 16);
-	z = modabs1(z, 16);
+	x = modabs(x, 16);
+	y = modabs(y, 16);
+	z = modabs(z, 16);
 	return	256 * x + 16 * y + z;
 }
 
@@ -58,46 +41,36 @@ Chunk::chunk* Chunk::load(Coord location)
 			for (int z = 0; z < 16; z++)
 			{
 				Coord blockpos = Coord(x, y, z) +location * 16;
-				retchunk.blockstruct[ind] = blockname::block(blockpos, 0);
+				retchunk.blockstruct[ind] =*new blockname::block(blockpos, 0);
+				gameobject::objectfromguid[retchunk.blockstruct[ind].guid] = &retchunk.blockstruct[ind];
+				
 				initblockmesh(&retchunk.blockstruct[ind], zerov, unitv / 2.0009);
 				//select block mechanism
-				
+			
 				  
 				//todo fix it
 				retchunk.blockstruct[ind].id = minecraftair;
-				float noiselevel =  trueperlin(blockpos.x,blockpos.z)*5+10;
+				float noiselevel =  trueperlin(blockpos.x,blockpos.y,blockpos.z);
 			
 			
-				if (noiselevel >= 10)
+				retchunk.blockstruct[ind].id = minecraftdirt;
+				
+				if (noiselevel >=0)
 				{
-					if (blockpos.y == floor(noiselevel)) {
-						retchunk.blockstruct[ind].id = minecraftgrass;
-					}
-					if (blockpos.y <floor(noiselevel))
-					{
-						retchunk.blockstruct[ind].id = minecraftdirt;
-					}
-					if (blockpos.y < 4)
-					{
-						retchunk.blockstruct[ind].id = minecraftdirt;
-					}
+					retchunk.blockstruct[ind].id = minecraftair;
 				}
-				if (noiselevel < 10)
+				if (noiselevel <= 0)
 				{
-					
-						if (blockpos.y <=10)
-						{
-							retchunk.blockstruct[ind].id = minecraftwater;
-						}
-						
-					if (blockpos.y <4)
-				     {
-					retchunk.blockstruct[ind].id = minecraftdirt;
-				     }
+					retchunk.blockstruct[ind].id = minecraftstone;
 				}
 				
+				
 				giveblocktraits(&(retchunk.blockstruct[ind]));
-			
+				if (retchunk.blockstruct[ind].guid == 65)
+				{
+					gameobject::obj* x = &retchunk.blockstruct[ind];
+					int l = 1;
+				}
 				
 				ind++;
 			}

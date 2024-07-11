@@ -13,6 +13,10 @@ namespace entity {
 	{
 		const char* name;
 		v3::Vector3 pos;
+
+	
+
+		entity() = default;
 	};
 
 
@@ -57,7 +61,7 @@ namespace entity {
 		object->name = _name;
 		object->complist = (array<gameobject::component*>());
 		
-		object->addcomponent<gameobject::component>();
+	
 		gameobject::objectfromguid[object->guid] = object;
 
 

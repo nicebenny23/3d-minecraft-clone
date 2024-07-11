@@ -2,7 +2,6 @@
 #ifndef mathutil_HPP
 #define mathutil_HPP
 
-
 inline int modabs(int x, int m) {
 
 	if (x < 0)

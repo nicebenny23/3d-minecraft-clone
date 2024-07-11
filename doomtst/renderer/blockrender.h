@@ -4,11 +4,6 @@
 #define blockrender_HPP
 namespace blockrender {
 	
-	struct chunkmesh
-	{
-		
-	};
-	
 	void initdatabuffer();
 	
 

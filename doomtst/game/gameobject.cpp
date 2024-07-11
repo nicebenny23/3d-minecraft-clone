@@ -137,8 +137,9 @@ void gameobject::obj::blkfaceupdate(obj* blk, int face)
 
 obj::obj() {
 
+	complist=array<component*>();
+	guid = -1;
 
-	complist.list = nullptr;
 };
 
 
@@ -189,20 +190,31 @@ void gameobject::runupdateloop() {
 
 	for (int i = 0; i < objectfromguid.length; i++)
 	{
-		if (objectfromguid.at(i) != 0) {
-			int len = objectfromguid[i]->complist.length;
+		
+		if (objectfromguid.at(i) != nullptr) {
 			
-			for (int j = 0; j < len; j++)
+			if (objectfromguid.at(i)->type == entity)
 			{
 
-			
-				objectfromguid[i]->complist[j]->update();
+
+
+				int len = objectfromguid[i]->complist.length;
+
+				for (int j = 0; j < len; j++)
+				{
+
+
+					objectfromguid[i]->complist[j]->update();
+
+
+
+				}
+
 			}
 		}
-		
 	}
-}
 
+}
 
 //gets a gameobject from a refrence to it;
 bool guidchanged(objref* ref) {
