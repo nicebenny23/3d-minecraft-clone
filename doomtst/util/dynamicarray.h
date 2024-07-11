@@ -21,6 +21,7 @@ namespace dynamicarray {
 		array(int size);
 		void destroy();
 		T& at(int ind);
+		T& fastat(int ind);
 		void append(array arr);
 		void append(T * arr,int otherlen);
 		bool cutind(int startindex, int endindex);
@@ -28,6 +29,7 @@ namespace dynamicarray {
 		void insertind(int index, T value);
 		void merge(int index, const array& arr);
 		bool deleteind(int index);
+		
 		T& gettop();
 		void setlist(array* arr);
 		void append(T value);
@@ -315,6 +317,13 @@ namespace dynamicarray {
 
 
 	}
+	//unsafe
+	template<class T>
+	inline T& array<T>::fastat(int ind)
+	{
+		T val = list[ind];
+		return list[ind];
+	}
 	//appends a list to the end of the list(doesent delete it)(!!!caution with pointer lists!!!)
 	template<class T>
 	void array<T>::append(array arr) {
@@ -368,8 +377,8 @@ namespace dynamicarray {
 
 		if (size > capacity)//so it cant be shrunk
 		{
-
-			T* newlist = new T[size];
+			void* newlist= realloc((void*)list, sizeof(T) * size);
+		//	T* newlist = new T[size];
 
 
 			if (newlist == nullptr)
@@ -379,30 +388,13 @@ namespace dynamicarray {
 
 				return false;
 			}
-
-			for (int i = 0; i < length; i++)
-			{
-
-				newlist[i] = list[i];
-			}
-
-			for (int i = length; i < capacity; i++)
-			{
-
-				//newlist[i] = T();
-			}
-			//also the error here is a bug 
-			if (list!=nullptr)
-			{
-
-				delete[] list;
-			}
+//
+			
 
 
 
 
-
-			list = newlist;
+			list = (T*)newlist;
 
 			capacity = size;
 			return true;

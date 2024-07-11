@@ -1,21 +1,28 @@
 #include "uirender.h"
 using namespace uirender;
 array<uirender::uibox*> uirender::uilist;
+const float cubeuv[] = {
+	0, 0,
+	1, 0,
+
+0, 1,
+1, 1
+
+};
+const v2::Vector2 offset[] = {
+ v2::Vector2(1, -1),
+v2::Vector2(-1,-1),
+v2::Vector2(-1, 1),
+v2::Vector2(1, 1)
+
+};
 uirender::uibox::uibox(const char* texloc, v2::Vector2 scl, v2::Vector2 ps)
 {
 
 	tex = texture(texloc,png);
 	scale = scl;
 	ps = pos;
-	for (int i = 0; i < 100; i++)
-	{
-		if (uilist[i] == nullptr) {
-			uilist[i] = this;
-			id = i;
-			return;
-		}
-	}
-	Assert("uilist full");
+
 }
 
 void uirender::initrenderlist()
@@ -51,32 +58,41 @@ void uirender::renderuilist()
 		if (uilist[i]!=nullptr)
 		{
 			array<float> databuf = array<float>();
+			texture te = uilist[i]->tex;
+			te.apply();
 			
-			uilist[i]->tex.apply();
-			v2::Vector2 min = uilist[i]->pos - uilist[i]->scale;
+			v2::Vector2 min =  uilist[i]->scale;
 			v2::Vector2 max = uilist[i]->pos + uilist[i]->scale;
-	
-			databuf.append(min.x);
-			databuf.append(min.y);
-			databuf.append(0);
-			databuf.append(0);
-			databuf.append(min.x);
-			databuf.append(max.y);
-			databuf.append(0);
-			databuf.append(1);
-			databuf.append(max.x);
-			databuf.append(max.y);
-			databuf.append(1);
-			databuf.append(1);
-			databuf.append(max.x);
-			databuf.append(min.y);
-			databuf.append(1);
-			databuf.append(0);
+			for (int i = 0; i < 4; i++)
+			{
+				v2::Vector2 pos = uilist[i]->pos + offset[i] * (uilist[i]->scale);
+				databuf.append(pos.x);
+				databuf.append(pos.y);
+				databuf.append(cubeuv[2 * i]);
+				databuf.append(cubeuv[2 * i+1]);
+			}
+			
+		
 			renderer::render2dquadlist(Voa, ibo, VBO, databuf, indbuf);
 			databuf.destroy();
 		}
 	}
+	indbuf.destroy();
 	Voa.destroy();
 	VBO.destroy();
 	ibo.destroy();
+}
+
+uibox* uirender::newbox(const char* texloc, v2::Vector2 scl, v2::Vector2 ps)
+{
+	uibox* bx = new uibox(texloc, scl, ps);
+	for (int i = 0; i < 100; i++)
+	{
+		if (uilist[i] == nullptr) {
+			uilist[i] = bx;
+			bx->id = i;
+			return bx;
+		}
+		return nullptr;
+	}
 }

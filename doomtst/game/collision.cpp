@@ -116,7 +116,7 @@ void collision::collideobjwithgrid(colrect& entity)
 							{
 
 
-								if (magnitude(force) < magnitude(minforce) || magnitude(minforce) == 0)
+								if (magnitude(force) > magnitude(minforce) || magnitude(minforce) == 0)
 								{
 
 									minforce = force;

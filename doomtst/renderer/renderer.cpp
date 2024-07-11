@@ -78,8 +78,7 @@ namespace renderer {
          //enable position
        
  
-        shaderlist[currshader].setmatval(proj, "projection");
-        shaderlist[currshader].setmatval(view, "view");
+        
 
         int vertexColorLocation = glGetUniformLocation(shaderlist[currshader].id, "Color");
 
@@ -88,6 +87,12 @@ namespace renderer {
 
       
 
+
+    }
+    void setmat()
+    {
+        shaderlist[currshader].setmatval(proj, "projection");
+        shaderlist[currshader].setmatval(view, "view");
     }
     void render2dquadlist(vao VAO, vbuf ibo, vbuf VBO, array<float>& pointlist, array<unsigned int>& indicelist)
     {
@@ -120,8 +125,8 @@ namespace renderer {
         array<const char*> texlist = array<const char*>(0);
         texlist[0] = "dirt.png";
         texlist[1] = "grass.png";
-        texlist[2] = "wood.png";
-        texlist[3] = "woodint.png";
+        texlist[2] = "stone.png";
+        texlist[3] = "stone.png";
        
         texlist[4] = "glass.png";
         texlist[5] = "water.png";
@@ -144,7 +149,7 @@ namespace renderer {
     void load()
     {
         view = glm::mat4(0);
-        setprojmatrix(90, .3, 100);
+        setprojmatrix(90, .23, 100);
         shaderlist = dynamicarray::array<shader>(10);
         shaderlist[uishader] = shader::shader("uivertex.vs", "uifragment.vs");
        shaderlist[uishader].attach();

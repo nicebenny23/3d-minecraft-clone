@@ -35,13 +35,15 @@ Chunk::chunk* Chunk::load(Coord location)
 	createchunkmesh(&retchunk);
 	retchunk.blockstruct = new block[chunksize];
 	int ind = 0;
+	chunknoisemap* map = trueperlin(location);
+	
 	for (int x = 0; x < 16; x++)
 	{
 		for (int y = 0;y < 16;y++) {
 			for (int z = 0; z < 16; z++)
 			{
 				Coord blockpos = Coord(x, y, z) +location * 16;
-				retchunk.blockstruct[ind] =*new blockname::block(blockpos, 0);
+				retchunk.blockstruct[ind] =blockname::block(blockpos, 0);
 				gameobject::objectfromguid[retchunk.blockstruct[ind].guid] = &retchunk.blockstruct[ind];
 				
 				initblockmesh(&retchunk.blockstruct[ind], zerov, unitv / 2.0009);
@@ -50,7 +52,7 @@ Chunk::chunk* Chunk::load(Coord location)
 				  
 				//todo fix it
 				retchunk.blockstruct[ind].id = minecraftair;
-				float noiselevel =  trueperlin(blockpos.x,blockpos.y,blockpos.z);
+				float noiselevel = (*map)[ind];
 			
 			
 				retchunk.blockstruct[ind].id = minecraftdirt;
@@ -66,11 +68,7 @@ Chunk::chunk* Chunk::load(Coord location)
 				
 				
 				giveblocktraits(&(retchunk.blockstruct[ind]));
-				if (retchunk.blockstruct[ind].guid == 65)
-				{
-					gameobject::obj* x = &retchunk.blockstruct[ind];
-					int l = 1;
-				}
+			
 				
 				ind++;
 			}
@@ -94,7 +92,8 @@ void Chunk::chunk::destroy()
 		gameobject::objectfromguid[blockstruct[i].guid] = nullptr;
 	
 	gameobject::immidiatedestroy(&blockstruct[i]);
-
+	delete 	blockstruct[i].mesh;
+	//delete blockstruct[i]
 	}
 	mesh->destroy();
 	delete[] blockstruct;

@@ -16,8 +16,10 @@ void main()
 {
    
 
-      
-gl_Position =  projection * view * vec4(aPos, 1.0);
+      vec4 pos =  projection * view * vec4(aPos.x,aPos.y,aPos.z, 1.0);
+pos.x=pos.x/1.77777777777;
+
+gl_Position=pos;
 
 
     Color = vec3(col,col,col);

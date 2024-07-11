@@ -193,7 +193,7 @@ void gameobject::runupdateloop() {
 		
 		if (objectfromguid.at(i) != nullptr) {
 			
-			if (objectfromguid.at(i)->type == entity)
+			if (objectfromguid.fastat(i)->type== entity)
 			{
 
 

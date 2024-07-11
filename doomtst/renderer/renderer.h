@@ -26,6 +26,7 @@ namespace renderer {
 	extern glm::mat4 proj,view;
 	extern int currshader;
 	extern dynamicarray::array<shader> shaderlist;
+	void setmat();
 	extern texturearray texarray;
 	enum rendertype
 	{

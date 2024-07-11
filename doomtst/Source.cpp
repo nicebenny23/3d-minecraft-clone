@@ -48,12 +48,12 @@ int main()
     glm::vec3 cam = glm::vec3(-100, 17, 200);
   
     uirender::initrenderlist();
-   uirender::uibox("col.png", v2::unitv/32, v2::zerov);
+   uirender::newbox("crosshair.png", v2::unitv/32, v2::zerov);
     userinput::endupdate();
     
     aabb::initcolrect();
     aabb::colrect pos = aabb::colrect(cam, Vector3(.5,1,.5), false);
-entity::entityref human = entity::createentity(v3::Vector3(0, 18, 0), "");
+entity::entityref human = entity::createentity(v3::Vector3(0, 0, 0), "");
 float lastupdate = 0;
 human.toent()->addcomponent<playermovement>();
 while (!window::shouldclose())

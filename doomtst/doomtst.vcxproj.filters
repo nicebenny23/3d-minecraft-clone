@@ -78,7 +78,10 @@
     <ClCompile Include="world\managegrid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="uirender.cpp">
+    <ClCompile Include="renderer\uirender.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="world\noise.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -176,9 +179,6 @@
     <ClInclude Include="util\dir.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="playermovment.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="world\managegrid.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -188,7 +188,10 @@
     <ClInclude Include="rigidbody.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="uirender.h">
+    <ClInclude Include="game\playermovment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\uirender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

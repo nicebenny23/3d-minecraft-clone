@@ -42,6 +42,7 @@ texture::texture(const char* file, textype imgtype)
 
 texture::texture()
 {
+	id = -1;
 }
 
 void texture::apply()

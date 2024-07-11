@@ -3,39 +3,6 @@
 dynamicarray::array<float> databuffer;
 dynamicarray::array<unsigned int> indicebuffer;
 using namespace grid;
-
-//uv's for cubemapping
-const float cubeuv[] = {
-   1, 0,
-0, 0,
-0, 1,
-1, 1
-
-};
-v2::Vector2 facecoordsmcent(face* fce,int ind) {
-	v3::Vector3 meshscale = fce->mesh->scale;
-	int facetype = ((fce->facenum) / 2);
-	v2::Vector2 offset;
-	switch (facetype)
-	{
-		
-	case 0:
-		offset = v2::Vector2(meshscale.z, meshscale.y);
-		break;
-	case 1:
-		offset = v2::Vector2(meshscale.x, meshscale.z);
-		break;
-	case 2:
-		offset = v2::Vector2(meshscale.x, meshscale.y);
-		break;
-	}
-	
-
-
-			v2::Vector2 ret = v2::unitv / 2 + offset * (v2::Vector2(cubeuv[2 * ind], cubeuv[2 * ind + 1]) - v2::unitv / 2) * -2;
-			return ret;
-	
-}
 const Vector3 vert[] = {
 		 Vector3(0, 0, 0),//vertex 0
 		 Vector3(1,0,0),//vertex 1
@@ -47,6 +14,55 @@ const Vector3 vert[] = {
 		  Vector3(0,1,1),//vertex 7
 
 };
+//uv's for cubemapping
+const float cubeuv[] = {
+   1, 0,
+0, 0,
+0, 1,
+1, 1
+
+};
+bool chunkviewable(Chunk::chunk* chk) {
+
+	v3::Vector3 center =chk->center()-camera::campos;
+
+
+	for (size_t i = 0; i < 8; i++)
+	{
+		Vector3 norm = center + (vert[i]-unitv/2)* 16;
+		if (dotproduct(norm,camera::direction())>0)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+v2::Vector2 facecoordsmcent(const face* fce, int ind) {
+	const v3::Vector3& meshscale = fce->mesh->scale;
+	int facetype = fce->facenum / 2;
+	v2::Vector2 offset;
+
+	switch (facetype) {
+	case 0:
+		offset = v2::Vector2(meshscale.z, meshscale.y);
+		break;
+	case 1:
+		offset = v2::Vector2(meshscale.x, meshscale.z);
+		break;
+	case 2:
+		offset = v2::Vector2(meshscale.x, meshscale.y);
+		break;
+	default:
+		// Handle unexpected facetype values if necessary
+		break;
+	}
+
+	v2::Vector2 uvCoord= v2::Vector2(cubeuv[2 * ind], cubeuv[2 * ind + 1]);
+	v2::Vector2 ret = v2::unitv / 2 + offset * ((uvCoord - v2::unitv / 2) * -2);
+	return ret;
+}
+
 
 //locatiion of unique indices in each set of vertices
 const int uniqueindices[] = {
@@ -84,7 +100,7 @@ void emitface(int face, block& torender,array<float>& datbuf,array<unsigned int>
 			//2*j is x coord 2*j+1 is y coord
 			v2::Vector2 coords = facecoordsmcent(&torender[face], j);
 		
-			float xtexpos = cubeuv[2 * j];
+			
 			datbuf.append(coords.x);
 			float ytexpos = (cubeuv[2 * j + 1]);
 			datbuf.append(coords.y);
@@ -218,12 +234,16 @@ void blockrender::initdatabuffer()
 
 	}
    oalgorithm::quicksort<Chunk::chunk>(tosort.getdata(), tosort.length);
-	
    renderer::changerendertype(renderer::solid);
-	for (int i = 0; i < totalgridsize; i++)
-	{
+   renderer::setmat();
 
-		renderchnk(*tosort[i].mesh, false);
+   for (int i = 0; i < totalgridsize; i++)
+	{
+	   if (chunkviewable(&tosort[i]))
+	   {
+		   renderchnk(*tosort[i].mesh, false);
+	   }
+	
 	}
 	
 	renderer::changerendertype(renderer::transparent);

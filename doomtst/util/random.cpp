@@ -32,16 +32,16 @@ unsigned int randomint()
     return static_cast<double>(val) *UINT32_MAX/ UINT64_MAX;
 }
 
-void randomcoord(uint64_t& seed)
+void randomcoord(unsigned int& seed)
 {
     seed ^= seed << 13;
-    seed ^= seed >> 7;
-    seed ^= seed << 17;
+    seed ^= seed >> 17;
+    seed ^= seed << 5;
 
     
 }
 
-v3::Vector3 randomseeded(uint64_t x, uint64_t y, uint64_t z)
+v3::Vector3 randomseeded(unsigned int x, unsigned int y, unsigned int z)
 {
    
     // Use a mix of XOR and multiplication to combine the seeds
@@ -50,13 +50,13 @@ v3::Vector3 randomseeded(uint64_t x, uint64_t y, uint64_t z)
     x += (x << 3) + (x >> 7);
     x ^= (x << 11) ^ (x >> 5);
     v3::Vector3 point;
-    point.x = static_cast<double>(x) / static_cast<float>(UINT64_MAX);
+    point.x = static_cast<double>(x) / static_cast<float>(MAXUINT32);
     randomcoord(x);
+  
+    point.y = static_cast<double>(x) / static_cast<float>(MAXUINT32);
     randomcoord(x);
-    point.y = static_cast<double>(x) / static_cast<float>(UINT64_MAX);
-    randomcoord(x);
-    randomcoord(x);
-    point.z = static_cast<double>(x) / static_cast<float>(UINT64_MAX);
+ 
+    point.z = static_cast<double>(x) / static_cast<float>(MAXUINT32);
     return point;
 }
 

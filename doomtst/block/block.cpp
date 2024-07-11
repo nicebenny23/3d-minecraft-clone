@@ -103,7 +103,7 @@ blockname::block::block(v3::Coord placment, int blockid)
 	guid = gameobject::getgoid();
 
 	emitedlight = 0;
-	complist = (array<gameobject::component*>());
+	 complist = (array<gameobject::component*>());
 	type = gameobject::block;
 	
 	gameobject::objectfromguid[guid] = this;
@@ -120,8 +120,9 @@ blockname::block::block()
 {
 	transparent = false;
 	solid = false;
-	complist = array<gameobject::component*>();
+	//complist = array<gameobject::component*>();
 	id = -1;
+	guid = -1;
 	pos = v3::zeroiv;
 	type = gameobject::block;
 	test = false;
@@ -170,7 +171,8 @@ void blockname::setair(blockname::block* blk)
 
 void blockname::giveblocktraits(blockname::block* nullblock)
 {
-	nullblock->emitedlight = 0;
+	nullblock->mesh->scale = unitv * 1 / 2.001;
+	nullblock->emitedlight =0;
 	switch (nullblock->id)
 	{
 	case minecraftair:
@@ -219,8 +221,8 @@ void blockname::giveblocktraits(blockname::block* nullblock)
 
 void blockname::block::createaabb()
 {
-	this->addcomponent<aabb::colrect>(this->mesh->pos,unitv/2, true);
-
+	this->addcomponent<aabb::colrect>(this->mesh->pos,this->mesh->scale, true);
+	int l = 1;
 }
 
 

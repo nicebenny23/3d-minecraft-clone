@@ -160,6 +160,7 @@
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="renderer\texture.cpp" />
     <ClCompile Include="util\userinput.cpp" />
+    <ClCompile Include="world\noise.cpp" />
     <ClCompile Include="world\voxeltraversal.cpp" />
     <ClCompile Include="renderer\Window.cpp" />
   </ItemGroup>

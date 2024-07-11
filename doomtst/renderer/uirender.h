@@ -20,6 +20,10 @@ namespace uirender {
 
 		uibox(const char* texloc, v2::Vector2 scl, v2::Vector2 ps);
 	};
+	uibox* newbox(const char* texloc, v2::Vector2 scl, v2::Vector2 ps);
+	
+	
+	
 	extern array<uibox*> uilist;
 	void initrenderlist();
 	void renderuilist();
