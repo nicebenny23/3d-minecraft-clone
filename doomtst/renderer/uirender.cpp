@@ -10,8 +10,9 @@ const float cubeuv[] = {
 
 };
 const v2::Vector2 offset[] = {
- v2::Vector2(1, -1),
-v2::Vector2(-1,-1),
+	v2::Vector2(-1,-1),
+	v2::Vector2(1, -1),
+
 v2::Vector2(-1, 1),
 v2::Vector2(1, 1)
 
@@ -40,7 +41,7 @@ void uirender::renderuilist()
 	array<unsigned int> indbuf = array<unsigned int>();
 	indbuf[0] = 0;
 	indbuf[1] = 1;
-	indbuf[2] = 2;
+	indbuf[2] = 3;
 	indbuf[3] = 0;
 	indbuf[4] = 3;
 	indbuf[5] = 2;
@@ -63,13 +64,13 @@ void uirender::renderuilist()
 			
 			v2::Vector2 min =  uilist[i]->scale;
 			v2::Vector2 max = uilist[i]->pos + uilist[i]->scale;
-			for (int i = 0; i < 4; i++)
+			for (int j = 0; j< 4; j++)
 			{
-				v2::Vector2 pos = uilist[i]->pos + offset[i] * (uilist[i]->scale);
+				v2::Vector2 pos = uilist[i]->pos + offset[j] * (uilist[i]->scale);
 				databuf.append(pos.x);
 				databuf.append(pos.y);
-				databuf.append(cubeuv[2 * i]);
-				databuf.append(cubeuv[2 * i+1]);
+				databuf.append(cubeuv[2 * j]);
+				databuf.append(cubeuv[2 * j+1]);
 			}
 			
 		

@@ -21,12 +21,12 @@ struct chunknoisemap
 {
    dynamicarray::array<float> noisemap;
     chunknoisemap(v3::Coord location);
-   float& operator[](int ind);
+   float operator[](int ind);
    float& operator[](Coord pos);
     void addlayer(float scale, float intensity);
     void destroy();
     v3::Coord loc;
-   
+    float maxint;
 };
 
 inline float interpolate(float v, float v1, float w) {
@@ -102,7 +102,7 @@ inline chunknoisemap* trueperlin(Coord chunk) {
    
     float inten = 1;
     chunknoisemap* map = new chunknoisemap(chunk);
-    float todob = 1;
+    float todob = 4;
     float val = 0;
     int maxnum = 0;
     
@@ -112,9 +112,13 @@ inline chunknoisemap* trueperlin(Coord chunk) {
             map->addlayer( inten,todob);
         
         maxnum += todob;
-        todob *= 1.1;
+        if (4<=i)
+        {
+            todob /= 1.5;
+        }
+        todob *= 1.4;
  
-        inten /= 2;
+        inten /= 1.593;
     }
     val /= maxnum;
     return map;

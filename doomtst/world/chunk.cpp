@@ -36,7 +36,8 @@ Chunk::chunk* Chunk::load(Coord location)
 	retchunk.blockstruct = new block[chunksize];
 	int ind = 0;
 	chunknoisemap* map = trueperlin(location);
-	
+	chunknoisemap* map2 = trueperlin(location+Coord(1,333,2));
+	chunknoisemap* map3 = trueperlin(location + Coord(3331,22,3));
 	for (int x = 0; x < 16; x++)
 	{
 		for (int y = 0;y < 16;y++) {
@@ -53,18 +54,26 @@ Chunk::chunk* Chunk::load(Coord location)
 				//todo fix it
 				retchunk.blockstruct[ind].id = minecraftair;
 				float noiselevel = (*map)[ind];
-			
-			
-				retchunk.blockstruct[ind].id = minecraftdirt;
+				float noiselevel2 = (*map)[ind];
+				float noiselevel3 = (*map)[ind];
+				noiselevel = interpolate(noiselevel, noiselevel2, (noiselevel3 + 1) / 2);
 				
-				if (noiselevel >=0)
+				if (noiselevel >=-.5)
 				{
-					retchunk.blockstruct[ind].id = minecraftair;
+					if (noiselevel <= .5)
+					{
+						if (noiselevel2 >= -.6)
+						{
+							if (noiselevel2 <= .6)
+							{
+								retchunk.blockstruct[ind].id = minecraftstone;
+							}
+						}
+					}
+					
 				}
-				if (noiselevel <= 0)
-				{
-					retchunk.blockstruct[ind].id = minecraftstone;
-				}
+				
+
 				
 				
 				giveblocktraits(&(retchunk.blockstruct[ind]));
@@ -75,7 +84,8 @@ Chunk::chunk* Chunk::load(Coord location)
 		}
 	}
 	
-
+	map->destroy();
+	map2->destroy();
 	return & retchunk;
 }
 

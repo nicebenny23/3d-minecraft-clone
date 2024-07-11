@@ -9,6 +9,7 @@ chunknoisemap::chunknoisemap(v3::Coord location)
 	{
 		noisemap[i] = 0;
 	}
+	maxint = 0;
 }
 
 Vector3& pointmap::at(Coord pos)
@@ -16,9 +17,9 @@ Vector3& pointmap::at(Coord pos)
 	return dirmap[pos.z+ 17 * pos.y+ 189 * pos.x];
 }
 
-float& chunknoisemap::operator[](int ind)
+float chunknoisemap::operator[](int ind)
 {
-	return noisemap[ind];
+	return noisemap[ind]/maxint;
 }
 
 float& chunknoisemap::operator[](Coord pos)
@@ -75,9 +76,10 @@ float interpolatenoisemap(pointmap& map, float x, float y, float z){
 }
 void chunknoisemap::addlayer(float scale, float intensity)
 {
-	
+	maxint += intensity;
 	pointmap map = pointmap(loc, scale);
 	int ind = 0;
+	
 	for (int x = 0; x < 16; x++)
 	{
 		for (int y = 0; y < 16; y++)
