@@ -19,8 +19,10 @@ namespace renderer {
 		uishader = 1
 	};
 	void renderquadlist(vao VAO, vbuf ibo, vbuf VBO, dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist);
+	void render2dquadlist(vao VAO, vbuf ibo, vbuf VBO, array<float>& pointlist, array<unsigned int>& indicelist);
 	void load();
 	void setviewmatrix(glm::mat4 viewmat);
+	void clear();
 	extern glm::mat4 proj,view;
 	extern int currshader;
 	extern dynamicarray::array<shader> shaderlist;

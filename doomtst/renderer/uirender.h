@@ -1,7 +1,7 @@
-#include "renderer/renderer.h"
-#include "util/dynamicarray.h"
-#include "util/vector2.h"
-#include "renderer/texture.h"
+#include "renderer.h"
+#include "../util/dynamicarray.h"
+#include "../util/vector2.h"
+#include "texture.h"
 using namespace dynamicarray;
 
 #ifndef uirender_H

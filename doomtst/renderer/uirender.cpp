@@ -9,12 +9,13 @@ uirender::uibox::uibox(const char* texloc, v2::Vector2 scl, v2::Vector2 ps)
 	ps = pos;
 	for (int i = 0; i < 100; i++)
 	{
-		if (uilist[i] != nullptr) {
+		if (uilist[i] == nullptr) {
 			uilist[i] = this;
 			id = i;
-			break;
+			return;
 		}
 	}
+	Assert("uilist full");
 }
 
 void uirender::initrenderlist()
@@ -50,6 +51,7 @@ void uirender::renderuilist()
 		if (uilist[i]!=nullptr)
 		{
 			array<float> databuf = array<float>();
+			
 			uilist[i]->tex.apply();
 			v2::Vector2 min = uilist[i]->pos - uilist[i]->scale;
 			v2::Vector2 max = uilist[i]->pos + uilist[i]->scale;
@@ -70,7 +72,8 @@ void uirender::renderuilist()
 			databuf.append(min.y);
 			databuf.append(1);
 			databuf.append(0);
-			renderer::renderquadlist(Voa, ibo, VBO, databuf, indbuf);
+			renderer::render2dquadlist(Voa, ibo, VBO, databuf, indbuf);
+			databuf.destroy();
 		}
 	}
 	Voa.destroy();

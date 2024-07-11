@@ -142,7 +142,7 @@
   <ItemGroup>
     <ClCompile Include="game\aabb.cpp" />
     <ClCompile Include="block\block.cpp" />
-    <ClCompile Include="uirender.cpp" />
+    <ClCompile Include="renderer\uirender.cpp" />
     <ClCompile Include="world\managegrid.cpp" />
     <ClCompile Include="renderer\blockrender.cpp" />
     <ClCompile Include="game\camera.cpp" />
@@ -165,9 +165,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="game\aabb.h" />
-    <ClInclude Include="playermovment.h" />
+    <ClInclude Include="game\playermovment.h" />
     <ClInclude Include="rigidbody.h" />
-    <ClInclude Include="uirender.h" />
+    <ClInclude Include="renderer\uirender.h" />
     <ClInclude Include="world\managegrid.h" />
     <ClInclude Include="util\queue.h" />
     <ClInclude Include="renderer\algorthm.h" />

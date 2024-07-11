@@ -16,8 +16,8 @@
 #include "renderer/blockrender.h"
 #include "world/managegrid.h"
 #include "util/time.h"
-#include "playermovment.h"
-#include "uirender.h"
+#include "game/playermovment.h"
+#include "renderer/uirender.h"
 // settings
 const unsigned int SCR_WIDTH = 4000;
 const unsigned int SCR_HEIGHT = 3000;
@@ -48,7 +48,7 @@ int main()
     glm::vec3 cam = glm::vec3(-100, 17, 200);
   
     uirender::initrenderlist();
-   // uirender::uibox("crosshair.png", v2::unitv*333, v2::zerov);
+   uirender::uibox("col.png", v2::unitv/32, v2::zerov);
     userinput::endupdate();
     
     aabb::initcolrect();
@@ -65,11 +65,7 @@ while (!window::shouldclose())
         
         window::processInput();
       
-        glClearColor(0,0,0, 0.0f);
-      
-       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-     
-   
+        renderer::clear();
         gameobject::runupdateloop();
         pos.center = human.toent()->pos;
 
@@ -99,9 +95,10 @@ while (!window::shouldclose())
            gridutil::computeallcover();
            gridutil::redolighting();
         }
-     
+     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
             blockrender::initdatabuffer();
-        //   uirender::renderuilist();
+           uirender::renderuilist();
       
         gameobject::deleteobjs();
       

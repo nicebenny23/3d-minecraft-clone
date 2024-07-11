@@ -14,7 +14,7 @@ texture::texture(const char* file, textype imgtype)
 
 	int colchannel;
 	
-	unsigned char* data = stbi_load(file, &width,& height, &colchannel, 0);
+	unsigned char* data = stbi_load(file, &width,& height, &colchannel, STBI_rgb_alpha);
 
 	if (data==nullptr)
 	{
@@ -35,7 +35,7 @@ texture::texture(const char* file, textype imgtype)
 		type = GL_RGB;
 	
 	}
-	glTexImage2D(GL_TEXTURE_2D, 0, type, width, height, 0, type, GL_UNSIGNED_BYTE, data);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, type, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	stbi_image_free(data);
 }
@@ -46,6 +46,8 @@ texture::texture()
 
 void texture::apply()
 {
+
+
 	glBindTexture(GL_TEXTURE_2D, id);
 }
 //only works for png

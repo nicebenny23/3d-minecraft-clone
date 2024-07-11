@@ -233,6 +233,7 @@ void blockrender::initdatabuffer()
 	}
 
 	tosort.destroy();
+	
 
 }
 
