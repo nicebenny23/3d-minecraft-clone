@@ -20,11 +20,7 @@ void gridutil::computecover(face& blkface)
 	{
 	
 	blkface.covered = true;
-	if (blkface.mesh->scale!=unitv / 2.0009)
-	{
-		blkface.covered = false;
-		return;
-	}
+	
 	
 		Coord pos = blkface.mesh->blk->pos + dirfromint(blkface.facenum);
 		block* blk = getobjatgrid(pos, true);

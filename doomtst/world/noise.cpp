@@ -14,7 +14,7 @@ chunknoisemap::chunknoisemap(v3::Coord location)
 
 Vector3& pointmap::at(Coord pos)
 {
-	return dirmap[pos.z+ 17 * pos.y+ 189 * pos.x];
+	return dirmap[pos.z+ 17 * pos.y+ 289 * pos.x];
 }
 
 float chunknoisemap::operator[](int ind)
@@ -22,9 +22,15 @@ float chunknoisemap::operator[](int ind)
 	return noisemap[ind]/maxint;
 }
 
-float& chunknoisemap::operator[](Coord pos)
+float chunknoisemap::operator[](Coord pos)
 {
-	return noisemap[pos.z+16*pos.y+256*pos.z];
+	
+	return noisemap[pos.z+16*pos.y+256*pos.x] / maxint;
+}
+float& chunknoisemap::operator[](Vector3 pos)
+{
+
+	return noisemap[pos.z + 16 * pos.y + 256 * pos.x] ;
 }
 
 
@@ -42,13 +48,17 @@ float dotGridGradient(pointmap& map, Coord chunkpos, Vector3 pos) {
 
 float interpolatenoisemap(pointmap& map, float x, float y, float z){
 
-	int x0 = floor(x);
+	x *= map.scale;
+	y *= map.scale;
+	z *= map.scale;
+	int x0 = floorabs(x);
 	int x1 = x0 + 1;
-	int y0 = floor(y);
+	int y0 = floorabs(y);
 	int y1 = y0 + 1;
-	int z0 =floor(z);
+	int z0 = floorabs(z);
 	int z1 = z0 + 1;
-	Vector3 pos = Vector3(x, y, z);
+
+	Vector3 pos(x, y, z);
 	float sx = x - x0;
 	float sy = y - y0;
 	float sz = z - z0;
@@ -71,8 +81,9 @@ float interpolatenoisemap(pointmap& map, float x, float y, float z){
 	ix1 = interpolate(n0, n1, sx);
 
 	value2 = interpolate(ix0, ix1, sy);
-	return interpolate(value1, value2, sz);
+	float final =interpolate(value1, value2, sz);
 
+	return final;
 }
 void chunknoisemap::addlayer(float scale, float intensity)
 {
@@ -87,7 +98,7 @@ void chunknoisemap::addlayer(float scale, float intensity)
 			for (int z = 0; z < 16; z++)
 			{
 				
-				noisemap[ind] += intensity*interpolatenoisemap(map, (x)*scale+.13034390, y*scale + .1034390, z*scale + .5034390);
+				(*this)[Vector3(x,y,z)] += intensity * interpolatenoisemap(map,x,y,z);
 				ind++;
 			}
 		}
@@ -112,10 +123,12 @@ pointmap::pointmap(v3::Coord location,float scl)
 		{
 			for (int z = 0; z < 17; z++)
 			{
-				Vector3 pos = location*16 +Coord(x, y, z);
-				dirmap[ind] = randompointonsphere(pos * scl);
+				Vector3 pos = location*16 +Coord(x, y, z)+unitv/21;
+				this->at(Coord(x,y,z))= randompointonsphere(pos / scl+ unitv * scl*181);
 				ind++;
 			}
 		}
 	}
+	scale =scl;
+	
 }

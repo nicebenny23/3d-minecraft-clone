@@ -1,5 +1,5 @@
 #include "renderer.h"
-
+#include "../util/userinput.h"
 namespace renderer {
 
     vbuf VBO;
@@ -82,9 +82,15 @@ namespace renderer {
 
         int vertexColorLocation = glGetUniformLocation(shaderlist[currshader].id, "Color");
 
-     
-        glDrawElements(GL_TRIANGLES, indicelist.length, GL_UNSIGNED_INT, 0);
-
+        if (userinput::getinputkey('t').held)
+        {
+            glDrawElements(GL_LINES, indicelist.length, GL_UNSIGNED_INT, 0);
+        }
+       
+        else
+        {
+            glDrawElements(GL_TRIANGLES, indicelist.length, GL_UNSIGNED_INT, 0);
+        }
       
 
 

@@ -14,15 +14,16 @@ struct pointmap
     array<Vector3> dirmap;
     v3::Coord loc;
     pointmap(v3::Coord location,float scl );
-
+    float scale;
     Vector3& at(Coord pos);
 };
 struct chunknoisemap
 {
    dynamicarray::array<float> noisemap;
     chunknoisemap(v3::Coord location);
+    float& operator[](Vector3 pos);
    float operator[](int ind);
-   float& operator[](Coord pos);
+   float operator[](Coord pos);
     void addlayer(float scale, float intensity);
     void destroy();
     v3::Coord loc;
@@ -30,7 +31,8 @@ struct chunknoisemap
 };
 
 inline float interpolate(float v, float v1, float w) {
-    w = (6*w*w- 15*w + 10)*w*w*w;
+    
+  //  w = (6*w*w- 15*w + 10)*w*w*w;
     return (v -v1)* w + v1;
    
 }
@@ -98,29 +100,24 @@ inline float perlin(float x, float y,float z) {
     value2 = interpolate(ix0, ix1, sy);
     return interpolate(value1,value2,sz);
 }
-inline chunknoisemap* trueperlin(Coord chunk) {
+inline chunknoisemap* trueperlin(Coord chunk,float startscale,float ampmul,float scalemul,int iter) {
    
-    float inten = 1;
+    float intensity = 1;
     chunknoisemap* map = new chunknoisemap(chunk);
-    float todob = 4;
-    float val = 0;
-    int maxnum = 0;
-    
-    for (int i = 0; i < 6; i++)
+    float scale = startscale;
+    for (int i = 0; i < iter; i++)
     {
       
-            map->addlayer( inten,todob);
+            map->addlayer( scale,intensity);
         
-        maxnum += todob;
-        if (4<=i)
-        {
-            todob /= 1.5;
-        }
-        todob *= 1.4;
+        
+       
+        scale *= scale;
+
  
-        inten /= 1.593;
+        intensity*=ampmul;
     }
-    val /= maxnum;
+   
     return map;
 }
 #endif // !noise_HPP

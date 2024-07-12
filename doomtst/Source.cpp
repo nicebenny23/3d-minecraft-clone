@@ -109,8 +109,8 @@ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
         {
 
             lastupdate = 0;
-           
-            std::cout << (1/timename::dt) << '\n';
+            Vector3 pos1 = human.toent()->pos;
+            std::cout << pos1.x<<pos1.y<<pos1.z << '\n';
         }
     }
    

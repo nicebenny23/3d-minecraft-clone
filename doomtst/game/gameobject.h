@@ -9,7 +9,7 @@ using namespace dynamicarray;
 #ifndef gameobj_HPP
 
 #define gameobj_HPP
-#define entsize 16*16*16*45
+#define entsize 16*16*16*150
 namespace gameobject {
 
 
