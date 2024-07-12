@@ -168,6 +168,7 @@
     <ClInclude Include="cone.h" />
     <ClInclude Include="game\aabb.h" />
     <ClInclude Include="game\playermovment.h" />
+    <ClInclude Include="playermodification.h" />
     <ClInclude Include="rigidbody.h" />
     <ClInclude Include="renderer\uirender.h" />
     <ClInclude Include="world\managegrid.h" />

@@ -8,22 +8,14 @@
 #define noise_HPP
 using namespace v3;
 using namespace dynamicarray;
-struct pointmap
-{
 
-    array<Vector3> dirmap;
-    v3::Coord loc;
-    pointmap(v3::Coord location,float scl );
-    float scale;
-    Vector3& at(Coord pos);
-};
 struct chunknoisemap
 {
-   dynamicarray::array<float> noisemap;
+    dynamicarray::array<float> noisemap;
     chunknoisemap(v3::Coord location);
     float& operator[](Vector3 pos);
-   float operator[](int ind);
-   float operator[](Coord pos);
+    float operator[](int ind);
+    float operator[](Coord pos);
     void addlayer(float scale, float intensity);
     void destroy();
     v3::Coord loc;
@@ -31,10 +23,10 @@ struct chunknoisemap
 };
 
 inline float interpolate(float v, float v1, float w) {
-    
-  //  w = (6*w*w- 15*w + 10)*w*w*w;
-    return (v -v1)* w + v1;
-   
+
+     w = (6*w*w- 15*w + 10)*w*w*w;
+    return (v1 - v) * w + v;
+
 }
 
 
@@ -52,40 +44,40 @@ inline v3::Vector3 randompointonsphere(Coord pnt) {
         l += 1040;
     }
 }
-    
-inline float dotGridGradient(Vector3 pos, float x, float y,float z) {
 
-    Vector3 gradient =randompointonsphere(pos);
+inline float dotGridGradient(Vector3 pos, float x, float y, float z) {
 
-   
+    Vector3 gradient = randompointonsphere(pos);
+
+
     float dx = x - pos.x;
     float dy = y - pos.y;
     float dz = z - pos.z;
-    return (dx * gradient.x + dy * gradient.y+ dz * gradient.z);
+    return (dx * gradient.x + dy * gradient.y + dz * gradient.z);
 }
 
 
-inline float perlin(float x, float y,float z) {
-    
+inline float perlin(float x, float y, float z) {
+
     int x0 = (int)floor(x);
     int x1 = x0 + 1;
     int y0 = (int)floor(y);
     int y1 = y0 + 1;
     int z0 = (int)floor(z);
     int z1 = z0 + 1;
-  
+
     float sx = x - (float)x0;
     float sy = y - (float)y0;
     float sz = z - (float)z0;
-   
-    float n0, n1, ix0, ix1, value1,value2;
 
-    n0 = dotGridGradient(Vector3(x0, y0,z0), x, y,z);
-    n1 = dotGridGradient(Vector3(x1, y0, z0), x, y,z);
+    float n0, n1, ix0, ix1, value1, value2;
+
+    n0 = dotGridGradient(Vector3(x0, y0, z0), x, y, z);
+    n1 = dotGridGradient(Vector3(x1, y0, z0), x, y, z);
     ix0 = interpolate(n0, n1, sx);
 
-    n0 = dotGridGradient(Vector3(x0, y1, z0), x, y,z);
-    n1 = dotGridGradient(Vector3(x1, y1, z0), x, y,z);
+    n0 = dotGridGradient(Vector3(x0, y1, z0), x, y, z);
+    n1 = dotGridGradient(Vector3(x1, y1, z0), x, y, z);
     ix1 = interpolate(n0, n1, sx);
 
     value1 = interpolate(ix0, ix1, sy);
@@ -98,26 +90,26 @@ inline float perlin(float x, float y,float z) {
     ix1 = interpolate(n0, n1, sx);
 
     value2 = interpolate(ix0, ix1, sy);
-    return interpolate(value1,value2,sz);
+    return interpolate(value1, value2, sz);
 }
-inline chunknoisemap* trueperlin(Coord chunk,float startscale,float ampmul,float scalemul,int iter) {
-   
+inline chunknoisemap* trueperlin(Coord chunk, float startscale, float ampmul, float scalemul, int iter) {
+
     float intensity = 1;
     chunknoisemap* map = new chunknoisemap(chunk);
     float scale = startscale;
     for (int i = 0; i < iter; i++)
     {
-      
-            map->addlayer( scale,intensity);
-        
-        
-       
+
+        map->addlayer(scale, intensity);
+
+
+
         scale *= scale;
 
- 
-        intensity*=ampmul;
+
+        intensity *= ampmul;
     }
-   
+
     return map;
 }
 #endif // !noise_HPP

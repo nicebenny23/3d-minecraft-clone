@@ -22,8 +22,8 @@ uirender::uibox::uibox(const char* texloc, v2::Vector2 scl, v2::Vector2 ps)
 
 	tex = texture(texloc,png);
 	scale = scl;
-	ps = pos;
-
+	pos = ps;
+	shouldrender = true;
 }
 
 void uirender::initrenderlist()
@@ -56,14 +56,14 @@ void uirender::renderuilist()
 	for (int i = 0; i < 100; i++)
 	{
 
-		if (uilist[i]!=nullptr)
+		if (uilist[i]!=nullptr&&uilist[i]->shouldrender)
 		{
 			array<float> databuf = array<float>();
-			texture te = uilist[i]->tex;
-			te.apply();
+			texture text = uilist[i]->tex;
+			text.apply();
 			
 			v2::Vector2 min =  uilist[i]->scale;
-			v2::Vector2 max = uilist[i]->pos + uilist[i]->scale;
+			v2::Vector2 max = uilist[i]->pos;
 			for (int j = 0; j< 4; j++)
 			{
 				v2::Vector2 pos = uilist[i]->pos + offset[j] * (uilist[i]->scale);
@@ -94,6 +94,7 @@ uibox* uirender::newbox(const char* texloc, v2::Vector2 scl, v2::Vector2 ps)
 			bx->id = i;
 			return bx;
 		}
-		return nullptr;
+		
 	}
+	return nullptr;
 }

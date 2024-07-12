@@ -1,7 +1,30 @@
 #include <cmath>
 #ifndef mathutil_HPP
 #define mathutil_HPP
+inline bool aproxequal(float v1, float v2) {
 
+	if (abs(v1 - v2) < .0001)
+	{
+		return true;
+	}
+	return false;	
+}
+inline float Max(float v1, float v2) {
+
+	if (v1<v2)
+	{
+		return v2;
+	}
+	return v1;
+}
+inline float Min(float v1, float v2) {
+
+	if (v1 < v2)
+	{
+		return v1;
+	}
+	return v2;
+}
 inline int modabs(int x, int m) {
 
 	if (x < 0)

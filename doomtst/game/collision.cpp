@@ -14,14 +14,14 @@ void collision::update()
 	}
 }
 
-raycolwithgrid collision::collideraywithgrid(ray nray) {
+voxtra::raycolwithgrid collision::collideraywithgrid(ray nray) {
 	
-	raycolwithgrid closest = raycolwithgrid();
+	voxtra::raycolwithgrid closest = voxtra::raycolwithgrid();
 	closest.dist = INFINITY;
 	for (int i = 0; i < (loadamt * 2 + 1) * (loadamt * 2 + 1)*(2*loadamt+1); i++)
 	{
 		for (int j = 0;j < 16 * 16 * 16;j++) {
-			block* blk = &grid::chunklist[i]->blockstruct[j];
+			block* blk = &grid::chunklist[i]->blockbuf[j];
 
 			//for now gyrantee tha it has no aabb
 			if (blk->solid) {
@@ -54,7 +54,7 @@ Vector3 getplaceoffset(Vector3 inter, Vector3 center,Vector3 colrectscale) {
 	pos.z = floorabs((inter.z - center.z) / colrectscale.z);
 	return pos;
 }
-bool aabbcollideswithent(colrect* blk) {
+bool collision::aabbcollideswithent(colrect* blk) {
 	for (int i = 0; i < colrectlist.length; i++)
 	{
 		if (colrectlist[i] != nullptr)
@@ -136,55 +136,4 @@ void collision::collideobjwithgrid(colrect& entity)
 		entity.prevpos = entity.center;
 	}
 }
-void collision::collidecamray() {
-	ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
-	raycolwithgrid closest = travvox(cameraray, 1000);
 
-	if (closest.box != nullptr)
-	{
-
-
-		toblk(closest.box->owner).lightval = 14;
-		for (int i = 0;i < 6;i++)
-		{
-			(*toblk(closest.box->owner).mesh) [i] .light = 14;
-
-		}
-		if (userinput::mouseleft.pressed)
-		{
-			
-			if (interactminrange < closest.dist && closest.dist < interactmaxrange)
-			{
-
-
-				gridutil::setblock(toblk(closest.box->owner).pos, minecraftair);
-			}
-		}
-
-
-		else if (userinput::mouseright.pressed)
-		{
-
-			if (interactminrange < closest.dist && closest.dist < interactmaxrange)
-			{
-			
-				block* plamentblock =findprevblock(cameraray,1000);
-				if (plamentblock!= nullptr && !plamentblock->solid)
-				{
-					int previd = plamentblock->id;
-					//i dont know why i create it and remove itit like this but it makes the core much simpler
-					gridutil::setblock(plamentblock->pos, minecraftglass);
-					if (aabbcollideswithent(&plamentblock->getcomponent<colrect>()))
-					{
-
-						gridutil::setblock(plamentblock->pos, previd);
-					}
-				}
-
-			}
-
-
-		}
-
-	}
-}
