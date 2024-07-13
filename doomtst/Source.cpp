@@ -18,6 +18,7 @@
 #include "util/time.h"
 #include "game/playermovment.h"
 #include "renderer/uirender.h"
+#include "playermodification.h"
 // settings
 const unsigned int SCR_WIDTH = 4000;
 const unsigned int SCR_HEIGHT = 3000;
@@ -56,6 +57,7 @@ int main()
 entity::entityref human = entity::createentity(v3::Vector3(0, 0, 0), "");
 float lastupdate = 0;
 human.toent()->addcomponent<playermovement>();
+human.toent()->addcomponent<playermod>();
 while (!window::shouldclose())
     {
    timename::calcfps();
@@ -75,7 +77,7 @@ while (!window::shouldclose())
 
      
          camera::calculateyawandpitch();
-         collision::collidecamray();
+        
          camera::setcamerapos(v3::Vector3(0,0,0)+human.toent()->pos);
          camera::sendoffviewmatrix();
         
@@ -110,7 +112,7 @@ glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
 
             lastupdate = 0;
             Vector3 pos1 = human.toent()->pos;
-            std::cout << pos1.x<<pos1.y<<pos1.z << '\n';
+            std::cout <<1/timename::dt << '\n';
         }
     }
    

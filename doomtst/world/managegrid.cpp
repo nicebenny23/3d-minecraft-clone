@@ -54,7 +54,7 @@ void gridutil::computeallcover()
 			for (int faceind = 0; faceind < 6; faceind++)
 			{
 				
-				face& tocover = (chunklist[gridind]->blockstruct[blockind])[faceind];
+				face& tocover = (chunklist[gridind]->blockbuf[blockind])[faceind];
 				
 				computecover(tocover);
 			}

@@ -69,7 +69,7 @@ namespace grid {
 		{
 
 			int ind = gridindfromchunkpos(xchunk, ychunk, zchunk);
-			block& blockatpos = chunklist[ind]->blockstruct[Chunk::indexfrompos(x, y, z)];
+			block& blockatpos = chunklist[ind]->blockbuf[Chunk::indexfrompos(x, y, z)];
 			if (countnonsolids || blockatpos.id != minecraftair)
 			{
 				return &blockatpos;
@@ -96,7 +96,7 @@ namespace grid {
 			//normilized the chunk
 
 			int gridindex = gridindfromchunkpos(xchunk, ychunk, zchunk);
-			block& blockatpos = chunklist[gridindex]->blockstruct[Chunk::indexfrompos(x, y, z)];
+			block& blockatpos = chunklist[gridindex]->blockbuf[Chunk::indexfrompos(x, y, z)];
 
 			//todo seperate for transperent,solid
 			if (!blockatpos.transparent)

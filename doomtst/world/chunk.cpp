@@ -5,7 +5,7 @@
 
 block& Chunk::chunk::operator[](int index)
 {
-	return blockstruct[index];
+	return blockbuf[index];
 }
 
 
@@ -29,73 +29,75 @@ void createchunkmesh(Chunk::chunk* aschunk)
 Chunk::chunk* Chunk::load(Coord location)
 {
 
-	chunk& retchunk = *(new chunk());
-	
-	retchunk.loc =location;
-	createchunkmesh(&retchunk);
-	retchunk.blockstruct = new block[chunksize];
+	chunk& newchunk = *(new chunk());
+
+	newchunk.loc = location;
+	createchunkmesh(&newchunk);
+	newchunk.blockbuf = new block[chunksize];
 	int ind = 0;
-	
-	chunknoisemap* map = trueperlin(location-Coord(0,location.y,location.z), .1f, 1,1, 1);
-	//chunknoisemap* map1 = trueperlin(location+Coord(3,3,411), .3f, 1.5f, .7f, 5);
-	
+	chunknoisemap* map = trueperlin(location , .1f, 1.2, .5f, 2);
 	for (int x = 0; x < 16; x++)
 	{
-		for (int y = 0;y < 16;y++) {
+		for (int y = 0; y < 16; y++) {
 			for (int z = 0; z < 16; z++)
 			{
-				Coord blockpos = Coord(x, y, z) +location * 16;
-				retchunk.blockstruct[ind] =blockname::block(blockpos, 0);
-				gameobject::objectfromguid[retchunk.blockstruct[ind].guid] = &retchunk.blockstruct[ind];
-				
-				initblockmesh(&retchunk.blockstruct[ind], zerov, unitv / 2.0009);
-				//select block mechanism
-			
-				  
-				//todo fix it
-				retchunk.blockstruct[ind].id = minecraftair;
-				float noiselevel =10* (*map)[Coord( x,0,0)];
-			///	float noiselevel1 = (*map1)[Coord(x, y, z)];
-				
-						if (noiselevel>blockpos.y)
-						{
-							retchunk.blockstruct[ind].id = minecraftstone;
-						}
-								
-					
-				
+				Coord blockpos = Coord(x, y, z) + location * 16;
+				newchunk.blockbuf[ind] = blockname::block(blockpos, 0);
+				gameobject::objectfromguid[newchunk.blockbuf[ind].guid] = &newchunk.blockbuf[ind];
 
-				
-				
-				giveblocktraits(&(retchunk.blockstruct[ind]));
-			
-				
+				initblockmesh(&newchunk.blockbuf[ind], zerov, unitv / 2.0009);
+				//select block mechanism
+
+
+				//todo fix it
+				newchunk.blockbuf[ind].id = minecraftair;
+				float noiselevel =  (*map)[Coord(x, y, z)];
+				///	float noiselevel1 = (*map1)[Coord(x, y, z)];
+
+				if (noiselevel > -.15)
+				{
+
+					if (noiselevel < .15)
+					{
+
+						newchunk.blockbuf[ind].id = minecraftstone;
+					}
+
+				}
+
+
+
+
+				giveblocktraits(&(newchunk.blockbuf[ind]));
+
+
 				ind++;
 			}
 		}
 	}
-	
+
 	map->destroy();
-	
-	return & retchunk;
+
+	return &newchunk;
 }
 
 
 Chunk::chunk::chunk()
 {
 	loc = zeroiv;
-	blockstruct =nullptr ;
+	blockbuf = nullptr;
+	mesh = nullptr;
 }
 
 void Chunk::chunk::destroy()
 {
-	for (int i = 0;i < 16 * 16 * 16;i++) {
-		gameobject::objectfromguid[blockstruct[i].guid] = nullptr;
-	
-	gameobject::immidiatedestroy(&blockstruct[i]);
-	delete 	blockstruct[i].mesh;
-	//delete blockstruct[i]
+	for (int i = 0; i < 16 * 16 * 16; i++) {
+		gameobject::objectfromguid[blockbuf[i].guid] = nullptr;
+
+		gameobject::immidiatedestroy(&blockbuf[i]);
+		delete 	blockbuf[i].mesh;
+		//delete blockbuf[i]
 	}
 	mesh->destroy();
-	delete[] blockstruct;
+	delete[] blockbuf;
 }

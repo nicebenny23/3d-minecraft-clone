@@ -18,7 +18,7 @@ namespace Chunk {
 			return loc*16 + unitv * 8;
 		}
 		block& operator[](int index);
-		block* blockstruct;
+		block* blockbuf;
 		void destroy();
 		float cameradist() {
 			return 	 distance(center(), camera::campos);

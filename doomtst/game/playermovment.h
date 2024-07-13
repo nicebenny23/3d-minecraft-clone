@@ -14,27 +14,27 @@ struct playermovement:gameobject::component
         float speed = 10;
         if (userinput::getinputkey('s').held)
         {
-            pos -= v3::Vector3(cos(glm::radians(camera::yaw)), 0, sin(glm::radians(camera::yaw))) * (timename::dt * speed);
+            pos -= v3::Vector3(cos(glm::radians(camera::yaw)), 0, sin(glm::radians(camera::yaw))) * (timename::mindt * speed);
         }
         if (userinput::getinputkey('w').held)
         {
-         pos += v3::Vector3(cos(glm::radians(camera::yaw)), 0, sin(glm::radians(camera::yaw))) * (timename::dt * speed);
+         pos += v3::Vector3(cos(glm::radians(camera::yaw)), 0, sin(glm::radians(camera::yaw))) * (timename::mindt * speed);
         }
         if (userinput::getinputkey('a').held)
         {
-           pos += v3::Vector3(sin(glm::radians(camera::yaw)), 0, -cos(glm::radians(camera::yaw))) * (timename::dt * speed);
+           pos += v3::Vector3(sin(glm::radians(camera::yaw)), 0, -cos(glm::radians(camera::yaw))) * (timename::mindt * speed);
         }
         if (userinput::getinputkey('d').held)
         {
-            pos -= v3::Vector3(sin(glm::radians(camera::yaw)), 0, -cos(glm::radians(camera::yaw))) * (timename::dt * speed);
+            pos -= v3::Vector3(sin(glm::radians(camera::yaw)), 0, -cos(glm::radians(camera::yaw))) * (timename::mindt * speed);
         }
         if (userinput::getinputkey(' ').held)
         {
-           pos += v3::Vector3(0, 1, 0) * (timename::dt * speed);
+           pos += v3::Vector3(0, 1, 0) * (timename::mindt * speed);
         }
         if (userinput::getinputkey('z').held)
         {
-          pos -= v3::Vector3(0, 1, 0) * (timename::dt * speed);
+          pos -= v3::Vector3(0, 1, 0) * (timename::mindt * speed);
         }
      
 

@@ -11,18 +11,19 @@ namespace timename {
 	float dt;
 	float time;
 	float tfps;
+	float mindt;
 	void inittime() {
 		time = 0;
 		dt = 0;
 		tfps = 60;
-
+		dt = 0;
 	}
 
 	void calcfps() {
 
 		auto currtime = glfwGetTime();
 		dt = currtime - time;
-
+		mindt =std::max(dt, .01f);
 
 		fps = 1000 / dt;
 
