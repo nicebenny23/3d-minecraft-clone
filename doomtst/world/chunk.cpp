@@ -35,6 +35,7 @@ Chunk::chunk* Chunk::load(Coord location)
 	createchunkmesh(&retchunk);
 	retchunk.blockstruct = new block[chunksize];
 	int ind = 0;
+	
 	chunknoisemap* map = trueperlin(location-Coord(0,location.y,location.z), .1f, 1,1, 1);
 	//chunknoisemap* map1 = trueperlin(location+Coord(3,3,411), .3f, 1.5f, .7f, 5);
 	
