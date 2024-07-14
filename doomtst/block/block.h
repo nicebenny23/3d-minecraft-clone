@@ -16,8 +16,12 @@ namespace blockname {
 		minecraftdirt = 1,
 		minecraftgrass = 2,
 		minecraftstone = 3,
+
 		minecraftglass = 4,
 		minecraftwater = 5,
+		minecraftcrystal = 6,
+		minecrafttorch = 7,
+		minecraftwood = 8,
 	};
 
 	struct blockmesh;

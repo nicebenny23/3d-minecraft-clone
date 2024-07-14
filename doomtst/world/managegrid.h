@@ -14,7 +14,7 @@ void computeallcover();
 void emitlight();
 void placeblockatloc(int x, int y, int z, int blockid);
 void destroyblockatloc(int x, int y, int z);
-void computelightingqueue();
+
 void redolighting();
      
 

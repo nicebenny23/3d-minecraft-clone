@@ -2,12 +2,15 @@
 #include "debug.h"
 #ifndef dir_H
 #define dir_H
-enum dir2d
+
+enum dir3d
 {
 	north = 0,
 	south = 1,
 	west = 2,
-	east = 2,
+	east = 3,
+	front=4,
+	back=5,
 };
 inline v3::Vector3 dirfromint(int face) {
 

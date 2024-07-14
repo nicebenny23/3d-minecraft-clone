@@ -19,6 +19,7 @@
 #include "game/playermovment.h"
 #include "renderer/uirender.h"
 #include "playermodification.h"
+#include "util/fileloader.h"
 // settings
 const unsigned int SCR_WIDTH = 4000;
 const unsigned int SCR_HEIGHT = 3000;
@@ -39,22 +40,22 @@ int main()
     }
   
     
-    
+  // createdirectory("worldstorage");
     camera::initilize();
 
     renderer::load();
    grid::initgrid();
   gridutil::computeallcover();
   gridutil::redolighting();
-    glm::vec3 cam = glm::vec3(-100, 17, 200);
+    Vector3 spawnpos = glm::vec3(-100, 17, 200);
   
     uirender::initrenderlist();
-   uirender::newbox("crosshair.png", v2::unitv/32, v2::zerov);
+   uirender::newbox("images\\crosshair.png", v2::unitv/32, v2::zerov);
     userinput::endupdate();
     
     aabb::initcolrect();
-    aabb::colrect pos = aabb::colrect(cam, Vector3(.5,1,.5), false);
-entity::entityref human = entity::createentity(v3::Vector3(0, 0, 0), "");
+    aabb::colrect pos = aabb::colrect(spawnpos, Vector3(.5,1,.5), false);
+entity::entityref human = entity::createentity(spawnpos, "");
 float lastupdate = 0;
 human.toent()->addcomponent<playermovement>();
 human.toent()->addcomponent<playermod>();

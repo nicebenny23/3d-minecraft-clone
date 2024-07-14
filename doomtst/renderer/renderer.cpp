@@ -1,17 +1,15 @@
 #include "renderer.h"
 #include "../util/userinput.h"
+
 namespace renderer {
 
-    vbuf VBO;
-    vao VAO;
     
-    vbuf ibo;//indicebufferobject
     dynamicarray::array<shader> shaderlist;
     glm::mat4 proj;
     glm::mat4 view;
     int currshader;
     texturearray texarray;
-   
+    float fov;
     void changerendertype(rendertype rentype) {
 
         switch (rentype) {
@@ -123,21 +121,23 @@ namespace renderer {
 
       
     }
-    void setprojmatrix(float fov,float nearclipplane, float farclipplane){
-        proj = glm::perspective(glm::radians(fov), float(4 / 3), nearclipplane, farclipplane);
+    void setprojmatrix(float newfov,float nearclipplane, float farclipplane){
+        proj = glm::perspective(glm::radians(newfov), float(4 / 3), nearclipplane, farclipplane);
+        fov = newfov;
     }
     void generatetexarray() {
 
         array<const char*> texlist = array<const char*>(0);
-        texlist[0] = "dirt.png";
-        texlist[1] = "grass.png";
-        texlist[2] = "stone.png";
-        texlist[3] = "stone.png";
+        texlist[0] = "images\\dirt.png";
+        texlist[1] = "images\\grass.png";
+        texlist[2] = "images\\stone.png";
+        texlist[3] = "images\\stone.png";
        
-        texlist[4] = "glass.png";
-        texlist[5] = "water.png";
-        texlist[6] = "torch.png";
-        texlist[7] = "torchtop.png";
+        texlist[4] = "images\\glass.png";
+        texlist[5] = "images\\water.png";
+        texlist[6] = "images\\torch.png";
+        texlist[7] = "images\\torchtop.png";
+        texlist[8] = "images\\crystalore.png";
        texarray = texturearray(16, 16, texlist);
         texarray.apply();
         
@@ -154,6 +154,7 @@ namespace renderer {
     }
     void load()
     {
+        fov = 90;
         view = glm::mat4(0);
         setprojmatrix(90, .23, 100);
         shaderlist = dynamicarray::array<shader>(10);

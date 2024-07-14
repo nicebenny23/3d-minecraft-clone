@@ -72,14 +72,23 @@ void blockname::block::createfaces()
 	case minecraftstone:
 		mesh->setfaces( 2, 2, 3, 3, 2, 2);
 		break;
+	case minecraftwood:
+		mesh->setfaces(2, 2, 3, 3, 2, 2);
+		break;
 	case minecraftglass:
-		mesh->setfaces( 6,6,7,4,6,6);
+		mesh->setfaces(4,4,4,4,4,4);
 		break;
 	case minecraftwater:
 		mesh->setfaces( 5, 5, 5, 5, 5, 5);
 		break;
 	case minecraftair:
 		mesh->setfaces( -1, -1, -1, -1, -1, -1);
+		break;
+	case minecraftcrystal:
+		mesh->setfaces(8,8,8,8,8,8);
+		break;
+	case minecrafttorch:
+		mesh->setfaces(6, 6, 7, 4, 6, 6);
 		break;
 	}
 }
@@ -153,6 +162,21 @@ void blockname::setair(blockname::block* blk)
 
 		blk->removecomponent<aabb::colrect>();
 		break;
+	case minecraftcrystal:
+
+
+		blk->removecomponent<aabb::colrect>();
+		break;
+	case minecrafttorch:
+
+
+		blk->removecomponent<aabb::colrect>();
+		break;
+	case minecraftwood:
+
+
+			blk->removecomponent<aabb::colrect>();
+			break;
 	case minecraftwater:
 
 		
@@ -198,7 +222,13 @@ void blockname::giveblocktraits(blockname::block* nullblock)
 		nullblock->createaabb();
 	
 		break;
-	case minecraftglass:
+	case minecraftcrystal:
+		nullblock->solid = true;
+		nullblock->transparent = false;
+		nullblock->createaabb();
+
+		break;
+	case minecrafttorch:
 		nullblock->solid = true;
 		nullblock->transparent = true;
 		nullblock->emitedlight = 15;
@@ -206,6 +236,17 @@ void blockname::giveblocktraits(blockname::block* nullblock)
 		
 		nullblock->createaabb();
 		break;
+	case minecraftglass:
+		nullblock->solid = true;
+		nullblock->transparent = true;
+		nullblock->createaabb();
+
+		break;
+	case minecraftwood:
+		nullblock->solid = false;
+		nullblock->transparent = true;
+		nullblock->createaabb();
+
 	case minecraftwater:
 		nullblock->solid = false;
 
@@ -222,7 +263,7 @@ void blockname::giveblocktraits(blockname::block* nullblock)
 void blockname::block::createaabb()
 {
 	this->addcomponent<aabb::colrect>(this->mesh->pos,this->mesh->scale, true);
-	int l = 1;
+
 }
 
 

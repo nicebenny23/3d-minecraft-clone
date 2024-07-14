@@ -1,8 +1,8 @@
 #include "chunk.h"
 #include "noise.h"
 #include "../renderer/chunkrender.h"
-
-
+#include <string>
+#include "../util/fileloader.h"
 block& Chunk::chunk::operator[](int index)
 {
 	return blockbuf[index];
@@ -24,13 +24,52 @@ void createchunkmesh(Chunk::chunk* aschunk)
 	aschunk->mesh = mesh;
 }
 
+Chunk::chunk* Chunk::fileload(Coord location)
+{
+	
+	const char* name = getcorefilename(location);
+	safefile file = safefile(name, fileread);
+	byte* bytelist = file.read<byte>(4096);
+	chunk& newchunk = *(new chunk());
+	newchunk.modified = false;
+	createchunkmesh(&newchunk);
+	newchunk.loc = location;
+	newchunk.blockbuf = new block[chunksize];
+
+
+	int i = 0;
+	for (int x = 0; x < 16; x++)
+	{
+		for (int y = 0; y < 16; y++) {
+			for (int z = 0; z < 16; z++)
+			{
+				Coord blockpos = Coord(x, y, z) + location * 16;
+				newchunk.blockbuf[i] = blockname::block(blockpos, bytelist[i]);
+
+				gameobject::objectfromguid[newchunk.blockbuf[i].guid] = &newchunk.blockbuf[i];
+
+				initblockmesh(&newchunk.blockbuf[i], zerov, unitv / 2.0009);
+				giveblocktraits(&(newchunk.blockbuf[i]));
+				i++;
+			}
+		}
+	}
+
+	delete bytelist;
+	file.close();
+	return &newchunk;
+}
+
 
 //complete
 Chunk::chunk* Chunk::load(Coord location)
 {
-
+	if (fileexists(getcorefilename(location)))
+	{
+		return fileload(location);
+	}
 	chunk& newchunk = *(new chunk());
-
+	newchunk.modified = false;
 	newchunk.loc = location;
 	createchunkmesh(&newchunk);
 	newchunk.blockbuf = new block[chunksize];
@@ -61,11 +100,21 @@ Chunk::chunk* Chunk::load(Coord location)
 					{
 
 						newchunk.blockbuf[ind].id = minecraftstone;
+					
+					
 					}
 
 				}
 
+				if (abs(noiselevel)<  .11f)
+				{
+					if (abs(noiselevel )> .1f)
+					{
 
+						newchunk.blockbuf[ind].id = minecraftcrystal;
+					}
+					
+				}
 
 
 				giveblocktraits(&(newchunk.blockbuf[ind]));
@@ -82,6 +131,36 @@ Chunk::chunk* Chunk::load(Coord location)
 }
 
 
+const char* Chunk::getcorefilename(Coord pos)
+{
+	std::string *strng = (new std::string());
+	strng->append("worldstorage\\");
+	strng->append("t");
+	strng->append(std::to_string(pos.x));
+	strng->append("t");
+	strng->append(std::to_string(pos.y));
+	strng->append("t");
+	strng->append(std::to_string(pos.z));
+
+return 	strng->data();
+}
+
+void Chunk::chunk::write()
+{
+	
+	const char* name = getcorefilename(loc);
+
+	safefile file = safefile(getcorefilename(loc), filewrite);
+	array<byte> bytelist = array<byte>();
+	for (int i = 0; i < chunksize; i++)
+	{
+		bytelist[i] = blockbuf[i].id;
+	}
+	file.write<byte>(bytelist.getdata(), bytelist.length);
+	bytelist.destroy();
+	file.close();
+}
+
 Chunk::chunk::chunk()
 {
 	loc = zeroiv;
@@ -91,6 +170,11 @@ Chunk::chunk::chunk()
 
 void Chunk::chunk::destroy()
 {
+	if (modified)
+	{
+
+		write();
+	}
 	for (int i = 0; i < 16 * 16 * 16; i++) {
 		gameobject::objectfromguid[blockbuf[i].guid] = nullptr;
 

@@ -3,25 +3,36 @@
 #ifndef debug_HPP
 #define debug_HPP
 //good
+constexpr bool debuggeneral = true;
+constexpr bool debugrender = false;
+constexpr bool generateflat = true;
 inline void Assert(char* msg) {
 
-	std::cout << '/n'<<msg;
+	std::cout << '\n' << msg;
 	std::abort();
+}
+inline void preAssert(char* msg) {
+
+	std::cout << '\n' << msg;
+
+}inline void preAssert(const char* msg) {
+
+	std::cout << '\n' << msg;
+
 }
 inline void Assert(const char* msg) {
 
-	std::cout << '/n' << msg;
+	std::cout << '\n' << msg;
 	std::abort();
 }
 
 
 
-constexpr bool debuggeneral = true;
-constexpr bool debugrender = true;
-	void reset();
 
-	
-	void writetodebug(std::string string);
+void reset();
+
+
+void writetodebug(std::string string);
 
 
 

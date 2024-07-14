@@ -1,5 +1,6 @@
 #include "blockrender.h"
 #include "../util/vector2.h"
+#include "../cone.h"
 dynamicarray::array<float> databuffer;
 dynamicarray::array<unsigned int> indicebuffer;
 using namespace grid;
@@ -23,18 +24,30 @@ const float cubeuv[] = {
 
 };
 bool chunkviewable(Chunk::chunk* chk) {
-
-	v3::Vector3 center =chk->center()-camera::campos;
-
-
-	for (size_t i = 0; i < 8; i++)
+	if (debugrender)
 	{
-		Vector3 norm = center + (vert[i]-unitv/2)* 16;
-		if (dotproduct(norm,camera::direction())>0)
-		{
-			return true;
-		}
+		return true;
 	}
+	if (gridpos == chk->loc){
+
+		return true;
+        }
+	v3::Vector3 center =chk->center()-camera::campos;
+	ray camray = ray(center, center + camera::direction());
+	//tan (60) is normal slope and multiply by sqrt(2)
+	
+
+		float fovconeslope = 1 / tan(renderer::fov / 2);
+		for (size_t i = 0; i < 8; i++)
+		{
+			Vector3 norm = center + (vert[i] - unitv / 2) * 16;
+			if (dotproduct(norm, camera::direction()) > 0)
+			{
+				return true;
+
+			}
+		}
+	
 	return false;
 }
 
@@ -249,7 +262,10 @@ void blockrender::initdatabuffer()
 	renderer::changerendertype(renderer::transparent);
 	for (int i = 0; i < totalgridsize; i++)
 	{
-		renderchnk(*tosort[i].mesh, true);
+		if (chunkviewable(&tosort[i]))
+		{
+			renderchnk(*tosort[i].mesh, true);
+		}
 	}
 
 	tosort.destroy();

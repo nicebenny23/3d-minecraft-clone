@@ -8,7 +8,7 @@
 #include "../util/vector3.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "texture.h"
-#
+
 
 using namespace vobj;
 #define texturesize 6
@@ -25,6 +25,7 @@ namespace renderer {
 	void clear();
 	extern glm::mat4 proj,view;
 	extern int currshader;
+	extern float fov;
 	extern dynamicarray::array<shader> shaderlist;
 	void setmat();
 	extern texturearray texarray;

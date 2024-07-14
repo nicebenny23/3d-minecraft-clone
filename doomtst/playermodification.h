@@ -25,23 +25,32 @@ struct playermod:gameobject::component
 			{
 			case 0:
 
-				blockbox[i] = uirender::newbox("stone.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
+				blockbox[i] = uirender::newbox("images\\dirt.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
 				break;
 			case 1:
 
-				blockbox[i] = uirender::newbox("glass.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
+				blockbox[i] = uirender::newbox("images\\glass.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
+			case 2:
+		
+
+				blockbox[i] = uirender::newbox("images\\stone.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
+				break;
 			case 3:
 
-				blockbox[i] = uirender::newbox("torch.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
+				blockbox[i] = uirender::newbox("images\\glass.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
 				break;
 			case 4:
 
-				blockbox[i] = uirender::newbox("water.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
+				blockbox[i] = uirender::newbox("images\\water.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
+				break;
+			case 5:
+
+				blockbox[i] = uirender::newbox("images\\torch.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
 				break;
 			default:
-				blockbox[i] = uirender::newbox("wood.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
+				blockbox[i] = uirender::newbox("images\\wood.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
 				break;
-			}box[i] = uirender::newbox("blockholder.png", v2::unitv / 20.f, v2::Vector2(i/10.f, -.4f));
+			}box[i] = uirender::newbox("images\\blockholder.png", v2::unitv / 20.f, v2::Vector2(i/10.f, -.4f));
 			box[i]->shouldrender = true;
 			blockbox[i]->shouldrender = true;
 		}
@@ -54,7 +63,7 @@ struct playermod:gameobject::component
 	void update() {
 		if (userinput::getinputkey('1').pressed)
 		{
-			curplaceid = 0;
+			curplaceid = 1;
 		}
 		if (userinput::getinputkey('2').pressed)
 		{
@@ -71,6 +80,9 @@ struct playermod:gameobject::component
 		if (userinput::getinputkey('5').pressed)
 		{
 			curplaceid = minecraftwater;
+		}	if (userinput::getinputkey('6').pressed)
+		{
+			curplaceid = minecrafttorch;
 		}
 			ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
 			voxtra::raycolwithgrid closest = voxtra::travvox(cameraray, 1000);

@@ -84,6 +84,9 @@
     <ClCompile Include="world\noise.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="util\fileloader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="util\vector3.h">
@@ -194,6 +197,27 @@
     <ClInclude Include="renderer\uirender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cone.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="playermodification.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\fileloader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="particles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\entitystate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\storagecomp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="frag1.vs">
@@ -204,5 +228,9 @@
     </None>
     <None Include="uivertex.vs" />
     <None Include="uifragment.vs" />
+    <None Include="renderer\particlevertex.vs" />
+    <None Include="renderer\particlefragment.vs" />
+    <None Include="renderer\modelvertex.vs" />
+    <None Include="renderer\modelfragment.vs" />
   </ItemGroup>
 </Project>

@@ -190,7 +190,7 @@ void gridutil::destroyblockatloc(int x, int y, int z)
 void gridutil::setblock(Coord loc, int blockid)
 {
 	int prevemit = grid::getobjatgrid(loc, true)->emitedlight;
-	
+	chunkatpos(loc.x, loc.y, loc.z)->modified = true;
 	if (blockid!=minecraftair)
 	{
 		placeblockatloc(loc.x,loc.y,loc.z, blockid);

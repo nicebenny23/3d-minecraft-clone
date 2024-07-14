@@ -5,14 +5,15 @@
 #define chunksize 16*16*16
 using namespace blockname;
 namespace Chunk {
-	
+	const char* getcorefilename(Coord pos);
 	int indexfrompos(int x, int y, int z);
 	struct chunk
 	{
-
+		
 		Coord loc;
 		chunkmesh* mesh;
-		
+		bool modified;
+		void write();
 		chunk();
 		Coord center() {
 			return loc*16 + unitv * 8;
@@ -33,6 +34,7 @@ namespace Chunk {
 	};
 	
 	chunk* load(Coord location);
+	chunk* fileload(Coord location);
 }
 #endif // !Chunk_H
 #pragma once
