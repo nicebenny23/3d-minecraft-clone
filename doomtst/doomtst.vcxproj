@@ -171,6 +171,7 @@
     <ClInclude Include="playermodification.h" />
     <ClInclude Include="rigidbody.h" />
     <ClInclude Include="renderer\uirender.h" />
+    <ClInclude Include="shareptr.h" />
     <ClInclude Include="world\managegrid.h" />
     <ClInclude Include="util\queue.h" />
     <ClInclude Include="renderer\algorthm.h" />
