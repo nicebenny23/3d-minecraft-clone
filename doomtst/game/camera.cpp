@@ -59,7 +59,8 @@ namespace camera {
 		glm::vec3 Right = glm::normalize(glm::cross(cameraFront, glm::vec3(0, 1, 0)));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
 		glm::vec3    Up = glm::normalize(glm::cross(Right, cameraFront));
 		renderer::setviewmatrix(glm::lookAt(campos, campos + cameraFront, Up));
-
+		
+	
 	}
 
 	void setcamerapos(v3::Vector3 newpos)

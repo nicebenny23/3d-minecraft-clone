@@ -6,7 +6,7 @@ namespace sharedptr {
 	{
 
 		unsigned int copyamnt;
-		operator*;
+	//	operator*;
 
 	};
 

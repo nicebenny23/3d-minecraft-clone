@@ -227,6 +227,7 @@ void renderchnk(chunkmesh& mesh,bool transparent)
 
 void blockrender::initdatabuffer()
 {
+	glUseProgram(renderer::shaderlist[renderer::normal].id);
 	for (int i = 0; i < totalgridsize; i++)
 	{
 		if (chunklist[i]->mesh->meshrecreateneeded) {

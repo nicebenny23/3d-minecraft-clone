@@ -1,5 +1,5 @@
 #include "game/camera.h"
-
+#include "mesh.h"
 #include "renderer/shader.h"
 #include <iostream>
 #include <cmath>
@@ -52,7 +52,12 @@ int main()
     uirender::initrenderlist();
    uirender::newbox("images\\crosshair.png", v2::unitv/32, v2::zerov);
     userinput::endupdate();
-    
+    vobj::vbuf testbuf;
+    vobj::vao testvoa;
+    testbuf.generate(GL_ARRAY_BUFFER);
+    testvoa.generate();
+    texture mtex = texture("images\\stone.png", png);
+    meshname::mesh newmehs = *meshname::loadmesh("cubetest.obj", mtex,spawnpos);
     aabb::initcolrect();
     aabb::colrect pos = aabb::colrect(spawnpos, Vector3(.5,1,.5), false);
 entity::entityref human = entity::createentity(spawnpos, "");
@@ -83,7 +88,7 @@ while (!window::shouldclose())
          camera::sendoffviewmatrix();
         
        
-       
+      
 
         userinput::endupdate();
         // update shader uniform
@@ -100,8 +105,9 @@ while (!window::shouldclose())
         }
      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
 glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-            blockrender::initdatabuffer();
-           uirender::renderuilist();
+         blockrender::initdatabuffer();
+meshname::rendermesh(&newmehs, testvoa, testbuf);
+uirender::renderuilist();
       
         gameobject::deleteobjs();
       

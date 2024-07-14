@@ -160,8 +160,9 @@ namespace renderer {
         shaderlist = dynamicarray::array<shader>(10);
         shaderlist[uishader] = shader::shader("uivertex.vs", "uifragment.vs");
        shaderlist[uishader].attach();
-
-        shaderlist[normal] = shader::shader("vert1.vs", "frag1.vs");
+       shaderlist[model] = shader::shader("modelvertex.vs", "modelfragment.vs");
+       shaderlist[model].attach();
+       shaderlist[normal] = shader::shader("vert1.vs", "frag1.vs");
         shaderlist[normal].attach();
               currshader = normal;
         glUseProgram(shaderlist[normal].id);

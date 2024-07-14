@@ -16,7 +16,8 @@ using namespace vobj;
 namespace renderer {
 	enum shadertype {
 		normal = 0,
-		uishader = 1
+		uishader = 1,
+		model = 2,
 	};
 	void renderquadlist(vao VAO, vbuf ibo, vbuf VBO, dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist);
 	void render2dquadlist(vao VAO, vbuf ibo, vbuf VBO, array<float>& pointlist, array<unsigned int>& indicelist);

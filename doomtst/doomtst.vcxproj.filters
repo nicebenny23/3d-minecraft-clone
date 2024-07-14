@@ -87,6 +87,9 @@
     <ClCompile Include="util\fileloader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="util\vector3.h">
@@ -218,6 +221,12 @@
     <ClInclude Include="game\storagecomp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="shareptr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="frag1.vs">
@@ -230,7 +239,7 @@
     <None Include="uifragment.vs" />
     <None Include="renderer\particlevertex.vs" />
     <None Include="renderer\particlefragment.vs" />
-    <None Include="renderer\modelvertex.vs" />
-    <None Include="renderer\modelfragment.vs" />
+    <None Include="modelvertex.vs" />
+    <None Include="modelfragment.vs" />
   </ItemGroup>
 </Project>
