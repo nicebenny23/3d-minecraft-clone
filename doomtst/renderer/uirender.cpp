@@ -2,11 +2,11 @@
 using namespace uirender;
 array<uirender::uibox*> uirender::uilist;
 const float cubeuv[] = {
-	0, 0,
-	1, 0,
+	0, 1,
+	1, 1,
 
-0, 1,
-1, 1
+0, 0,
+1, 0
 
 };
 const v2::Vector2 offset[] = {

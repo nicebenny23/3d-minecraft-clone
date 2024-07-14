@@ -140,6 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="util\fileloader.cpp" />
     <ClCompile Include="game\aabb.cpp" />
     <ClCompile Include="block\block.cpp" />
     <ClCompile Include="renderer\uirender.cpp" />
@@ -166,6 +167,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cone.h" />
+    <ClInclude Include="game\storagecomp.h" />
+    <ClInclude Include="model.h" />
+    <ClInclude Include="particles.h" />
+    <ClInclude Include="game\entitystate.h" />
+    <ClInclude Include="util\fileloader.h" />
     <ClInclude Include="game\aabb.h" />
     <ClInclude Include="game\playermovment.h" />
     <ClInclude Include="playermodification.h" />
@@ -206,6 +212,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="frag1.vs" />
+    <None Include="renderer\modelfragment.vs" />
+    <None Include="renderer\modelvertex.vs" />
+    <None Include="renderer\particlefragment.vs" />
+    <None Include="renderer\particlevertex.vs" />
     <None Include="uifragment.vs" />
     <None Include="uivertex.vs" />
     <None Include="vert1.vs" />

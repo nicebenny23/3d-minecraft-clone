@@ -295,10 +295,7 @@ namespace gameobject {
 		//deletes pointer itsekf
 		object->complist.destroy();
 		//makes it so "object from guid is now freed"
-		if (object->guid==2)
-		{
-			int l = 1;
-		}
+
 		objectfromguid[object->guid] = nullptr;
 		
 	}
