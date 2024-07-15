@@ -7,30 +7,25 @@ using namespace std::chrono;
 #ifndef timehpp
 #define timehpp
 namespace timename {
-	float fps;
-	float dt;
-	float time;
-	float tfps;
-	float mindt;
-	void inittime() {
-		time = 0;
-		dt = 0;
-		tfps = 60;
-		dt = 0;
-	}
+	extern float fps;
+	extern float dt;
+	extern float gametime;
+	extern float tfps;
+	extern float mindt;
+	void inittime(); 
 
-	void calcfps() {
+	inline void calcfps() {
 
 		auto currtime = glfwGetTime();
-		dt = currtime - time;
+		dt = currtime - gametime;
 		mindt =std::max(dt, .01f);
 
 		fps = 1000 / dt;
 
-		time = currtime;
+		gametime = currtime;
 	}
 
-	int currtimer = 0;
+	extern int currtimer;
 
 	struct  timer
 	{
@@ -51,10 +46,10 @@ namespace timename {
 
 
 	};
-	array<timer*> timerlist = array<timer*>::array(0);
+	extern array<timer*> timerlist;
 
 
-	timer::timer() {
+	inline timer::timer() {
 		decreseonceonframe = false;
 
 		running = false;
@@ -114,7 +109,7 @@ namespace timename {
 		running = true;
 	}
 
-	int currwatch = 0;
+	extern int currwatch;
 
 	struct  watch
 	{
@@ -132,10 +127,10 @@ namespace timename {
 
 
 	};
-	array<watch*> watchlist = array<watch*>::array(0);
+	extern array<watch*> watchlist; 
 
 
-	watch::watch(float time, bool isrunningatstart) {
+	inline watch::watch(float time, bool isrunningatstart) {
 
 
 		currtime = time;
@@ -163,14 +158,14 @@ namespace timename {
 		currwatch--;
 	}
 
-	void watch::start()
+inline 	void watch::start()
 	{
 		currtime = 0;
 		running = true;
 	}
 
 
-	void calctimers() {
+	inline  void calctimers() {
 
 
 		for (int i = 0; i < watchlist.length; i++)

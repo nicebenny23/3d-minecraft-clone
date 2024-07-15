@@ -5,11 +5,23 @@
 #include "../game/aabb.h"
 #include "../game/camera.h"
 
-
 #ifndef block_HPP
 #define block_HPP
+enum blocktex {
+	dirttex = 0,
+	grasstex = 1,
+	stonetex = 2,
+	stonetex1 = 3,
+	glasstex = 4,
+	watertex = 5,
+	torchtex = 6,
+	torchtoptex = 7,
+	crystaloretex = 8,
+};
 using namespace v3;
+
 namespace blockname {
+	const v3::Vector3 unitscale = unitv * 1 / 2.004;
 	enum id
 	{
 		minecraftair = 0,
@@ -113,8 +125,7 @@ namespace blockname {
 		v3::Coord pos;
 		blockmesh* mesh;
 		
-		void createfaces();
-		
+	
 		Vector3 center() {
 			return pos + unitv / 2;
 	    }
@@ -125,8 +136,6 @@ namespace blockname {
 		 block();
 		 void createaabb();
 	};
-	void setair(blockname::block* blk);
-	void giveblocktraits(blockname::block* nullblock);
 
 	void initblockmesh(block* blk, Vector3 pos, Vector3 scale);
 

@@ -3,6 +3,7 @@
 #include "../renderer/chunkrender.h"
 #include <string>
 #include "../util/fileloader.h"
+#include "../block/blockinit.h"
 block& Chunk::chunk::operator[](int index)
 {
 	return blockbuf[index];
@@ -48,8 +49,8 @@ Chunk::chunk* Chunk::fileload(Coord location)
 
 				gameobject::objectfromguid[newchunk.blockbuf[i].guid] = &newchunk.blockbuf[i];
 
-				initblockmesh(&newchunk.blockbuf[i], zerov, unitv / 2.0009);
-				giveblocktraits(&(newchunk.blockbuf[i]));
+				initblockmesh(&newchunk.blockbuf[i], zerov,unitscale);
+				blkinitname::blockinit(&newchunk.blockbuf[i]);
 				i++;
 			}
 		}
@@ -84,7 +85,7 @@ Chunk::chunk* Chunk::load(Coord location)
 				newchunk.blockbuf[ind] = blockname::block(blockpos, 0);
 				gameobject::objectfromguid[newchunk.blockbuf[ind].guid] = &newchunk.blockbuf[ind];
 
-				initblockmesh(&newchunk.blockbuf[ind], zerov, unitv / 2.0009);
+				initblockmesh(&newchunk.blockbuf[ind], zerov,unitscale);
 				//select block mechanism
 
 
@@ -117,7 +118,7 @@ Chunk::chunk* Chunk::load(Coord location)
 				}
 
 
-				giveblocktraits(&(newchunk.blockbuf[ind]));
+				blkinitname::blockinit(&newchunk.blockbuf[ind]);
 
 
 				ind++;

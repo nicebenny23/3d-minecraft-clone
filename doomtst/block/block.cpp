@@ -58,40 +58,6 @@ face& blockname::block::operator[](int index)
 	return (*mesh)[index];
 }
 
-void blockname::block::createfaces()
-{
-
-	switch (id)
-	{
-	case minecraftdirt:
-		mesh->setfaces(0, 0, 0, 0, 0, 0);
-		break;
-	case minecraftgrass:
-		mesh->setfaces( 0, 0, 1, 0, 0, 0);
-		break;
-	case minecraftstone:
-		mesh->setfaces( 2, 2, 3, 3, 2, 2);
-		break;
-	case minecraftwood:
-		mesh->setfaces(2, 2, 3, 3, 2, 2);
-		break;
-	case minecraftglass:
-		mesh->setfaces(4,4,4,4,4,4);
-		break;
-	case minecraftwater:
-		mesh->setfaces( 5, 5, 5, 5, 5, 5);
-		break;
-	case minecraftair:
-		mesh->setfaces( -1, -1, -1, -1, -1, -1);
-		break;
-	case minecraftcrystal:
-		mesh->setfaces(8,8,8,8,8,8);
-		break;
-	case minecrafttorch:
-		mesh->setfaces(6, 6, 7, 4, 6, 6);
-		break;
-	}
-}
 void blockname::initblockmesh(blockname::block* blk, Vector3 pos,Vector3 scale) {
 	
 	
@@ -104,7 +70,7 @@ void blockname::initblockmesh(blockname::block* blk, Vector3 pos,Vector3 scale) 
 	
 	mesh->blk = blk;
 	blk->mesh = mesh;
-	blk->createfaces();
+	
 }
 blockname::block::block(v3::Coord placment, int blockid)
 {
@@ -137,127 +103,6 @@ blockname::block::block()
 	test = false;
 }
 
-
-
-void blockname::setair(blockname::block* blk)
-{
-	switch (blk->id)
-	{
-	case minecraftair:
-		break;
-	case minecraftgrass:
-		blk->removecomponent<aabb::colrect>();
-		break;
-	case minecraftdirt:
-		blk->removecomponent<aabb::colrect>();
-		break;
-	case minecraftstone:
-		
-
-		blk->removecomponent<aabb::colrect>();
-		break;
-	
-	case minecraftglass:
-
-
-		blk->removecomponent<aabb::colrect>();
-		break;
-	case minecraftcrystal:
-
-
-		blk->removecomponent<aabb::colrect>();
-		break;
-	case minecrafttorch:
-
-
-		blk->removecomponent<aabb::colrect>();
-		break;
-	case minecraftwood:
-
-
-			blk->removecomponent<aabb::colrect>();
-			break;
-	case minecraftwater:
-
-		
-		
-		break;
-	default:
-		Assert("need valid id in set blk");
-    }
-	blk->transparent = true;
-	blk->solid =false;
-	blk->id = minecraftair;
-	blk->emitedlight = 0;
-	blk->lightval= 0;
-	blk->mesh->scale = unitv * 1 / 2.01;
-}
-
-void blockname::giveblocktraits(blockname::block* nullblock)
-{
-	nullblock->mesh->scale = unitv * 1 / 2.001;
-	nullblock->emitedlight =0;
-	switch (nullblock->id)
-	{
-	case minecraftair:
-		nullblock->solid = false;
-		nullblock->transparent = true;
-	
-		break;
-	case minecraftgrass:
-		nullblock->transparent = false;
-		nullblock->solid = true;
-		nullblock->createaabb();
-	
-		break;
-	case minecraftdirt:
-		nullblock->solid = true;
-
-		nullblock->transparent = false;
-		nullblock->createaabb();
-		break;
-	case minecraftstone:
-		nullblock->solid = true;
-		nullblock->transparent = false;
-		nullblock->createaabb();
-	
-		break;
-	case minecraftcrystal:
-		nullblock->solid = true;
-		nullblock->transparent = false;
-		nullblock->createaabb();
-
-		break;
-	case minecrafttorch:
-		nullblock->solid = true;
-		nullblock->transparent = true;
-		nullblock->emitedlight = 15;
-	nullblock->mesh->scale = v3::Vector3(1/16.f,.375,1/16.f);
-		
-		nullblock->createaabb();
-		break;
-	case minecraftglass:
-		nullblock->solid = true;
-		nullblock->transparent = true;
-		nullblock->createaabb();
-
-		break;
-	case minecraftwood:
-		nullblock->solid = false;
-		nullblock->transparent = true;
-		nullblock->createaabb();
-
-	case minecraftwater:
-		nullblock->solid = false;
-
-		nullblock->transparent = true;
-		break;
-
-		
-	}
-	//nullblock->mesh->scale = unitv * 1 / 2.01;
-	(*nullblock).createfaces();
-}
 
 
 void blockname::block::createaabb()

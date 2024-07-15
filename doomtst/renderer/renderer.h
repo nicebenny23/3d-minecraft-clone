@@ -15,9 +15,11 @@ using namespace vobj;
 
 namespace renderer {
 	enum shadertype {
-		normal = 0,
+		normalshader = 0,
 		uishader = 1,
-		model = 2,
+		modelshader = 2,
+		particleshader = 3,
+
 	};
 	void renderquadlist(vao VAO, vbuf ibo, vbuf VBO, dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist);
 	void render2dquadlist(vao VAO, vbuf ibo, vbuf VBO, array<float>& pointlist, array<unsigned int>& indicelist);
@@ -28,13 +30,15 @@ namespace renderer {
 	extern int currshader;
 	extern float fov;
 	extern dynamicarray::array<shader> shaderlist;
-	void setmat();
+	void setrenderingmatrixes();
 	extern texturearray texarray;
 	enum rendertype
 	{
-		solid = 0,
-		transparent=1,
-		ui=2,
+		rendersolid = 0,
+		rendertransparent=1,
+		renderui=2,
+		rendermodel= 3,
+		renderparticle=4,
 	}; void changerendertype(rendertype rentype);
 }
 #endif

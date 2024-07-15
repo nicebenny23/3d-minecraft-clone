@@ -10,8 +10,8 @@ meshname::mesh:: mesh()
 
 Vector3 meshname::mesh::nthvertex(int i)
 {
-    int l = vertexindices[i];
-    return vertices[l-1];
+
+    return vertices[vertexindices[i] -1];
 }
 
 v2::Vector2 meshname::mesh::nthtex(int i)
@@ -51,7 +51,10 @@ meshname::mesh* meshname::loadmesh(const char* name, texture TEX,Vector3 positio
         vertexIndex = new unsigned int[3];
         uvIndex= new unsigned int[3];
         int matches = fscanf(meshfile.fp, "%u/%u %u/%u %u/%u\n", &vertexIndex[0], &uvIndex[0], &vertexIndex[1], &uvIndex[1], &vertexIndex[2], &uvIndex[2]);
-
+        if (matches!=6)
+        {
+            Assert("Mesh not triangulated correctly ");
+        }
         newmesh->vertexindices.append(vertexIndex[0]);
         newmesh->vertexindices.append(vertexIndex[1]);
         newmesh->vertexindices.append(vertexIndex[2]);
@@ -71,13 +74,10 @@ void meshname::rendermesh(mesh* torender,vao Vao,vbuf vbo)
     
     torender->tex.apply();
     array<float> databuf;
-    renderer::currshader = renderer::model;
+    renderer::changerendertype(renderer::rendermodel);
     
-    renderer::shaderlist[renderer::currshader].attach();
-    glUseProgram(renderer::shaderlist[renderer::currshader].id);
-    renderer::setmat();
-    int length =(torender->vertexindices.length );
-    for (int i = 0; i < length; i++)
+   
+    for (int i = 0; i < torender->vertexindices.length; i++)
     {
         Vector3 vertex= torender->nthvertex(i);
         v2::Vector2 texture= torender->nthtex(i);
@@ -91,7 +91,7 @@ void meshname::rendermesh(mesh* torender,vao Vao,vbuf vbo)
     }
     vbo.bind();
 
-    vbo.fillbuffer<v3::Vector3>(torender->vertices);
+    vbo.fillbuffer<float>(databuf);
 
 
 
@@ -100,7 +100,7 @@ void meshname::rendermesh(mesh* torender,vao Vao,vbuf vbo)
     Vao.set_attr(0, 3, GL_FLOAT, 5 * sizeof(float), 0);
     glEnableVertexAttribArray(0);
     //texture coords,inclusing the texture in the array 
-    Vao.set_attr(1, 3, GL_FLOAT, 5 * sizeof(float), 3 * sizeof(float));
+    Vao.set_attr(1, 2, GL_FLOAT, 5 * sizeof(float), 3 * sizeof(float));
     glEnableVertexAttribArray(1);
 
    

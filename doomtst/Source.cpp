@@ -21,99 +21,94 @@
 #include "playermodification.h"
 #include "util/fileloader.h"
 // settings
+const Vector3 spawnpos = glm::vec3(-100, -30, 200);
 const unsigned int SCR_WIDTH = 4000;
 const unsigned int SCR_HEIGHT = 3000;
-
-int main()
-{
+void init() {
     timename::inittime();
     randominit();
-    window::createcurwindow(1600,1200);
+    window::createcurwindow(1600, 1200);
     userinput::initiate();
     gameobject::initmap();
     gameobject::initobjs();
- 
+
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
-        std::cout << "Failed to initialize GLAD" << std::endl;
-        return -1;
+        Assert( "Failed to initialize GLAD");
+      
     }
-  
-    
-  // createdirectory("worldstorage");
+
+
     camera::initilize();
 
     renderer::load();
-   grid::initgrid();
-  gridutil::computeallcover();
-  gridutil::redolighting();
-    Vector3 spawnpos = glm::vec3(-100, 17, 200);
-  
+    grid::initgrid();
+    gridutil::computeallcover();
+    gridutil::redolighting();
+
+
     uirender::initrenderlist();
-   uirender::newbox("images\\crosshair.png", v2::unitv/32, v2::zerov);
+    uirender::newbox("images\\crosshair.png", v2::unitv / 32, v2::zerov);
     userinput::endupdate();
+    aabb::initcolrect();
+}
+
+int main()
+{
+    init();
     vobj::vbuf testbuf;
     vobj::vao testvoa;
     testbuf.generate(GL_ARRAY_BUFFER);
     testvoa.generate();
-    texture mtex = texture("images\\stone.png", png);
-    meshname::mesh newmehs = *meshname::loadmesh("cubetest.obj", mtex,spawnpos);
-    aabb::initcolrect();
-    aabb::colrect pos = aabb::colrect(spawnpos, Vector3(.5,1,.5), false);
+    texture mtex = texture("images\\crystalore.png", png);
+    meshname::mesh newmehs = *meshname::loadmesh("newtest.obj", mtex,spawnpos);
+  
+  
 entity::entityref human = entity::createentity(spawnpos, "");
+human.toent()->addcomponent<colrect>(spawnpos,unitv/2,false);
+
 float lastupdate = 0;
 human.toent()->addcomponent<playermovement>();
 human.toent()->addcomponent<playermod>();
 while (!window::shouldclose())
     {
-   timename::calcfps();
-    entity::entity* a = human.toent();
+    timename::calcfps();
+
+    window::processInput();
+
+    renderer::clear();
+    gameobject::runupdateloop();
+
+    collision::update();
+
+
+
+    camera::calculateyawandpitch();
+
+    camera::setcamerapos(human.toent()->pos);
+    camera::sendoffviewmatrix();
+
+    userinput::endupdate();
+    // update shader uniform
    
-      
-        
-        window::processInput();
-      
-        renderer::clear();
-        gameobject::runupdateloop();
-        pos.center = human.toent()->pos;
+    grid::reupdatechunkborders();
+    grid::load();
+    if (grid::gridchanged())
+    {
+        gridutil::computeallcover();
+        gridutil::redolighting();
+    }
 
-        collision::update();
-        human.toent()->pos = pos.center.glm();
-         
+    meshname::rendermesh(&newmehs, testvoa, testbuf);
+    blockrender::initdatabuffer();
+   
+    uirender::renderuilist();
 
-     
-         camera::calculateyawandpitch();
-        
-         camera::setcamerapos(v3::Vector3(0,0,0)+human.toent()->pos);
-         camera::sendoffviewmatrix();
-        
-       
-      
+    gameobject::deleteobjs();
 
-        userinput::endupdate();
-        // update shader uniform
-        // bind texture
-        float timeValue = glfwGetTime();
-     
-        grid::reupdatechunkborders();
-        grid::load();
-        if (grid::gridchanged())
-        {
-
-           gridutil::computeallcover();
-           gridutil::redolighting();
-        }
-     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
-glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
-         blockrender::initdatabuffer();
-meshname::rendermesh(&newmehs, testvoa, testbuf);
-uirender::renderuilist();
-      
-        gameobject::deleteobjs();
-      
     window::swapbuffer();
-        glfwPollEvents();
-        lastupdate += timename::dt;
+    glfwPollEvents();
+    lastupdate += timename::dt;
         if (lastupdate > 1)
         {
 

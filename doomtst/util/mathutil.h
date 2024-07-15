@@ -8,7 +8,51 @@ inline bool aproxequal(float v1, float v2) {
 		return true;
 	}
 	return false;	
+}	
+
+
+inline float clamp(float val, float low, float high)
+{
+	if (val > high)
+	{
+		return high;
+	}
+	if (val < low)
+	{
+		return low;
+	}
+	return val;
 }
+
+
+inline int clamp(int val, int low, int high)
+{
+	if (val > high)
+	{
+		return high;
+	}
+	if (val < low)
+	{
+		return low;
+	}
+	return val;
+}
+
+
+inline bool inrange(float val, float low, float high)
+{
+	if (val > high)
+	{
+		return false;
+	}
+	if (val < low)
+	{
+		return false;
+	}
+	return true;
+}
+
+
 inline float Max(float v1, float v2) {
 
 	if (v1<v2)

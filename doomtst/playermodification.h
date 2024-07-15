@@ -91,10 +91,10 @@ struct playermod:gameobject::component
 			{
 
 
-				toblk(closest.box->owner).lightval = 14;
+			//	toblk(closest.box->owner).lightval = 14;
 				for (int i = 0; i < 6; i++)
 				{
-					(*toblk(closest.box->owner).mesh)[i].light = 14;
+				//	(*toblk(closest.box->owner).mesh)[i].light = 14;
 
 				}
 				if (userinput::mouseleft.pressed)

@@ -18,9 +18,9 @@ namespace uirender {
 		int id;
 
 
-		uibox(const char* texloc, v2::Vector2 scl, v2::Vector2 ps);
+		uibox(const char* texloc, v2::Vector2 scl, v2::Vector2 position);
 	};
-	uibox* newbox(const char* texloc, v2::Vector2 scl, v2::Vector2 ps);
+	uibox* newbox(const char* texloc, v2::Vector2 scl, v2::Vector2 position);
 	
 	
 	
