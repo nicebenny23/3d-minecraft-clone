@@ -17,15 +17,17 @@ struct particleemiter:gameobject::component
 	v3::Vector3 position;
 	
 	
-
-	queuename::queue<entity::entity*> particlequeue;
+	vobj::vao emitervoa;
+	//tiny quad
+	vobj::vbuf emmitervbuf;
+	array<entity::entity*> particlearray;
 	float particlespawntime;
 	float timetillspawn;
 	void (*particleinit) (entity::entity*);
 	particleemiter(float spawntime, void (*initfunc) (entity::entity*));
 	bool shouldspawnparticle();
 	void update();
-
+	void renderparticles();
 };
 
 

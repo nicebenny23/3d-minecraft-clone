@@ -3,12 +3,16 @@
 void particleemiter::update()
 {
 	timetillspawn -= timename::dt;
-	while (particlequeue.peek()->getcomponent<particle>().endtime< timename::gametime)
+	for (int i = 0; i < particlearray.length; i++)
 	{
-		entity::entity* todelete = particlequeue.pop();
-		gameobject::destroy(todelete);
-	
+		if (particlearray[i]->getcomponent<particle>().endtime < timename::gametime)
+		{
+			entity::entity* todelete = particlearray[i];
+			gameobject::destroy(todelete);
+
+		}
 	}
+
 
 	if (shouldspawnparticle())
 	{
@@ -18,6 +22,11 @@ void particleemiter::update()
 		 (*particleinit)(newparticle.toent());
 
 	}
+	
+}
+
+void particleemiter::renderparticles()
+{
 	
 }
 

@@ -83,7 +83,7 @@ namespace blockname {
 			scale = zerov;
 			blk = parent;
 		}
-
+		dir3d direction;
 		Vector3 pos;
 		Vector3 scale;
 		face up;
@@ -94,7 +94,7 @@ namespace blockname {
 		face back;
 		block* blk;
 		face& operator[](int index);
-
+		void attachindirection();
 		void setfaces(int leftface, int rightface, int upface, int downface, int frontface, int backface);
 		
 	};
