@@ -73,6 +73,7 @@ bool collision::aabbcollideswithent(colrect* blk) {
 //todo implement movment per axis
 void collision::collideobjwithgrid(colrect& entity)
 {
+	entity.center = toent(entity.owner).pos;
 	v3::Vector3 lowpos= entity.center - entity.scale-unitv;
 	
 	v3::Coord lowest = v3::Coord(floorabs(lowpos.x), floorabs(lowpos.y), floorabs(lowpos.z));
@@ -132,6 +133,7 @@ void collision::collideobjwithgrid(colrect& entity)
 			}
 		}
 		entity.center += minforce;
+		toent(entity.owner).pos += minforce;
 		entity.prevpos+= minforce;
 		entity.prevpos = entity.center;
 	}

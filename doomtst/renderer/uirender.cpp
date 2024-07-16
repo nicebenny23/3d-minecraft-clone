@@ -17,12 +17,12 @@ v2::Vector2(-1, 1),
 v2::Vector2(1, 1)
 
 };
-uirender::uibox::uibox(const char* texloc, v2::Vector2 scl, v2::Vector2 ps)
+uirender::uibox::uibox(const char* texloc, v2::Vector2 scl, v2::Vector2 position)
 {
 
 	tex = texture(texloc,png);
 	scale = scl;
-	pos = ps;
+	pos = position;
 	shouldrender = true;
 }
 
@@ -45,7 +45,7 @@ void uirender::renderuilist()
 	indbuf[3] = 0;
 	indbuf[4] = 3;
 	indbuf[5] = 2;
-	renderer::changerendertype(renderer::ui);
+	renderer::changerendertype(renderer::renderui);
 	
 	vao Voa;
 	vbuf VBO;
@@ -59,11 +59,9 @@ void uirender::renderuilist()
 		if (uilist[i]!=nullptr&&uilist[i]->shouldrender)
 		{
 			array<float> databuf = array<float>();
-			texture text = uilist[i]->tex;
-			text.apply();
-			
-			v2::Vector2 min =  uilist[i]->scale;
-			v2::Vector2 max = uilist[i]->pos;
+			texture uitexture = uilist[i]->tex;
+			uitexture.apply();
+		
 			for (int j = 0; j< 4; j++)
 			{
 				v2::Vector2 pos = uilist[i]->pos + offset[j] * (uilist[i]->scale);
@@ -84,15 +82,15 @@ void uirender::renderuilist()
 	ibo.destroy();
 }
 
-uibox* uirender::newbox(const char* texloc, v2::Vector2 scl, v2::Vector2 ps)
+uibox* uirender::newbox(const char* texloc, v2::Vector2 scl, v2::Vector2 position)
 {
-	uibox* bx = new uibox(texloc, scl, ps);
+	uibox* newuibox = new uibox(texloc, scl,position);
 	for (int i = 0; i < 100; i++)
 	{
 		if (uilist[i] == nullptr) {
-			uilist[i] = bx;
-			bx->id = i;
-			return bx;
+			uilist[i] =newuibox;
+			newuibox->id = i;
+			return newuibox;
 		}
 		
 	}

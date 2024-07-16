@@ -1,4 +1,5 @@
 #include "managegrid.h"
+#include "../block/blockinit.h"
 queue<block*> lightingq;
 void gridutil::sendrecreatemsg()
 {
@@ -19,6 +20,11 @@ void gridutil::computecover(face& blkface)
 
 	{
 	
+	if (!apx(blkface.mesh->scale,(unitscale) ))
+	{
+		blkface.covered = false;
+		return;
+	}
 	blkface.covered = true;
 	
 	
@@ -91,9 +97,9 @@ void gridutil::emitlight()
 					}
 					else
 					{
-						int blockface = i + 2 * (1 - modabs(i, 2)) - 1;
+						int blockface = i + 1 -2* modabs(i, 2);
 
-						(*blocklight->mesh)[blockface].light = blk->lightval;
+						(*blocklight)[blockface].light = blk->lightval;
 
 
 					}
@@ -136,9 +142,9 @@ void gridutil::placeblockatloc(int x, int y, int z, int blockid)
 		if (location != nullptr)
 		{
 
-			setair(location);
+			blkinitname::setair(location);
 			location->id = blockid;
-			giveblocktraits(location);
+			blkinitname::blockinit(location);
 
 			for (int faceind = 0; faceind < 6; faceind++)
 			{
@@ -166,7 +172,7 @@ void gridutil::destroyblockatloc(int x, int y, int z)
 	if (location != nullptr)
 	{
 
-		setair(location);
+		blkinitname::setair(location);
 
 		for (int faceind = 0; faceind < 6; faceind++)
 		{

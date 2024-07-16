@@ -6,7 +6,7 @@ struct estate
 	int health;
 	 int maxhealth;
 	void update() {
-
+		
 
 	}
 	void start() {

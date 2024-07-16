@@ -4,32 +4,30 @@
 #include "util/dynamicarray.h"
 #include "util/queue.h"
 #include "game/entity.h"
+#include "util/time.h"
+#include "renderer/vertexobject.h"
+#ifndef  particle_HPP
+#define particle_HPP
+
 using namespace v3;
 using namespace dynamicarray;
-struct particleemmiter:gameobject::component
+struct particleemiter:gameobject::component
 {
 
-
-
-
-
-	queuename::queue<entity::entity*> particlequeue;
-	void(*entity::entity);
+	v3::Vector3 position;
+	
+	
+	vobj::vao emitervoa;
+	//tiny quad
+	vobj::vbuf emmitervbuf;
+	array<entity::entity*> particlearray;
+	float particlespawntime;
+	float timetillspawn;
+	void (*particleinit) (entity::entity*);
+	particleemiter(float spawntime, void (*initfunc) (entity::entity*));
 	bool shouldspawnparticle();
-	void update() {
-		while (particlequeue.peek()->getcomponent<particle>().timeleft<0)
-		{
-			entity::entity* todelete = particlequeue.pop();
-			gameobject::destroy(todelete);
-		}
-
-	//	if (shouldspawn)
-		{
-
-		}
-
-    }
-
+	void update();
+	void renderparticles();
 };
 
 
@@ -37,8 +35,9 @@ struct particle:gameobject::component
 {
 	
 	
-	float timeleft;
+	float endtime;
 	
 
 	particle() = default;
-};
+}; 
+#endif // ! particle_HPP

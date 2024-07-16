@@ -227,7 +227,7 @@ void renderchnk(chunkmesh& mesh,bool transparent)
 
 void blockrender::initdatabuffer()
 {
-	glUseProgram(renderer::shaderlist[renderer::normal].id);
+	glUseProgram(renderer::shaderlist[renderer::normalshader].id);
 	for (int i = 0; i < totalgridsize; i++)
 	{
 		if (chunklist[i]->mesh->meshrecreateneeded) {
@@ -248,9 +248,8 @@ void blockrender::initdatabuffer()
 
 	}
    oalgorithm::quicksort<Chunk::chunk>(tosort.getdata(), tosort.length);
-   renderer::changerendertype(renderer::solid);
-   renderer::setmat();
-
+   renderer::changerendertype(renderer::rendersolid);
+  
    for (int i = 0; i < totalgridsize; i++)
 	{
 	   if (chunkviewable(&tosort[i]))
@@ -260,7 +259,7 @@ void blockrender::initdatabuffer()
 	
 	}
 	
-	renderer::changerendertype(renderer::transparent);
+	renderer::changerendertype(renderer::rendertransparent);
 	for (int i = 0; i < totalgridsize; i++)
 	{
 		if (chunkviewable(&tosort[i]))

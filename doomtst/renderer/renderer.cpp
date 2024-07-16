@@ -13,35 +13,48 @@ namespace renderer {
     void changerendertype(rendertype rentype) {
 
         switch (rentype) {
-        case solid:
+        case rendersolid:
            glDepthFunc(GL_LESS);
             glDepthMask(GL_TRUE);
-         glCullFace(GL_BACK);
               glDisable(GL_CULL_FACE);
+            glEnable(GL_DEPTH_TEST);
+     
+            glDisable(GL_BLEND);
+           currshader = normalshader;
+            shaderlist[normalshader].attach();
+           
+            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+          texarray.apply();
+          setrenderingmatrixes();
+            break;
+        case rendermodel:
+            glDepthFunc(GL_LESS);
+            glDepthMask(GL_TRUE);
+            glDisable(GL_CULL_FACE);
             glEnable(GL_DEPTH_TEST);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             glDisable(GL_BLEND);
-           currshader = normal;
-            shaderlist[normal].attach();
-           glUseProgram(shaderlist[normal].id);
+            currshader = modelshader;
+            shaderlist[modelshader].attach();
+            setrenderingmatrixes();
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-          texarray.apply();
+            
             break;
-        case transparent:
+        case rendertransparent:
            glDepthFunc(GL_LESS);
             glDepthMask(GL_FALSE);
             glDisable(GL_CULL_FACE);
             glEnable(GL_DEPTH_TEST);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-           currshader = normal;
-          shaderlist[normal].attach();
+           currshader = normalshader;
+          shaderlist[normalshader].attach();
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            glUseProgram(shaderlist[normal].id);
+         
            texarray.apply();
-            
+           setrenderingmatrixes();
             break;
-        case ui:
+        case renderui:
            
             glDisable(GL_DEPTH_TEST);
             glDepthMask(GL_FALSE);
@@ -49,7 +62,17 @@ namespace renderer {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             currshader = uishader;
             shaderlist[uishader].attach();
-            glUseProgram(shaderlist[currshader].id);
+            
+            break;
+        case renderparticle:
+
+            glDisable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            currshader = uishader;
+            shaderlist[uishader].attach();
+
             break;
         }
     }
@@ -73,13 +96,7 @@ namespace renderer {
         glEnableVertexAttribArray(2);
         ibo.bind();
         ibo.fillbuffer<unsigned int>(indicelist);
-         //enable position
-       
- 
         
-
-        int vertexColorLocation = glGetUniformLocation(shaderlist[currshader].id, "Color");
-
         if (userinput::getinputkey('t').held)
         {
             glDrawElements(GL_LINES, indicelist.length, GL_UNSIGNED_INT, 0);
@@ -93,7 +110,7 @@ namespace renderer {
 
 
     }
-    void setmat()
+    void setrenderingmatrixes()
     {
         shaderlist[currshader].setmatval(proj, "projection");
         shaderlist[currshader].setmatval(view, "view");
@@ -127,12 +144,11 @@ namespace renderer {
     }
     void generatetexarray() {
 
-        array<const char*> texlist = array<const char*>(0);
+        array<const char*> texlist = array<const char*>();
         texlist[0] = "images\\dirt.png";
         texlist[1] = "images\\grass.png";
         texlist[2] = "images\\stone.png";
         texlist[3] = "images\\stone.png";
-       
         texlist[4] = "images\\glass.png";
         texlist[5] = "images\\water.png";
         texlist[6] = "images\\torch.png";
@@ -149,23 +165,35 @@ namespace renderer {
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
      
-
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 1000);
         glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LOD, 1000);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+
+        
     }
     void load()
     {
         fov = 90;
         view = glm::mat4(0);
         setprojmatrix(90, .23, 100);
-        shaderlist = dynamicarray::array<shader>(10);
-        shaderlist[uishader] = shader::shader("uivertex.vs", "uifragment.vs");
-       shaderlist[uishader].attach();
-       shaderlist[model] = shader::shader("modelvertex.vs", "modelfragment.vs");
-       shaderlist[model].attach();
-       shaderlist[normal] = shader::shader("vert1.vs", "frag1.vs");
-        shaderlist[normal].attach();
-              currshader = normal;
-        glUseProgram(shaderlist[normal].id);
+        shaderlist = dynamicarray::array<shader>(1);
+        shaderlist[uishader] = shader::shader("shaders\\uivertex.vs", "shaders\\uifragment.vs");
+        shaderlist[uishader].attach();
+        settextureparams();
+       shaderlist[modelshader] = shader::shader("shaders\\modelvertex.vs", "shaders\\modelfragment.vs");
+       shaderlist[modelshader].attach();
+       settextureparams();
+       shaderlist[particleshader] = shader::shader("shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
+       shaderlist[particleshader].attach();
+       settextureparams();
+       shaderlist[normalshader] = shader::shader("shaders\\vert1.vs", "shaders\\frag1.vs");
+        shaderlist[normalshader].attach();
+              currshader = normalshader;
+      
         
         
     
