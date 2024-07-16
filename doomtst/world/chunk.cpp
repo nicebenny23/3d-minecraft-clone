@@ -47,8 +47,6 @@ Chunk::chunk* Chunk::fileload(Coord location)
 				Coord blockpos = Coord(x, y, z) + location * 16;
 				newchunk.blockbuf[i] = blockname::block(blockpos, bytelist[i]);
 
-				gameobject::objectfromguid[newchunk.blockbuf[i].guid] = &newchunk.blockbuf[i];
-
 				initblockmesh(&newchunk.blockbuf[i], zerov,unitscale);
 				blkinitname::blockinit(&newchunk.blockbuf[i]);
 				i++;
@@ -83,8 +81,7 @@ Chunk::chunk* Chunk::load(Coord location)
 			{
 				Coord blockpos = Coord(x, y, z) + location * 16;
 				newchunk.blockbuf[ind] = blockname::block(blockpos, 0);
-				gameobject::objectfromguid[newchunk.blockbuf[ind].guid] = &newchunk.blockbuf[ind];
-
+				
 				initblockmesh(&newchunk.blockbuf[ind], zerov,unitscale);
 				//select block mechanism
 
@@ -177,8 +174,7 @@ void Chunk::chunk::destroy()
 		write();
 	}
 	for (int i = 0; i < 16 * 16 * 16; i++) {
-		gameobject::objectfromguid[blockbuf[i].guid] = nullptr;
-
+		
 		gameobject::immidiatedestroy(&blockbuf[i]);
 		delete 	blockbuf[i].mesh;
 		//delete blockbuf[i]

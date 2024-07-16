@@ -75,13 +75,11 @@ void blockname::initblockmesh(blockname::block* blk, Vector3 pos,Vector3 scale) 
 blockname::block::block(v3::Coord placment, int blockid)
 {
 	
-	guid = gameobject::getgoid();
 
 	emitedlight = 0;
 	 complist = (array<gameobject::component*>());
 	type = gameobject::block;
 	
-	gameobject::objectfromguid[guid] = this;
 	
 	id = blockid;
 	pos = placment;
@@ -97,7 +95,6 @@ blockname::block::block()
 	solid = false;
 	//complist = array<gameobject::component*>();
 	id = -1;
-	guid = -1;
 	pos = v3::zeroiv;
 	type = gameobject::block;
 	test = false;

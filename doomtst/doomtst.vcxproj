@@ -140,6 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="game\entity.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="particles.cpp" />
     <ClCompile Include="util\fileloader.cpp" />

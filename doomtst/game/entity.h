@@ -1,27 +1,28 @@
 #include "gameobject.h"
 #include "aabb.h"
 #include "../util/vector3.h"
-
+#define entsize 16*16*16*150
 #ifndef entity_HPP
 #define entity_HPP
-namespace entity {
-	struct entity;
+namespace entityname {
 	
 
+
+
+	
 
 	struct entity : gameobject::obj
 	{
 		const char* name;
 		v3::Vector3 pos;
 
-	
+		int guid;
 
 		entity() = default;
 	};
 
 
-
-
+	extern array<entity*> objectfromguid;
 	struct entityref
 	{
 		int guid;
@@ -35,7 +36,7 @@ namespace entity {
 			{
 				return nullptr;
 			}
-			entity* toreturn = (entity*)(gameobject::objectfromguid[guid]);
+			entity* toreturn = (entity*)(objectfromguid[guid]);
 			if (false)
 			{
 				guid = -1;
@@ -48,28 +49,11 @@ namespace entity {
 		}
 	};
 
-
-	inline entityref createentity(v3::Vector3 ipos, const char* _name) {
-		entity* object = new entity();
-		object->type = gameobject::entity;
-
-
-		object->pos = ipos;
-
-		object->guid = gameobject::getgoid();
-
-		object->name = _name;
-		object->complist = (array<gameobject::component*>());
-		
-	
-		gameobject::objectfromguid[object->guid] = object;
-
-
-		return entityref(*object);
-
-	}
-	
-
+	void destroy(entity* ent);
+	entityref createentity(v3::Vector3 ipos, const char* _name);
+	void runupdateloop();
+	void deleteobjs();
+	void initobjs();
 }
 
 #endif entity_HPP

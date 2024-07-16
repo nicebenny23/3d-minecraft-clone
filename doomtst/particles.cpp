@@ -7,7 +7,7 @@ void particleemiter::update()
 	{
 		if (particlearray[i]->getcomponent<particle>().endtime < timename::gametime)
 		{
-			entity::entity* todelete = particlearray[i];
+			entity* todelete = particlearray[i];
 			gameobject::destroy(todelete);
 
 		}
@@ -16,7 +16,7 @@ void particleemiter::update()
 
 	if (shouldspawnparticle())
 	{
-		entity::entityref newparticle = entity::createentity(position, "");
+		entityref newparticle = createentity(position, "");
 
 		newparticle.toent()->addcomponent<particle>();
 		 (*particleinit)(newparticle.toent());
@@ -30,7 +30,7 @@ void particleemiter::renderparticles()
 	
 }
 
-particleemiter::particleemiter(float spawntime, void (*initfunc) (entity::entity*))
+particleemiter::particleemiter(float spawntime, void (*initfunc) (entity*))
 {
 	particlespawntime = spawntime;
 	particleinit = initfunc;

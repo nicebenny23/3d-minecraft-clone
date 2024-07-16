@@ -8,17 +8,7 @@
 #include "crystalore.h"
 #include "torch.h"
 #include "wood.h"
-/*minecraftair = 0,
-minecraftdirt = 1,
-minecraftgrass = 2,
-minecraftstone = 3,
-
-minecraftglass = 4,
-minecraftwater = 5,
-minecraftcrystal = 6,
-minecrafttorch = 7,
-minecraftwood = 8,
-*/
+//provides utility functions for blocks
 using namespace blockname;
 #ifndef blockinit_H
 #define blockinit_H

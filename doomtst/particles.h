@@ -8,7 +8,7 @@
 #include "renderer/vertexobject.h"
 #ifndef  particle_HPP
 #define particle_HPP
-
+using namespace entityname;
 using namespace v3;
 using namespace dynamicarray;
 struct particleemiter:gameobject::component
@@ -20,11 +20,11 @@ struct particleemiter:gameobject::component
 	vobj::vao emitervoa;
 	//tiny quad
 	vobj::vbuf emmitervbuf;
-	array<entity::entity*> particlearray;
+	array<entity*> particlearray;
 	float particlespawntime;
 	float timetillspawn;
-	void (*particleinit) (entity::entity*);
-	particleemiter(float spawntime, void (*initfunc) (entity::entity*));
+	void (*particleinit) (entity*);
+	particleemiter(float spawntime, void (*initfunc) (entity*));
 	bool shouldspawnparticle();
 	void update();
 	void renderparticles();

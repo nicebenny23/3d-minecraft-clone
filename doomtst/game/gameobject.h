@@ -9,7 +9,7 @@ using namespace dynamicarray;
 #ifndef gameobj_HPP
 
 #define gameobj_HPP
-#define entsize 16*16*16*150
+
 namespace gameobject {
 
 
@@ -93,7 +93,7 @@ namespace gameobject {
 	};
 	struct obj
 	{
-		int guid;
+		
 
 		array<component*> complist;
 
@@ -127,10 +127,7 @@ namespace gameobject {
 
 
 	void destroy(obj* object);
-	void deleteobjs();
-	int getgoid();
-	void initobjs();
-	void runupdateloop();
+	
 
 	template <class T>
 	void obj::removecomponent()
@@ -266,21 +263,7 @@ namespace gameobject {
 	//is a guid with 2 numbers one for hashing and another for checking this basicly ellimiantes any prossiblity for collision as the other one can go to 2billion
 
 
-	struct objref
-	{
-		int guid;
-		int probguid;
-		objref(obj& object) {
-			guid = object.guid;
-		}
-		obj* toobj();
-		objref() {
-
-			 guid = -1;
-		}
-	};
-
-
+	
 
 
 	inline void immidiatedestroy(obj* object) {
@@ -296,8 +279,6 @@ namespace gameobject {
 		object->complist.destroy();
 		//makes it so "object from guid is now freed"
 
-		objectfromguid[object->guid] = nullptr;
-		
 	}
 
 	

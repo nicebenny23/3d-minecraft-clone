@@ -30,7 +30,7 @@ void init() {
     window::createcurwindow(1600, 1200);
     userinput::initiate();
     gameobject::initmap();
-    gameobject::initobjs();
+    entityname::initobjs();
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -64,7 +64,7 @@ int main()
     meshname::mesh newmehs = *meshname::loadmesh("newtest.obj", mtex,spawnpos);
   
   
-entity::entityref human = entity::createentity(spawnpos, "");
+    entityname::entityref human = entityname::createentity(spawnpos, "");
 human.toent()->addcomponent<colrect>(spawnpos,unitv/2,false);
 
 float lastupdate = 0;
@@ -77,7 +77,7 @@ while (!window::shouldclose())
     window::processInput();
 
     renderer::clear();
-    gameobject::runupdateloop();
+    entityname::runupdateloop();
 
     collision::update();
 
@@ -104,7 +104,7 @@ while (!window::shouldclose())
    
     uirender::renderuilist();
 
-    gameobject::deleteobjs();
+    entityname::deleteobjs();
 
     window::swapbuffer();
     glfwPollEvents();
