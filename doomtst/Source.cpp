@@ -52,7 +52,12 @@ void init() {
     uirender::initrenderlist();
     uirender::newbox("images\\crosshair.png", v2::unitv / 32, v2::zerov);
     userinput::endupdate();
-    aabb::initcolrect();
+    aabb::initCollider();
+    
+    
+    
+    
+
 }
 
 int main()
@@ -62,7 +67,7 @@ int main()
     player::initplayer();
    
     texture mtex = texture("slimetex.png", png);
-    meshname::mesh newmehs = *meshname::loadmesh("slime.obj", mtex,spawnpos);
+   // meshname::mesh newmehs = *meshname::loadmesh("slime.obj", mtex,spawnpos);
   
    // newmehs.rotation = Vector3(1, 1, 1);
 
@@ -99,7 +104,7 @@ while (!window::shouldclose())
     }
     //newmehs.rotation += Vector3(1,0,1)/30;
     gridutil::redolighting();
-    meshname::rendermesh(&newmehs);
+  //  meshname::rendermesh(&newmehs);
     blockrender::initdatabuffer();
    
     uirender::renderuilist();

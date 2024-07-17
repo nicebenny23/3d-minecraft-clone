@@ -9,9 +9,9 @@ void player::initplayer()
 	goblin.toent()->addcomponent<estate>(10);
 	goblin.toent()->addcomponent<playerhealth>();
 
-		goblin.toent()->addcomponent<colrect>(zerov, unitv / 2, true);
+		goblin.toent()->addcomponent<Collider>(zerov, unitv / 2, true);
 	goblin.toent()->addcomponent<playermovement>();
 	goblin.toent()->addcomponent< playermod>();
 	goblin.toent()->addcomponent<rigidbody>();
-	goblin.toent()->getcomponent <colrect>().hasrigidbody = true;
+	goblin.toent()->getcomponent <Collider>().hasrigidbody = true;
 }

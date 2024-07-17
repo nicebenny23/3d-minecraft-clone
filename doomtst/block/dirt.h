@@ -11,7 +11,7 @@ inline void dirtinit(blockname::block* blk) {
 	blk->createaabb();
 }
 inline void dirtdelete(blockname::block* blk) {
-	blk->removecomponent<aabb::colrect>();
+	blk->removecomponent<aabb::Collider>();
 
 }
 #endif // !wood_HPP

@@ -15,7 +15,7 @@ inline void torchinit(blockname::block* blk) {
 }
 
 inline void torchdelete(blockname::block* blk) {
-	blk->removecomponent<aabb::colrect>();
+	blk->removecomponent<aabb::Collider>();
 
 }
 #endif // !torch_HPP

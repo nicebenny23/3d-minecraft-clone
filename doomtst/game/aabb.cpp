@@ -3,16 +3,16 @@
 //simple aabb class without collision implemented 
 namespace aabb {
 
-    dynamicarray::array<colrect*> colrectlist;
-    void initcolrect()
+    dynamicarray::array<Collider*> Colliderlist;
+    void initCollider()
     {
-        colrectlist = dynamicarray::array<colrect*>(1000);
+        Colliderlist = dynamicarray::array<Collider*>(1000);
         for (int i = 0; i < 1000; i++)
         {
-            colrectlist[i] = nullptr;
+            Colliderlist[i] = nullptr;
         }
     }
-    bool aabbsintersect(colrect & p1, colrect & p2)
+    bool aabbsintersect(Collider & p1, Collider & p2)
     {
         if (abs(p1.center.x - p2.center.x) < p1.scale.x + p2.scale.x)
         {
@@ -27,7 +27,7 @@ namespace aabb {
         return false;
     }
     
-    v3::Vector3 collideaabb(colrect p1, colrect p2)
+    v3::Vector3 collideaabb(Collider p1, Collider p2)
     {
         int sgnx = p1.center.x > p2.center.x?1 : -1;
         int sgny = p1.center.y > p2.center.y ? 1 : -1;
@@ -56,7 +56,7 @@ namespace aabb {
         
 
 
-    bool colrect::pointinbox(v3::Vector3 pos)
+    bool Collider::pointinbox(v3::Vector3 pos)
     {
         pos -= center;
         if (abs(pos.x)<=scale.x)
@@ -72,16 +72,16 @@ namespace aabb {
         return false;
     }
 
-    void colrect::destroy()
+    void Collider::destroy()
     {
 
         if (owner->type!=gameobject::block)
         {
-            colrectlist[index]=nullptr;
+            Colliderlist[index]=nullptr;
         }
     }
 
-    colrect::colrect(const v3::Vector3& objcenter, const v3::Vector3& objscale,bool appendtolist)
+    Collider::Collider(const v3::Vector3& objcenter, const v3::Vector3& objscale,bool appendtolist)
     {
         hasrigidbody = false;
         center = objcenter;
@@ -93,16 +93,16 @@ namespace aabb {
             {
                 
                 int l = randomint(1000);
-                if (colrectlist[l] == nullptr)
+                if (Colliderlist[l] == nullptr)
                 {
-                    colrectlist[l] = this;
+                    Colliderlist[l] = this;
                     index = l;
                 }
 
             }
         }
     }
-    aabbraycolinfo colrect::distanceonray(ray fray)
+    aabbraycolinfo Collider::distanceonray(ray fray)
     {
         v3::Vector3 dir = fray.end - fray.start;
 
@@ -144,7 +144,7 @@ namespace aabb {
 
 
 
-    bool  aabbboxintersect(geometry::Box p1, colrect& p2)
+    bool  aabbboxintersect(geometry::Box p1, Collider& p2)
     {
         if (abs(p1.center.x - p2.center.x) < p1.scale.x + p2.scale.x)
         {

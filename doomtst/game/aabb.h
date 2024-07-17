@@ -25,28 +25,28 @@ namespace aabb {
             : collided(colided), dist(orgindist), intersectionpoint(pointofintersection) {}
     };
 
-    struct colrect : gameobject::component {
+    struct Collider : gameobject::component {
         v3::Vector3 center;
         v3::Vector3 scale;
         v3::Vector3 prevpos;
         bool hasrigidbody;
         int index;
 
-        colrect() = default;
-        colrect(const v3::Vector3& objcenter, const v3::Vector3& objscale, bool appendtolist);
-        ~colrect() = default;
+        Collider() = default;
+        Collider(const v3::Vector3& objcenter, const v3::Vector3& objscale, bool appendtolist);
+        ~Collider() = default;
 
         bool pointinbox(v3::Vector3 pos);
         void destroy();
         aabbraycolinfo distanceonray(ray fray);
     };
 
-    void initcolrect();
-    bool aabbboxintersect(geometry::Box p1, colrect& p2);
-    bool aabbsintersect(colrect& p1, colrect& p2);
-    v3::Vector3 collideaabb(colrect p1, colrect p2);
+    void initCollider();
+    bool aabbboxintersect(geometry::Box p1, Collider& p2);
+    bool aabbsintersect(Collider& p1, Collider& p2);
+    v3::Vector3 collideaabb(Collider p1, Collider p2);
 
-    extern dynamicarray::array<colrect*> colrectlist;
+    extern dynamicarray::array<Collider*> Colliderlist;
 }
 
 #endif // AABB_HPP

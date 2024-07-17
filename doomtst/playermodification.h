@@ -85,7 +85,7 @@ struct playermod:gameobject::component
 			curplaceid = minecrafttorch;
 		}
 			ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
-			voxtra::raycolwithgrid closest = voxtra::travvox(cameraray, 1000);
+			voxtra::RayCollisionWithGrid closest = voxtra::travvox(cameraray, 1000);
 
 			if (closest.box != nullptr)
 			{
@@ -131,7 +131,7 @@ struct playermod:gameobject::component
 							{
 
 
-								if (collision::aabbcollideswithent(&plamentblock->getcomponent<colrect>()))
+								if (collision::aabbCollidesWithEntity(&plamentblock->getcomponent<Collider>()))
 								{
 
 									gridutil::setblock(plamentblock->pos, previd);

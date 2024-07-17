@@ -5,23 +5,23 @@
 using namespace objutil;
 void collision::update()
 {
-	for (int i = 0; i < colrectlist.length; i++)
+	for (int i = 0; i < Colliderlist.length; i++)
 	{
-		if (colrectlist[i] != nullptr) {
-			collideobjwithgrid(*colrectlist[i]);
+		if (Colliderlist[i] != nullptr) {
+			handleCollisionWithGrid(*Colliderlist[i]);
 
 
 		}
 	}
 }
 
-voxtra::raycolwithgrid collision::collideraywithgrid(ray nray) {
+voxtra::RayCollisionWithGrid collision::raycastCollisionWithGrid(ray nray) {
 	
-	voxtra::raycolwithgrid closest = voxtra::raycolwithgrid();
+	voxtra::RayCollisionWithGrid closest = voxtra::RayCollisionWithGrid();
 	closest.dist = INFINITY;
-	for (int i = 0; i < (loadamt * 2 + 1) * (loadamt * 2 + 1)*(2*loadamt+1); i++)
+	for (int i = 0; i < totalgridsize; i++)
 	{
-		for (int j = 0;j < 16 * 16 * 16;j++) {
+		for (int j = 0;j < chunksize;j++) {
 			block* blk = &grid::chunklist[i]->blockbuf[j];
 
 			//for now gyrantee tha it has no aabb
@@ -30,11 +30,11 @@ voxtra::raycolwithgrid collision::collideraywithgrid(ray nray) {
 				{
 
 
-					aabbraycolinfo blkinter = blk->getcomponent<colrect>().distanceonray(nray);
+					aabbraycolinfo blkinter = blk->getcomponent<Collider>().distanceonray(nray);
 					if (blkinter.collided&&blkinter.dist < closest.dist)
 					{
 						closest.colpoint= blkinter.intersectionpoint;
-						closest.box =&( blk->getcomponent<colrect>());
+						closest.box =&( blk->getcomponent<Collider>());
 						closest.dist = blkinter.dist;
 					}
 				}
@@ -47,22 +47,22 @@ voxtra::raycolwithgrid collision::collideraywithgrid(ray nray) {
 	
 	
 }
-Vector3 getplaceoffset(Vector3 inter, Vector3 center,Vector3 colrectscale) {
+Vector3 getplaceoffset(Vector3 inter, Vector3 center,Vector3 Colliderscale) {
 
 	Vector3 pos = zerov;
-	pos.x = floorabs((inter.x - center.x)/colrectscale.x);
-	pos.y = floorabs((inter.y - center.y) / colrectscale.y);
-	pos.z = floorabs((inter.z - center.z) / colrectscale.z);
+	pos.x = floorabs((inter.x - center.x)/Colliderscale.x);
+	pos.y = floorabs((inter.y - center.y) / Colliderscale.y);
+	pos.z = floorabs((inter.z - center.z) / Colliderscale.z);
 	return pos;
 }
-bool collision::aabbcollideswithent(colrect* blk) {
-	for (int i = 0; i < colrectlist.length; i++)
+bool collision::aabbCollidesWithEntity(Collider* blk) {
+	for (int i = 0; i < Colliderlist.length; i++)
 	{
-		if (colrectlist[i] != nullptr)
+		if (Colliderlist[i] != nullptr)
 		{
 
 
-			if (aabbsintersect(*(colrectlist[i]), *blk))
+			if (aabbsintersect(*(Colliderlist[i]), *blk))
 			{
 				return true;
 			}
@@ -72,7 +72,7 @@ bool collision::aabbcollideswithent(colrect* blk) {
 }
 
 //todo implement movment per axis
-void collision::collideobjwithgrid(colrect& entity)
+void collision::handleCollisionWithGrid(Collider& entity)
 {
 	entity.center = toent(entity.owner).pos;
 	v3::Vector3 lowpos = entity.center - entity.scale - unitv;
@@ -107,11 +107,11 @@ void collision::collideobjwithgrid(colrect& entity)
 					blockname::block* tocollide = grid::getobjatgrid(x, y, z, false);
 					if (tocollide != nullptr)
 					{
-						if (tocollide->hascomponent<aabb::colrect>())
+						if (tocollide->hascomponent<aabb::Collider>())
 						{
 
 
-							aabb::colrect& blockcol = tocollide->getcomponent<aabb::colrect>();
+							aabb::Collider& blockcol = tocollide->getcomponent<aabb::Collider>();
 
 
 

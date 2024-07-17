@@ -5,6 +5,7 @@
 #include "util/queue.h"
 #include "game/entity.h"
 #include "util/time.h"
+#include "renderer/renderer.h"
 #include "renderer/vertexobject.h"
 #ifndef  particle_HPP
 #define particle_HPP
@@ -15,11 +16,12 @@ struct particleemiter:gameobject::component
 {
 
 	v3::Vector3 position;
-	
-	
+	texture tex;
+	int maxparticles = 100;
 	vobj::vao emitervoa;
 	//tiny quad
-	vobj::vbuf emmitervbuf;
+	vobj::vbuf emmitervbo;
+	vobj::vbuf emmiteribo;
 	array<entityname::entity*> particlearray;
 	float particlespawntime;
 	float timetillspawn;

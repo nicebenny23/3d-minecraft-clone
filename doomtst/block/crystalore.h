@@ -11,7 +11,7 @@ inline void crystalinit(blockname::block* blk) {
 	blk->createaabb();
 }
 inline void crystaldelete(blockname::block* blk) {
-	blk->removecomponent<aabb::colrect>();
+	blk->removecomponent<aabb::Collider>();
 
 }
 #endif // !wood_HPP
