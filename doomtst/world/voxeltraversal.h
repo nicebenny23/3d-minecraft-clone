@@ -8,26 +8,26 @@ namespace voxtra {
 	inline Coord   getcurrvoxel(Vector3 pos) {
 		return  Coord(std::floor(pos.x), std::floor(pos.y), std::floor(pos.z));
 	}
-	struct raycolwithgrid
+	struct RayCollisionWithGrid
 	{
-		aabb::colrect* box;
+		aabb::Collider* box;
 		v3::Vector3 colpoint;
 		float dist;
 
-		raycolwithgrid(float distance, aabb::colrect* closestbox, v3::Vector3 intpoint) {
+		RayCollisionWithGrid(float distance, aabb::Collider* closestbox, v3::Vector3 intpoint) {
 
 			dist = distance;
 			box = closestbox;
 			colpoint = intpoint;
 		}
-		raycolwithgrid() {
+		RayCollisionWithGrid() {
 			box = nullptr;
 			dist = 1;
 			colpoint = zerov;
 		}
 	};
 	bool Boxcollwithgrid(geometry::Box bx, float acc);
-	raycolwithgrid travvox(ray nray, float acc);
+	RayCollisionWithGrid travvox(ray nray, float acc);
 	block* findprevblock(ray nray, float acc);
 }
 #endif

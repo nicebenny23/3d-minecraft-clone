@@ -3,7 +3,7 @@ using namespace blockname;
 //by implementing inner search loop acuracy scales quadraticlly
 //aproxomate voxel traversel algorthm,the accuracy scales linearly with time complexity,
 
-voxtra::raycolwithgrid  voxtra::travvox(ray nray, float acc)
+voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc)
 {
 	float maxdist = nray.length();
 	v3::Vector3 offdist = (nray.end - nray.start) / acc;
@@ -20,12 +20,12 @@ voxtra::raycolwithgrid  voxtra::travvox(ray nray, float acc)
 			{
 				if (blk->solid)
 				{
-					aabb::aabbraycolinfo rayinfo = blk->getcomponent<aabb::colrect>().distanceonray(nray);
+					aabb::aabbraycolinfo rayinfo = blk->getcomponent<aabb::Collider>().distanceonray(nray);
 					if (rayinfo.collided)
 					{
 
 
-						return voxtra::raycolwithgrid(rayinfo.dist, &blk->getcomponent<aabb::colrect>(), rayinfo.intersectionpoint);
+						return voxtra::RayCollisionWithGrid(rayinfo.dist, &blk->getcomponent<aabb::Collider>(), rayinfo.intersectionpoint);
 					}
 				}
 			}
@@ -34,7 +34,7 @@ voxtra::raycolwithgrid  voxtra::travvox(ray nray, float acc)
 		pos += offdist;
 
 	}
-	return voxtra::raycolwithgrid();
+	return voxtra::RayCollisionWithGrid();
 }
 
 bool voxtra::Boxcollwithgrid (geometry::Box bx, float acc)
@@ -59,11 +59,11 @@ bool voxtra::Boxcollwithgrid (geometry::Box bx, float acc)
 				{
 					continue;
 				}
-				if (!tocollide->hascomponent<aabb::colrect>())
+				if (!tocollide->hascomponent<aabb::Collider>())
 				{
 				    continue;
 				}
-						aabb::colrect& blockcol = tocollide->getcomponent<aabb::colrect>();
+						aabb::Collider& blockcol = tocollide->getcomponent<aabb::Collider>();
 
 
 
@@ -109,7 +109,7 @@ bool voxtra::Boxcollwithgrid (geometry::Box bx, float acc)
 				{
 					if (blk->solid)
 					{
-						aabb::aabbraycolinfo rayinfo = blk->getcomponent<aabb::colrect>().distanceonray(nray);
+						aabb::aabbraycolinfo rayinfo = blk->getcomponent<aabb::Collider>().distanceonray(nray);
 						if (rayinfo.collided)
 						{
 

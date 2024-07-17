@@ -11,7 +11,7 @@ inline void woodinit(blockname::block* blk) {
 	blk->createaabb();
 }
 inline void wooddelete(blockname::block* blk) {
-	blk->removecomponent<aabb::colrect>();
+	blk->removecomponent<aabb::Collider>();
 
 }
 #endif // !wood_HPP

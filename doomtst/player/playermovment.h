@@ -14,7 +14,7 @@ struct playermovement:gameobject::component
 	virtual void update() {
 
 
-        Vector3 aabbscale = owner->getcomponent<colrect>().scale;
+        Vector3 aabbscale = owner->getcomponent<Collider>().scale;
         Vector3& pos = objutil::toent(owner).pos;
         Vector3 boxcenter = pos  - Vector3(0, aabbscale.y+.05 , 0) ;
         geometry::Box checkbox = geometry::Box(boxcenter, Vector3(aabbscale.x, .1, aabbscale.z)*unitscale);
@@ -56,14 +56,12 @@ struct playermovement:gameobject::component
         }
         if (userinput::getinputkey(' ').pressed&&onground)
         {
-           velocity.y = 100 * (timename::mindt * speed);
+           velocity.y = 00 * (timename::mindt * speed);
         }
         if (userinput::getinputkey('z').held)
         {
           pos -= v3::Vector3(0, 1, 0) * (timename::mindt * speed);
         }
-       
-
 
 	}
 

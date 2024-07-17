@@ -153,7 +153,7 @@ void blockname::block::initasgameobj()
 
 void blockname::block::createaabb()
 {
-	this->addcomponent<aabb::colrect>(this->mesh.pos,this->mesh.scale, false);
+	this->addcomponent<aabb::Collider>(this->mesh.pos,this->mesh.scale, false);
 
 }
 

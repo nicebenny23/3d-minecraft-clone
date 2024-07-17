@@ -16,7 +16,7 @@ struct rigidbody : gameobject::component {
     Vector3 acceleration;
     float mass = 1.0f;
     float restitution = 0.1f;
-    aabb::colrect* boundingbox;
+    aabb::Collider* boundingbox;
 
     // Constructor
     rigidbody() : velocity(zerov), unsetpositon(zerov), acceleration(zerov), boundingbox(nullptr) {}
@@ -25,7 +25,7 @@ struct rigidbody : gameobject::component {
     void start() {
         acceleration = zerov;
         unsetpositon = objutil::toent(owner).pos;
-        boundingbox = &owner->getcomponent<aabb::colrect>();
+        boundingbox = &owner->getcomponent<aabb::Collider>();
     }
 
     // Update function called every frame
@@ -51,7 +51,7 @@ struct rigidbody : gameobject::component {
     }
 
     // Compute collision with another collision rectangle
-    void computecollision(aabb::colrect* colrect, Vector3 force) {
+    void computecollision(aabb::Collider* Collider, Vector3 force) {
        
     }
 };

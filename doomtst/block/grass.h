@@ -11,7 +11,7 @@ inline void grassinit(blockname::block* blk) {
 	blk->createaabb();
 }
 inline void grassdelete(blockname::block* blk) {
-	blk->removecomponent<aabb::colrect>();
+	blk->removecomponent<aabb::Collider>();
 
 }
 #endif // !wood_HPP

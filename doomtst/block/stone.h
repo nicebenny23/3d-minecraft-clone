@@ -11,7 +11,7 @@ inline void stoneinit(blockname::block* blk) {
 	blk->createaabb();
 }
 inline void stonedelete(blockname::block* blk) {
-	blk->removecomponent<aabb::colrect>();
+	blk->removecomponent<aabb::Collider>();
 
 }
 #endif // !wood_HPP

@@ -11,7 +11,7 @@ inline void glassinit(blockname::block* blk) {
 	blk->createaabb();
 }
 inline void glassdelete(blockname::block* blk) {
-	blk->removecomponent<aabb::colrect>();
+	blk->removecomponent<aabb::Collider>();
 
 }
 #endif // !wood_HPP
