@@ -91,7 +91,7 @@ safefile::safefile(char* filepath, mode openmode)
         fp = fopen(filepath, "ab");
         break;
     default:
-
+        std::cout << fp;
         Assert("No valid file acess type given");
         break;
     }
@@ -129,6 +129,7 @@ void safefile::go(unsigned int byteoffset)
 {
 
     if (fseek(fp, byteoffset, SEEK_SET) != 0) {
+        
         Assert("Failed to fseek to offset");
         fclose(fp);
 

@@ -25,32 +25,32 @@ struct playermod:gameobject::component
 			{
 			case 0:
 
-				blockbox[i] = uirender::newbox("images\\dirt.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
+				blockbox[i] = uirender::newbox("images\\dirt.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f), 0);
 				break;
 			case 1:
 
-				blockbox[i] = uirender::newbox("images\\glass.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
+				blockbox[i] = uirender::newbox("images\\glass.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f), 0);
 			case 2:
 		
 
-				blockbox[i] = uirender::newbox("images\\stone.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
+				blockbox[i] = uirender::newbox("images\\stone.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f), 0);
 				break;
 			case 3:
 
-				blockbox[i] = uirender::newbox("images\\glass.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
+				blockbox[i] = uirender::newbox("images\\glass.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f), 0);
 				break;
 			case 4:
 
-				blockbox[i] = uirender::newbox("images\\water.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
+				blockbox[i] = uirender::newbox("images\\water.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f), 0);
 				break;
 			case 5:
 
-				blockbox[i] = uirender::newbox("images\\torch.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
+				blockbox[i] = uirender::newbox("images\\torch.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f), 0);
 				break;
 			default:
-				blockbox[i] = uirender::newbox("images\\wood.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f));
+				blockbox[i] = uirender::newbox("images\\wood.png", v2::unitv / 30.f, v2::Vector2(i / 10.f, -.4f), 0);
 				break;
-			}box[i] = uirender::newbox("images\\blockholder.png", v2::unitv / 20.f, v2::Vector2(i/10.f, -.4f));
+			}box[i] = uirender::newbox("images\\blockholder.png", v2::unitv / 20.f, v2::Vector2(i/10.f, -.4f),0);
 			box[i]->shouldrender = true;
 			blockbox[i]->shouldrender = true;
 		}

@@ -76,6 +76,7 @@ struct safefile
 			size_t writeval = fwrite(ptr, sizeof(T), amt, fp);
 			if (writeval != amt)
 			{
+				std::cout << "only " << writeval << "out of " << amt << "elems were read";
 				Assert("writing failed");
 			}
 			return;
@@ -99,8 +100,11 @@ struct safefile
 			size_t read = fread(newarr, sizeof(T), amt, fp);
 			if (read != amt)
 			{
+				preAssert("reading failed");
+				preAssert("attempted to read a file but only");
+				std::cout << read << "out of " << amt<<"elements were read";
 
-				Assert("reading failed");
+				Assert("reading ");
 			}
 			return newarr;
 		}

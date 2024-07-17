@@ -20,7 +20,7 @@ struct rigidbody : gameobject::component {
 
     // Constructor
     rigidbody() : velocity(zerov), unsetpositon(zerov), acceleration(zerov), boundingbox(nullptr) {}
-
+    ~rigidbody() = default;
     // Start function to initialize the rigidbody component
     void start() {
         acceleration = zerov;
@@ -37,13 +37,13 @@ struct rigidbody : gameobject::component {
 
     // Apply gravity to the rigidbody
     void applyGravity() {
-        Vector3 gravity(0, -40.81f, 0);
+        Vector3 gravity(0, -10.81f, 0);
         acceleration += gravity / mass;
     }
 
     // Integrate the acceleration to update velocity and position
     void integrate() {
-        float deltaTime = timename::mindt;
+        float deltaTime = timename::dt;
         velocity += acceleration * deltaTime;
         velocity *= 0.98f;  // Adjust damping factor to prevent excessive damping
         objutil::toent(owner).pos += velocity * deltaTime;

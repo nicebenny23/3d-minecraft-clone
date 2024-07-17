@@ -89,5 +89,6 @@ void gameobject::destroy(obj* object)
 	{
 		object->complist[i]->ondestroy();
 	}
-	object->complist.destroy();
+
+ 	object->complist.destroy();
 }

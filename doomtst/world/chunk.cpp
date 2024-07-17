@@ -119,11 +119,7 @@ Chunk::chunk* Chunk::load(Coord location)
 						neid = minecraftdirt;
 
 					}
-					newchunk.blockbuf[ind] = blockname::block(blockpos, neid);
-
-				  blkinitname::genblock(&newchunk.blockbuf[ind], neid, blockpos, 0, 0);
-
-					ind++;
+				
 					continue;
 				}
 
@@ -137,7 +133,7 @@ Chunk::chunk* Chunk::load(Coord location)
 					if (noiselevel < .15)
 					{
 
-						newchunk.blockbuf[ind].id = minecraftstone;
+						neid = minecraftstone;
 					
 					
 					}
@@ -149,16 +145,19 @@ Chunk::chunk* Chunk::load(Coord location)
 					if (abs(noiselevel )> .1f)
 					{
 
-						newchunk.blockbuf[ind].id = minecraftcrystal;
+						neid = minecraftcrystal;
 					}
 					
 				}
+				newchunk.blockbuf[ind] = blockname::block(blockpos, neid);
 
-
-				blkinitname::blockinit(&newchunk.blockbuf[ind]);
-
+				blkinitname::genblock(&newchunk.blockbuf[ind], neid, blockpos, 0, 0);
 
 				ind++;
+
+				
+
+
 			}
 		}
 	}

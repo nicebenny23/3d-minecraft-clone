@@ -1,0 +1,25 @@
+#include "../renderer/uirender.h"
+#include "inventoryblock.h"
+using namespace uirender;
+using namespace dynamicarray;
+#ifndef  menu_HPP
+#define menu_HPP
+struct menu
+{
+
+	void close();
+	void(*closeinven);
+		uibox* menubox;
+		
+		 array<invblock> blockstore;
+	bool isopen;
+	void open();
+	menu() = default;
+	menu(v2::Vector2 size);
+	void testclick(item* held);
+
+};
+
+extern menu* openmenu;
+
+#endif // ! menu_HPP

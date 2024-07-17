@@ -1,6 +1,7 @@
 #include "camera.h"
 #include "../util/vector3.h";
-
+#include "../items/menu.h"
+#include "../renderer/Window.h"
 namespace camera {
 	glm::vec3 campos;
 	float yaw, pitch;
@@ -26,12 +27,15 @@ namespace camera {
 	void calculateyawandpitch()
 	{
 		
+		if (openmenu == nullptr)
+		{
+			window::setcursor(false);
 
 			float xoffset = -userinput::mouseposdt.x;
 			float yoffset = userinput::mouseposdt.y;
 
 			float sensitivity = 0.3;
-			
+
 			if (abs(xoffset) > 180)
 			{
 				xoffset = 0;
@@ -49,6 +53,12 @@ namespace camera {
 				pitch = 89.0f;
 			if (pitch < -89.0f)
 				pitch = -89.0f;
+
+		}
+		else
+		{
+			window::setcursor(true);
+		}
 	}
 	
 	void sendoffviewmatrix()

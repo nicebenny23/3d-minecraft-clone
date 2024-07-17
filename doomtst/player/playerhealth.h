@@ -12,7 +12,7 @@ struct playerhealth:gameobject::component
 		healthboxes = array<uirender::uibox*>();
 		for (int i = 0; i < 10; i++) {
 			v2::Vector2 pos = v2::Vector2(i / 40.f-.4f, -.45);
-			healthboxes.append(uirender::newbox("images\\health.png",scale,pos));
+			healthboxes.append(uirender::newbox("images\\health.png",scale,pos,55));
 		}
 	}
 	void update() {

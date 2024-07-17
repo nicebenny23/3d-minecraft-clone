@@ -21,7 +21,9 @@ namespace window {
   static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
   {
       userinput::mouseposdt = userinput::mousepos - glm::vec2(float(xpos), float(ypos));
-      userinput::mousepos= glm::vec2(float(xpos), float(ypos));
+      userinput::mousepos= glm::vec2(float(xpos), float(ypos)); 
+      
+      userinput::normedmousepos= v2::Vector2( (2.0 * xpos / width) - 1.0, (1-(2.0 * ypos / height))/1.777);
   }
 
  static void framebuffer_size_callback(GLFWwindow* window, int widt1h, int heigh1t)
@@ -31,7 +33,18 @@ namespace window {
         glViewport(0, 0, widt1h, heigh1t);
 
     }
-    void createcurwindow(int scrwidth, int scrheight)
+ void setcursor(bool mode)
+ {
+     if (mode==false)
+     {
+         glfwSetInputMode(awindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+     }
+     else
+     {
+         glfwSetInputMode(awindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+     }
+ }
+ void createcurwindow(int scrwidth, int scrheight)
     {
      
      //   glfwSetWindowMonitor(awindow, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
@@ -55,14 +68,14 @@ namespace window {
 
         width = mode->width;
         height = mode->height;
-      
+        setcursor(false);
         glfwSetCursorPosCallback(awindow, cursor_position_callback);
         glfwSetFramebufferSizeCallback(awindow, framebuffer_size_callback);
         glfwSetMouseButtonCallback(awindow, mouse_button_callback);
         glfwSetKeyCallback(awindow, key_callback);
-        glfwSetInputMode(awindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+      
     }
-
+    
 
 
     void swapbuffer() {

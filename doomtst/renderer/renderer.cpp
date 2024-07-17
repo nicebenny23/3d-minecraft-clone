@@ -66,13 +66,13 @@ namespace renderer {
             break;
         case renderparticle:
 
-            glDisable(GL_DEPTH_TEST);
-            glDepthMask(GL_FALSE);
+            glEnable(GL_DEPTH_TEST);
+            glDepthMask(GL_TRUE);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            currshader = uishader;
-            shaderlist[uishader].attach();
-
+            currshader = particleshader;
+            shaderlist[particleshader].attach();
+            setrenderingmatrixes();
             break;
         }
     }

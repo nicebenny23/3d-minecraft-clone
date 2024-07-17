@@ -31,6 +31,7 @@ namespace renderer {
 	extern float fov;
 	extern dynamicarray::array<shader> shaderlist;
 	void setrenderingmatrixes();
+	
 	extern texturearray texarray;
 	enum rendertype
 	{

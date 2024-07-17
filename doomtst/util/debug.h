@@ -5,7 +5,7 @@
 //good
 constexpr bool debuggeneral = true;
 constexpr bool debugrender = false;
-constexpr bool generateflat = true;
+constexpr bool generateflat = false;
 inline void Assert(char* msg) {
 
 	std::cout << '\n' << msg;
