@@ -18,27 +18,16 @@ namespace objutil {
 	inline blockname::block& toblk(gameobject::obj& object) {
 
 		return *((blockname::block*)(&object));
-	}inline entity::entity& toent(gameobject::obj* object) {
+	}inline entityname::entity& toent(gameobject::obj* object) {
 
-		return *((entity::entity*)(object));
+		return *((entityname::entity*)(object));
 	}
-	inline entity::entity& toent(gameobject::obj& object) {
+	inline entityname::entity& toent(gameobject::obj& object) {
 
-		return *((entity::entity*)(&object));
+		return *((entityname::entity*)(&object));
 	}
 
 
-
-	inline entity::entity* toent(gameobject::objref object)
-	{
-
-		return ((entity::entity*)(object.toobj()));
-	}
-	inline block* toblk(gameobject::objref object)
-	{
-
-		return ((block*)(object.toobj()));
-	}
 
 	inline Vector3 getcenter(gameobject::obj& object) {
 
@@ -48,7 +37,7 @@ namespace objutil {
 	}
 	if (object.type==gameobject::entity)
 	{
-		((entity::entity*)(&object))->pos ;
+		((entityname::entity*)(&object))->pos ;
 	}
 }
 //returns id ob object only works for block

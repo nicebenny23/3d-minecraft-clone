@@ -12,12 +12,40 @@ void face::calccameradist() {
 }
 
 void blockmesh::setfaces(int leftface, int rightface, int upface, int downface, int frontface, int backface) {
-	left = face(leftface, 0, this);
-	right = face(rightface, 1, this);
 	up = face(upface, 2, this);
 	down = face(downface, 3, this);
-	front = face(frontface, 4, this);
-	back = face(backface, 5, this);
+	
+		switch (direction)
+		{
+		case west2d:
+			left = face(frontface, 0, this);
+			right = face(backface, 1, this);
+			front = face(rightface, 4, this);
+			back = face(leftface, 5, this);
+			break;
+		case east2d:
+			left = face(backface, 0, this);
+			right = face(frontface, 1, this);
+			front = face(leftface, 4, this);
+			back = face(rightface, 5, this);
+			break;
+		case front2d:
+			left = face(leftface, 0, this);
+			right = face(rightface, 1, this);
+			front = face(frontface, 4, this);
+			back = face(backface, 5, this);
+			break;
+		case back2d:
+			left = face(rightface, 0, this);
+			right = face(leftface, 1, this);
+			front = face(backface, 4, this);
+			back = face(frontface, 5, this);
+			break;
+		
+		}
+	
+	
+	
 
 
 }
@@ -53,38 +81,42 @@ face& blockmesh::operator[](int index)
 
 }
 
+void blockname::blockmesh::attachindirection()
+{
+
+	Vector3 maxpos =blk->center() + scale * dirfromint(attachdir);
+	Vector3 blkpos = dirfromint(attachdir) / 2 + blk->center();
+	pos += blkpos - maxpos;
+}
 face& blockname::block::operator[](int index)
 {
-	return (*mesh)[index];
+	return (mesh)[index];
 }
 
 void blockname::initblockmesh(blockname::block* blk, Vector3 pos,Vector3 scale) {
 	
 	
 	
-	blockmesh* mesh=new blockmesh();
 
-
-	mesh->scale = scale;
-	mesh->pos = blk->center();
-	
-	mesh->blk = blk;
-	blk->mesh = mesh;
+		blk->mesh = blockmesh();
+	blk->mesh.scale = scale;
+	blk->mesh.pos = blk->center();
+	blk->mesh.blk = blk;
+	blk->mesh.direction = front2d;
+	blk->mesh.attachdir = 0;
 	
 }
-blockname::block::block(v3::Coord placment, int blockid)
+//initiates block as gameobject;
+blockname::block::block(v3::Coord location, int blockid)
 {
-	
-	guid = gameobject::getgoid();
+
 
 	emitedlight = 0;
 	 complist = (array<gameobject::component*>());
 	type = gameobject::block;
 	
-	gameobject::objectfromguid[guid] = this;
-	
 	id = blockid;
-	pos = placment;
+	pos = location;
 	transparent = false;
 	solid = true;
 	
@@ -95,19 +127,33 @@ blockname::block::block()
 {
 	transparent = false;
 	solid = false;
-	//complist = array<gameobject::component*>();
+	complist = array<gameobject::component*>();
 	id = -1;
-	guid = -1;
-	pos = v3::zeroiv;
+pos = v3::zeroiv;
 	type = gameobject::block;
-	test = false;
+	
+
+}
+
+void blockname::block::initasgameobj()
+{
+	transparent = false;
+	solid = false;
+
+	emitedlight = 0;
+	complist = (array<gameobject::component*>());
+	type = gameobject::block;
+
+
+
+	
 }
 
 
 
 void blockname::block::createaabb()
 {
-	this->addcomponent<aabb::colrect>(this->mesh->pos,this->mesh->scale, true);
+	this->addcomponent<aabb::colrect>(this->mesh.pos,this->mesh.scale, false);
 
 }
 

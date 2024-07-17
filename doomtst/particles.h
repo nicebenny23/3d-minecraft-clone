@@ -20,11 +20,11 @@ struct particleemiter:gameobject::component
 	vobj::vao emitervoa;
 	//tiny quad
 	vobj::vbuf emmitervbuf;
-	array<entity::entity*> particlearray;
+	array<entityname::entity*> particlearray;
 	float particlespawntime;
 	float timetillspawn;
-	void (*particleinit) (entity::entity*);
-	particleemiter(float spawntime, void (*initfunc) (entity::entity*));
+	void (*particleinit) (entityname::entity*);
+	particleemiter(float spawntime, void (*initfunc) (entityname::entity*));
 	bool shouldspawnparticle();
 	void update();
 	void renderparticles();

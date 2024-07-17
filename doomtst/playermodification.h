@@ -118,9 +118,15 @@ struct playermod:gameobject::component
 						block* plamentblock = voxtra::findprevblock(cameraray, 1000);
 						if (plamentblock != nullptr && !plamentblock->solid)
 						{
+							int dir = maxdirection( closest.box->center - plamentblock->center());
 							int previd = plamentblock->id;
 							//i dont know why i create it and remove itit like this but it makes the core much simpler
+							int blockdirection = max2ddirection(Vector3( camera::campos)-closest.colpoint);
+							
+							plamentblock->mesh.direction = blockdirection;
+							plamentblock->mesh.attachdir = dir;
 							gridutil::setblock(plamentblock->pos,curplaceid);
+							
 							if (plamentblock->solid)
 							{
 

@@ -6,7 +6,7 @@ using namespace queuename;
 #define gridmanger_HPP
 
 namespace gridutil{
-	
+	extern bool redoallighting;
 	void createlightingqueue();
 	void computecover(face& blkface);
 	void sendrecreatemsg();

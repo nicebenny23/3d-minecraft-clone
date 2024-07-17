@@ -158,23 +158,7 @@ namespace renderer {
         texarray.apply();
         
     }
-    void settextureparams() {
-      //  glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY, 10);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT);
-     
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAX_LOD, 1000);
-        glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_LOD, 1000);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-
-
-        
-    }
+   
     void load()
     {
         fov = 90;
@@ -183,24 +167,22 @@ namespace renderer {
         shaderlist = dynamicarray::array<shader>(1);
         shaderlist[uishader] = shader::shader("shaders\\uivertex.vs", "shaders\\uifragment.vs");
         shaderlist[uishader].attach();
-        settextureparams();
+        
        shaderlist[modelshader] = shader::shader("shaders\\modelvertex.vs", "shaders\\modelfragment.vs");
        shaderlist[modelshader].attach();
-       settextureparams();
+      
        shaderlist[particleshader] = shader::shader("shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
        shaderlist[particleshader].attach();
-       settextureparams();
        shaderlist[normalshader] = shader::shader("shaders\\vert1.vs", "shaders\\frag1.vs");
         shaderlist[normalshader].attach();
               currshader = normalshader;
       
         
-        
+           
     
        
-        generatetexarray();
-        settextureparams();
-
+              generatetexarray();
+            
    
     }
 

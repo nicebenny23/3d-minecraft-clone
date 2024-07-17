@@ -4,6 +4,20 @@
 #include "game/camera.h"
 
 using namespace meshname;
+void meshname::mesh::setmodeluniform()
+{
+    Vector3 xbasis=Vector3(1,0,0);
+    Vector3 ybasis = Vector3(0, 1, 0);
+
+    Vector3 zbasis=Vector3(0,0,1);
+    glm::mat4 trans = glm::mat4(1.0f);
+    trans = glm::translate(trans, pos.glm());
+
+    trans = glm::rotate(trans, glm::radians(rotation.x), xbasis.glm());
+    trans = glm::rotate(trans, glm::radians(rotation.y), ybasis.glm());
+    trans = glm::rotate(trans, glm::radians(rotation.z), zbasis.glm());
+    renderer::shaderlist[renderer::modelshader].setmatval(trans, "model");
+}
 meshname::mesh:: mesh()
 {
 }
@@ -26,6 +40,7 @@ meshname::mesh* meshname::loadmesh(const char* name, texture TEX,Vector3 positio
 	safefile meshfile = safefile(name, fileread);
     newmesh->pos = position;
     newmesh->tex = TEX;
+    newmesh->setvobjs();
     while (true)
     {
         char* header = new char[128];
@@ -69,19 +84,19 @@ meshname::mesh* meshname::loadmesh(const char* name, texture TEX,Vector3 positio
     return newmesh;
 }
 
-void meshname::rendermesh(mesh* torender,vao Vao,vbuf vbo)
+void meshname::rendermesh(mesh* torender)
 {
     
     torender->tex.apply();
     array<float> databuf;
     renderer::changerendertype(renderer::rendermodel);
-    
+    torender->setmodeluniform();
    
     for (int i = 0; i < torender->vertexindices.length; i++)
     {
         Vector3 vertex= torender->nthvertex(i);
         v2::Vector2 texture= torender->nthtex(i);
-        vertex +=torender->pos;
+        
         databuf.append(vertex.x);
         databuf.append(vertex.y);
         databuf.append(vertex.z);
@@ -89,18 +104,18 @@ void meshname::rendermesh(mesh* torender,vao Vao,vbuf vbo)
         databuf.append(texture.y);
        
     }
-    vbo.bind();
+    torender->meshvbuf.bind();
 
-    vbo.fillbuffer<float>(databuf);
+    torender->meshvbuf.fillbuffer<float>(databuf);
 
 
 
     //uv
-    Vao.bind();
-    Vao.set_attr(0, 3, GL_FLOAT, 5 * sizeof(float), 0);
+    torender->meshvao.bind();
+    torender->meshvao.set_attr(0, 3, GL_FLOAT, 5 * sizeof(float), 0);
     glEnableVertexAttribArray(0);
     //texture coords,inclusing the texture in the array 
-    Vao.set_attr(1, 2, GL_FLOAT, 5 * sizeof(float), 3 * sizeof(float));
+    torender->meshvao.set_attr(1, 2, GL_FLOAT, 5 * sizeof(float), 3 * sizeof(float));
     glEnableVertexAttribArray(1);
 
    

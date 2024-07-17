@@ -30,7 +30,10 @@ Chunk::chunk* Chunk::fileload(Coord location)
 	
 	const char* name = getcorefilename(location);
 	safefile file = safefile(name, fileread);
-	byte* bytelist = file.read<byte>(4096);
+	short* bytelist = file.read<short>(4096);
+	
+	file.go((4096) * 2);
+	short* randomproperties= file.read<short>(4096);
 	chunk& newchunk = *(new chunk());
 	newchunk.modified = false;
 	createchunkmesh(&newchunk);
@@ -45,18 +48,37 @@ Chunk::chunk* Chunk::fileload(Coord location)
 			for (int z = 0; z < 16; z++)
 			{
 				Coord blockpos = Coord(x, y, z) + location * 16;
-				newchunk.blockbuf[i] = blockname::block(blockpos, bytelist[i]);
+				byte blockid = bytelist[i]  &255;
+				newchunk.blockbuf[i] = blockname::block(blockpos,blockid );
 
-				gameobject::objectfromguid[newchunk.blockbuf[i].guid] = &newchunk.blockbuf[i];
+				initblockmesh(&newchunk.blockbuf[i], zerov, unitscale);
+				byte dirprop = bytelist[i]>>8;
+				
 
-				initblockmesh(&newchunk.blockbuf[i], zerov,unitscale);
+				byte attachdir = dirprop >> 3;
+				byte dir = dirprop &7;
+				newchunk.blockbuf[i].mesh.attachdir = attachdir;
+			
+
+				newchunk.blockbuf[i].mesh.direction = dir;
 				blkinitname::blockinit(&newchunk.blockbuf[i]);
+			
+				
 				i++;
 			}
 		}
 	}
+	
+	for (int ind = 0; ind < 4096; ind++)
+	{
 
-	delete bytelist;
+		
+		if (newchunk.blockbuf[ind].hascomponent<liquidprop>())
+		{
+			newchunk.blockbuf[ind].getcomponent<liquidprop>().liqval = randomproperties[ind];
+		}
+	}
+	delete[] bytelist;
 	file.close();
 	return &newchunk;
 }
@@ -82,15 +104,30 @@ Chunk::chunk* Chunk::load(Coord location)
 			for (int z = 0; z < 16; z++)
 			{
 				Coord blockpos = Coord(x, y, z) + location * 16;
-				newchunk.blockbuf[ind] = blockname::block(blockpos, 0);
-				gameobject::objectfromguid[newchunk.blockbuf[ind].guid] = &newchunk.blockbuf[ind];
+				
+			
+			
 
-				initblockmesh(&newchunk.blockbuf[ind], zerov,unitscale);
+				
 				//select block mechanism
+				int neid = minecraftair;
 
+				if (generateflat)
+				{
+					if (blockpos.y < 0)
+					{
+						neid = minecraftdirt;
+
+					}
+					newchunk.blockbuf[ind] = blockname::block(blockpos, neid);
+
+				  blkinitname::genblock(&newchunk.blockbuf[ind], neid, blockpos, 0, 0);
+
+					ind++;
+					continue;
+				}
 
 				//todo fix it
-				newchunk.blockbuf[ind].id = minecraftair;
 				float noiselevel =  (*map)[Coord(x, y, z)];
 				///	float noiselevel1 = (*map1)[Coord(x, y, z)];
 
@@ -155,7 +192,19 @@ void Chunk::chunk::write()
 	array<byte> bytelist = array<byte>();
 	for (int i = 0; i < chunksize; i++)
 	{
-		bytelist[i] = blockbuf[i].id;
+		bytelist[2*i] = blockbuf[i].id;
+		bytelist[2*i+1] = blockbuf[i].mesh.direction | (blockbuf[i].mesh.attachdir * 8);
+	}
+	for (int i = 0; i < chunksize; i++)
+	{
+		bytelist[8192 + 2 * i] = 0;
+		bytelist[8192 + 2 * i+1] = 0;
+		if (blockbuf[i].hascomponent<liquidprop>())
+		{
+			bytelist[8192 + 2 * i] = blockbuf[i].getcomponent<liquidprop>().liqval;
+			bytelist[8192 + 2 * i+1] =0;
+		}
+	
 	}
 	file.write<byte>(bytelist.getdata(), bytelist.length);
 	bytelist.destroy();
@@ -177,10 +226,10 @@ void Chunk::chunk::destroy()
 		write();
 	}
 	for (int i = 0; i < 16 * 16 * 16; i++) {
-		gameobject::objectfromguid[blockbuf[i].guid] = nullptr;
+		
 
 		gameobject::immidiatedestroy(&blockbuf[i]);
-		delete 	blockbuf[i].mesh;
+	
 		//delete blockbuf[i]
 	}
 	mesh->destroy();

@@ -1,5 +1,5 @@
 #include "aabb.h"
-
+#include "../util/geometry.h"
 //simple aabb class without collision implemented 
 namespace aabb {
 
@@ -74,18 +74,20 @@ namespace aabb {
 
     void colrect::destroy()
     {
-        if (!gridobj)
+
+        if (owner->type!=gameobject::block)
         {
             colrectlist[index]=nullptr;
         }
     }
 
-    colrect::colrect(const v3::Vector3& objcenter, const v3::Vector3& objscale,bool gridobj)
+    colrect::colrect(const v3::Vector3& objcenter, const v3::Vector3& objscale,bool appendtolist)
     {
+        hasrigidbody = false;
         center = objcenter;
         scale = objscale;
         index = -1;
-        if (!gridobj) {
+        if (appendtolist) {
            
             while (index == -1)
             {
@@ -138,4 +140,23 @@ namespace aabb {
         return toreturn;
         
     }
+
+
+
+
+    bool  aabbboxintersect(geometry::Box p1, colrect& p2)
+    {
+        if (abs(p1.center.x - p2.center.x) < p1.scale.x + p2.scale.x)
+        {
+            if (abs(p1.center.y - p2.center.y) < p1.scale.y + p2.scale.y)
+            {
+                if (abs(p1.center.z - p2.center.z) < p1.scale.z + p2.scale.z)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 }

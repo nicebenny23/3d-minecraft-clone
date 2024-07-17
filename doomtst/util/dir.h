@@ -5,13 +5,56 @@
 
 enum dir3d
 {
-	north = 0,
-	south = 1,
-	west = 2,
-	east = 3,
-	front=4,
-	back=5,
+	north3d = 0,
+	south3d = 1,
+	west3d = 2,
+	east3d = 3,
+	front3d=4,
+	back3d=5,
 };
+enum dir2d
+{
+	west2d = 0,
+	east2d = 1,
+
+	front2d = 4,
+	back2d = 5,
+};
+inline int invdir(int dir) {
+
+	return dir + 1 - 2 * modabs(dir, 2);
+}
+inline int maxdirection(v3::Vector3 point) {
+
+
+	float max = Max(abs(point.x), Max(abs(point.y), abs(point.z)));
+	if (abs(point.x)==max)
+	{
+		return (1-sign(point.x))/2;
+	}
+	if (abs(point.y) == max)
+	{
+		return 2+(1 - sign(point.y)) / 2;
+	}
+	if (abs(point.z) == max)
+	{
+		return 4 + (1 - sign(point.z)) / 2;
+	}
+}
+inline int max2ddirection(v3::Vector3 point) {
+
+
+	float max = Max(abs(point.x),  abs(point.z));
+	if (abs(point.x) == max)
+	{
+		return ( 1- sign(point.x)) / 2;
+	}
+	
+	if (abs(point.z) == max)
+	{
+		return 4 + (1 - sign(point.z)) / 2;
+	}
+}
 inline v3::Vector3 dirfromint(int face) {
 
 	switch (face)

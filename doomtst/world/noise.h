@@ -16,6 +16,7 @@ struct chunknoisemap
     float& operator[](Vector3 pos);
     float operator[](int ind);
     float operator[](Coord pos);
+    float& at(int ind);
     void addlayer(float scale, float intensity);
     void destroy();
     v3::Coord loc;

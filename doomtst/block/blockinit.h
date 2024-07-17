@@ -44,7 +44,7 @@ namespace blkinitname {
 			glassinit(blk);
 			break;
 		case minecraftwater:
-			glassinit(blk);
+			waterinit(blk);
 			break;
 		case minecraftcrystal:
 			crystalinit(blk);
@@ -57,6 +57,16 @@ namespace blkinitname {
 			break;
 		}
      } 
+	inline void genblock(block* blk,int blkid, Coord location, byte attachface, byte direction) {
+	
+		 *blk = blockname::block(location, blkid);
+	
+		initblockmesh(blk, zerov, unitscale);
+		
+		blkinitname::blockinit(blk);
+		
+	
+	}
 	inline void setair(block* blk) {
 		switch (blk->id)
 		{
@@ -103,6 +113,13 @@ namespace blkinitname {
 			Assert("need valid id in set blk");
 		}
 		airinit(blk);
+	}
+	inline void deleteandset(block* blk, int id)
+	{
+		setair(blk);
+		blk->id = id;
+		blockinit(blk);
+
 	}
 }
 

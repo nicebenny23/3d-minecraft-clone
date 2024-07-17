@@ -125,7 +125,7 @@ void  safefile::close()
     }
 }
 
-void safefile::go(size_t byteoffset)
+void safefile::go(unsigned int byteoffset)
 {
 
     if (fseek(fp, byteoffset, SEEK_SET) != 0) {

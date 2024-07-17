@@ -6,7 +6,21 @@
 #include <iostream>
 
 
+void settextureparams() {
+	//  glTexParameterf(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAX_ANISOTROPY, 10);
 
+
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+
+
+
+}
 texture::texture(const char* file, textype imgtype)
 {
 	int width;
@@ -38,6 +52,7 @@ texture::texture(const char* file, textype imgtype)
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, type, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	stbi_image_free(data);
+	settextureparams();
 }
 
 texture::texture()
@@ -97,7 +112,7 @@ texturearray::texturearray(int width, int height, array<const char*> textures)
 	
 	glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 	//glUniform1i(id, 0);
-
+	settextureparams();
 }
 
 void texturearray::apply()

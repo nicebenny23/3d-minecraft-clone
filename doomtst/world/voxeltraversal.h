@@ -1,6 +1,7 @@
 #include "grid.h"
 #include "../util/ray.h"
 #include "../game/aabb.h"
+#include "../util/geometry.h"
 #ifndef voxtrav_Hpp
 #define voxtrav_Hpp
 namespace voxtra {
@@ -19,9 +20,13 @@ namespace voxtra {
 			box = closestbox;
 			colpoint = intpoint;
 		}
-		raycolwithgrid() = default;
+		raycolwithgrid() {
+			box = nullptr;
+			dist = 1;
+			colpoint = zerov;
+		}
 	};
-
+	bool Boxcollwithgrid(geometry::Box bx, float acc);
 	raycolwithgrid travvox(ray nray, float acc);
 	block* findprevblock(ray nray, float acc);
 }

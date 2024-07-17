@@ -1,6 +1,7 @@
 #include "collision.h"
 #include "objecthelper.h"
 #include "../world/managegrid.h"
+#include "../rigidbody.h"
 using namespace objutil;
 void collision::update()
 {
@@ -74,27 +75,27 @@ bool collision::aabbcollideswithent(colrect* blk) {
 void collision::collideobjwithgrid(colrect& entity)
 {
 	entity.center = toent(entity.owner).pos;
-	v3::Vector3 lowpos= entity.center - entity.scale-unitv;
-	
-	v3::Coord lowest = v3::Coord(floorabs(lowpos.x), floorabs(lowpos.y), floorabs(lowpos.z));
-	v3::Vector3 highpos = entity.center + entity.scale+unitv;
+	v3::Vector3 lowpos = entity.center - entity.scale - unitv;
 
-	v3::Coord highest= v3::Coord(ceilabs(highpos.x), ceilabs(highpos.y), ceilabs(highpos.z));
+	v3::Coord lowest = v3::Coord(floorabs(lowpos.x), floorabs(lowpos.y), floorabs(lowpos.z));
+	v3::Vector3 highpos = entity.center + entity.scale + unitv;
+
+	v3::Coord highest = v3::Coord(ceilabs(highpos.x), ceilabs(highpos.y), ceilabs(highpos.z));
 	std::swap(entity.center, entity.prevpos);
-	for (int  i = 0; i < 3; i++)
+	for (int i = 0; i < 3; i++)
 	{
 		switch (i)
 		{
 
 		case 0:
-			entity.center.y= entity.prevpos.y;
+			entity.center.y = entity.prevpos.y;
 		case 1:
-			entity.center.z= entity.prevpos.z;
+			entity.center.z = entity.prevpos.z;
 		case 2:
-			entity.center.x= entity.prevpos.x;
+			entity.center.x = entity.prevpos.x;
 		}
 		Vector3 minforce = zerov;
-	
+
 		for (int x = lowest.x; x < highest.x; x++)
 		{
 			for (int y = lowest.y; y < highest.y; y++)
@@ -103,16 +104,20 @@ void collision::collideobjwithgrid(colrect& entity)
 				{
 					//getting solid at grid is optimization
 
-					blockname::block* tocollide = grid::getobjatgrid(x, y, z,false);
+					blockname::block* tocollide = grid::getobjatgrid(x, y, z, false);
 					if (tocollide != nullptr)
 					{
 						if (tocollide->hascomponent<aabb::colrect>())
 						{
 
 
-							aabb::colrect blockcol = tocollide->getcomponent<aabb::colrect>();
-						
-								Vector3 force = aabb::collideaabb(entity, blockcol);
+							aabb::colrect& blockcol = tocollide->getcomponent<aabb::colrect>();
+
+
+
+							Vector3 force = aabb::collideaabb(entity, blockcol);
+
+
 							if (force != zerov)
 							{
 
@@ -122,20 +127,26 @@ void collision::collideobjwithgrid(colrect& entity)
 
 									minforce = force;
 								}
-
-
 							}
+
 						}
-
-
 					}
+
+
 				}
 			}
 		}
+
+
+
+
+
+		entity.prevpos += minforce;
 		entity.center += minforce;
 		toent(entity.owner).pos += minforce;
-		entity.prevpos+= minforce;
-		entity.prevpos = entity.center;
 	}
+
+
 }
+
 

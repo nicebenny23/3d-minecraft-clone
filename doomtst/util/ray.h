@@ -26,9 +26,10 @@ inline	Vector3 pointonline(v3::Vector3 vector){
 	
 			Vector3 normed = (end - start) / distance(end, start);
 			Vector3 aoffset = vector - start;
+			
 			float t = dotproduct(aoffset, normed);
 			Vector3 position = start + normed * t;
-		
+			
 			return position;
 	}
 //todo get linetraversel working

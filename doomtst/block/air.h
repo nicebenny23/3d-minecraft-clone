@@ -6,7 +6,8 @@ inline void airinit(blockname::block* blk) {
 	blk->transparent = true;
 	blk->emitedlight = 0;
 	blk->id = minecraftair;
-	blk->mesh->setfaces(0,0,0,0,0,0);
+	blk->mesh.setfaces(0,0,0,0,0,0);
+	blk->mesh.pos = blk->center();
 }
 
 

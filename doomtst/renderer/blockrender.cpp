@@ -1,275 +1,210 @@
 #include "blockrender.h"
 #include "../util/vector2.h"
-#include "../cone.h"
+#include "../util/geometry.h"
+
 dynamicarray::array<float> databuffer;
 dynamicarray::array<unsigned int> indicebuffer;
+
 using namespace grid;
+
+// Predefined vertices for a cube
 const Vector3 vert[] = {
-		 Vector3(0, 0, 0),//vertex 0
-		 Vector3(1,0,0),//vertex 1
-		 Vector3(1,1,0),//vertex 2
-		  Vector3(0,1,0),//vertex 3
-		  Vector3(0,0,1),//vertex 4
-		  Vector3(1,0,1),//vertex 5
-		  Vector3(1,1,1),//vertex 6
-		  Vector3(0,1,1),//vertex 7
-
+    Vector3(0, 0, 0), // vertex 0
+    Vector3(1, 0, 0), // vertex 1
+    Vector3(1, 1, 0), // vertex 2
+    Vector3(0, 1, 0), // vertex 3
+    Vector3(0, 0, 1), // vertex 4
+    Vector3(1, 0, 1), // vertex 5
+    Vector3(1, 1, 1), // vertex 6
+    Vector3(0, 1, 1)  // vertex 7
 };
-//uv's for cubemapping
+
+// UV coordinates for cube mapping
 const float cubeuv[] = {
-   1, 0,
-0, 0,
-0, 1,
-1, 1
-
+    1, 0,
+    0, 0,
+    0, 1,
+    1, 1
 };
+
+// Check if a chunk is viewable within the camera's frustum
 bool chunkviewable(Chunk::chunk* chk) {
-	if (debugrender)
-	{
-		return true;
-	}
-	if (gridpos == chk->loc){
-
-		return true;
-        }
-	v3::Vector3 center =chk->center()-camera::campos;
-	ray camray = ray(center, center + camera::direction());
-	//tan (60) is normal slope and multiply by sqrt(2)
-	
-
-		float fovconeslope = 1 / tan(renderer::fov / 2);
-		for (size_t i = 0; i < 8; i++)
-		{
-			Vector3 norm = center + (vert[i] - unitv / 2) * 16;
-			if (dotproduct(norm, camera::direction()) > 0)
-			{
-				return true;
-
-			}
-		}
-	
-	return false;
+    float slope = tan(renderer::fov / 2);
+    geometry::Box chkb = geometry::Box(chk->center(), unitv * 8);
+    ray camray = ray(camera::campos, v3::Vector3(camera::campos) + camera::frontvec * 1);
+    geometry::cone ncone = geometry::cone(camray, slope);
+    return ncone.intersectssphere(geometry::sphere(chkb));
 }
 
-v2::Vector2 facecoordsmcent(const face* fce, int ind) {
-	const v3::Vector3& meshscale = fce->mesh->scale;
-	int facetype = fce->facenum / 2;
-	v2::Vector2 offset;
+// Calculate UV coordinates for a face centered at the mesh
+v2::Vector2 facecoordtouv(const face* fce, int ind) {
+    const v3::Vector3& meshscale = fce->mesh->scale;
+    int facetype = fce->facenum / 2;
+    v2::Vector2 offset;
 
-	switch (facetype) {
-	case 0:
-		offset = v2::Vector2(meshscale.z, meshscale.y);
-		break;
-	case 1:
-		offset = v2::Vector2(meshscale.x, meshscale.z);
-		break;
-	case 2:
-		offset = v2::Vector2(meshscale.x, meshscale.y);
-		break;
-	default:
-		// Handle unexpected facetype values if necessary
-		break;
-	}
+    switch (facetype) {
+    case 0:
+        offset = v2::Vector2(meshscale.z, meshscale.y);
+        break;
+    case 1:
+        offset = v2::Vector2(meshscale.x, meshscale.z);
+        break;
+    case 2:
+        offset = v2::Vector2(meshscale.x, meshscale.y);
+        break;
+    default:
+        // Handle unexpected facetype values if necessary
+        break;
+    }
 
-	v2::Vector2 uvCoord= v2::Vector2(cubeuv[2 * ind], cubeuv[2 * ind + 1]);
-	v2::Vector2 ret = v2::unitv / 2 + offset * ((uvCoord - v2::unitv / 2) * -2);
-	return ret;
+    v2::Vector2 uvCoord = v2::Vector2(cubeuv[2 * ind], cubeuv[2 * ind + 1]);
+    v2::Vector2 ret = v2::unitv / 2 + offset * ((uvCoord - v2::unitv / 2) * -2);
+    return ret;
 }
 
-
-//locatiion of unique indices in each set of vertices
+// Indices of unique vertices for each face of the cube
 const int uniqueindices[] = {
-	5,1,2,6// east (+x)
-	,0,4,7,3,// west (-x)
-	2,3,7,6, // top (+y)
-	0,1,5,4,// bottom (-y)
-	4,5,6,7// south (+z)
-   ,0,1,2,3// north (-z)
-	
-	
-};
-//0,1,2,3 are offsets from baselocation,this is a method to get the proper indices from offset
-const int indiceoffsetfrombaselocation[]{
-	0,1,2,0,2,3
+    5, 1, 2, 6,  // east (+x)
+    0, 4, 7, 3,  // west (-x)
+    2, 3, 7, 6,  // top (+y)
+    0, 1, 5, 4,  // bottom (-y)
+    4, 5, 6, 7,  // south (+z)
+    0, 1, 2, 3   // north (-z)
 };
 
-void emitface(int face, block& torender,array<float>& datbuf,array<unsigned int>& indbuf) {
+// Offset indices for the vertices in each face
+const int indiceoffsetfrombaselocation[] = {
+    0, 1, 2, 0, 2, 3
+};
 
-	if (!torender[face].covered)
-	{
-		int baselocation = datbuf.length / 7;
-		for (int j = 0; j < 4; j++)
-		{
-			//index of uniqe vertice's in each face
-			int uniqueind = uniqueindices[4 * face + j];
-			//actual location
-			//use *.9999 so clipping does not hapepen
-			Vector3 offsetfromcenter = (vert[uniqueind] - unitv / 2) * Vector3((torender.mesh)->scale) * 2;
-			Vector3 offset = torender.mesh->pos + offsetfromcenter;
-			datbuf.append(offset.x);
-			datbuf.append(offset.y);
-			datbuf.append(offset.z);
+// Emit the vertices and indices for a single face of a block
+void emitface(int face, block& torender, array<float>& datbuf, array<unsigned int>& indbuf) {
+    if (!torender[face].covered) {
+        int baselocation = datbuf.length / 7;
+        for (int j = 0; j < 4; j++) {
+            // Index of unique vertex in each face
+            int uniqueind = uniqueindices[4 * face + j];
+            // Actual location
+            Vector3 offsetfromcenter = (vert[uniqueind] - unitv / 2) * Vector3((torender.mesh).scale) * 2;
+            Vector3 offset = torender.mesh.pos + offsetfromcenter;
+            datbuf.append(offset.x);
+            datbuf.append(offset.y);
+            datbuf.append(offset.z);
 
-			//2*j is x coord 2*j+1 is y coord
-			v2::Vector2 coords = facecoordsmcent(&torender[face], j);
-		
-			
-			datbuf.append(coords.x);
-			float ytexpos = (cubeuv[2 * j + 1]);
-			datbuf.append(coords.y);
-			int texturenumb = (*(torender).mesh)[face].tex;
-			datbuf.append(texturenumb);
-			
-				
-				if (torender.transparent) {
-					datbuf.append(torender.lightval);
+            // UV coordinates
+            v2::Vector2 coords = facecoordtouv(&torender[face], j);
+            datbuf.append(coords.x);
+            datbuf.append(coords.y);
 
-				}
-				else {
+            // Texture number
+            int texturenumb = ((torender).mesh)[face].tex;
+            datbuf.append(texturenumb);
 
-					datbuf.append((*torender.mesh)[face].light);
-				}
-			
-		}
+            // Light value
+            if (torender.transparent) {
+                datbuf.append(torender.lightval);
+            }
+            else {
+                datbuf.append((torender.mesh)[face].light);
+            }
+        }
 
-		for (int j = 0; j < 6; j++)
-		{
-			int indicelocation = baselocation + indiceoffsetfrombaselocation[j];
-			indbuf.append(indicelocation);
-		}
-	}
+        for (int j = 0; j < 6; j++) {
+            int indicelocation = baselocation + indiceoffsetfrombaselocation[j];
+            indbuf.append(indicelocation);
+        }
+    }
 }
+
+// Emit the faces for a block
 void emitblock(block& torender, array<float>& datbuf, array<unsigned int>& indbuf) {
-	if (torender.id != minecraftair)
-	{
-
-
-		for (int i = 0; i < 6; i++)
-		{
-
-			//set u to length ofver 6 because now 0-first new elem of bufffer
-
-			//each vertice of the face
-			
-
-				emitface(i, torender, datbuf, indbuf);
-			
-		}
-	}
-
+    if (torender.id != minecraftair) {
+        for (int i = 0; i < 6; i++) {
+            emitface(i, torender, datbuf, indbuf);
+        }
+    }
 }
+
+// Recreate the mesh for a chunk
 void recreatechunkmesh(Chunk::chunk* aschunk) {
-	aschunk->mesh->indbuf.destroy();
-	aschunk->mesh->datbuf.destroy();
-	aschunk->mesh->facebuf.destroy();
-	aschunk->mesh->facebuf = dynamicarray::array<face>();
-	aschunk->mesh->indbuf= dynamicarray::array<unsigned int>();
-	aschunk->mesh->datbuf = dynamicarray::array<float>();
-	
+    aschunk->mesh->indbuf.destroy();
+    aschunk->mesh->datbuf.destroy();
+    aschunk->mesh->facebuf.destroy();
+    aschunk->mesh->facebuf = dynamicarray::array<face>();
+    aschunk->mesh->indbuf = dynamicarray::array<unsigned int>();
+    aschunk->mesh->datbuf = dynamicarray::array<float>();
 
-	for (int ind = 0;ind < chunksize;ind++) {
+    for (int ind = 0; ind < chunksize; ind++) {
+        block& blockatpos = (aschunk->blockbuf[ind]);
 
-		block& blockatpos = (aschunk->blockbuf[ind]);
-		if (blockatpos.transparent == false)
-		{
-			emitblock(blockatpos, aschunk->mesh->datbuf, aschunk->mesh->indbuf);
-		}
-		else
-		{
-			if (blockatpos.id != minecraftair)
-			{
-
-
-				for (int x = 0; x < 6; x++)
-				{
-					//each vertice of the face
-					if (!(*blockatpos.mesh)[x].covered)
-					{
-
-						aschunk->mesh->facebuf.append((*blockatpos.mesh)[x]);
-					}
-			//implement sort elsewere
-				}
-			}
-		}
-
-
-	}
-
+        if (!blockatpos.transparent) {
+            emitblock(blockatpos, aschunk->mesh->datbuf, aschunk->mesh->indbuf);
+        }
+        else {
+            if (blockatpos.id != minecraftair) {
+                for (int x = 0; x < 6; x++) {
+                    if (!(blockatpos.mesh)[x].covered) {
+                        aschunk->mesh->facebuf.append((blockatpos.mesh)[x]);
+                    }
+                }
+            }
+        }
+    }
 }
 
-void renderchnk(chunkmesh& mesh,bool transparent)
-{
+// Render a chunk mesh
+void renderchnk(chunkmesh& mesh, bool transparent) {
+    if (!transparent) {
+        renderer::renderquadlist(mesh.Voa, mesh.ibo, mesh.VBO, mesh.datbuf, mesh.indbuf);
+    }
+    else {
+        // Enable 2D render
+        array<float> datbuf = array<float>();
+        array<unsigned int> indbuf = array<unsigned int>();
 
-	if (!transparent)
-	{
-		renderer::renderquadlist(mesh.Voa, mesh.ibo, mesh.VBO, mesh.datbuf, mesh.indbuf);
-	}
-	else
-	{
-
-		//enable 2d render
-		array <float> datbuf = array<float>();
-		array<unsigned int> indbuf = array<unsigned int>();
-		
-		for (int i = 0; i < mesh.facebuf.length; i++)
-		{
-			
-			emitface(mesh.facebuf[i].facenum, *(mesh.facebuf[i].mesh->blk),datbuf,indbuf);
-		}
-		renderer::renderquadlist(mesh.Voa, mesh.ibo, mesh.VBO, datbuf, indbuf);
-		datbuf.destroy();
-		indbuf.destroy();
-	}
+        for (int i = 0; i < mesh.facebuf.length; i++) {
+            emitface(mesh.facebuf[i].facenum, *(mesh.facebuf[i].mesh->blk), datbuf, indbuf);
+        }
+        renderer::renderquadlist(mesh.Voa, mesh.ibo, mesh.VBO, datbuf, indbuf);
+        datbuf.destroy();
+        indbuf.destroy();
+    }
 }
 
+// Initialize the data buffer and render chunks
+void blockrender::initdatabuffer() {
+    glUseProgram(renderer::shaderlist[renderer::normalshader].id);
+    for (int i = 0; i < totalgridsize; i++) {
+        if (chunklist[i]->mesh->meshrecreateneeded) {
+            recreatechunkmesh(chunklist[i]);
+            chunklist[i]->mesh->meshrecreateneeded = false;
+        }
+        chunklist[i]->mesh->sortbuf();
+    }
 
+    array<Chunk::chunk> tosort = array<Chunk::chunk>();
+    v3::Vector3 camerapos = camera::campos;
 
-void blockrender::initdatabuffer()
-{
-	glUseProgram(renderer::shaderlist[renderer::normalshader].id);
-	for (int i = 0; i < totalgridsize; i++)
-	{
-		if (chunklist[i]->mesh->meshrecreateneeded) {
-			recreatechunkmesh(chunklist[i]);
-			chunklist[i]->mesh->meshrecreateneeded = false;
-		
-		}
-		chunklist[i]->mesh->sortbuf();
-	}
-	array<Chunk::chunk> tosort = array < Chunk::chunk >();
-	
-	v3::Vector3 camerapos = camera::campos;
-	
-	for (int i = 0; i < totalgridsize; i++)
-	{
-		tosort.append(*(chunklist[i]));
+    for (int i = 0; i < totalgridsize; i++) {
+        tosort.append(*(chunklist[i]));
+    }
 
+    oalgorithm::quicksort<Chunk::chunk>(tosort.getdata(), tosort.length);
+    renderer::changerendertype(renderer::rendersolid);
 
-	}
-   oalgorithm::quicksort<Chunk::chunk>(tosort.getdata(), tosort.length);
-   renderer::changerendertype(renderer::rendersolid);
-  
-   for (int i = 0; i < totalgridsize; i++)
-	{
-	   if (chunkviewable(&tosort[i]))
-	   {
-		   renderchnk(*tosort[i].mesh, false);
-	   }
-	
-	}
-	
-	renderer::changerendertype(renderer::rendertransparent);
-	for (int i = 0; i < totalgridsize; i++)
-	{
-		if (chunkviewable(&tosort[i]))
-		{
-			renderchnk(*tosort[i].mesh, true);
-		}
-	}
+    for (int i = 0; i < totalgridsize; i++) {
+        if (chunkviewable(&tosort[i])) {
+            renderchnk(*tosort[i].mesh, false);
+        }
+    }
 
-	tosort.destroy();
-	
+    renderer::changerendertype(renderer::rendertransparent);
+    for (int i = 0; i < totalgridsize; i++) {
+        if (chunkviewable(&tosort[i])) {
+            renderchnk(*tosort[i].mesh, true);
+        }
+    }
 
+    tosort.destroy();
 }
 

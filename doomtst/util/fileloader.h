@@ -66,7 +66,7 @@ struct safefile
 	safefile(char* filepath, mode openmode);
 	void close();
 
-	void go(size_t byteoffset);
+	void go(unsigned int byteoffset);
 	template <typename T>
 	void write(T* ptr, size_t amt)
 	{

@@ -16,7 +16,9 @@ namespace meshname {
 
 	struct mesh
 	{
+		v3::Vector3 rotation;
 		v3::Vector3 pos;
+		void setmodeluniform();
 		texture tex;
 		mesh();
 		array<Vector3> vertices;
@@ -25,9 +27,16 @@ namespace meshname {
 		array<unsigned int> texindices;
 		Vector3 nthvertex(int i);
 		v2::Vector2 nthtex(int i);
+		vobj::vao meshvao;
+		vobj::vbuf meshvbuf;
+		void setvobjs() {
+
+			meshvbuf.generate(GL_ARRAY_BUFFER);
+			meshvao.generate();
+		}
 	};
 
 	mesh* loadmesh(const char* name,texture TEX,Vector3 position);
-	void rendermesh(mesh* torender, vao Vao, vbuf vbo);
+	void rendermesh(mesh* torender);
 }
 #endif // ! mesh_H

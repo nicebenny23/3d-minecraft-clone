@@ -18,7 +18,7 @@ namespace timename {
 
 		auto currtime = glfwGetTime();
 		dt = currtime - gametime;
-		mindt =std::max(dt, .01f);
+		mindt =std::min(dt, .01f);
 
 		fps = 1000 / dt;
 

@@ -58,6 +58,21 @@ namespace grid {
 		return nullptr;
 	}
 
+	void updateblocks()
+	{
+		for (int gridind = 0; gridind < totalgridsize; gridind++)
+		{
+			for (int chunkind = 0; chunkind < chunksize; chunkind++)
+			{
+				block& blk = (*chunklist[gridind])[chunkind];
+				for (int compind= 0; compind< blk.complist.length; compind++)
+				{
+					blk.complist[compind]->update();
+				}
+			}
+		}
+	}
+
 
 	block* getobjatgrid(int x, int y, int z, bool countnonsolids)
 	{

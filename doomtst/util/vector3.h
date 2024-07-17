@@ -374,8 +374,13 @@ namespace v3 {
 
 		return(p / magnitude(p));
 	}
-
-
+	inline Vector3 crossprod(const Vector3& p, const Vector3& p1) {
+		Vector3 crosspoint;
+		crosspoint.x = p.y * p1.z - p.z * p1.y;
+		crosspoint.y = p.z * p1.x - p.x * p1.z;
+		crosspoint.z = p.x * p1.y - p.y * p1.x;
+		return crosspoint;
+	}
 
 
 	inline Vector3 lerp(const Vector3& p, const Vector3& p1, float t) {

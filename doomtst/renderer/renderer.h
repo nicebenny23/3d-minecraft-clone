@@ -40,6 +40,7 @@ namespace renderer {
 		rendermodel= 3,
 		renderparticle=4,
 	}; void changerendertype(rendertype rentype);
+
 }
 #endif
 

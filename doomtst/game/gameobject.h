@@ -9,7 +9,7 @@ using namespace dynamicarray;
 #ifndef gameobj_HPP
 
 #define gameobj_HPP
-#define entsize 16*16*16*150
+
 namespace gameobject {
 
 
@@ -36,7 +36,7 @@ namespace gameobject {
 		return stringtoint[name];
 	}
 
-	
+
 	inline int compidfromname(char* name) {
 		if (stringtoint.count(name) == 0)
 		{
@@ -44,7 +44,7 @@ namespace gameobject {
 			return -1;
 		}
 
-		
+
 		return stringtoint[name];
 	}
 
@@ -56,10 +56,10 @@ namespace gameobject {
 
 
 
-	
+
 	struct obj;
-	
-	
+
+
 	extern array<obj*> objectfromguid;
 
 	struct component
@@ -79,7 +79,7 @@ namespace gameobject {
 		virtual void start();
 
 		virtual void update();
-		virtual void blockfaceupdate(obj* blk,int face);
+		virtual void blockfaceupdate(obj* blk, int face);
 
 
 		int id;
@@ -89,17 +89,17 @@ namespace gameobject {
 	enum objtype {
 		block = 0,
 		entity = 1
-		
+
 	};
 	struct obj
 	{
-		int guid;
+
 
 		array<component*> complist;
 
-		obj(v3::Vector3 ipos, const char* _name);
+		//obj(v3::Vector3 ipos, const char* _name);
 
-		bool test;
+		
 		objtype type;
 
 		template <class T>
@@ -111,8 +111,7 @@ namespace gameobject {
 		template <class T>
 		void removecomponent();
 
-		template <class T>
-		array<T>  getcomponents();
+		
 
 
 		template <class T, typename... types>
@@ -127,10 +126,7 @@ namespace gameobject {
 
 
 	void destroy(obj* object);
-	void deleteobjs();
-	int getgoid();
-	void initobjs();
-	void runupdateloop();
+
 
 	template <class T>
 	void obj::removecomponent()
@@ -146,7 +142,7 @@ namespace gameobject {
 			if (id == complist[i]->id) {
 				complist.deleteind(i);
 				i--;
-				
+
 			}
 		}
 		return;
@@ -175,31 +171,6 @@ namespace gameobject {
 		}
 		static_assert("", "");
 	}
-	//barely used
-	template <class T>
-	array<T> obj::getcomponents()
-	{
-
-
-
-
-		int id = idfromnameadd((char*)(typeid(T).name()));
-		if (id == -1)
-		{
-
-		}
-		array<T> componentlist = *(new array<T>());
-		for (int i = 0; i < complist.length; i++)
-		{
-
-			if (id == complist[i]->id) {
-				componentlist.append(*dynamic_cast<T*>(complist[i]));
-			}
-		}
-
-		return componentlist;
-
-	}
 
 
 	template <class T>
@@ -210,7 +181,7 @@ namespace gameobject {
 		int id = compidfromname((char*)(typeid(T).name()));
 		if (id == -1)
 		{
-			Assert("component not defined yet");
+	//no assert because it should be safe to do this 
 
 			return false;
 		}
@@ -241,9 +212,9 @@ namespace gameobject {
 
 
 		int id = idfromnameadd((char*)(typeid(T).name()));
-	//fix
-		//Assert(std::is_constructible_v<T, types...>, "no constructer takes these parameters");
-	//	Assert(std::is_base_of<component, T>::value, "T is not a component");
+		//fix
+			//Assert(std::is_constructible_v<T, types...>, "no constructer takes these parameters");
+		//	Assert(std::is_base_of<component, T>::value, "T is not a component");
 
 		T* comp = new T(std::forward<types>(initval)...);
 
@@ -266,20 +237,6 @@ namespace gameobject {
 	//is a guid with 2 numbers one for hashing and another for checking this basicly ellimiantes any prossiblity for collision as the other one can go to 2billion
 
 
-	struct objref
-	{
-		int guid;
-		int probguid;
-		objref(obj& object) {
-			guid = object.guid;
-		}
-		obj* toobj();
-		objref() {
-
-			 guid = -1;
-		}
-	};
-
 
 
 
@@ -288,7 +245,7 @@ namespace gameobject {
 		for (int i = 0; i < object->complist.length; i++)
 		{
 			object->complist[i]->ondestroy();
-		//deletes component refered to by pointer
+			//deletes component refered to by pointer
 			delete object->complist[i];
 
 		}
@@ -296,10 +253,8 @@ namespace gameobject {
 		object->complist.destroy();
 		//makes it so "object from guid is now freed"
 
-		objectfromguid[object->guid] = nullptr;
-		
 	}
 
-	
-	}
+
+}
 #endif#pragma once

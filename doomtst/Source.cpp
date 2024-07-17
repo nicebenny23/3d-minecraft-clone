@@ -12,25 +12,27 @@
 #include "world/chunk.h"
 #include "game/objecthelper.h"
 #include "world/grid.h"
-#include "game/collision.h"
+
 #include "renderer/blockrender.h"
 #include "world/managegrid.h"
 #include "util/time.h"
-#include "game/playermovment.h"
+#include "game/collision.h"
 #include "renderer/uirender.h"
 #include "playermodification.h"
 #include "util/fileloader.h"
+#include "player/player.h"
 // settings
-const Vector3 spawnpos = glm::vec3(-100, -30, 200);
+const Vector3 spawnpos = glm::vec3(-100, 56, 200);
 const unsigned int SCR_WIDTH = 4000;
 const unsigned int SCR_HEIGHT = 3000;
 void init() {
+ 
     timename::inittime();
     randominit();
     window::createcurwindow(1600, 1200);
     userinput::initiate();
     gameobject::initmap();
-    gameobject::initobjs();
+    entityname::initobjs();
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -55,21 +57,17 @@ void init() {
 
 int main()
 {
+
     init();
-    vobj::vbuf testbuf;
-    vobj::vao testvoa;
-    testbuf.generate(GL_ARRAY_BUFFER);
-    testvoa.generate();
-    texture mtex = texture("images\\crystalore.png", png);
-    meshname::mesh newmehs = *meshname::loadmesh("newtest.obj", mtex,spawnpos);
+    player::initplayer();
+   
+    texture mtex = texture("slimetex.png", png);
+    meshname::mesh newmehs = *meshname::loadmesh("slime.obj", mtex,spawnpos);
   
-  
-entity::entityref human = entity::createentity(spawnpos, "");
-human.toent()->addcomponent<colrect>(spawnpos,unitv/2,false);
+   // newmehs.rotation = Vector3(1, 1, 1);
 
 float lastupdate = 0;
-human.toent()->addcomponent<playermovement>();
-human.toent()->addcomponent<playermod>();
+
 while (!window::shouldclose())
     {
     timename::calcfps();
@@ -77,34 +75,36 @@ while (!window::shouldclose())
     window::processInput();
 
     renderer::clear();
-    gameobject::runupdateloop();
-
+    entityname::runupdateloop();
+    grid::updateblocks();
     collision::update();
-
+    
 
 
     camera::calculateyawandpitch();
 
-    camera::setcamerapos(human.toent()->pos);
+ 
     camera::sendoffviewmatrix();
 
     userinput::endupdate();
     // update shader uniform
-   
+    camera::setcamerapos(player::goblin.toent()->pos);
     grid::reupdatechunkborders();
     grid::load();
     if (grid::gridchanged())
     {
         gridutil::computeallcover();
-        gridutil::redolighting();
-    }
+        gridutil::redoallighting = true;
 
-    meshname::rendermesh(&newmehs, testvoa, testbuf);
+    }
+    //newmehs.rotation += Vector3(1,0,1)/30;
+    gridutil::redolighting();
+    meshname::rendermesh(&newmehs);
     blockrender::initdatabuffer();
    
     uirender::renderuilist();
 
-    gameobject::deleteobjs();
+    entityname::deleteobjs();
 
     window::swapbuffer();
     glfwPollEvents();
@@ -113,7 +113,7 @@ while (!window::shouldclose())
         {
 
             lastupdate = 0;
-            Vector3 pos1 = human.toent()->pos;
+           // Vector3 pos1 = human.toent()->pos;
             std::cout <<1/timename::dt << '\n';
         }
     }

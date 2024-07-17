@@ -4,6 +4,9 @@
 namespace camera {
 	glm::vec3 campos;
 	float yaw, pitch;
+	v3::Vector3 upvec;
+	v3::Vector3 frontvec;
+	v3::Vector3 rightvec;
 	void initilize()
 	{
 		campos = glm::vec3(0,16,-1);
@@ -58,6 +61,10 @@ namespace camera {
 		glm::vec3 cameraFront = glm::normalize(direction);
 		glm::vec3 Right = glm::normalize(glm::cross(cameraFront, glm::vec3(0, 1, 0)));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
 		glm::vec3    Up = glm::normalize(glm::cross(Right, cameraFront));
+		upvec = v3::Vector3(Up);
+		rightvec= v3::Vector3(Right);
+		frontvec= v3::Vector3(cameraFront);
+
 		renderer::setviewmatrix(glm::lookAt(campos, campos + cameraFront, Up));
 		
 	

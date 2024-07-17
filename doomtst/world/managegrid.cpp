@@ -1,6 +1,7 @@
 #include "managegrid.h"
 #include "../block/blockinit.h"
 queue<block*> lightingq;
+bool gridutil::redoallighting=true;
 void gridutil::sendrecreatemsg()
 {
 
@@ -22,8 +23,13 @@ void gridutil::computecover(face& blkface)
 	
 	if (!apx(blkface.mesh->scale,(unitscale) ))
 	{
-		blkface.covered = false;
-		return;
+		if (blkface.mesh->blk->id != minecraftwater)
+		{
+
+			blkface.covered = false;
+			return;
+		}
+		
 	}
 	blkface.covered = true;
 	
@@ -60,9 +66,9 @@ void gridutil::computeallcover()
 			for (int faceind = 0; faceind < 6; faceind++)
 			{
 				
-				face& tocover = (chunklist[gridind]->blockbuf[blockind])[faceind];
+				face* tocover = &(chunklist[gridind]->blockbuf[blockind])[faceind];
 				
-				computecover(tocover);
+				computecover(*tocover);
 			}
 
 		}
@@ -97,7 +103,7 @@ void gridutil::emitlight()
 					}
 					else
 					{
-						int blockface = i + 1 -2* modabs(i, 2);
+						int blockface = invdir(i);
 
 						(*blocklight)[blockface].light = blk->lightval;
 
@@ -112,27 +118,31 @@ void gridutil::emitlight()
 
 void gridutil::redolighting()
 {
-
-
-	for (int chunkind = 0; chunkind < totalgridsize; chunkind++)
+	if (redoallighting)
 	{
-		for (int blockind = 0; blockind < chunksize; blockind++)
+
+
+		redoallighting = false;
+
+		for (int chunkind = 0; chunkind < totalgridsize; chunkind++)
 		{
-			block* blk = &(*chunklist[chunkind])[blockind];
-			blk->lightval = 0;
-			for (int faceind = 0; faceind < 6; faceind++)
+			for (int blockind = 0; blockind < chunksize; blockind++)
 			{
-				(*blk->mesh)[faceind].light = 0;
-			}
-			blk->lightval = blk->emitedlight;
-			if (0 < blk->emitedlight)
-			{
-				lightingq.append(blk);
+				block* blk = &(*chunklist[chunkind])[blockind];
+				blk->lightval = 0;
+				for (int faceind = 0; faceind < 6; faceind++)
+				{
+					(blk->mesh)[faceind].light = 0;
+				}
+				blk->lightval = blk->emitedlight;
+				if (0 < blk->emitedlight)
+				{
+					lightingq.append(blk);
+				}
 			}
 		}
+		emitlight();
 	}
-	emitlight();
-
 }
 void gridutil::placeblockatloc(int x, int y, int z, int blockid)
 
@@ -148,20 +158,24 @@ void gridutil::placeblockatloc(int x, int y, int z, int blockid)
 
 			for (int faceind = 0; faceind < 6; faceind++)
 			{
-				computecover((*location->mesh)[faceind]);
+				computecover((location->mesh)[faceind]);
 			}
 			for (int blkind = 0; blkind < 6; blkind++)
 			{
 				block* blockatpos = getobjatgrid(dirfromint(blkind) + location->pos);
 				for (int faceind = 0;faceind < 6;faceind++) {
 					
-					computecover((*(blockatpos->mesh))[faceind]);
-					
+					if (blockatpos != nullptr)
+					{
+
+
+						computecover(((blockatpos->mesh))[faceind]);
+					}
 				}
 			}
 		}
 		sendrecreatemsg();
-		redolighting();
+		redoallighting = true;
 		
 		
 }
@@ -176,25 +190,27 @@ void gridutil::destroyblockatloc(int x, int y, int z)
 
 		for (int faceind = 0; faceind < 6; faceind++)
 		{
-			computecover((*location->mesh)[faceind]);
+			computecover((location->mesh)[faceind]);
 		}
 		for (int blkind = 0; blkind < 6; blkind++)
 		{
 			block* blockatpos = getobjatgrid(dirfromint(blkind) + location->pos);
 			for (int faceind = 0;faceind < 6;faceind++) {
-				computecover((*(blockatpos->mesh))[faceind]);
+				computecover(((blockatpos->mesh))[faceind]);
 
 			}
 		}
 	}
 	sendrecreatemsg();
-	redolighting();
+	redoallighting = true;
 
 }
 
 
 void gridutil::setblock(Coord loc, int blockid)
 {
+	block* curblock = getobjatgrid(loc, true);
+
 	int prevemit = grid::getobjatgrid(loc, true)->emitedlight;
 	chunkatpos(loc.x, loc.y, loc.z)->modified = true;
 	if (blockid!=minecraftair)
@@ -210,6 +226,7 @@ void gridutil::setblock(Coord loc, int blockid)
 	bool transparent = grid::getobjatgrid(loc, true)->transparent;
 	if (currlightemit >= prevemit)
 	{
+		gridutil::redoallighting = true;
 
 		lightingq.append(grid::getobjatgrid(loc, true));
 		for (int i = 0; i < 6; i++)
@@ -226,8 +243,19 @@ void gridutil::setblock(Coord loc, int blockid)
 	else
 	{
 		
-		redolighting();
-		
+		//redolighting();
+		gridutil::redoallighting = true;
+
+		for (int i = 0; i < 6; i++)
+		{
+			v3::Vector3 dir = dirfromint(i);
+			block* tobeupdated = getobjatgrid(loc + dir, true);
+			if (tobeupdated!=nullptr)
+			{
+				tobeupdated->blkfaceupdate(curblock, invdir(i));
+			}
+			
+		}
 
 	}
 }

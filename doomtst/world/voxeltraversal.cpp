@@ -36,6 +36,61 @@ voxtra::raycolwithgrid  voxtra::travvox(ray nray, float acc)
 	}
 	return voxtra::raycolwithgrid();
 }
+
+bool voxtra::Boxcollwithgrid (geometry::Box bx, float acc)
+{
+
+	v3::Vector3 lowpos = bx.center - bx.scale - unitv;
+
+	v3::Coord lowest = v3::Coord(floorabs(lowpos.x), floorabs(lowpos.y), floorabs(lowpos.z));
+	v3::Vector3 highpos = bx.center + bx.scale + unitv;
+
+	v3::Coord highest = v3::Coord(ceilabs(highpos.x), ceilabs(highpos.y), ceilabs(highpos.z));
+	
+	for (int x = lowest.x; x < highest.x; x++)
+	{
+		for (int y = lowest.y; y < highest.y; y++)
+		{
+			for (int z = lowest.z; z < highest.z; z++)
+			{
+				
+				blockname::block* tocollide = grid::getobjatgrid(x, y, z, false);
+				if (tocollide == nullptr)
+				{
+					continue;
+				}
+				if (!tocollide->hascomponent<aabb::colrect>())
+				{
+				    continue;
+				}
+						aabb::colrect& blockcol = tocollide->getcomponent<aabb::colrect>();
+
+
+
+						bool collided = aabb::aabbboxintersect(bx, blockcol);
+
+
+						if (collided )
+						{
+							return true;
+						}
+						
+
+				}
+		}
+
+
+	}
+	return false;
+}
+
+
+
+
+
+
+
+
 	block* voxtra::findprevblock(ray nray, float acc)
 	{
 		float maxdist = nray.length();

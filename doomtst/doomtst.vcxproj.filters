@@ -90,6 +90,21 @@
     <ClCompile Include="mesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="particles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="player\player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\time.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\geometry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="util\vector3.h">
@@ -194,13 +209,7 @@
     <ClInclude Include="rigidbody.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game\playermovment.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="renderer\uirender.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="cone.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="playermodification.h">
@@ -227,19 +236,67 @@
     <ClInclude Include="mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="block\air.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\blockinit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\crystalore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\dirt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\glass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\grass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\stone.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\torch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\water.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\wood.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playerhealth.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playermovment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\geometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="collutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\liquid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="frag1.vs">
+    <None Include="shaders\frag1.vs" />
+    <None Include="shaders\modelfragment.vs" />
+    <None Include="shaders\modelvertex.vs" />
+    <None Include="shaders\particlefragment.vs" />
+    <None Include="shaders\particlevertex.vs" />
+    <None Include="shaders\uifragment.vs" />
+    <None Include="shaders\uivertex.vs" />
+    <None Include="shaders\vert1.vs" />
+    <None Include="shaders\spritefragment.vs" />
+    <None Include="shaders\spritevert.vs">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="vert1.vs">
-      <Filter>Source Files</Filter>
-    </None>
-    <None Include="uivertex.vs" />
-    <None Include="uifragment.vs" />
-    <None Include="renderer\particlevertex.vs" />
-    <None Include="renderer\particlefragment.vs" />
-    <None Include="modelvertex.vs" />
-    <None Include="modelfragment.vs" />
   </ItemGroup>
 </Project>

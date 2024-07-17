@@ -13,5 +13,5 @@ void main()
     float scale = 10.0f;
     TexCoords = texcoord;
 
-    gl_Position = projection * vec4(vertex*scale, 1.0);
+    gl_Position = projection * vec4(vertex*scale+offset, 1.0);
 }

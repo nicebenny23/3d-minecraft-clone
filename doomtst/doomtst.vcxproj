@@ -140,12 +140,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="game\entity.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="particles.cpp" />
+    <ClCompile Include="player\player.cpp" />
     <ClCompile Include="util\fileloader.cpp" />
     <ClCompile Include="game\aabb.cpp" />
     <ClCompile Include="block\block.cpp" />
     <ClCompile Include="renderer\uirender.cpp" />
+    <ClCompile Include="util\geometry.cpp" />
     <ClCompile Include="util\time.cpp" />
     <ClCompile Include="world\managegrid.cpp" />
     <ClCompile Include="renderer\blockrender.cpp" />
@@ -175,19 +178,23 @@
     <ClInclude Include="block\dirt.h" />
     <ClInclude Include="block\glass.h" />
     <ClInclude Include="block\grass.h" />
+    <ClInclude Include="block\liquid.h" />
     <ClInclude Include="block\stone.h" />
     <ClInclude Include="block\torch.h" />
     <ClInclude Include="block\water.h" />
     <ClInclude Include="block\wood.h" />
-    <ClInclude Include="cone.h" />
+    <ClInclude Include="collutil.h" />
     <ClInclude Include="game\storagecomp.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="particles.h" />
     <ClInclude Include="game\entitystate.h" />
+    <ClInclude Include="player\player.h" />
+    <ClInclude Include="player\playerhealth.h" />
+    <ClInclude Include="util\geometry.h" />
     <ClInclude Include="util\fileloader.h" />
     <ClInclude Include="game\aabb.h" />
-    <ClInclude Include="game\playermovment.h" />
+    <ClInclude Include="player\playermovment.h" />
     <ClInclude Include="playermodification.h" />
     <ClInclude Include="rigidbody.h" />
     <ClInclude Include="renderer\uirender.h" />
@@ -231,6 +238,8 @@
     <None Include="shaders\modelvertex.vs" />
     <None Include="shaders\particlefragment.vs" />
     <None Include="shaders\particlevertex.vs" />
+    <None Include="shaders\spritefragment.vs" />
+    <None Include="shaders\spritevert.vs" />
     <None Include="shaders\uifragment.vs" />
     <None Include="shaders\uivertex.vs" />
     <None Include="shaders\vert1.vs" />

@@ -21,7 +21,7 @@ enum blocktex {
 using namespace v3;
 
 namespace blockname {
-	const v3::Vector3 unitscale = unitv * 1 / 2.004;
+	const v3::Vector3 unitscale = unitv * 1 / 2.002;
 	enum id
 	{
 		minecraftair = 0,
@@ -35,9 +35,9 @@ namespace blockname {
 		minecrafttorch = 7,
 		minecraftwood = 8,
 	};
-
 	struct blockmesh;
 	struct face {
+		
 		blockmesh* mesh;
 		bool covered;
 		byte tex;
@@ -67,7 +67,11 @@ namespace blockname {
 	struct block;
 
 
-
+	enum directionmode {
+		attachdir = 0,
+		orientdir=1,
+		ignoredir=2,
+	};
 	struct blockmesh
 	{
 
@@ -83,7 +87,8 @@ namespace blockname {
 			scale = zerov;
 			blk = parent;
 		}
-		dir3d direction;
+		int direction;
+		int attachdir;
 		Vector3 pos;
 		Vector3 scale;
 		face up;
@@ -123,17 +128,17 @@ namespace blockname {
 		bool solid;
 		byte id;
 		v3::Coord pos;
-		blockmesh* mesh;
+		blockmesh mesh;
 		
 	
 		Vector3 center() {
 			return pos + unitv / 2;
 	    }
 		
-		
-		//todo externd thissso we dont hav4e to use bad function s
-		 block(v3::Coord placment,int blockid);
+
+		 block(v3::Coord location,int blockid);
 		 block();
+		 void initasgameobj();
 		 void createaabb();
 	};
 
