@@ -1,9 +1,11 @@
 #include "../renderer/uirender.h"
 #include "inventoryblock.h"
+#include "itemstorage.h"
 using namespace uirender;
 using namespace dynamicarray;
 #ifndef  menu_HPP
 #define menu_HPP
+
 struct menu
 {
 
@@ -11,13 +13,14 @@ struct menu
 	void(*closeinven);
 		uibox* menubox;
 		
-		 array<invblock> blockstore;
+		Container blkcont;
 	bool isopen;
 	void open();
 	menu() = default;
 	menu(v2::Vector2 size);
 	void testclick(item* held);
-
+	virtual void onopen();
+	virtual void onclose();
 };
 
 extern menu* openmenu;

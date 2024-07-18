@@ -80,7 +80,7 @@ namespace gameobject {
 
 		virtual void update();
 		virtual void blockfaceupdate(obj* blk, int face);
-
+		virtual void oncollision(obj* collidedwith);
 
 		int id;
 

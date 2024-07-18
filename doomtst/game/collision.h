@@ -15,7 +15,7 @@ namespace collision {
 
 	bool aabbCollidesWithEntity(Collider* blk);
 	voxtra::RayCollisionWithGrid raycastCollisionWithGrid(ray nray);
-	
+	void handleduelentitycollisions();
 void handleCollisionWithGrid(Collider& entity);
 }
 #endif

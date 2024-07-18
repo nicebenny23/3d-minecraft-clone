@@ -16,7 +16,7 @@ struct item
 {
 
 	item(int itemid);
-	itemstate state;
+	int state;
 	item() {
 	}
 	int id;
