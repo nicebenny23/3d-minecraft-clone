@@ -6,6 +6,7 @@
 #include "../rigidbody.h"
 #include "../world/voxeltraversal.h"
 #include "../game/entitystate.h"
+#include "../items/menu.h"
 #ifndef player_H
 #define player_H
 struct playermovement:gameobject::component

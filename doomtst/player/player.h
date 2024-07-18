@@ -10,6 +10,7 @@
 namespace player {
 	extern entityname::entityref goblin;
 	void initplayer();
+	extern bool playeractive;
 }
 
 #endif // !player_H

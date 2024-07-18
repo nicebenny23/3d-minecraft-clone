@@ -13,6 +13,14 @@ void collision::update()
 
 		}
 	}
+	handleduelentitycollisions();
+	for (int i = 0; i < Colliderlist.length; i++)
+	{
+		if (Colliderlist[i] != nullptr) {
+
+			Colliderlist[i]->prevpos = Colliderlist[i]->center;
+		}
+	}
 }
 
 voxtra::RayCollisionWithGrid collision::raycastCollisionWithGrid(ray nray) {
@@ -46,6 +54,45 @@ voxtra::RayCollisionWithGrid collision::raycastCollisionWithGrid(ray nray) {
 	
 	
 	
+}
+void componentcollisionsend(gameobject::obj* reciever, gameobject::obj* collided) {
+
+	for (int i = 0; i < reciever->complist.length; i++)
+	{
+		reciever->complist[i]->oncollision(collided);
+	}
+}
+void collision::handleduelentitycollisions()
+{
+	for (int i = 0; i < Colliderlist.length; i++)
+	{
+		for (int j = 0;j < Colliderlist.length; j++)
+		{
+			if (i == j) {
+				continue;
+            }
+
+			if (Colliderlist[i] == nullptr || Colliderlist[j] == nullptr) {
+
+				continue;
+			}
+			v3::Vector3 force=  aabb::collideaabb(*Colliderlist[i], *Colliderlist[j]);
+			if (force!=zerov)
+			{
+				Vector3 actualforce = force / 2;
+				
+				Colliderlist[i]->center +=actualforce;
+				toent(Colliderlist[i]->owner).pos += actualforce;
+				componentcollisionsend(Colliderlist[i]->owner, Colliderlist[j]->owner);
+				Colliderlist[j]->center -= actualforce;
+				toent(Colliderlist[j]->owner).pos-= actualforce;
+				componentcollisionsend(Colliderlist[j]->owner, Colliderlist[i]->owner);
+
+		
+			}
+
+		}
+	}
 }
 Vector3 getplaceoffset(Vector3 inter, Vector3 center,Vector3 Colliderscale) {
 
@@ -120,6 +167,13 @@ void collision::handleCollisionWithGrid(Collider& entity)
 
 							if (force != zerov)
 							{
+								for (int i = 0; i < entity.owner->complist.length; i++)
+								{
+									entity.owner->complist[i]->oncollision(tocollide);
+								}for (int i = 0; i < tocollide->complist.length; i++)
+								{
+									tocollide->complist[i]->oncollision(entity.owner);
+								}
 
 
 								if (magnitude(force) > magnitude(minforce) || magnitude(minforce) == 0)
@@ -128,7 +182,7 @@ void collision::handleCollisionWithGrid(Collider& entity)
 									minforce = force;
 								}
 							}
-
+						
 						}
 					}
 

@@ -43,6 +43,10 @@ void gameobject::component::blockfaceupdate(obj* blk, int face)
 {
 }
 
+void gameobject::component::oncollision(obj* collidedwith)
+{
+}
+
 
 
 

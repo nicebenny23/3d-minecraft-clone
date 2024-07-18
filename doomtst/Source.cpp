@@ -65,7 +65,7 @@ int main()
     player::initplayer();
     glfwSwapInterval(0);
     texture mtex = texture("slimetex.png", png);
-    meshname::mesh newmehs = *meshname::loadmesh("slime.obj", mtex,spawnpos);
+//    meshname::mesh newmehs = *meshname::loadmesh("slime.obj", mtex,spawnpos);
 
     entityname::entityref emit = entityname::createentity(Vector3(1,20,1), "2");
     emit.toent()->addcomponent<particleemiter>(3, initbaseparticle);
@@ -105,7 +105,7 @@ while (!window::shouldclose())
     }
     //newmehs.rotation += Vector3(1,0,1)/30;
     gridutil::redolighting();
-  meshname::rendermesh(&newmehs);
+//  meshname::rendermesh(&newmehs);
     blockrender::initdatabuffer();
   
     emit.toent()->getcomponent<particleemiter>().renderparticles();

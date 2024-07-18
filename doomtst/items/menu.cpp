@@ -7,10 +7,7 @@ void menu::close()
 	isopen = false;
 	openmenu = nullptr;
 	menubox->shouldrender=false;
-	for (int i = 0; i < blockstore.length; i++)
-	{
-		blockstore[i].hide();
-	}
+	blkcont.setviewable(false);
 }
 
 void menu::open()
@@ -24,58 +21,33 @@ void menu::open()
 	{
 			openmenu->close();
 	}
-
+	
 			
 			menubox->shouldrender = true;
 			isopen = true;
 			openmenu = this;
-			for (int i = 0; i < blockstore.length; i++)
-			{
-				blockstore[i].show();
-			}
-}
-
-void menu::customclose()
-{
-}
-
-void menu::customopen()
-{
+			blkcont.setviewable(true);
 }
 
 menu::menu(v2::Vector2 size) 
 {
-	blockstore = array<invblock>();
-	int ind = 0;
-	for ( int i = -4; i < 4; i++)
-	{
-		for (int j = -4; j < 4; j++)
-		{
-			
-			blockstore[ind] = invblock(i, j);
-			ind++;
-		}
-	}
+	blkcont = Container(4, 4,0,0);
 	menubox = newbox("menutex.png", size,v2::zerov,-111);
 	menubox->shouldrender = true;
 }
 
 void menu::testclick(item* held)
 {
-	for (size_t i = 0; i < blockstore.length; i++)
+	for (size_t i = 0; i < blkcont.databuf.length; i++)
 	{
-		
-			if (blockstore[i].framebox->mouseonblock())
-			{
-		
-				if (userinput::mouseleft.pressed)
-				{
-					blockstore[i].transferitem(held);
-					//blockstore[i].onclick( blockstore[i]);
-
-				}
-
-			}
-		
+		blkcont.databuf[i].testclick(held);
 	}
+}
+
+void menu::onopen()
+{
+}
+
+void menu::onclose()
+{
 }
