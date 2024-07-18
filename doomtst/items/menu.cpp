@@ -9,10 +9,7 @@ void menu::close()
 	menubox->shouldrender=false;
 	for (int i = 0; i < blockstore.length; i++)
 	{
-		uibox* bx = blockstore[i].framebox;
-	bx->shouldrender = false;
-	blockstore[i].held.itemsprite->shouldrender = false;
-		int l = 1;
+		blockstore[i].hide();
 	}
 }
 
@@ -27,17 +24,23 @@ void menu::open()
 	{
 			openmenu->close();
 	}
-	
+
 			
 			menubox->shouldrender = true;
 			isopen = true;
 			openmenu = this;
 			for (int i = 0; i < blockstore.length; i++)
 			{
-				blockstore[i].framebox->shouldrender = true;
-				blockstore[i].held.itemsprite->shouldrender = true;
-
+				blockstore[i].show();
 			}
+}
+
+void menu::customclose()
+{
+}
+
+void menu::customopen()
+{
 }
 
 menu::menu(v2::Vector2 size) 

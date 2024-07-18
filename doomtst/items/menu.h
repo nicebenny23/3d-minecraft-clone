@@ -14,6 +14,9 @@ struct menu
 		 array<invblock> blockstore;
 	bool isopen;
 	void open();
+	virtual void customclose();
+
+	virtual void customopen();
 	menu() = default;
 	menu(v2::Vector2 size);
 	void testclick(item* held);

@@ -4,8 +4,24 @@ void destroyonclick(invblock& toremove) {
 	toremove.held.itemsprite->shouldrender = false;
 
 }
+void invblock::hide()
+{
+	framebox->shouldrender = false;
+	held.itemsprite->shouldrender = false;
+
+}
+void invblock::show()
+{
+	framebox->shouldrender = true;
+	held.itemsprite->shouldrender = true;
+}
 invblock::invblock(int xloc,int yloc)
 {
+	if (!inrange(xloc,0,xamt)|| !inrange(yloc, 0, yamt))
+	{
+		std::cout << xloc << yloc;
+		Assert("inventory block position out of bounds");
+	}
 	float xval = ((2*xloc+.5) / float(xamt));
 	float yval = ((2 * yloc+ 1) / float(yamt)) ;
 	v2::Vector2 scale = v2::Vector2(1 / float(xamt),1/float(yamt));
