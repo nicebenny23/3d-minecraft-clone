@@ -24,7 +24,7 @@ struct playermovement:gameobject::component
         {
             if (lastgroundy- pos.y>1)
             {
-                objutil::toent(owner).getcomponent<estate>().damage(floor(abs(velocity.y) / 4.f));
+                objutil::toent(owner).getcomponent<estate>().damage(floor(abs(velocity.y) / 20.f));
                 int l = 1;
 
                 lastgroundy = pos.y;
@@ -56,7 +56,7 @@ struct playermovement:gameobject::component
         }
         if (userinput::getinputkey(' ').pressed&&onground)
         {
-           velocity.y = 00 * (timename::mindt * speed);
+           velocity.y = 100 * (timename::mindt * speed);
         }
         if (userinput::getinputkey('z').held)
         {

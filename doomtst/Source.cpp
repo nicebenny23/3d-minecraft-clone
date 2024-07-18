@@ -12,7 +12,7 @@
 #include "world/chunk.h"
 #include "game/objecthelper.h"
 #include "world/grid.h"
-
+#include "particles.h"
 #include "renderer/blockrender.h"
 #include "world/managegrid.h"
 #include "util/time.h"
@@ -50,12 +50,10 @@ void init() {
 
 
     uirender::initrenderlist();
-    uirender::newbox("images\\crosshair.png", v2::unitv / 32, v2::zerov);
+    uirender::newbox("images\\crosshair.png", v2::unitv / 32, v2::zerov,3);
     userinput::endupdate();
     aabb::initCollider();
-    
-    
-    
+
     
 
 }
@@ -65,10 +63,13 @@ int main()
 
     init();
     player::initplayer();
-   
+    glfwSwapInterval(0);
     texture mtex = texture("slimetex.png", png);
-   // meshname::mesh newmehs = *meshname::loadmesh("slime.obj", mtex,spawnpos);
-  
+    meshname::mesh newmehs = *meshname::loadmesh("slime.obj", mtex,spawnpos);
+
+    entityname::entityref emit = entityname::createentity(Vector3(1,20,1), "2");
+    emit.toent()->addcomponent<particleemiter>(3, initbaseparticle);
+    emit.toent()->getcomponent<particleemiter>().tex = mtex;
    // newmehs.rotation = Vector3(1, 1, 1);
 
 float lastupdate = 0;
@@ -87,7 +88,7 @@ while (!window::shouldclose())
 
 
     camera::calculateyawandpitch();
-
+    
  
     camera::sendoffviewmatrix();
 
@@ -104,9 +105,10 @@ while (!window::shouldclose())
     }
     //newmehs.rotation += Vector3(1,0,1)/30;
     gridutil::redolighting();
-  //  meshname::rendermesh(&newmehs);
+  meshname::rendermesh(&newmehs);
     blockrender::initdatabuffer();
-   
+  
+    emit.toent()->getcomponent<particleemiter>().renderparticles();
     uirender::renderuilist();
 
     entityname::deleteobjs();

@@ -1,7 +1,7 @@
 #include "iostream"
 #include <Windows.h>
 #include "dynamicarray.h"
-
+#include "vector2.h"
 #include <glm/glm.hpp>
 #ifndef Userinput_HPP
 #define Userinput_HPP
@@ -9,6 +9,7 @@
 namespace userinput {
 	extern glm::vec2 mouseposdt;
 	extern glm::vec2 mousepos;
+	extern v2::Vector2 normedmousepos;
 		struct inputkey {
 		bool held;
 		bool relesed;

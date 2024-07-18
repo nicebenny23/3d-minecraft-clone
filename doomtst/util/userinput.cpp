@@ -5,6 +5,7 @@ namespace userinput {
 	glm::vec2 mouseposdt;
 	inputkey mouseleft;
 	inputkey mouseright;
+	v2::Vector2 normedmousepos;
 	dynamicarray::array<inputkey> keylist;
 
 	void endupdate(){

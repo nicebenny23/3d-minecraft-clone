@@ -21,6 +21,7 @@ namespace meshname {
 		void setmodeluniform();
 		texture tex;
 		mesh();
+		
 		array<Vector3> vertices;
 		array<v2::Vector2> texcoords;
 		array<unsigned int> vertexindices;

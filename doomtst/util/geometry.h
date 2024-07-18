@@ -4,7 +4,7 @@
 #include "vector3.h"
 #include "mathutil.h"
 #include "ray.h"
-
+#include "vector2.h"
 using namespace v3;
 
 namespace geometry {
@@ -18,6 +18,29 @@ namespace geometry {
 
         bool rayintersects(ray fray);
     };
+
+
+    struct Box2d {
+        v2::Vector2 center;
+        v2::Vector2 scale;
+
+        Box2d(v2::Vector2 cent, v2::Vector2 scl)
+            : center(cent), scale(scl) {}
+
+        bool pointinbox(v2::Vector2 point) {
+
+            point -= center;
+            if (abs(point.x)<scale.x,abs(point.y)<scale.y)
+            {
+                return true;
+            }
+            return false;    
+        }
+
+        Box2d() = default;
+    };
+
+
 
     struct Plane {
         Vector3 normal;

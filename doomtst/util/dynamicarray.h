@@ -17,7 +17,7 @@ namespace dynamicarray {
 		array(T* arr, int size);
 		T& operator[](int index);
 		T getelem(int index);
-		
+		void writelist();
 		array(int size);
 		void destroy();
 		T& at(int ind);
@@ -72,6 +72,14 @@ namespace dynamicarray {
 			Assert("index for getelem less than 0");
 		}
 		return list[index];
+	}
+	template<class T>
+	inline void array<T>::writelist()
+	{
+		for (int i = 0; i < length; i++)
+		{
+			std::cout << list[i] << '\n';
+		}
 	}
 	template<class T>
 	void array<T>::merge(int index, const array& arr) {
@@ -236,11 +244,12 @@ namespace dynamicarray {
 	void array<T>::insertind(int index, T value) {
 		if (index < 0)//sees if it over 0
 		{
+			std::cout << "index=" << index;
 			Assert("attempted to insert an element in array below zero");
 			return;
 		}
 		if (index > length) {
-
+			std::cout << "index=" << index;
 			Assert("attempted to insert an element in array greater than length");
 			return;
 		}
@@ -271,8 +280,10 @@ namespace dynamicarray {
 
 		if (index >= capacity)
 		{
-			if (!resize(resizelen(length)))//array resize failed
+			if (!resize(resizelen(index)))//array resize failed
 			{
+				std::cout << length;
+				Assert("could not allocate correctly");
 				return *list;//to avoid error in case of memory fail and derenfrence it because its cool
 			}
 		}
@@ -283,7 +294,7 @@ namespace dynamicarray {
 		}
 		if (index < 0)
 		{
-			
+			std::cout << "index=" << index;
 			Assert("index for [] operator less than 0");
 		}
 
@@ -304,10 +315,12 @@ namespace dynamicarray {
 	template<class T>
 	T& array<T>::at(int index) {
 		if (index >= length) {
+			std::cout << "index=" << index;
 			Assert("index for at greater than max length");
 		}
 		if (index < 0)
 		{
+			std::cout << "index=" << index;
 			Assert("index for at less than 0");
 		}
 

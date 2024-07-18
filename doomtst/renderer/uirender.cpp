@@ -1,5 +1,9 @@
 #include "uirender.h"
+#include "../util/geometry.h"
+#include "../util/userinput.h"
+#include "../util/mathutil.h"
 using namespace uirender;
+constexpr int listsize= 400;
 array<uirender::uibox*> uirender::uilist;
 const float cubeuv[] = {
 	0, 1,
@@ -17,27 +21,58 @@ v2::Vector2(-1, 1),
 v2::Vector2(1, 1)
 
 };
-uirender::uibox::uibox(const char* texloc, v2::Vector2 scl, v2::Vector2 position)
+bool uirender::uibox::mouseonblock()
 {
+	v2::Vector2 normedpos = userinput::normedmousepos;
+	normedpos -= bx.center;
+	if ( abs(normedpos.x)<bx.scale.x)
+	{
+		if (abs(normedpos.y) < bx.scale.y)
+		{
+			return true;
+		}
+	}
+	return false;
+}
 
+uirender::uibox::uibox(uibox& toreplace)
+{
+	Assert("cant copy ui box");
+}
+
+uirender::uibox::uibox(const char* texloc, v2::Vector2 scl, v2::Vector2 position, float boxpriority)
+{
+	priority = boxpriority;
 	tex = texture(texloc,png);
-	scale = scl;
-	pos = position;
+	bx.scale = scl;
+	bx.center = position;
 	shouldrender = true;
 }
 
 void uirender::initrenderlist()
 {
 	uilist = array<uibox*>();
-	for (int i = 0; i < 100; i++)
+	for (int i = 0; i < listsize; i++)
 	{
 		uilist[i] = nullptr;
 	}
 }
 
+int compareui(const void* b, const void* a) {
+	return -sign(uilist[*(int*)b]->priority- uilist[*(int*)a]->priority);
+}
 void uirender::renderuilist()
 {
-	
+	array<int> indicetosort;
+	for (int i = 0; i < listsize; i++)
+	{
+		if (uilist[i]!=nullptr)
+		{
+
+			indicetosort.append(uilist[i]->id);
+		}
+	}
+	std::qsort(indicetosort.getdata(), indicetosort.length, sizeof(int), compareui);
 	array<unsigned int> indbuf = array<unsigned int>();
 	indbuf[0] = 0;
 	indbuf[1] = 1;
@@ -53,9 +88,9 @@ void uirender::renderuilist()
 	Voa.generate();
 	VBO.generate(GL_ARRAY_BUFFER);
 	ibo.generate(GL_ELEMENT_ARRAY_BUFFER);
-	for (int i = 0; i < 100; i++)
+	for (int ind = 0; ind< indicetosort.length; ind++)
 	{
-
+		int i = indicetosort[ind];
 		if (uilist[i]!=nullptr&&uilist[i]->shouldrender)
 		{
 			array<float> databuf = array<float>();
@@ -64,7 +99,7 @@ void uirender::renderuilist()
 		
 			for (int j = 0; j< 4; j++)
 			{
-				v2::Vector2 pos = uilist[i]->pos + offset[j] * (uilist[i]->scale);
+				v2::Vector2 pos = uilist[i]->bx.center + offset[j] * (uilist[i]->bx.scale);
 				databuf.append(pos.x);
 				databuf.append(pos.y);
 				databuf.append(cubeuv[2 * j]);
@@ -82,10 +117,11 @@ void uirender::renderuilist()
 	ibo.destroy();
 }
 
-uibox* uirender::newbox(const char* texloc, v2::Vector2 scl, v2::Vector2 position)
+uibox* uirender::newbox(const char* texloc, v2::Vector2 scl, v2::Vector2 position, float boxpriority)
 {
-	uibox* newuibox = new uibox(texloc, scl,position);
-	for (int i = 0; i < 100; i++)
+	
+	uibox* newuibox = new uibox(texloc, scl,position,boxpriority);
+	for (int i = 0; i < listsize; i++)
 	{
 		if (uilist[i] == nullptr) {
 			uilist[i] =newuibox;
@@ -94,5 +130,6 @@ uibox* uirender::newbox(const char* texloc, v2::Vector2 scl, v2::Vector2 positio
 		}
 		
 	}
+	Assert("not enogh room to inat aanewbox");
 	return nullptr;
 }

@@ -40,16 +40,20 @@ struct liquidprop :gameobject::component {
 		{
 			Assert("block must be inititated with liquid component");
 		}
-		
-		blk->getcomponent<liquidprop>().liqval = liqval - 1;
-		
+		if (face==3)
+		{
+			blk->getcomponent<liquidprop>().liqval = liqval;
+		}
+		else {
+			blk->getcomponent<liquidprop>().liqval = liqval - 1;
+		}
 		
 		blk->mesh.attachdir = 3;
 		
 	}
 	void update() {
 		diffusetime += timename::dt;
-		if (1<liqval&&.2<diffusetime)
+		if (1<liqval&&.4<diffusetime)
 		{
 			updateinface(0);
 			updateinface(1);

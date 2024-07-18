@@ -7,7 +7,7 @@ namespace window {
 
 
 
-
+	void setcursor(bool mode);
 
 void		createcurwindow(int scrwidth, int scrheight);
 void swapbuffer();

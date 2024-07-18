@@ -21,7 +21,7 @@ struct particleemiter:gameobject::component
 	vobj::vao emitervoa;
 	//tiny quad
 	vobj::vbuf emmitervbo;
-	vobj::vbuf emmiteribo;
+
 	array<entityname::entity*> particlearray;
 	float particlespawntime;
 	float timetillspawn;
@@ -29,9 +29,10 @@ struct particleemiter:gameobject::component
 	particleemiter(float spawntime, void (*initfunc) (entityname::entity*));
 	bool shouldspawnparticle();
 	void update();
+	void start();
 	void renderparticles();
 };
-
+void initbaseparticle(entityname::entity* newent);
 
 struct particle:gameobject::component
 {
@@ -39,7 +40,7 @@ struct particle:gameobject::component
 	
 	float endtime;
 	
-
+	~particle() = default;
 	particle() = default;
 }; 
 #endif // ! particle_HPP
