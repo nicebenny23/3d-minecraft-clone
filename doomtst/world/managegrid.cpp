@@ -183,9 +183,10 @@ void gridutil::placeblockatloc(int x, int y, int z, int blockid)
 void gridutil::destroyblockatloc(int x, int y, int z)
 {
 	block* location = getobjatgrid(x, y, z);
+	
 	if (location != nullptr)
 	{
-
+		location->senddestroycall();
 		blkinitname::setair(location);
 
 		for (int faceind = 0; faceind < 6; faceind++)

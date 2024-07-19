@@ -11,7 +11,7 @@ using namespace dynamicarray;
 using namespace v3;
 using namespace vobj;
 #ifndef  mesh_H
-#define  model_H
+#define  mesh_H
 namespace meshname {
 
 	struct mesh

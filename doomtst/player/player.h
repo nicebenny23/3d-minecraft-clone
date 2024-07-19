@@ -2,7 +2,7 @@
 #include "../game/collision.h"
 #include "../renderer/uirender.h"
 #include "playermovment.h"
-#include "../playermodification.h"
+#include "playermodification.h"
 #include "../game/entitystate.h"
 #include"playerhealth.h"
 #ifndef player_HPP

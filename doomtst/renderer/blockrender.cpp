@@ -33,6 +33,20 @@ bool chunkviewable(Chunk::chunk* chk) {
     geometry::Box chkb = geometry::Box(chk->center(), unitv * 8);
     ray camray = ray(camera::campos, v3::Vector3(camera::campos) + camera::frontvec * 1);
     geometry::cone ncone = geometry::cone(camray, slope);
+    geometry::Plane pln =geometry::Plane(camera::frontvec,camray.start);
+    bool srf = false;
+    for (int i = 0; i < 8; i++)
+    {
+        Vector3 vertex = chk->center()+(vert[i]-unitv/2.f)*16;
+        if (dotproduct(vertex - camera::campos, camera::frontvec )> 0) {
+
+            srf=true;
+        }
+    }
+    if (!srf)
+    {
+        return false;
+    }
     return ncone.intersectssphere(geometry::sphere(chkb));
 }
 

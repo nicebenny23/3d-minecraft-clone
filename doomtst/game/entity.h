@@ -1,7 +1,7 @@
 #include "gameobject.h"
 #include "aabb.h"
 #include "../util/vector3.h"
-#define entsize 16*16*16*150
+#define entsize 16*16*16
 #ifndef entity_HPP
 #define entity_HPP
 namespace entityname {

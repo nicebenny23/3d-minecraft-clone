@@ -32,7 +32,7 @@ component* gameobject::component::copydat(component* orgin)
 
 void gameobject::component::start()
 {
-
+	priority = 0;
 }
 void gameobject::component::update()
 {

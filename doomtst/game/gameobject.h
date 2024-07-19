@@ -64,6 +64,7 @@ namespace gameobject {
 
 	struct component
 	{
+		int priority ;
 		//called on destroy used for deallocation
 		virtual void ondestroy();
 		obj* owner;
@@ -121,7 +122,13 @@ namespace gameobject {
 		void blkfaceupdate(obj* blk, int face);
 
 		obj();
+		void senddestroycall() {
 
+			for (int i = 0; i < complist.length; i++)
+			{
+				complist[i]->ondestroy();
+			}
+		}
 	};
 
 

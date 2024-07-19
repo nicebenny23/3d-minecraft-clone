@@ -1,104 +1,85 @@
 #include "inventoryblock.h"
 #include "../util/mathutil.h"
-void destroyonclick(invblock& toremove) {
-	toremove.held.itemsprite->shouldrender = false;
 
+void destroyonclick(itemslot& toremove) {
+    toremove.helditem->itemsprite->shouldrender = false;
 }
-invblock::invblock(int xloc, int yloc)
-{
-	float xval = ((2 * xloc + .5) / float(xamt));
-	float yval = ((2 * yloc + 1) / float(yamt));
-	v2::Vector2 scale = v2::Vector2(1 / float(xamt), 1 / float(yamt));
-	framebox = uirender::newbox("images\\blockholder.png", scale, v2::Vector2(xval, yval), -130);
-	held = item(1);
-	held.state = ininventoryblock;
-	held.itemsprite->bx.center = v2::Vector2(xval, yval);
-	held.itemsprite->bx.scale = scale / 1.4f;
-	onclick = destroyonclick;
+Box2d getboxfrominvloc(int xloc, int yloc) {
+
+    float xval = ((2 * xloc + 1.0f) / float(xamt));
+    float yval = ((2 * yloc + 1.0f) / float(yamt));
+    v2::Vector2 scale = v2::Vector2(1.0f / float(xamt), 1.0f / float(yamt));
+    return Box2d(v2::Vector2(xval, yval), scale);
 }
 
-invblock::invblock(int xloc, int yloc, void(*clickaction)(invblock&))
-{
-
-	float xval = ((2 * xloc + .5) / float(xamt));
-	float yval = ((2 * yloc + 1) / float(yamt));
-	v2::Vector2 scale = v2::Vector2(1 / float(xamt), 1 / float(yamt));
-	framebox = uirender::newbox("images\\blockholder.png", scale, v2::Vector2(xval, yval), -130);
-	held = item(1);
-	held.itemsprite->bx.center = v2::Vector2(xval, yval);
-	held.itemsprite->bx.scale = scale / 1.4f;
-	held.state = ininventoryblock;
-	onclick = clickaction;
+itemslot::itemslot(int xloc, int yloc) {
+    Box2d frameboxsize = getboxfrominvloc(xloc, yloc);
+    frame = uirender::newbox("images\\blockholder.png", frameboxsize.scale, frameboxsize.center, 13);
+    helditem =nullptr;
+    if (randombool())
+    {
+        giveitem(1);
+    }
+    onclick = destroyonclick;
+   
 }
 
-void invblock::giveitem(int id)
-{
-	if (!empty)
-	{
-
-		Assert("cant give item to unempty array");
-	}
-	held = item(id);
+itemslot::itemslot(int xloc, int yloc, void(*clickaction)(itemslot&)) {
+    Box2d frameboxsize = getboxfrominvloc(xloc, yloc);
+    frame = uirender::newbox("images\\blockholder.png", frameboxsize.scale, frameboxsize.center, -130);
+   
+  
+    onclick = clickaction;
 }
 
-void invblock::transferitem(item* otherholder)
-{
-
-	if (otherholder->state == beingheld)
-	{
-		otherholder->itemsprite->bx.center = held.itemsprite->bx.center;
-		std::swap(otherholder->itemsprite, held.itemsprite);
-		std::swap(otherholder->id, held.id);
-		int oldstate = held.state;
-		
-		int l = 1;
-	}
-	else
-	{
-		int l = 1;
-	}
+void itemslot::giveitem(int id) {
+    helditem = inititem(2);
+    helditem->amt = 1;
+    helditem->state = ininventoryblock;
+    helditem->itemsprite->box.center = frame->box.center;
+    helditem->itemsprite->box.scale = frame->box.scale / 1.4f;
 }
 
-void invblock::destroyitem()
-{
+void itemslot::transferitem(item* otherholder) {
+  
+    
+    item* temp = otherholder;
+    freeditem = helditem;
+    helditem = otherholder;
+    if (freeditem!=nullptr)
+    {
 
+        freeditem->state = beingheld;
+
+    }
+    if (helditem!=nullptr)
+    {
+
+        helditem->state = ininventoryblock;
+
+        helditem->itemsprite->box.center = frame->box.center;
+
+    }
 
 }
 
-void invblock::setviewable(bool isviewable)
-{
-	framebox->shouldrender = isviewable;
-	held.itemsprite->shouldrender = isviewable;
+void itemslot::destroyitem() {
+    if (helditem != nullptr) {
+        helditem->destroy();
+        helditem = nullptr;
+    }
 }
 
-void invblock::testclick(item* helditem)
-{
-	if (framebox->mouseonblock())
-	{
-
-		if (userinput::mouseleft.pressed)
-		{
-			transferitem(helditem);
-			//blockstore[i].onclick( blockstore[i]);
-
-		}
-
-	}
-
+void itemslot::setviewable(bool isviewable) {
+    frame->shouldrender = isviewable;
+    if (helditem != nullptr && helditem->itemsprite != nullptr) {
+        helditem->itemsprite->shouldrender = isviewable;
+    }
 }
 
-array<invblock>& createinvblock(int xsize, int ysize)
-{
-	array<invblock> blockstore = array<invblock>(0);
-	int ind = 0;
-	for (int i = -xsize; i < xsize; i++)
-	{
-		for (int j = -ysize; j < ysize; j++)
-		{
-
-			blockstore[ind] = invblock(i, j);
-			ind++;
-		}
-	}
-	return blockstore;
+void itemslot::testclick() {
+    if (frame->mouseonblock() && userinput::mouseleft.pressed) {
+        transferitem(freeditem);
+    }
 }
+

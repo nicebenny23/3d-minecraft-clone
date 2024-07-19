@@ -66,7 +66,10 @@ void collision::handleduelentitycollisions()
 {
 	for (int i = 0; i < Colliderlist.length; i++)
 	{
-		for (int j = 0;j < Colliderlist.length; j++)
+		if(Colliderlist[i] == nullptr) {
+			continue;
+		}
+		for (int j = i;j < Colliderlist.length; j++)
 		{
 			if (i == j) {
 				continue;

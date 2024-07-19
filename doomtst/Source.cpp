@@ -18,7 +18,7 @@
 #include "util/time.h"
 #include "game/collision.h"
 #include "renderer/uirender.h"
-#include "playermodification.h"
+#include "player/playermodification.h"
 #include "util/fileloader.h"
 #include "player/player.h"
 // settings
@@ -50,11 +50,10 @@ void init() {
 
 
     uirender::initrenderlist();
-    uirender::newbox("images\\crosshair.png", v2::unitv / 32, v2::zerov,3);
+    uirender::newbox("images\\crosshair.png", v2::unitv / 32, v2::zerov,-3);
     userinput::endupdate();
     aabb::initCollider();
-
-    
+    initfreeditem();
 
 }
 
@@ -63,6 +62,8 @@ int main()
 
     init();
     player::initplayer();
+    
+
     glfwSwapInterval(0);
     texture mtex = texture("slimetex.png", png);
 //    meshname::mesh newmehs = *meshname::loadmesh("slime.obj", mtex,spawnpos);

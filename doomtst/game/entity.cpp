@@ -36,12 +36,7 @@ void entityname::deleteobjs()
 	for (int ind = 0; ind < len; ind++) {
 
 
-		for (size_t i = 0; i < todelete[ind]->complist.length; i++)
-		{
-			todelete[ind]->complist[i]->ondestroy();
-
-
-		}
+		todelete[ind]->senddestroycall();
 
 
 
@@ -66,7 +61,29 @@ void entityname::destroy(entity* ent)
 {
 	todelete.append(ent);
 }
+struct entitycomponentindexer
+{
+	entitycomponentindexer(int entind, int compnum) {
 
+		entity = entind;
+		componentnumber = compnum;
+	}
+	int entity;
+	int componentnumber;
+	gameobject::component* at() {
+
+		return objectfromguid[entity]->complist[componentnumber];
+	}
+};
+
+int comparecomponent(const void* b, const void* a) {
+	
+	int priorityb =(* (entitycomponentindexer*)(b)).at()->priority;
+
+	int prioritya = (*(entitycomponentindexer*)(a)).at()->priority;
+	return (prioritya> priorityb) - (priorityb< prioritya);
+	
+}
 entityref entityname::createentity(v3::Vector3 ipos, const char* _name) {
 	entity* object = new entity();
 	object->type = gameobject::entity;
@@ -90,8 +107,8 @@ entityref entityname::createentity(v3::Vector3 ipos, const char* _name) {
 
 void entityname::runupdateloop() {
 
-
-
+	array<entitycomponentindexer> componentlist;
+	
 	for (int i = 0; i < objectfromguid.length; i++)
 	{
 
@@ -105,8 +122,7 @@ void entityname::runupdateloop() {
 			for (int j = 0; j < len; j++)
 			{
 
-
-				objectfromguid[i]->complist[j]->update();
+				componentlist.append(entitycomponentindexer(i,j));
 
 
 
@@ -115,5 +131,14 @@ void entityname::runupdateloop() {
 
 		}
 	}
+	std::qsort(componentlist.getdata(), componentlist.length, sizeof(entitycomponentindexer), comparecomponent);
+	for (int i = 0; i < componentlist.length; i++)
+	{
+		if (componentlist[i].at()!= nullptr) {
 
+			componentlist[i].at()->update();
+
+		}
+	}
+	componentlist.destroy();
 }

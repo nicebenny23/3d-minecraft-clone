@@ -15,12 +15,13 @@ namespace uirender {
 		uibox() = default;
 		texture tex;
 		bool shouldrender;
-		geometry::Box2d bx;
+		geometry::Box2d box;
 		int id;
 		float priority;
 		bool mouseonblock();
 		void (*onclick) (v2::Vector2);
 		uibox(uibox& toreplace);
+		void destroy();
 		uibox(const char* texloc, v2::Vector2 scl, v2::Vector2 position, float boxpriority);
 	};
 	uibox* newbox(const char* texloc, v2::Vector2 scl, v2::Vector2 position,float boxpriority);

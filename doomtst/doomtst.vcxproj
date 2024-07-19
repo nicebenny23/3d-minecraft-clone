@@ -133,7 +133,7 @@
       <SDLCheck>No</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>Yes</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -193,10 +193,18 @@
     <ClInclude Include="block\wood.h" />
     <ClInclude Include="collutil.h" />
     <ClInclude Include="game\storagecomp.h" />
+    <ClInclude Include="items\airitem.h" />
+    <ClInclude Include="items\grassitem.h" />
     <ClInclude Include="items\inventoryblock.h" />
     <ClInclude Include="items\item.h" />
     <ClInclude Include="items\itemstorage.h" />
+    <ClInclude Include="items\itemutil.h" />
+    <ClInclude Include="items\lavapickitem.h" />
+    <ClInclude Include="items\loottable.h" />
     <ClInclude Include="items\menu.h" />
+    <ClInclude Include="items\stoneitem.h" />
+    <ClInclude Include="items\sworditem.h" />
+    <ClInclude Include="items\torchitem.h" />
     <ClInclude Include="mesh.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="particles.h" />
@@ -208,7 +216,7 @@
     <ClInclude Include="util\fileloader.h" />
     <ClInclude Include="game\aabb.h" />
     <ClInclude Include="player\playermovment.h" />
-    <ClInclude Include="playermodification.h" />
+    <ClInclude Include="player\playermodification.h" />
     <ClInclude Include="rigidbody.h" />
     <ClInclude Include="renderer\uirender.h" />
     <ClInclude Include="shareptr.h" />

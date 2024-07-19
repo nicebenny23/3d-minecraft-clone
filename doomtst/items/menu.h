@@ -21,7 +21,7 @@ struct menu
 	virtual void customopen();
 	menu() = default;
 	menu(v2::Vector2 size);
-	void testclick(item* held);
+	void testclick();
 	virtual void onopen();
 	virtual void onclose();
 };

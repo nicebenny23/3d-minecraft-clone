@@ -11,7 +11,7 @@ void chunkmesh::genbufs()
 
 
 int compare(const void* b, const void* a) {
-	return sign((*(face*)a).cameradist - (*(face*)b).cameradist);
+	return sign(((face*)a)->cameradist - ((face*)b)->cameradist);
 }
 void chunkmesh::sortbuf()
 {

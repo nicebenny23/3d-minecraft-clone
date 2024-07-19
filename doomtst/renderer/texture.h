@@ -18,7 +18,7 @@ struct texture
 	texture(const char* file,textype png);
 	texture();
 	void apply();
-
+	void destroy();
 	
 	GLuint id;
 

@@ -17,7 +17,7 @@ struct rigidbody : gameobject::component {
     float mass = 1.0f;
     float restitution = 0.1f;
     aabb::Collider* boundingbox;
-
+  
     // Constructor
     rigidbody() : velocity(zerov), unsetpositon(zerov), acceleration(zerov), boundingbox(nullptr) {}
     ~rigidbody() = default;
@@ -25,7 +25,8 @@ struct rigidbody : gameobject::component {
     void start() {
         acceleration = zerov;
         unsetpositon = objutil::toent(owner).pos;
-        boundingbox = &owner->getcomponent<aabb::Collider>();
+        boundingbox = &owner->getcomponent<aabb::Collider>();  
+        priority = -111;
     }
 
     // Update function called every frame
@@ -37,7 +38,7 @@ struct rigidbody : gameobject::component {
 
     // Apply gravity to the rigidbody
     void applyGravity() {
-        Vector3 gravity(0, -10.81f, 0);
+        Vector3 gravity(0, 0*-20.81f, 0);
         acceleration += gravity / mass;
     }
 

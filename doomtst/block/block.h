@@ -140,6 +140,7 @@ namespace blockname {
 		 block();
 		 void initasgameobj();
 		 void createaabb();
+		
 	};
 
 	void initblockmesh(block* blk, Vector3 pos, Vector3 scale);

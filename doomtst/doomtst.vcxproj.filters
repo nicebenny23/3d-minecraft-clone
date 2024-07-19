@@ -224,9 +224,6 @@
     <ClInclude Include="renderer\uirender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="playermodification.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="util\fileloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -309,6 +306,33 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="items\itemstorage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\airitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\grassitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\itemutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\lavapickitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\stoneitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\sworditem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\torchitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playermodification.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\loottable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

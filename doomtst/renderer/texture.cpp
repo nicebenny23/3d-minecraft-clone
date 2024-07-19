@@ -66,6 +66,11 @@ void texture::apply()
 
 	glBindTexture(GL_TEXTURE_2D, id);
 }
+void texture::destroy()
+{
+	glDeleteTextures(1,&id);
+
+}
 //only works for png
 texturearray::texturearray(int width, int height, array<const char*> textures)
 {

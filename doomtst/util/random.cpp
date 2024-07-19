@@ -29,7 +29,7 @@ unsigned int randomint()
     val ^= val >> 7;
     val ^= val << 17;
 
-    return static_cast<double>(val) *UINT32_MAX/ UINT64_MAX;
+    return (static_cast<double>(val) *UINT32_MAX)/ UINT64_MAX;
 }
 
 void randomcoord(unsigned int& seed)
@@ -67,7 +67,7 @@ float random(float max)
     val ^= val >> 7;
     val ^= val << 17;
 
-    return max * static_cast<double>(val) / UINT64_MAX;
+    return max *( static_cast<double>(val) / UINT64_MAX);
 }
 template <typename T>
 
@@ -80,10 +80,10 @@ bool randombool(float truechance) {
     }
     return false;
 }
-int randomint(float max)
+int randomint(int max)
 {
 
-    return round(random(max) - .5);
+    return (randomint()%max);
 }
 void  randominit()
 {

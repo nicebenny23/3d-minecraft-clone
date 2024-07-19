@@ -14,7 +14,7 @@ void randomcoord(unsigned int& seed);
 v3::Vector3 randomseeded(unsigned int x, unsigned int y, unsigned int z);
 int random(int val, int seed);
 bool randombool(float truechange);
-int randomint(float max);
+int randomint( int max);
 
 
 

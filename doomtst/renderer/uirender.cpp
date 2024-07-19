@@ -24,10 +24,10 @@ v2::Vector2(1, 1)
 bool uirender::uibox::mouseonblock()
 {
 	v2::Vector2 normedpos = userinput::normedmousepos;
-	normedpos -= bx.center;
-	if ( abs(normedpos.x)<bx.scale.x)
+	normedpos -= box.center;
+	if ( abs(normedpos.x)<box.scale.x)
 	{
-		if (abs(normedpos.y) < bx.scale.y)
+		if (abs(normedpos.y) < box.scale.y)
 		{
 			return true;
 		}
@@ -40,12 +40,19 @@ uirender::uibox::uibox(uibox& toreplace)
 	Assert("cant copy ui box");
 }
 
+void uirender::uibox::destroy()
+{
+	uilist[id] = nullptr;
+	tex.destroy();
+
+}
+
 uirender::uibox::uibox(const char* texloc, v2::Vector2 scl, v2::Vector2 position, float boxpriority)
 {
 	priority = boxpriority;
 	tex = texture(texloc,png);
-	bx.scale = scl;
-	bx.center = position;
+	box.scale = scl;
+	box.center = position;
 	shouldrender = true;
 }
 
@@ -59,7 +66,7 @@ void uirender::initrenderlist()
 }
 
 int compareui(const void* b, const void* a) {
-	return -sign(uilist[*(int*)b]->priority- uilist[*(int*)a]->priority);
+	return sign(uilist[*(int*)b]->priority- uilist[*(int*)a]->priority);
 }
 void uirender::renderuilist()
 {
@@ -99,7 +106,7 @@ void uirender::renderuilist()
 		
 			for (int j = 0; j< 4; j++)
 			{
-				v2::Vector2 pos = uilist[i]->bx.center + offset[j] * (uilist[i]->bx.scale);
+				v2::Vector2 pos = uilist[i]->box.center + offset[j] * (uilist[i]->box.scale);
 				databuf.append(pos.x);
 				databuf.append(pos.y);
 				databuf.append(cubeuv[2 * j]);

@@ -29,18 +29,28 @@ void menu::open()
 			blkcont.setviewable(true);
 }
 
-menu::menu(v2::Vector2 size) 
+void menu::customclose()
 {
-	blkcont = Container(4, 4,0,0);
-	menubox = newbox("menutex.png", size,v2::zerov,-111);
+}
+
+void menu::customopen()
+{
+}
+
+menu::menu(v2::Vector2 size)
+{
+	blkcont = Container(8, 4,0,0);
+	menubox = newbox("menutex.png", size,v2::zerov,11);
 	menubox->shouldrender = true;
 }
 
-void menu::testclick(item* held)
+void menu::testclick()
 {
-	for (size_t i = 0; i < blkcont.databuf.length; i++)
+
+	if (isopen)
 	{
-		blkcont.databuf[i].testclick(held);
+
+		blkcont.testmouseclick();
 	}
 }
 
