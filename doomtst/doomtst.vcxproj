@@ -148,6 +148,7 @@
     <ClCompile Include="items\inventoryblock.cpp" />
     <ClCompile Include="items\item.cpp" />
     <ClCompile Include="items\menu.cpp" />
+    <ClCompile Include="items\recipe.cpp" />
     <ClCompile Include="mesh.cpp" />
     <ClCompile Include="particles.cpp" />
     <ClCompile Include="player\player.cpp" />
@@ -202,6 +203,7 @@
     <ClInclude Include="items\lavapickitem.h" />
     <ClInclude Include="items\loottable.h" />
     <ClInclude Include="items\menu.h" />
+    <ClInclude Include="items\recipe.h" />
     <ClInclude Include="items\stoneitem.h" />
     <ClInclude Include="items\sworditem.h" />
     <ClInclude Include="items\torchitem.h" />

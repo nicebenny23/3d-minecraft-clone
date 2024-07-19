@@ -12,12 +12,12 @@ inline void placeitemid(item* itm) {
 
 	switch (itm->id)
 	{
-	
+
 	case stoneitem:
 		initstoneitem(itm);
 		break;
 	case sworditem:
-		
+
 		initsworditem(itm);
 		break;
 	case grassitem:
@@ -45,13 +45,13 @@ inline int blockidfromitemid(item* itm) {
 
 	switch (itm->id)
 	{
-	
+
 	case stoneitem:
 		return stoneitemasblockid;
 		break;
 	case sworditem:
 		return sworditemblockid;
-	
+
 		break;
 	case grassitem:
 		return grassitemblockid;
@@ -65,7 +65,7 @@ inline int blockidfromitemid(item* itm) {
 	default:
 		break;
 	}
-	
+
 }
 inline void getitemfromblock() {
 

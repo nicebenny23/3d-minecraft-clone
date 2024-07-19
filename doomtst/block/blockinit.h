@@ -29,7 +29,7 @@ namespace blkinitname {
 			break;
 		case minecraftstone:
 			stoneinit(blk);
-				break;
+			break;
 		case minecraftglass:
 			glassinit(blk);
 			break;
@@ -46,22 +46,22 @@ namespace blkinitname {
 			woodinit(blk);
 			break;
 		}
-     } 
-	inline void genblock(block* blk,int blkid, Coord location, byte attachface, byte direction) {
-	
-		 *blk = blockname::block(location, blkid);
-	
+	}
+	inline void genblock(block* blk, int blkid, Coord location, byte attachface, byte direction) {
+
+		*blk = blockname::block(location, blkid);
+
 		initblockmesh(blk, zerov, unitscale);
-		
+
 		blkinitname::blockinit(blk);
-		
-	
+
+
 	}
 	inline void setair(block* blk) {
 		switch (blk->id)
 		{
 		case minecraftair:
-			
+
 			break;
 		case minecraftgrass:
 			grassdelete(blk);

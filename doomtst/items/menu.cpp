@@ -1,18 +1,47 @@
 #include "menu.h"
 
 menu* openmenu;
-
+menu* inventoryifopen;
+bool ismenuopen() {
+	if (openmenu!=nullptr)
+	{
+		return true;
+	}if (inventoryifopen!=nullptr)
+	{
+		return true;
+	}
+	return false;
+}
 void menu::close()
 {
+	if (menutype==inventorymenu)
+	{
+
+		isopen = false;
+		inventoryifopen= nullptr;
+		menubox->shouldrender = false;
+		customclose();
+	}
 	isopen = false;
 	openmenu = nullptr;
 	menubox->shouldrender=false;
-	blkcont.setviewable(false);
+	customclose();
+
 }
 
 void menu::open()
 {
+	if (menutype==inventorymenu)
+	{
 
+		if (inventoryifopen!=nullptr)
+		{
+			return;
+		}
+		inventoryifopen = this;
+		menubox->shouldrender = true;
+		isopen = true;
+	}
 	if (isopen)
 	{
 		return;
@@ -26,38 +55,34 @@ void menu::open()
 			menubox->shouldrender = true;
 			isopen = true;
 			openmenu = this;
-			blkcont.setviewable(true);
+			customopen();
 }
 
 void menu::customclose()
 {
+	
 }
 
 void menu::customopen()
 {
+
 }
 
 menu::menu(v2::Vector2 size)
 {
-	blkcont = Container(8, 4,0,0);
+
 	menubox = newbox("menutex.png", size,v2::zerov,11);
 	menubox->shouldrender = true;
+	
 }
-
-void menu::testclick()
+ void menu::testclick()
 {
 
-	if (isopen)
-	{
-
-		blkcont.testmouseclick();
-	}
+	
 }
 
-void menu::onopen()
-{
-}
+ void menu::custominit()
+ {
+	 int l = 1;
 
-void menu::onclose()
-{
-}
+ }

@@ -21,7 +21,7 @@ namespace meshname {
 		void setmodeluniform();
 		texture tex;
 		mesh();
-		
+
 		array<Vector3> vertices;
 		array<v2::Vector2> texcoords;
 		array<unsigned int> vertexindices;
@@ -37,7 +37,7 @@ namespace meshname {
 		}
 	};
 
-	mesh* loadmesh(const char* name,texture TEX,Vector3 position);
+	mesh* loadmesh(const char* name, texture TEX, Vector3 position);
 	void rendermesh(mesh* torender);
 }
 #endif // ! mesh_H

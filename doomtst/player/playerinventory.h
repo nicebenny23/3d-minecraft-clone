@@ -8,11 +8,46 @@ inline void initfreeditem() {
 	freeditem = inititem(0);
 	freeditem->state = beingheld;
 	
-}
+}struct inventorymen :menu
+{
+	Container blkcont;
+	inventorymen(v2::Vector2 size) {
+		menubox = newbox("menutex.png", size, v2::zerov, 11);
+		menubox->shouldrender = true;
+
+		blkcont = Container(8, 4, 0, 0);
+
+
+	}
+	void custominit() {
+
+	}
+	void customopen() {
+
+		blkcont.setviewable(true);
+	}
+	void customclose() {
+
+		blkcont.setviewable(false);
+
+	}
+	void testclick() {
+
+
+		if (isopen)
+		{
+
+			blkcont.testmouseclick();
+		}
+
+	}
+
+	inventorymen() = default;
+};
 struct inventory :gameobject::component
 {
-	
-	menu playermenu;
+	Container blkcont;
+	inventorymen playermenu;
 	inventory();
 		Container hotbar;
 		item* selected;

@@ -9,13 +9,13 @@ using namespace aabb;
 namespace collision {
 
 	void update();
-	
+
 
 
 
 	bool aabbCollidesWithEntity(Collider* blk);
 	voxtra::RayCollisionWithGrid raycastCollisionWithGrid(ray nray);
 	void handleduelentitycollisions();
-void handleCollisionWithGrid(Collider& entity);
+	void handleCollisionWithGrid(Collider& entity);
 }
 #endif

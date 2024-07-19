@@ -12,17 +12,17 @@ struct itemslot
 {
 	itemslot() {
 		Assert("invblockconstrutur cant be used just to get complier to work");
-	
+
 	}
 	item* helditem;
-	
+
 	//(0...9),(0...14)
 	Coord location;
 	uirender::uibox* frame;
 	void(*onclick)(itemslot&);
-	
+
 	itemslot(int xloc, int yloc);
-	itemslot(int xloc, int yloc,void (*clickaction)(itemslot&));
+	itemslot(int xloc, int yloc, void (*clickaction)(itemslot&));
 	void giveitem(int id);
 	void transferitem(item* otherholder);
 	void destroyitem();

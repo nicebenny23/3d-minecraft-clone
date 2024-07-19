@@ -17,7 +17,7 @@ struct lootelement
 	float maxamt;
 	void drop() {
 
-		int dropamt=114*random(maxamt);
+		int dropamt=2*random(maxamt);
 		player::goblin.toent()->getcomponent<inventory>().playermenu.blkcont.fill(itemid, dropamt);
 	}
 

@@ -24,25 +24,25 @@ void collision::update()
 }
 
 voxtra::RayCollisionWithGrid collision::raycastCollisionWithGrid(ray nray) {
-	
+
 	voxtra::RayCollisionWithGrid closest = voxtra::RayCollisionWithGrid();
 	closest.dist = INFINITY;
 	for (int i = 0; i < totalgridsize; i++)
 	{
-		for (int j = 0;j < chunksize;j++) {
+		for (int j = 0; j < chunksize; j++) {
 			block* blk = &grid::chunklist[i]->blockbuf[j];
 
 			//for now gyrantee tha it has no aabb
 			if (blk->solid) {
-				if (distance(nray.start, blk->center()) <nray.length())
+				if (distance(nray.start, blk->center()) < nray.length())
 				{
 
 
 					aabbraycolinfo blkinter = blk->getcomponent<Collider>().distanceonray(nray);
-					if (blkinter.collided&&blkinter.dist < closest.dist)
+					if (blkinter.collided && blkinter.dist < closest.dist)
 					{
-						closest.colpoint= blkinter.intersectionpoint;
-						closest.box =&( blk->getcomponent<Collider>());
+						closest.colpoint = blkinter.intersectionpoint;
+						closest.box = &(blk->getcomponent<Collider>());
 						closest.dist = blkinter.dist;
 					}
 				}
@@ -50,10 +50,10 @@ voxtra::RayCollisionWithGrid collision::raycastCollisionWithGrid(ray nray) {
 
 		}
 	}
-		return closest;
-	
-	
-	
+	return closest;
+
+
+
 }
 void componentcollisionsend(gameobject::obj* reciever, gameobject::obj* collided) {
 
@@ -66,41 +66,41 @@ void collision::handleduelentitycollisions()
 {
 	for (int i = 0; i < Colliderlist.length; i++)
 	{
-		if(Colliderlist[i] == nullptr) {
+		if (Colliderlist[i] == nullptr) {
 			continue;
 		}
-		for (int j = i;j < Colliderlist.length; j++)
+		for (int j = i; j < Colliderlist.length; j++)
 		{
 			if (i == j) {
 				continue;
-            }
+			}
 
 			if (Colliderlist[i] == nullptr || Colliderlist[j] == nullptr) {
 
 				continue;
 			}
-			v3::Vector3 force=  aabb::collideaabb(*Colliderlist[i], *Colliderlist[j]);
-			if (force!=zerov)
+			v3::Vector3 force = aabb::collideaabb(*Colliderlist[i], *Colliderlist[j]);
+			if (force != zerov)
 			{
 				Vector3 actualforce = force / 2;
-				
-				Colliderlist[i]->center +=actualforce;
+
+				Colliderlist[i]->center += actualforce;
 				toent(Colliderlist[i]->owner).pos += actualforce;
 				componentcollisionsend(Colliderlist[i]->owner, Colliderlist[j]->owner);
 				Colliderlist[j]->center -= actualforce;
-				toent(Colliderlist[j]->owner).pos-= actualforce;
+				toent(Colliderlist[j]->owner).pos -= actualforce;
 				componentcollisionsend(Colliderlist[j]->owner, Colliderlist[i]->owner);
 
-		
+
 			}
 
 		}
 	}
 }
-Vector3 getplaceoffset(Vector3 inter, Vector3 center,Vector3 Colliderscale) {
+Vector3 getplaceoffset(Vector3 inter, Vector3 center, Vector3 Colliderscale) {
 
 	Vector3 pos = zerov;
-	pos.x = floorabs((inter.x - center.x)/Colliderscale.x);
+	pos.x = floorabs((inter.x - center.x) / Colliderscale.x);
 	pos.y = floorabs((inter.y - center.y) / Colliderscale.y);
 	pos.z = floorabs((inter.z - center.z) / Colliderscale.z);
 	return pos;
@@ -185,7 +185,7 @@ void collision::handleCollisionWithGrid(Collider& entity)
 									minforce = force;
 								}
 							}
-						
+
 						}
 					}
 

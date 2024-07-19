@@ -5,15 +5,15 @@
 #define item_HPP
 enum itemid {
 
-	stoneitem=0,
-	sworditem=1,
-	grassitem=2,
-	torchitem= 3,
-	pickitemid= 4,
+	stoneitem = 0,
+	sworditem = 1,
+	grassitem = 2,
+	torchitem = 3,
+	pickitemid = 4,
 };
 enum itemstate {
-	beingheld=0,
-	ininventoryblock=1,
+	beingheld = 0,
+	ininventoryblock = 1,
 
 };
 
@@ -25,7 +25,7 @@ struct item
 	item() {
 		maxamt = 0;
 		amt = 0;
-	
+
 	}
 	int id;
 	float pickaxepower;
@@ -37,7 +37,7 @@ struct item
 	void destroy();
 	bool use(int useamt);
 	uirender::uibox* itemsprite;
-	
+
 };
 extern texturearray textureidlist;
 extern item* freeditem;

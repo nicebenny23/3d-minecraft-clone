@@ -12,4 +12,4 @@ namespace blockrender {
 
 #endif // !blockrender_HPP
 
-void renderchnk(chunkmesh&mesh, bool transparent);
+void renderchunk(chunkmesh&mesh, bool transparent);

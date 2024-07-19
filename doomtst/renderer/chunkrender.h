@@ -17,7 +17,7 @@ struct chunkmesh
 	vao Voa;
 	//voa vertexspec;
 	void genbufs();
-	
+
 	bool meshrecreateneeded;
 	chunk* aschunk;
 	array<float> datbuf;

@@ -5,7 +5,7 @@ item::item(int itemid)
 	id = itemid;
 	itemsprite = nullptr;
 
-	
+
 }
 void item::destroy()
 {
@@ -14,8 +14,8 @@ void item::destroy()
 bool item::use(int useamt)
 {
 	amt -= useamt;
-	
-	if (amt<0)
+
+	if (amt < 0)
 	{
 		amt += useamt;
 		return false;

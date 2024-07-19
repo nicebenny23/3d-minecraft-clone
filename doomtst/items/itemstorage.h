@@ -6,12 +6,19 @@
 struct Container
 {
 	Container() {};
-	
+	void destroy() {
+
+		for (int i = 0; i < databuf.length; i++)
+		{
+			databuf[i].destroyitem();
+		}
+		databuf.destroy();
+	}
 	array<itemslot> databuf;
 	itemslot& getlocalat(int xpos,int ypos) {
 		return databuf[xpos + ypos * sizex];
 	}
-	itemslot& getlocalat(int ind) {
+	itemslot& at(int ind) {
 		return databuf[ind];
 	}
 	void deletebelowzero() {

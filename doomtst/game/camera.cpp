@@ -27,7 +27,7 @@ namespace camera {
 	void calculateyawandpitch()
 	{
 		
-		if (openmenu == nullptr)
+		if (!ismenuopen())
 		{
 			window::setcursor(false);
 

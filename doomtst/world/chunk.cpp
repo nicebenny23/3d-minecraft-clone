@@ -27,13 +27,13 @@ void createchunkmesh(Chunk::chunk* aschunk)
 
 Chunk::chunk* Chunk::fileload(Coord location)
 {
-	
+
 	const char* name = getcorefilename(location);
 	safefile file = safefile(name, fileread);
 	short* bytelist = file.read<short>(4096);
-	
-	file.go((4096) * 2);
-	short* randomproperties= file.read<short>(4096);
+
+	file.go(4096 * 2);
+	short* randomproperties = file.read<short>(4096);
 	chunk& newchunk = *(new chunk());
 	newchunk.modified = false;
 	createchunkmesh(&newchunk);
@@ -48,31 +48,31 @@ Chunk::chunk* Chunk::fileload(Coord location)
 			for (int z = 0; z < 16; z++)
 			{
 				Coord blockpos = Coord(x, y, z) + location * 16;
-				byte blockid = bytelist[i]  &255;
-				newchunk.blockbuf[i] = blockname::block(blockpos,blockid );
+				byte blockid = bytelist[i] & 255;
+				newchunk.blockbuf[i] = blockname::block(blockpos, blockid);
 
 				initblockmesh(&newchunk.blockbuf[i], zerov, unitscale);
-				byte dirprop = bytelist[i]>>8;
-				
+				byte dirprop = bytelist[i] >> 8;
+
 
 				byte attachdir = dirprop >> 3;
-				byte dir = dirprop &7;
+				byte dir = dirprop & 7;
 				newchunk.blockbuf[i].mesh.attachdir = attachdir;
-			
+
 
 				newchunk.blockbuf[i].mesh.direction = dir;
 				blkinitname::blockinit(&newchunk.blockbuf[i]);
-			
-				
+
+
 				i++;
 			}
 		}
 	}
-	
+
 	for (int ind = 0; ind < 4096; ind++)
 	{
 
-		
+
 		if (newchunk.blockbuf[ind].hascomponent<liquidprop>())
 		{
 			newchunk.blockbuf[ind].getcomponent<liquidprop>().liqval = randomproperties[ind];
@@ -97,18 +97,18 @@ Chunk::chunk* Chunk::load(Coord location)
 	createchunkmesh(&newchunk);
 	newchunk.blockbuf = new block[chunksize];
 	int ind = 0;
-	chunknoisemap* map = trueperlin(location , .1f, 1.2, .5f, 2);
+	chunknoisemap* map = trueperlin(location, .1f, 1.2, .5f, 2);
 	for (int x = 0; x < 16; x++)
 	{
 		for (int y = 0; y < 16; y++) {
 			for (int z = 0; z < 16; z++)
 			{
 				Coord blockpos = Coord(x, y, z) + location * 16;
-				
-			
-			
 
-				
+
+
+
+
 				//select block mechanism
 				int neid = minecraftair;
 
@@ -119,12 +119,12 @@ Chunk::chunk* Chunk::load(Coord location)
 						neid = minecraftdirt;
 
 					}
-				
+
 					continue;
 				}
 
 				//todo fix it
-				float noiselevel =  (*map)[Coord(x, y, z)];
+				float noiselevel = (*map)[Coord(x, y, z)];
 				///	float noiselevel1 = (*map1)[Coord(x, y, z)];
 
 				if (noiselevel > -.15)
@@ -134,20 +134,20 @@ Chunk::chunk* Chunk::load(Coord location)
 					{
 
 						neid = minecraftstone;
-					
-					
+
+
 					}
 
 				}
 
-				if (abs(noiselevel)<  .11f)
+				if (abs(noiselevel) < .11f)
 				{
-					if (abs(noiselevel )> .1f)
+					if (abs(noiselevel) > .1f)
 					{
 
 						neid = minecraftcrystal;
 					}
-					
+
 				}
 				newchunk.blockbuf[ind] = blockname::block(blockpos, neid);
 
@@ -155,7 +155,7 @@ Chunk::chunk* Chunk::load(Coord location)
 
 				ind++;
 
-				
+
 
 
 			}
@@ -170,7 +170,7 @@ Chunk::chunk* Chunk::load(Coord location)
 
 const char* Chunk::getcorefilename(Coord pos)
 {
-	std::string *strng = (new std::string());
+	std::string* strng = (new std::string());
 	strng->append("worldstorage\\");
 	strng->append("t");
 	strng->append(std::to_string(pos.x));
@@ -179,31 +179,31 @@ const char* Chunk::getcorefilename(Coord pos)
 	strng->append("t");
 	strng->append(std::to_string(pos.z));
 
-return 	strng->data();
+	return 	strng->data();
 }
 
 void Chunk::chunk::write()
 {
-	
+
 	const char* name = getcorefilename(loc);
 
 	safefile file = safefile(getcorefilename(loc), filewrite);
 	array<byte> bytelist = array<byte>();
 	for (int i = 0; i < chunksize; i++)
 	{
-		bytelist[2*i] = blockbuf[i].id;
-		bytelist[2*i+1] = blockbuf[i].mesh.direction | (blockbuf[i].mesh.attachdir * 8);
+		bytelist[2 * i] = blockbuf[i].id;
+		bytelist[2 * i + 1] = blockbuf[i].mesh.direction | (blockbuf[i].mesh.attachdir * 8);
 	}
 	for (int i = 0; i < chunksize; i++)
 	{
 		bytelist[8192 + 2 * i] = 0;
-		bytelist[8192 + 2 * i+1] = 0;
+		bytelist[8192 + 2 * i + 1] = 0;
 		if (blockbuf[i].hascomponent<liquidprop>())
 		{
 			bytelist[8192 + 2 * i] = blockbuf[i].getcomponent<liquidprop>().liqval;
-			bytelist[8192 + 2 * i+1] =0;
+			bytelist[8192 + 2 * i + 1] = 0;
 		}
-	
+
 	}
 	file.write<byte>(bytelist.getdata(), bytelist.length);
 	bytelist.destroy();
@@ -225,10 +225,10 @@ void Chunk::chunk::destroy()
 		write();
 	}
 	for (int i = 0; i < 16 * 16 * 16; i++) {
-		
+
 
 		gameobject::immidiatedestroy(&blockbuf[i]);
-	
+
 		//delete blockbuf[i]
 	}
 	mesh->destroy();

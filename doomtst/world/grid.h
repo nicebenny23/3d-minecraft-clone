@@ -8,10 +8,10 @@ constexpr auto totalgridsize = (2 * loadamt + 1) * (2 * loadamt + 1) * (2 * load
 namespace grid {
 	bool gridchanged();
 	extern Chunk::chunk** chunklist;
-	bool issolidatpos(int x, int y, int z,bool countoob);
+	bool issolidatpos(int x, int y, int z, bool countoob);
 	extern v3::Vector3 gridpos;
-	block* getobjatgrid(int x, int y, int z,bool countnonsolids =true);
-	block* getobjatgrid(v3::Coord pos,bool countnonsolids =true);
+	block* getobjatgrid(int x, int y, int z, bool countnonsolids = true);
+	block* getobjatgrid(v3::Coord pos, bool countnonsolids = true);
 	void initgrid();
 	void load();
 	void reupdatechunkborders();

@@ -44,7 +44,7 @@ namespace grid {
 
 
 
-	Chunk::chunk * chunkatpos(int x, int y, int z)
+	Chunk::chunk* chunkatpos(int x, int y, int z)
 	{
 		int xchunk = x >> 4;
 		int zchunk = z >> 4;
@@ -65,7 +65,7 @@ namespace grid {
 			for (int chunkind = 0; chunkind < chunksize; chunkind++)
 			{
 				block& blk = (*chunklist[gridind])[chunkind];
-				for (int compind= 0; compind< blk.complist.length; compind++)
+				for (int compind = 0; compind < blk.complist.length; compind++)
 				{
 					blk.complist[compind]->update();
 				}
@@ -101,7 +101,7 @@ namespace grid {
 		return getobjatgrid(pos.x, pos.y, pos.z, counttransparent);
 	}
 
-	bool issolidatpos(int x, int y, int z,bool countoob)
+	bool issolidatpos(int x, int y, int z, bool countoob)
 	{
 		int xchunk = x >> 4;
 		int zchunk = z >> 4;
@@ -123,7 +123,7 @@ namespace grid {
 		return countoob;
 
 	}
-	
+
 	//complete
 	void initgrid()
 	{
@@ -132,24 +132,24 @@ namespace grid {
 		griddt = zerov;
 		const int size = (2 * loadamt + 1);
 
-		chunklist = new Chunk::chunk *[totalgridsize];
+		chunklist = new Chunk::chunk * [totalgridsize];
 		for (int i = 0; i < size; i++)
 		{
-			for (int j = 0; j < size;j++)
+			for (int j = 0; j < size; j++)
 			{
-				for (int k = 0; k < size;k++)
+				for (int k = 0; k < size; k++)
 				{
 					Coord gridind = Coord(i - loadamt, j - loadamt, k - loadamt);
 					chunklist[gridindexfromnormedchunkpos(i, j, k)] = Chunk::load(gridind);
-				
-				
+
+
 				}
 			}
 		}
-		
-		
 
-	
+
+
+
 		int l = 11;
 	}
 
@@ -162,59 +162,59 @@ namespace grid {
 
 	void grid::load()
 	{
-		
+
 		if (!gridchanged())
 		{
 			return;
 		}
-	      	const int size = 2 * loadamt + 1;
-			Chunk::chunk** newchunklist = new Chunk::chunk * [totalgridsize];
-			int indexdxchange = gridindexfromnormedchunkpos(griddt);
+		const int size = 2 * loadamt + 1;
+		Chunk::chunk** newchunklist = new Chunk::chunk * [totalgridsize];
+		int indexdxchange = gridindexfromnormedchunkpos(griddt);
 
-			int ind = 0;
-			for (int k = 0; k < size; k++)
-			{
-				for (int j = 0;j < size;j++) {
+		int ind = 0;
+		for (int k = 0; k < size; k++)
+		{
+			for (int j = 0; j < size; j++) {
 
-					for (int i = 0;i < size;i++) {
-
-
-						if (chunkloaded(chunklist[ind]->loc))
-						{
-							//moves to new posi
-							newchunklist[ind - indexdxchange] = chunklist[ind];
-
-						}
-						else
-						{
-							chunklist[ind]->destroy();
-							int invind = (totalgridsize)-(1 + ind);
-
-							int x = (2 * loadamt - i) + (gridpos.x - loadamt);
-							int y = (2 * loadamt - j) + (gridpos.y - loadamt);
-							int z = (2 * loadamt - k) + (gridpos.z - loadamt);
-							//int y = (2 * loadamt - k) + (gridpos.y - loadamt);
-							//gets 
-							//	int z = floorabs((invind / static_cast<float>((2 * loadamt + 1)))) - loadamt + gridpos.z;
-							newchunklist[invind] = Chunk::load(Coord(x, y, z));
+				for (int i = 0; i < size; i++) {
 
 
+					if (chunkloaded(chunklist[ind]->loc))
+					{
+						//moves to new posi
+						newchunklist[ind - indexdxchange] = chunklist[ind];
 
-						}
+					}
+					else
+					{
+						chunklist[ind]->destroy();
+						int invind = (totalgridsize)-(1 + ind);
 
-						ind++;
+						int x = (2 * loadamt - i) + (gridpos.x - loadamt);
+						int y = (2 * loadamt - j) + (gridpos.y - loadamt);
+						int z = (2 * loadamt - k) + (gridpos.z - loadamt);
+						//int y = (2 * loadamt - k) + (gridpos.y - loadamt);
+						//gets 
+						//	int z = floorabs((invind / static_cast<float>((2 * loadamt + 1)))) - loadamt + gridpos.z;
+						newchunklist[invind] = Chunk::load(Coord(x, y, z));
+
+
+
 					}
 
-
+					ind++;
 				}
-			}
-			delete[] chunklist;
 
-			chunklist = newchunklist;
-			//get chunk space every frame
-			//(0,0)->(0,0)
-			//(16,0)->(1,0)
-		
+
+			}
+		}
+		delete[] chunklist;
+
+		chunklist = newchunklist;
+		//get chunk space every frame
+		//(0,0)->(0,0)
+		//(16,0)->(1,0)
+
 	}
 	void reupdatechunkborders()
 	{
