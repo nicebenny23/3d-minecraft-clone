@@ -1,12 +1,12 @@
 #include "menu.h"
 
 menu* openmenu;
-menu* inventoryifopen;
+menu* inventorylocation;
 bool ismenuopen() {
 	if (openmenu!=nullptr)
 	{
 		return true;
-	}if (inventoryifopen!=nullptr)
+	}if (inventorylocation->isopen)
 	{
 		return true;
 	}
@@ -18,15 +18,16 @@ void menu::close()
 	{
 
 		isopen = false;
-		inventoryifopen= nullptr;
 		menubox->shouldrender = false;
 		customclose();
+		return;
 	}
+
 	isopen = false;
 	openmenu = nullptr;
 	menubox->shouldrender=false;
 	customclose();
-
+	inventorylocation->close();
 }
 
 void menu::open()
