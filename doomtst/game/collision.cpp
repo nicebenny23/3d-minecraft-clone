@@ -1,7 +1,7 @@
 #include "collision.h"
 #include "objecthelper.h"
 #include "../world/managegrid.h"
-#include "../rigidbody.h"
+#include "../game/rigidbody.h"
 using namespace objutil;
 void collision::update()
 {
@@ -85,10 +85,10 @@ void collision::handleduelentitycollisions()
 				Vector3 actualforce = force / 2;
 
 				Colliderlist[i]->center += actualforce;
-				toent(Colliderlist[i]->owner).pos += actualforce;
+				toent(Colliderlist[i]->owner).transform.position += actualforce;
 				componentcollisionsend(Colliderlist[i]->owner, Colliderlist[j]->owner);
 				Colliderlist[j]->center -= actualforce;
-				toent(Colliderlist[j]->owner).pos -= actualforce;
+				toent(Colliderlist[j]->owner).transform.position -= actualforce;
 				componentcollisionsend(Colliderlist[j]->owner, Colliderlist[i]->owner);
 
 
@@ -124,7 +124,7 @@ bool collision::aabbCollidesWithEntity(Collider* blk) {
 //todo implement movment per axis
 void collision::handleCollisionWithGrid(Collider& entity)
 {
-	entity.center = toent(entity.owner).pos;
+	entity.center = toent(entity.owner).transform.position;
 	v3::Vector3 lowpos = entity.center - entity.scale - unitv;
 
 	v3::Coord lowest = v3::Coord(floorabs(lowpos.x), floorabs(lowpos.y), floorabs(lowpos.z));
@@ -200,7 +200,7 @@ void collision::handleCollisionWithGrid(Collider& entity)
 
 		entity.prevpos += minforce;
 		entity.center += minforce;
-		toent(entity.owner).pos += minforce;
+		toent(entity.owner).transform.position += minforce;
 	}
 
 

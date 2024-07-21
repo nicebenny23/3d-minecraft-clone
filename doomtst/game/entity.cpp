@@ -89,7 +89,7 @@ entityref entityname::createentity(v3::Vector3 ipos, const char* _name) {
 	object->type = gameobject::entity;
 
 
-	object->pos = ipos;
+	object->transform.position = ipos;
 
 	object->guid = getgoid();
 

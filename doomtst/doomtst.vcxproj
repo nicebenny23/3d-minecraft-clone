@@ -145,14 +145,16 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="game\entity.cpp" />
+    <ClCompile Include="game\transform.cpp" />
     <ClCompile Include="items\inventoryblock.cpp" />
     <ClCompile Include="items\item.cpp" />
     <ClCompile Include="items\menu.cpp" />
     <ClCompile Include="items\recipe.cpp" />
-    <ClCompile Include="mesh.cpp" />
-    <ClCompile Include="particles.cpp" />
+    <ClCompile Include="renderer\mesh.cpp" />
+    <ClCompile Include="game\particles.cpp" />
     <ClCompile Include="player\player.cpp" />
     <ClCompile Include="player\playerinventory.cpp" />
+    <ClCompile Include="renderer\textrender.cpp" />
     <ClCompile Include="util\fileloader.cpp" />
     <ClCompile Include="game\aabb.cpp" />
     <ClCompile Include="block\block.cpp" />
@@ -192,8 +194,9 @@
     <ClInclude Include="block\torch.h" />
     <ClInclude Include="block\water.h" />
     <ClInclude Include="block\wood.h" />
-    <ClInclude Include="collutil.h" />
+    <ClInclude Include="game\collutil.h" />
     <ClInclude Include="game\storagecomp.h" />
+    <ClInclude Include="game\transform.h" />
     <ClInclude Include="items\airitem.h" />
     <ClInclude Include="items\grassitem.h" />
     <ClInclude Include="items\inventoryblock.h" />
@@ -207,21 +210,21 @@
     <ClInclude Include="items\stoneitem.h" />
     <ClInclude Include="items\sworditem.h" />
     <ClInclude Include="items\torchitem.h" />
-    <ClInclude Include="mesh.h" />
-    <ClInclude Include="model.h" />
-    <ClInclude Include="particles.h" />
+    <ClInclude Include="renderer\mesh.h" />
+    <ClInclude Include="renderer\model.h" />
+    <ClInclude Include="game\particles.h" />
     <ClInclude Include="game\entitystate.h" />
     <ClInclude Include="player\player.h" />
     <ClInclude Include="player\playerhealth.h" />
     <ClInclude Include="player\playerinventory.h" />
+    <ClInclude Include="renderer\textrender.h" />
     <ClInclude Include="util\geometry.h" />
     <ClInclude Include="util\fileloader.h" />
     <ClInclude Include="game\aabb.h" />
     <ClInclude Include="player\playermovment.h" />
     <ClInclude Include="player\playermodification.h" />
-    <ClInclude Include="rigidbody.h" />
+    <ClInclude Include="game\rigidbody.h" />
     <ClInclude Include="renderer\uirender.h" />
-    <ClInclude Include="shareptr.h" />
     <ClInclude Include="world\managegrid.h" />
     <ClInclude Include="util\queue.h" />
     <ClInclude Include="renderer\algorthm.h" />
@@ -263,6 +266,8 @@
     <None Include="shaders\particlevertex.vs" />
     <None Include="shaders\spritefragment.vs" />
     <None Include="shaders\spritevert.vs" />
+    <None Include="shaders\textfragment.vs" />
+    <None Include="shaders\textvertex.vs" />
     <None Include="shaders\uifragment.vs" />
     <None Include="shaders\uivertex.vs" />
     <None Include="shaders\vert1.vs" />

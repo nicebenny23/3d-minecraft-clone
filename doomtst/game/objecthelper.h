@@ -37,7 +37,7 @@ namespace objutil {
 	}
 	if (object.type==gameobject::entity)
 	{
-		((entityname::entity*)(&object))->pos ;
+		((entityname::entity*)(&object))->transform.position;
 	}
 }
 //returns id ob object only works for block

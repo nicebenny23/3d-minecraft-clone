@@ -71,8 +71,8 @@ void menu::customopen()
 menu::menu(v2::Vector2 size)
 {
 
-	menubox = newbox("menutex.png", size,v2::zerov,11);
-	menubox->shouldrender = true;
+	menubox = newbox("images\\menutex.png", size,v2::zerov,11);
+	menubox->shouldrender = false;
 	
 }
  void menu::testclick()

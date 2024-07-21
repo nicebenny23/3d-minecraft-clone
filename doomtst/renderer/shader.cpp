@@ -37,7 +37,7 @@ shader::shader(const char* vertexpath, const char* fragpath)
     {
 
         glGetShaderInfoLog(vertexShader, 512, NULL, infolog);
-      
+        std::cout << vertexpath;
         std::cout << "vertex shader error ";
             Assert(infolog);
     }
@@ -49,7 +49,7 @@ GLint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
     glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fragsuccess);
     if (!fragsuccess)
     {
-      
+        std::cout << fragpath;
         glGetShaderInfoLog(fragmentShader, 512, NULL, infolog);
         std::cout << '/n' << "fragment shader error ";
         Assert(infolog);

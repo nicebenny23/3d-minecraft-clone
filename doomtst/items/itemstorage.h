@@ -1,6 +1,6 @@
 #include "../util/vector2.h"
 #include "inventoryblock.h"
-
+#include "menu.h"
 #ifndef itemstorage_HPP
 #define itemstorage_HPP
 struct Container
@@ -14,12 +14,38 @@ struct Container
 		}
 		databuf.destroy();
 	}
+	void update() {
+
+		if (ismenuopen())
+		{
+			testmouseclick();
+		}
+		deletebelowzero();
+	}
 	array<itemslot> databuf;
 	itemslot& getlocalat(int xpos,int ypos) {
 		return databuf[xpos + ypos * sizex];
 	}
 	itemslot& at(int ind) {
 		return databuf[ind];
+	}
+	bool clicked() {
+		if (!ismenuopen())
+		{
+			return false;
+		}
+		if (!userinput::mouseleft.pressed)
+		{
+			return false;
+		}
+		for (int i = 0; i < databuf.length; i++)
+		{
+			itemslot* slt = &databuf[i];
+			if (slt->frame->mouseonblock()) {
+				return true;
+			}
+		}
+		return false;
 	}
 	void deletebelowzero() {
 
@@ -28,7 +54,7 @@ struct Container
 		{
 			if (databuf[i].helditem!=nullptr)
 			{
-				if(databuf[i].helditem->amt<0){
+				if(databuf[i].helditem->amt<=0){
 				
 					databuf[i].destroyitem();
 				}
@@ -111,6 +137,7 @@ struct Container
 				ind++;
 			}
 		}
+		setviewable(false);
 	}
 	void testmouseclick() {
 

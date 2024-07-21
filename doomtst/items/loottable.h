@@ -18,6 +18,7 @@ struct lootelement
 	void drop() {
 
 		int dropamt=2*random(maxamt);
+
 		player::goblin.toent()->getcomponent<inventory>().playermenu.blkcont.fill(itemid, dropamt);
 	}
 
@@ -39,7 +40,15 @@ struct  loottable:gameobject::component
 		lootlist.append(lootelement(itemid, maxamt));
 	}
 	void ondestroy() {
-
+		if (owner->type==gameobject::block)
+		{
+			if (grid::getobjatgrid(toblk(owner).pos)==nullptr)
+			{
+				lootlist.destroy();
+				return;
+			}
+		}
+	
 		for (int i = 0; i < lootlist.length; i++)
 		{
 			lootlist[i].drop();

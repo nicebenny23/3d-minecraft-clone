@@ -1,42 +1,46 @@
 #include "../items/menu.h"
 #include "../game/gameobject.h"
 #include "../util/userinput.h"
+#include "../items/recipe.h"
 #ifndef playerinventory_Hpp
 #define playerinventory_Hpp
 inline void initfreeditem() {
 
-	freeditem = inititem(0);
-	freeditem->state = beingheld;
+	nullptr;
 	
 }struct inventorymen :menu
 {
 	Container blkcont;
+	recipemanager manager;
 	inventorymen(v2::Vector2 size) {
-		menubox = newbox("menutex.png", size, v2::zerov, 11);
-		menubox->shouldrender = true;
-
+		menubox = newbox("images\\menutex.png", size, v2::zerov, 11);
+		
+		menubox->shouldrender = false;
+		
+		manager=recipemanager("2x2craft.txt", 1, 1);
 		blkcont = Container(8, 4, 0, 0);
 
-
+		 
 	}
 	void custominit() {
 
 	}
 	void customopen() {
 
+		manager.setviewable(true);
 		blkcont.setviewable(true);
 	}
 	void customclose() {
 
 		blkcont.setviewable(false);
-
+		manager.setviewable(false);
 	}
 	void testclick() {
 
 
 		if (isopen)
 		{
-
+			manager.testmouseclick();
 			blkcont.testmouseclick();
 		}
 
@@ -53,7 +57,7 @@ struct inventory :gameobject::component
 		item* selected;
 	void update() {
 		
-		hotbar.testmouseclick();
+		hotbar.update();
 		if (userinput::getinputkey('j').pressed) {
 			playermenu.close();
 		}
@@ -93,6 +97,13 @@ struct inventory :gameobject::component
 		}
 		playermenu.testclick();
 		playermenu.blkcont.deletebelowzero();
+		if (freeditem!=nullptr)
+		{
+			if (freeditem->amt == 0) {
+				freeditem->destroy();
+				freeditem = nullptr;
+			}
+		}
 	}
 };
 

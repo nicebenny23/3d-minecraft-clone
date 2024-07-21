@@ -36,8 +36,9 @@ struct item
 	int amt;
 	void destroy();
 	bool use(int useamt);
+	bool canuse(int useamt);
 	uirender::uibox* itemsprite;
-
+	void maxoutthis(item* itm);
 };
 extern texturearray textureidlist;
 extern item* freeditem;

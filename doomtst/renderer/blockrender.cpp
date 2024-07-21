@@ -94,12 +94,12 @@ const int indiceoffsetfrombaselocation[] = {
 // Emit the vertices and indices for a single face of a block
 void emitface(int face, block& torender, array<float>& datbuf, array<unsigned int>& indbuf) {
 	if (!torender[face].covered) {
-		int baselocation = datbuf.length / 7;
+		const int baselocation = datbuf.length / 7;
 		for (int j = 0; j < 4; j++) {
 			// Index of unique vertex in each face
 			int uniqueind = uniqueindices[4 * face + j];
 			// Actual location
-			Vector3 offsetfromcenter = (vert[uniqueind] - unitv / 2) * Vector3((torender.mesh).scale) * 2;
+			Vector3 offsetfromcenter = (vert[uniqueind] - unitv / 2) * Vector3(torender.mesh.scale) * 2;
 			Vector3 offset = torender.mesh.pos + offsetfromcenter;
 			datbuf.append(offset.x);
 			datbuf.append(offset.y);

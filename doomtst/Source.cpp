@@ -1,5 +1,5 @@
 #include "game/camera.h"
-#include "mesh.h"
+#include "renderer/mesh.h"
 #include "renderer/shader.h"
 #include <iostream>
 #include <cmath>
@@ -12,7 +12,7 @@
 #include "world/chunk.h"
 #include "game/objecthelper.h"
 #include "world/grid.h"
-#include "particles.h"
+#include "game/particles.h"
 #include "renderer/blockrender.h"
 #include "world/managegrid.h"
 #include "util/time.h"
@@ -20,13 +20,16 @@
 #include "renderer/uirender.h"
 #include "player/playermodification.h"
 #include "util/fileloader.h"
+#include "renderer/textrender.h"
 #include "player/player.h"
+#include "renderer/textrender.h"
 // settings
-const Vector3 spawnpos = glm::vec3(-100, 56, 200);
+const Vector3 spawnpos = glm::vec3(0,0,0);
 const unsigned int SCR_WIDTH = 4000;
 const unsigned int SCR_HEIGHT = 3000;
 void init() {
  
+   
     timename::inittime();
     randominit();
     window::createcurwindow(1600, 1200);
@@ -54,24 +57,30 @@ void init() {
     userinput::endupdate();
     aabb::initCollider();
     initfreeditem();
+    inittextarray();
+}
+void render() {
+
+
+
 
 }
-
 int main()
 {
 
     init();
     player::initplayer();
-    
+    integertext* inttext = createinteger(v2::zerov,.1f);
+    inttext->value = 1;
 
     glfwSwapInterval(0);
-    texture mtex = texture("slimetex.png", png);
-//    meshname::mesh newmehs = *meshname::loadmesh("slime.obj", mtex,spawnpos);
+    texture mtex = texture("images\\slimetex.png", png);
+    meshname::mesh newmehs = *meshname::loadmesh("newtest.obj", mtex,spawnpos);
 
-    entityname::entityref emit = entityname::createentity(Vector3(1,20,1), "2");
+    entityname::entityref emit = entityname::createentity(Vector3(.01f,0,0), "2");
     emit.toent()->addcomponent<particleemiter>(3, initbaseparticle);
     emit.toent()->getcomponent<particleemiter>().tex = mtex;
-   // newmehs.rotation = Vector3(1, 1, 1);
+    newmehs.yaw=1;
 
 float lastupdate = 0;
 
@@ -92,10 +101,13 @@ while (!window::shouldclose())
     
  
     camera::sendoffviewmatrix();
-
+   
     userinput::endupdate();
     // update shader uniform
-    camera::setcamerapos(player::goblin.toent()->pos);
+    camera::setcamerapos(player::goblin.toent()->transform.position);
+        
+        
+        
     grid::reupdatechunkborders();
     grid::load();
     if (grid::gridchanged())
@@ -104,14 +116,14 @@ while (!window::shouldclose())
         gridutil::redoallighting = true;
 
     }
-    //newmehs.rotation += Vector3(1,0,1)/30;
+    newmehs.yaw += 1/30;
     gridutil::redolighting();
-//  meshname::rendermesh(&newmehs);
+  meshname::rendermesh(&newmehs);
     blockrender::initdatabuffer();
-  
+ 
     emit.toent()->getcomponent<particleemiter>().renderparticles();
-    uirender::renderuilist();
-
+   uirender::renderuilist();
+    rendertextlist();
     entityname::deleteobjs();
 
     window::swapbuffer();

@@ -8,7 +8,7 @@
 #include "grassitem.h"
 #ifndef itemutil_HPP
 #define itemutil_HPP
-inline void placeitemid(item* itm) {
+inline void inititemproperties(item* itm) {
 
 	switch (itm->id)
 	{
@@ -35,9 +35,9 @@ inline void placeitemid(item* itm) {
 
 }
 inline item* inititem(int id) {
-	int rint = randomint(5);
+	int rint = id;
 	item* newitem = new item(rint);
-	placeitemid(newitem);
+	inititemproperties(newitem);
 	return newitem;
 
 }

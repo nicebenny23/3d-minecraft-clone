@@ -87,12 +87,6 @@
     <ClCompile Include="util\fileloader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="mesh.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="particles.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="player\player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -118,6 +112,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="items\recipe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\particles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\textrender.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -221,31 +227,16 @@
     <ClInclude Include="util\queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="rigidbody.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="renderer\uirender.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="util\fileloader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="particles.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="model.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="game\entitystate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game\storagecomp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="shareptr.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="mesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="block\air.h">
@@ -288,9 +279,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="util\geometry.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="collutil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="block\liquid.h">
@@ -341,6 +329,27 @@
     <ClInclude Include="items\recipe.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game\collutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\particles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\textrender.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\rigidbody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\transform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag1.vs" />
@@ -355,5 +364,7 @@
     <None Include="shaders\spritevert.vs">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="shaders\textfragment.vs" />
+    <None Include="shaders\textvertex.vs" />
   </ItemGroup>
 </Project>

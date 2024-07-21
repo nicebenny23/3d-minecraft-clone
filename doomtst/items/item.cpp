@@ -22,5 +22,23 @@ bool item::use(int useamt)
 	}
 	return true;
 }
+bool item::canuse(int useamt)
+{
+	if (amt-useamt < 0) {
+
+		return false;
+	}
+	return true;
+}
+void item::maxoutthis(item* itm)
+{
+	int numcanstore = maxamt - amt;
+	if (numcanstore>0)
+	{
+		int amttaken = Min(numcanstore, itm->amt);
+		itm->amt -= amttaken;
+		amt += amttaken;
+	}
+}
 item* freeditem;
 texturearray itemidlist;

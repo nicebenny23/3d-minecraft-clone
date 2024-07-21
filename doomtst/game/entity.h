@@ -1,6 +1,7 @@
 #include "gameobject.h"
 #include "aabb.h"
 #include "../util/vector3.h"
+#include "transform.h"
 #define entsize 16*16*16
 #ifndef entity_HPP
 #define entity_HPP
@@ -14,10 +15,10 @@ namespace entityname {
 	struct entity : gameobject::obj
 	{
 		const char* name;
-		v3::Vector3 pos;
+		
 
 		int guid;
-
+		Transform transform;
 		entity() = default;
 	};
 

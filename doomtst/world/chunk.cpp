@@ -120,34 +120,35 @@ Chunk::chunk* Chunk::load(Coord location)
 
 					}
 
-					continue;
+					
 				}
+				else {
+					//todo fix it
+					float noiselevel = (*map)[Coord(x, y, z)];
+					///	float noiselevel1 = (*map1)[Coord(x, y, z)];
 
-				//todo fix it
-				float noiselevel = (*map)[Coord(x, y, z)];
-				///	float noiselevel1 = (*map1)[Coord(x, y, z)];
-
-				if (noiselevel > -.15)
-				{
-
-					if (noiselevel < .15)
+					if (noiselevel > -.15)
 					{
 
-						neid = minecraftstone;
+						if (noiselevel < .15)
+						{
 
+							neid = minecraftstone;
+
+
+						}
 
 					}
 
-				}
-
-				if (abs(noiselevel) < .11f)
-				{
-					if (abs(noiselevel) > .1f)
+					if (abs(noiselevel) < .11f)
 					{
+						if (abs(noiselevel) > .1f)
+						{
 
-						neid = minecraftcrystal;
+							neid = minecraftcrystal;
+						}
+
 					}
-
 				}
 				newchunk.blockbuf[ind] = blockname::block(blockpos, neid);
 

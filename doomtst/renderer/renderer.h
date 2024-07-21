@@ -19,10 +19,11 @@ namespace renderer {
 		uishader = 1,
 		modelshader = 2,
 		particleshader = 3,
-
+		textshader=4,
 	};
 	void renderquadlist(vao VAO, vbuf ibo, vbuf VBO, dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist);
 	void render2dquadlist(vao VAO, vbuf ibo, vbuf VBO, array<float>& pointlist, array<unsigned int>& indicelist);
+	void render2dtextarray(vao VAO, vbuf ibo, vbuf VBO, array<float>& pointlist, array<unsigned int>& indicelist);
 	void load();
 	void setviewmatrix(glm::mat4 viewmat);
 	void clear();
@@ -40,6 +41,7 @@ namespace renderer {
 		renderui=2,
 		rendermodel= 3,
 		renderparticle=4,
+		rendertext=5,
 	}; void changerendertype(rendertype rentype);
 
 }

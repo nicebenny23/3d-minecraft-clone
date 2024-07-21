@@ -4,7 +4,7 @@
 #define airitemasblockid 0
 inline void initairitem(item* itm) {
 	itm->pickaxepower = 0;
-	itm->itemsprite = uirender::newbox("airtex.png", v2::Vector2(1 / 20.f, 1 / 20.f), v2::zerov, 100);
+	itm->itemsprite = uirender::newbox("images\\airtex.png", v2::Vector2(1 / 20.f, 1 / 20.f), v2::zerov, 100);
 }
 
 #endif // !airinit_HPP

@@ -23,7 +23,7 @@ namespace geometry {
 	struct Box2d {
 		v2::Vector2 center;
 		v2::Vector2 scale;
-
+		
 		Box2d(v2::Vector2 cent, v2::Vector2 scl)
 			: center(cent), scale(scl) {}
 

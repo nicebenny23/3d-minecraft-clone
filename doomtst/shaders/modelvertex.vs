@@ -15,8 +15,8 @@ void main()
 {
    
 
-      vec4 pos =  projection * view*model* vec4(aPos.x,aPos.y*1.7,aPos.z, 1.0);
-
+      vec4 pos =  projection * view*model* vec4(aPos.x,aPos.y,aPos.z, 1.0);
+      pos.y=pos.y*1.77;
 gl_Position=pos;
 
 

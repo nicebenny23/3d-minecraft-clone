@@ -11,11 +11,13 @@ inline void torchinit(blockname::block* blk) {
 	blk->mesh.scale = v3::Vector3(1 / 16.f, .375, 1 / 16.f);
 	blk->mesh.attachindirection();
 	blk->createaabb();
-
+	blk->addcomponent<loottable>();
+	blk->getcomponent<loottable>().addelem(torchitem, 1);
 }
 
 inline void torchdelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();
+	blk->removecomponent<loottable>();
 
 }
 #endif // !torch_HPP

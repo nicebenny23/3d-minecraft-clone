@@ -118,6 +118,7 @@ void uirender::renderuilist()
 			databuf.destroy();
 		}
 	}
+	indicetosort.destroy();
 	indbuf.destroy();
 	Voa.destroy();
 	VBO.destroy();

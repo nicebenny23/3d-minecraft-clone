@@ -68,11 +68,23 @@ namespace renderer {
 
             glEnable(GL_DEPTH_TEST);
             glDepthMask(GL_TRUE);
+            glDisable(GL_CULL_FACE);
             glEnable(GL_BLEND);
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             currshader = particleshader;
             shaderlist[particleshader].attach();
             setrenderingmatrixes();
+            break;
+        case rendertext:
+
+            glDisable(GL_DEPTH_TEST);
+            glDepthMask(GL_FALSE);
+            glEnable(GL_BLEND);
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            currshader = textshader;
+            shaderlist[textshader].attach();
+           
+            glBindTexture(GL_TEXTURE_2D, 0);
             break;
         }
     }
@@ -138,8 +150,29 @@ namespace renderer {
 
       
     }
+    void render2dtextarray(vao VAO, vbuf ibo, vbuf VBO, array<float>& pointlist, array<unsigned int>& indicelist)
+    {
+        VBO.bind();
+
+        VBO.fillbuffer<float>(pointlist);
+
+
+
+        //uv
+        VAO.bind();
+        VAO.set_attr(0, 2, GL_FLOAT, 5 * sizeof(float), 0);
+        glEnableVertexAttribArray(0);
+        //texture coords,inclusing the texture in the array 
+        VAO.set_attr(1, 3, GL_FLOAT, 5* sizeof(float), 2 * sizeof(float));
+        glEnableVertexAttribArray(1);
+        ibo.bind();
+        ibo.fillbuffer<unsigned int>(indicelist);
+        //enable position
+        glDrawElements(GL_TRIANGLES, indicelist.length, GL_UNSIGNED_INT, 0);
+
+    }
     void setprojmatrix(float newfov,float nearclipplane, float farclipplane){
-        proj = glm::perspective(glm::radians(newfov), float(4 / 3), nearclipplane, farclipplane);
+        proj = glm::perspective(glm::radians(newfov), float(4 / 3.f), nearclipplane, farclipplane);
         fov = newfov;
     }
     void generatetexarray() {
@@ -173,6 +206,9 @@ namespace renderer {
       
        shaderlist[particleshader] = shader::shader("shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
        shaderlist[particleshader].attach();
+ 
+       shaderlist[textshader] = shader::shader("shaders\\textvertex.vs", "shaders\\textfragment.vs");
+       shaderlist[textshader].attach();
        shaderlist[normalshader] = shader::shader("shaders\\vert1.vs", "shaders\\frag1.vs");
         shaderlist[normalshader].attach();
               currshader = normalshader;

@@ -33,7 +33,7 @@ itemslot::itemslot(int xloc, int yloc, void(*clickaction)(itemslot&)) {
 }
 
 void itemslot::giveitem(int id) {
-	helditem = inititem(2);
+	helditem = inititem(id);
 	helditem->amt = 1;
 	helditem->state = ininventoryblock;
 	helditem->itemsprite->box.center = frame->box.center;
@@ -79,6 +79,13 @@ void itemslot::setviewable(bool isviewable) {
 
 void itemslot::testclick() {
 	if (frame->mouseonblock() && userinput::mouseleft.pressed) {
+		if (freeditem!=nullptr&& helditem != nullptr)
+		{
+			if (freeditem->id == helditem->id) {
+				helditem->maxoutthis(freeditem);
+				return;
+			}
+		}
 		transferitem(freeditem);
 	}
 }

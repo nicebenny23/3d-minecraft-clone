@@ -121,7 +121,10 @@ namespace dynamicarray {
 	void array<T>::destroy() {
 		if (list != nullptr) {
 			delete[] list;
+			list = nullptr;
 		}
+		length = 0;
+		capacity = 0;
 	}
 
 

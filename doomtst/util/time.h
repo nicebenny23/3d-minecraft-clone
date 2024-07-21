@@ -2,6 +2,7 @@
 #include "dynamicarray.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "mathutil.h"
 using namespace dynamicarray;
 using namespace std::chrono;
 #ifndef timehpp
@@ -11,16 +12,18 @@ namespace timename {
 	extern float dt;
 	extern float gametime;
 	extern float tfps;
-	extern float mindt;
+	extern float averagedt;
+	extern float smoothdt;
 	void inittime(); 
 
 	inline void calcfps() {
 
 		auto currtime = glfwGetTime();
 		dt = currtime - gametime;
-		mindt =std::min(dt, .01f);
-
-		fps = 1000 / dt;
+		averagedt = averagedt * .99f+ dt * .01f;
+		smoothdt =Min(smoothdt, averagedt*2);
+		smoothdt = averagedt;
+		fps = 1000 / smoothdt;
 
 		gametime = currtime;
 	}

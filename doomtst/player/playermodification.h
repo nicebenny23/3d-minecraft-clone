@@ -61,8 +61,12 @@ struct playermod:gameobject::component
 
 			if (collision::aabbCollidesWithEntity(&plamentblock->getcomponent<Collider>()))
 			{
-
+			
 				gridutil::setblock(plamentblock->pos, previd);
+			}
+			else
+			{
+				select->use(1);
 			}
 		}
 
@@ -78,6 +82,10 @@ struct playermod:gameobject::component
 
 	}
 	void update() {
+		if (ismenuopen())
+		{
+			return;
+		}
 		select = owner->getcomponent<inventory>().selected;
 
 		ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
@@ -103,7 +111,7 @@ struct playermod:gameobject::component
 			{
 				if (blockidfromitemid(select) != -1)
 				{
-					if (select->use(1))
+					if (select->canuse(1))
 					{
 
 						placeblock();
