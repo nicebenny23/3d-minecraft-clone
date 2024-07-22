@@ -3,13 +3,14 @@
 item::item(int itemid)
 {
 	id = itemid;
-	itemsprite = nullptr;
-
-
+	itemui.itemsprite = nullptr;
+	itemui.textvalue=createinteger(v2::zerov,1/80.0f);
+	maxamt = 0;
 }
 void item::destroy()
 {
-	itemsprite->destroy();
+	itemui.textvalue->destroy();
+	itemui.itemsprite->destroy();
 }
 bool item::use(int useamt)
 {

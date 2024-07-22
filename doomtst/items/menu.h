@@ -34,5 +34,5 @@ struct menu
 };
 
 extern menu* openmenu;
-
+extern menu* inventorylocation;
 #endif // ! menu_HPP

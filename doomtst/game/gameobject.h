@@ -78,7 +78,7 @@ namespace gameobject {
 		};
 		virtual component* copydat(component* orgin);
 		virtual void start();
-
+		virtual void renderupdate();
 		virtual void update();
 		virtual void blockfaceupdate(obj* blk, int face);
 		virtual void oncollision(obj* collidedwith);

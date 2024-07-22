@@ -6,17 +6,18 @@ integertext::integertext(v2::Vector2 textcenter, float textscale)
 {
 	center = textcenter;
 	scale = textscale;
- 
+	shouldrender = false;
 }
 
  void integertext::recalculateword()
 {
 	 word.clear();
 	word= std::to_string(value);
-	
+	int l = value;
 }
 void integertext::destroy()
 {
+	word.clear();
 	textlist[id] = nullptr;
 
 }
@@ -72,14 +73,16 @@ void writeletter(geometry::Box2d location, int letter)
 }
 void integertext::write()
 {
-	v2::Vector2 min = center - v2::unitv / 2 * scale*word.length();
-
-	v2::Vector2 increse=  v2::Vector2(1,0) * scale;
-	Box2d charlocation = Box2d(min+v2::unitv*scale/2.0f, v2::unitv * scale);
+	v2::Vector2 min = center - (v2::Vector2(1.5f*word.length(), 1.f) * scale) / 2;
+	v2::Vector2 boxoffset = v2::Vector2(1.5, 1) * scale / 2.0;
+	v2::Vector2 increse=  v2::Vector2(1.5,0) * scale;
+	Box2d charlocation = Box2d(min+boxoffset, v2::unitv * scale);
 	for (int i = 0; i < word.length(); i++)
 	{
 		writeletter(charlocation, int(word[i]-'0'));
+		charlocation.center += increse;
 	}
+
 }
 
 integertext* createinteger(v2::Vector2 textcenter, float textscale)
@@ -110,9 +113,13 @@ void rendertextlist()
 	{
 		if (textlist[i]!=nullptr)
 		{
-			textlist[i]->recalculateword();
+			if (textlist[i]->shouldrender)
+			{
+				textlist[i]->recalculateword();
 
-			textlist[i]->write();
+				textlist[i]->write();
+			}
+		
 		}
 	}
 	vao Voa=vao();

@@ -27,8 +27,8 @@ struct itemslot
 	void transferitem(item* otherholder);
 	void destroyitem();
 	void setviewable(bool isviewable);
-
-	void testclick();
+	bool hasbeenclicked();
+	void updatestate();
 };
 
 #endif // !invblock_HPP

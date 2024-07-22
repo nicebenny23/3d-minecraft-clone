@@ -30,7 +30,10 @@ struct playermod:gameobject::component
 		{
 			return false;
 		}
-
+		if (closest.box->owner->type!=gameobject::block)
+		{
+			return false;
+		}
 		if (!inrange(closest.dist, interactminrange, interactmaxrange))
 		{
 			return false;
@@ -89,7 +92,7 @@ struct playermod:gameobject::component
 		select = owner->getcomponent<inventory>().selected;
 
 		ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
-		closest = voxtra::travvox(cameraray, 1000);
+		closest = collision::raycastall(cameraray);
 		if (!caninteract())
 		{
 			return;
@@ -116,10 +119,7 @@ struct playermod:gameobject::component
 
 						placeblock();
 					}
-					else
-					{
-						select->itemsprite->shouldrender=(false) ;
-					}
+				
 				}
 			}
 

@@ -1,5 +1,9 @@
 #include "../util/vector3.h"
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
 #ifndef  transform_HPP
 #define transform_HPP
 struct Transform
@@ -14,6 +18,8 @@ struct Transform
 	v3::Vector3 getnormaldirection();
 	void orient(v3::Vector3 to);
 };
-
+glm::mat4 transformtomat(Transform& transform);
+glm::mat4 tcompose(Transform& t1, Transform& t2);
+Transform compose(Transform& t1, Transform& t2);
 
 #endif // ! transform_HPP

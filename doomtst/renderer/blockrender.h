@@ -4,9 +4,9 @@
 #define blockrender_HPP
 namespace blockrender {
 	
-	void initdatabuffer();
+	void initdatabuffer(bool transparent);
 	
-
+	
 
 }
 

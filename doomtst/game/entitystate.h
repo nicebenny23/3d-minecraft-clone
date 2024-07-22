@@ -19,9 +19,9 @@ struct estate :gameobject::component
 		
 		if (owner->getcomponent<rigidbody>().isonground && !prevonground)
 		{
-			if (velocitylast.y < -13)
+			if (velocitylast.y < -10)
 			{
-				damage(abs(velocitylast.y / 5.f));
+				damage(abs(velocitylast.y / 4.f));
 			}
 
 		}

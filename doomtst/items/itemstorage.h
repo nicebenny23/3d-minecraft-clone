@@ -14,14 +14,7 @@ struct Container
 		}
 		databuf.destroy();
 	}
-	void update() {
 
-		if (ismenuopen())
-		{
-			testmouseclick();
-		}
-		deletebelowzero();
-	}
 	array<itemslot> databuf;
 	itemslot& getlocalat(int xpos,int ypos) {
 		return databuf[xpos + ypos * sizex];
@@ -139,16 +132,17 @@ struct Container
 		}
 		setviewable(false);
 	}
-	void testmouseclick() {
+	void update() {
 
 
 		for (int i = 0; i < databuf.length; i++)
 		{
 			
 
-				databuf[i].testclick();
+				databuf[i].updatestate();
 			
 		}
+		deletebelowzero();
 	}
 	
 };

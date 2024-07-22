@@ -5,6 +5,7 @@
 #include "texture.h"
 #include "vertexobject.h"
 #include "vertexobject.h"
+#include "../game/transform.h"
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_DEPRECATE
 using namespace dynamicarray;
@@ -16,17 +17,29 @@ namespace meshname {
 
 	struct mesh
 	{
+
 		float yaw;
 		float pitch;
 		v3::Vector3 pos;
 		void setmodeluniform();
 		texture tex;
 		mesh();
-
+		Transform* modeltranform;
+		Transform transform;
 		array<Vector3> vertices;
 		array<v2::Vector2> texcoords;
 		array<unsigned int> vertexindices;
 		array<unsigned int> texindices;
+		void destroy() {
+
+			meshvbuf.destroy();
+			meshvao.destroy();
+			tex.destroy();
+			vertexindices.destroy();
+			texcoords.destroy();
+			texindices.destroy();
+			vertices.destroy();
+		}
 		Vector3 nthvertex(int i);
 		v2::Vector2 nthtex(int i);
 		vobj::vao meshvao;

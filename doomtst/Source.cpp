@@ -24,6 +24,7 @@
 #include "player/player.h"
 #include "renderer/textrender.h"
 // settings
+#include "renderer/model.h"
 const Vector3 spawnpos = glm::vec3(0,0,0);
 const unsigned int SCR_WIDTH = 4000;
 const unsigned int SCR_HEIGHT = 3000;
@@ -56,7 +57,7 @@ void init() {
     uirender::newbox("images\\crosshair.png", v2::unitv / 32, v2::zerov,-3);
     userinput::endupdate();
     aabb::initCollider();
-    initfreeditem();
+    
     inittextarray();
 }
 void render() {
@@ -70,17 +71,18 @@ int main()
 
     init();
     player::initplayer();
-    integertext* inttext = createinteger(v2::zerov,.1f);
-    inttext->value = 1;
-
+    entityname::entityref refmodel = entityname::createentity(zerov, "frjiofiuje");
+    refmodel.toent()->addcomponent<model>();
+    refmodel.toent()->getcomponent<model>().add("slime.obj", "images\\slimetex.png");
     glfwSwapInterval(0);
+    refmodel.toent()->addcomponent<Collider>(zerov, unitv , true);
     texture mtex = texture("images\\slimetex.png", png);
-    meshname::mesh newmehs = *meshname::loadmesh("newtest.obj", mtex,spawnpos);
+  //  meshname::mesh newmehs = *meshname::loadmesh("newtest.obj", mtex,spawnpos);
 
-    entityname::entityref emit = entityname::createentity(Vector3(.01f,0,0), "2");
-    emit.toent()->addcomponent<particleemiter>(3, initbaseparticle);
-    emit.toent()->getcomponent<particleemiter>().tex = mtex;
-    newmehs.yaw=1;
+  //  entityname::entityref emit = entityname::createentity(Vector3(.01f,0,0), "2");
+  //  emit.toent()->addcomponent<particleemiter>(3, initbaseparticle);
+  // emit.toent()->getcomponent<particleemiter>().tex = mtex;
+    //newmehs.yaw=1;
 
 float lastupdate = 0;
 
@@ -116,16 +118,20 @@ while (!window::shouldclose())
         gridutil::redoallighting = true;
 
     }
-    newmehs.yaw += 1/30;
+    refmodel.toent()->transform.scale = unitv ;
+    //refmodel.toent()->transform.yaw += 1 / 30.f;
+    
     gridutil::redolighting();
-  meshname::rendermesh(&newmehs);
-    blockrender::initdatabuffer();
- 
-    emit.toent()->getcomponent<particleemiter>().renderparticles();
-   uirender::renderuilist();
+  //meshname::rendermesh(&newmehs);
+    blockrender::initdatabuffer(false);
+    entityname::runrenderloop();
+    //emit.toent()->getcomponent<particleemiter>().renderparticles();
+
+    blockrender::initdatabuffer(true);
+    uirender::renderuilist();
     rendertextlist();
     entityname::deleteobjs();
-
+   
     window::swapbuffer();
     glfwPollEvents();
     lastupdate += timename::dt;

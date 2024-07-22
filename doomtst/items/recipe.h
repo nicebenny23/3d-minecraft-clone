@@ -30,12 +30,13 @@ struct irecipe {
 struct recipemanager {
 	int xsize;
 	int ysize;
+	bool cancreate;
 	Container* newitemlocation;
 	Container* resourcecontainer;
 	void destroy();
 	void createcontainers();
 	void addrecipe(irecipe recipe);
-	void testmouseclick();
+	void updatestate();
 	void ontake();
 	void preview(); 
 	void craft();

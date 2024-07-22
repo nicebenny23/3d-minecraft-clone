@@ -142,3 +142,24 @@ void entityname::runupdateloop() {
 	}
 	componentlist.destroy();
 }
+
+void entityname::runrenderloop()
+{
+	for (int i = 0; i < objectfromguid.length; i++)
+	{
+
+		if (objectfromguid.at(i) != nullptr) {
+
+
+
+
+			int len = objectfromguid[i]->complist.length;
+
+			for (int j = 0; j < len; j++)
+			{
+	
+				objectfromguid[i]->complist[j]->renderupdate();
+			}
+		}
+	}
+}

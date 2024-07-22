@@ -30,18 +30,24 @@ void recipemanager::ontake() {
 void recipemanager::preview() {
     
 
-        
+    if (cancreate)
+    {
         newitemlocation->databuf[0].destroyitem();
         irecipe* todisplay = searchrecipe();
+
         if (todisplay != nullptr)
         {
 
 
             newitemlocation->databuf[0].giveitem(todisplay->itemcreated.id);
+
+            newitemlocation->at(0).helditem->updateui();
         }
+    }
+       
     
 
-    }
+}
 
 irecipe* recipemanager::searchrecipe() {
     int maxamt = 0;
@@ -68,9 +74,10 @@ irecipe* recipemanager::searchrecipe() {
     return maximal;
 }
 
-void recipemanager::testmouseclick()
+void recipemanager::updatestate()
 {
     newitemlocation->deletebelowzero();
+  
     resourcecontainer->update();
     preview();
     if (newitemlocation->clicked())
@@ -150,13 +157,14 @@ bool irecipe::cancraft(Container* resourcecont) {
      
         if (itematpos == nullptr)
         {
+            //-1 implies null;
             if (recipe[i].id == -1)
             {
                 continue;
             }
             else
             {
-
+                //only  one is n ull ptr
                 return false;
             }
         }
@@ -201,5 +209,5 @@ void recipemanager::craft() {
 
         resourcecontainer->databuf[i].helditem->amt -= bestrecipe->recipe[i].amt;
     }
-    newitemlocation->testmouseclick();
+    newitemlocation->update();
 }

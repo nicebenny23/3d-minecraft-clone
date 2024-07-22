@@ -34,6 +34,9 @@ void gameobject::component::start()
 {
 	priority = 0;
 }
+void gameobject::component::renderupdate()
+{
+}
 void gameobject::component::update()
 {
 

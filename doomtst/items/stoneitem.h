@@ -8,7 +8,7 @@ inline void initstoneitem(item* itm) {
 	itm->maxamt = 3;
 
 	itm->placeable = true;
-	itm->itemsprite= uirender::newbox("images\\stone.png", v2::unitv/30.f, v2::zerov, 100);
+	itm->itemui.itemsprite= uirender::newbox("images\\stone.png", v2::unitv/30.f, v2::zerov, 100);
 }
 
 

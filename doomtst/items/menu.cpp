@@ -35,24 +35,27 @@ void menu::open()
 	if (menutype==inventorymenu)
 	{
 
-		if (inventoryifopen!=nullptr)
-		{
-			return;
-		}
-		inventoryifopen = this;
+
 		menubox->shouldrender = true;
 		isopen = true;
+		customopen();
+		return;
 	}
+	
+	
 	if (isopen)
 	{
 		return;
 	}
+
+
+
 	if (openmenu!=nullptr)
 	{
 			openmenu->close();
 	}
 	
-			
+	inventorylocation->open();
 			menubox->shouldrender = true;
 			isopen = true;
 			openmenu = this;

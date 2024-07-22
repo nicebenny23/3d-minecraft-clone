@@ -5,6 +5,7 @@
 inline void initsworditem(item* itm) {
 	itm->pickaxepower = 0;
 	itm->placeable = false;
-itm->itemsprite = uirender::newbox("images\\sword.png", v2::Vector2(1 / 20.f, 1 / 20.f), v2::zerov, 100);
+	itm->maxamt = 3;
+itm->itemui.itemsprite = uirender::newbox("images\\sword.png", v2::Vector2(1 / 20.f, 1 / 20.f), v2::zerov, 100);
 }
 #endif // !sworditem_HPP

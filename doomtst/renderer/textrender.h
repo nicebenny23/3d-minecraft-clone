@@ -7,7 +7,7 @@ using namespace dynamicarray;
 using namespace geometry;
 #ifndef  textrender_HPP
 #define textrender_HPP
-#define maxtextamount 40
+#define maxtextamount 100
 extern texturearray textarray;
 void inittextarray();
 const v2::Vector2 cubeuv[] = {
@@ -38,6 +38,7 @@ v2::Vector2(1, 1)
 };
 struct integertext
 {
+	bool shouldrender;
 	float scale;
 	v2::Vector2 center;
 	
@@ -53,9 +54,11 @@ struct integertext
 	int id;
 };
 integertext* createinteger(v2::Vector2 textcenter, float textscale);
+
 void rendertextlist();
 extern array<integertext*> textlist;
 inline void inittextlist() {
+	
 	textlist = array<integertext*>(maxtextamount);
 	for (int i = 0; i < textlist.length; i++)
 	{

@@ -5,21 +5,13 @@
 
 using namespace meshname;
 void meshname::mesh::setmodeluniform()
-{
-	Vector3 xbasis = Vector3(1, 0, 0);
-	Vector3 ybasis = Vector3(0, 1, 0);
-
-	Vector3 zbasis = Vector3(0, 0, 1);
-	glm::mat4 trans = glm::mat4(1.0f);
-	trans = glm::translate(trans, pos.glm());
-
-	trans = glm::rotate(trans, glm::radians(pitch), xbasis.glm());
-	trans = glm::rotate(trans, glm::radians(yaw), ybasis.glm());
-	
+{	glm::mat4 trans = glm::mat4(1.0f);
+	trans = tcompose(*modeltranform, transform);
 	renderer::shaderlist[renderer::modelshader].setmatval(trans, "model");
 }
 meshname::mesh::mesh()
 {
+	transform = Transform();
 }
 
 Vector3 meshname::mesh::nthvertex(int i)

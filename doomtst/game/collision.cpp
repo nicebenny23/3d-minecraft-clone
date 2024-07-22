@@ -23,6 +23,38 @@ void collision::update()
 	}
 }
 
+voxtra::RayCollisionWithGrid collision::raycastentity(ray nray)
+{
+	voxtra::RayCollisionWithGrid closest = voxtra::RayCollisionWithGrid();
+	closest.dist = INFINITY;
+
+	for (int i = 0; i < entityname::objectfromguid.length; i++)
+	{
+		if (entityname::objectfromguid[i] != nullptr) {
+			entityname::entity *entatpos = entityname::objectfromguid[i];
+				
+
+			if (entatpos->hascomponent<Collider>())
+			{
+				Collider* coll = &entatpos->getcomponent<Collider>();
+				if (distance(coll->center,nray.start)<Min(v3::magnitude(coll->scale),nray.length()))
+				{
+				
+					aabbraycolinfo blkinter =coll->distanceonray(nray);
+					if (blkinter.collided && blkinter.dist < closest.dist)
+					{
+						closest.colpoint = blkinter.intersectionpoint;
+						closest.box =coll;
+						closest.dist = blkinter.dist;
+					}
+				}
+			}
+
+		}
+	}
+	return closest;
+}
+
 voxtra::RayCollisionWithGrid collision::raycastCollisionWithGrid(ray nray) {
 
 	voxtra::RayCollisionWithGrid closest = voxtra::RayCollisionWithGrid();
@@ -119,6 +151,17 @@ bool collision::aabbCollidesWithEntity(Collider* blk) {
 		}
 	}
 	return false;
+}
+
+voxtra::RayCollisionWithGrid collision::raycastall(ray nray)
+{
+	voxtra::RayCollisionWithGrid gridcol = voxtra::travvox(nray,100);
+	voxtra::RayCollisionWithGrid entcol = raycastentity(nray);
+	if (gridcol.dist<entcol.dist)
+	{
+		return gridcol;
+	}
+	return entcol;
 }
 
 //todo implement movment per axis

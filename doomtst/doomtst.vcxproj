@@ -117,7 +117,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <MultiProcessorCompilation>false</MultiProcessorCompilation>
+      <MultiProcessorCompilation>Yes</MultiProcessorCompilation>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -154,6 +154,7 @@
     <ClCompile Include="game\particles.cpp" />
     <ClCompile Include="player\player.cpp" />
     <ClCompile Include="player\playerinventory.cpp" />
+    <ClCompile Include="renderer\model.cpp" />
     <ClCompile Include="renderer\textrender.cpp" />
     <ClCompile Include="util\fileloader.cpp" />
     <ClCompile Include="game\aabb.cpp" />
@@ -210,6 +211,7 @@
     <ClInclude Include="items\stoneitem.h" />
     <ClInclude Include="items\sworditem.h" />
     <ClInclude Include="items\torchitem.h" />
+    <ClInclude Include="player\playerattack.h" />
     <ClInclude Include="renderer\mesh.h" />
     <ClInclude Include="renderer\model.h" />
     <ClInclude Include="game\particles.h" />

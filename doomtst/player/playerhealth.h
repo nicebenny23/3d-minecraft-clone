@@ -19,8 +19,9 @@ struct playerhealth:gameobject::component
 		int health = owner->getcomponent<estate>().health;
 		if (health<=1)
 		{
-			glfwTerminate();
-			std::exit(11);
+			health = 5;
+		//	glfwTerminate();
+			//std::exit(11);
 		}
 		
 		for (int i =0; i < health; i++) {

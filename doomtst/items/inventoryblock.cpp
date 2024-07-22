@@ -2,7 +2,7 @@
 #include "../util/mathutil.h"
 
 void destroyonclick(itemslot& toremove) {
-	toremove.helditem->itemsprite->shouldrender = false;
+	toremove.helditem->itemui.itemsprite->shouldrender = false;
 }
 Box2d getboxfrominvloc(int xloc, int yloc) {
 
@@ -35,9 +35,10 @@ itemslot::itemslot(int xloc, int yloc, void(*clickaction)(itemslot&)) {
 void itemslot::giveitem(int id) {
 	helditem = inititem(id);
 	helditem->amt = 1;
+	helditem->setviewable(frame->shouldrender);
 	helditem->state = ininventoryblock;
-	helditem->itemsprite->box.center = frame->box.center;
-	helditem->itemsprite->box.scale = frame->box.scale / 1.4f;
+	helditem->itemui.itemsprite->box.center = frame->box.center;
+
 }
 
 void itemslot::transferitem(item* otherholder) {
@@ -57,7 +58,7 @@ void itemslot::transferitem(item* otherholder) {
 
 		helditem->state = ininventoryblock;
 
-		helditem->itemsprite->box.center = frame->box.center;
+		helditem->itemui.itemsprite->box.center = frame->box.center;
 
 	}
 
@@ -72,20 +73,39 @@ void itemslot::destroyitem() {
 
 void itemslot::setviewable(bool isviewable) {
 	frame->shouldrender = isviewable;
-	if (helditem != nullptr && helditem->itemsprite != nullptr) {
-		helditem->itemsprite->shouldrender = isviewable;
+	if (helditem != nullptr && helditem->itemui.itemsprite != nullptr) {
+		helditem->setviewable(isviewable);
 	}
 }
+bool itemslot::hasbeenclicked()
+{
+	
+		if (frame->mouseonblock() && userinput::mouseleft.pressed) {
 
-void itemslot::testclick() {
-	if (frame->mouseonblock() && userinput::mouseleft.pressed) {
-		if (freeditem!=nullptr&& helditem != nullptr)
+			return true;
+		}
+	
+	return false;
+}
+
+
+void itemslot::updatestate() {
+	if (helditem!=nullptr)
+	{
+		helditem->updateui();
+	}
+
+	if (hasbeenclicked()) {
+		if (freeditem != nullptr&&helditem!=nullptr)
 		{
+
+
 			if (freeditem->id == helditem->id) {
 				helditem->maxoutthis(freeditem);
 				return;
 			}
 		}
+
 		transferitem(freeditem);
 	}
 }

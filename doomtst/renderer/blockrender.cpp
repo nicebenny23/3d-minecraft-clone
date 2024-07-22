@@ -192,7 +192,7 @@ void renderchunk(chunkmesh& mesh, bool transparent) {
 }
 
 // Initialize the data buffer and render chunks
-void blockrender::initdatabuffer() {
+void blockrender::initdatabuffer(bool rendertransparent) {
 	glUseProgram(renderer::shaderlist[renderer::normalshader].id);
 	for (int i = 0; i < totalgridsize; i++) {
 		if (chunklist[i]->mesh->meshrecreateneeded) {
@@ -211,20 +211,27 @@ void blockrender::initdatabuffer() {
 
 	oalgorithm::quicksort<Chunk::chunk>(tosort.getdata(), tosort.length);
 	renderer::changerendertype(renderer::rendersolid);
+	if (!rendertransparent)
+	{
 
-	for (int i = 0; i < totalgridsize; i++) {
-		if (chunkviewable(&tosort[i])) {
-			renderchunk(*tosort[i].mesh, false);
+
+		for (int i = 0; i < totalgridsize; i++) {
+			if (chunkviewable(&tosort[i])) {
+				renderchunk(*tosort[i].mesh, false);
+			}
 		}
 	}
+	if (rendertransparent)
+	{
 
-	renderer::changerendertype(renderer::rendertransparent);
-	for (int i = 0; i < totalgridsize; i++) {
-		if (chunkviewable(&tosort[i])) {
-			renderchunk(*tosort[i].mesh, true);
+
+		renderer::changerendertype(renderer::rendertransparent);
+		for (int i = 0; i < totalgridsize; i++) {
+			if (chunkviewable(&tosort[i])) {
+				renderchunk(*tosort[i].mesh, true);
+			}
 		}
 	}
-
 	tosort.destroy();
 }
 

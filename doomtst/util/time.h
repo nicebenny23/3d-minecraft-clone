@@ -21,8 +21,8 @@ namespace timename {
 		auto currtime = glfwGetTime();
 		dt = currtime - gametime;
 		averagedt = averagedt * .99f+ dt * .01f;
-		smoothdt =Min(smoothdt, averagedt*2);
-		smoothdt = averagedt;
+		smoothdt =Min(averagedt, .03f);
+		
 		fps = 1000 / smoothdt;
 
 		gametime = currtime;

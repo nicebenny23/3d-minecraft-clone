@@ -53,6 +53,7 @@ namespace entityname {
 	void destroy(entity* ent);
 	entityref createentity(v3::Vector3 ipos, const char* _name);
 	void runupdateloop();
+	void runrenderloop();
 	void deleteobjs();
 	void initobjs();
 }

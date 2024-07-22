@@ -19,7 +19,7 @@ struct rigidbody : gameobject::component {
     float mass = 1.0f;
     aabb::Collider* boundingbox;
     bool isonground;
-
+    
     void calculateonground() {
 
 

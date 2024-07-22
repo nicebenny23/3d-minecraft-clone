@@ -4,11 +4,7 @@
 #include "../items/recipe.h"
 #ifndef playerinventory_Hpp
 #define playerinventory_Hpp
-inline void initfreeditem() {
-
-	nullptr;
-	
-}struct inventorymen :menu
+struct inventorymen :menu
 {
 	Container blkcont;
 	recipemanager manager;
@@ -40,8 +36,8 @@ inline void initfreeditem() {
 
 		if (isopen)
 		{
-			manager.testmouseclick();
-			blkcont.testmouseclick();
+			manager.updatestate();
+			blkcont.update();
 		}
 
 	}
@@ -91,19 +87,19 @@ struct inventory :gameobject::component
 		}
 		if (freeditem!=nullptr)
 		{
+			
+			freeditem->updateui();
 
-			freeditem->itemsprite->box.center = userinput::normedmousepos;
-
-		}
-		playermenu.testclick();
-		playermenu.blkcont.deletebelowzero();
-		if (freeditem!=nullptr)
-		{
 			if (freeditem->amt == 0) {
 				freeditem->destroy();
 				freeditem = nullptr;
 			}
+
 		}
+		
+		playermenu.testclick();
+
+		
 	}
 };
 
