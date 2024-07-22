@@ -73,19 +73,20 @@ int main()
     player::initplayer();
     entityname::entityref refmodel = entityname::createentity(zerov, "frjiofiuje");
     refmodel.toent()->addcomponent<model>();
-    refmodel.toent()->getcomponent<model>().add("slime.obj", "images\\slimetex.png");
+    refmodel.toent()->getcomponent<model>().add("newtest.obj", "images\\slimetex.png");
     glfwSwapInterval(0);
-    refmodel.toent()->addcomponent<Collider>(zerov, unitv , true);
+    refmodel.toent()->addcomponent<Collider>(zerov, unitscale, true);
     texture mtex = texture("images\\slimetex.png", png);
   //  meshname::mesh newmehs = *meshname::loadmesh("newtest.obj", mtex,spawnpos);
 
+    refmodel.toent()->addcomponent<rigidbody>();
   //  entityname::entityref emit = entityname::createentity(Vector3(.01f,0,0), "2");
   //  emit.toent()->addcomponent<particleemiter>(3, initbaseparticle);
   // emit.toent()->getcomponent<particleemiter>().tex = mtex;
     //newmehs.yaw=1;
 
 float lastupdate = 0;
-
+refmodel.toent()->transform.position = v3::Vector3(10, 0, 0);
 while (!window::shouldclose())
     {
     timename::calcfps();
@@ -118,10 +119,14 @@ while (!window::shouldclose())
         gridutil::redoallighting = true;
 
     }
-    refmodel.toent()->transform.scale = unitv ;
-    //refmodel.toent()->transform.yaw += 1 / 30.f;
-    
-    gridutil::redolighting();
+    refmodel.toent()->transform.scale = unitv;
+    //refmodel.toent()->transform.position.x    += 1 / 300.f;
+   // refmodel.toent()->transform.position = v3::Vector3(0,0,0);
+    gridutil::redolighting();    
+    refmodel.toent()->transform.orient(player::goblin.toent()->transform.position);
+
+   refmodel.toent()->transform.position += refmodel.toent()->transform.getnormaldirection()/100;
+
   //meshname::rendermesh(&newmehs);
     blockrender::initdatabuffer(false);
     entityname::runrenderloop();

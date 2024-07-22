@@ -33,29 +33,32 @@ v3::Vector3 Transform::getnormaldirection()
 
 void Transform::orient(v3::Vector3 to)
 {
-	v3::Vector3 up=v3::Vector3(0, 1, 0);  // Assuming up vector is Y-axis
-	to -= position;
-	float newpitch = std::asin(to.y);
+    to -= position;
+
+ 
+    to = normal(to);
+    float newpitch = -std::asin(to.y);
 	float newyaw = std::atan2(to.z, to.x);
-	pitch = newpitch;
-	yaw = newyaw;
+	pitch = glm::degrees(newpitch);
+	yaw = glm::degrees(newyaw);
 }
 // Convert a Transform to a glm::mat4
 glm::mat4 transformtomat( Transform& transform) {
     glm::mat4 trans = glm::mat4(1.0f);
 
     // Apply translation
+
     trans = glm::translate(trans, transform.position.glm());
-
+   
+    trans = glm::rotate(trans, glm::radians(-transform.yaw), glm::vec3(0, 1, 0));
     // Apply pitch (rotation around the x-axis)
-    trans = glm::rotate(trans, glm::radians(transform.pitch), glm::vec3(1, 0, 0));
+    trans = glm::rotate(trans, glm::radians(-transform.pitch), glm::vec3(0, 0, 1));
+    // Apply yaw (rotation around the y-axis) 
 
-    // Apply yaw (rotation around the y-axis)
-    trans = glm::rotate(trans, glm::radians(transform.yaw), glm::vec3(0, 1, 0));
-
-    // Apply scale
+   
+ 
+    // Apply 
     trans = glm::scale(trans, transform.scale.glm());
-
     return trans;
 }
 

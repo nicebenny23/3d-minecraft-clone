@@ -37,7 +37,7 @@ voxtra::RayCollisionWithGrid collision::raycastentity(ray nray)
 			if (entatpos->hascomponent<Collider>())
 			{
 				Collider* coll = &entatpos->getcomponent<Collider>();
-				if (distance(coll->center,nray.start)<Min(v3::magnitude(coll->scale),nray.length()))
+				if (distance(coll->center,nray.start)<nray.length())
 				{
 				
 					aabbraycolinfo blkinter =coll->distanceonray(nray);
@@ -98,10 +98,19 @@ void collision::handleduelentitycollisions()
 {
 	for (int i = 0; i < Colliderlist.length; i++)
 	{
+
+		if (Colliderlist[i] != nullptr) {
+			Colliderlist[i]->center = objutil::toent(Colliderlist[i]->owner).transform.position;
+		}
+	}
+
+	for (int i = 0; i < Colliderlist.length; i++)
+	{
+		
 		if (Colliderlist[i] == nullptr) {
 			continue;
 		}
-		for (int j = i; j < Colliderlist.length; j++)
+		for (int j = 0; j < Colliderlist.length; j++)
 		{
 			if (i == j) {
 				continue;
@@ -112,9 +121,9 @@ void collision::handleduelentitycollisions()
 				continue;
 			}
 			v3::Vector3 force = aabb::collideaabb(*Colliderlist[i], *Colliderlist[j]);
-			if (force != zerov)
+			if (v3::magnitude( force )>0.00001f)
 			{
-				Vector3 actualforce = force / 2;
+				Vector3 actualforce = force / 2.0f;
 
 				Colliderlist[i]->center += actualforce;
 				toent(Colliderlist[i]->owner).transform.position += actualforce;

@@ -11,6 +11,7 @@ struct Transform
 	Transform();
 	Transform(v3::Vector3 pos, float newyaw, float newpitch, v3::Vector3 newscale);
 	v3::Vector3 position;
+
 	float yaw;
 	float pitch;
 	v3::Vector3 scale;

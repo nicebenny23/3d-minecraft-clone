@@ -6,7 +6,7 @@
 using namespace meshname;
 void meshname::mesh::setmodeluniform()
 {	glm::mat4 trans = glm::mat4(1.0f);
-	trans = tcompose(*modeltranform, transform);
+	trans = transformtomat(*modeltranform);
 	renderer::shaderlist[renderer::modelshader].setmatval(trans, "model");
 }
 meshname::mesh::mesh()
