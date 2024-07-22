@@ -1,5 +1,7 @@
 #include "gameobject.h"
 #include "../util/mathutil.h"
+#include "entity.h"
+#include "objecthelper.h"
 #ifndef  entitystate_HPP
 #define entitystate_HPP
 
@@ -11,6 +13,7 @@ struct estate :gameobject::component
 	int maxhealth;
 	v3::Vector3 velocitylast;
 	void update() {
+		std::cout << 1;
 		velocitylast = owner->getcomponent<rigidbody>().velocity * .03f + velocitylast * .97f;
 		testfalldamage();
 		prevonground = owner->getcomponent<rigidbody>().isonground;
@@ -27,7 +30,7 @@ struct estate :gameobject::component
 		}
 	}
 	void start() {
-		priority = -1111;
+		priority = 11;
 		health = maxhealth;
 	}
 	estate(int maxhp) {
@@ -37,7 +40,11 @@ struct estate :gameobject::component
 	void damage(int dmg) {
 
 		health -= dmg;
-		health = clamp(health, 1, maxhealth);
+		if (health<0)
+		{
+			entityname::destroy(&objutil::toent(owner));
+		}
+		health = clamp(health, 0, maxhealth);
 	}
 };
 #endif // ! entitystate_HPP

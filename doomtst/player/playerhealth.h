@@ -1,13 +1,19 @@
 #include "../util/dynamicarray.h"
 #include "../renderer/uirender.h"
 #include "../game/gameobject.h"
+#include <conio.h>
 #include "../game/entitystate.h"
 #ifndef playerheath_HPP
 #define playerhealth_HPP
 struct playerhealth:gameobject::component
 {
+	void killplayer() {
+
+	
+	}
 	array<uirender::uibox*> healthboxes;
 	void start(){
+		priority = 4;
 		v2::Vector2 scale = v2::unitv / 100;
 		healthboxes = array<uirender::uibox*>();
 		for (int i = 0; i < 10; i++) {
@@ -19,11 +25,12 @@ struct playerhealth:gameobject::component
 		int health = owner->getcomponent<estate>().health;
 		if (health<=1)
 		{
-			health = 5;
-		//	glfwTerminate();
-			//std::exit(11);
+			system("cls");
+			killplayer();
+		glfwTerminate();
+			std::exit(0);
 		}
-		
+		std::cout << 2;
 		for (int i =0; i < health; i++) {
 			
 			healthboxes[i]->shouldrender = true;

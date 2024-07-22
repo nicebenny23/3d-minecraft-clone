@@ -16,6 +16,9 @@ struct playermod:gameobject::component
 	int curplaceid;
 	voxtra::RayCollisionWithGrid closest;
 	item* select;
+	block* currmining;
+	
+	float timeuntilbreak;
 	void start() {
 		select = nullptr;
 		curplaceid = 0;
@@ -43,11 +46,6 @@ struct playermod:gameobject::component
 	void placeblock() {
 		ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
 		block* plamentblock = voxtra::findprevblock(cameraray, 1000);
-		if (plamentblock->solid)
-		{
-			return;
-		}
-
 
 		int dir = maxdirection(closest.box->center - plamentblock->center());
 		int previd = plamentblock->id;
@@ -79,12 +77,38 @@ struct playermod:gameobject::component
 	
 
 	}
+
+
+	void testifmining()
+		{
+			if (currmining != nullptr)
+			{
+
+				if (currmining == ((block*)(closest.box->owner)))
+				{
+					timeuntilbreak -= timename::dt;
+					return;
+				}
+			}
+			timeuntilbreak =.3f;
+			currmining =(block*)( closest.box->owner);
+	}
+
+
+
 	void destroylogic() {
+	
+		testifmining();
+		if (timeuntilbreak<=0)
+		{
+			timeuntilbreak == 0;
 
-		gridutil::setblock(toblk(closest.box->owner).pos, minecraftair);
+			gridutil::setblock(toblk(closest.box->owner).pos, minecraftair);
 
+		}
 	}
 	void update() {
+		
 		if (ismenuopen())
 		{
 			return;
@@ -100,7 +124,7 @@ struct playermod:gameobject::component
 
 
 
-		if (userinput::mouseleft.pressed)
+		if (userinput::mouseleft.held)
 		{
 
 		

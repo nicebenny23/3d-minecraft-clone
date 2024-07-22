@@ -81,7 +81,7 @@ int comparecomponent(const void* b, const void* a) {
 	int priorityb =(* (entitycomponentindexer*)(b)).at()->priority;
 
 	int prioritya = (*(entitycomponentindexer*)(a)).at()->priority;
-	return (prioritya> priorityb) - (priorityb< prioritya);
+	return (prioritya>priorityb) - (priorityb> prioritya);
 	
 }
 entityref entityname::createentity(v3::Vector3 ipos, const char* _name) {

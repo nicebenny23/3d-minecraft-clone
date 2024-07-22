@@ -75,6 +75,7 @@ int main()
     refmodel.toent()->addcomponent<model>();
     refmodel.toent()->getcomponent<model>().add("newtest.obj", "images\\slimetex.png");
     glfwSwapInterval(0);
+    refmodel.toent()->addcomponent<estate>(11);
     refmodel.toent()->addcomponent<Collider>(zerov, unitscale, true);
     texture mtex = texture("images\\slimetex.png", png);
   //  meshname::mesh newmehs = *meshname::loadmesh("newtest.obj", mtex,spawnpos);
@@ -119,14 +120,19 @@ while (!window::shouldclose())
         gridutil::redoallighting = true;
 
     }
-    refmodel.toent()->transform.scale = unitv;
+    if (refmodel.toent()!=nullptr)
+    {
+        refmodel.toent()->transform.scale = unitv;
+
+        refmodel.toent()->transform.orient(player::goblin.toent()->transform.position);
+
+        refmodel.toent()->transform.position += refmodel.toent()->transform.getnormaldirection() / 100;
+
+    }
+   
     //refmodel.toent()->transform.position.x    += 1 / 300.f;
    // refmodel.toent()->transform.position = v3::Vector3(0,0,0);
     gridutil::redolighting();    
-    refmodel.toent()->transform.orient(player::goblin.toent()->transform.position);
-
-   refmodel.toent()->transform.position += refmodel.toent()->transform.getnormaldirection()/100;
-
   //meshname::rendermesh(&newmehs);
     blockrender::initdatabuffer(false);
     entityname::runrenderloop();
