@@ -1,9 +1,0 @@
-
-struct inventoryblock
-{
-
-};
-struct  inventorynode
-{
-
-};

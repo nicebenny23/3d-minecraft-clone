@@ -13,7 +13,7 @@ struct estate :gameobject::component
 	bool prevonground;
 	int maxhealth;
 	v3::Vector3 velocitylast;
-
+	float lastongroundy;
 	float invincablilitymax;
 	float timetilldmg;
 	void update() {
@@ -27,14 +27,19 @@ struct estate :gameobject::component
 		if (takesfalldmg)
 		{
 
-
+		
 			if (owner->getcomponent<rigidbody>().isonground && !prevonground)
 			{
-				if (velocitylast.y < -10)
-				{
-					damage(abs(velocitylast.y / 4.f));
-				}
+				float ypos =objutil::toent(owner).transform.position.y;
+					float falldmg = Max(3.f,lastongroundy -ypos) - 3.f;
+					damage(( falldmg));
+			
 
+			}
+			if (owner->getcomponent<rigidbody>().isonground) {
+
+
+				lastongroundy = objutil::toent(owner).transform.position.y;
 			}
 		}
 	}
@@ -49,9 +54,13 @@ struct estate :gameobject::component
 		takesfalldmg = falls;
 	}
 	void damage(int dmg) {
+		if (dmg<=0)
+		{
+			return;
+		}
 		if (timetilldmg < 0)
 		{
-
+			
 			timetilldmg = invincablilitymax;
 			health -= dmg;
 			if (health < 0)

@@ -211,13 +211,14 @@ void blockrender::initdatabuffer(bool rendertransparent) {
 	oalgorithm::quicksort<Chunk::chunk>(tosort.getdata(), tosort.length);
 	renderer::changerendertype(renderer::rendersolid);
 	
-
+	int renderamt = 0;
 		for (int i = 0; i < totalgridsize; i++) {
 			if (chunkviewable(&tosort[i])) {
+				renderamt++;
 				renderchunk(*tosort[i].mesh, false);
 			}
 		}
-	
+ 		int l = 1;
 	
 
 

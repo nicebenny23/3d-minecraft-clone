@@ -9,12 +9,13 @@ namespace Chunk {
 	int indexfrompos(int x, int y, int z);
 	struct chunk
 	{
-		
+		bool init;
 		Coord loc;
 		chunkmesh* mesh;
 		bool modified;
 		void write();
 		chunk();
+
 		Coord center() {
 			return loc*16 + unitv * 8;
 		}
@@ -32,7 +33,7 @@ namespace Chunk {
 		}
 
 	};
-	
+	chunk* airload(Coord location);
 	chunk* load(Coord location);
 	chunk* fileload(Coord location);
 }

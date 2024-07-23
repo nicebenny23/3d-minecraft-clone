@@ -1,5 +1,5 @@
 #include "../util/vector2.h"
-#include "inventoryblock.h"
+#include "itemslot.h"
 #include "menu.h"
 #ifndef itemstorage_HPP
 #define itemstorage_HPP
@@ -20,7 +20,7 @@ struct Container
 	}
 	Container(int newid);
 	void writetofile();
-	
+	bool enabled;
 	array<itemslot> databuf;
 	itemslot& getlocalat(int xpos,int ypos) {
 		return databuf[xpos + ypos * sizex];
@@ -101,13 +101,23 @@ struct Container
 	int sizex;
 	int sizey;
 	v2::Vector2 offset;
-	void setviewable(bool isviewable) {
+	void enable() {
 		for (int i = 0; i < databuf.length; i++)
 		{
-			databuf[i].setviewable(isviewable);
+			databuf[i].enable();
 		}
 
-	
+		enabled = true;
+
+	}
+	void disable() {
+
+		for (int i = 0; i < databuf.length; i++)
+		{
+			databuf[i].disable();
+		}
+		enabled=false;
+
 	}
 	//void addtocontainer(int id);
 	Container(int xsize, int ysize,float xoff,float yoff) {
@@ -127,20 +137,24 @@ struct Container
 				ind++;
 			}
 		}
-		setviewable(false);
+		disable();
 	}
-	void update() {
-
-
-		for (int i = 0; i < databuf.length; i++)
+	void update() 
+	{
+		if (enabled)
 		{
-			
 
-			databuf[i].updatestate();
+
+
+			for (int i = 0; i < databuf.length; i++)
+			{
+
+
+				databuf[i].updatestate();
+			}
+
 		}
-	
 	}
-	
 };
 
 

@@ -20,14 +20,15 @@ struct itemslot
 	Coord location;
 	uirender::uibox* frame;
 	void(*onclick)(itemslot&);
-
+	
 	itemslot(int xloc, int yloc);
 	itemslot(int xloc, int yloc, void (*clickaction)(itemslot&));
 	void giveitem(int id);
 	void giveitem(int id,int amt);
 	void transferitem(item* otherholder);
 	void destroyitem();
-	void setviewable(bool isviewable);
+	void enable();
+	void disable();
 	bool hasbeenclicked();
 	void updatestate();
 };

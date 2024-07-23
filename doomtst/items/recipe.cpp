@@ -69,17 +69,24 @@ irecipe* recipemanager::searchrecipe() {
 
 void recipemanager::updatestate()
 {
+    if (enabled)
+    {
 
-    
+
+        item* freeitem = freeditem;
 
         newitemlocation->deletebelowzero();
+        if (resourcecontainer->clicked())
+        {
+         
+        }
         resourcecontainer->update();
         preview();
         if (newitemlocation->clicked())
         {
             craft();
         }
-    
+    }
 }
 
 recipemanager::recipemanager(const char* filename, int sizex, int sizey)
@@ -137,15 +144,15 @@ ysize = sizey;
 void recipemanager::enable()
 {
     enabled = true;
-    newitemlocation->setviewable(true);
-    resourcecontainer->setviewable(true);
+    newitemlocation->enable();
+    resourcecontainer->enable();
 }
 
 void recipemanager::disable()
 {
     enabled = false;
-    newitemlocation->setviewable(false);
-    resourcecontainer->setviewable(false);
+    newitemlocation->disable();
+    resourcecontainer->disable();
 }
 
 bool irecipe::cancraft(Container* resourcecont) {
@@ -183,6 +190,7 @@ bool irecipe::cancraft(Container* resourcecont) {
 
     return true;
 }
+
 
 irecipe::irecipe(iteminrecipe* itemarray, iteminrecipe created, int sizex, int sizey)
 {

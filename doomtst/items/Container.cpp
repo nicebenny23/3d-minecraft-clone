@@ -41,7 +41,7 @@ int ind = 0;
 			ind++;
 		}
 	}
-	setviewable(false);
+	disable();
 	for (int i = 0; i < sizex*sizey; i++)
 	{
 		databuf[i].giveitem(objdata[i] & 255);

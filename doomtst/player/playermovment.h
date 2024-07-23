@@ -46,7 +46,7 @@ struct playermovement:gameobject::component
         }
         if (userinput::getinputkey(' ').pressed&&owner->getcomponent<rigidbody>().isonground)
         {
-           velocity.y = 50 * effectivespeed;
+           velocity.y = 150 * effectivespeed;
         }
         if (userinput::getinputkey('z').held)
         {

@@ -114,7 +114,7 @@ blockname::block::block(v3::Coord location, int blockid)
 	emitedlight = 0;
 	complist = (array<gameobject::component*>());
 	type = gameobject::block;
-
+	mininglevel = 0;
 	id = blockid;
 	pos = location;
 	transparent = false;

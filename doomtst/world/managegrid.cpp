@@ -23,12 +23,11 @@ void gridutil::computecover(face& blkface)
 
 	if (!apx(blkface.mesh->scale, (unitscale)))
 	{
-		if (blkface.mesh->blk->id != minecraftwater)
-		{
+		
 
 			blkface.covered = false;
 			return;
-		}
+		
 
 	}
 	blkface.covered = true;
@@ -50,7 +49,7 @@ void gridutil::computecover(face& blkface)
 	else {
 
 
-		blkface.covered = issolidatpos(pos.x, pos.y, pos.z, true);
+		blkface.covered =blk->solid;
 	}
 
 }

@@ -8,6 +8,6 @@ inventory::inventory()
 	playermenu.menutype = inventorymenu;
 	inventorylocation = &playermenu;
 		hotbar = Container(6, 1, 0, -4.5);
-	hotbar.setviewable(true);
+	hotbar.enable();
 	selected = nullptr;
 }

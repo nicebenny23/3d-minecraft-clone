@@ -24,17 +24,17 @@ struct inventorymen :menu
 	void customopen() {
 
 		manager.enable();
-		blkcont.setviewable(true);
+		blkcont.enable();
 	}
 	void customclose() {
 
-		blkcont.setviewable(false);
+		blkcont.disable();
 		manager.disable();
 	}
 	void testclick() {
 
 
-		if (isopen)
+		if (enabled)
 		{
 			manager.updatestate();
 			blkcont.update();

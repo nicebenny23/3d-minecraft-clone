@@ -13,7 +13,7 @@ struct craftingmenu :menu {
 		menubox->shouldrender = false;
 		menutype = normalmenu;
 	
-		blkcont = recipemanager("3x3craft", 3, 3);
+		blkcont = recipemanager("3x3craft.txt", 3, 3);
 
 
 	}
@@ -38,7 +38,7 @@ struct craftingmenu :menu {
 	void testclick() {
 
 
-		if (isopen)
+		if (enabled)
 		{
 		
 			blkcont.updatestate();

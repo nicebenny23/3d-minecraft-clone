@@ -1,4 +1,4 @@
-#include "inventoryblock.h"
+#include "itemslot.h"
 #include "../util/mathutil.h"
 
 void destroyonclick(itemslot& toremove) {
@@ -80,10 +80,16 @@ void itemslot::destroyitem() {
 	}
 }
 
-void itemslot::setviewable(bool isviewable) {
-	frame->shouldrender = isviewable;
+void itemslot::enable() {
+	frame->shouldrender = true;
 	if (helditem != nullptr && helditem->itemui.itemsprite != nullptr) {
-		helditem->setviewable(isviewable);
+		helditem->setviewable(true);
+	}
+}
+void itemslot::disable() {
+	frame->shouldrender = false;
+	if (helditem != nullptr && helditem->itemui.itemsprite != nullptr) {
+		helditem->setviewable(false);
 	}
 }
 bool itemslot::hasbeenclicked()
@@ -99,29 +105,32 @@ bool itemslot::hasbeenclicked()
 
 
 void itemslot::updatestate() {
-	if (helditem!=nullptr)
-	{
-		helditem->updateui();
-	}
+	
 
-	if (hasbeenclicked()) {
-		if (freeditem != nullptr&&helditem!=nullptr)
+		if (helditem != nullptr)
 		{
+			helditem->updateui();
+		}
+
+		if (hasbeenclicked()) {
+			if (freeditem != nullptr && helditem != nullptr)
+			{
 
 
-			if (freeditem->id == helditem->id) {
-				helditem->maxoutthis(freeditem);
-				return;
+				if (freeditem->id == helditem->id) {
+					helditem->maxoutthis(freeditem);
+					return;
+				}
+			}
+
+			transferitem(freeditem);
+		}
+		if (helditem != nullptr)
+		{
+			if (helditem->amt <= 0) {
+				destroyitem();
 			}
 		}
-
-		transferitem(freeditem);
-	}
-	if (helditem!=nullptr)
-	{
-		if (helditem->amt <= 0) {
-			destroyitem();
-		}
-	}
+	
 }
 

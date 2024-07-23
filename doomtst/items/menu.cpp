@@ -6,7 +6,7 @@ bool ismenuopen() {
 	if (openmenu!=nullptr)
 	{
 		return true;
-	}if (inventorylocation->isopen)
+	}if (inventorylocation->enabled)
 	{
 		return true;
 	}
@@ -17,13 +17,13 @@ void menu::close()
 	if (menutype==inventorymenu)
 	{
 
-		isopen = false;
+		enabled = false;
 		menubox->shouldrender = false;
 		customclose();
 		return;
 	}
 
-	isopen = false;
+	enabled = false;
 	openmenu = nullptr;
 	menubox->shouldrender=false;
 	customclose();
@@ -37,13 +37,13 @@ void menu::open()
 
 
 		menubox->shouldrender = true;
-		isopen = true;
+		enabled = true;
 		customopen();
 		return;
 	}
 	
 	
-	if (isopen)
+	if (enabled)
 	{
 		return;
 	}
@@ -57,7 +57,7 @@ void menu::open()
 	
 	inventorylocation->open();
 			menubox->shouldrender = true;
-			isopen = true;
+			enabled = true;
 			openmenu = this;
 			customopen();
 }

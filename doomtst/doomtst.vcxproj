@@ -149,7 +149,7 @@
   <ItemGroup>
     <ClCompile Include="game\entity.cpp" />
     <ClCompile Include="game\transform.cpp" />
-    <ClCompile Include="items\inventoryblock.cpp" />
+    <ClCompile Include="items\itemslot.cpp" />
     <ClCompile Include="items\item.cpp" />
     <ClCompile Include="items\Container.cpp" />
     <ClCompile Include="items\menu.cpp" />
@@ -202,11 +202,10 @@
     <ClInclude Include="block\wood.h" />
     <ClInclude Include="entities\dmgonhit.h" />
     <ClInclude Include="game\collutil.h" />
-    <ClInclude Include="game\storagecomp.h" />
     <ClInclude Include="game\transform.h" />
     <ClInclude Include="items\airitem.h" />
     <ClInclude Include="items\grassitem.h" />
-    <ClInclude Include="items\inventoryblock.h" />
+    <ClInclude Include="items\itemslot.h" />
     <ClInclude Include="items\item.h" />
     <ClInclude Include="items\Container.h" />
     <ClInclude Include="items\itemutil.h" />

@@ -1,5 +1,5 @@
 #include "../renderer/uirender.h"
-#include "inventoryblock.h"
+#include "itemslot.h"
 
 using namespace uirender;
 using namespace dynamicarray;
@@ -19,7 +19,7 @@ struct menu
 		uibox* menubox;
 		type menutype;
 		
-	bool isopen;
+	bool enabled;
 	void open();
 	virtual void customclose();
 

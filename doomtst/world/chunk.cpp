@@ -23,6 +23,7 @@ void createchunkmesh(Chunk::chunk* aschunk)
 	chunkmesh* mesh = new chunkmesh;
 	mesh->genbufs();
 	aschunk->mesh = mesh;
+
 }
 
 Chunk::chunk* Chunk::fileload(Coord location)
@@ -75,7 +76,7 @@ Chunk::chunk* Chunk::fileload(Coord location)
 					currentcontid -= 2;
 					int resourceid = randomproperties[i] & 255;
 
-					int newloc= randomproperties[i]>>7;
+					int newloc= randomproperties[i]/256.f;
 					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.resourcecontainer =new Container(resourceid);
 					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.newitemlocation= new Container(newloc);
 
@@ -140,6 +141,31 @@ int generatechunkvalfromnoise(float noiselevel, Coord position,float feturemap) 
 	return neid;
 
 }
+Chunk::chunk* Chunk::airload(Coord location)
+{
+	chunk& newchunk = *(new chunk());
+	newchunk.modified = false;
+	newchunk.loc = location;
+	int ind = 0;
+	createchunkmesh(&newchunk);
+	newchunk.blockbuf = new block[chunksize];
+	for (int x = 0; x < 16; x++)
+	{
+		for (int y = 0; y < 16; y++) {
+			for (int z = 0; z < 16; z++)
+			{
+				Coord blockpos = Coord(x, y, z) + location * 16;
+				int neid = minecraftair;
+				newchunk.blockbuf[ind] = blockname::block(blockpos, neid);
+
+				blkinitname::genblock(&newchunk.blockbuf[ind], neid, blockpos, 0, 0);
+
+				ind++;
+			}
+		}
+	}
+	return &newchunk;
+}
 //complete
 Chunk::chunk* Chunk::load(Coord location)
 {
@@ -154,7 +180,7 @@ Chunk::chunk* Chunk::load(Coord location)
 	newchunk.blockbuf = new block[chunksize];
 	int ind = 0;
 	chunknoisemap* map = trueperlin(location, .1f, 1.2, .5f, 2);
-	chunknoisemap* map2 = trueperlin(location+Coord(3,3,33), .1f, 1.2, .5f, 2);
+	chunknoisemap* map2 = trueperlin(location+Coord(3,3,33), .1f, 1.2, .5f, 1);
 	for (int x = 0; x < 16; x++)
 	{
 		for (int y = 0; y < 16; y++) {
@@ -228,7 +254,7 @@ void Chunk::chunk::write()
 		if (blockbuf[i].hascomponent<craftingtablecomp>())
 		{
 			bytelist[8192 + 2 * i] = blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.resourcecontainer->containerid;
-			bytelist[8192 + 2 * i] = blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.newitemlocation->containerid;
+			bytelist[8192 + 2 * i+1] = blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.newitemlocation->containerid;
 
 			}
 	}
