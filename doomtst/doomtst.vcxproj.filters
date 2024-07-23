@@ -126,6 +126,12 @@
     <ClCompile Include="game\transform.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="renderer\model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="items\Container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="util\vector3.h">
@@ -296,7 +302,7 @@
     <ClInclude Include="player\playerinventory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="items\itemstorage.h">
+    <ClInclude Include="items\Container.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="items\airitem.h">
@@ -348,6 +354,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game\transform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playerattack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\dmgonhit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\craftingtable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playerplace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

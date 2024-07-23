@@ -110,7 +110,7 @@ void blockname::initblockmesh(blockname::block* blk, Vector3 pos, Vector3 scale)
 blockname::block::block(v3::Coord location, int blockid)
 {
 
-
+	
 	emitedlight = 0;
 	complist = (array<gameobject::component*>());
 	type = gameobject::block;
@@ -153,7 +153,7 @@ void blockname::block::initasgameobj()
 
 void blockname::block::createaabb()
 {
-	this->addcomponent<aabb::Collider>(this->mesh.pos, this->mesh.scale, false);
+	this->addcomponent<aabb::Collider>(this->mesh.pos, this->mesh.scale, false,!solid);
 
 }
 

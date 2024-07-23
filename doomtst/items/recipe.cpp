@@ -30,7 +30,7 @@ void recipemanager::ontake() {
 void recipemanager::preview() {
     
 
-    if (cancreate)
+    if (true)
     {
         newitemlocation->databuf[0].destroyitem();
         irecipe* todisplay = searchrecipe();
@@ -51,39 +51,35 @@ void recipemanager::preview() {
 
 irecipe* recipemanager::searchrecipe() {
     int maxamt = 0;
-    irecipe* maximal = nullptr;
+ 
 
     for (int i = 0; i < recipelist->length; i++) {
         if (!recipelist->at(i).cancraft(resourcecontainer)) {
             continue;
         }
 
-        int recipeamt = 0;
-        for (int j = 0; j < xsize*ysize; j++) {
-            if (recipelist->at(i).recipe[j].id != -1) {
-                recipeamt += 1;
-            }
-        }
 
-        if (recipeamt > maxamt) {
-            maxamt = recipeamt;
-            maximal = &recipelist->at(i);
-        }
+          
+            return  &recipelist->at(i);
+        
     }
 
-    return maximal;
+    return nullptr;
 }
 
 void recipemanager::updatestate()
 {
-    newitemlocation->deletebelowzero();
-  
-    resourcecontainer->update();
-    preview();
-    if (newitemlocation->clicked())
-    {
-        craft();
-    }
+
+    
+
+        newitemlocation->deletebelowzero();
+        resourcecontainer->update();
+        preview();
+        if (newitemlocation->clicked())
+        {
+            craft();
+        }
+    
 }
 
 recipemanager::recipemanager(const char* filename, int sizex, int sizey)
@@ -138,10 +134,18 @@ ysize = sizey;
    recipefile.close();
 }
 
-void recipemanager::setviewable(bool state)
+void recipemanager::enable()
 {
-    newitemlocation->setviewable(state);
-    resourcecontainer->setviewable(state);
+    enabled = true;
+    newitemlocation->setviewable(true);
+    resourcecontainer->setviewable(true);
+}
+
+void recipemanager::disable()
+{
+    enabled = false;
+    newitemlocation->setviewable(false);
+    resourcecontainer->setviewable(false);
 }
 
 bool irecipe::cancraft(Container* resourcecont) {
@@ -192,12 +196,7 @@ irecipe::irecipe(iteminrecipe* itemarray, iteminrecipe created, int sizex, int s
 
 void recipemanager::craft() {
     irecipe* bestrecipe = searchrecipe();
-    if (xsize != resourcecontainer->sizex) {
-        Assert("size != recipesize");
-    }
-    if (ysize != resourcecontainer->sizey) {
-        Assert("size != recipesize");
-    }
+  
     if (bestrecipe==nullptr)
     {
         return;

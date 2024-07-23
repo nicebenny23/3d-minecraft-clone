@@ -1,5 +1,4 @@
 #include "blockrender.h"
-#include "../util/vector2.h"
 #include "../util/geometry.h"
 
 dynamicarray::array<float> databuffer;
@@ -211,18 +210,15 @@ void blockrender::initdatabuffer(bool rendertransparent) {
 
 	oalgorithm::quicksort<Chunk::chunk>(tosort.getdata(), tosort.length);
 	renderer::changerendertype(renderer::rendersolid);
-	if (!rendertransparent)
-	{
-
+	
 
 		for (int i = 0; i < totalgridsize; i++) {
 			if (chunkviewable(&tosort[i])) {
 				renderchunk(*tosort[i].mesh, false);
 			}
 		}
-	}
-	if (rendertransparent)
-	{
+	
+	
 
 
 		renderer::changerendertype(renderer::rendertransparent);
@@ -231,7 +227,7 @@ void blockrender::initdatabuffer(bool rendertransparent) {
 				renderchunk(*tosort[i].mesh, true);
 			}
 		}
-	}
+	
 	tosort.destroy();
 }
 

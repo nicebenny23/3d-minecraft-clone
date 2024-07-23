@@ -35,39 +35,39 @@ namespace window {
     }
  void setcursor(bool mode)
  {
-     if (mode==false)
-     {
-         glfwSetInputMode(awindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-     }
-     else
+     if (mode)
      {
          glfwSetInputMode(awindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
      }
+     else
+     {
+         glfwSetInputMode(awindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+     }
+    
  }
  void createcurwindow(int scrwidth, int scrheight)
     {
      
-     //   glfwSetWindowMonitor(awindow, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
-      
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
-        awindow = glfwCreateWindow(mode->width, mode->height, "Project",NULL, NULL);
+        width = mode->width;
+        height = mode->height;
+        awindow = glfwCreateWindow(width, height, "benny render 3d",NULL, NULL);
         if (awindow == NULL)
         {
             
             glfwTerminate();
-
+            Assert("window was null");
         }
         glfwMakeContextCurrent(awindow);
         
        
 
-        width = mode->width;
-        height = mode->height;
+        
         setcursor(false);
         glfwSetCursorPosCallback(awindow, cursor_position_callback);
         glfwSetFramebufferSizeCallback(awindow, framebuffer_size_callback);

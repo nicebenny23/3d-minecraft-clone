@@ -23,6 +23,7 @@
 #include "renderer/textrender.h"
 #include "player/player.h"
 #include "renderer/textrender.h"
+#include "entities/dmgonhit.h"
 // settings
 #include "renderer/model.h"
 const Vector3 spawnpos = glm::vec3(0,0,0);
@@ -30,7 +31,8 @@ const unsigned int SCR_WIDTH = 4000;
 const unsigned int SCR_HEIGHT = 3000;
 void init() {
  
-   
+    deleteFilesInFolder(std::string("C:/Users/User/source/repos/nicebenny23/3d-minecraft-clone/doomtst/worldstorage"));
+
     timename::inittime();
     randominit();
     window::createcurwindow(1600, 1200);
@@ -48,17 +50,22 @@ void init() {
     camera::initilize();
 
     renderer::load();
-    grid::initgrid();
-    gridutil::computeallcover();
-    gridutil::redolighting();
+
+  
 
 
     uirender::initrenderlist();
+    grid::initgrid();
+    gridutil::computeallcover();
+    gridutil::redolighting();
     uirender::newbox("images\\crosshair.png", v2::unitv / 32, v2::zerov,-3);
     userinput::endupdate();
     aabb::initCollider();
     
     inittextarray();
+
+    player::initplayer();
+    glfwSwapInterval(0);
 }
 void render() {
 
@@ -70,16 +77,15 @@ int main()
 {
 
     init();
-    player::initplayer();
     entityname::entityref refmodel = entityname::createentity(zerov, "frjiofiuje");
     refmodel.toent()->addcomponent<model>();
-    refmodel.toent()->getcomponent<model>().add("newtest.obj", "images\\slimetex.png");
-    glfwSwapInterval(0);
-    refmodel.toent()->addcomponent<estate>(11);
-    refmodel.toent()->addcomponent<Collider>(zerov, unitscale, true);
+    refmodel.toent()->getcomponent<model>().add("slime.obj", "images\\slimetex.png");
+  
+    refmodel.toent()->addcomponent<estate>(10,false);
+    refmodel.toent()->addcomponent<Collider>(zerov, unitscale*.7f, true);
     texture mtex = texture("images\\slimetex.png", png);
   //  meshname::mesh newmehs = *meshname::loadmesh("newtest.obj", mtex,spawnpos);
-
+    refmodel.toent()->addcomponent<dmgplayeronhit>(6);
     refmodel.toent()->addcomponent<rigidbody>();
   //  entityname::entityref emit = entityname::createentity(Vector3(.01f,0,0), "2");
   //  emit.toent()->addcomponent<particleemiter>(3, initbaseparticle);
@@ -95,12 +101,13 @@ while (!window::shouldclose())
     window::processInput();
 
     renderer::clear();
-    entityname::runupdateloop();
+
     grid::updateblocks();
     collision::update();
-    
 
+    entityname::runupdateloop();
 
+    collision::sendplayercameraray();
     camera::calculateyawandpitch();
     
  
@@ -126,7 +133,7 @@ while (!window::shouldclose())
 
         refmodel.toent()->transform.orient(player::goblin.toent()->transform.position);
 
-        refmodel.toent()->transform.position += refmodel.toent()->transform.getnormaldirection() / 100;
+   // refmodel.toent()->transform.position += refmodel.toent()->transform.getnormaldirection() / 100;
 
     }
    
@@ -134,11 +141,13 @@ while (!window::shouldclose())
    // refmodel.toent()->transform.position = v3::Vector3(0,0,0);
     gridutil::redolighting();    
   //meshname::rendermesh(&newmehs);
-    blockrender::initdatabuffer(false);
+   
     entityname::runrenderloop();
+    blockrender::initdatabuffer(false);
+
     //emit.toent()->getcomponent<particleemiter>().renderparticles();
 
-    blockrender::initdatabuffer(true);
+   
     uirender::renderuilist();
     rendertextlist();
     entityname::deleteobjs();

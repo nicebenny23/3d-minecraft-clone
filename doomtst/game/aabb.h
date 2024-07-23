@@ -31,13 +31,13 @@ namespace aabb {
         v3::Vector3 prevpos;
         bool hasrigidbody;
         int index;
-
+        bool effector;
         Collider() = default;
-        Collider(const v3::Vector3& objcenter, const v3::Vector3& objscale, bool appendtolist);
+        Collider(const v3::Vector3& objcenter, const v3::Vector3& objscale, bool appendtolist,bool iseffector=false);
         ~Collider() = default;
 
         bool pointinbox(v3::Vector3 pos);
-        void destroy();
+        void ondestroy();
         aabbraycolinfo distanceonray(ray fray);
     };
 

@@ -8,6 +8,7 @@
 #include "crystalore.h"
 #include "torch.h"
 #include "wood.h"
+#include "craftingtable.h"
 //provides utility functions for blocks
 using namespace blockname;
 #ifndef blockinit_H
@@ -44,6 +45,9 @@ namespace blkinitname {
 			break;
 		case minecraftwood:
 			woodinit(blk);
+			break;
+		case minecraftcraftingtable:
+			tableinit(blk);
 			break;
 		}
 	}
@@ -98,6 +102,9 @@ namespace blkinitname {
 
 
 			waterdelete(blk);
+			break;
+		case minecraftcraftingtable:
+			tabledelete(blk);
 			break;
 		default:
 			Assert("need valid id in set blk");

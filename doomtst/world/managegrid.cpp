@@ -247,16 +247,7 @@ void gridutil::setblock(Coord loc, int blockid)
 		//redolighting();
 		gridutil::redoallighting = true;
 
-		for (int i = 0; i < 6; i++)
-		{
-			v3::Vector3 dir = dirfromint(i);
-			block* tobeupdated = getobjatgrid(loc + dir, true);
-			if (tobeupdated != nullptr)
-			{
-				tobeupdated->blkfaceupdate(curblock, invdir(i));
-			}
-
-		}
+		
 
 	}
 }

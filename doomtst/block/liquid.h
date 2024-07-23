@@ -19,8 +19,20 @@ struct liquidprop :gameobject::component {
 		 
 		
 	}
+	void oncollision(gameobject::obj* collidedwith) {
+		if (collidedwith->hascomponent<rigidbody>())
+		{
+			collidedwith->getcomponent<rigidbody>().velocity *= .9f;
+		}
+	}
 	void updateinface(int face) {
+		
+		if (objutil::toblk(owner)[face].covered) {
+			return;
+		}
+		
 		Coord newpos = dirfromint(face) + objutil::toblk(owner).pos;
+		
 		blockname::block* blk = grid::getobjatgrid(newpos, true);
 		if (blk==nullptr)
 		{
@@ -36,6 +48,7 @@ struct liquidprop :gameobject::component {
 			return;
 		}
 		gridutil::setblock(blk->pos, objutil::toblk(owner).id);
+		
 		if (!blk->hascomponent<liquidprop>())
 		{
 			Assert("block must be inititated with liquid component");

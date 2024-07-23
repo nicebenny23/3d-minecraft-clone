@@ -5,7 +5,7 @@
 inline void lavapickinit(item* itm) {
 	itm->pickaxepower = 5;
 	itm->placeable = false;
-	itm->itemui.itemsprite= uirender::newbox("images\\pikaxe.png", v2::Vector2(1 / 20.f, 1 / 20.f), v2::zerov, 100);
+	itm->itemui.itemsprite= createitembox("images\\pikaxe.png");
 }
 
 #endif // !lavapickitem_HPP

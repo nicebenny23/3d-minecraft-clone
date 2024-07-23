@@ -3,8 +3,12 @@
 #include "menu.h"
 #ifndef itemstorage_HPP
 #define itemstorage_HPP
+extern int currentcontid;
+void deleteallcontainerfiles();
+const char* writefilename(int id);
 struct Container
 {
+	short containerid;
 	Container() {};
 	void destroy() {
 
@@ -14,7 +18,9 @@ struct Container
 		}
 		databuf.destroy();
 	}
-
+	Container(int newid);
+	void writetofile();
+	
 	array<itemslot> databuf;
 	itemslot& getlocalat(int xpos,int ypos) {
 		return databuf[xpos + ypos * sizex];
@@ -66,32 +72,22 @@ struct Container
 			if (databuf[i].helditem == nullptr)
 			{
 
-				databuf[i].giveitem(elemid);
-				databuf[i].setviewable(false);
-				int putamt = Min(amt, databuf[i].helditem->maxamt);
-				if (0 < putamt)
+				databuf[i].giveitem(elemid,0);
+				
+				databuf[i].helditem->give(amt);
+				if (databuf[i].helditem->amt==0)
 				{
 
-					databuf[i].helditem->amt = putamt;
-					amt -= putamt;
-				}
-				else
-				{
 					databuf[i].destroyitem();
 				}
+				
+		
 				continue;
 			}
 		
 			if (databuf[i].helditem->id == elemid) {
 
-				int putamt =Min(amt, databuf[i].helditem->maxamt - databuf[i].helditem->amt);
-				if (0<putamt)
-				{
-
-					databuf[i].helditem->amt+=putamt;
-					amt -= putamt;
-				}
-
+				databuf[i].helditem->give(amt);
 			}
 		
 		
@@ -116,7 +112,8 @@ struct Container
 	//void addtocontainer(int id);
 	Container(int xsize, int ysize,float xoff,float yoff) {
 
-
+		containerid = currentcontid;
+		currentcontid++;
 		sizex = xsize;
 		sizey = ysize;
 		offset = v2::Vector2(xoff, yoff);
@@ -139,10 +136,9 @@ struct Container
 		{
 			
 
-				databuf[i].updatestate();
-			
+			databuf[i].updatestate();
 		}
-		deletebelowzero();
+	
 	}
 	
 };

@@ -62,7 +62,24 @@ Chunk::chunk* Chunk::fileload(Coord location)
 
 				newchunk.blockbuf[i].mesh.direction = dir;
 				blkinitname::blockinit(&newchunk.blockbuf[i]);
+				
+				if (newchunk.blockbuf[i].hascomponent<liquidprop>())
+				{
+					newchunk.blockbuf[i].getcomponent<liquidprop>().liqval = randomproperties[i];
+				}
+				if (newchunk.blockbuf[i].hascomponent<craftingtablecomp>())
+				{
 
+					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.destroy();
+					//we created a contaner so we are going back
+					currentcontid -= 2;
+					int resourceid = randomproperties[i] & 255;
+
+					int newloc= randomproperties[i]>>7;
+					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.resourcecontainer =new Container(resourceid);
+					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.newitemlocation= new Container(newloc);
+
+				}
 
 				i++;
 			}
@@ -73,17 +90,56 @@ Chunk::chunk* Chunk::fileload(Coord location)
 	{
 
 
-		if (newchunk.blockbuf[ind].hascomponent<liquidprop>())
-		{
-			newchunk.blockbuf[ind].getcomponent<liquidprop>().liqval = randomproperties[ind];
-		}
 	}
 	delete[] bytelist;
 	file.close();
 	return &newchunk;
 }
 
+int generatechunkvalfromnoise(float noiselevel, Coord position,float feturemap) {
 
+	//select block mechanism
+	int neid = minecraftair;
+
+	if (generateflat)
+	{
+		if (position.y < 0)
+		{
+			neid = minecraftdirt;
+
+		}
+
+
+	}
+	else {
+
+		///	float noiselevel1 = (*map1)[Coord(x, y, z)];
+
+		if (inrange( noiselevel ,-.15f,.15f))
+		{
+
+
+				neid = minecraftstone;
+
+				if (inrange(feturemap, .1f, .11f))
+				{
+					neid = minecraftcrystal;
+
+				}	
+		}
+		else
+		{
+			if (inrange(feturemap, .1f, .101f))
+			{
+				 //neid =minecraftwater;
+
+			}
+		}
+		
+	}
+	return neid;
+
+}
 //complete
 Chunk::chunk* Chunk::load(Coord location)
 {
@@ -98,6 +154,7 @@ Chunk::chunk* Chunk::load(Coord location)
 	newchunk.blockbuf = new block[chunksize];
 	int ind = 0;
 	chunknoisemap* map = trueperlin(location, .1f, 1.2, .5f, 2);
+	chunknoisemap* map2 = trueperlin(location+Coord(3,3,33), .1f, 1.2, .5f, 2);
 	for (int x = 0; x < 16; x++)
 	{
 		for (int y = 0; y < 16; y++) {
@@ -109,62 +166,25 @@ Chunk::chunk* Chunk::load(Coord location)
 
 
 
-				//select block mechanism
-				int neid = minecraftair;
+				int neid = generatechunkvalfromnoise((*map)[Coord(x, y, z)], blockpos, (*map2)[Coord(x, y, z)]);
 
-				if (generateflat)
-				{
-					if (blockpos.y < 0)
-					{
-						neid = minecraftdirt;
-
-					}
-
-					
-				}
-				else {
-					//todo fix it
-					float noiselevel = (*map)[Coord(x, y, z)];
-					///	float noiselevel1 = (*map1)[Coord(x, y, z)];
-
-					if (noiselevel > -.15)
-					{
-
-						if (noiselevel < .15)
-						{
-
-							neid = minecraftstone;
-
-
-						}
-
-					}
-
-					if (abs(noiselevel) < .11f)
-					{
-						if (abs(noiselevel) > .1f)
-						{
-
-							neid = minecraftcrystal;
-						}
-
-					}
-				}
+		
 				newchunk.blockbuf[ind] = blockname::block(blockpos, neid);
 
 				blkinitname::genblock(&newchunk.blockbuf[ind], neid, blockpos, 0, 0);
 
 				ind++;
 
-
-
-
 			}
+
+
 		}
+			
+		
 	}
 
 	map->destroy();
-
+	map2->destroy();
 	return &newchunk;
 }
 
@@ -199,12 +219,18 @@ void Chunk::chunk::write()
 	{
 		bytelist[8192 + 2 * i] = 0;
 		bytelist[8192 + 2 * i + 1] = 0;
-		if (blockbuf[i].hascomponent<liquidprop>())
+		liquidprop* getliq = blockbuf[i].getcomponentptr<liquidprop>();
+		if (getliq!=nullptr)
 		{
-			bytelist[8192 + 2 * i] = blockbuf[i].getcomponent<liquidprop>().liqval;
+			bytelist[8192 + 2 * i] =getliq->liqval;
 			bytelist[8192 + 2 * i + 1] = 0;
 		}
+		if (blockbuf[i].hascomponent<craftingtablecomp>())
+		{
+			bytelist[8192 + 2 * i] = blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.resourcecontainer->containerid;
+			bytelist[8192 + 2 * i] = blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.newitemlocation->containerid;
 
+			}
 	}
 	file.write<byte>(bytelist.getdata(), bytelist.length);
 	bytelist.destroy();
@@ -225,9 +251,9 @@ void Chunk::chunk::destroy()
 
 		write();
 	}
-	for (int i = 0; i < 16 * 16 * 16; i++) {
+	for (int i = 0; i < chunksize; i++) {
 
-
+		//blkinitname::setair(&blockbuf[i]);
 		gameobject::immidiatedestroy(&blockbuf[i]);
 
 		//delete blockbuf[i]

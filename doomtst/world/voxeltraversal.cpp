@@ -3,7 +3,7 @@ using namespace blockname;
 //by implementing inner search loop acuracy scales quadraticlly
 //aproxomate voxel traversel algorthm,the accuracy scales linearly with time complexity,
 
-voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc)
+voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc,bool counteffectors)
 {
 	float maxdist = nray.length();
 	v3::Vector3 offdist = (nray.end - nray.start) / acc;
@@ -20,12 +20,17 @@ voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc)
 			{
 				if (blk->solid)
 				{
-					aabb::aabbraycolinfo rayinfo = blk->getcomponent<aabb::Collider>().distanceonray(nray);
-					if (rayinfo.collided)
+					if (!blk->getcomponent<aabb::Collider>().effector || counteffectors)
 					{
 
 
-						return voxtra::RayCollisionWithGrid(rayinfo.dist, &blk->getcomponent<aabb::Collider>(), rayinfo.intersectionpoint);
+						aabb::aabbraycolinfo rayinfo = blk->getcomponent<aabb::Collider>().distanceonray(nray);
+						if (rayinfo.collided)
+						{
+
+
+							return voxtra::RayCollisionWithGrid(rayinfo.dist, &blk->getcomponent<aabb::Collider>(), rayinfo.intersectionpoint);
+						}
 					}
 				}
 			}
@@ -37,7 +42,7 @@ voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc)
 	return voxtra::RayCollisionWithGrid();
 }
 
-bool voxtra::Boxcollwithgrid (geometry::Box bx, float acc)
+bool voxtra::Boxcollwithgrid (geometry::Box bx, float acc,bool counteffectors)
 {
 
 	v3::Vector3 lowpos = bx.center - bx.scale - unitv;
@@ -66,15 +71,18 @@ bool voxtra::Boxcollwithgrid (geometry::Box bx, float acc)
 						aabb::Collider& blockcol = tocollide->getcomponent<aabb::Collider>();
 
 
-
-						bool collided = aabb::aabbboxintersect(bx, blockcol);
-
-
-						if (collided )
+						if (!blockcol.effector || counteffectors)
 						{
-							return true;
+
+
+							bool collided = aabb::aabbboxintersect(bx, blockcol);
+
+
+							if (collided)
+							{
+								return true;
+							}
 						}
-						
 
 				}
 		}
@@ -107,7 +115,7 @@ bool voxtra::Boxcollwithgrid (geometry::Box bx, float acc)
 				block* blk = grid::getobjatgrid(curvox);
 				if (blk != nullptr)
 				{
-					if (blk->solid)
+					if (blk->solid&&!blk->getcomponent<aabb::Collider>().effector)
 					{
 						aabb::aabbraycolinfo rayinfo = blk->getcomponent<aabb::Collider>().distanceonray(nray);
 						if (rayinfo.collided)

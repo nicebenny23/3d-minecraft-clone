@@ -17,7 +17,7 @@ struct playermovement:gameobject::component
 
         prevonground = false;
         velocitylast = zerov;
-        priority = -1111;
+        priority = 11;
     }float lastgroundy;
 	virtual void update() {
 
@@ -46,7 +46,7 @@ struct playermovement:gameobject::component
         }
         if (userinput::getinputkey(' ').pressed&&owner->getcomponent<rigidbody>().isonground)
         {
-           velocity.y = 250 * effectivespeed;
+           velocity.y = 50 * effectivespeed;
         }
         if (userinput::getinputkey('z').held)
         {

@@ -1,5 +1,5 @@
 #include "../util/dynamicarray.h"
-#include "itemstorage.h"
+#include "Container.h"
 #include "../util/fileloader.h"
 using namespace dynamicarray;
 #ifndef recipe_hpp
@@ -31,6 +31,7 @@ struct recipemanager {
 	int xsize;
 	int ysize;
 	bool cancreate;
+	bool enabled;
 	Container* newitemlocation;
 	Container* resourcecontainer;
 	void destroy();
@@ -42,7 +43,9 @@ struct recipemanager {
 	void craft();
 	irecipe* searchrecipe();
 	array<irecipe>* recipelist;
-	void setviewable(bool state);
+
+	void enable();
+	void disable();
 	recipemanager(const char* filename, int sizex, int sizey);
 	recipemanager() {
 

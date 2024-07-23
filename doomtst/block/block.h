@@ -17,6 +17,7 @@ enum blocktex {
 	torchtex = 6,
 	torchtoptex = 7,
 	crystaloretex = 8,
+	
 };
 using namespace v3;
 
@@ -34,6 +35,7 @@ namespace blockname {
 		minecraftcrystal = 6,
 		minecrafttorch = 7,
 		minecraftwood = 8,
+		minecraftcraftingtable=9,
 	};
 	struct blockmesh;
 	struct face {
@@ -98,6 +100,7 @@ namespace blockname {
 		face front;
 		face back;
 		block* blk;
+		
 		face& operator[](int index);
 		void attachindirection();
 		void setfaces(int leftface, int rightface, int upface, int downface, int frontface, int backface);
@@ -129,7 +132,7 @@ namespace blockname {
 		byte id;
 		v3::Coord pos;
 		blockmesh mesh;
-		
+		float mininglevel;
 	
 		Vector3 center() {
 			return pos + unitv / 2;

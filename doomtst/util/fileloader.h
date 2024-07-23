@@ -5,8 +5,22 @@
 #include "debug.h"
 #include <sys/stat.h>
 #include <direct.h>
+#include <iostream>
+#include <windows.h>
+#include <string>
+#include <filesystem>
 #ifndef filename_HPP
 #define filename_HPP
+
+namespace fs = std::filesystem;
+
+inline void deleteFilesInFolder(const std::string& folderPath) {
+	for (const auto& entry : fs::directory_iterator(folderPath)) {
+		if (entry.is_regular_file()) {
+			fs::remove(entry.path());
+		}
+	}
+}
 inline void createdirectory(const char* name) {
 
 	if (_mkdir(name) != 0) {

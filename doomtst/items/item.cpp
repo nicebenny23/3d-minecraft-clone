@@ -1,11 +1,13 @@
 #include "item.h"
 #include "../util/random.h"
+
 item::item(int itemid)
 {
 	id = itemid;
 	itemui.itemsprite = nullptr;
 	itemui.textvalue=createinteger(v2::zerov,1/80.0f);
 	maxamt = 0;
+	dmg = 1;
 }
 void item::destroy()
 {
@@ -31,15 +33,19 @@ bool item::canuse(int useamt)
 	}
 	return true;
 }
-void item::maxoutthis(item* itm)
+void item::give(int& givenamt)
 {
 	int numcanstore = maxamt - amt;
-	if (numcanstore>0)
+	if (numcanstore > 0)
 	{
-		int amttaken = Min(numcanstore, itm->amt);
-		itm->amt -= amttaken;
+		int amttaken = Min(numcanstore, givenamt);
+		givenamt-= amttaken;
 		amt += amttaken;
 	}
+}
+void item::maxoutthis(item* itm)
+{
+	this->give(itm->amt);
 }
 item* freeditem;
 texturearray itemidlist;

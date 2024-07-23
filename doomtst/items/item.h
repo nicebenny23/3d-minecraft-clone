@@ -4,6 +4,10 @@
 #include "../renderer/textrender.h"
 #ifndef item_HPP
 #define item_HPP
+inline uirender::uibox* createitembox(const char* boxname) {
+
+	return uirender::newbox(boxname, v2::unitv / 40.f, v2::zerov, 100);
+}
 enum itemid {
 
 	stoneitem = 0,
@@ -38,9 +42,15 @@ struct item
 	void(*onleft);
 	void(*onright);
 	bool placeable;
+	
+	
 	int maxamt;
-
 	int amt;
+
+
+	int dmg;
+	
+	
 
 	struct  itemuistruct
 	{
@@ -53,14 +63,14 @@ struct item
 		{
 			itemui.itemsprite->box.center = userinput::normedmousepos;
 		}
-		itemui.textvalue->center = itemui.itemsprite->box.center-itemui.itemsprite->box.scale/1.1;
+		itemui.textvalue->center = itemui.itemsprite->box.center-itemui.itemsprite->box.scale*v2::Vector2(-1.4,.8)/1.14f;
 		itemui.textvalue->value= amt;
 		
 	}
 	void destroy();
 	bool use(int useamt);
 	bool canuse(int useamt);
-	
+	void give(int& givenamt);
 	void maxoutthis(item* itm);
 };
 extern texturearray textureidlist;

@@ -26,15 +26,23 @@ struct lootelement
 		: itemid(itemid), maxamt(maxamt)
 	{
 	}
+	~lootelement() = default;
 };
-struct  loottable:gameobject::component
+struct  loottable :gameobject::component
 {
 
 	void start() {
 
-		lootlist = *new array<lootelement>();
+		lootlist =  array<lootelement>();
 	}
-	~loottable() = default;
+	~loottable()
+	{
+
+		if (lootlist.getdata()!=nullptr)
+		{
+			Assert("lootlist not nullptr");
+		}
+	};
 	array<lootelement> lootlist;
 	void addelem(int itemid, float maxamt) {
 		lootlist.append(lootelement(itemid, maxamt));
@@ -52,6 +60,7 @@ struct  loottable:gameobject::component
 		for (int i = 0; i < lootlist.length; i++)
 		{
 			lootlist[i].drop();
+			lootlist[i];
 		}
 		lootlist.destroy();
 }

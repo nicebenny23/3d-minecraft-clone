@@ -9,7 +9,7 @@ using namespace aabb;
 namespace collision {
 
 	void update();
-
+	void sendplayercameraray();
 
 
 

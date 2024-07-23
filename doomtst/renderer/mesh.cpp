@@ -114,4 +114,5 @@ void meshname::rendermesh(mesh* torender)
 	//enable position
 
 	glDrawArrays(GL_TRIANGLES, 0, databuf.length / 5);
+	databuf.destroy();
 }

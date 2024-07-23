@@ -19,7 +19,7 @@ struct rigidbody : gameobject::component {
     float mass = 1.0f;
     aabb::Collider* boundingbox;
     bool isonground;
-    
+    float friction;
     void calculateonground() {
 
 
@@ -49,7 +49,7 @@ struct rigidbody : gameobject::component {
 
     // Apply gravity to the rigidbody
     void applyGravity() {
-        Vector3 gravity(0, -30.81f, 0);
+        Vector3 gravity(0, -9.81f, 0);
         acceleration += gravity / mass;
     }
 

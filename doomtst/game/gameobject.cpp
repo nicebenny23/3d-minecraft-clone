@@ -42,9 +42,11 @@ void gameobject::component::update()
 
 }
 
-void gameobject::component::blockfaceupdate(obj* blk, int face)
+void gameobject::component::onplayerclick()
 {
 }
+
+
 
 void gameobject::component::oncollision(obj* collidedwith)
 {
@@ -61,32 +63,12 @@ void gameobject::component::oncollision(obj* collidedwith)
 //not functonal yet
 
 
-void gameobject::obj::blkfaceupdate(obj* blk, int face)
-{
-	if (type == block)
-	{
-		for (int i = 0; i < complist.length; i++)
-		{
-			complist[i]->blockfaceupdate(blk, face);
-		}
-	}
-	else
-	{
-		Assert("blockfaceupdateonly defined for blocks");
-
-	}
-}
-
 obj::obj() {
 
 	complist = array<component*>();
 
 
 };
-
-
-
-
 
 //gets a gameobject from a refrence to it;
 

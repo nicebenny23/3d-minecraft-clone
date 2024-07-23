@@ -5,23 +5,23 @@
 #include "../game/objecthelper.h"
 #include "../world/voxeltraversal.h"
 #include "../util/dynamicarray.h"
-#include "../items/itemstorage.h"
+#include "../items/Container.h"
 #include "playerinventory.h"
 #include "../items/itemutil.h"
 using namespace objutil;
 #ifndef  playerplace_Hpp
 #define playerplace_Hpp
-struct playermod:gameobject::component
+struct playerbreak:gameobject::component
 {
-	int curplaceid;
+	
 	voxtra::RayCollisionWithGrid closest;
-	item* select;
+	item* pickaxe;
 	block* currmining;
 	
 	float timeuntilbreak;
 	void start() {
-		select = nullptr;
-		curplaceid = 0;
+		pickaxe = nullptr;
+	
 		closest.box=nullptr;
 	}
 	bool caninteract() {
@@ -41,53 +41,42 @@ struct playermod:gameobject::component
 		{
 			return false;
 		}
+
+		if (ismenuopen())
+		{
+			return false;
+		}
 		return true;
 	}
-	void placeblock() {
-		ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
-		block* plamentblock = voxtra::findprevblock(cameraray, 1000);
-
-		int dir = maxdirection(closest.box->center - plamentblock->center());
-		int previd = plamentblock->id;
-		//i dont know why i create it and remove itit like this but it makes the core much simpler
-		int blockdirection = max2ddirection(Vector3(camera::campos) - closest.colpoint);
-
-		plamentblock->mesh.direction = blockdirection;
-		plamentblock->mesh.attachdir = dir;
-		gridutil::setblock(plamentblock->pos, blockidfromitemid(select));
-
-		if (plamentblock->solid)
-		{
-
-
-			if (collision::aabbCollidesWithEntity(&plamentblock->getcomponent<Collider>()))
-			{
-			
-				gridutil::setblock(plamentblock->pos, previd);
-			}
-			else
-			{
-				select->use(1);
-			}
-		}
-
+	
 
 
 
 	
 
-	}
-
+	
 
 	void testifmining()
 		{
 			if (currmining != nullptr)
 			{
-
+				
 				if (currmining == ((block*)(closest.box->owner)))
 				{
-					timeuntilbreak -= timename::dt;
-					return;
+					int pickpower=0;
+					if (pickaxe!=nullptr)
+					{
+						pickpower = pickaxe->pickaxepower;
+					}
+					if (pickpower>=currmining->mininglevel)
+					{
+
+						float timemod = pickpower / (1 + currmining->mininglevel);
+						timeuntilbreak -= timename::dt;
+						return;
+					}
+					
+					
 				}
 			}
 			timeuntilbreak =.3f;
@@ -107,13 +96,11 @@ struct playermod:gameobject::component
 
 		}
 	}
-	void update() {
+	 void update() {
+
 		
-		if (ismenuopen())
-		{
-			return;
-		}
-		select = owner->getcomponent<inventory>().selected;
+
+		pickaxe = owner->getcomponent<inventory>().selected;
 
 		ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
 		closest = collision::raycastall(cameraray);
@@ -127,30 +114,9 @@ struct playermod:gameobject::component
 		if (userinput::mouseleft.held)
 		{
 
-		
+
 			destroylogic();
 		}
-
-
-		else if (userinput::mouseright.pressed)
-		{
-			if (select != nullptr)
-			{
-				if (blockidfromitemid(select) != -1)
-				{
-					if (select->canuse(1))
-					{
-
-						placeblock();
-					}
-				
-				}
-			}
-
-		}
-
-
-
 	}
 };
 

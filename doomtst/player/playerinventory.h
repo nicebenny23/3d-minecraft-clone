@@ -23,13 +23,13 @@ struct inventorymen :menu
 	}
 	void customopen() {
 
-		manager.setviewable(true);
+		manager.enable();
 		blkcont.setviewable(true);
 	}
 	void customclose() {
 
 		blkcont.setviewable(false);
-		manager.setviewable(false);
+		manager.disable();
 	}
 	void testclick() {
 
@@ -51,6 +51,7 @@ struct inventory :gameobject::component
 	inventory();
 		Container hotbar;
 		item* selected;
+		
 	void update() {
 		
 		hotbar.update();
@@ -95,6 +96,10 @@ struct inventory :gameobject::component
 				freeditem = nullptr;
 			}
 
+		}
+		if (openmenu!=nullptr)
+		{
+			playermenu.manager.disable();
 		}
 		
 		playermenu.testclick();

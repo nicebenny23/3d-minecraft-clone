@@ -80,7 +80,8 @@ namespace gameobject {
 		virtual void start();
 		virtual void renderupdate();
 		virtual void update();
-		virtual void blockfaceupdate(obj* blk, int face);
+		virtual void onplayerclick();
+	
 		virtual void oncollision(obj* collidedwith);
 
 		int id;
@@ -107,6 +108,8 @@ namespace gameobject {
 		T& getcomponent();
 
 		template <class T>
+		T* getcomponentptr();
+		template <class T>
 		bool hascomponent();
 		//removes a component
 		template <class T>
@@ -117,10 +120,10 @@ namespace gameobject {
 
 		template <class T, typename... types>
 		void addcomponent(types&&... initval);
-
+		template <class T, typename... types>
+		T* addcomponentptr(types&&... initval);
 		//todo -mid proiorty implement;
-		void blkfaceupdate(obj* blk, int face);
-
+	
 		obj();
 		void senddestroycall() {
 
@@ -147,6 +150,7 @@ namespace gameobject {
 		{
 			int l = complist[i]->id;
 			if (id == complist[i]->id) {
+				complist[i]->ondestroy();
 				complist.deleteind(i);
 				i--;
 
@@ -180,6 +184,22 @@ namespace gameobject {
 	}
 
 
+	template<class T>
+	inline T* obj::getcomponentptr()
+	{
+		int id = compidfromname((char*)(typeid(T).name()));
+		for (int i = 0; i < complist.length; i++)
+		{
+
+			if (id == complist[i]->id) {
+
+
+				return ((T*)complist[i]);
+			}
+		}
+		return nullptr;
+	}
+
 	template <class T>
 	bool obj::hascomponent()
 	{
@@ -207,6 +227,27 @@ namespace gameobject {
 
 
 
+	template<class T, typename ...types>
+	inline T* obj::addcomponentptr(types && ...initval)
+	{
+
+
+		int id = idfromnameadd((char*)(typeid(T).name()));
+		//fix
+			//Assert(std::is_constructible_v<T, types...>, "no constructer takes these parameters");
+		//	Assert(std::is_base_of<component, T>::value, "T is not a component");
+
+		T* comp = new T(std::forward<types>(initval)...);
+
+		comp->setobj(this);
+
+		comp->start();
+
+		comp->id = compidfromname((char*)(typeid(T).name()));
+
+		complist.append(comp);
+		return comp;
+	}
 
 	template <class T, typename... types>
 
@@ -230,17 +271,12 @@ namespace gameobject {
 		comp->start();
 
 		comp->id = compidfromname((char*)(typeid(T).name()));
-		for (int i = 0; i < complist.length; i++)
-		{
-			if (id > complist[i]->id) {
-
-				complist.insertind(i, comp);
-				return;
-			}
-		}
+		
 		complist.append(comp);
 
 	}
+	
+	
 	//is a guid with 2 numbers one for hashing and another for checking this basicly ellimiantes any prossiblity for collision as the other one can go to 2billion
 
 

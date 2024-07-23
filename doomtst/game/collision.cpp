@@ -23,6 +23,20 @@ void collision::update()
 	}
 }
 
+void collision::sendplayercameraray()
+{
+
+	ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
+	voxtra::RayCollisionWithGrid 	closest = collision::raycastall(cameraray);
+	if (closest.box!=nullptr)
+	{
+		for (int i = 0; i < closest.box->owner->complist.length; i++) {
+			closest.box->owner->complist[i]->onplayerclick();
+
+		}
+	}
+}
+
 voxtra::RayCollisionWithGrid collision::raycastentity(ray nray)
 {
 	voxtra::RayCollisionWithGrid closest = voxtra::RayCollisionWithGrid();
@@ -120,17 +134,23 @@ void collision::handleduelentitycollisions()
 
 				continue;
 			}
+
 			v3::Vector3 force = aabb::collideaabb(*Colliderlist[i], *Colliderlist[j]);
 			if (v3::magnitude( force )>0.00001f)
 			{
 				Vector3 actualforce = force / 2.0f;
+				componentcollisionsend(Colliderlist[i]->owner, Colliderlist[j]->owner);
+				componentcollisionsend(Colliderlist[j]->owner, Colliderlist[i]->owner);
 
+				if (Colliderlist[i]->effector || Colliderlist[j]->effector) {
+
+					continue;
+				}
 				Colliderlist[i]->center += actualforce;
 				toent(Colliderlist[i]->owner).transform.position += actualforce;
-				componentcollisionsend(Colliderlist[i]->owner, Colliderlist[j]->owner);
+				
 				Colliderlist[j]->center -= actualforce;
 				toent(Colliderlist[j]->owner).transform.position -= actualforce;
-				componentcollisionsend(Colliderlist[j]->owner, Colliderlist[i]->owner);
 
 
 			}
@@ -220,8 +240,12 @@ void collision::handleCollisionWithGrid(Collider& entity)
 							Vector3 force = aabb::collideaabb(entity, blockcol);
 
 
-							if (force != zerov)
+							if (force == zerov)
 							{
+								continue;
+							}
+
+
 								for (int i = 0; i < entity.owner->complist.length; i++)
 								{
 									entity.owner->complist[i]->oncollision(tocollide);
@@ -230,13 +254,20 @@ void collision::handleCollisionWithGrid(Collider& entity)
 									tocollide->complist[i]->oncollision(entity.owner);
 								}
 
+								componentcollisionsend(entity.owner, tocollide);
+								componentcollisionsend(tocollide, entity.owner);
 
-								if (magnitude(force) > magnitude(minforce) || magnitude(minforce) == 0)
+								if (!blockcol.effector&&!entity.effector)
 								{
 
-									minforce = force;
+
+									if (magnitude(force) > magnitude(minforce) || magnitude(minforce) == 0)
+									{
+
+										minforce = force;
+									}
 								}
-							}
+							
 
 						}
 					}

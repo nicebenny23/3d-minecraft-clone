@@ -4,8 +4,8 @@
 #define torchitemblockid 7
 inline void inittorchitem(item* itm) {
 	itm->pickaxepower = 0;
-	itm->maxamt = 3;
-	itm->itemui.itemsprite= uirender::newbox("images\\torch.png", v2::Vector2(1 / 20.f, 1 / 20.f), v2::zerov, 100);
+	itm->maxamt = 64;
+	itm->itemui.itemsprite= createitembox("images\\torch.png");
 	itm->placeable = true;
 }
 

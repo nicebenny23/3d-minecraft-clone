@@ -39,8 +39,17 @@ void itemslot::giveitem(int id) {
 	helditem->state = ininventoryblock;
 	helditem->itemui.itemsprite->box.center = frame->box.center;
 
-}
 
+
+}
+void itemslot::giveitem(int id,int amt) {
+	helditem = inititem(id);
+	helditem->amt = amt;
+	helditem->setviewable(frame->shouldrender);
+	helditem->state = ininventoryblock;
+	helditem->itemui.itemsprite->box.center = frame->box.center;
+
+}
 void itemslot::transferitem(item* otherholder) {
 
 
@@ -107,6 +116,12 @@ void itemslot::updatestate() {
 		}
 
 		transferitem(freeditem);
+	}
+	if (helditem!=nullptr)
+	{
+		if (helditem->amt <= 0) {
+			destroyitem();
+		}
 	}
 }
 

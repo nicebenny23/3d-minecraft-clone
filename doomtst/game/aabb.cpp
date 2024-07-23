@@ -72,17 +72,17 @@ namespace aabb {
         return false;
     }
 
-    void Collider::destroy()
+    void Collider::ondestroy()
     {
-
         if (owner->type!=gameobject::block)
         {
             Colliderlist[index]=nullptr;
         }
     }
 
-    Collider::Collider(const v3::Vector3& objcenter, const v3::Vector3& objscale,bool appendtolist)
+    Collider::Collider(const v3::Vector3& objcenter, const v3::Vector3& objscale,bool appendtolist, bool iseffector)
     {
+        effector = iseffector;
         hasrigidbody = false;
         center = objcenter;
         scale = objscale;
@@ -104,6 +104,8 @@ namespace aabb {
     }
     aabbraycolinfo Collider::distanceonray(ray fray)
     {
+        aabbraycolinfo toreturn = aabbraycolinfo();
+        
         v3::Vector3 dir = fray.end - fray.start;
 
         //not actually max
@@ -121,7 +123,7 @@ namespace aabb {
         float minzval = fmin(zval1, zval2);
         float actualminval = fmax(fmax(minxval, minyval), minzval);
         float actualmaxval = fmin(fmin(maxxval, maxyval), maxzval);
-        aabbraycolinfo toreturn = aabbraycolinfo();
+        
         if (actualminval < actualmaxval)
         {
             float closestt = actualminval;

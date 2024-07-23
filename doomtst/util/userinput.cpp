@@ -13,12 +13,12 @@ namespace userinput {
 		for (int i = 0; i < keylist.capacity; i++)
 		{
 			keylist[i].pressed = false;
-			keylist[i].relesed = false;
+			keylist[i].released = false;
 		}
 		mouseleft.pressed = false;
-		mouseleft.relesed = false;
+		mouseleft.released = false;
 		mouseright.pressed = false;
-		mouseright.relesed = false;
+		mouseright.released = false;
 	}
 
 	void initiate()
@@ -47,7 +47,7 @@ namespace userinput {
 		{
 			keylist[code].pressed = false;
 			keylist[code].held= false;
-			keylist[code].relesed = true;
+			keylist[code].released = true;
 		}
 		
 	}
@@ -67,7 +67,7 @@ namespace userinput {
 			{
 				mouseright.pressed = false;
 				mouseright.held = false;
-				mouseright.relesed = true;
+				mouseright.released = true;
 			}
 		}if (button == GLFW_MOUSE_BUTTON_LEFT)
 		{
@@ -82,7 +82,7 @@ namespace userinput {
 			{
 				mouseleft.pressed = false;
 				mouseleft.held = false;
-				mouseleft.relesed = true;
+				mouseleft.released = true;
 			}
 		}
 	}

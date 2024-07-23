@@ -87,8 +87,8 @@ int randomint(int max)
 }
 void  randominit()
 {
-    int s = 1;
+    
 
-    val = s;
+    val = 1;
 
 }

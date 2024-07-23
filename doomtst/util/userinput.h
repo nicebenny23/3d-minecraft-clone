@@ -12,13 +12,13 @@ namespace userinput {
 	extern v2::Vector2 normedmousepos;
 		struct inputkey {
 		bool held;
-		bool relesed;
+		bool released;
 		bool pressed;
      		inputkey() {
 
 			held = false;
 			pressed = false;
-			relesed = false;
+			released = false;
 	     	}
 	};
 		extern inputkey mouseleft;
