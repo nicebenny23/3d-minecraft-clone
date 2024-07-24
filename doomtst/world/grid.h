@@ -17,9 +17,8 @@ namespace grid {
 	void reupdatechunkborders();
 	Chunk::chunk* chunkatpos(int x, int y, int z);
 	void updateblocks();
+	Chunk::chunk* chunkatpos(int x, int y, int z);
 };
-
-
 
 
 #endif #pragma once

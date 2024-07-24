@@ -5,7 +5,7 @@
 #include "playermodification.h"
 #include "../game/entitystate.h"
 #include"playerhealth.h"
-#include "game/navigation.h"
+
 // settings
 #ifndef player_HPP
 #define player_HPP

@@ -1,41 +1,42 @@
-#include "gameobject.h"
-#include "../world/voxeltraversal.h"
-#ifndef navmesh_HPP
-#define navmesh_HPP
+#include <cmath>
+#include "../world/grid.h"
+#include "../util/dir.h"
+struct navnode {
+    Coord pos;
+    float gcost, hcost;
+    navnode* parent;
+    int pathlen;
+    navnode() {
+        pos = zeroiv;
+        gcost = 0;
+        hcost = 0;
+        parent = nullptr;
+        pathlen = 1;
+    }
+    navnode(Coord position, navnode* parentnode = nullptr)
+      {
+        if (parentnode==nullptr)
+        {
 
-struct navagentpoint
-{
-	v3::Vector3 location;
-	navagentpoint(v3::Vector3 loc,float parentdist);
-	float dist;
-	float disptancetoend();
-	float distance(v3::Vector3 start);
-};
-struct navparent;
-struct navfollow:gameobject::component
-{
-	
-	navparent* following;
-	v3::Vector3 followingpos;
-	void update();
-	navparent* parent;
-	
-	navfollow(navparent* parentagent);
-	float timetillupdate;
-	void getcurrentpath();
-	bool  seesparent();
-	bool seespoint(v3::Vector3 point);
-	float distancethroughpoint(navagentpoint point);
-};
-struct navparent:gameobject::component {
-	float navgridoffset;
-	int navamt;
-	float timetillupdate;
-	void update();
-	array<navagentpoint> navpoints;
-	void generatenavagentpoints();
-	float dist(v3::Vector3 point);
-};
+            pathlen = 0;
 
+        }
+        else {
+            pathlen = parentnode->pathlen + 1;
+        }pos = position;
+        gcost = 0;
+        hcost = 0;
+        parent = parentnode;
+    }
 
-#endif // !
+    float calcfcost() const {
+        return gcost + hcost;
+    }
+
+    bool operator==(const navnode& other)  {
+        return pos == other.pos;
+    }
+
+  
+};
+array<navnode> astarpathfinding(navnode start, navnode goal);

@@ -59,7 +59,7 @@ struct rigidbody : gameobject::component {
         velocity += acceleration * deltaTime;
         if (isonground)
         {
-            velocity.y *= .9;
+            velocity.y *= 1-deltaTime*10;
         }
         velocity *= (1-deltaTime);  // Adjust damping factor to prevent excessive damping
         objutil::toent(owner).transform.position += velocity * deltaTime;

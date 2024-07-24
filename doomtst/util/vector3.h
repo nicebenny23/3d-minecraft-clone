@@ -37,7 +37,7 @@ namespace v3 {
 		Vector3 operator-(const Vector3& p1) const;
 		void operator=(const Vector3& p1);
 		Coord(const Vector3& p1);
-
+		Coord(const Vector3& p1,bool useless);
 	};
 
 	const  Coord zeroiv = Coord(0, 0, 0);
@@ -305,7 +305,12 @@ namespace v3 {
 		return *this;
 
 	}
-
+	inline Coord::Coord(const Vector3& p1, bool useless)
+	{
+		x = round(p1.x);
+		y = round(p1.y);
+		z = round(p1.z);
+	}
 	inline Vector3 Vector3::operator/(float scale) const {
 
 		return Vector3(x / scale, y / scale,z/scale);

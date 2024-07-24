@@ -4,6 +4,7 @@
 #include "playerattack.h"
 #include "playerplace.h"
 #include "playermodification.h"
+
 using namespace player;
 entityname::entityref player::goblin;
 
@@ -17,7 +18,7 @@ void player::initplayer()
 	goblin.toent()->addcomponent<playermovement>();
 	goblin.toent()->addcomponent< playerbreak>();
 	goblin.toent()->addcomponent< playerplace>();
-	goblin.toent()->addcomponent<
+	
 	goblin.toent()->addcomponent<rigidbody>();
 	goblin.toent()->addcomponent<playerattackcomp>();
 	goblin.toent()->getcomponent <Collider>().hasrigidbody = true;

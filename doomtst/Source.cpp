@@ -26,6 +26,7 @@
 #include "entities/dmgonhit.h"
 #include "game/navigation.h"
 // settings
+
 #include "renderer/model.h"
 #include "world/noise.h"
 const Vector3 spawnpos = glm::vec3(0,0,0);
@@ -33,7 +34,7 @@ const unsigned int SCR_WIDTH = 4000;
 const unsigned int SCR_HEIGHT = 3000;
 void init() {
  
-    deleteFilesInFolder(std::string("C:/Users/User/source/repos/nicebenny23/3d-minecraft-clone/doomtst/worldstorage"));
+    deleteFilesInFolder(std::string("C:/Users/bchar/source/repos/doomtst/doomtst/worldstorage"));
 
     timename::inittime();
     randominit();
@@ -81,15 +82,15 @@ int main()
     init();
     entityname::entityref refmodel = entityname::createentity(zerov, "frjiofiuje");
     refmodel.toent()->addcomponent<model>();
-    refmodel.toent()->getcomponent<model>().add("slime.obj", "images\\slimetex.png");
+    refmodel.toent()->getcomponent<model>().add("newtest.obj", "images\\slimetex.png");
   
     refmodel.toent()->addcomponent<estate>(10,false);
-    refmodel.toent()->addcomponent<Collider>(zerov, unitscale*.7f, true);
+    refmodel.toent()->addcomponent<Collider>(zerov, unitscale, true);
     texture mtex = texture("images\\slimetex.png", png);
   
     refmodel.toent()->addcomponent<dmgplayeronhit>(6);
     refmodel.toent()->addcomponent<rigidbody>();
- 
+  
 float lastupdate = 0;
 refmodel.toent()->transform.position = v3::Vector3(10, 0, 0);
 while (!window::shouldclose())
@@ -125,13 +126,22 @@ while (!window::shouldclose())
         gridutil::redoallighting = true;
 
     }
+   
     if (refmodel.toent()!=nullptr)
     {
-        refmodel.toent()->transform.scale = unitv;
+        navnode t1 = navnode(Coord(refmodel.toent()->transform.position), nullptr);
+        navnode t3 = navnode(player::goblin.toent()->transform.position, nullptr);
 
-        refmodel.toent()->transform.orient(player::goblin.toent()->transform.position);
+        array<navnode> pathl = astarpathfinding(t1, t3);
+        refmodel.toent()->transform.scale = unitscale;
+        if (pathl.length >=1)
+        {
+        v3::Vector3 moveoffset = v3::Vector3(pathl[1].pos - pathl[0].pos) * timename::dt;
 
-   // refmodel.toent()->transform.position += refmodel.toent()->transform.getnormaldirection() / 100;
+            refmodel.toent()->transform.position +=moveoffset ;
+        }
+
+  //refmodel.toent()->getcomponent<rigidbody>().velocity += refmodel.toent()->transform.getnormaldirection()* timename::smoothdt*3;
 
     }
    
