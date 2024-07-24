@@ -3,6 +3,7 @@
 #include "../renderer/uirender.h"
 #include  "../util/userinput.h"
 #include "itemutil.h"
+#include "menu.h"
 using namespace v3;
 #ifndef invblock_HPP
 #define invblock_HPP
@@ -24,12 +25,14 @@ struct itemslot
 	itemslot(int xloc, int yloc);
 	itemslot(int xloc, int yloc, void (*clickaction)(itemslot&));
 	void giveitem(int id);
+	void givefreeamt(int amt);
 	void giveitem(int id,int amt);
 	void transferitem(item* otherholder);
 	void destroyitem();
 	void enable();
 	void disable();
-	bool hasbeenclicked();
+	bool hasbeenrightclicked();
+	bool hasbeenleftclicked();
 	void updatestate();
 };
 

@@ -10,18 +10,33 @@ inline uirender::uibox* createitembox(const char* boxname) {
 }
 enum itemid {
 
-	stoneitem = 0,
-	sworditem = 1,
+	nullitemid = 0,
+
+	stoneitem = 1,
 	grassitem = 2,
-	torchitem = 3,
-	pickitemid = 4,
+	
+	crystalitem =3,
+	metalroditem=4,
+	torchitem = 5,
+
+	sworditem =6,
+
+	pickitemid = 7,
+	craftingtableitem=8,
+	crystalpickitemid=9,
+	simplerock=10,
 };
 enum itemstate {
 	beingheld = 0,
 	ininventoryblock = 1,
 
 };
-
+enum itemprop
+{
+	wear=0,
+	count=1
+};
+//
 struct item
 {
 	void setviewable(bool isviewable) {
@@ -43,7 +58,7 @@ struct item
 	void(*onright);
 	bool placeable;
 	
-	
+	itemprop itemtype;
 	int maxamt;
 	int amt;
 
@@ -51,7 +66,6 @@ struct item
 	int dmg;
 	
 	
-
 	struct  itemuistruct
 	{
 		integertext* textvalue;
@@ -65,6 +79,11 @@ struct item
 		}
 		itemui.textvalue->center = itemui.itemsprite->box.center-itemui.itemsprite->box.scale*v2::Vector2(-1.4,.8)/1.14f;
 		itemui.textvalue->value= amt;
+		if (itemtype==wear)
+		{
+			int textamt = round((amt *5)/ maxamt);
+			itemui.textvalue->value = textamt;
+		}
 		
 	}
 	void destroy();
@@ -75,5 +94,23 @@ struct item
 };
 extern texturearray textureidlist;
 extern item* freeditem;
-void createfreeditem();
+
+inline void updateitem(item*& itm) {
+	if (itm == nullptr)
+	{
+		return;
+	}
+
+		itm->updateui();
+		if (itm->maxamt < itm->amt)
+		{
+			itm->amt = itm->maxamt;
+		}
+		if (itm->amt <= 0) {
+			itm->destroy();
+			itm = nullptr;
+		}
+	
+
+}
 #endif // !item_HPP

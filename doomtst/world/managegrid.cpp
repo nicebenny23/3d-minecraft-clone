@@ -47,9 +47,9 @@ void gridutil::computecover(face& blkface)
 
 	}
 	else {
+		blkface.covered = issolidatpos(pos.x, pos.y, pos.z, true);
+		
 
-
-		blkface.covered =blk->solid;
 	}
 
 }

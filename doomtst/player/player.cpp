@@ -17,6 +17,7 @@ void player::initplayer()
 	goblin.toent()->addcomponent<playermovement>();
 	goblin.toent()->addcomponent< playerbreak>();
 	goblin.toent()->addcomponent< playerplace>();
+	goblin.toent()->addcomponent<
 	goblin.toent()->addcomponent<rigidbody>();
 	goblin.toent()->addcomponent<playerattackcomp>();
 	goblin.toent()->getcomponent <Collider>().hasrigidbody = true;

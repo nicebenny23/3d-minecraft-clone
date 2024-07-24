@@ -11,6 +11,7 @@ float random(float max);
 bool randombool();
 unsigned int randomint();
 void randomcoord(unsigned int& seed);
+unsigned int randomushortfromdir(unsigned int x, unsigned int y, unsigned int z);
 v3::Vector3 randomseeded(unsigned int x, unsigned int y, unsigned int z);
 v3::Vector3 randompointonsphere(unsigned int x, unsigned int y, unsigned int z);
 int random(int val, int seed);

@@ -51,30 +51,23 @@ struct playerplace :gameobject::component
 		block* plamentblock = voxtra::findprevblock(cameraray, 1000);
 
 		int dir = maxdirection(closest.box->center - plamentblock->center());
-		int previd = plamentblock->id;
-		//i dont know why i create it and remove itit like this but it makes the core much simpler
+	
 		int blockdirection = max2ddirection(Vector3(camera::campos) - closest.colpoint);
 
 		plamentblock->mesh.direction = blockdirection;
 		plamentblock->mesh.attachdir = dir;
-		gridutil::setblock(plamentblock->pos, blockidfromitemid(select));
-
-		if (plamentblock->solid)
+		Box newblockbox = Box(plamentblock->center(), unitv / 2.0f);
+		if (!collision::boxCollidesWithEntity(newblockbox))
 		{
-
-
-			if (collision::aabbCollidesWithEntity(&plamentblock->getcomponent<Collider>()))
+			int placeid = blockidfromitemid(select);
+			if (placeid==-1)
 			{
-
-				gridutil::setblock(plamentblock->pos, previd);
+				return;
 			}
-			else
-			{
-				select->use(1);
-			}
+			gridutil::setblock(plamentblock->pos, placeid);
+	
+			select->use(1);
 		}
-
-
 
 
 

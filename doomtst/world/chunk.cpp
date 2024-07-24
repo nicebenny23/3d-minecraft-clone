@@ -97,14 +97,14 @@ Chunk::chunk* Chunk::fileload(Coord location)
 	return &newchunk;
 }
 
-int generatechunkvalfromnoise(float noiselevel, Coord position,float feturemap) {
+int generatechunkvalfromnoise(float noiselevel, Coord position,float feturemap,float modulatedmap) {
 
-	//select block mechanism
+	
+
 	int neid = minecraftair;
-
 	if (generateflat)
 	{
-		if (position.y < 0)
+		if (position.y <0)
 		{
 			neid = minecraftdirt;
 
@@ -116,26 +116,24 @@ int generatechunkvalfromnoise(float noiselevel, Coord position,float feturemap) 
 
 		///	float noiselevel1 = (*map1)[Coord(x, y, z)];
 
-		if (inrange( noiselevel ,-.15f,.15f))
+		if (inrange( noiselevel ,-.18f,.18f)&&inrange(modulatedmap,-.18f,.18f))
 		{
+			//select block mechanism
+			neid = minecraftstone;
 
-
-				neid = minecraftstone;
-
-				if (inrange(feturemap, .1f, .11f))
-				{
-					neid = minecraftcrystal;
-
-				}	
-		}
-		else
-		{
 			if (inrange(feturemap, .1f, .101f))
 			{
-				 //neid =minecraftwater;
+				neid = minecraftcrystal;
 
 			}
-		}
+			if (inrange(feturemap, .0f, .02f))
+			{
+				neid = minecraftdirt;
+
+			}
+
+			}
+	
 		
 	}
 	return neid;
@@ -180,7 +178,9 @@ Chunk::chunk* Chunk::load(Coord location)
 	newchunk.blockbuf = new block[chunksize];
 	int ind = 0;
 	chunknoisemap* map = trueperlin(location, .1f, 1.2, .5f, 2);
-	chunknoisemap* map2 = trueperlin(location+Coord(3,3,33), .1f, 1.2, .5f, 1);
+
+	chunknoisemap* expmap =  trueperlin(location+Coord(101,303,2), .1f, 1.2, .5f, 2);
+	chunknoisemap* map2 = trueperlin(location+Coord(3,3,33), .04f, 1.2, .5f, 1);
 	for (int x = 0; x < 16; x++)
 	{
 		for (int y = 0; y < 16; y++) {
@@ -189,11 +189,14 @@ Chunk::chunk* Chunk::load(Coord location)
 				Coord blockpos = Coord(x, y, z) + location * 16;
 
 
+				float expmapval = (*expmap)[Coord(x, y, z)];
+				float interp = (1+(*map2)[Coord(x, y, z)])/2;
 
-
-
-				int neid = generatechunkvalfromnoise((*map)[Coord(x, y, z)], blockpos, (*map2)[Coord(x, y, z)]);
-
+				float bint = (*map)[Coord(x, y, z)];
+				float noiseval = interpolate(expmapval, bint, interp);
+				float modulated = (noiseval - bint);
+				int neid = generatechunkvalfromnoise(noiseval, blockpos,noiseval,modulated);
+				
 		
 				newchunk.blockbuf[ind] = blockname::block(blockpos, neid);
 
@@ -280,7 +283,7 @@ void Chunk::chunk::destroy()
 	for (int i = 0; i < chunksize; i++) {
 
 		//blkinitname::setair(&blockbuf[i]);
-		gameobject::immidiatedestroy(&blockbuf[i]);
+		gameobject::immidiatedestroy(&blockbuf[i],false);
 
 		//delete blockbuf[i]
 	}

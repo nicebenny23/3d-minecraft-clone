@@ -14,7 +14,7 @@ struct craftingmenu :menu {
 		menutype = normalmenu;
 	
 		blkcont = recipemanager("3x3craft.txt", 3, 3);
-
+		enabled = false;
 
 	}
 	void custominit() {
@@ -82,7 +82,7 @@ struct craftingtablecomp :gameobject::component {
 };
 inline void tableinit(blockname::block* blk) {
 
-	blk->mesh.setfaces(stonetex, stonetex, crystaloretex, stonetex, stonetex, stonetex);
+	blk->mesh.setfaces(craftingtableside, craftingtableside,craftingtabletop, craftingtableside, craftingtableside, craftingtableside);
 	blk->solid = true;
 	blk->transparent = false;
 	blk->emitedlight = 0;
@@ -94,12 +94,14 @@ inline void tableinit(blockname::block* blk) {
 		blk->addcomponent<craftingtablecomp>();
 
 	}
-
+	blk->addcomponentptr<loottable>()->addelem(craftingtableitem, 1, false);
 }
 inline void tabledelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();
 
 	blk->removecomponent<craftingtablecomp>();
+
+	blk->removecomponent<loottable>();
 }
 #endif // !wood_HPP
 

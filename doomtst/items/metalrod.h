@@ -1,0 +1,16 @@
+#include "item.h"
+#ifndef metalroditem_HPP
+#define metalroditem_HPP
+#define metalroditemasblockid -1
+
+inline void initmetalroditem(item* itm) {
+	itm->pickaxepower = 0;
+	itm->maxamt = 30;
+
+	itm->itemtype = count;
+	itm->placeable = true;
+	itm->itemui.itemsprite = createitembox("images\\metalrod.png");
+}
+
+
+#endif // !stoneitem_HPP

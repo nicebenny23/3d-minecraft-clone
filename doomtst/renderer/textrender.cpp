@@ -36,7 +36,7 @@ void inittextarray()
     texlist[7] = "bitmaptext\\sevenimg.png";
     texlist[8] = "bitmaptext\\eightimg.png";
     texlist[9] = "bitmaptext\\nineimg.png";
-    textarray = texturearray(8, 8, texlist);
+    textarray = texturearray(16, 16, texlist);
    
 }
 array<float> datbuf;

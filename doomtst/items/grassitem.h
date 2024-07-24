@@ -6,6 +6,8 @@ inline void initgrassitem(item* itm) {
 	itm->pickaxepower = 0;
 	itm->maxamt = 3;
 	itm->placeable = true;
+
+	itm->itemtype = count;
 	itm->itemui.itemsprite = createitembox("images\\grass.png");
 }
 #endif // !grassitem_HPP

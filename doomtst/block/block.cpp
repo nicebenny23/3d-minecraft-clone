@@ -110,7 +110,7 @@ void blockname::initblockmesh(blockname::block* blk, Vector3 pos, Vector3 scale)
 blockname::block::block(v3::Coord location, int blockid)
 {
 
-	
+	state = gameobject::beinginitiated;
 	emitedlight = 0;
 	complist = (array<gameobject::component*>());
 	type = gameobject::block;
@@ -125,6 +125,8 @@ blockname::block::block(v3::Coord location, int blockid)
 
 blockname::block::block()
 {
+
+	state = gameobject::beinginitiated;
 	transparent = false;
 	solid = false;
 	complist = array<gameobject::component*>();

@@ -1,5 +1,6 @@
 #include "noise.h"
 using namespace dynamicarray;
+array<v3::Vector3> seededdirections;
 chunknoisemap::chunknoisemap(v3::Coord location)
 {
 
@@ -113,4 +114,43 @@ void chunknoisemap::destroy()
 {
 
 	noisemap.destroy();
+}
+
+void initrandomdirs()
+{
+	const int startingseed = 2;
+
+	unsigned int noiseval = startingseed;
+	for (int i = 0; i < 100; i++)
+	{
+		randomcoord(noiseval);
+	}
+	seededdirections = array<Vector3>(USHRT_MAX);
+	for (int i = 0; i < USHRT_MAX; i++)
+	{
+
+		Vector3 gradatind;
+		do
+		{
+
+			randomcoord(noiseval);
+			randomcoord(noiseval);
+			randomcoord(noiseval);
+			gradatind.x = noiseval / static_cast<float>(MAXUINT32);
+			randomcoord(noiseval);
+			randomcoord(noiseval);
+
+			randomcoord(noiseval);
+			gradatind.y = noiseval / static_cast<float>(MAXUINT32);
+			randomcoord(noiseval);
+
+			randomcoord(noiseval);
+			randomcoord(noiseval);
+			gradatind.z = noiseval / static_cast<float>(MAXUINT32);
+			gradatind -= unitv / 2;
+			gradatind * 2;
+		} while (magnitude2(gradatind)>1);
+		seededdirections[i] = normal(gradatind);
+	}
+
 }

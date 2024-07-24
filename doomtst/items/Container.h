@@ -60,7 +60,7 @@ struct Container
 			}
 		}
 	}
-	bool fill(int elemid, int amt) {
+	bool fill(int elemid, int& amt) {
 
 
 		for (int i = 0; i < databuf.length; i++)
@@ -86,8 +86,12 @@ struct Container
 			}
 		
 			if (databuf[i].helditem->id == elemid) {
+				if (databuf[i].helditem->itemtype == count)
+				{
 
-				databuf[i].helditem->give(amt);
+
+					databuf[i].helditem->give(amt);
+				}
 			}
 		
 		
@@ -128,13 +132,16 @@ struct Container
 		sizey = ysize;
 		offset = v2::Vector2(xoff, yoff);
 		int ind = 0;
-		for (int i = 0; i < xsize; i++)
+	
+		for (int j = 0; j < ysize; j++)
 		{
-			for (int j =0; j < ysize; j++)
+			for (int i = 0; i < xsize; i++)
 			{
 
-				databuf[ind] = itemslot(i+xoff-float(sizex)/2.0f, j+yoff-ysize / 2.0f);
+
+				databuf[ind] = itemslot(i + xoff - float(sizex) / 2.0f, j + yoff - ysize / 2.0f);
 				ind++;
+
 			}
 		}
 		disable();

@@ -8,7 +8,8 @@
 #define noise_HPP
 using namespace v3;
 using namespace dynamicarray;
-
+extern array<v3::Vector3> seededdirections;
+void initrandomdirs();
 struct chunknoisemap
 {
     dynamicarray::array<float> noisemap;
@@ -32,18 +33,7 @@ inline float interpolate(float v, float v1, float w) {
 
 
 inline v3::Vector3 randompointonsphere(Coord pnt) {
-    v3::Vector3 retpoint = unitv;
-    int l = 0;
-    while (true) {
-        retpoint = (randomseeded(pnt.x + l, pnt.y, pnt.z) - unitv / 2) * 2;
-
-
-        if (magnitude2(retpoint) < 1)
-        {
-            return retpoint / magnitude(retpoint);
-        }
-        l += 1040;
-    }
+    return(seededdirections[randomushortfromdir(pnt.x, pnt.y, pnt.z)]);
 }
 
 inline chunknoisemap* trueperlin(Coord chunk, float startscale, float ampmul, float scalemul, int iter) {

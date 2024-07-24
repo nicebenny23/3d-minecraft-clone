@@ -42,6 +42,45 @@ voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc,bool counteffe
 	return voxtra::RayCollisionWithGrid();
 }
 
+bool voxtra::raycolllideswithgrid(ray nray, float acc, bool counteffectors)
+{
+	float maxdist = nray.length();
+	v3::Vector3 offdist = (nray.end - nray.start) / acc;
+	v3::Vector3 pos = nray.start;
+	Coord prevpos = pos;
+	for (int i = 0; i < maxdist * acc; i++)
+	{
+		Coord curvox = voxtra::getcurrvoxel(pos);
+		if (curvox != prevpos)
+		{
+
+			block* blk = grid::getobjatgrid(curvox);
+			if (blk != nullptr)
+			{
+				if (blk->solid)
+				{
+					if (!blk->getcomponent<aabb::Collider>().effector || counteffectors)
+					{
+
+
+						aabb::aabbraycolinfo rayinfo = blk->getcomponent<aabb::Collider>().distanceonray(nray);
+						if (rayinfo.collided)
+						{
+
+
+							return true;
+						}
+					}
+				}
+			}
+		}
+		prevpos = getcurrvoxel(pos);
+		pos += offdist;
+
+	}
+	return false;
+}
+
 bool voxtra::Boxcollwithgrid (geometry::Box bx, float acc,bool counteffectors)
 {
 

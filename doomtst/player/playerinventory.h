@@ -15,7 +15,7 @@ struct inventorymen :menu
 		
 		manager=recipemanager("2x2craft.txt", 1, 1);
 		blkcont = Container(8, 4, 0, 0);
-
+		enabled = false;
 		 
 	}
 	void custominit() {
@@ -49,13 +49,14 @@ struct inventory :gameobject::component
 	Container blkcont;
 	inventorymen playermenu;
 	inventory();
+	unsigned int selectedind;
 		Container hotbar;
 		item* selected;
 		
 	void update() {
 		
 		hotbar.update();
-		if (userinput::getinputkey('j').pressed) {
+		if(userinput::getinputkey('j').pressed) {
 			playermenu.close();
 		}
 
@@ -64,39 +65,40 @@ struct inventory :gameobject::component
 		}
 		if (userinput::getinputkey('1').pressed)
 		{
-			selected = hotbar.databuf[0].helditem;
+			selectedind = 0;
 		}
 		if (userinput::getinputkey('2').pressed)
 		{
-			selected = hotbar.databuf[1].helditem;
+			selectedind = 1;
 		}
 		if (userinput::getinputkey('3').pressed)
 		{
-			selected = hotbar.databuf[2].helditem;
+
+			selectedind = 2;
 		}if (userinput::getinputkey('4').pressed)
 		{
-			selected = hotbar.databuf[3].helditem;
+			selectedind = 3;
 		}
 		if (userinput::getinputkey('5').pressed)
 		{
-			selected = hotbar.databuf[4].helditem;
+
+			selectedind = 4;
 		}
 		if (userinput::getinputkey('6').pressed)
 		{
-			selected = hotbar.databuf[5].helditem;
+			selectedind = 5;
 
 		}
-		if (freeditem!=nullptr)
+		if (selectedind!=-1&&hotbar.at(selectedind).helditem!=nullptr)
 		{
-			
-			freeditem->updateui();
-
-			if (freeditem->amt == 0) {
-				freeditem->destroy();
-				freeditem = nullptr;
-			}
-
+			selected = hotbar.at(selectedind).helditem;
 		}
+		else
+		{
+			selectedind = -1;
+			selected = nullptr;
+		}
+		updateitem(freeditem);
 		if (openmenu!=nullptr)
 		{
 			playermenu.manager.disable();

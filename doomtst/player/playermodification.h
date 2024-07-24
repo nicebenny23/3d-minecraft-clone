@@ -51,7 +51,15 @@ struct playerbreak:gameobject::component
 	
 
 
-
+	void wearduribilty() {
+	
+		if (pickaxe!= nullptr)
+		{
+			if (pickaxe->itemtype == wear) {
+				pickaxe->amt -= 1;
+			}
+		}
+	}
 	
 
 	
@@ -63,7 +71,7 @@ struct playerbreak:gameobject::component
 				
 				if (currmining == ((block*)(closest.box->owner)))
 				{
-					int pickpower=0;
+					int pickpower=1;
 					if (pickaxe!=nullptr)
 					{
 						pickpower = pickaxe->pickaxepower;
@@ -72,14 +80,14 @@ struct playerbreak:gameobject::component
 					{
 
 						float timemod = pickpower / (1 + currmining->mininglevel);
-						timeuntilbreak -= timename::dt;
+						timeuntilbreak -= timemod*timename::dt;
 						return;
 					}
 					
 					
 				}
 			}
-			timeuntilbreak =.3f;
+			timeuntilbreak =1.2f;
 			currmining =(block*)( closest.box->owner);
 	}
 
@@ -90,8 +98,8 @@ struct playerbreak:gameobject::component
 		testifmining();
 		if (timeuntilbreak<=0)
 		{
-			timeuntilbreak == 0;
-
+			timeuntilbreak = 1.2f;
+			wearduribilty();
 			gridutil::setblock(toblk(closest.box->owner).pos, minecraftair);
 
 		}

@@ -12,7 +12,15 @@ using namespace dynamicarray;
 
 namespace gameobject {
 
-
+	enum objstate
+	{
+		beinginitiated=0,
+		active=1,
+		//deleting components but keeping object
+		beingsoftdestroyed=2,
+		//deleting object and components
+		beingroughdestroyed=3
+	};
 
 	//these 3 function are used to get a unique component number f
 	extern std::unordered_map<char*, int> stringtoint;
@@ -103,7 +111,7 @@ namespace gameobject {
 
 		
 		objtype type;
-
+		objstate state;
 		template <class T>
 		T& getcomponent();
 
@@ -136,7 +144,19 @@ namespace gameobject {
 
 
 	void destroy(obj* object);
+	inline bool shouldbeupdated(obj* object) {
 
+		if (object->state == active)
+		{
+			return true;
+		}
+		if (object->state == beinginitiated)
+		{
+			object->state = active;
+			return true;
+		}
+		return false;
+	}
 
 	template <class T>
 	void obj::removecomponent()
@@ -283,19 +303,34 @@ namespace gameobject {
 
 
 
-	inline void immidiatedestroy(obj* object) {
+	inline void immidiatedestroy(obj* object,bool soft) {
+		
+		if (soft)
+		{
+			object->state = beingsoftdestroyed;
+		}
+		else {
 
+
+			object->state = beingroughdestroyed;
+		}
 		for (int i = 0; i < object->complist.length; i++)
 		{
 			object->complist[i]->ondestroy();
 			//deletes component refered to by pointer
-			delete object->complist[i];
+			if (!soft)
+			{
+				delete object->complist[i];
+			}
+		
 
 		}
-		//deletes pointer itsekf
-		object->complist.destroy();
-		//makes it so "object from guid is now freed"
-
+		if (!soft)
+		{
+			//deletes pointer itsekf
+			object->complist.destroy();
+			//makes it so "object from guid is now freed"
+		}
 	}
 
 

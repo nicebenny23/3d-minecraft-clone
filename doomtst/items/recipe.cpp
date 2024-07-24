@@ -39,7 +39,7 @@ void recipemanager::preview() {
         {
 
 
-            newitemlocation->databuf[0].giveitem(todisplay->itemcreated.id);
+            newitemlocation->databuf[0].giveitem(todisplay->itemcreated.id,todisplay->itemcreated.amt);
 
             newitemlocation->at(0).helditem->updateui();
         }
@@ -69,24 +69,26 @@ irecipe* recipemanager::searchrecipe() {
 
 void recipemanager::updatestate()
 {
-    if (enabled)
-    {
-
-
-        item* freeitem = freeditem;
-
-        newitemlocation->deletebelowzero();
-        if (resourcecontainer->clicked())
+    item* itemincont = newitemlocation->at(0).helditem;
+   
+   
+        if (enabled)
         {
-         
+            resourcecontainer->update();
+            
+                item* freeitem = freeditem;
+
+                newitemlocation->deletebelowzero();
+            
+
+                preview();
+                if (newitemlocation->clicked()&&freeditem==nullptr)
+                {
+                    craft();
+                }
+            
         }
-        resourcecontainer->update();
-        preview();
-        if (newitemlocation->clicked())
-        {
-            craft();
-        }
-    }
+    
 }
 
 recipemanager::recipemanager(const char* filename, int sizex, int sizey)
@@ -110,6 +112,9 @@ ysize = sizey;
 
        
        if (line[0] == '\r') {
+           continue;
+       }
+       if (line[0] == '#') {
            continue;
        }
            int itemid;
@@ -169,7 +174,7 @@ bool irecipe::cancraft(Container* resourcecont) {
         if (itematpos == nullptr)
         {
             //-1 implies null;
-            if (recipe[i].id == -1)
+            if (recipe[i].id == 0)
             {
                 continue;
             }
@@ -210,11 +215,19 @@ void recipemanager::craft() {
         return;
     }
     for (int i = 0; i < resourcecontainer->databuf.length; i++) {
-        if (bestrecipe->recipe[i].id == -1) {
+        if (bestrecipe->recipe[i].id == 0) {
             continue;
         }
+        if (resourcecontainer->databuf[i].helditem->itemtype==wear)
+        {
+            resourcecontainer->databuf[i].destroyitem();
+        }
+        else
+        {
 
-        resourcecontainer->databuf[i].helditem->amt -= bestrecipe->recipe[i].amt;
+            resourcecontainer->databuf[i].helditem->amt -= bestrecipe->recipe[i].amt;
+        }
     }
+   
     newitemlocation->update();
 }

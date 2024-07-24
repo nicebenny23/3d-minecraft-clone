@@ -187,8 +187,9 @@ namespace renderer {
         texlist[6] = "images\\torch.png";
         texlist[7] = "images\\torchtop.png";
         texlist[8] = "images\\crystalore.png";
-     //   texlist[9] = "images\\crystalore.png";
-        texarray = texturearray(16, 16, texlist);
+        texlist[9] = "images\\craftingtabletop.png";
+        texlist[10] = "images\\craftingtableside.png";
+     texarray = texturearray(16, 16, texlist);
         texarray.apply();
         
     }

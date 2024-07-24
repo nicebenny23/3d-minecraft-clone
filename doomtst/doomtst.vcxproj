@@ -202,8 +202,12 @@
     <ClInclude Include="block\wood.h" />
     <ClInclude Include="entities\dmgonhit.h" />
     <ClInclude Include="game\collutil.h" />
+    <ClInclude Include="game\navigation.h" />
     <ClInclude Include="game\transform.h" />
     <ClInclude Include="items\airitem.h" />
+    <ClInclude Include="items\craftingtableitem.h" />
+    <ClInclude Include="items\crystalitem.h" />
+    <ClInclude Include="items\crystalpickinit.h" />
     <ClInclude Include="items\grassitem.h" />
     <ClInclude Include="items\itemslot.h" />
     <ClInclude Include="items\item.h" />
@@ -213,6 +217,7 @@
     <ClInclude Include="items\loottable.h" />
     <ClInclude Include="items\menu.h" />
     <ClInclude Include="items\recipe.h" />
+    <ClInclude Include="items\rockitem.h" />
     <ClInclude Include="items\stoneitem.h" />
     <ClInclude Include="items\sworditem.h" />
     <ClInclude Include="items\torchitem.h" />
@@ -267,6 +272,7 @@
     <ClInclude Include="renderer\Window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="items\metalrod.h" />
     <None Include="shaders\frag1.vs" />
     <None Include="shaders\modelfragment.vs" />
     <None Include="shaders\modelvertex.vs" />

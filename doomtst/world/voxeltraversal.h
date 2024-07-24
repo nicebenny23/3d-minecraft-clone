@@ -26,6 +26,7 @@ namespace voxtra {
 			colpoint = zerov;
 		}
 	};
+	bool raycolllideswithgrid(ray nray, float acc, bool counteffectors = false);
 	bool Boxcollwithgrid(geometry::Box bx, float acc, bool counteffectors=false);
 	RayCollisionWithGrid travvox(ray nray, float acc,bool counteffectors=false);
 	block* findprevblock(ray nray, float acc);

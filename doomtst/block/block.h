@@ -17,7 +17,8 @@ enum blocktex {
 	torchtex = 6,
 	torchtoptex = 7,
 	crystaloretex = 8,
-	
+	craftingtabletop= 9,
+	craftingtableside=10,
 };
 using namespace v3;
 

@@ -11,7 +11,7 @@ namespace collision {
 	void update();
 	void sendplayercameraray();
 
-
+	bool boxCollidesWithEntity(geometry::Box blk);
 
 	bool aabbCollidesWithEntity(Collider* blk);
 	voxtra::RayCollisionWithGrid raycastall(ray nray);

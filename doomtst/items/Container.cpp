@@ -32,20 +32,29 @@ Container::Container(int newid)
 	contfile.go(sizeof(float) * 4);
 	short* objdata = contfile.read<short>(size_t(sizex) * size_t(sizey));
 int ind = 0;
+for (int j = 0; j < sizey; j++)
+{
 	for (int i = 0; i < sizex; i++)
 	{
-		for (int j = 0; j < sizey; j++)
-		{
 
-			databuf[ind] = itemslot(i + offset.x- float(sizex) / 2.0f, j + offset.y- sizey/ 2.0f);
-			ind++;
-		}
+
+
+		databuf[ind] = itemslot(i + offset.x - float(sizex) / 2.0f, j + offset.y - sizey / 2.0f);
+		ind++;
+
 	}
+}
 	disable();
 	for (int i = 0; i < sizex*sizey; i++)
 	{
 		databuf[i].giveitem(objdata[i] & 255);
-		databuf[i].helditem->amt= objdata[i] >>8;
+
+		if (databuf[i].helditem != nullptr)
+		{
+
+
+			databuf[i].helditem->amt = objdata[i] >> 8;
+		}
 	}
 	delete[] objdata;
 	contfile.close();

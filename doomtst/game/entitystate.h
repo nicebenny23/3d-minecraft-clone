@@ -32,7 +32,7 @@ struct estate :gameobject::component
 			{
 				float ypos =objutil::toent(owner).transform.position.y;
 					float falldmg = Max(3.f,lastongroundy -ypos) - 3.f;
-					damage(( falldmg));
+					damage(( falldmg/2.f));
 			
 
 			}

@@ -67,7 +67,12 @@ namespace grid {
 				block& blk = (*chunklist[gridind])[chunkind];
 				for (int compind = 0; compind < blk.complist.length; compind++)
 				{
-					blk.complist[compind]->update();
+					if (gameobject::shouldbeupdated(&blk))
+					{
+
+					
+						blk.complist[compind]->update();
+					}
 				}
 			}
 		}

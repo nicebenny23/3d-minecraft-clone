@@ -20,7 +20,12 @@ namespace entityname {
 
 		int guid;
 		Transform transform;
-		entity() = default;
+		entity() {
+
+
+			state = gameobject::beinginitiated;
+
+		}
 	};
 
 

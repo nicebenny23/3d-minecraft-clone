@@ -51,7 +51,10 @@ inline bool inrange(float val, float low, float high)
 	}
 	return true;
 }
+inline float sigmoid(float v1) {
 
+return	exp(v1) / (1 + exp(v1));
+}
 
 inline float Max(float v1, float v2) {
 

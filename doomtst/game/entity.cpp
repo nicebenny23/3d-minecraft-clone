@@ -88,6 +88,7 @@ entityref entityname::createentity(v3::Vector3 ipos, const char* _name) {
 	entity* object = new entity();
 	object->type = gameobject::entity;
 
+object->state = gameobject::beinginitiated;
 
 	object->transform.position = ipos;
 
@@ -135,9 +136,10 @@ void entityname::runupdateloop() {
 	for (int i = 0; i < componentlist.length; i++)
 	{
 		if (componentlist[i].at()!= nullptr) {
+			if (gameobject::shouldbeupdated(objectfromguid[componentlist[i].entity])){
 
-			componentlist[i].at()->update();
-
+				componentlist[i].at()->update();
+			}
 		}
 	}
 	componentlist.destroy();

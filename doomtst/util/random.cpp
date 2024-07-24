@@ -41,6 +41,18 @@ void randomcoord(unsigned int& seed)
     
 }
 
+unsigned int randomushortfromdir(unsigned int x, unsigned int y, unsigned int z)
+{
+    x ^= y + 0x9e3779b97f4a7c15 + (x << 6) + (x >> 2);
+    x ^= z + 0x9e3779b97f4a7c15 + (x << 6) + (x >> 2);
+    x += (x << 3) + (x >> 7);
+    x ^= (x << 11) ^ (x >> 5);
+    randomcoord(x);
+    randomcoord(x);
+    randomcoord(x);
+    return x/USHRT_MAX;
+}
+
 v3::Vector3 randomseeded(unsigned int x, unsigned int y, unsigned int z)
 {
    

@@ -9,6 +9,7 @@ using namespace dynamicarray;
 
 struct lootelement
 {
+	bool israndom;
 	lootelement() {
 		itemid = -1;
 		maxamt = -1;
@@ -16,15 +17,20 @@ struct lootelement
 	int itemid;
 	float maxamt;
 	void drop() {
+		int dropamt = maxamt;
+		if (israndom)
+		{
 
-		int dropamt=2*random(maxamt);
+			 dropamt = 2 * random(maxamt);
 
+		}player::goblin.toent()->getcomponent<inventory>().hotbar.fill(itemid, dropamt);
 		player::goblin.toent()->getcomponent<inventory>().playermenu.blkcont.fill(itemid, dropamt);
 	}
 
-	lootelement(int itemid, float maxamt)
+	lootelement(int itemid, float maxamt,bool happenrandom)
 		: itemid(itemid), maxamt(maxamt)
 	{
+		israndom = happenrandom;
 	}
 	~lootelement() = default;
 };
@@ -44,21 +50,27 @@ struct  loottable :gameobject::component
 		}
 	};
 	array<lootelement> lootlist;
-	void addelem(int itemid, float maxamt) {
-		lootlist.append(lootelement(itemid, maxamt));
+	void addelem(int itemid, float maxamt,bool israndom=false) {
+		lootlist.append(lootelement(itemid, maxamt,israndom));
 	}
 	void ondestroy() {
 		if (owner->type==gameobject::block)
 		{
-			if (grid::getobjatgrid(toblk(owner).pos)==nullptr)
+
+		
+			if (owner->state == gameobject::beingroughdestroyed)
 			{
+
+			
 				lootlist.destroy();
 				return;
+
 			}
 		}
 	
 		for (int i = 0; i < lootlist.length; i++)
 		{
+			
 			lootlist[i].drop();
 			lootlist[i];
 		}

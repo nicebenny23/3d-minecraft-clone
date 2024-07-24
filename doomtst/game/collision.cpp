@@ -37,6 +37,24 @@ void collision::sendplayercameraray()
 	}
 }
 
+bool collision::boxCollidesWithEntity(geometry::Box blk)
+{
+	for (int i = 0; i < Colliderlist.length; i++)
+	{
+		if (Colliderlist[i] != nullptr)
+		{
+
+
+			if (aabbboxintersect(blk,*Colliderlist[i]))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+	return false;
+}
+
 voxtra::RayCollisionWithGrid collision::raycastentity(ray nray)
 {
 	voxtra::RayCollisionWithGrid closest = voxtra::RayCollisionWithGrid();

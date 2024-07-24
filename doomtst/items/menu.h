@@ -1,5 +1,5 @@
 #include "../renderer/uirender.h"
-#include "itemslot.h"
+
 
 using namespace uirender;
 using namespace dynamicarray;

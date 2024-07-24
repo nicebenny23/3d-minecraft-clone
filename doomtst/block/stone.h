@@ -9,7 +9,7 @@ inline void stoneinit(blockname::block* blk) {
 	blk->emitedlight = 0;
 	blk->mesh.scale = blockname::unitscale;
 	blk->createaabb();
-	blk->addcomponentptr<loottable>()->addelem(0,1);
+	blk->addcomponentptr<loottable>()->addelem(stoneitem,1,false);
 		
 }
 inline void stonedelete(blockname::block* blk) {

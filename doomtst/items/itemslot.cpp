@@ -16,10 +16,7 @@ itemslot::itemslot(int xloc, int yloc) {
 	Box2d frameboxsize = getboxfrominvloc(xloc, yloc);
 	frame = uirender::newbox("images\\blockholder.png", frameboxsize.scale, frameboxsize.center, 13);
 	helditem = nullptr;
-	if (randombool())
-	{
-		giveitem(1);
-	}
+	
 	onclick = destroyonclick;
 
 }
@@ -33,12 +30,47 @@ itemslot::itemslot(int xloc, int yloc, void(*clickaction)(itemslot&)) {
 }
 
 void itemslot::giveitem(int id) {
+	if (id==0)
+	{
+		helditem = nullptr;
+		return;
+	}
 	helditem = inititem(id);
-	helditem->amt = 1;
-	helditem->setviewable(frame->shouldrender);
-	helditem->state = ininventoryblock;
-	helditem->itemui.itemsprite->box.center = frame->box.center;
+	
 
+
+		helditem->amt = 1;
+		helditem->setviewable(frame->shouldrender);
+		helditem->state = ininventoryblock;
+		helditem->itemui.itemsprite->box.center = frame->box.center;
+	
+
+
+}
+void itemslot::givefreeamt(int amt)
+{
+
+
+	if (amt<=0)
+	{
+		return;
+	}
+	if (helditem==nullptr)
+	{
+		Assert("cant give item to other from nullptr");
+	}
+	if (freeditem==nullptr)
+	{
+		freeditem = inititem(helditem->id);
+		
+		freeditem->setviewable(frame->shouldrender);
+		freeditem->amt = 0;
+		freeditem->state = beingheld;
+	}
+	freeditem->amt += amt;
+	helditem->amt -= amt;
+	freeditem->updateui();
+	freeditem->itemui.itemsprite->box.center = frame->box.center;
 
 
 }
@@ -92,7 +124,7 @@ void itemslot::disable() {
 		helditem->setviewable(false);
 	}
 }
-bool itemslot::hasbeenclicked()
+bool itemslot::hasbeenleftclicked()
 {
 	
 		if (frame->mouseonblock() && userinput::mouseleft.pressed) {
@@ -102,35 +134,65 @@ bool itemslot::hasbeenclicked()
 	
 	return false;
 }
+bool itemslot::hasbeenrightclicked()
+{
 
+	if (frame->mouseonblock() && userinput::mouseright.pressed) {
+
+		return true;
+	}
+
+	return false;
+}
 
 void itemslot::updatestate() {
-	
 
-		if (helditem != nullptr)
+
+		
+		
+		if (ismenuopen())
 		{
-			helditem->updateui();
-		}
-
-		if (hasbeenclicked()) {
-			if (freeditem != nullptr && helditem != nullptr)
-			{
 
 
-				if (freeditem->id == helditem->id) {
-					helditem->maxoutthis(freeditem);
-					return;
+			if (hasbeenleftclicked()) {
+				if (freeditem != nullptr && helditem != nullptr)
+				{
+
+					if (helditem->itemtype == count)
+					{
+
+
+						if (freeditem->id == helditem->id) {
+							helditem->maxoutthis(freeditem);
+							return;
+						}
+					}
+				}
+
+				transferitem(freeditem);
+			}
+
+			if (hasbeenrightclicked()) {
+				if (helditem != nullptr)
+				{
+					int giveamt = helditem->amt / 2;
+					if (freeditem == nullptr || freeditem->id == helditem->id)
+					{
+						if (helditem->itemtype == count)
+						{
+							givefreeamt(giveamt);
+						}
+						
+					}
+
+
 				}
 			}
-
-			transferitem(freeditem);
 		}
-		if (helditem != nullptr)
-		{
-			if (helditem->amt <= 0) {
-				destroyitem();
-			}
-		}
+		
+			updateitem(helditem);
+		
+		
 	
 }
 

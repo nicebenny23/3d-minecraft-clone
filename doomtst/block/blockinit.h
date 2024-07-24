@@ -50,6 +50,8 @@ namespace blkinitname {
 			tableinit(blk);
 			break;
 		}
+
+		blk->state = gameobject::active;
 	}
 	inline void genblock(block* blk, int blkid, Coord location, byte attachface, byte direction) {
 
@@ -62,6 +64,7 @@ namespace blkinitname {
 
 	}
 	inline void setair(block* blk) {
+		blk->state = gameobject::beingsoftdestroyed;
 		switch (blk->id)
 		{
 		case minecraftair:
@@ -110,13 +113,14 @@ namespace blkinitname {
 			Assert("need valid id in set blk");
 		}
 		airinit(blk);
+
 	}
 	inline void deleteandset(block* blk, int id)
 	{
 		setair(blk);
 		blk->id = id;
 		blockinit(blk);
-
+	
 	}
 }
 

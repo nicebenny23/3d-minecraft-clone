@@ -30,7 +30,7 @@ struct irecipe {
 struct recipemanager {
 	int xsize;
 	int ysize;
-	bool cancreate;
+	item* locatheld;
 	bool enabled;
 	Container* newitemlocation;
 	Container* resourcecontainer;

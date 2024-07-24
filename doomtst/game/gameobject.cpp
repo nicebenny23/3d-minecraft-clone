@@ -64,7 +64,7 @@ void gameobject::component::oncollision(obj* collidedwith)
 
 
 obj::obj() {
-
+	state = beinginitiated;
 	complist = array<component*>();
 
 
