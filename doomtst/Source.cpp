@@ -24,6 +24,7 @@
 #include "player/player.h"
 #include "renderer/textrender.h"
 #include "entities/dmgonhit.h"
+#include "game/navigation.h"
 // settings
 #include "renderer/model.h"
 #include "world/noise.h"

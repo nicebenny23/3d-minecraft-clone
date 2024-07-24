@@ -148,6 +148,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="game\entity.cpp" />
+    <ClCompile Include="game\navigation.cpp" />
     <ClCompile Include="game\transform.cpp" />
     <ClCompile Include="items\itemslot.cpp" />
     <ClCompile Include="items\item.cpp" />
