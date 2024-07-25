@@ -81,7 +81,7 @@ bool voxtra::raycolllideswithgrid(ray nray, float acc, bool counteffectors)
 	return false;
 }
 
-bool voxtra::Boxcollwithgrid (geometry::Box bx, float acc,bool counteffectors)
+bool voxtra::Boxcollwithgrid (geometry::Box bx, bool counteffectors)
 {
 
 	v3::Vector3 lowpos = bx.center - bx.scale - unitv;

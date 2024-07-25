@@ -13,7 +13,7 @@ enum itemid {
 	nullitemid = 0,
 
 	stoneitem = 1,
-	grassitem = 2,
+	dirtitem = 2,
 	
 	crystalitem =3,
 	metalroditem=4,
@@ -25,6 +25,7 @@ enum itemid {
 	craftingtableitem=8,
 	crystalpickitemid=9,
 	simplerock=10,
+	slimeballitem= 11,
 };
 enum itemstate {
 	beingheld = 0,

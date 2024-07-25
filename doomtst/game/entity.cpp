@@ -3,8 +3,9 @@ using namespace entityname;
 array<entity*> entityname::objectfromguid;
 array<entity*> todelete;
 array<entity*> initobj;
+int entityname::totalcount;
 void entityname::initobjs() {
-
+	totalcount = 0;
 	objectfromguid = array<entity*>(entsize);
 	for (int i = 0; i < entsize; i++)
 	{
@@ -122,9 +123,12 @@ void entityname::runupdateloop() {
 
 			for (int j = 0; j < len; j++)
 			{
+				if (objectfromguid[i]->complist[j]->active)
+				{
+					componentlist.append(entitycomponentindexer(i, j));
 
-				componentlist.append(entitycomponentindexer(i,j));
-
+				}
+				
 
 
 			}

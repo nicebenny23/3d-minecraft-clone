@@ -10,21 +10,23 @@ namespace entityname {
 
 
 
-
+	extern int totalcount;
 
 
 	struct entity : gameobject::obj
 	{
 		const char* name;
 		
-
+		int amtcount;
 		int guid;
 		Transform transform;
 		entity() {
 
-
+amtcount = totalcount;
+			totalcount += 1;
 			state = gameobject::beinginitiated;
 
+			
 		}
 	};
 
@@ -32,10 +34,11 @@ namespace entityname {
 	extern array<entity*> objectfromguid;
 	struct entityref
 	{
+		int sharedcount;
 		int guid;
-
 		entityref(entity& object) {
 			guid = object.guid;
+			sharedcount = object.amtcount;
 		}
 		entity* toent()
 		{
@@ -43,10 +46,17 @@ namespace entityname {
 			{
 				return nullptr;
 			}
+			
 			entity* toreturn = (entity*)(objectfromguid[guid]);
-			if (false)
+			if (toreturn==nullptr)
 			{
 				guid = -1;
+			}
+			if (toreturn->amtcount!=sharedcount)
+			{
+				guid = -1;
+
+				return nullptr;
 			}
 			return toreturn;
 		};

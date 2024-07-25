@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="entities\slime.cpp" />
     <ClCompile Include="game\entity.cpp" />
     <ClCompile Include="game\navigation.cpp" />
     <ClCompile Include="game\transform.cpp" />
@@ -202,6 +203,9 @@
     <ClInclude Include="block\water.h" />
     <ClInclude Include="block\wood.h" />
     <ClInclude Include="entities\dmgonhit.h" />
+    <ClInclude Include="entities\entityinit.h" />
+    <ClInclude Include="entities\entityspawner.h" />
+    <ClInclude Include="entities\slime.h" />
     <ClInclude Include="game\collutil.h" />
     <ClInclude Include="game\navigation.h" />
     <ClInclude Include="game\transform.h" />
@@ -209,7 +213,7 @@
     <ClInclude Include="items\craftingtableitem.h" />
     <ClInclude Include="items\crystalitem.h" />
     <ClInclude Include="items\crystalpickinit.h" />
-    <ClInclude Include="items\grassitem.h" />
+    <ClInclude Include="items\dirtitem.h" />
     <ClInclude Include="items\itemslot.h" />
     <ClInclude Include="items\item.h" />
     <ClInclude Include="items\Container.h" />
@@ -219,6 +223,7 @@
     <ClInclude Include="items\menu.h" />
     <ClInclude Include="items\recipe.h" />
     <ClInclude Include="items\rockitem.h" />
+    <ClInclude Include="items\slimeitem.h" />
     <ClInclude Include="items\stoneitem.h" />
     <ClInclude Include="items\sworditem.h" />
     <ClInclude Include="items\torchitem.h" />

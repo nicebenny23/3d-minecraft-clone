@@ -54,19 +54,12 @@ struct  loottable :gameobject::component
 		lootlist.append(lootelement(itemid, maxamt,israndom));
 	}
 	void ondestroy() {
-		if (owner->type==gameobject::block)
+		if (owner->state == gameobject::beingroughdestroyed)
 		{
-
-		
-			if (owner->state == gameobject::beingroughdestroyed)
-			{
-
-			
-				lootlist.destroy();
-				return;
-
-			}
+			lootlist.destroy();
+			return;
 		}
+	
 	
 		for (int i = 0; i < lootlist.length; i++)
 		{

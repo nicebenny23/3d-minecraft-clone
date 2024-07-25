@@ -22,7 +22,7 @@ struct playermovement:gameobject::component
 	virtual void update() {
 
         Vector3& pos = objutil::toent(owner).transform.position;
-            
+        float slowdown = 2;
         Vector3& velocity = owner->getcomponent<rigidbody>().velocity;
         float speed = 16;
         float effectivespeed = (timename::smoothdt * speed);
@@ -30,23 +30,23 @@ struct playermovement:gameobject::component
 
         if (userinput::getinputkey('s').held)
         {
-            pos -= v3::Vector3(cos(glm::radians(camera::yaw)), 0, sin(glm::radians(camera::yaw)))*effectivespeed;
+            velocity -= v3::Vector3(cos(glm::radians(camera::yaw)), 0, sin(glm::radians(camera::yaw)))*effectivespeed*slowdown;
         }
         if (userinput::getinputkey('w').held)
         {
-         pos += v3::Vector3(cos(glm::radians(camera::yaw)), 0, sin(glm::radians(camera::yaw))) * effectivespeed;
+         velocity += v3::Vector3(cos(glm::radians(camera::yaw)), 0, sin(glm::radians(camera::yaw))) * effectivespeed * slowdown;
         }
         if (userinput::getinputkey('a').held)
         {
-           pos += v3::Vector3(sin(glm::radians(camera::yaw)), 0, -cos(glm::radians(camera::yaw))) * effectivespeed;
+           velocity += v3::Vector3(sin(glm::radians(camera::yaw)), 0, -cos(glm::radians(camera::yaw))) * effectivespeed * slowdown;
         }
         if (userinput::getinputkey('d').held)
         {
-            pos -= v3::Vector3(sin(glm::radians(camera::yaw)), 0, -cos(glm::radians(camera::yaw)))*effectivespeed;
+            velocity-= v3::Vector3(sin(glm::radians(camera::yaw)), 0, -cos(glm::radians(camera::yaw)))*effectivespeed * slowdown;
         }
         if (userinput::getinputkey(' ').pressed&&owner->getcomponent<rigidbody>().isonground)
         {
-           velocity.y = 150 * effectivespeed;
+           velocity.y = 150 * speed/200;
         }
         if (userinput::getinputkey('z').held)
         {

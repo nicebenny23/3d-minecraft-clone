@@ -8,8 +8,9 @@ inline void glassinit(blockname::block* blk) {
 	blk->mesh.setfaces(glasstex, glasstex, glasstex, glasstex, glasstex, glasstex);
 	blk->emitedlight = 0;
 	blk->mesh.scale = blockname::unitscale;
-	blk->createaabb();
-}
+
+	blk->minedfastwithpick = true;
+	blk->createaabb();}
 inline void glassdelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();
 

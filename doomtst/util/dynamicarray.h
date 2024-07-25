@@ -17,6 +17,7 @@ namespace dynamicarray {
 		array(T* arr, int size);
 		T& operator[](int index);
 		T getelem(int index);
+		
 		void writelist();
 		array(int size);
 		void destroy();

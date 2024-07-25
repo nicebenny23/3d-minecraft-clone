@@ -11,6 +11,8 @@ inline void dirtinit(blockname::block* blk) {
 	blk->mesh.scale = blockname::unitscale;
 	blk->createaabb();
 	blk->addcomponent<loottable>();
+	blk->mininglevel = .3;
+	blk->minedfastwithpick = false;
 	blk->getcomponent<loottable>().addelem(2, 1);
 }
 inline void dirtdelete(blockname::block* blk) {

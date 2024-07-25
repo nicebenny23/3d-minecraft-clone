@@ -5,7 +5,7 @@
 
 inline void initmetalroditem(item* itm) {
 	itm->pickaxepower = 0;
-	itm->maxamt = 30;
+	itm->maxamt = 64;
 
 	itm->itemtype = count;
 	itm->placeable = true;

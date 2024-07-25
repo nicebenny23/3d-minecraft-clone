@@ -42,7 +42,9 @@ namespace renderer {
 		rendermodel= 3,
 		renderparticle=4,
 		rendertext=5,
-	}; void changerendertype(rendertype rentype);
+	}; 
+	extern rendertype currendertype;
+		void changerendertype(rendertype rentype);
 
 }
 #endif

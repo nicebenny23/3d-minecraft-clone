@@ -11,6 +11,8 @@ inline void torchinit(blockname::block* blk) {
 	blk->mesh.scale = v3::Vector3(1 / 16.f, .375, 1 / 16.f);
 	blk->mesh.attachindirection();
 	blk->createaabb();
+	blk->mininglevel = .25f;
+	blk->minedfastwithpick = true;
 	blk->addcomponent<loottable>();
 	blk->getcomponent<loottable>().addelem(torchitem, 1);
 }

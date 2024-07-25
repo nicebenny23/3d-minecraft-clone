@@ -10,6 +10,7 @@ namespace grid {
 	extern Chunk::chunk** chunklist;
 	bool issolidatpos(int x, int y, int z, bool countoob);
 	extern v3::Vector3 gridpos;
+	Coord prevgridpos();
 	block* getobjatgrid(int x, int y, int z, bool countnonsolids = true);
 	block* getobjatgrid(v3::Coord pos, bool countnonsolids = true);
 	void initgrid();

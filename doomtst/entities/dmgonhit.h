@@ -1,6 +1,7 @@
 #include "../game/entity.h"
 #include "../game/collision.h"
 #include "../player/playerhealth.h"
+#include "../game/rigidbody.h"
 #ifndef dmgonhit_HPP
 #define dmgonhit_HPP
 struct dmgplayeronhit:gameobject::component
@@ -19,8 +20,8 @@ struct dmgplayeronhit:gameobject::component
 
 			if (collidedwith->hascomponent<playerhealth>())
 			{
-				v3::Vector3 center = toent(owner).transform.position;
-				v3::Vector3 othercenter = toent(collidedwith).transform.position;
+				v3::Vector3 center = objutil::toent(owner).transform.position;
+				v3::Vector3 othercenter = objutil::toent(collidedwith).transform.position;
 				if (collidedwith->hascomponent<rigidbody>()) {
 					collidedwith->getcomponent<rigidbody>().velocity -= normal(center - othercenter)*7;
 				}

@@ -10,6 +10,8 @@ inline void waterinit(blockname::block* blk) {
 	blk->mesh.scale = blockname::unitscale;
 	blk->addcomponent<liquidprop>(15);
 	blk->createaabb();
+
+	blk->minedfastwithpick = false;
 }
 inline void waterdelete (blockname::block* blk) {
 	blk->removecomponent<liquidprop>();

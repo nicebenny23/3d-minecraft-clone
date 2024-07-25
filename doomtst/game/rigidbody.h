@@ -28,7 +28,11 @@ struct rigidbody : gameobject::component {
         isonground = (voxtra::Boxcollwithgrid(checkbox, 100));
     }
     // Constructor
-    rigidbody() : velocity(zerov), unsetpositon(zerov), acceleration(zerov), boundingbox(nullptr) {}
+    rigidbody() : velocity(zerov), unsetpositon(zerov), acceleration(zerov), boundingbox(nullptr) {
+        friction = 1;
+    } rigidbody(float fric) : velocity(zerov), unsetpositon(zerov), acceleration(zerov), boundingbox(nullptr) {
+        friction = fric;
+    }
     ~rigidbody() = default;
     // Start function to initialize the rigidbody component
     void start() {
@@ -61,7 +65,11 @@ struct rigidbody : gameobject::component {
         {
             velocity.y *= 1-deltaTime*10;
         }
-        velocity *= (1-deltaTime);  // Adjust damping factor to prevent excessive damping
+        velocity.y *= 1 - deltaTime;
+        velocity.x *= (1-deltaTime*friction);  // Adjust damping factor to prevent excessive damping
+
+        velocity.z *= (1 - deltaTime * friction);  // Adjust damping factor to prevent excessive damping
+
         objutil::toent(owner).transform.position += velocity * deltaTime;
         acceleration = Vector3(0, 0, 0);  // Reset acceleration after integration
     }

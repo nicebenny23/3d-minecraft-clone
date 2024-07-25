@@ -86,6 +86,7 @@ inline void tableinit(blockname::block* blk) {
 	blk->solid = true;
 	blk->transparent = false;
 	blk->emitedlight = 0;
+	blk->mininglevel = 1;
 	blk->mesh.scale = blockname::unitscale;
 	blk->createaabb();
 	if (!blk->hascomponent<craftingtablecomp>())

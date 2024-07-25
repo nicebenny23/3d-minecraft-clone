@@ -4,7 +4,7 @@
 #define torchitem_HPP
 #define torchitemblockid 7
 inline void inittorchitem(item* itm) {
-	itm->pickaxepower = 0;
+	itm->pickaxepower = 1;
 	itm->maxamt = 64;
 
 	itm->itemtype = count;

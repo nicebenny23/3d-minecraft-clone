@@ -9,9 +9,18 @@ namespace renderer {
     glm::mat4 view;
     int currshader;
     texturearray texarray;
+    rendertype currendertype;
     float fov;
     void changerendertype(rendertype rentype) {
 
+        if (rentype==currendertype)
+        {
+            return;
+        }
+        else
+        {
+            currendertype = rentype;
+        }
         switch (rentype) {
         case rendersolid:
            glDepthFunc(GL_LESS);

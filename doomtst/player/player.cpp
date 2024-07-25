@@ -14,12 +14,12 @@ void player::initplayer()
 	goblin.toent()->addcomponent<estate>(10,true);
 	goblin.toent()->addcomponent<playerhealth>();
 	goblin.toent()->addcomponent<inventory>();
-		goblin.toent()->addcomponent<Collider>(zerov, unitv / 2, true);
+		goblin.toent()->addcomponent<Collider>(zerov, unitv / 2.3f, true);
 	goblin.toent()->addcomponent<playermovement>();
 	goblin.toent()->addcomponent< playerbreak>();
 	goblin.toent()->addcomponent< playerplace>();
-	
-	goblin.toent()->addcomponent<rigidbody>();
+	float playerfric = 5;
+	goblin.toent()->addcomponent<rigidbody>(playerfric);
 	goblin.toent()->addcomponent<playerattackcomp>();
 	goblin.toent()->getcomponent <Collider>().hasrigidbody = true;
 }

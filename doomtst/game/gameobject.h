@@ -16,6 +16,7 @@ namespace gameobject {
 	{
 		beinginitiated=0,
 		active=1,
+		
 		//deleting components but keeping object
 		beingsoftdestroyed=2,
 		//deleting object and components
@@ -69,7 +70,7 @@ namespace gameobject {
 
 
 	extern array<obj*> objectfromguid;
-
+	
 	struct component
 	{
 		int priority ;
@@ -80,7 +81,9 @@ namespace gameobject {
 		virtual void setobj(obj* object) {
 			owner = object;
 		}
+		bool active;
 		component() {
+			active = true;
 			owner = nullptr;
 			id = -1;
 		};
@@ -262,7 +265,7 @@ namespace gameobject {
 		comp->setobj(this);
 
 		comp->start();
-
+		comp->active = true;
 		comp->id = compidfromname((char*)(typeid(T).name()));
 
 		complist.append(comp);
@@ -277,6 +280,7 @@ namespace gameobject {
 
 
 
+		
 
 
 		int id = idfromnameadd((char*)(typeid(T).name()));
@@ -291,7 +295,7 @@ namespace gameobject {
 		comp->start();
 
 		comp->id = compidfromname((char*)(typeid(T).name()));
-		
+		comp->active = true;
 		complist.append(comp);
 
 	}

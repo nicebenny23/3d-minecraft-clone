@@ -64,20 +64,42 @@ namespace grid {
 		{
 			for (int chunkind = 0; chunkind < chunksize; chunkind++)
 			{
+
 				block& blk = (*chunklist[gridind])[chunkind];
-				for (int compind = 0; compind < blk.complist.length; compind++)
+				if (blk.id == minecraftair) {
+
+					continue;
+				}
+				if (blk.id==minecraftdirt)
 				{
-					if (gameobject::shouldbeupdated(&blk))
+					continue;
+				}if (blk.id == minecraftstone)
+				{
+					continue;
+				}
+				if (gameobject::shouldbeupdated(&blk))
+				{
+
+					for (int compind = 0; compind < blk.complist.length; compind++)
 					{
 
-					
-						blk.complist[compind]->update();
+						if (blk.complist[compind]->active)
+						{
+
+							blk.complist[compind]->update();
+
+						}
 					}
 				}
 			}
 		}
 	}
 
+
+	Coord prevgridpos()
+	{
+		return gridpos - griddt;
+	}
 
 	block* getobjatgrid(int x, int y, int z, bool countnonsolids)
 	{

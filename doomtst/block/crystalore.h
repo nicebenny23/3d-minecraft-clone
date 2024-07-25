@@ -10,6 +10,7 @@ inline void crystalinit(blockname::block* blk) {
 	blk->mesh.scale = blockname::unitscale;
 	blk->createaabb();
 	blk->mininglevel = 4;
+	blk->minedfastwithpick = true;
 	blk->addcomponentptr<loottable>()->addelem(crystalitem, 2,true);
 }
 inline void crystaldelete(blockname::block* blk) {

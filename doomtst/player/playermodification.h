@@ -71,12 +71,13 @@ struct playerbreak:gameobject::component
 				
 				if (currmining == ((block*)(closest.box->owner)))
 				{
+					
 					int pickpower=1;
 					if (pickaxe!=nullptr)
 					{
 						pickpower = pickaxe->pickaxepower;
 					}
-					if (pickpower>=currmining->mininglevel)
+					if (pickpower>=currmining->mininglevel||!currmining->minedfastwithpick)
 					{
 
 						float timemod = pickpower / (1 + currmining->mininglevel);
@@ -87,8 +88,13 @@ struct playerbreak:gameobject::component
 					
 				}
 			}
-			timeuntilbreak =1.2f;
-			currmining =(block*)( closest.box->owner);
+			currmining = (block*)(closest.box->owner);
+			if (currmining!=nullptr)
+			{
+
+				timeuntilbreak = currmining->mininglevel;
+
+			}
 	}
 
 
@@ -98,7 +104,7 @@ struct playerbreak:gameobject::component
 		testifmining();
 		if (timeuntilbreak<=0)
 		{
-			timeuntilbreak = 1.2f;
+			timeuntilbreak = currmining->mininglevel;
 			wearduribilty();
 			gridutil::setblock(toblk(closest.box->owner).pos, minecraftair);
 

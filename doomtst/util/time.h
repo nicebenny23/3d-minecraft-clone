@@ -25,7 +25,7 @@ namespace timename {
 		{
 			averagedt = 1/60.f;
 		}
-		averagedt = averagedt * .99f+ Min( dt,.2)* .01f;
+		averagedt = averagedt * .95f+ Min( dt,.2f)* .05f;
 		smoothdt =Min(averagedt, .05f);
 		
 		fps = 1000 / smoothdt;

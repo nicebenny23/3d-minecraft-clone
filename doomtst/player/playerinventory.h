@@ -95,7 +95,7 @@ struct inventory :gameobject::component
 		}
 		else
 		{
-			selectedind = -1;
+			
 			selected = nullptr;
 		}
 		updateitem(freeditem);

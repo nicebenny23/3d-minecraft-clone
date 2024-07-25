@@ -1,6 +1,7 @@
 #include "gameobject.h"
 #include "../util/mathutil.h"
 #include "entity.h"
+#include "rigidbody.h"
 #include "objecthelper.h"
 #ifndef  entitystate_HPP
 #define entitystate_HPP

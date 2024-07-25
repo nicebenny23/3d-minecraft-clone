@@ -33,7 +33,7 @@ inline float interpolate(float v, float v1, float w) {
 
 
 inline v3::Vector3 randompointonsphere(Coord pnt) {
-    return(seededdirections[randomushortfromdir(pnt.x, pnt.y, pnt.z)]);
+    return(seededdirections.fastat(randomushortfromdir(pnt.x, pnt.y, pnt.z)));
 }
 
 inline chunknoisemap* trueperlin(Coord chunk, float startscale, float ampmul, float scalemul, int iter) {

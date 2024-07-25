@@ -9,6 +9,8 @@ inline void stoneinit(blockname::block* blk) {
 	blk->emitedlight = 0;
 	blk->mesh.scale = blockname::unitscale;
 	blk->createaabb();
+	blk->mininglevel = 1;
+	blk->minedfastwithpick = true;
 	blk->addcomponentptr<loottable>()->addelem(stoneitem,1,false);
 		
 }

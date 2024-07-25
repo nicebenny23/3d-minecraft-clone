@@ -23,7 +23,7 @@ enum blocktex {
 using namespace v3;
 
 namespace blockname {
-	const v3::Vector3 unitscale = unitv * 1 / 2.002;
+	const v3::Vector3 unitscale = unitv * 1 / 2.002f;
 	enum id
 	{
 		minecraftair = 0,
@@ -47,7 +47,6 @@ namespace blockname {
 		int facenum;
 		float cameradist;
 		int light;
-
 		face() {
 			mesh= nullptr;
 			covered = false;
@@ -125,6 +124,8 @@ namespace blockname {
 
 	struct block:gameobject::obj
 	{
+
+		bool minedfastwithpick;
 		face& operator[](int index);
 		bool transparent;
 		int emitedlight;

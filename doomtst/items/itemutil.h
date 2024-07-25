@@ -5,11 +5,13 @@
 #include "stoneitem.h"
 #include "airitem.h"
 #include "torchitem.h"
-#include "grassitem.h"
+#include "dirtitem.h"
 #include "crystalitem.h"
 #include "craftingtableitem.h"
 #include "metalrod.h"
 #include "crystalpickinit.h"
+#include "item.h"
+#include "slimeitem.h"
 #ifndef itemutil_HPP
 #define itemutil_HPP
 inline void inititemproperties(item* itm) {
@@ -24,8 +26,8 @@ inline void inititemproperties(item* itm) {
 
 		initsworditem(itm);
 		break;
-	case grassitem:
-		initgrassitem(itm);
+	case dirtitem:
+		initdirtitem(itm);
 		break;
 	case torchitem:
 		inittorchitem(itm);
@@ -44,6 +46,10 @@ inline void inititemproperties(item* itm) {
 		break;
 	case crystalpickitemid:
 	crystalpickinit	(itm);
+
+	break;
+	case slimeballitem:
+		initslimeitem(itm);
 		break;
 	default:
 	//	Assert("null item not initiated");
@@ -90,14 +96,14 @@ inline int blockidfromitemid(item* itm) {
 		return sworditemblockid;
 
 		break;
-	case grassitem:
-		return grassitemblockid;
+	case dirtitem:
+		return dirtitemblockid;
 		break;
 	case torchitem:
 		return torchitemblockid;
 		break;
 	case pickitemid:
-		return pickitemid;
+		return lavapickblockid;
 		break;
 	case crystalitem:
 		return crystalitemasblockid;
@@ -110,6 +116,9 @@ inline int blockidfromitemid(item* itm) {
 		break;
 	case crystalpickitemid:
 		return crystalitemasblockid;
+		break;
+	case slimeballitem:
+		return slimeitemasblock;
 		break;
 	default:
 		break;

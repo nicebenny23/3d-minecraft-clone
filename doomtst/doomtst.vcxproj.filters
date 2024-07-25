@@ -99,9 +99,6 @@
     <ClCompile Include="game\entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="items\inventoryblock.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="items\menu.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -130,6 +127,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="items\Container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\navigation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="items\itemslot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entities\slime.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -242,9 +248,6 @@
     <ClInclude Include="game\entitystate.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="game\storagecomp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="block\air.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -293,9 +296,6 @@
     <ClInclude Include="items\item.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="items\inventoryblock.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="items\menu.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -308,7 +308,7 @@
     <ClInclude Include="items\airitem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="items\grassitem.h">
+    <ClInclude Include="items\dirtitem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="items\itemutil.h">
@@ -368,6 +368,36 @@
     <ClInclude Include="player\playerplace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game\navigation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\craftingtableitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\crystalitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\crystalpickinit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\itemslot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\rockitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\slime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\entityinit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\entityspawner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\slimeitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag1.vs" />
@@ -384,5 +414,8 @@
     </None>
     <None Include="shaders\textfragment.vs" />
     <None Include="shaders\textvertex.vs" />
+    <None Include="items\metalrod.h">
+      <Filter>Header Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

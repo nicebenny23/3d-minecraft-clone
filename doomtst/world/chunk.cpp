@@ -214,6 +214,7 @@ Chunk::chunk* Chunk::load(Coord location)
 
 	map->destroy();
 	map2->destroy();
+	expmap->destroy();
 	return &newchunk;
 }
 

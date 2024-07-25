@@ -47,7 +47,7 @@ void gridutil::computecover(face& blkface)
 
 	}
 	else {
-		blkface.covered = issolidatpos(pos.x, pos.y, pos.z, true);
+		blkface.covered = !blk->transparent;
 		
 
 	}
@@ -59,7 +59,7 @@ void gridutil::computeallcover()
 	for (int gridind = 0; gridind < totalgridsize; gridind++)
 
 	{
-
+		
 		for (int blockind = 0; blockind < chunksize; blockind++) {
 
 			for (int faceind = 0; faceind < 6; faceind++)
@@ -70,6 +70,39 @@ void gridutil::computeallcover()
 				computecover(*tocover);
 			}
 
+		}
+	}
+	sendrecreatemsg();
+}
+
+void gridutil::computeallchangedcover()
+{
+	Coord centerbefore = grid::prevgridpos();
+
+	v3::Vector3 lerpedslight= centerbefore*.98f+gridpos*.02f;
+	Box gridbox = Box(lerpedslight, unitv * (2 * loadamt + 1) / 2);
+	
+	
+	for (int gridind = 0; gridind < totalgridsize; gridind++)
+	{
+		Coord chunkpos = chunklist[gridind]->loc;
+
+		Box chunkbox = Box(chunkpos, unitv * 1.01f / 2 );
+		if (!gridbox.Boxinbox(chunkbox))
+		{
+
+			int l = 1;
+			for (int blockind = 0; blockind < chunksize; blockind++) {
+
+				for (int faceind = 0; faceind < 6; faceind++)
+				{
+
+					face* tocover = &(chunklist[gridind]->blockbuf[blockind])[faceind];
+
+					computecover(*tocover);
+				}
+
+			}
 		}
 	}
 	sendrecreatemsg();

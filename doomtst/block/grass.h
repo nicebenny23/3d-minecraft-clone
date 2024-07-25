@@ -9,6 +9,8 @@ inline void grassinit(blockname::block* blk) {
 	blk->emitedlight = 0;
 	blk->mesh.scale = blockname::unitscale;
 	blk->createaabb(); blk->addcomponent<loottable>();
+
+	blk->minedfastwithpick = false;
 	blk->getcomponent<loottable>().addelem(2,1);
 }
 inline void grassdelete(blockname::block* blk) {

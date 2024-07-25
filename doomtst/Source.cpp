@@ -24,6 +24,7 @@
 #include "player/player.h"
 #include "renderer/textrender.h"
 #include "entities/dmgonhit.h"
+#include "entities/slime.h"
 #include "game/navigation.h"
 // settings
 
@@ -34,7 +35,10 @@ const unsigned int SCR_WIDTH = 4000;
 const unsigned int SCR_HEIGHT = 3000;
 void init() {
  
-    deleteFilesInFolder(std::string("C:/Users/bchar/source/repos/doomtst/doomtst/worldstorage"));
+    std::string o1 = std::string("C:/Users/bchar/source/repos/doomtst/doomtst/worldstorage");
+
+    std::string o2 = std::string("C:/Users/User/source/repos/nicebenny23/3d-minecraft-clone/doomtst/worldstorage");
+    deleteFilesInFolder(o2 );
 
     timename::inittime();
     randominit();
@@ -80,19 +84,13 @@ int main()
 {
 
     init();
-    entityname::entityref refmodel = entityname::createentity(zerov, "frjiofiuje");
-    refmodel.toent()->addcomponent<model>();
-    refmodel.toent()->getcomponent<model>().add("newtest.obj", "images\\slimetex.png");
-  
-    refmodel.toent()->addcomponent<estate>(10,false);
-    refmodel.toent()->addcomponent<Collider>(zerov, unitscale, true);
-    texture mtex = texture("images\\slimetex.png", png);
-  
-    refmodel.toent()->addcomponent<dmgplayeronhit>(6);
-    refmodel.toent()->addcomponent<rigidbody>();
+    for (int i = 0; i < 1; i++)
+    {
+       createslime(v3::Vector3(4, 1, 0));
+    }
+   
   
 float lastupdate = 0;
-refmodel.toent()->transform.position = v3::Vector3(10, 0, 0);
 while (!window::shouldclose())
     {
     timename::calcfps();
@@ -122,28 +120,12 @@ while (!window::shouldclose())
     grid::load();
     if (grid::gridchanged())
     {
-        gridutil::computeallcover();
+        gridutil::computeallchangedcover();
         gridutil::redoallighting = true;
 
     }
    
-    if (refmodel.toent()!=nullptr)
-    {
-        navnode t1 = navnode(Coord(refmodel.toent()->transform.position), nullptr);
-        navnode t3 = navnode(player::goblin.toent()->transform.position, nullptr);
-
-        array<navnode> pathl = astarpathfinding(t1, t3);
-        refmodel.toent()->transform.scale = unitscale;
-        if (pathl.length >=1)
-        {
-        v3::Vector3 moveoffset = v3::Vector3(pathl[1].pos - pathl[0].pos) * timename::dt;
-
-            refmodel.toent()->transform.position +=moveoffset ;
-        }
-
-  //refmodel.toent()->getcomponent<rigidbody>().velocity += refmodel.toent()->transform.getnormaldirection()* timename::smoothdt*3;
-
-    }
+   
    
     //refmodel.toent()->transform.position.x    += 1 / 300.f;
    // refmodel.toent()->transform.position = v3::Vector3(0,0,0);

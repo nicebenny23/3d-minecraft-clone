@@ -12,7 +12,26 @@ namespace geometry {
 	struct Box {
 		Vector3 center;
 		Vector3 scale;
+		Box() {
+			center = zerov;
+			scale = zerov;
+		}
+		bool Boxinbox(Box b ) {
+			b.center -= center;
+			if (abs(b.center.x)+b.scale.x<scale.x)
+			{
+				if (abs(b.center.y) + b.scale.y < scale.y)
+				{
+					if (abs(b.center.z) + b.scale.z < scale.z)
+					{
+						return true;
+					}
 
+				}
+
+			}
+			return false;
+		}
 		Box(Vector3 cent, Vector3 scl)
 			: center(cent), scale(scl) {}
 
