@@ -49,7 +49,7 @@ namespace geometry {
 		bool pointinbox(v2::Vector2 point) {
 
 			point -= center;
-			if (abs(point.x)<scale.x,abs(point.y)<scale.y)
+			if (abs(point.x)<scale.x&&abs(point.y)<scale.y)
 			{
 				return true;
 			}

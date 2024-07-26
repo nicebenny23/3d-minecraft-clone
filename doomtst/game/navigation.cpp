@@ -29,7 +29,7 @@ continue;
         v3::Vector3 center = place + unitv / 2;
         v3::Vector3 scale = unitscale * v3::Vector3(1.1, .9f, 1.1);
         geometry::Box bx = geometry::Box(center, scale);
-        if (!voxtra::Boxcollwithgrid(bx, true))
+        if (!voxtra::Boxcollwithgrid(bx, voxtra::countnormal))
         {
             neighbors.append(navnode(neiborpoint));
         }
@@ -71,7 +71,7 @@ return        array<navnode>();
     array<navnode> closedlist;
     array<navnode*> todeallocatelist;
     openlist.append(start);
-    const int maxiter = 300;
+    const int maxiter = 200;
     int iter = 0;
 
     while (openlist.length > 0) {
@@ -86,21 +86,34 @@ return        array<navnode>();
                 shortestind = i;
             }
         }
+        navnode current = openlist[shortestind];
+        navnode* newnode = new navnode(current);
+        todeallocatelist.append(newnode);
+
+        openlist.deleteind(shortestind);
+
         //removes it 
-        if (shortestind==-1||iter==maxiter)
+        if (iter == maxiter)
+        {
+            
+            array<navnode> toret = reconstructpath(&current);
+            for (int i = 0; i < todeallocatelist.length; i++)
+            {
+                delete todeallocatelist[i];
+            }
+            closedlist.destroy();
+            todeallocatelist.destroy();
+            openlist.destroy();
+            return toret;
+        }
+        if (shortestind==-1)
         {
             openlist.destroy();
             closedlist.destroy();
             break;
         }
-        navnode current = openlist[shortestind];
-        navnode* newnode = new navnode(current);
-        todeallocatelist.append(newnode);
-        if (current.parent != nullptr) {
-
-        }
-        openlist.deleteind(shortestind);
-
+       
+      
         // checks if goal
         if (current == goal) {
          
@@ -124,8 +137,8 @@ return        array<navnode>();
 
             // Check if neighbor is in closed list
             bool inclosedlist = false;
-            for (int j = 0; j < closedlist.length; ++j) {
-                if (closedlist[j] == *neighbor) {
+            for (int j = 0; j < closedlist.length; j++) {
+                if (closedlist.fastat(j) == *neighbor) {
                     inclosedlist = true;
                     break;
                 }
@@ -140,13 +153,13 @@ return        array<navnode>();
             // Check if neighbor is in open list
             bool inopenlist = false;
             for (int j = 0; j < openlist.length; j++) {
-                if (*neighbor==openlist[j] ) {
+                if (*neighbor==openlist.fastat(j) ) {
 
                     inopenlist = true;
                     //updates gcost to be shorter
-                    if (potentialg < openlist[j].gcost) {
-                        openlist[j].gcost = potentialg;
-                        openlist[j].parent =newnode;
+                    if (potentialg < openlist.fastat(j).gcost) {
+                        openlist.fastat(j).gcost = potentialg;
+                        openlist.fastat(j).parent = newnode;
                     }
                     break;
                 }
@@ -174,6 +187,7 @@ return        array<navnode>();
 
 navigator::navigator(entityname::entityref parentref, array<navnode>(*testfunc)(navnode& pos))
 {
+    priority = 4411;
     timetillupdate = 0;
     goingtwords = parentref;
     testfunction = testfunc;
@@ -181,13 +195,19 @@ navigator::navigator(entityname::entityref parentref, array<navnode>(*testfunc)(
 
 void navigator::calcpath()
 {
-    Coord currpos = objutil::toent(owner).transform.position-objutil::toent(owner).transform.scale;
-    Coord gotopos = goingtwords.toent()->transform.position- goingtwords.toent()->transform.scale;
+    
+    Coord currpos = voxtra::getcurrvoxel(objutil::toent(owner).transform.position);
+
+    Vector3 gotopos = voxtra::getcurrvoxel(goingtwords.toent()->transform.position);
  
-    array<navnode>  finding = astarpathfinding(currpos,gotopos,testfunction);
+    array<navnode>  finding = astarpathfinding(currpos,Coord(gotopos), testfunction);
     if (finding.length>1)
     {
         headed = finding[1].pos;
+    }
+    else {
+
+        headed = currpos;
     }
 }
 
@@ -221,7 +241,7 @@ void navigator::update()
     if (timetillupdate<=0||dist2(loc,headed)<.01)
     {
         calcpath();
-        timetillupdate =.1f;
+        timetillupdate =.3f;
     }
   
 }

@@ -26,9 +26,9 @@ texture::texture(const char* file, textype imgtype)
 	int width;
 	int height;
 
-	int colchannel;
+	int colchannel=0;
 	
-	unsigned char* data = stbi_load(file, &width,& height, &colchannel, STBI_rgb_alpha);
+	unsigned char* data = stbi_load(file, &width,&height, &colchannel, STBI_rgb_alpha);
 
 	if (data==nullptr)
 	{

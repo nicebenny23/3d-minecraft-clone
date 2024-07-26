@@ -21,7 +21,7 @@ struct itemslot
 	Coord location;
 	uirender::uibox* frame;
 	void(*onclick)(itemslot&);
-	
+	bool important;
 	itemslot(int xloc, int yloc);
 	itemslot(int xloc, int yloc, void (*clickaction)(itemslot&));
 	void giveitem(int id);
@@ -30,6 +30,8 @@ struct itemslot
 	void transferitem(item* otherholder);
 	void destroyitem();
 	void enable();
+	void makeimportant();
+	void makeunimportant();
 	void disable();
 	bool hasbeenrightclicked();
 	bool hasbeenleftclicked();

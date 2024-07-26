@@ -23,8 +23,11 @@ struct lootelement
 
 			 dropamt = 2 * random(maxamt);
 
-		}player::goblin.toent()->getcomponent<inventory>().hotbar.fill(itemid, dropamt);
-		player::goblin.toent()->getcomponent<inventory>().playermenu.blkcont.fill(itemid, dropamt);
+		}player::goblin.toent()->getcomponent<inventory>().hotbar.fill(itemid, dropamt, false);
+		player::goblin.toent()->getcomponent<inventory>().playermenu.blkcont.fill(itemid, dropamt,false);
+		player::goblin.toent()->getcomponent<inventory>().hotbar.fill(itemid, dropamt, true);
+
+		player::goblin.toent()->getcomponent<inventory>().playermenu.blkcont.fill(itemid, dropamt, true);
 	}
 
 	lootelement(int itemid, float maxamt,bool happenrandom)
@@ -65,7 +68,7 @@ struct  loottable :gameobject::component
 		{
 			
 			lootlist[i].drop();
-			lootlist[i];
+		
 		}
 		lootlist.destroy();
 }

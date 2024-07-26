@@ -3,30 +3,38 @@
 #include "aabb.h"
 #include "../util/vector3.h"
 #include "transform.h"
+#include <string>
 #define entsize 16*16*16
 #ifndef entity_HPP
 #define entity_HPP
+#define playertag 3
+inline std::string str(const char* charlist) {
+
+	return 	std::string(charlist);
+}
 namespace entityname {
 
 
 
 	extern int totalcount;
 
-
 	struct entity : gameobject::obj
 	{
 		const char* name;
-		
+		array<std::string*> tags;
 		int amtcount;
 		int guid;
+		void removetag(std::string tag);
+		void addtag(std::string tag);
+		bool hastag(std::string tag);
 		Transform transform;
 		entity() {
-
+			
 amtcount = totalcount;
 			totalcount += 1;
 			state = gameobject::beinginitiated;
 
-			
+		
 		}
 	};
 
@@ -34,6 +42,10 @@ amtcount = totalcount;
 	extern array<entity*> objectfromguid;
 	struct entityref
 	{
+		entity* operator->() {
+
+			return toent();
+		}
 		int sharedcount;
 		int guid;
 		entityref(entity& object) {
@@ -51,6 +63,7 @@ amtcount = totalcount;
 			if (toreturn==nullptr)
 			{
 				guid = -1;
+				return nullptr;
 			}
 			if (toreturn->amtcount!=sharedcount)
 			{
@@ -66,7 +79,8 @@ amtcount = totalcount;
 		}
 	};
 
-	void destroy(entity* ent);
+
+	void destroy(entity* ent,bool soft =true);
 	entityref createentity(v3::Vector3 ipos, const char* _name);
 	void runupdateloop();
 	void runrenderloop();

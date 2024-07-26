@@ -7,6 +7,7 @@
 #include "../world/voxeltraversal.h"
 #include "../game/entitystate.h"
 #include "../items/menu.h"
+#include "playerclimb.h"
 #ifndef player_H
 #define player_H
 struct playermovement:gameobject::component
@@ -44,15 +45,30 @@ struct playermovement:gameobject::component
         {
             velocity-= v3::Vector3(sin(glm::radians(camera::yaw)), 0, -cos(glm::radians(camera::yaw)))*effectivespeed * slowdown;
         }
-        if (userinput::getinputkey(' ').pressed&&owner->getcomponent<rigidbody>().isonground)
+      
+        if (owner->getcomponent<playerclimb>().onrope)
         {
-           velocity.y = 150 * speed/200;
+            if (userinput::getinputkey('z').held)
+            {
+                velocity.y = -5;
+            }
+            if (userinput::getinputkey(' ').pressed )
+            {
+                velocity.y = 5;
+            }
         }
-        if (userinput::getinputkey('z').held)
+        else
         {
-            velocity.y -= 1 * effectivespeed;
-        }
+            if (userinput::getinputkey(' ').pressed && owner->getcomponent<rigidbody>().isonground)
+            {
+                velocity.y = 150 * speed / 200;
+            }
 
+            if (userinput::getinputkey('z').held)
+            {
+                velocity.y -= 1 * effectivespeed;
+            }
+        }
 	}
 
 

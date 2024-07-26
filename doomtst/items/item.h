@@ -26,6 +26,9 @@ enum itemid {
 	crystalpickitemid=9,
 	simplerock=10,
 	slimeballitem= 11,
+	crystaltorchitem=12,
+	mossitem=13,
+	ropeitem=14,
 };
 enum itemstate {
 	beingheld = 0,
@@ -51,10 +54,12 @@ struct item
 	item() {
 		maxamt = 0;
 		amt = 0;
+		foodval = 0;
 		itemui.textvalue = createinteger(v2::zerov, 1 / 70.f);
 	}
 	int id;
 	float pickaxepower;
+	float foodval;
 	void(*onleft);
 	void(*onright);
 	bool placeable;

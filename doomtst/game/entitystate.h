@@ -33,7 +33,7 @@ struct estate :gameobject::component
 			{
 				float ypos =objutil::toent(owner).transform.position.y;
 					float falldmg = Max(3.f,lastongroundy -ypos) - 3.f;
-					damage(( falldmg/2.f));
+					damage(( falldmg));
 			
 
 			}
@@ -66,10 +66,26 @@ struct estate :gameobject::component
 			health -= dmg;
 			if (health < 0)
 			{
-				entityname::destroy(&objutil::toent(owner));
+				if (!objutil::toent(owner).hastag("player"))
+				{
+					entityname::destroy(&objutil::toent(owner));
+				}
+				
 			}
 			health = clamp(health, 0, maxhealth);
 		}
+	}
+	void heal(int healamt) {
+		if (healamt <= 0)
+		{
+			return;
+		}
+		
+			timetilldmg = invincablilitymax;
+			health += healamt;
+			
+			health = clamp(health, 0, maxhealth);
+		
 	}
 };
 #endif // ! entitystate_HPP

@@ -37,14 +37,24 @@ void collision::sendplayercameraray()
 	}
 }
 
-bool collision::boxCollidesWithEntity(geometry::Box blk)
+bool collision::boxCollidesWithEntity(geometry::Box blk, gameobject::obj* orgin )
 {
+	bool orginwelldefined = false;
+	if (orgin!=nullptr)
+	{
+		orginwelldefined = true;
+	}
 	for (int i = 0; i < Colliderlist.length; i++)
 	{
 		if (Colliderlist[i] != nullptr)
 		{
-
-
+			if (orginwelldefined)
+			{
+				if (Colliderlist[i]->owner == orgin)
+				{
+					continue;
+				}
+			}
 			if (aabbboxintersect(blk,*Colliderlist[i]))
 			{
 				return true;
@@ -55,8 +65,13 @@ bool collision::boxCollidesWithEntity(geometry::Box blk)
 	return false;
 }
 
-voxtra::RayCollisionWithGrid collision::raycastentity(ray nray)
+voxtra::RayCollisionWithGrid collision::raycastentity(ray nray, gameobject::obj* orgin )
 {
+	bool orginwelldefined = false;
+	if (orgin != nullptr)
+	{
+		orginwelldefined = true;
+	}
 	voxtra::RayCollisionWithGrid closest = voxtra::RayCollisionWithGrid();
 	closest.dist = INFINITY;
 
@@ -65,7 +80,10 @@ voxtra::RayCollisionWithGrid collision::raycastentity(ray nray)
 		if (entityname::objectfromguid[i] != nullptr) {
 			entityname::entity *entatpos = entityname::objectfromguid[i];
 				
-
+			if (entityname::objectfromguid[i]==orgin)
+			{
+				continue;
+			}
 			if (entatpos->hascomponent<Collider>())
 			{
 				Collider* coll = &entatpos->getcomponent<Collider>();
@@ -184,13 +202,17 @@ Vector3 getplaceoffset(Vector3 inter, Vector3 center, Vector3 Colliderscale) {
 	pos.z = floorabs((inter.z - center.z) / Colliderscale.z);
 	return pos;
 }
-bool collision::aabbCollidesWithEntity(Collider* blk) {
+bool collision::aabbCollidesWithEntity(Collider* blk, gameobject::obj* orgin ) {
 	for (int i = 0; i < Colliderlist.length; i++)
 	{
 		if (Colliderlist[i] != nullptr)
 		{
 
-
+				if (Colliderlist[i]->owner == orgin)
+				{
+					continue;
+				}
+			
 			if (aabbsintersect(*(Colliderlist[i]), *blk))
 			{
 				return true;
@@ -200,10 +222,10 @@ bool collision::aabbCollidesWithEntity(Collider* blk) {
 	return false;
 }
 
-voxtra::RayCollisionWithGrid collision::raycastall(ray nray)
+voxtra::RayCollisionWithGrid collision::raycastall(ray nray, gameobject::obj* orgin, voxtra::gridtrav travmode)
 {
-	voxtra::RayCollisionWithGrid gridcol = voxtra::travvox(nray,100);
-	voxtra::RayCollisionWithGrid entcol = raycastentity(nray);
+	voxtra::RayCollisionWithGrid gridcol = voxtra::travvox(nray,200,travmode);
+	voxtra::RayCollisionWithGrid entcol = raycastentity(nray,orgin);
 	if (gridcol.dist<entcol.dist)
 	{
 		return gridcol;

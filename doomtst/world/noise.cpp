@@ -118,7 +118,7 @@ void chunknoisemap::destroy()
 
 void initrandomdirs()
 {
-	const int startingseed = 2;
+	const int startingseed = 3;
 
 	unsigned int noiseval = startingseed;
 	for (int i = 0; i < 100; i++)

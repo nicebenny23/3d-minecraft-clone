@@ -8,7 +8,11 @@
 struct playerhealth:gameobject::component
 {
 	void killplayer() {
-
+		system("cls");
+		
+		glfwTerminate();
+		std::exit(0);
+	
 	
 	}
 	array<uirender::uibox*> healthboxes;
@@ -25,10 +29,10 @@ struct playerhealth:gameobject::component
 		int health = owner->getcomponent<estate>().health;
 		if (health<=1)
 		{
-			system("cls");
+			
 			killplayer();
-		glfwTerminate();
-			std::exit(0);
+		
+		
 		}
 	
 		for (int i =0; i < health; i++) {

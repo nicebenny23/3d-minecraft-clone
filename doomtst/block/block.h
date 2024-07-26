@@ -19,6 +19,10 @@ enum blocktex {
 	crystaloretex = 8,
 	craftingtabletop= 9,
 	craftingtableside=10,
+	crystaltorchtex = 11,
+	crystaltorchtoptex = 12,
+	mosstex=13,
+	ropetex=14,
 };
 using namespace v3;
 
@@ -28,7 +32,7 @@ namespace blockname {
 	{
 		minecraftair = 0,
 		minecraftdirt = 1,
-		minecraftgrass = 2,
+		minecraftmoss = 2,
 		minecraftstone = 3,
 
 		minecraftglass = 4,
@@ -37,6 +41,8 @@ namespace blockname {
 		minecrafttorch = 7,
 		minecraftwood = 8,
 		minecraftcraftingtable=9,
+		minecraftcrystaltorch=10,
+		minecraftrope=11,
 	};
 	struct blockmesh;
 	struct face {
@@ -144,7 +150,7 @@ namespace blockname {
 		 block(v3::Coord location,int blockid);
 		 block();
 		 void initasgameobj();
-		 void createaabb();
+		 void createaabb(bool effector=false);
 		
 	};
 

@@ -1,4 +1,5 @@
 #include "entity.h"
+#include "../world/grid.h"
 using namespace entityname;
 array<entity*> entityname::objectfromguid;
 array<entity*> todelete;
@@ -43,7 +44,7 @@ void entityname::deleteobjs()
 
 		objectfromguid[todelete[ind]->guid] = nullptr;
 
-
+		todelete[ind]->tags.destroy();
 		//	delete delobjs[ind];
 
 	}
@@ -58,8 +59,58 @@ void entityname::deleteobjs()
 
 }
 
-void entityname::destroy(entity* ent)
+void entityname::entity::removetag(std::string tag)
 {
+	for (int i = 0; i < tags.length; i++)
+	{
+		if (*tags[i] == tag)
+		{
+			tags.deleteind(i);
+			i--;
+		}
+	}
+	
+	Assert("entity must have tags to delete");
+}
+
+void entityname::entity::addtag(std::string tag)
+{
+	if (!hastag(tag))
+	{
+		std::string* newstring = new std::string(tag);
+		tags.append(newstring);
+	}
+	else
+	{
+		Assert("entity already has tag");
+	}
+}
+
+bool entityname::entity::hastag(std::string tag)
+{
+	for (int i = 0; i <tags.length ; i++)
+	{
+		if (*tags[i]==tag)
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void entityname::destroy(entity* ent,bool soft)
+{
+	if (ent!=nullptr)
+	{
+		if (soft)
+		{
+			ent->state = gameobject::beingsoftdestroyed;
+		}
+		else
+		{
+			ent->state = gameobject::beingroughdestroyed;
+		}
+	}
 	todelete.append(ent);
 }
 struct entitycomponentindexer
@@ -98,7 +149,7 @@ object->state = gameobject::beinginitiated;
 	object->name = _name;
 	object->complist = (array<gameobject::component*>());
 
-
+	object->tags = array<std::string*>();
 	objectfromguid[object->guid] = object;
 
 
@@ -113,9 +164,12 @@ void entityname::runupdateloop() {
 	
 	for (int i = 0; i < objectfromguid.length; i++)
 	{
-
+		
 		if (objectfromguid.at(i) != nullptr) {
-
+			if (grid::getobjatgrid(objectfromguid.at(i)->transform.position,true)==nullptr)
+			{
+				destroy(objectfromguid.at(i), false);
+			}
 
 
 

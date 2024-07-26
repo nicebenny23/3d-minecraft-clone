@@ -26,9 +26,33 @@ namespace voxtra {
 			colpoint = zerov;
 		}
 	};
-	bool raycolllideswithgrid(ray nray, float acc, bool counteffectors = false);
-	bool Boxcollwithgrid(geometry::Box bx,  bool counteffectors=false);
-	RayCollisionWithGrid travvox(ray nray, float acc,bool counteffectors=false);
-	block* findprevblock(ray nray, float acc);
+	enum gridtrav {
+		countnormal = 0,
+		countall = 1,
+		countsolid = 2,
+
+	};
+	bool raycolllideswithgrid(ray nray, float acc, gridtrav trav =countnormal);
+	bool Boxcollwithgrid(geometry::Box bx, gridtrav trav = countnormal);
+	RayCollisionWithGrid travvox(ray nray, float acc, gridtrav trav = countnormal);
+	block* findprevblock(ray nray, float acc, gridtrav trav = countnormal);
+	inline v3::Vector3 findemptyspace(v3::Vector3 scale) {
+		geometry::Box loadbox;
+
+		bool notinblock = false;
+		do
+		{
+
+
+			float ranx = (random() - .5) * 2;
+
+			float rany = (random() - .5) * 2;
+
+			float ranz = (random() - .5) * 2;
+			v3::Vector3 offset = (Vector3(ranx, rany, ranz) * (2 * loadamt + 1) / 2 +grid::gridpos) * 16;
+			loadbox = geometry::Box(offset, scale);
+		} while (Boxcollwithgrid(loadbox, countnormal));
+		return loadbox.center;
+	}
 }
 #endif

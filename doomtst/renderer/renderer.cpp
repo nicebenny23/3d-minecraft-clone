@@ -198,6 +198,10 @@ namespace renderer {
         texlist[8] = "images\\crystalore.png";
         texlist[9] = "images\\craftingtabletop.png";
         texlist[10] = "images\\craftingtableside.png";
+        texlist[11] = "images\\crystaltorch.png";
+        texlist[12] = "images\\crystaltorchtop.png";
+        texlist[13] = "images\\moss.png";
+        texlist[14] = "images\\rope.png";
      texarray = texturearray(16, 16, texlist);
         texarray.apply();
         
@@ -207,7 +211,7 @@ namespace renderer {
     {
         fov = 90;
         view = glm::mat4(0);
-        setprojmatrix(90, .23, 100);
+        setprojmatrix(90, .35f, 100);
         shaderlist = dynamicarray::array<shader>(1);
         shaderlist[uishader] = shader::shader("shaders\\uivertex.vs", "shaders\\uifragment.vs");
         shaderlist[uishader].attach();

@@ -60,7 +60,7 @@ struct Container
 			}
 		}
 	}
-	bool fill(int elemid, int& amt) {
+	bool fill(int elemid, int& amt,bool createnew) {
 
 
 		for (int i = 0; i < databuf.length; i++)
@@ -69,22 +69,26 @@ struct Container
 			{
 				break;
 			}
-			if (databuf[i].helditem == nullptr)
-			{
+			
 
-				databuf[i].giveitem(elemid,0);
-				
-				databuf[i].helditem->give(amt);
-				if (databuf[i].helditem->amt==0)
+
+				if (databuf[i].helditem == nullptr)
 				{
+					if (createnew)
+					{
+						databuf[i].giveitem(elemid, 0);
 
-					databuf[i].destroyitem();
+						databuf[i].helditem->give(amt);
+						if (databuf[i].helditem->amt == 0)
+						{
+
+							databuf[i].destroyitem();
+						}
+					}
+
+					continue;
 				}
-				
-		
-				continue;
-			}
-		
+			
 			if (databuf[i].helditem->id == elemid) {
 				if (databuf[i].helditem->itemtype == count)
 				{

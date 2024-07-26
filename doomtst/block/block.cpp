@@ -153,9 +153,9 @@ void blockname::block::initasgameobj()
 
 
 
-void blockname::block::createaabb()
+void blockname::block::createaabb(bool effector)
 {
-	this->addcomponent<aabb::Collider>(this->mesh.pos, this->mesh.scale, false,!solid);
+	this->addcomponent<aabb::Collider>(this->mesh.pos, this->mesh.scale, false,effector);
 
 }
 

@@ -84,7 +84,7 @@ struct playerplace :gameobject::component
 		select = owner->getcomponent<inventory>().selected;
 
 		ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
-		closest = collision::raycastall(cameraray);
+		closest = collision::raycastall(cameraray,owner);
 		if (!caninteract())
 		{
 			return;

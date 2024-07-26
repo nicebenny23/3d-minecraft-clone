@@ -5,31 +5,23 @@
 #include"../world/voxeltraversal.h"
 #ifndef entityspawner_HPP
 #define entityspawner_HPP
-
+#define enemytag 1
 void spawn() {
-	float spawnthreshold=.001;
+	float spawnthreshold=.001f;
 	float randomnum = random();
 	
 	if (randomnum<spawnthreshold)
 	{
-		bool notinblock = false;
-		do
-		{
-
-			Box spawnradbox;
-			float ranx = (random() - .5) * 2;
-
-			float rany = (random() - .5) * 2;
-
-			float ranz = (random() - .5) * 2;
-			v3::Vector3 offset = (Vector3(ranx, rany, ranz) * (2 * loadamt + 1) / 2 + gridpos) * 16;
-			Box loadbox = Box(offset, unitv * 2);
-			if (!voxtra::Boxcollwithgrid(loadbox,false))
-			{
-				notinblock = true;
-				createslime(offset);
-			}
-		} while (!notinblock);
+		
+	Vector3 pos= voxtra::findemptyspace(unitv);
+				if (distance(player::goblin.toent()->transform.position,pos)>8)
+				{
+					int entityswitchnum = randomint(4);
+					createslime(pos);
+				}
+			
+				
+	
 	}
 	
 

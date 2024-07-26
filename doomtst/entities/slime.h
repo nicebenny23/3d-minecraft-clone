@@ -25,10 +25,10 @@ struct slimemove :gameobject::component {
 
 
         timesincejump -= timename::smoothdt;
-        Coord pos = objutil::toent(owner ).transform.position-objutil::toent(owner).transform.scale;
+        Vector3 pos = objutil::toent(owner ).transform.position;
         v3::Vector3 headed = owner->getcomponent<navigator>().headed;
         
-            v3::Vector3 gotopos = headed - pos;
+            v3::Vector3 gotopos = headed -voxtra::getcurrvoxel( pos);
             if (gotopos!=zerov)
             {
 
@@ -41,7 +41,7 @@ struct slimemove :gameobject::component {
                 }
             }
           
-            objutil::toent(owner).transform.position += normal(headed - pos) * timename::smoothdt;
+            objutil::toent(owner).transform.position += normal(gotopos) * timename::smoothdt;
             }
 
     }

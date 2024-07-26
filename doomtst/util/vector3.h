@@ -307,9 +307,9 @@ namespace v3 {
 	}
 	inline Coord::Coord(const Vector3& p1, bool useless)
 	{
-		x = round(p1.x);
-		y = round(p1.y);
-		z = round(p1.z);
+		x = round(abs(p1.x))*sign(p1.x);
+		y = round(abs(p1.y)) * sign(p1.y);
+		z = round(abs(p1.z)) ;
 	}
 	inline Vector3 Vector3::operator/(float scale) const {
 

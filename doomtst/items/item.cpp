@@ -3,7 +3,11 @@
 
 item::item(int itemid)
 {
-	id = itemid;
+
+
+		id = itemid;
+
+		foodval = 0;
 	itemui.itemsprite = nullptr;
 	itemui.textvalue=createinteger(v2::zerov,1/80.0f);
 	maxamt = 0;

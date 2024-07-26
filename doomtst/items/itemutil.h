@@ -12,6 +12,9 @@
 #include "crystalpickinit.h"
 #include "item.h"
 #include "slimeitem.h"
+#include "crystaltorchitem.h"
+#include "mossitem.h"
+#include "rope.h"
 #ifndef itemutil_HPP
 #define itemutil_HPP
 inline void inititemproperties(item* itm) {
@@ -50,6 +53,15 @@ inline void inititemproperties(item* itm) {
 	break;
 	case slimeballitem:
 		initslimeitem(itm);
+		break;
+	case crystaltorchitem:
+		initcrystaltorchitem(itm);
+		break;
+	case mossitem:
+		initmossitem(itm);
+		break;
+	case ropeitem:
+		initropeitem(itm);
 		break;
 	default:
 	//	Assert("null item not initiated");
@@ -119,6 +131,15 @@ inline int blockidfromitemid(item* itm) {
 		break;
 	case slimeballitem:
 		return slimeitemasblock;
+		break;
+	case crystaltorchitem:
+		return crystaltorchitemblockid;
+		break;
+	case mossitem:
+		return mossitemblockid;
+		break;
+	case ropeitem:
+		return ropeitemasblock;
 		break;
 	default:
 		break;

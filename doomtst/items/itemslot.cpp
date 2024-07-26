@@ -16,15 +16,15 @@ itemslot::itemslot(int xloc, int yloc) {
 	Box2d frameboxsize = getboxfrominvloc(xloc, yloc);
 	frame = uirender::newbox("images\\blockholder.png", frameboxsize.scale, frameboxsize.center, 13);
 	helditem = nullptr;
-	
+	important = false;
 	onclick = destroyonclick;
-
+	important = false;
 }
 
 itemslot::itemslot(int xloc, int yloc, void(*clickaction)(itemslot&)) {
 	Box2d frameboxsize = getboxfrominvloc(xloc, yloc);
 	frame = uirender::newbox("images\\blockholder.png", frameboxsize.scale, frameboxsize.center, -130);
-
+	important = false;
 
 	onclick = clickaction;
 }
@@ -118,6 +118,25 @@ void itemslot::enable() {
 		helditem->setviewable(true);
 	}
 }
+void itemslot::makeimportant()
+{
+	if (!important) {
+		frame->tex.destroy();
+		frame->tex = texture("images\\importantblockholder.png", png);
+		important = true;
+	}
+}
+void itemslot::makeunimportant()
+{
+	if (important)
+	{
+		frame->tex.destroy();
+		frame->tex = texture("images\\blockholder.png", png);
+		important = false;
+	}
+	
+	
+}
 void itemslot::disable() {
 	frame->shouldrender = false;
 	if (helditem != nullptr && helditem->itemui.itemsprite != nullptr) {
@@ -148,7 +167,7 @@ bool itemslot::hasbeenrightclicked()
 void itemslot::updatestate() {
 
 
-		
+
 		
 		if (ismenuopen())
 		{

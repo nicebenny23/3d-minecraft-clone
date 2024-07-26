@@ -8,7 +8,8 @@ inline void crystalinit(blockname::block* blk) {
 	blk->transparent = false;
 	blk->emitedlight = 0;
 	blk->mesh.scale = blockname::unitscale;
-	blk->createaabb();
+
+	blk->createaabb(false);
 	blk->mininglevel = 4;
 	blk->minedfastwithpick = true;
 	blk->addcomponentptr<loottable>()->addelem(crystalitem, 2,true);

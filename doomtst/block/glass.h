@@ -10,7 +10,9 @@ inline void glassinit(blockname::block* blk) {
 	blk->mesh.scale = blockname::unitscale;
 
 	blk->minedfastwithpick = true;
-	blk->createaabb();}
+
+	blk->createaabb(false);
+}
 inline void glassdelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();
 

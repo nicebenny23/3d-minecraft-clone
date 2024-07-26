@@ -263,7 +263,7 @@
     <ClInclude Include="block\glass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="block\grass.h">
+    <ClInclude Include="block\moss.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="block\stone.h">
@@ -396,6 +396,27 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="items\slimeitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\crystaltorch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\crystaltorchitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playereat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\mossitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\rope.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\ropeblock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playerclimb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

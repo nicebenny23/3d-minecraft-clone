@@ -26,6 +26,7 @@
 #include "entities/dmgonhit.h"
 #include "entities/slime.h"
 #include "game/navigation.h"
+#include "entities/entityspawner.h"
 // settings
 
 #include "renderer/model.h"
@@ -33,6 +34,61 @@
 const Vector3 spawnpos = glm::vec3(0,0,0);
 const unsigned int SCR_WIDTH = 4000;
 const unsigned int SCR_HEIGHT = 3000;
+void update() {
+
+    timename::calcfps();
+
+    window::processInput();
+
+    renderer::clear();
+
+    grid::updateblocks();
+    collision::update();
+
+    entityname::runupdateloop();
+
+    collision::sendplayercameraray();
+    camera::calculateyawandpitch();
+
+
+    camera::sendoffviewmatrix();
+
+    userinput::endupdate();
+    // update shader uniform
+    camera::setcamerapos(player::goblin.toent()->transform.position);
+
+
+
+    grid::reupdatechunkborders();
+    grid::load();
+    if (grid::gridchanged())
+    {
+        gridutil::computeallcover();
+        gridutil::redoallighting = true;
+
+    }
+
+
+    spawn();
+    //refmodel.toent()->transform.position.x    += 1 / 300.f;
+   // refmodel.toent()->transform.position = v3::Vector3(0,0,0);
+    gridutil::redolighting();
+    //meshname::rendermesh(&newmehs);
+
+    entityname::runrenderloop();
+    blockrender::initdatabuffer(false);
+
+    //emit.toent()->getcomponent<particleemiter>().renderparticles();
+
+
+    uirender::renderuilist();
+    rendertextlist();
+    entityname::deleteobjs();
+
+    window::swapbuffer();
+    glfwPollEvents();
+
+}
 void init() {
  
     std::string o1 = std::string("C:/Users/bchar/source/repos/doomtst/doomtst/worldstorage");
@@ -93,57 +149,7 @@ int main()
 float lastupdate = 0;
 while (!window::shouldclose())
     {
-    timename::calcfps();
-
-    window::processInput();
-
-    renderer::clear();
-
-    grid::updateblocks();
-    collision::update();
-
-    entityname::runupdateloop();
-
-    collision::sendplayercameraray();
-    camera::calculateyawandpitch();
-    
- 
-    camera::sendoffviewmatrix();
-   
-    userinput::endupdate();
-    // update shader uniform
-    camera::setcamerapos(player::goblin.toent()->transform.position);
-        
-        
-        
-    grid::reupdatechunkborders();
-    grid::load();
-    if (grid::gridchanged())
-    {
-        gridutil::computeallchangedcover();
-        gridutil::redoallighting = true;
-
-    }
-   
-   
-   
-    //refmodel.toent()->transform.position.x    += 1 / 300.f;
-   // refmodel.toent()->transform.position = v3::Vector3(0,0,0);
-    gridutil::redolighting();    
-  //meshname::rendermesh(&newmehs);
-   
-    entityname::runrenderloop();
-    blockrender::initdatabuffer(false);
-
-    //emit.toent()->getcomponent<particleemiter>().renderparticles();
-
-   
-    uirender::renderuilist();
-    rendertextlist();
-    entityname::deleteobjs();
-   
-    window::swapbuffer();
-    glfwPollEvents();
+    update();
     lastupdate += timename::dt;
         if (lastupdate > 1)
         {

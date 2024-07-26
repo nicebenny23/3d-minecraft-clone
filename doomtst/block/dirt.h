@@ -9,7 +9,8 @@ inline void dirtinit(blockname::block* blk) {
 	blk->transparent = false;
 	blk->emitedlight = 0;
 	blk->mesh.scale = blockname::unitscale;
-	blk->createaabb();
+
+	blk->createaabb(false);
 	blk->addcomponent<loottable>();
 	blk->mininglevel = .3;
 	blk->minedfastwithpick = false;

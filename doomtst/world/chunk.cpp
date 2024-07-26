@@ -97,7 +97,7 @@ Chunk::chunk* Chunk::fileload(Coord location)
 	return &newchunk;
 }
 
-int generatechunkvalfromnoise(float noiselevel, Coord position,float feturemap,float modulatedmap) {
+int generatechunkvalfromnoise(float noiselevel, Coord position,float feturemap,float modulatedmap,float biomemap) {
 
 	
 
@@ -110,9 +110,9 @@ int generatechunkvalfromnoise(float noiselevel, Coord position,float feturemap,f
 
 		}
 
-
+		return neid;
 	}
-	else {
+	
 
 		///	float noiselevel1 = (*map1)[Coord(x, y, z)];
 
@@ -126,16 +126,36 @@ int generatechunkvalfromnoise(float noiselevel, Coord position,float feturemap,f
 				neid = minecraftcrystal;
 
 			}
-			if (inrange(feturemap, .0f, .02f))
+			if (biomemap < 0)
 			{
-				neid = minecraftdirt;
+				if (inrange(feturemap, .0f, .04))
+				{
+					neid = minecraftdirt;
+				}
 
 			}
+			if (0 < biomemap)
+			{
 
+
+				if (inrange(feturemap, .1f, .17))
+				{
+					
+						neid = minecraftmoss;
+					
+				}
+				if (noiselevel>.15)
+				{
+					neid = minecraftmoss;
+				}
 			}
+
+		}
+
+			
 	
 		
-	}
+	
 	return neid;
 
 }
@@ -178,7 +198,7 @@ Chunk::chunk* Chunk::load(Coord location)
 	newchunk.blockbuf = new block[chunksize];
 	int ind = 0;
 	chunknoisemap* map = trueperlin(location, .1f, 1.2, .5f, 2);
-
+	chunknoisemap* biomemap= trueperlin(location+Coord(100,0,0), .01f, 1.2, .5f, 1);
 	chunknoisemap* expmap =  trueperlin(location+Coord(101,303,2), .1f, 1.2, .5f, 2);
 	chunknoisemap* map2 = trueperlin(location+Coord(3,3,33), .04f, 1.2, .5f, 1);
 	for (int x = 0; x < 16; x++)
@@ -195,7 +215,8 @@ Chunk::chunk* Chunk::load(Coord location)
 				float bint = (*map)[Coord(x, y, z)];
 				float noiseval = interpolate(expmapval, bint, interp);
 				float modulated = (noiseval - bint);
-				int neid = generatechunkvalfromnoise(noiseval, blockpos,noiseval,modulated);
+				float biome = (*biomemap)[Coord(x, y, z)];
+				int neid = generatechunkvalfromnoise(noiseval, blockpos,noiseval,modulated,biome);
 				
 		
 				newchunk.blockbuf[ind] = blockname::block(blockpos, neid);
@@ -211,10 +232,11 @@ Chunk::chunk* Chunk::load(Coord location)
 			
 		
 	}
-
+	biomemap->destroy();
 	map->destroy();
 	map2->destroy();
 	expmap->destroy();
+	
 	return &newchunk;
 }
 

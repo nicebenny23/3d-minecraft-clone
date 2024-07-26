@@ -19,18 +19,21 @@ struct rigidbody : gameobject::component {
     float mass = 1.0f;
     aabb::Collider* boundingbox;
     bool isonground;
+    bool gravityenabled;
     float friction;
     void calculateonground() {
 
 
         Vector3 boxcenter = objutil::toent(owner).transform.position - Vector3(0, boundingbox->scale.y + .05, 0);
         geometry::Box checkbox = geometry::Box(boxcenter, Vector3(boundingbox->scale.x, .1, boundingbox->scale.z) * unitscale);
-        isonground = (voxtra::Boxcollwithgrid(checkbox, 100));
+        isonground = (voxtra::Boxcollwithgrid(checkbox ));
     }
     // Constructor
     rigidbody() : velocity(zerov), unsetpositon(zerov), acceleration(zerov), boundingbox(nullptr) {
         friction = 1;
-    } rigidbody(float fric) : velocity(zerov), unsetpositon(zerov), acceleration(zerov), boundingbox(nullptr) {
+        gravityenabled = true;
+    } rigidbody(float fric,bool gravenabled=true) : velocity(zerov), unsetpositon(zerov), acceleration(zerov), boundingbox(nullptr) {
+        gravityenabled = gravenabled;
         friction = fric;
     }
     ~rigidbody() = default;
@@ -45,15 +48,20 @@ struct rigidbody : gameobject::component {
     // Update function called every frame
     void update() {
         calculateonground();
-        
-        applyGravity();
-        integrate();
+        if (gravityenabled)
+        {
+
+            applyGravity();
+
+        }integrate();
         unsetpositon = objutil::toent(owner).transform.position;
     }
 
     // Apply gravity to the rigidbody
     void applyGravity() {
+        
         Vector3 gravity(0, -9.81f, 0);
+        
         acceleration += gravity / mass;
     }
 

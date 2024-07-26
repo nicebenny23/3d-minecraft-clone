@@ -5,7 +5,7 @@
 inline void initsworditem(item* itm) {
 	itm->pickaxepower = 0;
 	itm->placeable = false;
-	itm->maxamt = 3;
+	itm->maxamt = 100;
 	itm->dmg = 4;
 
 	itm->itemtype = wear;

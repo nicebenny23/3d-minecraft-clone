@@ -59,12 +59,13 @@ struct inventory :gameobject::component
 		if(userinput::getinputkey('j').pressed) {
 			playermenu.close();
 		}
-
+		int prevselectedind = selectedind;
 		if (userinput::getinputkey('e').pressed) {
 			playermenu.open();
 		}
 		if (userinput::getinputkey('1').pressed)
 		{
+			
 			selectedind = 0;
 		}
 		if (userinput::getinputkey('2').pressed)
@@ -89,15 +90,36 @@ struct inventory :gameobject::component
 			selectedind = 5;
 
 		}
+		if (prevselectedind != selectedind)
+		{
+
+
+
+			if (prevselectedind != -1)
+			{
+				hotbar.at(prevselectedind).makeunimportant();
+			}
+			if (selectedind!=-1)
+			{
+
+				hotbar.at(selectedind).makeimportant();
+
+			}
+		}
 		if (selectedind!=-1&&hotbar.at(selectedind).helditem!=nullptr)
 		{
+		
+			
 			selected = hotbar.at(selectedind).helditem;
+
+		
 		}
 		else
 		{
 			
 			selected = nullptr;
 		}
+		prevselectedind = selectedind;
 		updateitem(freeditem);
 		if (openmenu!=nullptr)
 		{

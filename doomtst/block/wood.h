@@ -9,6 +9,7 @@ inline void woodinit(blockname::block* blk) {
 	blk->emitedlight = 0;
 	blk->mesh.scale = blockname::unitscale;
 	blk->createaabb();
+	blk->createaabb(false);
 }
 inline void wooddelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();

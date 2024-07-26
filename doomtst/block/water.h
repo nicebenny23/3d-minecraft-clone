@@ -9,7 +9,7 @@ inline void waterinit(blockname::block* blk) {
 	blk->emitedlight = 0;
 	blk->mesh.scale = blockname::unitscale;
 	blk->addcomponent<liquidprop>(15);
-	blk->createaabb();
+	blk->createaabb(true);
 
 	blk->minedfastwithpick = false;
 }

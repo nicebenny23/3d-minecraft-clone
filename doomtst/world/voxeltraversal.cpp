@@ -3,7 +3,7 @@ using namespace blockname;
 //by implementing inner search loop acuracy scales quadraticlly
 //aproxomate voxel traversel algorthm,the accuracy scales linearly with time complexity,
 
-voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc,bool counteffectors)
+voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc, gridtrav trav )
 {
 	float maxdist = nray.length();
 	v3::Vector3 offdist = (nray.end - nray.start) / acc;
@@ -18,13 +18,27 @@ voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc,bool counteffe
 			block* blk = grid::getobjatgrid(curvox);
 			if (blk != nullptr)
 			{
-				if (blk->solid)
+
+				aabb::Collider* col = blk->getcomponentptr<aabb::Collider>();
+				if (col != nullptr)
 				{
-					if (!blk->getcomponent<aabb::Collider>().effector || counteffectors)
+				bool cango = true;
+				  if ((trav == countsolid|| trav == countnormal)&& !blk->solid)
+				   {
+					cango = false;
+
+				   }
+			
+			
+
+					if (col->effector)
 					{
+						cango = trav != countnormal;
 
-
-						aabb::aabbraycolinfo rayinfo = blk->getcomponent<aabb::Collider>().distanceonray(nray);
+					}
+					if (cango)
+					{
+						aabb::aabbraycolinfo rayinfo = col->distanceonray(nray);
 						if (rayinfo.collided)
 						{
 
@@ -33,6 +47,8 @@ voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc,bool counteffe
 						}
 					}
 				}
+					
+				
 			}
 		}
 		prevpos = getcurrvoxel(pos);
@@ -42,7 +58,7 @@ voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc,bool counteffe
 	return voxtra::RayCollisionWithGrid();
 }
 
-bool voxtra::raycolllideswithgrid(ray nray, float acc, bool counteffectors)
+bool voxtra::raycolllideswithgrid(ray nray, float acc, gridtrav trav)
 {
 	float maxdist = nray.length();
 	v3::Vector3 offdist = (nray.end - nray.start) / acc;
@@ -57,12 +73,20 @@ bool voxtra::raycolllideswithgrid(ray nray, float acc, bool counteffectors)
 			block* blk = grid::getobjatgrid(curvox);
 			if (blk != nullptr)
 			{
-				if (blk->solid)
+				bool cango = true;
+				if ((trav == countsolid || trav == countnormal) && !blk->solid)
 				{
-					if (!blk->getcomponent<aabb::Collider>().effector || counteffectors)
-					{
+					cango = false;
 
+				}
+				if (blk->getcomponent<aabb::Collider>().effector)
+				{
+					cango = trav != countnormal;
 
+				}
+				if (cango)
+				{
+				
 						aabb::aabbraycolinfo rayinfo = blk->getcomponent<aabb::Collider>().distanceonray(nray);
 						if (rayinfo.collided)
 						{
@@ -70,7 +94,7 @@ bool voxtra::raycolllideswithgrid(ray nray, float acc, bool counteffectors)
 
 							return true;
 						}
-					}
+					
 				}
 			}
 		}
@@ -81,7 +105,7 @@ bool voxtra::raycolllideswithgrid(ray nray, float acc, bool counteffectors)
 	return false;
 }
 
-bool voxtra::Boxcollwithgrid (geometry::Box bx, bool counteffectors)
+bool voxtra::Boxcollwithgrid(geometry::Box bx, gridtrav trav )
 {
 
 	v3::Vector3 lowpos = bx.center - bx.scale - unitv;
@@ -90,14 +114,14 @@ bool voxtra::Boxcollwithgrid (geometry::Box bx, bool counteffectors)
 	v3::Vector3 highpos = bx.center + bx.scale + unitv;
 
 	v3::Coord highest = v3::Coord(ceilabs(highpos.x), ceilabs(highpos.y), ceilabs(highpos.z));
-	
+
 	for (int x = lowest.x; x < highest.x; x++)
 	{
 		for (int y = lowest.y; y < highest.y; y++)
 		{
 			for (int z = lowest.z; z < highest.z; z++)
 			{
-				
+
 				blockname::block* tocollide = grid::getobjatgrid(x, y, z, false);
 				if (tocollide == nullptr)
 				{
@@ -105,40 +129,51 @@ bool voxtra::Boxcollwithgrid (geometry::Box bx, bool counteffectors)
 				}
 				if (!tocollide->hascomponent<aabb::Collider>())
 				{
-				    continue;
+					continue;
 				}
-						aabb::Collider& blockcol = tocollide->getcomponent<aabb::Collider>();
+				aabb::Collider& blockcol = tocollide->getcomponent<aabb::Collider>();
 
-
-						if (!blockcol.effector || counteffectors)
-						{
-
-
-							bool collided = aabb::aabbboxintersect(bx, blockcol);
-
-
-							if (collided)
-							{
-								return true;
-							}
-						}
+				bool cango = true;
+				if ((trav == countsolid || trav == countnormal) && !tocollide->solid)
+				{
+					cango = false;
 
 				}
+				if (tocollide->getcomponent<aabb::Collider>().effector)
+				{
+					cango =( trav != countnormal);
+
+				}
+				if (cango)
+				{
+
+
+					bool collided = aabb::aabbboxintersect(bx, blockcol);
+
+
+					if (collided)
+					{
+						return true;
+					}
+				}
+
+
+			}
+
+
 		}
-
-
+	
 	}
+
 	return false;
+
+
+
+
 }
 
 
-
-
-
-
-
-
-	block* voxtra::findprevblock(ray nray, float acc)
+	block* voxtra::findprevblock(ray nray, float acc,gridtrav trav)
 	{
 		float maxdist = nray.length();
 		v3::Vector3 offdist = (nray.end - nray.start) / acc;
@@ -147,14 +182,25 @@ bool voxtra::Boxcollwithgrid (geometry::Box bx, bool counteffectors)
 		block* prevblock;
 		for (int i = 0; i < maxdist * acc; i++)
 		{
-			Coord curvox = getcurrvoxel(pos);
+			Coord curvox = voxtra::getcurrvoxel(pos);
 			if (curvox != prevpos)
 			{
 				prevblock = grid::getobjatgrid(prevpos);
 				block* blk = grid::getobjatgrid(curvox);
 				if (blk != nullptr)
 				{
-					if (blk->solid&&!blk->getcomponent<aabb::Collider>().effector)
+					bool cango = true;
+					if ((trav == countsolid || trav == countnormal) && !blk->solid)
+					{
+						cango = false;
+
+					}
+					if (blk->getcomponent<aabb::Collider>().effector)
+					{
+						cango = trav != countnormal;
+
+					}
+					if (cango)
 					{
 						aabb::aabbraycolinfo rayinfo = blk->getcomponent<aabb::Collider>().distanceonray(nray);
 						if (rayinfo.collided)

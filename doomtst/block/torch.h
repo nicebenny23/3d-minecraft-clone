@@ -6,11 +6,12 @@ inline void torchinit(blockname::block* blk) {
 
 	blk->solid = true;
 	blk->transparent = true;
-	blk->emitedlight = 15;
-	blk->lightval = 15;
+	blk->emitedlight = 8;
+	blk->lightval = 8;
 	blk->mesh.scale = v3::Vector3(1 / 16.f, .375, 1 / 16.f);
 	blk->mesh.attachindirection();
-	blk->createaabb();
+
+	blk->createaabb(false);
 	blk->mininglevel = .25f;
 	blk->minedfastwithpick = true;
 	blk->addcomponent<loottable>();
