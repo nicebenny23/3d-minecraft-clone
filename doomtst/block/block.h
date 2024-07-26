@@ -23,6 +23,7 @@ enum blocktex {
 	crystaltorchtoptex = 12,
 	mosstex=13,
 	ropetex=14,
+	lavatex=15,
 };
 using namespace v3;
 
@@ -43,6 +44,7 @@ namespace blockname {
 		minecraftcraftingtable=9,
 		minecraftcrystaltorch=10,
 		minecraftrope=11,
+		minecraftlava=12,
 	};
 	struct blockmesh;
 	struct face {

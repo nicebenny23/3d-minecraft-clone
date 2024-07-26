@@ -11,6 +11,7 @@
 #include "craftingtable.h"
 #include "ropeblock.h"
 #include "crystaltorch.h"
+#include "lava.h"
 //provides utility functions for blocks
 using namespace blockname;
 #ifndef blockinit_H
@@ -56,6 +57,9 @@ namespace blkinitname {
 			break;
 		case minecraftrope:
 			ropeinit(blk);
+			break;
+		case minecraftlava:
+			lavainit(blk);
 			break;
 		}
 
@@ -122,6 +126,9 @@ namespace blkinitname {
 			break;
 		case minecraftrope:
 			ropedelete(blk);
+			break;
+		case minecraftlava:
+			lavainit(blk);
 			break;
 		default:
 			Assert("need valid id in set blk");

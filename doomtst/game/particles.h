@@ -7,6 +7,7 @@
 #include "../util/time.h"
 #include "../renderer/renderer.h"
 #include "../renderer/vertexobject.h"
+#include "camera.h"
 #ifndef  particle_HPP
 #define particle_HPP
 

@@ -81,8 +81,15 @@ void particleemiter::renderparticles()
 	for (int ind = 0; ind < 6; ind++)
 	{
 		int i = indices[ind];
-		Vector3 vertice = vertexlist[i]+position;
-		databuf.append(vertice.x);
+		Vector3 vertice = vertexlist[i];
+
+		v3::Vector3 center = position;
+
+		Vector3 rightvertex = (camera::rightvec)*vertice.x;
+
+		Vector3 upvertex = (camera::upvec) * vertice.y ;
+		vertice = upvertex + rightvertex + center;
+			databuf.append(vertice.x);
 		databuf.append(vertice.y);
 		databuf.append(vertice.z);
 		databuf.append(cubeuv[2 * i]);

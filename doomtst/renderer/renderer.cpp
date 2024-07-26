@@ -202,6 +202,7 @@ namespace renderer {
         texlist[12] = "images\\crystaltorchtop.png";
         texlist[13] = "images\\moss.png";
         texlist[14] = "images\\rope.png";
+        texlist[14] = "images\\lava.png";
      texarray = texturearray(16, 16, texlist);
         texarray.apply();
         

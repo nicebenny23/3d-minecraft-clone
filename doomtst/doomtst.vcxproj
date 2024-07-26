@@ -209,6 +209,7 @@
     <ClInclude Include="entities\entityspawner.h" />
     <ClInclude Include="entities\slime.h" />
     <ClInclude Include="game\collutil.h" />
+    <ClInclude Include="game\game.h" />
     <ClInclude Include="game\navigation.h" />
     <ClInclude Include="game\transform.h" />
     <ClInclude Include="items\airitem.h" />
