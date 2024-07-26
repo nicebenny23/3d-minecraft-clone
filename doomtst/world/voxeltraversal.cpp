@@ -31,7 +31,7 @@ voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc, gridtrav trav
 			
 			
 
-					if (col->effector)
+					if (col->effector&&cango)
 					{
 						cango = trav != countnormal;
 
@@ -79,7 +79,7 @@ bool voxtra::raycolllideswithgrid(ray nray, float acc, gridtrav trav)
 					cango = false;
 
 				}
-				if (blk->getcomponent<aabb::Collider>().effector)
+				if (blk->getcomponent<aabb::Collider>().effector && cango)
 				{
 					cango = trav != countnormal;
 
@@ -139,7 +139,7 @@ bool voxtra::Boxcollwithgrid(geometry::Box bx, gridtrav trav )
 					cango = false;
 
 				}
-				if (tocollide->getcomponent<aabb::Collider>().effector)
+				if (tocollide->getcomponent<aabb::Collider>().effector && cango)
 				{
 					cango =( trav != countnormal);
 
@@ -195,7 +195,7 @@ bool voxtra::Boxcollwithgrid(geometry::Box bx, gridtrav trav )
 						cango = false;
 
 					}
-					if (blk->getcomponent<aabb::Collider>().effector)
+					if (blk->getcomponent<aabb::Collider>().effector && cango)
 					{
 						cango = trav != countnormal;
 

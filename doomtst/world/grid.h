@@ -1,5 +1,5 @@
 #include "../game/camera.h"
-#include "chunk.h"
+#include "chunkload.h"
 #include "../util/vector3.h"
 #ifndef grid_HPP
 #define grid_HPP

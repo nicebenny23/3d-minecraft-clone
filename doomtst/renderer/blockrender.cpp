@@ -172,7 +172,7 @@ void recreatechunkmesh(Chunk::chunk* aschunk) {
 }
 
 // Render a chunk mesh
-void renderchunk(chunkmesh& mesh, bool transparent) {
+void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 	if (!transparent) {
 		renderer::renderquadlist(mesh.Voa, mesh.ibo, mesh.VBO, mesh.datbuf, mesh.indbuf);
 	}

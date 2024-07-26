@@ -19,11 +19,12 @@ struct rigidbody : gameobject::component {
     float mass = 1.0f;
     aabb::Collider* boundingbox;
     bool isonground;
+    bool inliquid;
     bool gravityenabled;
     float friction;
     void calculateonground() {
 
-
+        inliquid = false;
         Vector3 boxcenter = objutil::toent(owner).transform.position - Vector3(0, boundingbox->scale.y + .05, 0);
         geometry::Box checkbox = geometry::Box(boxcenter, Vector3(boundingbox->scale.x, .1, boundingbox->scale.z) * unitscale);
         isonground = (voxtra::Boxcollwithgrid(checkbox ));

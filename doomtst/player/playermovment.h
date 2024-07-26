@@ -45,20 +45,36 @@ struct playermovement:gameobject::component
         {
             velocity-= v3::Vector3(sin(glm::radians(camera::yaw)), 0, -cos(glm::radians(camera::yaw)))*effectivespeed * slowdown;
         }
-      
+        bool normalstate = true;
+        if ( owner->getcomponent<rigidbody>().inliquid)
+        {
+            normalstate = false;
+            if (userinput::getinputkey('z').held)
+            {
+                velocity.y = -10;
+            }
+            if (userinput::getinputkey(' ').held )
+            {
+                velocity.y = 10;
+            }
+        }
         if (owner->getcomponent<playerclimb>().onrope)
         {
+
+            normalstate = false;
             if (userinput::getinputkey('z').held)
             {
                 velocity.y = -5;
             }
-            if (userinput::getinputkey(' ').pressed )
+            if (userinput::getinputkey(' ').held )
             {
                 velocity.y = 5;
             }
         }
-        else
+        if (normalstate)
         {
+
+        
             if (userinput::getinputkey(' ').pressed && owner->getcomponent<rigidbody>().isonground)
             {
                 velocity.y = 150 * speed / 200;

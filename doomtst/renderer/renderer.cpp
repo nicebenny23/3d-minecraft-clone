@@ -212,7 +212,7 @@ namespace renderer {
     {
         fov = 90;
         view = glm::mat4(0);
-        setprojmatrix(90, .35f, 100);
+        setprojmatrix(90, .21f, 100);
         shaderlist = dynamicarray::array<shader>(1);
         shaderlist[uishader] = shader::shader("shaders\\uivertex.vs", "shaders\\uifragment.vs");
         shaderlist[uishader].attach();

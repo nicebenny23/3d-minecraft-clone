@@ -10,6 +10,12 @@ using namespace v3;
 using namespace dynamicarray;
 extern array<v3::Vector3> seededdirections;
 void initrandomdirs();
+enum noisetype {
+    normalnoise = 0,
+    rigid = 1,
+    billowed = 2,
+};
+
 struct chunknoisemap
 {
     dynamicarray::array<float> noisemap;
@@ -18,7 +24,7 @@ struct chunknoisemap
     float operator[](int ind);
     float operator[](Coord pos);
     float& at(int ind);
-    void addlayer(float scale, float intensity);
+    void addlayer(float scale, float intensity,noisetype type);
     void destroy();
     v3::Coord loc;
     float maxint;
@@ -36,19 +42,19 @@ inline v3::Vector3 randompointonsphere(Coord pnt) {
     return(seededdirections.fastat(randomushortfromdir(pnt.x, pnt.y, pnt.z)));
 }
 
-inline chunknoisemap* trueperlin(Coord chunk, float startscale, float ampmul, float scalemul, int iter) {
+inline chunknoisemap* genperlin(Coord chunk,int octaves,  float scalemul, float startscale, float ampmul,noisetype type) {
 
     float intensity = 1;
     chunknoisemap* map = new chunknoisemap(chunk);
     float scale = startscale;
-    for (int i = 0; i < iter; i++)
+    for (int i = 0; i < octaves; i++)
     {
 
-        map->addlayer(scale, intensity);
+        map->addlayer(scale, intensity,type);
 
 
 
-        scale *= scale;
+        scale *= scalemul;
 
 
         intensity *= ampmul;

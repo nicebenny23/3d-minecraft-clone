@@ -168,6 +168,7 @@
     <ClCompile Include="renderer\uirender.cpp" />
     <ClCompile Include="util\geometry.cpp" />
     <ClCompile Include="util\time.cpp" />
+    <ClCompile Include="world\chunkload.cpp" />
     <ClCompile Include="world\managegrid.cpp" />
     <ClCompile Include="renderer\blockrender.cpp" />
     <ClCompile Include="game\camera.cpp" />
@@ -249,10 +250,10 @@
     <ClInclude Include="util\geometry.h" />
     <ClInclude Include="util\fileloader.h" />
     <ClInclude Include="game\aabb.h" />
-    <ClInclude Include="player\playermovment.h" />
     <ClInclude Include="player\playermodification.h" />
     <ClInclude Include="game\rigidbody.h" />
     <ClInclude Include="renderer\uirender.h" />
+    <ClInclude Include="world\chunkload.h" />
     <ClInclude Include="world\managegrid.h" />
     <ClInclude Include="util\queue.h" />
     <ClInclude Include="renderer\algorthm.h" />

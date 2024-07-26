@@ -27,7 +27,7 @@ struct playerhealth:gameobject::component
 	}
 	void update() {
 		int health = owner->getcomponent<estate>().health;
-		if (health<=1)
+		if (health<=0)
 		{
 			
 			killplayer();

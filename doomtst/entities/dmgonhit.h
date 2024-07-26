@@ -6,27 +6,37 @@
 #define dmgonhit_HPP
 struct dmgplayeronhit:gameobject::component
 {
+	bool hasknockback;
+	std::string tagtoeffect;
 	int dmgdone;
-	dmgplayeronhit(int dmg) {
+	dmgplayeronhit(int dmg,std::string affecttag,bool givekb) {
 		priority = 1111;
-
+		tagtoeffect=affecttag ;
 		dmgdone = dmg;
+		hasknockback = givekb;
 	}
 	void oncollision(gameobject::obj* collidedwith) {
 
 		if (collidedwith->type == gameobject::entity)
 		{
 
-
-			if (collidedwith->hascomponent<playerhealth>())
+			if (!objutil::toent(collidedwith).hastag(tagtoeffect))
 			{
-				v3::Vector3 center = objutil::toent(owner).transform.position;
+				return;
+			}
+			v3::Vector3 center = objutil::toent(owner).transform.position;
 				v3::Vector3 othercenter = objutil::toent(collidedwith).transform.position;
 				if (collidedwith->hascomponent<rigidbody>()) {
-					collidedwith->getcomponent<rigidbody>().velocity -= normal(center - othercenter)*7;
+					if (hasknockback)
+					{
+
+						collidedwith->getcomponent<rigidbody>().velocity -= normal(center - othercenter) * 7;
+
+					}
+					collidedwith->getcomponent<rigidbody>().inliquid = true;
 				}
 				collidedwith->getcomponent<estate>().damage(dmgdone);
-			}
+			
 		}
 	}
 

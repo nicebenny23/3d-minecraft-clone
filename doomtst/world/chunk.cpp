@@ -4,6 +4,11 @@
 #include <string>
 #include "../util/fileloader.h"
 #include "../block/blockinit.h"
+#include "../block/block.h"
+#include "../renderer/algorthm.h"
+
+#include "../util/dynamicarray.h"
+#include "../renderer/renderer.h"
 block& Chunk::chunk::operator[](int index)
 {
 	return blockbuf[index];
@@ -18,145 +23,45 @@ int Chunk::indexfrompos(int x, int y, int z)
 	return	256 * x + 16 * y + z;
 }
 
-void createchunkmesh(Chunk::chunk* aschunk)
+
+void Chunk::chunkmesh::genbufs()
+{
+	Voa.generate();
+	VBO.generate(GL_ARRAY_BUFFER);
+	ibo.generate(GL_ELEMENT_ARRAY_BUFFER);
+}
+
+
+
+int compare(const void* b, const void* a) {
+	return sign(((face*)a)->cameradist - ((face*)b)->cameradist);
+}
+void Chunk::chunkmesh::sortbuf()
+{
+	for (int i = 0; i < facebuf.length; i++)
+	{
+		facebuf[i].calccameradist();
+	}
+	std::qsort(facebuf.getdata(), facebuf.length, sizeof(face), compare);
+
+}
+
+
+void Chunk::chunkmesh::destroy()
+{
+	Voa.destroy();
+	ibo.destroy();
+	VBO.destroy();
+	datbuf.destroy();
+	indbuf.destroy();
+	facebuf.destroy();
+}
+
+void Chunk::createchunkmesh(Chunk::chunk* aschunk)
 {
 	chunkmesh* mesh = new chunkmesh;
 	mesh->genbufs();
 	aschunk->mesh = mesh;
-
-}
-
-Chunk::chunk* Chunk::fileload(Coord location)
-{
-
-	const char* name = getcorefilename(location);
-	safefile file = safefile(name, fileread);
-	short* bytelist = file.read<short>(4096);
-
-	file.go(4096 * 2);
-	short* randomproperties = file.read<short>(4096);
-	chunk& newchunk = *(new chunk());
-	newchunk.modified = false;
-	createchunkmesh(&newchunk);
-	newchunk.loc = location;
-	newchunk.blockbuf = new block[chunksize];
-
-
-	int i = 0;
-	for (int x = 0; x < 16; x++)
-	{
-		for (int y = 0; y < 16; y++) {
-			for (int z = 0; z < 16; z++)
-			{
-				Coord blockpos = Coord(x, y, z) + location * 16;
-				byte blockid = bytelist[i] & 255;
-				newchunk.blockbuf[i] = blockname::block(blockpos, blockid);
-
-				initblockmesh(&newchunk.blockbuf[i], zerov, unitscale);
-				byte dirprop = bytelist[i] >> 8;
-
-
-				byte attachdir = dirprop >> 3;
-				byte dir = dirprop & 7;
-				newchunk.blockbuf[i].mesh.attachdir = attachdir;
-
-
-				newchunk.blockbuf[i].mesh.direction = dir;
-				blkinitname::blockinit(&newchunk.blockbuf[i]);
-				
-				if (newchunk.blockbuf[i].hascomponent<liquidprop>())
-				{
-					newchunk.blockbuf[i].getcomponent<liquidprop>().liqval = randomproperties[i];
-				}
-				if (newchunk.blockbuf[i].hascomponent<craftingtablecomp>())
-				{
-
-					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.destroy();
-					//we created a contaner so we are going back
-					currentcontid -= 2;
-					int resourceid = randomproperties[i] & 255;
-
-					int newloc= randomproperties[i]/256.f;
-					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.resourcecontainer =new Container(resourceid);
-					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.newitemlocation= new Container(newloc);
-
-				}
-
-				i++;
-			}
-		}
-	}
-
-	for (int ind = 0; ind < 4096; ind++)
-	{
-
-
-	}
-	delete[] bytelist;
-	file.close();
-	return &newchunk;
-}
-
-int generatechunkvalfromnoise(float noiselevel, Coord position,float feturemap,float modulatedmap,float biomemap) {
-
-	
-
-	int neid = minecraftair;
-	if (generateflat)
-	{
-		if (position.y <0)
-		{
-			neid = minecraftdirt;
-
-		}
-
-		return neid;
-	}
-	
-
-		///	float noiselevel1 = (*map1)[Coord(x, y, z)];
-
-		if (inrange( noiselevel ,-.18f,.18f)&&inrange(modulatedmap,-.18f,.18f))
-		{
-			//select block mechanism
-			neid = minecraftstone;
-
-			if (inrange(feturemap, .1f, .101f))
-			{
-				neid = minecraftcrystal;
-
-			}
-			if (biomemap < 0)
-			{
-				if (inrange(feturemap, .0f, .04))
-				{
-					neid = minecraftdirt;
-				}
-
-			}
-			if (0 < biomemap)
-			{
-
-
-				if (inrange(feturemap, .1f, .17))
-				{
-					
-						neid = minecraftmoss;
-					
-				}
-				if (noiselevel>.15)
-				{
-					neid = minecraftmoss;
-				}
-			}
-
-		}
-
-			
-	
-		
-	
-	return neid;
 
 }
 Chunk::chunk* Chunk::airload(Coord location)
@@ -185,60 +90,7 @@ Chunk::chunk* Chunk::airload(Coord location)
 	return &newchunk;
 }
 //complete
-Chunk::chunk* Chunk::load(Coord location)
-{
-	if (fileexists(getcorefilename(location)))
-	{
-		return fileload(location);
-	}
-	chunk& newchunk = *(new chunk());
-	newchunk.modified = false;
-	newchunk.loc = location;
-	createchunkmesh(&newchunk);
-	newchunk.blockbuf = new block[chunksize];
-	int ind = 0;
-	chunknoisemap* map = trueperlin(location, .1f, 1.2, .5f, 2);
-	chunknoisemap* biomemap= trueperlin(location+Coord(100,0,0), .01f, 1.2, .5f, 1);
-	chunknoisemap* expmap =  trueperlin(location+Coord(101,303,2), .1f, 1.2, .5f, 2);
-	chunknoisemap* map2 = trueperlin(location+Coord(3,3,33), .04f, 1.2, .5f, 1);
-	for (int x = 0; x < 16; x++)
-	{
-		for (int y = 0; y < 16; y++) {
-			for (int z = 0; z < 16; z++)
-			{
-				Coord blockpos = Coord(x, y, z) + location * 16;
 
-
-				float expmapval = (*expmap)[Coord(x, y, z)];
-				float interp = (1+(*map2)[Coord(x, y, z)])/2;
-
-				float bint = (*map)[Coord(x, y, z)];
-				float noiseval = interpolate(expmapval, bint, interp);
-				float modulated = (noiseval - bint);
-				float biome = (*biomemap)[Coord(x, y, z)];
-				int neid = generatechunkvalfromnoise(noiseval, blockpos,noiseval,modulated,biome);
-				
-		
-				newchunk.blockbuf[ind] = blockname::block(blockpos, neid);
-
-				blkinitname::genblock(&newchunk.blockbuf[ind], neid, blockpos, 0, 0);
-
-				ind++;
-
-			}
-
-
-		}
-			
-		
-	}
-	biomemap->destroy();
-	map->destroy();
-	map2->destroy();
-	expmap->destroy();
-	
-	return &newchunk;
-}
 
 
 const char* Chunk::getcorefilename(Coord pos)

@@ -2,6 +2,7 @@
 #include <cmath>
 #include "../util/mathutil.h"
 #include "../util/vector2.h"
+#include "chunkload.h"	
 using namespace v3;
 
 namespace grid {
@@ -167,7 +168,7 @@ namespace grid {
 				for (int k = 0; k < size; k++)
 				{
 					Coord gridind = Coord(i - loadamt, j - loadamt, k - loadamt);
-					chunklist[gridindexfromnormedchunkpos(i, j, k)] = Chunk::load(gridind);
+					chunklist[gridindexfromnormedchunkpos(i, j, k)] = chunkload(gridind);
 
 
 				}
@@ -223,7 +224,7 @@ namespace grid {
 						//int y = (2 * loadamt - k) + (gridpos.y - loadamt);
 						//gets 
 						//	int z = floorabs((invind / static_cast<float>((2 * loadamt + 1)))) - loadamt + gridpos.z;
-						newchunklist[invind] = Chunk::load(Coord(x, y, z));
+						newchunklist[invind] =chunkload(Coord(x, y, z));
 
 
 

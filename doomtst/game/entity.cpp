@@ -139,7 +139,7 @@ int comparecomponent(const void* b, const void* a) {
 entityref entityname::createentity(v3::Vector3 ipos, const char* _name) {
 	entity* object = new entity();
 	object->type = gameobject::entity;
-
+	
 object->state = gameobject::beinginitiated;
 
 	object->transform.position = ipos;
@@ -151,7 +151,7 @@ object->state = gameobject::beinginitiated;
 
 	object->tags = array<std::string*>();
 	objectfromguid[object->guid] = object;
-
+	object->addtag("entity");
 
 	return entityref(*object);
 

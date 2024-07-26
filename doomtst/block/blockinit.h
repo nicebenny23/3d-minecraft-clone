@@ -128,7 +128,7 @@ namespace blkinitname {
 			ropedelete(blk);
 			break;
 		case minecraftlava:
-			lavainit(blk);
+			lavadelete(blk);
 			break;
 		default:
 			Assert("need valid id in set blk");

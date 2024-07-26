@@ -5,6 +5,29 @@
 #define chunksize 16*16*16
 using namespace blockname;
 namespace Chunk {
+
+	struct chunk;
+	struct chunkmesh
+	{
+		chunkmesh() = default;
+		vbuf VBO;
+		vbuf ibo;
+		vao Voa;
+		//voa vertexspec;
+		void genbufs();
+
+		bool meshrecreateneeded;
+		chunk* aschunk;
+		array<float> datbuf;
+		array<unsigned int> indbuf;
+		array<face> facebuf;
+		void sortbuf();
+
+		//todo  get basic mesh and        reupdsted working
+
+
+		void destroy();
+	};
 	const char* getcorefilename(Coord pos);
 	int indexfrompos(int x, int y, int z);
 	struct chunk
@@ -34,8 +57,9 @@ namespace Chunk {
 
 	};
 	chunk* airload(Coord location);
-	chunk* load(Coord location);
-	chunk* fileload(Coord location);
+
+	void createchunkmesh(chunk* aschunk);
 }
+
 #endif // !Chunk_H
 #pragma once

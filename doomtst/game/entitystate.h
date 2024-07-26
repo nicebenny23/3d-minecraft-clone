@@ -64,7 +64,7 @@ struct estate :gameobject::component
 			
 			timetilldmg = invincablilitymax;
 			health -= dmg;
-			if (health < 0)
+			if (health <= 0)
 			{
 				if (!objutil::toent(owner).hastag("player"))
 				{

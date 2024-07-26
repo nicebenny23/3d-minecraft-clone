@@ -48,7 +48,7 @@ struct playerplace :gameobject::component
 	}
 	void placeblock() {
 		ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
-		block* plamentblock = voxtra::findprevblock(cameraray, 1000);
+		block* plamentblock = voxtra::findprevblock(cameraray, 1000,voxtra::countsolid);
 
 		int dir = maxdirection(closest.box->center - plamentblock->center());
 	

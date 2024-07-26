@@ -41,12 +41,13 @@ float& chunknoisemap::operator[](Vector3 pos)
 float dotGridGradient( Coord chunkpos, Vector3 pos) {
 
 	Vector3 gradient = radat(chunkpos);
-
-
+	
 	float dx = pos.x - chunkpos.x;
 	float dy = pos.y - chunkpos.y;
 	float dz = pos.z - chunkpos.z;
-	return (dx * gradient.x + dy * gradient.y + dz * gradient.z);
+	float rval= (dx * gradient.x + dy * gradient.y + dz * gradient.z);
+	return rval;
+	
 }
 
 
@@ -89,7 +90,7 @@ float interpolatenoisemap(float x, float y, float z,float scl) {
 
 	return final;
 }
-void chunknoisemap::addlayer(float scale, float intensity)
+void chunknoisemap::addlayer(float scale, float intensity,noisetype type)
 {
 	maxint += intensity;
 	
@@ -101,8 +102,22 @@ void chunknoisemap::addlayer(float scale, float intensity)
 		{
 			for (int z = 0; z < 16; z++)
 			{
-				Coord np = Vector3(x, y, z) + loc * 16;
-				(*this).noisemap[ind] += intensity * interpolatenoisemap(np.x,np.y,np.z,scale);
+				Vector3 np = Vector3(x, y, z) + loc * 16+Vector3(.4103,.10303,.613030449);
+				float intval = interpolatenoisemap(np.x, np.y, np.z, scale);
+				switch (type)
+				{
+				case normalnoise:
+					break;
+				case rigid:
+					intval = abs(intval);
+					break;
+				case billowed:
+					intval *= intval;
+					break;
+				default:
+					break;
+				}
+				(*this).noisemap[ind] += intensity *intval;
 				ind++;
 			}
 		}
@@ -118,17 +133,18 @@ void chunknoisemap::destroy()
 
 void initrandomdirs()
 {
-	const int startingseed = 3;
-
+	const int startingseed = 4;
+	
 	unsigned int noiseval = startingseed;
 	for (int i = 0; i < 100; i++)
 	{
 		randomcoord(noiseval);
 	}
+	float nabs = 0;
 	seededdirections = array<Vector3>(USHRT_MAX);
 	for (int i = 0; i < USHRT_MAX; i++)
 	{
-
+		
 		Vector3 gradatind;
 		do
 		{
