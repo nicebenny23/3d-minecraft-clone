@@ -197,6 +197,7 @@
     <ClInclude Include="block\crystaltorch.h" />
     <ClInclude Include="block\dirt.h" />
     <ClInclude Include="block\glass.h" />
+    <ClInclude Include="block\lava.h" />
     <ClInclude Include="block\moss.h" />
     <ClInclude Include="block\liquid.h" />
     <ClInclude Include="block\ropeblock.h" />
