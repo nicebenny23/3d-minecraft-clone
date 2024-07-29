@@ -106,7 +106,21 @@ const char* Chunk::getcorefilename(Coord pos)
 
 	return 	strng->data();
 }
+void appendspecialbytelist(array<byte>& bytelist, int index, block* blk) {
 
+	liquidprop* getliq = blk->getcomponentptr<liquidprop>();
+	if (getliq != nullptr)
+	{
+		bytelist[8192 + 2 * index] = getliq->liqval;
+		bytelist[8192 + 2 * index + 1] = 0;
+	}
+	if (blk->hascomponent<craftingtablecomp>())
+	{
+		bytelist[8192 + 2 * index] = blk->getcomponent<craftingtablecomp>().men.blkcont.resourcecontainer->containerid;
+		bytelist[8192 + 2 * index+ 1] =blk->getcomponent<craftingtablecomp>().men.blkcont.newitemlocation->containerid;
+
+	}
+}
 void Chunk::chunk::write()
 {
 
@@ -123,18 +137,7 @@ void Chunk::chunk::write()
 	{
 		bytelist[8192 + 2 * i] = 0;
 		bytelist[8192 + 2 * i + 1] = 0;
-		liquidprop* getliq = blockbuf[i].getcomponentptr<liquidprop>();
-		if (getliq!=nullptr)
-		{
-			bytelist[8192 + 2 * i] =getliq->liqval;
-			bytelist[8192 + 2 * i + 1] = 0;
-		}
-		if (blockbuf[i].hascomponent<craftingtablecomp>())
-		{
-			bytelist[8192 + 2 * i] = blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.resourcecontainer->containerid;
-			bytelist[8192 + 2 * i+1] = blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.newitemlocation->containerid;
-
-			}
+		appendspecialbytelist(bytelist, i, &blockbuf[i]);
 	}
 	file.write<byte>(bytelist.getdata(), bytelist.length);
 	bytelist.destroy();

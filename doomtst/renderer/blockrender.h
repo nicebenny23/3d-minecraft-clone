@@ -3,9 +3,11 @@
 #ifndef blockrender_HPP
 #define blockrender_HPP
 namespace blockrender {
-	
-	void initdatabuffer(bool transparent);
-	
+	void setrendertransparent();
+	extern texturearray texarray;
+	void setrendersolid();
+	void renderblocks(bool transparent);
+	void initblockrendering();
 	
 
 }

@@ -90,6 +90,7 @@ inline void tableinit(blockname::block* blk) {
 	blk->mesh.scale = blockname::unitscale;
 
 	blk->createaabb(false);
+	//stupid thing
 	if (!blk->hascomponent<craftingtablecomp>())
 	{
 

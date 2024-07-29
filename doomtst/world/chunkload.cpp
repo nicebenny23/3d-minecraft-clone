@@ -87,15 +87,15 @@ enum biometype {
 };
 biometype getbiometype(float biomeval){
 
-	if (inrange(biomeval, -.1, .1))
+	if (inrange(biomeval, -.3, .3))
 	{
 	return normalbiome;
 	}
-	if (inrange(biomeval,.1,.7))
+	if (inrange(biomeval,.3,1))
 	{
 		return mossybiome;
 	}
-	if (inrange(biomeval, -.7, -.1))
+	if (inrange(biomeval, -1, -.3))
 	{
 		return lavabiome;
 	}
@@ -103,7 +103,7 @@ biometype getbiometype(float biomeval){
 }
 bool shouldbeore(float feturemap) {
 
-	if (inrange(feturemap, 0, .02f))
+	if (inrange(feturemap, 0, .002f))
 	{
 		return true;
 	}
@@ -111,7 +111,7 @@ bool shouldbeore(float feturemap) {
 }
 bool shouldbemoss(float feturemap, float distto) {
 
-	if (inrange(feturemap, .0, .1)||distto<.02)
+	if (inrange(feturemap, .0, .1f)||inrange(distto,0,.1f))
 	{
 		return true;
 	}
@@ -128,36 +128,34 @@ bool shouldbelava(float feturemap) {
 
 	return false;
 }
+int idfromnoise(Coord pos, float nint, float mint, float bint, float fint) {
 
-int generatechunkvalfromnoise(float noiselevel,float modulatedmap,float biomemap,float feturemap)
-{
-
-
-	float modval = (modulatedmap + 1) / 2;
-	modval /= 3;
 	int neid = minecraftair;
-	if (generateflat)
+	//if between the value is negitive if above positive
+	float distto = 2 * (sigmoid(nint - (mint)) - .5);
+	int biomeval = getbiometype(bint);
+	if (inrange(nint, -mint, mint))
 	{
-	
+		if (biomeval==mossybiome)
+		{
+			neid = minecrafttreestone;
+		}
+		else
+		{
 
-		return neid;
-	}
-	float distto =sigmoid(noiselevel-abs(modval));
-	if (inrange(noiselevel, -modval, modval))
-	{
+			neid = minecraftstone;
 
-		neid = minecraftstone;
-		
+		}
 	}
-	if (shouldbeore)
+	if (shouldbeore(fint))
 	{
 		neid = minecraftcrystal;
 	}
-	int biomeval = getbiometype(biomemap);
+	
 	switch (biomeval)
 	{
 	case mossybiome:
-		if (shouldbemoss(feturemap,distto))
+		if (shouldbemoss(fint, distto))
 		{
 			neid = minecraftmoss;
 		}
@@ -165,7 +163,10 @@ int generatechunkvalfromnoise(float noiselevel,float modulatedmap,float biomemap
 	case normalbiome:
 		break;
 	case lavabiome:
-	
+		if (shouldbemoss(fint, distto))
+		{
+			neid = minecraftlava;
+		}
 		break;
 	default:
 		break;
@@ -173,6 +174,59 @@ int generatechunkvalfromnoise(float noiselevel,float modulatedmap,float biomemap
 
 	return neid;
 
+}
+int generatechunkvalfromnoise(Coord pos,noisemap* map, noisemap* modulatedmap, noisemap* biomemap, noisemap* feturemap,noisemap* lavamap)
+{
+	Coord localpos;
+	localpos.x = modabs(pos.x,16);
+
+	localpos.y = modabs(pos.y, 16);
+
+	localpos.z = modabs(pos.z, 16);
+	float nint = (*map)[localpos];
+	float bint = (*biomemap)[localpos];
+	float fint = (*feturemap)[localpos];
+	float mint = (*modulatedmap)[localpos];
+	float lint = (*lavamap)[Coord(localpos.x,0,localpos.z)];
+
+	float modval = (mint + 1) / 2;
+	modval /= 3;
+
+	float biomebias = 2 * (sigmoid(pos.y / 300.f) - .5);
+	bint += biomebias;
+	bint = clamp(bint, -1.0f, 1.0f);
+	nint *= clamp(biomebias + 1, .4, 1.4);
+	if (generateflat)
+	{
+	
+		
+		return minecraftair;
+	}
+	if (pos.y==-500)
+	{
+		return minecraftobsidian;
+	}
+	if (pos.y<-500)
+	{
+		int maxy = lint * 30 - 530;
+		if (maxy>-520)
+		{
+			maxy = 1000;
+		}
+	
+		if (pos.y<maxy)
+		{
+			return minecraftobsidian;
+
+		}
+		if (pos.y < -530)
+		{
+			return minecraftlava;
+
+		}
+		return minecraftair;
+	}
+	return idfromnoise(pos, nint, modval, bint, fint);
 
 
 }
@@ -190,11 +244,12 @@ Chunk::chunk* chunkload(Coord location)
 	createchunkmesh(&newchunk);
 	newchunk.blockbuf = new block[chunksize];
 	int ind = 0;
-	chunknoisemap* map = genperlin(location,  2,.5f,.1f, 1.2,normalnoise);
-	chunknoisemap* feturemap= genperlin(location+Coord(0,1010,0), 2, .5f, .01f, 1.2, normalnoise);
+	noisemap* map = genperlin(location * 16,  2,.5f,.1f, 1.2,normalnoise);
+	noisemap* feturemap= genperlin((location + Coord(0, 1010, 0) )* 16 , 2, .5f, .01f, 1.2, normalnoise);
 
-	chunknoisemap* biomemap = genperlin(location+Coord(10,202,0), 1, .5f, .01f, 1.2, normalnoise);
-	chunknoisemap* map2 = genperlin(location+Coord(100,0,0), 2, .1f, .1f, 1.2,normalnoise);
+	noisemap* biomemap = genperlin((location+Coord(10,202,0)) * 16, 1, .5f, .003f, 1.2, normalnoise);
+	noisemap* lavalayermap= genperlin2d(Vector3(location.x,-10,location.z) *16, 1, .5f, .03f, 1.2, normalnoise);
+	noisemap* modulatedmap = genperlin((location +Coord(100,0,0)) * 16, 2, .1f, .1f, 1.2,normalnoise);
 	for (int x = 0; x < 16; x++)
 	{
 		for (int y = 0; y < 16; y++) {
@@ -205,13 +260,9 @@ Chunk::chunk* chunkload(Coord location)
 
 				
 
-				float nint = (*map)[Coord(x, y, z)];
-				float bint = (*biomemap)[Coord(x, y, z)];
-				float fint = (*feturemap)[Coord(x, y, z)];
-				float mint = (*map2)[Coord(x, y, z)];
-				
 			
-				int neid = generatechunkvalfromnoise(nint,mint,bint,fint);
+			
+				int neid = generatechunkvalfromnoise(blockpos,map,modulatedmap,biomemap,feturemap,lavalayermap);
 
 
 				newchunk.blockbuf[ind] = blockname::block(blockpos, neid);
@@ -229,8 +280,9 @@ Chunk::chunk* chunkload(Coord location)
 	}
 
 	map->destroy();
-	map2->destroy();
-
+	modulatedmap->destroy();
+	feturemap->destroy();
+	biomemap->destroy();
 
 	return &newchunk;
 }

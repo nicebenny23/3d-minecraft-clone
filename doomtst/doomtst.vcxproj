@@ -193,14 +193,16 @@
   <ItemGroup>
     <ClInclude Include="block\air.h" />
     <ClInclude Include="block\blockinit.h" />
+    <ClInclude Include="block\chest.h" />
     <ClInclude Include="block\craftingtable.h" />
     <ClInclude Include="block\crystalore.h" />
     <ClInclude Include="block\crystaltorch.h" />
-    <ClInclude Include="block\dirt.h" />
+    <ClInclude Include="block\treestone.h" />
     <ClInclude Include="block\glass.h" />
     <ClInclude Include="block\lava.h" />
     <ClInclude Include="block\moss.h" />
     <ClInclude Include="block\liquid.h" />
+    <ClInclude Include="block\obisidian.h" />
     <ClInclude Include="block\ropeblock.h" />
     <ClInclude Include="block\stone.h" />
     <ClInclude Include="block\torch.h" />
@@ -219,7 +221,7 @@
     <ClInclude Include="items\crystalitem.h" />
     <ClInclude Include="items\crystalpickinit.h" />
     <ClInclude Include="items\crystaltorchitem.h" />
-    <ClInclude Include="items\dirtitem.h" />
+    <ClInclude Include="items\treestoneitem.h" />
     <ClInclude Include="items\itemslot.h" />
     <ClInclude Include="items\item.h" />
     <ClInclude Include="items\Container.h" />
@@ -239,6 +241,7 @@
     <ClInclude Include="player\playerclimb.h" />
     <ClInclude Include="player\playereat.h" />
     <ClInclude Include="player\playerplace.h" />
+    <ClInclude Include="renderer\grandrenderer.h" />
     <ClInclude Include="renderer\mesh.h" />
     <ClInclude Include="renderer\model.h" />
     <ClInclude Include="game\particles.h" />

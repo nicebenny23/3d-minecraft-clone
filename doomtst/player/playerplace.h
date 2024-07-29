@@ -23,6 +23,7 @@ struct playerplace :gameobject::component
 		select = nullptr;
 		curplaceid = 0;
 		closest.box = nullptr;
+		priority = 101010101;
 	}
 	bool caninteract() {
 
@@ -40,7 +41,7 @@ struct playerplace :gameobject::component
 		{
 			return false;
 		}
-		if (!inrange(closest.dist, interactminrange, interactmaxrange))
+		if (!inrange(closest.dist, -1, interactmaxrange))
 		{
 			return false;
 		}
@@ -56,8 +57,9 @@ struct playerplace :gameobject::component
 
 		plamentblock->mesh.direction = blockdirection;
 		plamentblock->mesh.attachdir = dir;
-		Box newblockbox = Box(plamentblock->center(), unitv / 2.0f);
-		if (!collision::boxCollidesWithEntity(newblockbox))
+		Box newblockbox = Box(zerov, zerov);
+		bool collides = collision::boxCollidesWithEntity(newblockbox);
+		if (!collides)
 		{
 			int placeid = blockidfromitemid(select);
 			if (placeid==-1)

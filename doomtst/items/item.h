@@ -13,7 +13,7 @@ enum itemid {
 	nullitemid = 0,
 
 	stoneitem = 1,
-	dirtitem = 2,
+	treestoneitem = 2,
 	
 	crystalitem =3,
 	metalroditem=4,

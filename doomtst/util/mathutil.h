@@ -55,6 +55,14 @@ inline float sigmoid(float v1) {
 
 return	exp(v1) / (1 + exp(v1));
 }
+inline float smoothmin(float v1,float v2) {
+	return v1 + (v2 - v1) / (1 + exp((v1 - v2) / .1f));
+	
+}
+inline float smoothmax(float v1,float v2) {
+
+	return	exp(v1) / (1 + exp(v1));
+}
 
 inline float Max(float v1, float v2) {
 

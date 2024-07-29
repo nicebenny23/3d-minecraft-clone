@@ -1,6 +1,7 @@
 #include "camera.h"
 #include "../util/vector3.h";
 #include "../items/menu.h"
+#include "../player/player.h"
 #include "../renderer/Window.h"
 namespace camera {
 	glm::vec3 campos;
@@ -10,7 +11,8 @@ namespace camera {
 	v3::Vector3 rightvec;
 	void initilize()
 	{
-		campos = glm::vec3(0,16,-1);
+		Vector3 playerpos=player::goblin->transform.position;
+		campos = playerpos.glm();
 		yaw = -90;
 		pitch = 0;
 
@@ -83,5 +85,15 @@ namespace camera {
 	void setcamerapos(v3::Vector3 newpos)
 	{
 		campos = newpos.glm();
+	}
+	void cameraupdate()
+	{
+		calculateyawandpitch();
+
+
+		sendoffviewmatrix();
+
+
+
 	}
 }

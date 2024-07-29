@@ -1,10 +1,10 @@
 #include "block.h"
 #include "../items/loottable.h"
-#ifndef dirt_HPP
-#define dirt_HPP
-inline void dirtinit(blockname::block* blk) {
+#ifndef treestone_HPP
+#define treestone_HPP
+inline void treestoneinit(blockname::block* blk) {
 
-	blk->mesh.setfaces( dirttex,dirttex,dirttex,dirttex,dirttex,dirttex);
+	blk->mesh.setfaces( treestonetex,treestonetex,treestonetex,treestonetex,treestonetex,treestonetex);
 	blk->solid = true;
 	blk->transparent = false;
 	blk->emitedlight = 0;
@@ -16,7 +16,7 @@ inline void dirtinit(blockname::block* blk) {
 	blk->minedfastwithpick = false;
 	blk->getcomponent<loottable>().addelem(2, 1);
 }
-inline void dirtdelete(blockname::block* blk) {
+inline void treestonedelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();
 
 	blk->removecomponent<loottable>();

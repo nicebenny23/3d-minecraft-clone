@@ -8,7 +8,7 @@
 #ifndef block_HPP
 #define block_HPP
 enum blocktex {
-	dirttex = 0,
+	treestonetex = 0,
 	grasstex = 1,
 	stonetex = 2,
 	stonetex1 = 3,
@@ -24,6 +24,9 @@ enum blocktex {
 	mosstex=13,
 	ropetex=14,
 	lavatex=15,
+	obsidiantex=16,
+	chesttop=17,
+	chestside=18,
 };
 using namespace v3;
 
@@ -32,7 +35,7 @@ namespace blockname {
 	enum id
 	{
 		minecraftair = 0,
-		minecraftdirt = 1,
+		minecrafttreestone = 1,
 		minecraftmoss = 2,
 		minecraftstone = 3,
 
@@ -45,6 +48,7 @@ namespace blockname {
 		minecraftcrystaltorch=10,
 		minecraftrope=11,
 		minecraftlava=12,
+		minecraftobsidian=13,
 	};
 	struct blockmesh;
 	struct face {

@@ -10,6 +10,6 @@ inline void initmossitem(item* itm) {
 	itm->placeable = true;
 
 	itm->itemtype = count;
-	itm->itemui.itemsprite = createitembox("images\\moss.png");
+	itm->itemui.itemsprite = createitembox("images\\mossitem.png");
 }
 #endif // !grassitem_HPP

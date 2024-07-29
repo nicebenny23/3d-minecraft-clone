@@ -25,7 +25,7 @@ const float cubeuv[] = {
 	0, 1,
 	1, 1
 };
-
+texturearray blockrender::texarray;
 // Check if a chunk is viewable within the camera's frustum
 bool chunkviewable(Chunk::chunk* chk) {
 	float slope = tan(renderer::fov / 2);
@@ -190,8 +190,41 @@ void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 	}
 }
 
+void blockrender::setrendertransparent()
+{
+	glDepthFunc(GL_LESS);
+	glDepthMask(GL_FALSE);
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	renderer::currshader = renderer::normalshader;
+	renderer::shaderlist[renderer::normalshader].attach();
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	texarray.apply();
+	renderer::setrenderingmatrixes();
+
+}
+
+void blockrender::setrendersolid()
+{
+	glDepthFunc(GL_LESS);
+	glDepthMask(GL_TRUE);
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+
+	glDisable(GL_BLEND);
+	renderer::currshader = renderer::normalshader;
+	renderer:: shaderlist[renderer::normalshader].attach();
+
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	texarray.apply();
+	renderer::setrenderingmatrixes();
+}
+
 // Initialize the data buffer and render chunks
-void blockrender::initdatabuffer(bool rendertransparent) {
+void blockrender::renderblocks(bool rendertransparent) {
 	glUseProgram(renderer::shaderlist[renderer::normalshader].id);
 	for (int i = 0; i < totalgridsize; i++) {
 		if (chunklist[i]->mesh->meshrecreateneeded) {
@@ -202,15 +235,13 @@ void blockrender::initdatabuffer(bool rendertransparent) {
 	}
 
 	array<Chunk::chunk> tosort = array<Chunk::chunk>();
-	v3::Vector3 camerapos = camera::campos;
 
 	for (int i = 0; i < totalgridsize; i++) {
 		tosort.append(*(chunklist[i]));
 	}
 
 	oalgorithm::quicksort<Chunk::chunk>(tosort.getdata(), tosort.length);
-	renderer::changerendertype(renderer::rendersolid);
-	
+	setrendersolid();
 	int renderamt = 0;
 		for (int i = 0; i < totalgridsize; i++) {
 			if (chunkviewable(&tosort[i])) {
@@ -221,8 +252,7 @@ void blockrender::initdatabuffer(bool rendertransparent) {
  		int l = 1;
 	
 
-
-		renderer::changerendertype(renderer::rendertransparent);
+		setrendertransparent();
 		for (int i = 0; i < totalgridsize; i++) {
 			if (chunkviewable(&tosort[i])) {
 				renderchunk(*tosort[i].mesh, true);
@@ -230,5 +260,33 @@ void blockrender::initdatabuffer(bool rendertransparent) {
 		}
 	
 	tosort.destroy();
+}
+
+void blockrender::initblockrendering()
+{
+	renderer::shaderlist[renderer::normalshader] = shader::shader("shaders\\vert1.vs", "shaders\\frag1.vs");
+	renderer::shaderlist[renderer::normalshader].attach();
+	renderer::currshader = renderer::normalshader;
+	array<const char*> texlist = array<const char*>();
+	texlist[0] = "images\\treestone.png";
+	texlist[1] = "images\\grass.png";
+	texlist[2] = "images\\stone.png";
+	texlist[3] = "images\\stone.png";
+	texlist[4] = "images\\glass.png";
+	texlist[5] = "images\\water.png";
+	texlist[6] = "images\\torch.png";
+	texlist[7] = "images\\torchtop.png";
+	texlist[8] = "images\\crystalore.png";
+	texlist[9] = "images\\craftingtabletop.png";
+	texlist[10] = "images\\craftingtableside.png";
+	texlist[11] = "images\\crystaltorch.png";
+	texlist[12] = "images\\crystaltorchtop.png";
+	texlist[13] = "images\\moss.png";
+	texlist[14] = "images\\rope.png";
+	texlist[15] = "images\\lava.png";
+	texlist[16] = "images\\obb.png";
+
+	texarray = texturearray(16, 16, texlist);
+	texarray.apply();
 }
 

@@ -47,6 +47,7 @@ struct estate :gameobject::component
 	void start() {
 		priority = 11;
 		health = maxhealth;
+		lastongroundy = objutil::toent(owner).transform.position.y;
 	}
 	estate(int maxhp,bool falls) {
 		maxhealth = maxhp;

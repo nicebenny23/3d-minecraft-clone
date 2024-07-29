@@ -14,6 +14,7 @@ namespace camera {
 	void calculateyawandpitch();
 	void sendoffviewmatrix();
 	void setcamerapos(v3::Vector3 newpos);
+	void cameraupdate();
 }
 
 #endif // !Camera_HPP

@@ -75,39 +75,6 @@ void gridutil::computeallcover()
 	sendrecreatemsg();
 }
 
-void gridutil::computeallchangedcover()
-{
-	Coord centerbefore = grid::prevgridpos();
-
-	v3::Vector3 lerpedslight= centerbefore*.98f+gridpos*.02f;
-	Box gridbox = Box(lerpedslight, unitv * (2 * loadamt + 1) / 2);
-	
-	
-	for (int gridind = 0; gridind < totalgridsize; gridind++)
-	{
-		Coord chunkpos = chunklist[gridind]->loc;
-
-		Box chunkbox = Box(chunkpos, unitv * 1.01f / 2 );
-		if (!gridbox.Boxinbox(chunkbox))
-		{
-
-			int l = 1;
-			for (int blockind = 0; blockind < chunksize; blockind++) {
-
-				for (int faceind = 0; faceind < 6; faceind++)
-				{
-
-					face* tocover = &(chunklist[gridind]->blockbuf[blockind])[faceind];
-
-					computecover(*tocover);
-				}
-
-			}
-		}
-	}
-	sendrecreatemsg();
-}
-
 void gridutil::emitlight()
 {
 	while (!lightingq.empty())
@@ -229,7 +196,7 @@ void gridutil::destroyblockatloc(int x, int y, int z)
 		{
 			block* blockatpos = getobjatgrid(dirfromint(blkind) + location->pos);
 			for (int faceind = 0; faceind < 6; faceind++) {
-				computecover(((blockatpos->mesh))[faceind]);
+				computecover((blockatpos->mesh)[faceind]);
 
 			}
 		}
@@ -239,7 +206,23 @@ void gridutil::destroyblockatloc(int x, int y, int z)
 
 }
 
+void gridutil::gridupdate()
+{
+	grid::reupdatechunkborders();
+	grid::load();
+	if (grid::gridchanged())
+	{
+		gridutil::computeallcover();
+		gridutil::redoallighting = true;
 
+	}
+
+
+	gridutil::redolighting();
+
+}
+
+//the setblock function is what should be used
 void gridutil::setblock(Coord loc, int blockid)
 {
 	block* curblock = getobjatgrid(loc, true);

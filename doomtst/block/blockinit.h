@@ -1,6 +1,6 @@
 #include "block.h"	
 #include "air.h"
-#include "dirt.h"
+#include "treestone.h"
 #include "moss.h"
 #include "stone.h"
 #include "glass.h"
@@ -12,6 +12,7 @@
 #include "ropeblock.h"
 #include "crystaltorch.h"
 #include "lava.h"
+#include "obisidian.h"
 //provides utility functions for blocks
 using namespace blockname;
 #ifndef blockinit_H
@@ -25,8 +26,8 @@ namespace blkinitname {
 		case minecraftair:
 			airinit(blk);
 			break;
-		case minecraftdirt:
-			dirtinit(blk);
+		case minecrafttreestone:
+			treestoneinit(blk);
 			break;
 		case minecraftmoss:
 			mossinit(blk);
@@ -61,6 +62,9 @@ namespace blkinitname {
 		case minecraftlava:
 			lavainit(blk);
 			break;
+		case minecraftobsidian:
+			obsidianinit(blk);
+			break;
 		}
 
 		blk->state = gameobject::active;
@@ -85,8 +89,8 @@ namespace blkinitname {
 		case minecraftmoss:
 			mossdelete(blk);
 			break;
-		case minecraftdirt:
-			dirtdelete(blk);
+		case minecrafttreestone:
+			treestonedelete(blk);
 			break;
 		case minecraftstone:
 
@@ -129,6 +133,9 @@ namespace blkinitname {
 			break;
 		case minecraftlava:
 			lavadelete(blk);
+			break;
+		case minecraftobsidian:
+			obsidiandelete(blk);
 			break;
 		default:
 			Assert("need valid id in set blk");

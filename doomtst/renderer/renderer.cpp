@@ -23,18 +23,7 @@ namespace renderer {
         }
         switch (rentype) {
         case rendersolid:
-           glDepthFunc(GL_LESS);
-            glDepthMask(GL_TRUE);
-              glDisable(GL_CULL_FACE);
-            glEnable(GL_DEPTH_TEST);
-     
-            glDisable(GL_BLEND);
-           currshader = normalshader;
-            shaderlist[normalshader].attach();
-           
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-          texarray.apply();
-          setrenderingmatrixes();
+       
             break;
         case rendermodel:
             glDepthFunc(GL_LESS);
@@ -50,19 +39,7 @@ namespace renderer {
             
             break;
         case rendertransparent:
-           glDepthFunc(GL_LESS);
-            glDepthMask(GL_FALSE);
-            glDisable(GL_CULL_FACE);
-            glEnable(GL_DEPTH_TEST);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-           currshader = normalshader;
-          shaderlist[normalshader].attach();
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-         
-           texarray.apply();
-           setrenderingmatrixes();
-            break;
+      break;
         case renderui:
            
             glDisable(GL_DEPTH_TEST);
@@ -186,25 +163,7 @@ namespace renderer {
     }
     void generatetexarray() {
 
-        array<const char*> texlist = array<const char*>();
-        texlist[0] = "images\\dirt.png";
-        texlist[1] = "images\\grass.png";
-        texlist[2] = "images\\stone.png";
-        texlist[3] = "images\\stone.png";
-        texlist[4] = "images\\glass.png";
-        texlist[5] = "images\\water.png";
-        texlist[6] = "images\\torch.png";
-        texlist[7] = "images\\torchtop.png";
-        texlist[8] = "images\\crystalore.png";
-        texlist[9] = "images\\craftingtabletop.png";
-        texlist[10] = "images\\craftingtableside.png";
-        texlist[11] = "images\\crystaltorch.png";
-        texlist[12] = "images\\crystaltorchtop.png";
-        texlist[13] = "images\\moss.png";
-        texlist[14] = "images\\rope.png";
-        texlist[14] = "images\\lava.png";
-     texarray = texturearray(16, 16, texlist);
-        texarray.apply();
+
         
     }
    
@@ -225,9 +184,7 @@ namespace renderer {
  
        shaderlist[textshader] = shader::shader("shaders\\textvertex.vs", "shaders\\textfragment.vs");
        shaderlist[textshader].attach();
-       shaderlist[normalshader] = shader::shader("shaders\\vert1.vs", "shaders\\frag1.vs");
-        shaderlist[normalshader].attach();
-              currshader = normalshader;
+  
       
         
            

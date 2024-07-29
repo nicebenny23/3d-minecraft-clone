@@ -6,23 +6,28 @@
 #include "../util/vector3.h"
 #ifndef noise_HPP
 #define noise_HPP
+#define distrubutionsize 4096
 using namespace v3;
 using namespace dynamicarray;
 extern array<v3::Vector3> seededdirections;
+
+
 void initrandomdirs();
+
 enum noisetype {
     normalnoise = 0,
     rigid = 1,
     billowed = 2,
 };
 
-struct chunknoisemap
+struct noisemap
 {
-    dynamicarray::array<float> noisemap;
-    chunknoisemap(v3::Coord location);
+    dynamicarray::array<float> values;
+    noisemap(v3::Coord location,Coord chksize);
     float& operator[](Vector3 pos);
     float operator[](int ind);
     float operator[](Coord pos);
+    Coord size;
     float& at(int ind);
     void addlayer(float scale, float intensity,noisetype type);
     void destroy();
@@ -42,10 +47,10 @@ inline v3::Vector3 randompointonsphere(Coord pnt) {
     return(seededdirections.fastat(randomushortfromdir(pnt.x, pnt.y, pnt.z)));
 }
 
-inline chunknoisemap* genperlin(Coord chunk,int octaves,  float scalemul, float startscale, float ampmul,noisetype type) {
+inline noisemap* genperlin(Coord chunk,int octaves,  float scalemul, float startscale, float ampmul,noisetype type) {
 
     float intensity = 1;
-    chunknoisemap* map = new chunknoisemap(chunk);
+    noisemap* map = new noisemap(chunk,unitv*16);
     float scale = startscale;
     for (int i = 0; i < octaves; i++)
     {
@@ -62,4 +67,25 @@ inline chunknoisemap* genperlin(Coord chunk,int octaves,  float scalemul, float 
 
     return map;
 }
-#endif // !noise_HPP
+
+inline noisemap* genperlin2d(Coord chunk, int octaves, float scalemul, float startscale, float ampmul, noisetype type) {
+
+    float intensity = 1;
+    noisemap* map = new noisemap(chunk, Coord(16,1,16));
+    float scale = startscale;
+    for (int i = 0; i < octaves; i++)
+    {
+
+        map->addlayer(scale, intensity, type);
+
+
+
+        scale *= scalemul;
+
+
+        intensity *= ampmul;
+    }
+
+    return map;
+}
+#endif // 

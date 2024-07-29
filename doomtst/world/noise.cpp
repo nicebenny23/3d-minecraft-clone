@@ -1,14 +1,14 @@
 #include "noise.h"
 using namespace dynamicarray;
 array<v3::Vector3> seededdirections;
-chunknoisemap::chunknoisemap(v3::Coord location)
+noisemap::noisemap(v3::Coord location, Coord chksize)
 {
-
+	size = chksize;
 	loc = location;
-	noisemap = dynamicarray::array<float>(16 * 16 * 16);
-	for (int i = 0; i < 16 * 16 * 16; i++)
+	values = dynamicarray::array<float>(size.x*size.y*size.z);
+	for (int i = 0; i < size.x * size.y * size.z; i++)
 	{
-		noisemap[i] = 0;
+		values[i] = 0;
 	}
 	maxint = 0;
 }
@@ -18,23 +18,23 @@ Vector3 radat(Coord pos)
 	return randompointonsphere(pos);
 }
 
-float chunknoisemap::operator[](int ind)
+float noisemap::operator[](int ind)
 {
-	return noisemap[ind] / maxint;
+	return values[ind] / maxint;
 }
-float& chunknoisemap::at(int ind)
+float& noisemap::at(int ind)
 {
-	return noisemap[ind];
+	return values[ind];
 }
-float chunknoisemap::operator[](Coord pos)
+float noisemap::operator[](Coord pos)
 {
 
-	return noisemap[pos.z + 16 * pos.y + 256 * pos.x] / maxint;
+	return values[pos.z + size.z* pos.y +  size.y * size.z * pos.x] / maxint;
 }
-float& chunknoisemap::operator[](Vector3 pos)
+float& noisemap::operator[](Vector3 pos)
 {
 
-	return noisemap[pos.z + 16 * pos.y + 256 * pos.x];
+	return values[pos.z + size.z * pos.y + size.y * size.z * pos.x];
 }
 
 
@@ -90,34 +90,22 @@ float interpolatenoisemap(float x, float y, float z,float scl) {
 
 	return final;
 }
-void chunknoisemap::addlayer(float scale, float intensity,noisetype type)
+void noisemap::addlayer(float scale, float intensity,noisetype type)
 {
 	maxint += intensity;
 	
 	int ind = 0;
 
-	for (int x = 0; x < 16; x++)
+	for (int x = 0; x < size.x; x++)
 	{
-		for (int y = 0; y < 16; y++)
+		for (int y = 0; y < size.y; y++)
 		{
-			for (int z = 0; z < 16; z++)
+			for (int z = 0; z < size.z; z++)
 			{
-				Vector3 np = Vector3(x, y, z) + loc * 16+Vector3(.4103,.10303,.613030449);
+				Vector3 np = Vector3(x, y, z) + loc +Vector3(.4103f,.10303f,.613030449f);
 				float intval = interpolatenoisemap(np.x, np.y, np.z, scale);
-				switch (type)
-				{
-				case normalnoise:
-					break;
-				case rigid:
-					intval = abs(intval);
-					break;
-				case billowed:
-					intval *= intval;
-					break;
-				default:
-					break;
-				}
-				(*this).noisemap[ind] += intensity *intval;
+			
+				(*this).values[ind] += intensity *intval;
 				ind++;
 			}
 		}
@@ -125,10 +113,10 @@ void chunknoisemap::addlayer(float scale, float intensity,noisetype type)
 	
 }
 
-void chunknoisemap::destroy()
+void noisemap::destroy()
 {
 
-	noisemap.destroy();
+	values.destroy();
 }
 
 void initrandomdirs()

@@ -251,10 +251,13 @@ void collision::handleCollisionWithGrid(Collider& entity)
 
 		case 0:
 			entity.center.y = entity.prevpos.y;
+			break;
 		case 1:
 			entity.center.z = entity.prevpos.z;
+			break;
 		case 2:
 			entity.center.x = entity.prevpos.x;
+			break;
 		}
 		Vector3 minforce = zerov;
 

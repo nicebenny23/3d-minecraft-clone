@@ -22,77 +22,67 @@
 #include "../util/fileloader.h"
 #include "../renderer/textrender.h"
 #include "../player/player.h"
-#include "../renderer/textrender.h"
 #include "../entities/dmgonhit.h"
 #include "../entities/slime.h"
 #include "../game/navigation.h"
 #include "../entities/entityspawner.h"
 // settings
+#include "../renderer/grandrenderer.h"
 
-#include "../renderer/model.h"
 #include "../world/noise.h"
 
 #ifndef game_HPP
 #define game_HPP
-const Vector3 spawnpos = glm::vec3(0, 0, 0);
-const unsigned int SCR_WIDTH = 4000;
-const unsigned int SCR_HEIGHT = 3000;
-void update() {
+void endupdate() {
+    entityname::deleteobjs();
+
+    userinput::endupdate();
+
+    window::swapbuffer();
+    glfwPollEvents();
+    renderer::clear();
+
+}
+void preupdate() {
+
+
+    camera::setcamerapos(player::goblin.toent()->transform.position);
 
     timename::calcfps();
 
     window::processInput();
 
-    renderer::clear();
 
-    grid::updateblocks();
+}
+
+void updateobjs() {
+
+
     collision::update();
 
+    grid::runblockupdates();
     entityname::runupdateloop();
 
     collision::sendplayercameraray();
-    camera::calculateyawandpitch();
+    camera::cameraupdate();
 
 
-    camera::sendoffviewmatrix();
+}
+void update() {
 
-    userinput::endupdate();
-
-    camera::setcamerapos(player::goblin.toent()->transform.position);
-
-
-
-    grid::reupdatechunkborders();
-    grid::load();
-    if (grid::gridchanged())
-    {
-        gridutil::computeallcover();
-        gridutil::redoallighting = true;
-
-    }
-
-
+    preupdate();
+    updateobjs();
     spawn();
-    gridutil::redolighting();
-
-    entityname::runrenderloop();
-    blockrender::initdatabuffer(false);
-
-
-    uirender::renderuilist();
-    rendertextlist();
-    entityname::deleteobjs();
-
-    window::swapbuffer();
-    glfwPollEvents();
-
+    gridutil::gridupdate();
+    rendergame();
+    endupdate();
 }
 void init() {
 
     std::string o1 = std::string("C:/Users/bchar/source/repos/doomtst/doomtst/worldstorage");
 
     std::string o2 = std::string("C:/Users/User/source/repos/nicebenny23/3d-minecraft-clone/doomtst/worldstorage");
-    deleteFilesInFolder(o2);
+    deleteFilesInFolder(o1);
 
     timename::inittime();
     randominit();
@@ -107,25 +97,27 @@ void init() {
 
     }
 
+    aabb::initCollider();
 
-    camera::initilize();
+    inittextarray();
+    uirender::initrenderlist();
+    player::initplayer();
     initrandomdirs();
     renderer::load();
+    blockrender::initblockrendering();
+    camera::initilize();
 
 
 
 
-    uirender::initrenderlist();
+
+  
     grid::initgrid();
     gridutil::computeallcover();
     gridutil::redolighting();
     uirender::newbox("images\\crosshair.png", v2::unitv / 32, v2::zerov, -3);
     userinput::endupdate();
-    aabb::initCollider();
 
-    inittextarray();
-
-    player::initplayer();
     glfwSwapInterval(0);
 }
 void render() {

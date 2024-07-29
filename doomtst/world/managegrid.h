@@ -11,14 +11,14 @@ namespace gridutil {
 	void computecover(face& blkface);
 	void sendrecreatemsg();
 	void computeallcover();
-	void computeallchangedcover();
+	
 	void emitlight();
 	void placeblockatloc(int x, int y, int z, int blockid);
 	void destroyblockatloc(int x, int y, int z);
 
 	void redolighting();
 
-
+	void gridupdate();
 	void setblock(Coord loc, int blockid);
 	//void removeblockatloc(Coord loc);
 

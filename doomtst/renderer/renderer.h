@@ -33,7 +33,7 @@ namespace renderer {
 	extern dynamicarray::array<shader> shaderlist;
 	void setrenderingmatrixes();
 	
-	extern texturearray texarray;
+	
 	enum rendertype
 	{
 		rendersolid = 0,

@@ -6,6 +6,7 @@
 #include "vertexobject.h"
 #include "vertexobject.h"
 #include "../game/transform.h"
+
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_DEPRECATE
 using namespace dynamicarray;

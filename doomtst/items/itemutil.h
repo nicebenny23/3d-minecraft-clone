@@ -5,7 +5,7 @@
 #include "stoneitem.h"
 #include "airitem.h"
 #include "torchitem.h"
-#include "dirtitem.h"
+#include "treestoneitem.h"
 #include "crystalitem.h"
 #include "craftingtableitem.h"
 #include "metalrod.h"
@@ -29,8 +29,8 @@ inline void inititemproperties(item* itm) {
 
 		initsworditem(itm);
 		break;
-	case dirtitem:
-		initdirtitem(itm);
+	case treestoneitem:
+		inittreestoneitem(itm);
 		break;
 	case torchitem:
 		inittorchitem(itm);
@@ -108,8 +108,8 @@ inline int blockidfromitemid(item* itm) {
 		return sworditemblockid;
 
 		break;
-	case dirtitem:
-		return dirtitemblockid;
+	case treestoneitem:
+		return treestoneitemblockid;
 		break;
 	case torchitem:
 		return torchitemblockid;

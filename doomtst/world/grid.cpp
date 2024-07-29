@@ -59,7 +59,7 @@ namespace grid {
 		return nullptr;
 	}
 
-	void updateblocks()
+	void runblockupdates()
 	{
 		for (int gridind = 0; gridind < totalgridsize; gridind++)
 		{
@@ -71,13 +71,14 @@ namespace grid {
 
 					continue;
 				}
-				if (blk.id==minecraftdirt)
+				if (blk.id==minecrafttreestone)
 				{
 					continue;
 				}if (blk.id == minecraftstone)
 				{
 					continue;
 				}
+
 				if (gameobject::shouldbeupdated(&blk))
 				{
 
@@ -156,7 +157,7 @@ namespace grid {
 	void initgrid()
 	{
 
-		gridpos = zerov;
+		gridpos = camera::campos/16.f;
 		griddt = zerov;
 		const int size = (2 * loadamt + 1);
 

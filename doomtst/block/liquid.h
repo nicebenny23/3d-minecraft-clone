@@ -72,7 +72,7 @@ struct liquidprop :gameobject::component {
 			updateinface(1);
 			updateinface(3);
 			updateinface(4);
-
+			diffusetime = 0;
 			updateinface(5);
 		}
 		

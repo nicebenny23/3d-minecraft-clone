@@ -1,8 +1,24 @@
 #include "voxeltraversal.h"
 using namespace blockname;
+using	 namespace voxtra;
 //by implementing inner search loop acuracy scales quadraticlly
 //aproxomate voxel traversel algorthm,the accuracy scales linearly with time complexity,
+bool isvoxelvalid(block* blk, gridtrav trav) {
+	if ((trav == countsolid || trav == countnormal) && !blk->solid)
+	{
+		return false;
 
+	}
+
+
+	
+	if (blk->getcomponent<aabb::Collider>().effector )
+	{
+		return trav != countnormal;
+
+	}
+	return true;
+}
 voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc, gridtrav trav )
 {
 	float maxdist = nray.length();
@@ -22,21 +38,7 @@ voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc, gridtrav trav
 				aabb::Collider* col = blk->getcomponentptr<aabb::Collider>();
 				if (col != nullptr)
 				{
-				bool cango = true;
-				  if ((trav == countsolid|| trav == countnormal)&& !blk->solid)
-				   {
-					cango = false;
-
-				   }
-			
-			
-
-					if (col->effector&&cango)
-					{
-						cango = trav != countnormal;
-
-					}
-					if (cango)
+					if (isvoxelvalid(blk,trav))
 					{
 						aabb::aabbraycolinfo rayinfo = col->distanceonray(nray);
 						if (rayinfo.collided)
@@ -73,18 +75,8 @@ bool voxtra::raycolllideswithgrid(ray nray, float acc, gridtrav trav)
 			block* blk = grid::getobjatgrid(curvox);
 			if (blk != nullptr)
 			{
-				bool cango = true;
-				if ((trav == countsolid || trav == countnormal) && !blk->solid)
-				{
-					cango = false;
-
-				}
-				if (blk->getcomponent<aabb::Collider>().effector && cango)
-				{
-					cango = trav != countnormal;
-
-				}
-				if (cango)
+				
+				if (isvoxelvalid(blk, trav))
 				{
 				
 						aabb::aabbraycolinfo rayinfo = blk->getcomponent<aabb::Collider>().distanceonray(nray);
@@ -133,18 +125,8 @@ bool voxtra::Boxcollwithgrid(geometry::Box bx, gridtrav trav )
 				}
 				aabb::Collider& blockcol = tocollide->getcomponent<aabb::Collider>();
 
-				bool cango = true;
-				if ((trav == countsolid || trav == countnormal) && !tocollide->solid)
-				{
-					cango = false;
-
-				}
-				if (tocollide->getcomponent<aabb::Collider>().effector && cango)
-				{
-					cango =( trav != countnormal);
-
-				}
-				if (cango)
+			
+				if (isvoxelvalid(tocollide, trav))
 				{
 
 
@@ -189,18 +171,8 @@ bool voxtra::Boxcollwithgrid(geometry::Box bx, gridtrav trav )
 				block* blk = grid::getobjatgrid(curvox);
 				if (blk != nullptr)
 				{
-					bool cango = true;
-					if ((trav == countsolid || trav == countnormal) && !blk->solid)
-					{
-						cango = false;
-
-					}
-					if (blk->getcomponent<aabb::Collider>().effector && cango)
-					{
-						cango = trav != countnormal;
-
-					}
-					if (cango)
+		
+					if (isvoxelvalid(blk, trav))
 					{
 						aabb::aabbraycolinfo rayinfo = blk->getcomponent<aabb::Collider>().distanceonray(nray);
 						if (rayinfo.collided)
