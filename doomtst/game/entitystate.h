@@ -60,7 +60,7 @@ struct estate :gameobject::component
 		{
 			return;
 		}
-		if (timetilldmg < 0)
+		if (dmg < 0)
 		{
 
 			timetilldmg = invincablilitymax;
@@ -76,7 +76,7 @@ struct estate :gameobject::component
 				{
 					if (debugnodeath)
 					{
-						health += dmg;
+						health +=dmg;
 					}
 				}
 			}
@@ -91,7 +91,7 @@ struct estate :gameobject::component
 			return;
 		}
 
-		timetilldmg = invincablilitymax;
+	timetilldmg = invincablilitymax;
 		health += healamt;
 
 		health = clamp(health, 0, maxhealth);

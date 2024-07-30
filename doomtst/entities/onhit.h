@@ -47,7 +47,7 @@ struct dmgonhit:gameobject::component
 	dmgonhit(int dmg,std::string affecttag,bool givekb) {
 		priority = 1111;
 		tagtoeffect=affecttag ;
-		dmgdone = dmg;
+	dmgdone = dmg;
 		hasknockback = givekb;
 	}
 	void oncollision(gameobject::obj* collidedwith) {
@@ -77,4 +77,4 @@ struct dmgonhit:gameobject::component
 
 };
 
-#endif // !dmgonhit_HPP
+#endif // !properties.dmgonhit_HPP

@@ -50,6 +50,10 @@ enum itemprop
 //
 struct item
 {
+	int state;
+	int id;
+	int maxamt;
+	int amt;
 	void setviewable(bool isviewable) {
 
 
@@ -57,34 +61,44 @@ struct item
 		itemui.itemsprite->shouldrender = isviewable;
 	}
 	item(int itemid);
-	int state;
+	
 	item() {
 		maxamt = 0;
 		amt = 0;
-		foodval = 0;
+		properties.foodval = 0;
 		itemui.textvalue = createinteger(v2::zerov, 1 / 70.f);
 	}
-	int id;
-	float pickaxepower;
-	float foodval;
-	void(*onleft);
-	void(*onright);
-	bool placeable;
-	
-	itemprop itemtype;
-	int maxamt;
-	int amt;
 
+	struct itemproperties {
+		float pickaxepower;
+		float foodval;
 
-	int dmg;
-	
-	
+		int dmg;
+
+		bool placeable;
+		itemproperties() {
+
+			pickaxepower = 0;
+			foodval = 0;
+			dmg = 1;
+			placeable = false;
+		}
+		
+	};
+
 	struct  itemuistruct
 	{
 		integertext* textvalue;
 		uirender::uibox* itemsprite;
 	};
+
+	itemproperties properties;
+
+	
+	itemprop itemtype;
+
 	itemuistruct itemui;
+
 	void updateui() {
 		if (state==beingheld)
 		{

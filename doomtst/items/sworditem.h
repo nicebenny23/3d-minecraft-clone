@@ -3,10 +3,10 @@
 #define sworditem_HPP
 #define sworditemblockid 9
 inline void initsworditem(item* itm) {
-	itm->pickaxepower = 0;
-	itm->placeable = false;
+	itm->properties.pickaxepower = 0;
+	itm->properties.placeable = false;
 	itm->maxamt = 100;
-	itm->dmg = 4;
+	itm->properties.dmg = 4;
 
 	itm->itemtype = wear;
 itm->itemui.itemsprite = createitembox("images\\sword.png");

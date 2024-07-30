@@ -7,12 +7,12 @@ item::item(int itemid)
 
 		id = itemid;
 
-		foodval = 0;
+		properties.foodval = 0;
 	itemui.itemsprite = nullptr;
 	itemui.textvalue=createinteger(v2::zerov,1/80.0f);
 	maxamt = 0;
-	pickaxepower = 1;
-	dmg = 1;
+	properties.pickaxepower = 1;
+	properties.dmg = 1;
 }
 void item::destroy()
 {

@@ -15,9 +15,9 @@
 inline entityname::entityref spawndagger(v3::Vector3 pos,v3::Vector3 velocity) {
 
     entityname::entityref refmodel = entityname::createentity(pos, "dagger");
-  refmodel.toent()->addcomponentptr<model>()->add("objs\\crystaldagger.obj", "images\\crystaldagger.png");
+  refmodel.toent()->addcomponentptr<model>()->add("newtest.obj", "images\\crystaldagger.png");
    
-    refmodel.toent()->addcomponent<aabb::Collider>(zerov, unitscale / 2, true);
+    refmodel->addcomponent<aabb::Collider>(zerov, unitscale / 2, true);
 
     refmodel.toent()->addcomponent<dmgonhit>(6, "entity", true);
     refmodel.toent()->addcomponent<destroyonhit>(6, "");

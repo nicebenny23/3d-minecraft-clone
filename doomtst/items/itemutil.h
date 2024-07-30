@@ -119,8 +119,9 @@ inline item* inititem(int id) {
 		}
 		int rint = id;
 		item* newitem = new item(rint);
-		newitem->amt = amt;
+
 		inititemproperties(newitem);
+		newitem->amt = amt;
 		return newitem;
 
 	}

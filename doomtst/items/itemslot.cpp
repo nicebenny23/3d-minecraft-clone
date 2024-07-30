@@ -17,36 +17,11 @@ itemslot::itemslot(int xloc, int yloc) {
 	frame = uirender::newbox("images\\blockholder.png", frameboxsize.scale, frameboxsize.center, 13);
 	helditem = nullptr;
 	important = false;
-	onclick = destroyonclick;
+	
 	important = false;
 }
 
-itemslot::itemslot(int xloc, int yloc, void(*clickaction)(itemslot&)) {
-	Box2d frameboxsize = getboxfrominvloc(xloc, yloc);
-	frame = uirender::newbox("images\\blockholder.png", frameboxsize.scale, frameboxsize.center, -130);
-	important = false;
 
-	onclick = clickaction;
-}
-
-void itemslot::giveitem(int id) {
-	if (id==0)
-	{
-		helditem = nullptr;
-		return;
-	}
-	helditem = inititem(id);
-	
-
-
-		helditem->amt = 1;
-		helditem->setviewable(frame->shouldrender);
-		helditem->state = ininventoryblock;
-		helditem->itemui.itemsprite->box.center = frame->box.center;
-	
-
-
-}
 void itemslot::givefreeamt(int amt)
 {
 
@@ -61,10 +36,10 @@ void itemslot::givefreeamt(int amt)
 	}
 	if (freeditem==nullptr)
 	{
-		freeditem = inititem(helditem->id);
+		freeditem = inititem(helditem->id,0);
 		
 		freeditem->setviewable(frame->shouldrender);
-		freeditem->amt = 0;
+		
 		freeditem->state = beingheld;
 	}
 	freeditem->amt += amt;
@@ -75,10 +50,15 @@ void itemslot::givefreeamt(int amt)
 
 }
 void itemslot::giveitem(int id,int amt) {
-	helditem = inititem(id);
-	helditem->amt = amt;
+	if (id == 0)
+	{
+		helditem = nullptr;
+		return;
+	}
+	helditem = inititem(id,amt);
 	helditem->setviewable(frame->shouldrender);
 	helditem->state = ininventoryblock;
+	
 	helditem->itemui.itemsprite->box.center = frame->box.center;
 
 }

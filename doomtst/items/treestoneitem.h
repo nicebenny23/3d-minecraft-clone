@@ -4,10 +4,10 @@
 #define treestoneitem_HPP
 #define treestoneitemblockid blockname::minecraftwater
 inline void inittreestoneitem(item* itm) {
-	itm->pickaxepower = 1;
+	itm->properties.pickaxepower = 1;
 	
 	itm->maxamt = 64;
-	itm->placeable = true;
+	itm->properties.placeable = true;
 
 	itm->itemtype = count;
 	itm->itemui.itemsprite = createitembox("images\\treestoneblock.png");

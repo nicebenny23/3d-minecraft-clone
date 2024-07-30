@@ -20,11 +20,13 @@ struct itemslot
 	//(0...9),(0...14)
 	Coord location;
 	uirender::uibox* frame;
-	void(*onclick)(itemslot&);
+	
 	bool important;
 	itemslot(int xloc, int yloc);
-	itemslot(int xloc, int yloc, void (*clickaction)(itemslot&));
-	void giveitem(int id);
+	bool empty() {
+
+		return (helditem == nullptr);
+	}
 	void givefreeamt(int amt);
 	void giveitem(int id,int amt);
 	void transferitem(item* otherholder);

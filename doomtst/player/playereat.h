@@ -39,7 +39,7 @@ struct playereat :gameobject::component
 		{
 			return false;
 		}
-		if (food->foodval==0)
+		if (food->properties.foodval==0)
 		{
 			return false;
 		}

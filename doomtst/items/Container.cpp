@@ -38,7 +38,7 @@ for (int j = 0; j < sizey; j++)
 	{
 
 
-
+		
 		databuf[ind] = itemslot(i + offset.x - float(sizex) / 2.0f, j + offset.y - sizey / 2.0f);
 		ind++;
 
@@ -47,14 +47,9 @@ for (int j = 0; j < sizey; j++)
 	disable();
 	for (int i = 0; i < sizex*sizey; i++)
 	{
-		databuf[i].giveitem(objdata[i] & 255);
-
-		if (databuf[i].helditem != nullptr)
-		{
+		databuf[i].giveitem(objdata[i] & 255, databuf[i].helditem->amt = objdata[i] >> 8);
 
 
-			databuf[i].helditem->amt = objdata[i] >> 8;
-		}
 	}
 	delete[] objdata;
 	contfile.close();

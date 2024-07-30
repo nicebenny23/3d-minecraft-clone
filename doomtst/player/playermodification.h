@@ -75,7 +75,7 @@ struct playerbreak:gameobject::component
 					int pickpower=1;
 					if (pickaxe!=nullptr)
 					{
-						pickpower = pickaxe->pickaxepower;
+						pickpower = pickaxe->properties.pickaxepower;
 					}
 					if (pickpower>=currmining->mininglevel||!currmining->minedfastwithpick)
 					{

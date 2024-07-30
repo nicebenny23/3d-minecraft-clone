@@ -3,8 +3,8 @@
 #define rockitemitem_HPP
 #define rockitemblockid -1
 inline void rockiteminit(item* itm) {
-	itm->pickaxepower = 2;
-	itm->placeable = false;
+	itm->properties.pickaxepower = 2;
+	itm->properties.placeable = false;
 	itm->maxamt = 4;
 	itm->amt = 4;
 	itm->itemtype = wear;

@@ -26,7 +26,7 @@ struct playerattackcomp:gameobject::component
 			return 1;
 		}
 		
-		return select->dmg;
+		return select->properties.dmg;
 	}
 
 	void update() {

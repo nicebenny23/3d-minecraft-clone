@@ -4,10 +4,10 @@
 #define stoneitemasblockid 3 
 
 inline void initstoneitem(item* itm) {
-	itm->pickaxepower = 1;
+	itm->properties.pickaxepower = 1;
 	itm->maxamt = 64;
 	itm->itemtype = count;
-	itm->placeable = true;
+	itm->properties.placeable = true;
 	itm->itemui.itemsprite = createitembox("images\\stone.png");
 }
 

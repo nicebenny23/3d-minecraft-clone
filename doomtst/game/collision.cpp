@@ -61,7 +61,7 @@ bool collision::boxCollidesWithEntity(geometry::Box blk, gameobject::obj* orgin 
 			}
 		}
 	}
-	return false;
+	
 	return false;
 }
 
