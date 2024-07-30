@@ -15,6 +15,13 @@
 #include "crystaltorchitem.h"
 #include "mossitem.h"
 #include "rope.h"
+#include "chestitem.h"
+#include "furnaceitem.h"
+#include "ironitem.h"
+#include "ironoreitem.h"
+#include "ironpick.h"
+#include "ironsword.h"
+#include "crystaldagger.h"
 #ifndef itemutil_HPP
 #define itemutil_HPP
 inline void inititemproperties(item* itm) {
@@ -62,6 +69,28 @@ inline void inititemproperties(item* itm) {
 		break;
 	case ropeitem:
 		initropeitem(itm);
+		break;
+	case chestitem:
+		initchestitem(itm);
+		break;
+	case furnaceitem:
+		initfurnaceitem(itm);
+		break;
+
+	case ironoreitem:
+		(itm);
+		break;
+	case ironitem:
+		initironitem(itm);
+		break;
+	case ironpickitem:
+		ironpickinit(itm);
+		break;
+	case ironsworditem:
+		initironsworditem(itm);
+		break;
+	case crystaldaggeritem:
+		initcrystaldaggeritem(itm);
 		break;
 	default:
 	//	Assert("null item not initiated");
@@ -140,6 +169,29 @@ inline int blockidfromitemid(item* itm) {
 		break;
 	case ropeitem:
 		return ropeitemasblock;
+		break;
+
+	case chestitem:
+		return chestblockid;
+		break;
+	case furnaceitem:
+		return furnaceblockid;
+		break;
+	case ironoreitem:
+		return ironoreitemasblockid;
+		break;
+	case ironitem:
+		return ironitemasblockid;
+		break;
+	case ironpickitem:
+		return ironpickblockid;
+		break;
+	case ironsworditem:
+		return ironsworditemblockid;
+
+		break;
+	case crystaldaggeritem:
+		return crystaldaggeritemasblockid;
 		break;
 	default:
 		break;

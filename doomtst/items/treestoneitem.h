@@ -2,7 +2,7 @@
 #include "../block/block.h"
 #ifndef treestoneitem_HPP
 #define treestoneitem_HPP
-#define treestoneitemblockid blockname::minecrafttreestone
+#define treestoneitemblockid blockname::minecraftwater
 inline void inittreestoneitem(item* itm) {
 	itm->pickaxepower = 1;
 	
@@ -10,6 +10,6 @@ inline void inittreestoneitem(item* itm) {
 	itm->placeable = true;
 
 	itm->itemtype = count;
-	itm->itemui.itemsprite = createitembox("images\\treestone.png");
+	itm->itemui.itemsprite = createitembox("images\\treestoneblock.png");
 }
 #endif // !grassitem_HPP

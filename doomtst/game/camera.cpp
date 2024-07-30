@@ -17,6 +17,12 @@ namespace camera {
 		pitch = 0;
 
 	}
+	void updatetoplayer()
+	{
+		campos = player::goblin->transform.position.glm();
+		pitch = player::goblin->transform.pitch;
+		yaw= player::goblin->transform.yaw;
+	}
     v3::Vector3 direction() {
 
 		v3::Vector3 dir = v3::zerov;
@@ -26,42 +32,6 @@ namespace camera {
 	return v3::normal(dir);
 	}
 	
-	void calculateyawandpitch()
-	{
-		
-		if (!ismenuopen())
-		{
-			window::setcursor(false);
-
-			float xoffset = -userinput::mouseposdt.x;
-			float yoffset = userinput::mouseposdt.y;
-
-			float sensitivity = 0.3;
-
-			if (abs(xoffset) > 180)
-			{
-				xoffset = 0;
-			}  if (abs(yoffset) > 180)
-			{
-				yoffset = 0;
-			}
-			xoffset *= sensitivity;
-			yoffset *= sensitivity;
-
-			yaw += xoffset;
-			pitch += yoffset;
-
-			if (pitch > 89.0f)
-				pitch = 89.0f;
-			if (pitch < -89.0f)
-				pitch = -89.0f;
-
-		}
-		else
-		{
-			window::setcursor(true);
-		}
-	}
 	
 	void sendoffviewmatrix()
 	
@@ -86,9 +56,11 @@ namespace camera {
 	{
 		campos = newpos.glm();
 	}
+	
 	void cameraupdate()
 	{
-		calculateyawandpitch();
+		player::calculateyawandpitch();
+		updatetoplayer();
 
 
 		sendoffviewmatrix();

@@ -27,13 +27,40 @@ struct irecipe {
 
 	array<iteminrecipe> recipe;
 	};
+struct extrarecipeattributes {
+
+	bool reversable;
+	float timetocraft;
+	extrarecipeattributes() {
+
+		reversable = true;
+		timetocraft = 0;
+	}
+	extrarecipeattributes(bool isreversable, float craftingtime) {
+
+		reversable = isreversable;
+		timetocraft = craftingtime;
+	}
+};
+struct managerstate {
+	
+	bool cancraft;
+	bool enabled;
+	bool craftedthisframe;
+	managerstate() {
+		cancraft = true;
+		enabled = false;
+		craftedthisframe = false;
+	}
+};
 struct recipemanager {
 	int xsize;
 	int ysize;
-	item* locatheld;
-	bool enabled;
+
+	managerstate state;
 	Container* newitemlocation;
 	Container* resourcecontainer;
+	extrarecipeattributes attributes;
 	void destroy();
 	void createcontainers();
 	void addrecipe(irecipe recipe);
@@ -43,9 +70,12 @@ struct recipemanager {
 	void craft();
 	irecipe* searchrecipe();
 	array<irecipe>* recipelist;
-
+	void save();
 	void enable();
 	void disable();
+	unsigned int getcombinedid() {
+		return 256 * newitemlocation->containerid + resourcecontainer->containerid;
+	}
 	recipemanager(const char* filename, int sizex, int sizey);
 	recipemanager() {
 

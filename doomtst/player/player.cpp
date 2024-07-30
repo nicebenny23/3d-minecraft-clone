@@ -5,6 +5,8 @@
 #include "playerplace.h"
 #include "playermodification.h"
 #include "playereat.h"
+#include "../renderer/Window.h"
+#include "daggerthrow.h"
 using namespace player;
 entityname::entityref player::goblin;
 
@@ -25,5 +27,44 @@ void player::initplayer()
 	goblin.toent()->transform.scale = unitscale;
 	goblin.toent()->addcomponent<rigidbody>(playerfric);
 	goblin.toent()->addcomponent<playerattackcomp>();
+	goblin.toent()->addcomponent<playerdaggercomp>();
 	goblin.toent()->getcomponent <Collider>().hasrigidbody = true;
+}
+
+void player::calculateyawandpitch()
+{
+	
+		if (!ismenuopen())
+		{
+			window::setcursor(false);
+
+			float xoffset = -userinput::mouseposdt.x;
+			float yoffset = userinput::mouseposdt.y;
+
+			float sensitivity = 0.3;
+
+			if (abs(xoffset) > 180)
+			{
+				xoffset = 0;
+			}  if (abs(yoffset) > 180)
+			{
+				yoffset = 0;
+			}
+			xoffset *= sensitivity;
+			yoffset *= sensitivity;
+
+			goblin->transform.yaw += xoffset;
+			goblin->transform.pitch += yoffset;
+
+			if (goblin->transform.pitch > 89.0f)
+				goblin->transform.pitch = 89.0f;
+			if (goblin->transform.pitch < -89.0f)
+				goblin->transform.pitch = -89.0f;
+
+		}
+		else
+		{
+			window::setcursor(true);
+		}
+	
 }

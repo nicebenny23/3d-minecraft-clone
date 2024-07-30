@@ -63,17 +63,39 @@ Chunk::chunk* chunkfileload(Coord location)
 						newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.newitemlocation = new Container(newloc);
 
 					}
+					if (newchunk.blockbuf[i].hascomponent<chestcomp>())
+					{
 
+						newchunk.blockbuf[i].getcomponent<chestcomp>().men.blkcont.destroy();
+						//we created a contaner so we are going back
+						currentcontid -= 1;
+						int resourceid = randomproperties[i] & 255;
+
+				
+						newchunk.blockbuf[i].getcomponent<chestcomp>().men.blkcont=  Container(resourceid);
+				
+					}
+					if (newchunk.blockbuf[i].hascomponent<furnacecomp>())
+					{
+
+						newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.destroy();
+						//we created a contaner so we are going back
+						currentcontid -= 2;
+						int resourceid = randomproperties[i] & 255;
+
+						int newloc = randomproperties[i] / 256.f;
+						newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.resourcecontainer = new Container(resourceid);
+						newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.newitemlocation = new Container(newloc);
+
+					}
+					//if (newchunk.blockbuf[i].hascomponent<>())
+					
 					i++;
 				}
 			}
 		}
 
-		for (int ind = 0; ind < 4096; ind++)
-		{
-
-
-		}
+		
 		delete[] bytelist;
 		file.close();
 	return &newchunk;
@@ -104,6 +126,16 @@ biometype getbiometype(float biomeval){
 bool shouldbeore(float feturemap) {
 
 	if (inrange(feturemap, 0, .002f))
+	{
+		return true;
+	}
+	return false;
+
+}
+
+bool shouldbeironore(float feturemap) {
+
+	if (inrange(feturemap, .002, .02f))
 	{
 		return true;
 	}
@@ -151,7 +183,10 @@ int idfromnoise(Coord pos, float nint, float mint, float bint, float fint) {
 	{
 		neid = minecraftcrystal;
 	}
-	
+	if (shouldbeironore(fint))
+	{
+		neid = minecraftironore;
+	}
 	switch (biomeval)
 	{
 	case mossybiome:
@@ -191,7 +226,7 @@ int generatechunkvalfromnoise(Coord pos,noisemap* map, noisemap* modulatedmap, n
 
 	float modval = (mint + 1) / 2;
 	modval /= 3;
-
+	bint *= 4.f;
 	float biomebias = 2 * (sigmoid(pos.y / 300.f) - .5);
 	bint += biomebias;
 	bint = clamp(bint, -1.0f, 1.0f);
@@ -245,7 +280,7 @@ Chunk::chunk* chunkload(Coord location)
 	newchunk.blockbuf = new block[chunksize];
 	int ind = 0;
 	noisemap* map = genperlin(location * 16,  2,.5f,.1f, 1.2,normalnoise);
-	noisemap* feturemap= genperlin((location + Coord(0, 1010, 0) )* 16 , 2, .5f, .01f, 1.2, normalnoise);
+	noisemap* feturemap= genperlin((location + Coord(0, 1010, 0) )* 16 , 1, .5f, .01f, 1.2, normalnoise);
 
 	noisemap* biomemap = genperlin((location+Coord(10,202,0)) * 16, 1, .5f, .003f, 1.2, normalnoise);
 	noisemap* lavalayermap= genperlin2d(Vector3(location.x,-10,location.z) *16, 1, .5f, .03f, 1.2, normalnoise);

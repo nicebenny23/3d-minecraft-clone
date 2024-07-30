@@ -93,7 +93,7 @@ void meshname::rendermesh(mesh* torender)
 		databuf.append(vertex.y);
 		databuf.append(vertex.z);
 		databuf.append(texture.x);
-		databuf.append(texture.y);
+		databuf.append(1-texture.y);
 
 	}
 	torender->meshvbuf.bind();

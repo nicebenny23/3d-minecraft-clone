@@ -6,6 +6,8 @@
 constexpr bool debuggeneral = true;
 constexpr bool debugrender = false;
 constexpr bool generateflat = false;
+constexpr bool debugnodeath = true;
+
 inline void Assert(char* msg) {
 
 	std::cout << '\n' << msg;

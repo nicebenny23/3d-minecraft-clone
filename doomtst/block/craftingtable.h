@@ -71,9 +71,11 @@ struct craftingtablecomp :gameobject::component {
 		}
 	}
 	void ondestroy(){
-		men.blkcont.resourcecontainer->writetofile();
-
-		men.blkcont.newitemlocation->writetofile();
+		if (owner->state == gameobject::beingroughdestroyed)
+		{
+			men.blkcont.save();
+		}
+		men.blkcont.destroy();
 	}
 	void start() {
 
@@ -103,7 +105,7 @@ inline void tabledelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();
 
 	blk->removecomponent<craftingtablecomp>();
-
+	
 	blk->removecomponent<loottable>();
 }
 #endif // !wood_HPP

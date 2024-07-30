@@ -285,7 +285,13 @@ void blockrender::initblockrendering()
 	texlist[14] = "images\\rope.png";
 	texlist[15] = "images\\lava.png";
 	texlist[16] = "images\\obb.png";
+	texlist[chestfront] = "images\\chest.png";
 
+	texlist[chestside] = "images\\chestsides.png";
+	texlist[furnacefront] = "images\\furnacetop.png";
+
+	texlist[furnaceside] = "images\\furnace.png";
+	texlist[ironoretex] = "images\\ironore.png";
 	texarray = texturearray(16, 16, texlist);
 	texarray.apply();
 }

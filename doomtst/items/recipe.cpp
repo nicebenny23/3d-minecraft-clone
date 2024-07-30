@@ -1,6 +1,7 @@
 #include "recipe.h"
 
 void recipemanager::destroy() {
+
     newitemlocation->destroy();
     resourcecontainer->destroy();
 }
@@ -71,22 +72,27 @@ void recipemanager::updatestate()
 {
     item* itemincont = newitemlocation->at(0).helditem;
    
-   
-        if (enabled)
+
+    state.craftedthisframe = false;
+        if (state.enabled)
         {
+            
             resourcecontainer->update();
             
                 item* freeitem = freeditem;
-
-                newitemlocation->deletebelowzero();
-            
-
-                preview();
-                if (newitemlocation->clicked()&&freeditem==nullptr)
+                if (state.cancraft)
                 {
-                    craft();
+
+
+                    newitemlocation->deletebelowzero();
+
+
+                    preview();
+                    if (newitemlocation->clicked() && freeditem == nullptr)
+                    {
+                        craft();
+                    }
                 }
-            
         }
     
 }
@@ -146,16 +152,23 @@ ysize = sizey;
    recipefile.close();
 }
 
+void recipemanager::save()
+{
+    resourcecontainer->writetofile();
+
+    newitemlocation->writetofile();
+}
+
 void recipemanager::enable()
 {
-    enabled = true;
+    state.enabled = true;
     newitemlocation->enable();
     resourcecontainer->enable();
 }
 
 void recipemanager::disable()
 {
-    enabled = false;
+    state.enabled = false;
     newitemlocation->disable();
     resourcecontainer->disable();
 }
@@ -228,6 +241,6 @@ void recipemanager::craft() {
             resourcecontainer->databuf[i].helditem->amt -= bestrecipe->recipe[i].amt;
         }
     }
-   
+    state.craftedthisframe = true;
     newitemlocation->update();
 }

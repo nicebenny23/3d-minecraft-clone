@@ -81,7 +81,7 @@ struct chestcomp :gameobject::component {
 };
 inline void chestinit(blockname::block* blk) {
 
-	blk->mesh.setfaces(chestside, chestside, chesttop, chestside, chestside, chestside);
+	blk->mesh.setfaces(chestside, chestside, chestside, chestside, chestfront, chestside);
 	blk->solid = true;
 	blk->transparent = false;
 	blk->emitedlight = 0;
@@ -95,14 +95,14 @@ inline void chestinit(blockname::block* blk) {
 		blk->addcomponent<chestcomp>();
 
 	}
-//blk->addcomponentptr < loottable > ()->addelem(chestitem, 1, false);
+blk->addcomponentptr < loottable > ()->addelem(chestitem, 1, false);
 }
 inline void chestdelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();
 
 	blk->removecomponent<chestcomp>();
 
-	//blk->removecomponent<loottable>();
+	blk->removecomponent<loottable>();
 }
 #endif // !wood_HPP
 

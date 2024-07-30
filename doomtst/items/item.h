@@ -29,6 +29,13 @@ enum itemid {
 	crystaltorchitem=12,
 	mossitem=13,
 	ropeitem=14,
+	chestitem=15,
+	furnaceitem=16,
+	ironoreitem=17,
+	ironitem=18,
+	ironpickitem=19,
+	ironsworditem=20,
+	crystaldaggeritem=21,
 };
 enum itemstate {
 	beingheld = 0,

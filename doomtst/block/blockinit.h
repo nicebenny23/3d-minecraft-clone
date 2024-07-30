@@ -13,6 +13,9 @@
 #include "crystaltorch.h"
 #include "lava.h"
 #include "obisidian.h"
+#include "chest.h"
+#include "furnaceblock.h"
+#include "ironblock.h"
 //provides utility functions for blocks
 using namespace blockname;
 #ifndef blockinit_H
@@ -65,6 +68,16 @@ namespace blkinitname {
 		case minecraftobsidian:
 			obsidianinit(blk);
 			break;
+		case minecraftchest:
+			chestinit(blk);
+			break;
+		case minecraftfurnace:
+			furnaceinit(blk);
+			break;
+		case minecraftironore:
+			ironinit(blk);
+			break;
+
 		}
 
 		blk->state = gameobject::active;
@@ -136,6 +149,15 @@ namespace blkinitname {
 			break;
 		case minecraftobsidian:
 			obsidiandelete(blk);
+			break;
+		case minecraftchest:
+			chestdelete(blk);
+			break;
+		case minecraftfurnace:
+			furnacedelete(blk);
+			break;
+		case minecraftironore:
+			irondelete(blk);
 			break;
 		default:
 			Assert("need valid id in set blk");

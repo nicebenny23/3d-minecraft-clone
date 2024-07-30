@@ -12,7 +12,7 @@ inline void treestoneinit(blockname::block* blk) {
 
 	blk->createaabb(false);
 	blk->addcomponent<loottable>();
-	blk->mininglevel = .3;
+	blk->mininglevel = .9;
 	blk->minedfastwithpick = false;
 	blk->getcomponent<loottable>().addelem(2, 1);
 }

@@ -164,7 +164,7 @@ namespace renderer {
     void generatetexarray() {
 
 
-        
+            
     }
    
     void load()
@@ -174,7 +174,7 @@ namespace renderer {
         setprojmatrix(90, .21f, 100);
         shaderlist = dynamicarray::array<shader>(1);
         shaderlist[uishader] = shader::shader("shaders\\uivertex.vs", "shaders\\uifragment.vs");
-        shaderlist[uishader].attach();
+            shaderlist[uishader].attach();
         
        shaderlist[modelshader] = shader::shader("shaders\\modelvertex.vs", "shaders\\modelfragment.vs");
        shaderlist[modelshader].attach();
@@ -197,15 +197,15 @@ namespace renderer {
 
     void setviewmatrix(glm::mat4 viewmat)
     {
-        view = viewmat;
+            view = viewmat;
     }
 
     void clear()
     {
-        glClearColor(0, 0, 0, 0.0f);
-        glDepthMask(GL_TRUE);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glDepthMask(GL_FALSE);
+          glClearColor(0, 0, 0, 0.0f);
+            glDepthMask(GL_TRUE);
+                   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+         glDepthMask(GL_FALSE);
 
     }
 

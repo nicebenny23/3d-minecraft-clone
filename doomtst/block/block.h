@@ -25,8 +25,11 @@ enum blocktex {
 	ropetex=14,
 	lavatex=15,
 	obsidiantex=16,
-	chesttop=17,
+	chestfront=17,
 	chestside=18,
+	furnaceside=19,
+	furnacefront=20,
+	ironoretex=21,
 };
 using namespace v3;
 
@@ -49,6 +52,9 @@ namespace blockname {
 		minecraftrope=11,
 		minecraftlava=12,
 		minecraftobsidian=13,
+		minecraftchest=14,
+		minecraftfurnace=15,
+		minecraftironore=16,
 	};
 	struct blockmesh;
 	struct face {

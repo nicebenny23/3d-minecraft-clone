@@ -1,6 +1,6 @@
 #include "block.h"
 #include "liquid.h"
-#include "../entities/dmgonhit.h"
+#include "../entities/onhit.h"
 #ifndef lava_HPP
 #define lava_HPP
 inline void lavainit(blockname::block* blk) {
@@ -11,13 +11,13 @@ inline void lavainit(blockname::block* blk) {
 	blk->mesh.scale = blockname::unitscale;
 	blk->addcomponent<liquidprop>(5);
 	blk->createaabb(true);
-	blk->addcomponent<dmgplayeronhit>(1,"entity",false);
+	blk->addcomponent<dmgonhit>(1,"entity",false);
 	blk->minedfastwithpick = false;
 }
 inline void lavadelete(blockname::block* blk) {
 	blk->removecomponent<liquidprop>();
 	blk->removecomponent < aabb::Collider>();
-	blk->removecomponent<dmgplayeronhit>();
+	blk->removecomponent<dmgonhit>();
 }
 
 #endif // !wood_HPP

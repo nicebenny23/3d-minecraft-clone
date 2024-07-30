@@ -2,7 +2,7 @@
 #include "../block/block.h"
 #ifndef mossitem_HPP
 #define mossitem_HPP
-#define mossitemblockid -1
+#define mossitemblockid blockname::minecraftlava
 inline void initmossitem(item* itm) {
 	itm->pickaxepower = 1;
 	itm->foodval = 2;

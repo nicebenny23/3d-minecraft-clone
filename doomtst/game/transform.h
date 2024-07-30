@@ -18,6 +18,7 @@ struct Transform
 	void rotate(float ptch,float yw);
 	v3::Vector3 getnormaldirection();
 	void orient(v3::Vector3 to);
+	void orientbase(v3::Vector3 base);
 };
 glm::mat4 transformtomat(Transform& transform);
 glm::mat4 tcompose(Transform& t1, Transform& t2);

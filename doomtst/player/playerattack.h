@@ -2,6 +2,7 @@
 #include "../game/entitystate.h"
 #include "../world/voxeltraversal.h"
 #include "../game/collision.h"
+#include "../game/entityutil.h"
 #ifndef playeratt_HPP
 #define playeratt_HPP
 struct playerattackcomp:gameobject::component
@@ -44,14 +45,15 @@ struct playerattackcomp:gameobject::component
 		}
 		if (closest.box->owner->hascomponent<estate>()&&userinput::mouseleft.pressed)
 		{
+			if (closest.box->owner->hascomponent<rigidbody>())
+			{
+				kb(closest.colpoint, 7,& toent(closest.box->owner));
+				
+			}
 			int dmgdone = computeattackdmg();
 			closest.box->owner->getcomponent<estate>().damage(dmgdone);
 			wearduribilty();
-			if (closest.box->owner->hascomponent<rigidbody>())
-			{
-				
-				closest.box->owner->getcomponent<rigidbody>().velocity-= normal(toent(owner).transform.position-closest.colpoint)*8;
-			}
+		
 		}
 
 	}

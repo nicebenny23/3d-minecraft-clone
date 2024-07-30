@@ -31,16 +31,20 @@ v3::Vector3 Transform::getnormaldirection()
     return v3::normal(direction);
 }
 
+
+void Transform::orientbase(v3::Vector3 base)
+{
+    base= normal(base);
+    float newpitch = -std::asin(base.y);
+    float newyaw = std::atan2(base.z, base.x);
+    pitch = glm::degrees(newpitch);
+    yaw = glm::degrees(newyaw);
+}
 void Transform::orient(v3::Vector3 to)
 {
     to -= position;
 
- 
-    to = normal(to);
-    float newpitch = -std::asin(to.y);
-	float newyaw = std::atan2(to.z, to.x);
-	pitch = glm::degrees(newpitch);
-	yaw = glm::degrees(newyaw);
+    orientbase(to);
 }
 // Convert a Transform to a glm::mat4
 glm::mat4 transformtomat( Transform& transform) {

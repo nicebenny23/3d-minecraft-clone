@@ -106,18 +106,28 @@ const char* Chunk::getcorefilename(Coord pos)
 
 	return 	strng->data();
 }
-void appendspecialbytelist(array<byte>& bytelist, int index, block* blk) {
+void appendspecialbytelist(array<short>& bytelist, int index, block* blk) {
 
 	liquidprop* getliq = blk->getcomponentptr<liquidprop>();
 	if (getliq != nullptr)
 	{
-		bytelist[8192 + 2 * index] = getliq->liqval;
-		bytelist[8192 + 2 * index + 1] = 0;
+		bytelist[4096+ index] = getliq->liqval;
+
 	}
 	if (blk->hascomponent<craftingtablecomp>())
 	{
-		bytelist[8192 + 2 * index] = blk->getcomponent<craftingtablecomp>().men.blkcont.resourcecontainer->containerid;
-		bytelist[8192 + 2 * index+ 1] =blk->getcomponent<craftingtablecomp>().men.blkcont.newitemlocation->containerid;
+		
+		bytelist[4096+index] =blk->getcomponent<craftingtablecomp>().men.blkcont.getcombinedid();
+
+	}
+	if (blk->hascomponent<chestcomp>())
+	{
+		bytelist[4096 + index] = blk->getcomponent<chestcomp>().men.blkcont.containerid;
+		
+	}
+	if (blk->hascomponent<furnacecomp>())
+	{
+		bytelist[4096 + index] = blk->getcomponent<furnacecomp>().men.blkcont.getcombinedid();
 
 	}
 }
@@ -127,19 +137,19 @@ void Chunk::chunk::write()
 	const char* name = getcorefilename(loc);
 
 	safefile file = safefile(getcorefilename(loc), filewrite);
-	array<byte> bytelist = array<byte>();
+	array<short> bytelist = array<short>();
 	for (int i = 0; i < chunksize; i++)
 	{
-		bytelist[2 * i] = blockbuf[i].id;
-		bytelist[2 * i + 1] = blockbuf[i].mesh.direction | (blockbuf[i].mesh.attachdir * 8);
+		int v1= blockbuf[i].id;
+		int v2= blockbuf[i].mesh.direction | (blockbuf[i].mesh.attachdir * 8);
+		bytelist[i] = v1 |(256*v2);
 	}
 	for (int i = 0; i < chunksize; i++)
 	{
-		bytelist[8192 + 2 * i] = 0;
-		bytelist[8192 + 2 * i + 1] = 0;
+		bytelist[4096 + i] = 0;
 		appendspecialbytelist(bytelist, i, &blockbuf[i]);
 	}
-	file.write<byte>(bytelist.getdata(), bytelist.length);
+	file.write<short>(bytelist.getdata(), bytelist.length);
 	bytelist.destroy();
 	file.close();
 }

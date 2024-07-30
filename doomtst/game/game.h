@@ -22,7 +22,7 @@
 #include "../util/fileloader.h"
 #include "../renderer/textrender.h"
 #include "../player/player.h"
-#include "../entities/dmgonhit.h"
+#include "../entities/onhit.h"
 #include "../entities/slime.h"
 #include "../game/navigation.h"
 #include "../entities/entityspawner.h"
@@ -82,7 +82,7 @@ void init() {
     std::string o1 = std::string("C:/Users/bchar/source/repos/doomtst/doomtst/worldstorage");
 
     std::string o2 = std::string("C:/Users/User/source/repos/nicebenny23/3d-minecraft-clone/doomtst/worldstorage");
-    deleteFilesInFolder(o1);
+    deleteFilesInFolder(o2);
 
     timename::inittime();
     randominit();

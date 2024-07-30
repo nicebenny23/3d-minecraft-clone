@@ -11,7 +11,7 @@ namespace camera {
 	extern glm::vec3 campos;
 	v3::Vector3 direction();
 	void initilize();
-	void calculateyawandpitch();
+	void updatetoplayer();
 	void sendoffviewmatrix();
 	void setcamerapos(v3::Vector3 newpos);
 	void cameraupdate();

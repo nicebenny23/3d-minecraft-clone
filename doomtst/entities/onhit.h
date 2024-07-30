@@ -2,14 +2,49 @@
 #include "../game/collision.h"
 #include "../player/playerhealth.h"
 #include "../game/rigidbody.h"
+#include "../game/entityutil.h"
 #ifndef dmgonhit_HPP
 #define dmgonhit_HPP
-struct dmgplayeronhit:gameobject::component
+struct destroyonhit :gameobject::component {
+
+	std::string tagtoeffect;
+	int dmgdone;
+	destroyonhit(int dmg, std::string affecttag) {
+		priority = 1111;
+		tagtoeffect = affecttag;
+		dmgdone = dmg;
+	
+	}
+	void oncollision(gameobject::obj* collidedwith) {
+
+		
+			if (tagtoeffect.length() == 0)
+			{
+				if (!collidedwith->getcomponent<Collider>().effector)
+				{
+					entityname::destroy(&objutil::toent(owner), false);
+				}
+				
+				return;
+			}
+		if (collidedwith->type == gameobject::entity)
+		{
+			if (objutil::toent(collidedwith).hastag(tagtoeffect))
+			{
+entityname::destroy(&objutil::toent(owner),false);
+			}
+		}
+	}
+
+
+	destroyonhit() = default;
+};
+struct dmgonhit:gameobject::component
 {
 	bool hasknockback;
 	std::string tagtoeffect;
 	int dmgdone;
-	dmgplayeronhit(int dmg,std::string affecttag,bool givekb) {
+	dmgonhit(int dmg,std::string affecttag,bool givekb) {
 		priority = 1111;
 		tagtoeffect=affecttag ;
 		dmgdone = dmg;
@@ -30,7 +65,7 @@ struct dmgplayeronhit:gameobject::component
 					if (hasknockback)
 					{
 
-						collidedwith->getcomponent<rigidbody>().velocity -= normal(center - othercenter) * 7;
+					kb( center, 7,&objutil::toent(collidedwith));
 
 					}
 					collidedwith->getcomponent<rigidbody>().inliquid = true;

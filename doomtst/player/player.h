@@ -13,6 +13,7 @@ namespace player {
 	extern entityname::entityref goblin;
 	void initplayer();
 	extern bool playeractive;
+	void calculateyawandpitch();
 }
 
 #endif // !player_H

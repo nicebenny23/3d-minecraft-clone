@@ -196,8 +196,12 @@ void gridutil::destroyblockatloc(int x, int y, int z)
 		{
 			block* blockatpos = getobjatgrid(dirfromint(blkind) + location->pos);
 			for (int faceind = 0; faceind < 6; faceind++) {
-				computecover((blockatpos->mesh)[faceind]);
+				if (blockatpos!=nullptr)
+				{
 
+					computecover((blockatpos->mesh)[faceind]);
+
+				}
 			}
 		}
 	}
