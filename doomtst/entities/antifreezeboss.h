@@ -12,18 +12,52 @@
 #include "crystaldaggers.h"
 #ifndef ultraantifreezefinalboss_HPP
 #define ultraantifreezefinalboss_HPP
+enum bosstate {
+    following=0,
+    shooting=1,
 
+};
 struct firedaggerfinalboss :gameobject::component {
-
+    float timetillshoot;
+    bosstate state;
     void update(){
+        Transform& currtransform = owner->getcomponent<model>()[0].transform;
+        Vector3 pos = player::goblin->transform.position;
+        if (state == following)
+        {
 
-        if (random() < timename::smoothdt) {
+
+      
+            //currtransform.position = pos;
+            currtransform.orient(pos);
+            currtransform.position += currtransform.getnormaldirection() * .01f;
+
+            if (random() < timename::smoothdt * 1 / 20.f) {
+                state = shooting;
+                timetillshoot = 1;
+            }
             
-            v3::Vector3 pos = owner->getcomponent<model>()[0].transform.position + owner->getcomponent<model>()[0].transform.getnormaldirection()*4;
-            Vector3 velocity = normal(pos - player::goblin.toent()->transform.position)*-6;
-            spawndagger(pos, velocity, 0);
         }
+        if (state == shooting)
+        {
+            currtransform.orientbase(Vector3(0, 1, 0));
+            currtransform.position += currtransform.getnormaldirection() * .01f;
 
+            //currtransform.position += Vector3(1, 0, 0)*.002f;
+            if (timetillshoot<0)
+            {
+
+                v3::Vector3 pos = owner->getcomponent<model>()[0].transform.position + owner->getcomponent<model>()[0].transform.getnormaldirection() * 4;
+                Vector3 velocity = normal(pos - player::goblin.toent()->transform.position) * -6;
+                spawndagger(pos, velocity, 0);
+
+            }
+            if (timetillshoot<-.1)
+            {
+                state == following;
+            }
+            timetillshoot -= timename::smoothdt;
+        }
     }
 
 };
@@ -35,7 +69,7 @@ inline entityname::entityref createfinalboss(v3::Vector3 pos) {
     //  refmodel.toent()->getcomponent<model>().add("slime2.obj", "images\\slimetex.png");
     for (int i = 0; i <160; i++)
     {
-        refmodel.toent()->getcomponent<model>().add("objs\\finalboss.obj", "images\\bosstex.png", Vector3(i, 0, 0));
+        refmodel.toent()->getcomponent<model>().add("newtest.obj", "images\\bosstex.png", Vector3(i, 0, 0));
         refmodel.toent()->addcomponentptr<aabb::Collider>(Vector3(i,0,0), unitscale, true)->isunmovable=true;
 
         refmodel.toent()->getcomponent<model>()[i].transform.yaw = 0;

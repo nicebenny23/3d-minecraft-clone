@@ -17,14 +17,23 @@ struct playerdaggercomp :gameobject::component
 		}
 	}
 	void update() {
-
+		item* select = owner->getcomponent<inventory>().selected;
+		if (select==nullptr)
+		{
+			return;
+		}
+	
 		if (userinput::mouseleft.pressed)
 		{
-
+			if (select->id!=crystaldaggeritem)
+			{
+				return;
+			}
 			Vector3 spawpos = toent(owner).transform.position + toent(owner).transform.getnormaldirection()*3;
 			Vector3 velocity = toent(owner).transform.getnormaldirection() * 10;
 
 			spawndagger(spawpos, velocity);
+			wearduribilty();
 		}
 	}
 	playerdaggercomp() {

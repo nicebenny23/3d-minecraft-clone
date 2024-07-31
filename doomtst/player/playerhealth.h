@@ -3,6 +3,7 @@
 #include "../game/gameobject.h"
 #include <conio.h>
 #include "../game/entitystate.h"
+#include "playerinventory.h"
 #ifndef playerhealth_HPP
 #define playerhealth_HPP
 struct playerhealth:gameobject::component
@@ -26,6 +27,16 @@ struct playerhealth:gameobject::component
 		}
 	}
 	void update() {
+		float dmgmul = 1;
+		for (int i = 0; i < 2; i++)
+		{
+			item* itm = owner->getcomponent<inventory>().playermenu.armor.at(i).helditem;
+			if (itm!=nullptr)
+			{
+				dmgmul *= itm->properties.dmg;
+			}
+		}
+		owner->getcomponent<estate>().damagemultiplyer = dmgmul;
 		int health = owner->getcomponent<estate>().health;
 		if (health<=0)
 		{

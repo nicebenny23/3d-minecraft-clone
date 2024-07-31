@@ -8,28 +8,32 @@ struct inventorymen :menu
 {
 	Container blkcont;
 	Container armor;
+	Container deletecont;
 	recipemanager manager;
 	inventorymen(v2::Vector2 size) {
 		menubox = newbox("images\\menutex.png", size, v2::zerov, 11);
 		
 		menubox->shouldrender = false;
 		
-		manager=recipemanager("2x2craft.txt", 1, 1);
+		manager=recipemanager("crafting\\2x2craft.txt", 1, 1);
 		blkcont = Container(8, 4, 0, 0);
-		armor= Container(1, 4, 5, 0);
+		armor= Container(1, 2, 5, 4);
+		deletecont = Container(1, 1, 5, -5);
 		enabled = false;
-		 
+		armor.at(0).setdecal(leggingdecal);
+		armor.at(1).setdecal(chestdecal);
 	}
 	void custominit() {
 
 	}
 	void customopen() {
-
+		deletecont.enable();
 		manager.enable();
 		blkcont.enable();
 		armor.enable();
 	}
 	void customclose() {
+		deletecont.disable();
 		armor.disable();
 		blkcont.disable();
 		manager.disable();
@@ -39,6 +43,9 @@ struct inventorymen :menu
 
 		if (enabled)
 		{
+			deletecont.update();
+			deletecont.at(0).setdecal(destroydecal);
+			deletecont.at(0).destroyitem();
 			manager.updatestate();
 			blkcont.update();
 			armor.update();
@@ -102,12 +109,12 @@ struct inventory :gameobject::component
 
 			if (prevselectedind != -1)
 			{
-				hotbar.at(prevselectedind).makeunimportant();
+				hotbar.at(prevselectedind).setdecal(normaldecal);
 			}
 			if (selectedind!=-1)
 			{
 
-				hotbar.at(selectedind).makeimportant();
+				hotbar.at(selectedind).setdecal(importantdecal);
 
 			}
 		}
@@ -128,6 +135,8 @@ struct inventory :gameobject::component
 		updateitem(freeditem);
 		if (openmenu!=nullptr)
 		{
+			playermenu.armor.disable();
+
 			playermenu.manager.disable();
 		}
 		

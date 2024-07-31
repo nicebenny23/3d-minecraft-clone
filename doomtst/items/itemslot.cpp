@@ -14,11 +14,11 @@ Box2d getboxfrominvloc(int xloc, int yloc) {
 
 itemslot::itemslot(int xloc, int yloc) {
 	Box2d frameboxsize = getboxfrominvloc(xloc, yloc);
-	frame = uirender::newbox("images\\blockholder.png", frameboxsize.scale, frameboxsize.center, 13);
+	framedecal = uirender::newbox("images\\blockholder.png",frameboxsize.scale, frameboxsize.center, 13);
 	helditem = nullptr;
-	important = false;
+
+	dtype = normaldecal;
 	
-	important = false;
 }
 
 
@@ -38,14 +38,14 @@ void itemslot::givefreeamt(int amt)
 	{
 		freeditem = inititem(helditem->id,0);
 		
-		freeditem->setviewable(frame->shouldrender);
-		
+		freeditem->setviewable(framedecal->shouldrender);
+
 		freeditem->state = beingheld;
 	}
 	freeditem->amt += amt;
 	helditem->amt -= amt;
 	freeditem->updateui();
-	freeditem->itemui.itemsprite->box.center = frame->box.center;
+	freeditem->itemui.itemsprite->box.center = framedecal->box.center;
 
 
 }
@@ -56,10 +56,10 @@ void itemslot::giveitem(int id,int amt) {
 		return;
 	}
 	helditem = inititem(id,amt);
-	helditem->setviewable(frame->shouldrender);
+	helditem->setviewable(framedecal->shouldrender);
 	helditem->state = ininventoryblock;
 	
-	helditem->itemui.itemsprite->box.center = frame->box.center;
+	helditem->itemui.itemsprite->box.center = framedecal->box.center;
 
 }
 void itemslot::transferitem(item* otherholder) {
@@ -79,7 +79,7 @@ void itemslot::transferitem(item* otherholder) {
 
 		helditem->state = ininventoryblock;
 
-		helditem->itemui.itemsprite->box.center = frame->box.center;
+		helditem->itemui.itemsprite->box.center = framedecal->box.center;
 
 	}
 
@@ -93,32 +93,56 @@ void itemslot::destroyitem() {
 }
 
 void itemslot::enable() {
-	frame->shouldrender = true;
+	
+	framedecal->shouldrender = true;
 	if (helditem != nullptr && helditem->itemui.itemsprite != nullptr) {
 		helditem->setviewable(true);
 	}
 }
-void itemslot::makeimportant()
+void itemslot::setdecal(decaltype toset)
 {
-	if (!important) {
-		frame->tex.destroy();
-		frame->tex = texture("images\\importantblockholder.png", png);
-		important = true;
-	}
-}
-void itemslot::makeunimportant()
-{
-	if (important)
+	if (toset==dtype)
 	{
-		frame->tex.destroy();
-		frame->tex = texture("images\\blockholder.png", png);
-		important = false;
+		return;
 	}
+	if (dtype==destroydecal)
+	{
+		return;
+	}
+	dtype = toset;
+	if (toset==importantdecal) {
+		
+		framedecal->tex = texture("images\\importantblockholder.png", png);
 	
+		return;
+	}
+	if (toset == normaldecal) {
+		framedecal->tex = texture("images\\blockholder.png", png);
 	
+		return;
+	}
+	if (toset == destroydecal) {
+
+		framedecal->tex = texture("images\\x.png", png);
+		
+		return;
+	}
+	if (toset == leggingdecal) {
+
+		framedecal->tex = texture("images\\leggingdecal.png", png);
+
+		return;
+	}
+	if (toset == chestdecal) {
+
+		framedecal->tex = texture("images\\chestdecal.png", png);
+
+		return;
+	}
 }
 void itemslot::disable() {
-	frame->shouldrender = false;
+
+	framedecal->shouldrender = false;
 	if (helditem != nullptr && helditem->itemui.itemsprite != nullptr) {
 		helditem->setviewable(false);
 	}
@@ -126,7 +150,7 @@ void itemslot::disable() {
 bool itemslot::hasbeenleftclicked()
 {
 	
-		if (frame->mouseonblock() && userinput::mouseleft.pressed) {
+		if (framedecal->mouseonblock() && userinput::mouseleft.pressed) {
 
 			return true;
 		}
@@ -136,7 +160,7 @@ bool itemslot::hasbeenleftclicked()
 bool itemslot::hasbeenrightclicked()
 {
 
-	if (frame->mouseonblock() && userinput::mouseright.pressed) {
+	if (framedecal->mouseonblock() && userinput::mouseright.pressed) {
 
 		return true;
 	}

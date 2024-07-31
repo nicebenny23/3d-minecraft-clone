@@ -10,7 +10,7 @@ void inventory::givestartitems(int i1, int i2) {
 	if (i2 != 0)
 	{
 
-		hotbar.at(1).giveitem(i2, 10);
+		hotbar.at(1).giveitem(i2, 100);
 
 	}
 }
@@ -26,5 +26,5 @@ inventory::inventory()
 		hotbar = Container(6, 1, 0, -4.5);
 		hotbar.enable();
 		selected = nullptr;
-		givestartitems(treestoneitem, craftingtableitem);
+		givestartitems(treestoneitem, crystaldaggeritem);
 }

@@ -10,7 +10,7 @@ inline void ironinit(blockname::block* blk) {
 	blk->mesh.scale = blockname::unitscale;
 
 	blk->createaabb(false);
-	blk->mininglevel = 4;
+	blk->mininglevel = 3;
 	blk->minedfastwithpick = true;
 	blk->addcomponentptr<loottable>()->addelem(crystalitem, 2, true);
 }

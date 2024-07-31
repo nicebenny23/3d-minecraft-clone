@@ -13,6 +13,7 @@ struct estate :gameobject::component
 	int health;
 	bool prevonground;
 	int maxhealth;
+	float damagemultiplyer;
 	v3::Vector3 velocitylast;
 	float lastongroundy;
 	float invincablilitymax;
@@ -56,10 +57,12 @@ struct estate :gameobject::component
 	estate(int maxhp, bool falls) {
 		maxhealth = maxhp;
 		health = maxhp;
+		damagemultiplyer = 1;
 		invincablilitymax = 1;
 		takesfalldmg = falls;
 	}
 	void damage(int dmg) {
+		dmg = dmg * damagemultiplyer;
 		if (dmg <= 0)
 		{
 			return;

@@ -3,9 +3,9 @@
 #define crystalpickitem_HPP
 #define crystalpickblockid -1
 inline void crystalpickinit(item* itm) {
-	itm->properties.pickaxepower = 10;
+	itm->properties.pickaxepower = 7;
 	itm->properties.placeable = false;
-	itm->maxamt = 256;
+	itm->maxamt = 512;
 	itm->amt = 256;
 	itm->itemtype = wear;
 	itm->itemui.itemsprite = createitembox("images\\crystalpick.png");

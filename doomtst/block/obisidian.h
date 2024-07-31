@@ -10,7 +10,7 @@ inline void obsidianinit(blockname::block* blk) {
 	blk->mesh.scale = blockname::unitscale;
 
 	blk->createaabb(false);
-	blk->mininglevel = 4;
+	blk->mininglevel = 5;
 	blk->minedfastwithpick = true;
 	//blk->addcomponentptr<loottable>()->addelem(obsidianitem, 2, true);
 }

@@ -15,6 +15,9 @@ struct Container
 		for (int i = 0; i < databuf.length; i++)
 		{
 			databuf[i].destroyitem();
+			databuf[i].framedecal->destroy();
+
+			databuf[i].framedecal->destroy();
 		}
 		databuf.destroy();
 	}
@@ -40,7 +43,7 @@ struct Container
 		for (int i = 0; i < databuf.length; i++)
 		{
 			itemslot* slt = &databuf[i];
-			if (slt->frame->mouseonblock()) {
+			if (slt->framedecal->mouseonblock()) {
 				return true;
 			}
 		}

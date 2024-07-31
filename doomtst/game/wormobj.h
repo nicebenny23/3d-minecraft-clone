@@ -19,13 +19,7 @@ struct worm:gameobject::component
 	}
 	void update() {
 		
-		Transform& currtransform = owner->getcomponent<model>()[0].transform;
-		Vector3 pos = player::goblin->transform.position;
-		//currtransform.position = pos;
-		currtransform.orient(pos);
-		
-		//currtransform.position += Vector3(1, 0, 0)*.002f;
-		currtransform.position +=currtransform.getnormaldirection()* .01f;
+	
 		updateglobals();
 	}
 	void updateglobals() {

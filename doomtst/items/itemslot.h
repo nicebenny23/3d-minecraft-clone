@@ -9,6 +9,14 @@ using namespace v3;
 #define invblock_HPP
 const int xamt = 20;
 const int yamt = 30;
+enum decaltype {
+
+	normaldecal = 0,
+	importantdecal = 1,
+	destroydecal = 2,
+	leggingdecal=3,
+	chestdecal=4,
+};
 struct itemslot
 {
 	itemslot() {
@@ -19,9 +27,10 @@ struct itemslot
 
 	//(0...9),(0...14)
 	Coord location;
-	uirender::uibox* frame;
 	
-	bool important;
+	uirender::uibox* framedecal;
+	decaltype dtype;
+	
 	itemslot(int xloc, int yloc);
 	bool empty() {
 
@@ -32,8 +41,8 @@ struct itemslot
 	void transferitem(item* otherholder);
 	void destroyitem();
 	void enable();
-	void makeimportant();
-	void makeunimportant();
+	void setdecal(decaltype toset);
+	
 	void disable();
 	bool hasbeenrightclicked();
 	bool hasbeenleftclicked();

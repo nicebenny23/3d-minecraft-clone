@@ -16,7 +16,7 @@ struct furnacemenu :menu {
 		menubox->shouldrender = false;
 		menutype = normalmenu;
 
-		blkcont = recipemanager("furnace.txt", 1,1);
+		blkcont = recipemanager("crafting\\furnace.txt", 1,1);
 		
 		enabled = false;
 

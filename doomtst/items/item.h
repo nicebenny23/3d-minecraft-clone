@@ -74,13 +74,14 @@ struct item
 		float foodval;
 
 		int dmg;
-
+		float armor;
 		bool placeable;
 		itemproperties() {
 
 			pickaxepower = 0;
 			foodval = 0;
 			dmg = 1;
+			armor = 1;
 			placeable = false;
 		}
 		

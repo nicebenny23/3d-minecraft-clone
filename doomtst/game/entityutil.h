@@ -15,7 +15,7 @@ inline void kb(Vector3 point, float force,entityname::entity* ent) {
 
 			if (ent->hascomponent<rigidbody>())
 			{
-				Vector3 forceval = point - objutil::toent(ent).transform.position;
+				Vector3 forceval = point -objutil::toent(ent).transform.position;
 				forceval = normal(forceval);
 				forceval *= force;
 
