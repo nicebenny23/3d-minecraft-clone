@@ -117,7 +117,8 @@ namespace gameobject {
 		objstate state;
 		template <class T>
 		T& getcomponent();
-
+		template <class T>
+		T* getcomponent(int i);
 		template <class T>
 		T* getcomponentptr();
 		template <class T>
@@ -127,7 +128,8 @@ namespace gameobject {
 		void removecomponent();
 
 		
-
+		template <class T>
+		array<T*>  getcomponents();
 
 		template <class T, typename... types>
 		void addcomponent(types&&... initval);
@@ -206,6 +208,27 @@ namespace gameobject {
 		static_assert("", "");
 	}
 
+	template<class T>
+	inline T* obj::getcomponent(int i)
+	{
+		int id = compidfromname((char*)(typeid(T).name()));
+		if (id == -1)
+		{
+			Assert("trying to get undefined component");
+		}
+		for (int i1 = 0; i1 < complist.length; i1++)
+		{
+
+			if (id == complist[i1]->id&&i==0) {
+
+
+				return ((T*)complist[i1]);
+			}
+			i--;
+		}
+		Assert("couldnet be found");
+	}
+
 
 	template<class T>
 	inline T* obj::getcomponentptr()
@@ -271,6 +294,25 @@ namespace gameobject {
 		complist.append(comp);
 		return comp;
 	}
+
+	template<class T>
+	inline array<T*> obj::getcomponents()
+	{
+		int id = idfromnameadd((char*)(typeid(T).name()));
+		if (id == -1)
+		{
+			Assert("compopnent does not exist");
+		}
+		array<T*> comps = *(new array<T*>());
+		for (int i = 0; i < complist.length; i++)
+		{
+			if (id == complist[i]->id) {
+				comps.append((T*)(complist[i]));
+			}
+		}
+		return comps;
+	}
+	
 
 	template <class T, typename... types>
 

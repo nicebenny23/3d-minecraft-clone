@@ -52,12 +52,12 @@ inline entityname::entityref createslime(v3::Vector3 pos) {
     entityname::entityref refmodel = entityname::createentity(pos, "slime");
    
   //  refmodel.toent()->getcomponent<model>().add("slime2.obj", "images\\slimetex.png");
-   refmodel.toent()->addcomponentptr<model>()->add("testobj.obj", "images\\slimetex.png");
+   refmodel.toent()->addcomponentptr<model>()->add("slime2.obj", "images\\slimetex.png");
     refmodel.toent()->addcomponentptr<loottable>()->addelem(slimeballitem, 1, false);
     refmodel.toent()->addcomponent<estate>(10, false);
     refmodel.toent()->addcomponent<aabb::Collider>(zerov, unitscale/2, true);
 
-    refmodel.toent()->addcomponent<dmgonhit>(6,"player",true);
+    refmodel.toent()->addcomponent<dmgonhit>(6,"player",6);
     refmodel.toent()->addcomponent<rigidbody>();
     refmodel.toent()->addcomponent<navigator>(player::goblin, getneighborslime);
     refmodel.toent()->addcomponent<slimemove>();

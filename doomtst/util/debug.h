@@ -5,8 +5,8 @@
 //good
 constexpr bool debuggeneral = true;
 constexpr bool debugrender = false;
-constexpr bool generateflat = false;
-constexpr bool debugnodeath = true;
+constexpr bool generateflat = true;
+constexpr bool debugnodeath = false;
 
 inline void Assert(char* msg) {
 
@@ -25,7 +25,7 @@ inline void preAssert(char* msg) {
 inline void Assert(const char* msg) {
 
 	std::cout << '\n' << msg;
-	std::abort();
+    	std::abort();
 }
 
 

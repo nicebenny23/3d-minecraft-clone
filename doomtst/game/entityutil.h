@@ -5,17 +5,22 @@
 
 
 inline void kb(Vector3 point, float force,entityname::entity* ent) {
-	if (ent->getcomponent<estate>().timetilldmg <= 0)
+	if (ent->hascomponent<estate>())
 	{
 
 
-		if (ent->hascomponent<rigidbody>())
+		if (ent->getcomponent<estate>().timetilldmg <= 0)
 		{
-			Vector3 forceval = point - objutil::toent(ent).transform.position;
-			forceval = normal(forceval);
-			forceval *= force;
-			
-			ent->getcomponent<rigidbody>().velocity += forceval;
+
+
+			if (ent->hascomponent<rigidbody>())
+			{
+				Vector3 forceval = point - objutil::toent(ent).transform.position;
+				forceval = normal(forceval);
+				forceval *= force;
+
+				ent->getcomponent<rigidbody>().velocity -= forceval;
+			}
 		}
 	}
 }

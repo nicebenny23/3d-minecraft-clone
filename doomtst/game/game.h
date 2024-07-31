@@ -28,7 +28,7 @@
 #include "../entities/entityspawner.h"
 // settings
 #include "../renderer/grandrenderer.h"
-
+#include "../entities/antifreezeboss.h"
 #include "../world/noise.h"
 
 #ifndef game_HPP
@@ -46,7 +46,7 @@ void endupdate() {
 void preupdate() {
 
 
-    camera::setcamerapos(player::goblin.toent()->transform.position);
+    camera::setcamerapos(player::goblin.toentnotnull()->transform.position);
 
     timename::calcfps();
 
@@ -54,7 +54,21 @@ void preupdate() {
 
 
 }
+void testtransform() {
 
+    
+    for (int i = 0; i < 300; i++)
+    {
+        Transform a = Transform();
+        Vector3 l = randompointonsphere(Vector3(1, 0, i));
+        a.orient(l);
+        if (!apx( a.getnormaldirection(),l))
+        {
+            Assert("ttestfail");
+        }
+    }
+  
+}
 void updateobjs() {
 
 
@@ -82,11 +96,11 @@ void init() {
     std::string o1 = std::string("C:/Users/bchar/source/repos/doomtst/doomtst/worldstorage");
 
     std::string o2 = std::string("C:/Users/User/source/repos/nicebenny23/3d-minecraft-clone/doomtst/worldstorage");
-    deleteFilesInFolder(o1);
+    deleteFilesInFolder(o2);
 
     timename::inittime();
     randominit();
-    window::createcurwindow(1600, 1200);
+    window::createwindow(1600, 1200);
     userinput::initiate();
     gameobject::initmap();
     entityname::initobjs();
@@ -107,7 +121,7 @@ void init() {
     blockrender::initblockrendering();
     camera::initilize();
 
-
+    createfinalboss(zerov);
 
 
 
@@ -117,7 +131,7 @@ void init() {
     gridutil::redolighting();
     uirender::newbox("images\\crosshair.png", v2::unitv / 32, v2::zerov, -3);
     userinput::endupdate();
-
+  
     glfwSwapInterval(0);
 }
 void render() {
@@ -130,7 +144,7 @@ void rungame()
 {
 
     init();
-   
+    testtransform();
 
 
     float lastupdate = 0;

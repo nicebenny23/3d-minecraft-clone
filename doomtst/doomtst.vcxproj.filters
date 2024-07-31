@@ -359,9 +359,6 @@
     <ClInclude Include="player\playerattack.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="entities\dmgonhit.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="block\craftingtable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -435,6 +432,54 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="renderer\grandrenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\furnaceblock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\ironblock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\crystaldaggers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\onhit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\rotatetovelocity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\entityutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\chestitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\crystaldagger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\furnaceitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\ironitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\ironoreitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\ironpick.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\ironsword.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\daggerthrow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\antifreezeboss.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\wormobj.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

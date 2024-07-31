@@ -110,8 +110,9 @@ void entityname::destroy(entity* ent,bool soft)
 		{
 			ent->state = gameobject::beingroughdestroyed;
 		}
+		todelete.append(ent);
 	}
-	todelete.append(ent);
+	
 }
 struct entitycomponentindexer
 {
@@ -166,9 +167,27 @@ void entityname::runupdateloop() {
 	{
 		
 		if (objectfromguid.at(i) != nullptr) {
+			
 			if (grid::getobjatgrid(objectfromguid.at(i)->transform.position,true)==nullptr)
 			{
-				destroy(objectfromguid.at(i), false);
+				Vector3 mm = camera::campos;
+				Vector3 griddd = grid::gridpos;
+				entity* ent = objectfromguid.at(i);
+				if (ent->hastag("player"))
+				{
+					block* n = grid::getobjatgrid(objectfromguid.at(i)->transform.position, true);
+					
+				//	Assert("cant destroy player");
+				}
+				else
+				{
+					if (objectfromguid.at(i)->canbedestroyed)
+					{
+
+						destroy(objectfromguid.at(i), false);
+
+					}
+				}
 			}
 
 

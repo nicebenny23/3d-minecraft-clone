@@ -20,9 +20,13 @@ struct estate :gameobject::component
 	void update() {
 
 		timetilldmg -= timename::smoothdt;
-		velocitylast = owner->getcomponent<rigidbody>().velocity * .03f + velocitylast * .97f;
-		testfalldamage();
-		prevonground = owner->getcomponent<rigidbody>().isonground;
+		if (owner->hascomponent<rigidbody>())
+		{
+			velocitylast = owner->getcomponent<rigidbody>().velocity * .03f + velocitylast * .97f;
+			testfalldamage();
+			prevonground = owner->getcomponent<rigidbody>().isonground;
+		}
+		
 	}
 	void testfalldamage() {
 		if (takesfalldmg)
@@ -60,7 +64,7 @@ struct estate :gameobject::component
 		{
 			return;
 		}
-		if (dmg < 0)
+		if (timetilldmg < 0)
 		{
 
 			timetilldmg = invincablilitymax;
@@ -74,10 +78,7 @@ struct estate :gameobject::component
 				}
 				else
 				{
-					if (debugnodeath)
-					{
-						health +=dmg;
-					}
+					
 				}
 			}
 			health = clamp(health, 0, maxhealth);

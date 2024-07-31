@@ -15,17 +15,19 @@ using namespace vobj;
 #ifndef  mesh_H
 #define  mesh_H
 namespace meshname {
-
+	
 	struct mesh
 	{
-
 		float yaw;
 		float pitch;
 		v3::Vector3 pos;
 		void setmodeluniform();
+		
+		void setmodeluniform(glm::mat4 model);
+
 		texture tex;
 		mesh();
-		Transform* modeltranform;
+	
 		Transform transform;
 		array<Vector3> vertices;
 		array<v2::Vector2> texcoords;
@@ -50,9 +52,11 @@ namespace meshname {
 			meshvbuf.generate(GL_ARRAY_BUFFER);
 			meshvao.generate();
 		}
-	};
 
-	mesh* loadmesh(const char* name, texture TEX, Vector3 position);
+		glm::mat4* modelmatrix;
+
+	};	mesh* loadmesh(const char* name, texture TEX, Vector3 position);
 	void rendermesh(mesh* torender);
+
 }
 #endif // ! mesh_H

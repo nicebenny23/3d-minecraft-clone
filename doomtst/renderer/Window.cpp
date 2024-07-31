@@ -45,7 +45,7 @@ namespace window {
      }
     
  }
- void createcurwindow(int scrwidth, int scrheight)
+ void createwindow(int scrwidth, int scrheight)
     {
      
         glfwInit();

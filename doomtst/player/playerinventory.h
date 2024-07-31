@@ -7,6 +7,7 @@
 struct inventorymen :menu
 {
 	Container blkcont;
+	Container armor;
 	recipemanager manager;
 	inventorymen(v2::Vector2 size) {
 		menubox = newbox("images\\menutex.png", size, v2::zerov, 11);
@@ -15,6 +16,7 @@ struct inventorymen :menu
 		
 		manager=recipemanager("2x2craft.txt", 1, 1);
 		blkcont = Container(8, 4, 0, 0);
+		armor= Container(1, 4, 5, 0);
 		enabled = false;
 		 
 	}
@@ -25,9 +27,10 @@ struct inventorymen :menu
 
 		manager.enable();
 		blkcont.enable();
+		armor.enable();
 	}
 	void customclose() {
-
+		armor.disable();
 		blkcont.disable();
 		manager.disable();
 	}
@@ -38,6 +41,7 @@ struct inventorymen :menu
 		{
 			manager.updatestate();
 			blkcont.update();
+			armor.update();
 		}
 
 	}

@@ -12,7 +12,7 @@ entityname::entityref player::goblin;
 
 void player::initplayer()
 {
-	goblin = entityname::createentity(Vector3(0,300,0), "");
+	goblin = entityname::createentity(Vector3(0,2,10), "");
 	goblin.toent()->addcomponent<estate>(10,true);
 	goblin->addcomponent<playereat>();
 	goblin.toent()->addcomponent<playerhealth>();
@@ -28,7 +28,6 @@ void player::initplayer()
 	goblin.toent()->addcomponent<rigidbody>(playerfric);
 	goblin.toent()->addcomponent<playerattackcomp>();
 	goblin.toent()->addcomponent<playerdaggercomp>();
-	goblin.toent()->getcomponent <Collider>().hasrigidbody = true;
 }
 
 void player::calculateyawandpitch()

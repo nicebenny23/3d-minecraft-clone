@@ -235,7 +235,12 @@ int generatechunkvalfromnoise(Coord pos,noisemap* map, noisemap* modulatedmap, n
 	{
 	
 		
+		if (pos.y<0)
+		{
+			return minecraftstone;
+		}
 		return minecraftair;
+
 	}
 	if (pos.y==-500)
 	{

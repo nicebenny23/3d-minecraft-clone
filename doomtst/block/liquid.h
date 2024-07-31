@@ -22,6 +22,7 @@ struct liquidprop :gameobject::component {
 	void oncollision(gameobject::obj* collidedwith) {
 		if (collidedwith->hascomponent<rigidbody>())
 		{
+			collidedwith->getcomponent<rigidbody>().inliquid = true;
 			collidedwith->getcomponent<rigidbody>().velocity *= 1 - timename::smoothdt * 5;
 		}
 	}

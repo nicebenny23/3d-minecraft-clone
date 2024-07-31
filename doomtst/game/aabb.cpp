@@ -83,8 +83,9 @@ namespace aabb {
     Collider::Collider(const v3::Vector3& objcenter, const v3::Vector3& objscale,bool appendtolist, bool iseffector)
     {
         effector = iseffector;
-        hasrigidbody = false;
+     
         center = objcenter;
+        collideroffset = objcenter;
         scale = objscale;
         index = -1;
         if (appendtolist) {

@@ -44,7 +44,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableASAN>false</EnableASAN>
+    <EnableASAN>Yes</EnableASAN>
     <EnableFuzzer>false</EnableFuzzer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -210,6 +210,7 @@
     <ClInclude Include="block\torch.h" />
     <ClInclude Include="block\water.h" />
     <ClInclude Include="block\wood.h" />
+    <ClInclude Include="entities\antifreezeboss.h" />
     <ClInclude Include="entities\crystaldaggers.h" />
     <ClInclude Include="entities\onhit.h" />
     <ClInclude Include="entities\entityinit.h" />
@@ -221,6 +222,7 @@
     <ClInclude Include="game\game.h" />
     <ClInclude Include="game\navigation.h" />
     <ClInclude Include="game\transform.h" />
+    <ClInclude Include="game\wormobj.h" />
     <ClInclude Include="items\airitem.h" />
     <ClInclude Include="items\chestitem.h" />
     <ClInclude Include="items\craftingtableitem.h" />

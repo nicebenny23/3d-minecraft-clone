@@ -20,7 +20,7 @@ struct rigidbody : gameobject::component {
     aabb::Collider* boundingbox;
     bool isonground;
     bool inliquid;
-    bool gravityenabled;
+    float  gravityscale;
     float friction;
     void calculateonground() {
 
@@ -32,9 +32,9 @@ struct rigidbody : gameobject::component {
     // Constructor
     rigidbody() : velocity(zerov), unsetpositon(zerov), acceleration(zerov), boundingbox(nullptr) {
         friction = 1;
-        gravityenabled = true;
-    } rigidbody(float fric,bool gravenabled=true) : velocity(zerov), unsetpositon(zerov), acceleration(zerov), boundingbox(nullptr) {
-        gravityenabled = gravenabled;
+        gravityscale =1;
+    } rigidbody(float fric,float gravenabled=1  ) : velocity(zerov), unsetpositon(zerov), acceleration(zerov), boundingbox(nullptr) {
+        gravityscale = 1;
         friction = fric;
     }
     ~rigidbody() = default;
@@ -49,12 +49,10 @@ struct rigidbody : gameobject::component {
     // Update function called every frame
     void update() {
         calculateonground();
-        if (gravityenabled)
-        {
-
+    
             applyGravity();
 
-        }integrate();
+        integrate();
         unsetpositon = objutil::toent(owner).transform.position;
     }
 
@@ -63,7 +61,7 @@ struct rigidbody : gameobject::component {
         
         Vector3 gravity(0, -9.81f, 0);
         
-        acceleration += gravity / mass;
+        acceleration += gravity*gravityscale / mass;
     }
 
     // Integrate the acceleration to update velocity and position

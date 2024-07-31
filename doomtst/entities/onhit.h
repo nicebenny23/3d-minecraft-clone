@@ -41,20 +41,24 @@ entityname::destroy(&objutil::toent(owner),false);
 };
 struct dmgonhit:gameobject::component
 {
-	bool hasknockback;
+	float knockback;
 	std::string tagtoeffect;
 	int dmgdone;
-	dmgonhit(int dmg,std::string affecttag,bool givekb) {
+	dmgonhit(int dmg,std::string affecttag,float kb=0) {
 		priority = 1111;
 		tagtoeffect=affecttag ;
 	dmgdone = dmg;
-		hasknockback = givekb;
+	knockback = kb;
+		
 	}
 	void oncollision(gameobject::obj* collidedwith) {
 
 		if (collidedwith->type == gameobject::entity)
 		{
-
+			if (!collidedwith->hascomponent<estate>()) {
+			
+				return;
+			}
 			if (!objutil::toent(collidedwith).hastag(tagtoeffect))
 			{
 				return;
@@ -62,13 +66,12 @@ struct dmgonhit:gameobject::component
 			v3::Vector3 center = objutil::toent(owner).transform.position;
 				v3::Vector3 othercenter = objutil::toent(collidedwith).transform.position;
 				if (collidedwith->hascomponent<rigidbody>()) {
-					if (hasknockback)
-					{
+				
 
-					kb( center, 7,&objutil::toent(collidedwith));
+					kb( center, knockback,&objutil::toent(collidedwith));
 
-					}
-					collidedwith->getcomponent<rigidbody>().inliquid = true;
+					
+					
 				}
 				collidedwith->getcomponent<estate>().damage(dmgdone);
 			

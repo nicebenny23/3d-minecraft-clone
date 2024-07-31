@@ -11,7 +11,7 @@ inline void lavainit(blockname::block* blk) {
 	blk->mesh.scale = blockname::unitscale;
 	blk->addcomponent<liquidprop>(5);
 	blk->createaabb(true);
-	blk->addcomponent<dmgonhit>(1,"entity",false);
+	blk->addcomponent<dmgonhit>(1,"entity",0);
 	blk->minedfastwithpick = false;
 }
 inline void lavadelete(blockname::block* blk) {

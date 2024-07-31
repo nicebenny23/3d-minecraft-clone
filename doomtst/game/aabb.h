@@ -26,12 +26,14 @@ namespace aabb {
     };
 
     struct Collider : gameobject::component {
+        v3::Vector3 collideroffset;
         v3::Vector3 center;
         v3::Vector3 scale;
         v3::Vector3 prevpos;
-        bool hasrigidbody;
+        bool isunmovable=false;
         int index;
         bool effector;
+
         Collider() = default;
         Collider(const v3::Vector3& objcenter, const v3::Vector3& objscale, bool appendtolist,bool iseffector=false);
         ~Collider() = default;

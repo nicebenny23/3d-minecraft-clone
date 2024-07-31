@@ -20,6 +20,7 @@ namespace entityname {
 
 	struct entity : gameobject::obj
 	{
+		bool canbedestroyed = false;
 		const char* name;
 		array<std::string*> tags;
 		int amtcount;
@@ -76,6 +77,15 @@ amtcount = totalcount;
 		entityref() {
 
 			guid = -1;
+		}
+		entity* toentnotnull() {
+
+			entity* ent = toent();
+			if (ent == nullptr)
+			{
+				Assert("ent cant be null");
+			}
+			return ent;
 		}
 	};
 

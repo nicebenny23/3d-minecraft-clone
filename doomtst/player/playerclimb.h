@@ -19,7 +19,7 @@ struct playerclimb:gameobject::component
 			if (potrope.id==minecraftrope)
 			{
 				onrope = true;
-				owner->getcomponent<rigidbody>().gravityenabled = false;
+				owner->getcomponent<rigidbody>().gravityscale= 0;
 			}
 		}
 	}
@@ -29,7 +29,7 @@ struct playerclimb:gameobject::component
 		if (onrope==false)
 		{
 
-			owner->getcomponent<rigidbody>().gravityenabled = true;
+			owner->getcomponent<rigidbody>().gravityscale = 1;
 
 		}onrope = false;
 	}

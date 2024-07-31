@@ -7,22 +7,24 @@ meshname::mesh& model::operator[](int index)
 void model::draw()
 {
 }
-void model::add(const char* meshname,const char * meshtexname)
+void model::add(const char* meshname,const char * meshtexname,Vector3 pos)
 {
 		texture meshtex = texture(meshtexname,png);
 	meshlist.append(meshname::loadmesh(meshname, meshtex, zerov));
-	meshlist[meshlist.length - 1]->modeltranform = &objutil::toent(owner).transform;
+meshlist[meshlist.length - 1]->transform.position = pos;
 }
-model::model()
+model::model(meshconnecttype connectmethod )
 {
-
+	connectiontype = connectmethod;
 	meshlist = array<meshname::mesh*>();
 }
 
 void model::renderupdate()
 {
+	glm::mat4* model =new glm::mat4(transformtomat(objutil::toent(owner).transform));
 	for (int i = 0; i < meshlist.length; i++)
 	{
+		meshlist[i]->modelmatrix =model;
 		meshname::rendermesh(meshlist[i]);
 	}
 }

@@ -6,12 +6,20 @@
 using namespace meshname;
 void meshname::mesh::setmodeluniform()
 {	
-	glm::mat4 trans = transformtomat(*modeltranform);
+	glm::mat4 trans =*modelmatrix;
+	
+	glm::mat4 trans2 = transformtomat(transform);
+	
+	trans *= trans2;
 	renderer::shaderlist[renderer::modelshader].setmatval(trans, "model");
 }
-meshname::mesh::mesh()
+void meshname::mesh::setmodeluniform(glm::mat4 model)
 {
-	transform = Transform();
+
+	renderer::shaderlist[renderer::modelshader].setmatval(model, "model");
+}
+meshname::mesh::mesh()
+{	transform = Transform();
 }
 
 Vector3 meshname::mesh::nthvertex(int i)
