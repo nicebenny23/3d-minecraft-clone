@@ -6,9 +6,10 @@
 using namespace dynamicarray;
 #ifndef loottable_HPP
 #define loottable_HPP
-
+const float interacttimeneededfordrop = 1;
 struct lootelement
 {
+	
 	bool israndom;
 	lootelement() {
 		itemid = -1;
@@ -36,12 +37,17 @@ struct lootelement
 		israndom = happenrandom;
 	}
 	~lootelement() = default;
+	
 };
 struct  loottable :gameobject::component
 {
-
+	bool playerinteract;
+	void onplayerclick() {
+		playerinteract = true;
+		
+	}
 	void start() {
-
+		playerinteract = false;
 		lootlist =  array<lootelement>();
 	}
 	~loottable()
@@ -63,7 +69,12 @@ struct  loottable :gameobject::component
 			return;
 		}
 	
-	
+		if (owner->type==gameobject::entity)
+		{
+			if (!playerinteract) {
+				return;
+			}
+		}
 		for (int i = 0; i < lootlist.length; i++)
 		{
 			

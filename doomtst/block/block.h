@@ -30,6 +30,8 @@ enum blocktex {
 	furnaceside=19,
 	furnacefront=20,
 	ironoretex=21,
+	furnacefronton=22,
+	furnacesideon=23,
 };
 using namespace v3;
 

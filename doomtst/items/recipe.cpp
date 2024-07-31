@@ -1,5 +1,5 @@
 #include "recipe.h"
-
+#include "../util/time.h"
 void recipemanager::destroy() {
 
     newitemlocation->destroy();
@@ -24,31 +24,86 @@ void recipemanager::addrecipe(irecipe recipe)
     }
 }
 
-void recipemanager::ontake() {
-    // Implementation needed
-}
 
-void recipemanager::preview() {
-    
 
-    if (true)
+autocraftstatetype recipemanager::autocraft()
+{
+    currecipe = searchrecipe();
+    state.craftedthisframe = false;
+    if (currecipe != nullptr)
     {
-        newitemlocation->databuf[0].destroyitem();
-        irecipe* todisplay = searchrecipe();
 
-        if (todisplay != nullptr)
+
+        if (newitemlocation->at(0).helditem != nullptr)
         {
 
-
-            newitemlocation->databuf[0].giveitem(todisplay->itemcreated.id,todisplay->itemcreated.amt);
-
-            newitemlocation->at(0).helditem->updateui();
+            if (currecipe->itemcreated.id == newitemlocation->at(0).helditem->id)
+            {
+                //if it h
+                
+            
+                if (newitemlocation->at(0).helditem->canadd(currecipe->itemcreated.amt))
+                {
+                    if (attributes.timetillcraft<0)
+                    {
+                        craft();
+                        newitemlocation->at(0).helditem->amt += currecipe->itemcreated.amt;
+                        newitemlocation->at(0).helditem->updateui();
+                       
+                        return crafted;
+                    }
+                    return iscrafting;
+                }
+            }
         }
+        if (attributes.timetillcraft < 0)
+        {
+            newitemlocation->at(0).giveitem(currecipe->itemcreated.id, currecipe->itemcreated.amt);
+            return crafted;
+
+        }
+        return iscrafting;
     }
-       
+    return notcrafting;
+}
+//feture exclusive to normal crafting
+void recipemanager::preview() {
+    bool shouldredorecipe = !previewvalid() || state.craftedthisframe;
+   
+        //if preview is invalid or if we have crafted this frame
+        if (shouldredorecipe)
+        {
+            
+            if (!isitempreview())
+            {
+                newitemlocation->update();
+                
+            }
+   
+
+            currecipe = searchrecipe();
+
+            if (currecipe != nullptr)
+            {
+
+
+                    newitemlocation->databuf[0].giveitem(currecipe->itemcreated.id, currecipe->itemcreated.amt);
+
+            }
+        }
+        if (newitemlocation->at(0).helditem!=nullptr)
+        {
+            newitemlocation->at(0).helditem->updateui();
+
+            
+        }
+        
+
+   }
+
     
 
-}
+
 
 irecipe* recipemanager::searchrecipe() {
     int maxamt = 0;
@@ -70,16 +125,16 @@ irecipe* recipemanager::searchrecipe() {
 
 void recipemanager::updatestate()
 {
-    item* itemincont = newitemlocation->at(0).helditem;
-   
-
-    state.craftedthisframe = false;
+    if (attributes.isauto)
+    {
+        autoupdate();
+        return;
+    }
         if (state.enabled)
         {
-            
             resourcecontainer->update();
             
-                item* freeitem = freeditem;
+               
                 if (state.cancraft)
                 {
 
@@ -88,13 +143,65 @@ void recipemanager::updatestate()
 
 
                     preview();
-                    if (newitemlocation->clicked() && freeditem == nullptr)
+                    state.craftedthisframe = false;
+                    if (currecipe != nullptr)
                     {
-                        craft();
+                        if (newitemlocation->clicked())
+                        {
+
+
+                            craft();
+                            newitemlocation->update();
+                        }
                     }
+
+                        
+                    
                 }
+                return;
+        }
+        else
+        {
+            state.craftedthisframe = false;
         }
     
+}
+
+void recipemanager::autoupdate()
+{
+  
+        if (state.enabled)
+        {
+            resourcecontainer->update();
+            newitemlocation->update();
+        }
+
+        if (state.cancraft)
+        {
+
+            autocraftstatetype currstate = autocraft();
+            if (currstate!=notcrafting)
+            {
+
+                attributes.timetillcraft -= timename::dt;
+                if (currstate==crafted)
+                {
+                    state.craftedthisframe = true;
+                }
+            }
+            if (currstate!=iscrafting)
+            {
+
+                state.craftedthisframe = false;
+                attributes.timetillcraft = attributes.timetocraft;
+            }
+           
+
+
+        }
+        return;
+    
+
 }
 
 recipemanager::recipemanager(const char* filename, int sizex, int sizey)
@@ -102,9 +209,10 @@ recipemanager::recipemanager(const char* filename, int sizex, int sizey)
 recipelist= new array<irecipe>();
 xsize = sizex;
 ysize = sizey;
+currecipe = nullptr;
    safefile recipefile= safefile(filename, fileread);
    createcontainers();
-   char line[256];
+   char line[512];
    int maxlinesize = xsize * ysize + 1;
    int linenumber = 0;
 
@@ -118,6 +226,9 @@ ysize = sizey;
 
        
        if (line[0] == '\r') {
+           continue;
+       }
+       if (line[0] == ' ') {
            continue;
        }
        if (line[0] == '#') {
@@ -150,6 +261,7 @@ ysize = sizey;
     }
 
    recipefile.close();
+   
 }
 
 void recipemanager::save()
@@ -171,6 +283,16 @@ void recipemanager::disable()
     state.enabled = false;
     newitemlocation->disable();
     resourcecontainer->disable();
+}
+
+bool recipemanager::previewvalid()
+{
+    
+    if (currecipe==nullptr)
+    {
+        return false;
+    }
+    return currecipe->cancraft(resourcecontainer);
 }
 
 bool irecipe::cancraft(Container* resourcecont) {
@@ -221,14 +343,10 @@ irecipe::irecipe(iteminrecipe* itemarray, iteminrecipe created, int sizex, int s
 
 
 void recipemanager::craft() {
-    irecipe* bestrecipe = searchrecipe();
   
-    if (bestrecipe==nullptr)
-    {
-        return;
-    }
+    
     for (int i = 0; i < resourcecontainer->databuf.length; i++) {
-        if (bestrecipe->recipe[i].id == 0) {
+        if (currecipe->recipe[i].id == 0) {
             continue;
         }
         if (resourcecontainer->databuf[i].helditem->itemtype==wear)
@@ -238,9 +356,33 @@ void recipemanager::craft() {
         else
         {
 
-            resourcecontainer->databuf[i].helditem->amt -= bestrecipe->recipe[i].amt;
+            resourcecontainer->databuf[i].helditem->amt -= currecipe->recipe[i].amt;
         }
     }
+    //lets the player swap
     state.craftedthisframe = true;
-    newitemlocation->update();
+    
+}
+
+bool recipemanager::isitempreview()
+{
+    //no recipe can give null item
+    if (currecipe==nullptr)
+    {
+        return false;
+    }
+    //no recipe can give null item
+    if (newitemlocation->at(0).helditem==nullptr)
+    {
+        return false;
+    
+    }
+    if (currecipe->itemcreated.amt==newitemlocation->at(0).helditem->amt)
+    {
+        if (currecipe->itemcreated.id == newitemlocation->at(0).helditem->id)
+        {
+            return true;
+        }
+    }
+    return  false;
 }

@@ -72,8 +72,12 @@ struct rigidbody : gameobject::component {
         {
             velocity.y *= 1-deltaTime*10;
         }
-        velocity.y *= 1 - deltaTime;
-        velocity.x *= (1-deltaTime*friction);  // Adjust damping factor to prevent excessive damping
+        if (gravityscale!=0)
+        {
+
+            velocity.y *= 1 - deltaTime;
+
+        }velocity.x *= (1-deltaTime*friction);  // Adjust damping factor to prevent excessive damping
 
         velocity.z *= (1 - deltaTime * friction);  // Adjust damping factor to prevent excessive damping
 

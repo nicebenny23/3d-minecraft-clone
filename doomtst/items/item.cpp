@@ -14,6 +14,16 @@ item::item(int itemid)
 	properties.pickaxepower = 1;
 	properties.dmg = 1;
 }
+bool item::canadd(int amtto)
+{
+	int cap = maxamt-amt;
+
+	if (amtto<cap)
+	{
+		return true;
+	}
+	return false;
+}
 void item::destroy()
 {
 	itemui.textvalue->destroy();

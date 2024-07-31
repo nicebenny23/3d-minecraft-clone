@@ -292,6 +292,10 @@ void blockrender::initblockrendering()
 
 	texlist[furnaceside] = "images\\furnace.png";
 	texlist[ironoretex] = "images\\ironore.png";
+
+	texlist[furnaceside] = "images\\furnaceon.png";
+	texlist[furnacefronton] = "images\\furnacetopon.png";
+
 	texarray = texturearray(16, 16, texlist);
 	texarray.apply();
 }

@@ -7,10 +7,13 @@
 #include "../util/dynamicarray.h"
 #include "../items/Container.h"
 #include "playerinventory.h"
+#include "../entities/onhit.h"
 #include "../items/itemutil.h"
+#include "../game/particles.h"
 using namespace objutil;
 #ifndef  playerplace_Hpp
 #define playerplace_Hpp
+void initbreakparticle(entityname::entity* newent);
 struct playerbreak:gameobject::component
 {
 	
@@ -23,6 +26,8 @@ struct playerbreak:gameobject::component
 		pickaxe = nullptr;
 	
 		closest.box=nullptr;
+		texture tex = texture("images\\menutex.png",png);
+	
 	}
 	bool caninteract() {
 
@@ -66,12 +71,15 @@ struct playerbreak:gameobject::component
 
 	void testifmining()
 		{
+	
 			if (currmining != nullptr)
 			{
 				
 				if (currmining == ((block*)(closest.box->owner)))
 				{
-					
+				
+
+
 					int pickpower=1;
 					if (pickaxe!=nullptr)
 					{
@@ -100,7 +108,7 @@ struct playerbreak:gameobject::component
 
 
 	void destroylogic() {
-	
+		
 		testifmining();
 		if (timeuntilbreak<=0)
 		{
@@ -111,9 +119,8 @@ struct playerbreak:gameobject::component
 		}
 	}
 	 void update() {
-
-		
-
+		 
+		 
 		pickaxe = owner->getcomponent<inventory>().selected;
 
 		ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);

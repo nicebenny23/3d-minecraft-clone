@@ -28,30 +28,38 @@ struct irecipe {
 	array<iteminrecipe> recipe;
 	};
 struct extrarecipeattributes {
-
-	bool reversable;
+	bool isauto = false;
+	float timetillcraft;
 	float timetocraft;
 	extrarecipeattributes() {
-
-		reversable = true;
+		timetillcraft = 0;
+		isauto = false;
 		timetocraft = 0;
 	}
 	extrarecipeattributes(bool isreversable, float craftingtime) {
-
-		reversable = isreversable;
+		timetillcraft = 0;
+		isauto = !isreversable;
 		timetocraft = craftingtime;
 	}
 };
 struct managerstate {
-	
+	bool itemcreatedinside;
 	bool cancraft;
 	bool enabled;
 	bool craftedthisframe;
+	
 	managerstate() {
+		
 		cancraft = true;
 		enabled = false;
 		craftedthisframe = false;
 	}
+};
+enum autocraftstatetype
+{
+	crafted=0,
+	iscrafting=1,
+	notcrafting=2,
 };
 struct recipemanager {
 	int xsize;
@@ -65,20 +73,26 @@ struct recipemanager {
 	void createcontainers();
 	void addrecipe(irecipe recipe);
 	void updatestate();
-	void ontake();
+	void autoupdate();
+	
 	void preview(); 
 	void craft();
-	irecipe* searchrecipe();
+	bool isitempreview();
+	
+	autocraftstatetype autocraft();
+		irecipe* searchrecipe();
 	array<irecipe>* recipelist;
+	irecipe* currecipe;
 	void save();
 	void enable();
 	void disable();
+	bool previewvalid();
 	unsigned int getcombinedid() {
 		return 256 * newitemlocation->containerid + resourcecontainer->containerid;
 	}
 	recipemanager(const char* filename, int sizex, int sizey);
 	recipemanager() {
-
+		currecipe = nullptr;
 		newitemlocation = nullptr;
 		resourcecontainer = nullptr;
 	}

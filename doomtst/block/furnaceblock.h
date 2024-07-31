@@ -12,7 +12,7 @@ struct furnacemenu :menu {
 
 	furnacemenu(v2::Vector2 size) {
 		menubox = newbox("images\\menutex.png", size, v2::zerov, 1);
-
+	
 		menubox->shouldrender = false;
 		menutype = normalmenu;
 
@@ -31,22 +31,20 @@ struct furnacemenu :menu {
 	}
 	void customopen() {
 
-
+		enabled = true;
 		blkcont.enable();
 	}
 	void customclose() {
-
+		enabled = false;
 		blkcont.disable();
 
 	}
 	void testclick() {
 
 
-		if (enabled)
-		{
-
+		
 			blkcont.updatestate();
-		}
+		
 
 	}
 
@@ -57,7 +55,9 @@ struct furnacemenu :menu {
 };
 struct furnacecomp :gameobject::component {
 
+	float timetillcraft = 1;
 	furnacemenu men;
+
 	void onplayerclick() {
 		if (userinput::getinputkey('p').pressed)
 		{
@@ -67,15 +67,19 @@ struct furnacecomp :gameobject::component {
 		int l = 1;
 	}
 	void update() {
+		timetillcraft -= timename::dt;
+		
 		blockname::block* getblockbelow = grid::getobjatgrid(objutil::toblk(owner).pos - Coord(0, 1, 0));
 		men.blkcont.state.cancraft = false;
+	
 		if (getblockbelow != nullptr)
 		{
 
-			if (getblockbelow->id==minecraftlava)
+			if (getblockbelow->id == minecraftlava)
 			{
+				
 				men.blkcont.state.cancraft = true;
-			
+
 				if (men.blkcont.state.craftedthisframe)
 				{
 					getblockbelow->getcomponent<liquidprop>().liqval -= 1;
@@ -83,6 +87,7 @@ struct furnacecomp :gameobject::component {
 			}
 
 		}
+		
 		men.testclick();
 		if (userinput::getinputkey('j').pressed)
 		{
@@ -102,7 +107,7 @@ struct furnacecomp :gameobject::component {
 	}
 };
 inline void furnaceinit(blockname::block* blk) {
-
+	
 	blk->mesh.setfaces(stonetex, stonetex, furnacefront, stonetex, furnaceside, stonetex);
 	blk->solid = true;
 	blk->transparent = false;
@@ -118,6 +123,8 @@ inline void furnaceinit(blockname::block* blk) {
 		blk->addcomponent<furnacecomp>();
 
 	}
+	blk->getcomponent<furnacecomp>().men.blkcont.attributes.timetocraft = .3;
+	blk->getcomponent<furnacecomp>().men.blkcont.attributes.isauto = true;
 	blk->addcomponentptr<loottable>()->addelem(furnaceitem, 1, false);
 }
 inline void furnacedelete(blockname::block* blk) {

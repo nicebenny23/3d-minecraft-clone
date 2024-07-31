@@ -156,6 +156,7 @@
     <ClCompile Include="items\Container.cpp" />
     <ClCompile Include="items\menu.cpp" />
     <ClCompile Include="items\recipe.cpp" />
+    <ClCompile Include="player\playermodification.cpp" />
     <ClCompile Include="renderer\mesh.cpp" />
     <ClCompile Include="game\particles.cpp" />
     <ClCompile Include="player\player.cpp" />
@@ -226,15 +227,19 @@
     <ClInclude Include="items\airitem.h" />
     <ClInclude Include="items\chestitem.h" />
     <ClInclude Include="items\craftingtableitem.h" />
+    <ClInclude Include="items\crystalbottom.h" />
     <ClInclude Include="items\crystaldagger.h" />
     <ClInclude Include="items\crystalitem.h" />
     <ClInclude Include="items\crystalpickinit.h" />
+    <ClInclude Include="items\crystaltop.h" />
     <ClInclude Include="items\crystaltorchitem.h" />
     <ClInclude Include="items\furnaceitem.h" />
+    <ClInclude Include="items\ironbottomitem.h" />
     <ClInclude Include="items\ironitem.h" />
     <ClInclude Include="items\ironoreitem.h" />
     <ClInclude Include="items\ironpick.h" />
     <ClInclude Include="items\ironsword.h" />
+    <ClInclude Include="items\irontopitem.h" />
     <ClInclude Include="items\treestoneitem.h" />
     <ClInclude Include="items\itemslot.h" />
     <ClInclude Include="items\item.h" />

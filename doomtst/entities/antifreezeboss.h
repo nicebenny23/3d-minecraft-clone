@@ -15,10 +15,11 @@
 enum bosstate {
     following=0,
     shooting=1,
-
+    ramming=2,
 };
 struct firedaggerfinalboss :gameobject::component {
     float timetillshoot;
+    int shotsleft = 0;
     bosstate state;
     void update(){
         Transform& currtransform = owner->getcomponent<model>()[0].transform;
@@ -34,9 +35,14 @@ struct firedaggerfinalboss :gameobject::component {
 
             if (random() < timename::smoothdt * 1 / 20.f) {
                 state = shooting;
-                timetillshoot = 1;
+                timetillshoot = .1;
+                shotsleft = 11;
             }
-            
+            if (random() > 1-timename::smoothdt * 1 / 20.f) {
+                state = ramming;
+                timetillshoot = 1.5;
+     
+            }
         }
         if (state == shooting)
         {
@@ -44,19 +50,36 @@ struct firedaggerfinalboss :gameobject::component {
             currtransform.position += currtransform.getnormaldirection() * .01f;
 
             //currtransform.position += Vector3(1, 0, 0)*.002f;
-            if (timetillshoot<0)
+            if (timetillshoot<0&&0<shotsleft)
             {
 
                 v3::Vector3 pos = owner->getcomponent<model>()[0].transform.position + owner->getcomponent<model>()[0].transform.getnormaldirection() * 4;
-                Vector3 velocity = normal(pos - player::goblin.toent()->transform.position) * -6;
+                Vector3 ppos = player::goblin.toent()->transform.position;
+                Vector3 velocity = normal(pos-ppos) * -6;
                 spawndagger(pos, velocity, 0);
-
+                shotsleft--;
+                timetillshoot = .1;
             }
-            if (timetillshoot<-.1)
+            if (shotsleft==1)
             {
-                state == following;
+                state = following;
             }
             timetillshoot -= timename::smoothdt;
+        }
+        if (state == ramming)
+        {
+
+
+
+            //currtransform.position = pos;
+            currtransform.orient(pos);
+            currtransform.position += currtransform.getnormaldirection() * .03f;
+            timetillshoot -= timename::smoothdt;
+            if (timetillshoot<0)
+            {
+                state = following;
+            }
+
         }
     }
 
@@ -69,7 +92,7 @@ inline entityname::entityref createfinalboss(v3::Vector3 pos) {
     //  refmodel.toent()->getcomponent<model>().add("slime2.obj", "images\\slimetex.png");
     for (int i = 0; i <160; i++)
     {
-        refmodel.toent()->getcomponent<model>().add("newtest.obj", "images\\bosstex.png", Vector3(i, 0, 0));
+        refmodel.toent()->getcomponent<model>().add("objs\\finalboss.obj", "images\\bosstex.png", Vector3(i, 0, 0));
         refmodel.toent()->addcomponentptr<aabb::Collider>(Vector3(i,0,0), unitscale, true)->isunmovable=true;
 
         refmodel.toent()->getcomponent<model>()[i].transform.yaw = 0;

@@ -20,6 +20,10 @@
 #include "ironitem.h"
 #include "ironoreitem.h"
 #include "ironpick.h"
+#include "ironbottomitem.h"
+#include "crystalbottom.h"
+#include "crystaltop.h"
+#include "irontopitem.h"
 #include "ironsword.h"
 #include "crystaldagger.h"
 #ifndef itemutil_HPP
@@ -78,7 +82,7 @@ inline void inititemproperties(item* itm) {
 		break;
 
 	case ironoreitem:
-		(itm);
+		initironoreitem(itm);
 		break;
 	case ironitem:
 		initironitem(itm);
@@ -91,6 +95,18 @@ inline void inititemproperties(item* itm) {
 		break;
 	case crystaldaggeritem:
 		initcrystaldaggeritem(itm);
+		break;
+	case irontop:
+		initirontopitem(itm);
+		break;
+	case ironbottom:
+		initironbottomitem (itm);
+		break;
+	case crystaltop:
+		initcrystaltopitem(itm);
+		break;
+	case crystalbottom:
+		initcrystalbottomitem(itm);
 		break;
 	default:
 	//	Assert("null item not initiated");
@@ -194,6 +210,18 @@ inline int blockidfromitemid(item* itm) {
 	case crystaldaggeritem:
 		return crystaldaggeritemasblockid;
 		break;
+	case irontop:
+		return irontopitemblockid;
+
+		break;
+	case ironbottom:
+		return ironbottomitemblockid;
+		break;
+	case crystaltop:
+		return crystaltopitemblockid;
+		break;
+	case crystalbottom:
+		return crystalbottomitemblockid;
 	default:
 		break;
 	}

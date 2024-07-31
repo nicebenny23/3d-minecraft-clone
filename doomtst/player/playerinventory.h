@@ -59,7 +59,7 @@ struct inventory :gameobject::component
 {
 	Container blkcont;
 	inventorymen playermenu;
-	void givestartitems(int i1, int i2);
+	void givestartitems(int i1, int i2,int i3);
 	inventory();
 	unsigned int selectedind;
 		Container hotbar;

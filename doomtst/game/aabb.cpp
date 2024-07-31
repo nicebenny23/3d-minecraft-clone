@@ -77,6 +77,7 @@ namespace aabb {
         if (owner->type!=gameobject::block)
         {
             Colliderlist[index]=nullptr;
+            int l = 1;
         }
     }
 
@@ -100,8 +101,12 @@ namespace aabb {
                     index = l;
                 }
 
+        
             }
+        
+        
         }
+
     }
     aabbraycolinfo Collider::distanceonray(ray fray)
     {

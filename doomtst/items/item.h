@@ -36,6 +36,10 @@ enum itemid {
 	ironpickitem=19,
 	ironsworditem=20,
 	crystaldaggeritem=21,
+	irontop=22,
+	ironbottom=23,
+	crystaltop=24,
+	crystalbottom=25,
 };
 enum itemstate {
 	beingheld = 0,
@@ -114,6 +118,7 @@ struct item
 		}
 		
 	}
+	bool canadd(int amtto);
 	void destroy();
 	bool use(int useamt);
 	bool canuse(int useamt);

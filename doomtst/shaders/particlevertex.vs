@@ -7,11 +7,10 @@ out vec2 TexCoords;
 uniform mat4 view;
 uniform mat4 projection;
 uniform vec3 offset;
-
+uniform vec3 scale;
 void main()
 {
-    float scale = .5f;
-    TexCoords = texcoord;
+TexCoords = texcoord;
     vec4 pos = projection*view* vec4((vertex * scale) + offset, 1.0f);
     pos.y=pos.y*1.77;
     gl_Position=pos;

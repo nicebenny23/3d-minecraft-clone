@@ -24,6 +24,7 @@ struct Container
 	Container(int newid);
 	void writetofile();
 	bool enabled;
+	
 	array<itemslot> databuf;
 	itemslot& getlocalat(int xpos,int ypos) {
 		return databuf[xpos + ypos * sizex];

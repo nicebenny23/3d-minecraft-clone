@@ -1,5 +1,6 @@
 #include "particles.h"
 #include "rigidbody.h"
+#include "../world/noise.h"
 using namespace renderer;
 Vector3 vertexlist[]{
 Vector3(-1, -1,0),
@@ -21,7 +22,7 @@ const int indices[]{
 };
 void particleemiter::update()
 {
-	timetillspawn -= timename::dt;
+	timetillspawn = Min(timetillspawn-timename::dt,particlespawntime);
 	for (int i = 0; i < particlearray.length; i++)
 	{
 		if (particlearray[i] != nullptr)
@@ -32,7 +33,7 @@ void particleemiter::update()
 			{
 
 
-				if (particlearray[i]->getcomponent<particle>().endtime > timename::gametime)
+				if (particlearray[i]->getcomponent<particle>().endtime < timename::gametime)
 				{
 					entityname::entity* todelete = particlearray[i];
 					entityname::destroy(todelete);
@@ -53,9 +54,12 @@ void particleemiter::update()
 			 if (particlearray[i] == nullptr)
 			 {
 				 entityname::entityref newparticle = entityname::createentity(position, "");
-
-				 newparticle.toent()->addcomponent<particle>();
+				 
+				 newparticle.toent()->addcomponentptr<particle>()->endtime= timename::gametime+particlelifetime;
+				 newparticle->getcomponent<particle>().ind = i;
+				 newparticle->getcomponent<particle>().emit = this;
 				 (*particleinit)(newparticle.toent());
+				 newparticle->addtag("particle");
 				 particlearray[i] = newparticle.toent();
 				 break;
 			 };
@@ -83,7 +87,7 @@ void particleemiter::renderparticles()
 		int i = indices[ind];
 		Vector3 vertice = vertexlist[i];
 
-		v3::Vector3 center = position;
+		v3::Vector3 center = zerov;
 
 		Vector3 rightvertex = (camera::rightvec)*vertice.x;
 
@@ -113,7 +117,8 @@ void particleemiter::renderparticles()
 		if (particlearray[i]!=nullptr)
 		{
 			renderer::shaderlist[particleshader].SetVector3f(  particlearray[i]->transform.position.glm(), "offset");
-			
+			renderer::shaderlist[particleshader].SetVector3f(particlearray[i]->transform.scale.glm(), "scale");
+
 			glDrawArrays(GL_TRIANGLES, 0, 6);
 			}
 	}
@@ -122,15 +127,18 @@ void particleemiter::renderparticles()
 	//databuf.destroy();
 }
 void initbaseparticle(entityname::entity* newent) {
-	//newent->addcomponent<aabb::Collider>(newent->pos, unitv / 2, true);
-
-
+	newent->transform.position += Vector3(random(), 1, random())/10;
+	newent->addcomponent<aabb::Collider>(newent->transform.position, unitv / 9, true);
+	newent->addcomponentptr<rigidbody>(1,.1)->velocity=Vector3(random(),1,random())*2;
+	newent->transform.scale = unitscale / 22;
+	
 }
-particleemiter::particleemiter(float spawntime, void (*initfunc) (entityname::entity*))
+particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) (entityname::entity*),texture newtex)
 {
+	tex = newtex;
 	emitervoa.generate();
 	emmitervbo.generate(GL_ARRAY_BUFFER);
-
+	particlelifetime = lifetime;
 	particlespawntime = spawntime;
 	particleinit = initfunc;
 	timetillspawn = spawntime;

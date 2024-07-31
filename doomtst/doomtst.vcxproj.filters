@@ -141,6 +141,9 @@
     <ClCompile Include="world\chunkload.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="player\playermodification.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="util\vector3.h">
@@ -480,6 +483,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game\wormobj.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\irontopitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\ironbottomitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\crystaltop.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\crystalbottom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

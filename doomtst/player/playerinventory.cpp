@@ -1,6 +1,6 @@
 #include "playerinventory.h"
 #include "../renderer/texture.h"
-void inventory::givestartitems(int i1, int i2) {
+void inventory::givestartitems(int i1, int i2,int i3) {
 	if (i1!=0)
 	{
 
@@ -11,6 +11,12 @@ void inventory::givestartitems(int i1, int i2) {
 	{
 
 		hotbar.at(1).giveitem(i2, 100);
+
+	}
+	if (i3 != 0)
+	{
+
+		hotbar.at(2).giveitem(i3, 100);
 
 	}
 }
@@ -26,5 +32,5 @@ inventory::inventory()
 		hotbar = Container(6, 1, 0, -4.5);
 		hotbar.enable();
 		selected = nullptr;
-		givestartitems(treestoneitem, crystaldaggeritem);
+		givestartitems(furnaceitem,torchitem,ironoreitem);
 }

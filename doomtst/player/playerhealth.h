@@ -8,6 +8,7 @@
 #define playerhealth_HPP
 struct playerhealth:gameobject::component
 {
+	bool dmgimmune = false;
 	void killplayer() {
 		system("cls");
 		
@@ -31,28 +32,49 @@ struct playerhealth:gameobject::component
 		for (int i = 0; i < 2; i++)
 		{
 			item* itm = owner->getcomponent<inventory>().playermenu.armor.at(i).helditem;
-			if (itm!=nullptr)
+			if (itm != nullptr)
 			{
-				dmgmul *= itm->properties.dmg;
+				dmgmul *= itm->properties.armor;
 			}
 		}
 		owner->getcomponent<estate>().damagemultiplyer = dmgmul;
 		int health = owner->getcomponent<estate>().health;
-		if (health<=0)
+		if (health <= 0)
 		{
-			
+
 			killplayer();
-		
-		
+
+
 		}
-	
-		for (int i =0; i < health; i++) {
-			
-			healthboxes[i]->shouldrender = true;
-		}
-		for (int i = health; i < 10; i++) {
-			
-			healthboxes[i]->shouldrender = false;
+		if (owner->getcomponent<estate>().invincablilitymax != owner->getcomponent<estate>().timetilldmg)
+		{
+			if (!dmgimmune) {
+
+				dmgimmune = true;
+				for (int i = 0; i < 2; i++)
+				{
+					item* itm = owner->getcomponent<inventory>().playermenu.armor.at(i).helditem;
+					if (itm != nullptr)
+					{
+						if (itm->properties.armor != 1) {
+							itm->amt -= 1;
+						}
+					}
+
+				}
+			}
+			else
+			{
+				dmgimmune = false;
+			}
+			for (int i = 0; i < health; i++) {
+
+				healthboxes[i]->shouldrender = true;
+			}
+			for (int i = health; i < 10; i++) {
+
+				healthboxes[i]->shouldrender = false;
+			}
 		}
 	}
 };

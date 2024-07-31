@@ -8,11 +8,19 @@
 struct destroyonhit :gameobject::component {
 
 	std::string tagtoeffect;
-	int dmgdone;
-	destroyonhit(int dmg, std::string affecttag) {
+	bool isnottag;
+	destroyonhit(std::string affecttag) {
 		priority = 1111;
+		isnottag = false;
+		if (affecttag.length()>0)
+		{
+			if (affecttag[0]='!')
+			{
+				isnottag = true;
+			}
+			affecttag.erase(1);
+		}
 		tagtoeffect = affecttag;
-		dmgdone = dmg;
 	
 	}
 	void oncollision(gameobject::obj* collidedwith) {
@@ -29,7 +37,7 @@ struct destroyonhit :gameobject::component {
 			}
 		if (collidedwith->type == gameobject::entity)
 		{
-			if (objutil::toent(collidedwith).hastag(tagtoeffect))
+			if (objutil::toent(collidedwith).hastag(tagtoeffect)^isnottag)
 			{
 entityname::destroy(&objutil::toent(owner),false);
 			}
