@@ -41,6 +41,7 @@ enum itemid {
 	crystaltop=24,
 	crystalbottom=25,
 	treestoneitem=26,
+	altaritem=27,
 };
 enum itemstate {
 	beingheld = 0,

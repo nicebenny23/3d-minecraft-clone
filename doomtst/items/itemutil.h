@@ -27,6 +27,7 @@
 #include "ironsword.h"
 #include "crystaldagger.h"
 #include "plank.h"
+#include "altaritem.h"
 #ifndef itemutil_HPP
 #define itemutil_HPP
 inline void inititemproperties(item* itm) {
@@ -111,6 +112,9 @@ inline void inititemproperties(item* itm) {
 		break;
 	case plankitem:
 		initplankitem(itm);
+		break;
+	case altaritem:
+		initaltaritem(itm);
 		break;
 	default:
 	//	Assert("null item not initiated");
@@ -230,6 +234,8 @@ inline int blockidfromitemid(item* itm) {
 	case plankitem:
 		return plankitemblockid;
 		break;
+	case altaritem:
+		return altaritemblockid;
 	default:
 		break;
 	}
