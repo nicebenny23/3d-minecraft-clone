@@ -1,6 +1,6 @@
 #include "blockrender.h"
 #include "../util/geometry.h"
-
+bool blockrender::enablelighting;
 dynamicarray::array<float> databuffer;
 dynamicarray::array<unsigned int> indicebuffer;
 
@@ -114,11 +114,20 @@ void emitface(int face, block& torender, array<float>& datbuf, array<unsigned in
 			datbuf.append(texturenumb);
 
 			// Light value
-			if (torender.transparent) {
-				datbuf.append(torender.lightval);
+			if (blockrender::enablelighting)
+			{
+
+				if (torender.transparent) {
+
+					datbuf.append(torender.lightval);
+				}
+				else {
+					datbuf.append((torender.mesh)[face].light);
+				}
 			}
-			else {
-				datbuf.append((torender.mesh)[face].light);
+			else
+			{
+				databuffer.append(15);
 			}
 		}
 
@@ -293,10 +302,11 @@ void blockrender::initblockrendering()
 	texlist[furnaceside] = "images\\furnace.png";
 	texlist[ironoretex] = "images\\ironore.png";
 
-	texlist[furnaceside] = "images\\furnaceon.png";
+	texlist[furnacesideon] = "images\\furnaceon.png";
 	texlist[furnacefronton] = "images\\furnacetopon.png";
-
+	texlist[logtoppng] = "images\\log.png";
 	texarray = texturearray(16, 16, texlist);
 	texarray.apply();
+	enablelighting = true;
 }
 

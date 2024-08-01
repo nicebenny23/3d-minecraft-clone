@@ -92,7 +92,7 @@ inline entityname::entityref createfinalboss(v3::Vector3 pos) {
     //  refmodel.toent()->getcomponent<model>().add("slime2.obj", "images\\slimetex.png");
     for (int i = 0; i <160; i++)
     {
-        refmodel.toent()->getcomponent<model>().add("objs\\finalboss.obj", "images\\bosstex.png", Vector3(i, 0, 0));
+        refmodel.toent()->getcomponent<model>().add("newtest.obj", "images\\bosstex.png", Vector3(i, 0, 0));
         refmodel.toent()->addcomponentptr<aabb::Collider>(Vector3(i,0,0), unitscale, true)->isunmovable=true;
 
         refmodel.toent()->getcomponent<model>()[i].transform.yaw = 0;

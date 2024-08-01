@@ -9,17 +9,17 @@
 struct furnacemenu :menu {
 
 	recipemanager blkcont;
-
+	uibox* progressbar;
 	furnacemenu(v2::Vector2 size) {
 		menubox = newbox("images\\menutex.png", size, v2::zerov, 1);
 	
 		menubox->shouldrender = false;
 		menutype = normalmenu;
-
+		progressbar = newbox("images\\greenbar.png", v2::Vector2(0, .1) , v2::Vector2(0, 0), 100);
 		blkcont = recipemanager("crafting\\furnace.txt", 1,1);
-		
+		progressbar->shouldrender = false;
 		enabled = false;
-
+		blkcont.attributes = extrarecipeattributes(true, 1);
 	}
 	void custominit() {
 
@@ -30,11 +30,12 @@ struct furnacemenu :menu {
 
 	}
 	void customopen() {
-
+		progressbar->shouldrender = true;
 		enabled = true;
 		blkcont.enable();
 	}
 	void customclose() {
+		progressbar->shouldrender = false;
 		enabled = false;
 		blkcont.disable();
 
@@ -55,7 +56,7 @@ struct furnacemenu :menu {
 };
 struct furnacecomp :gameobject::component {
 
-	float timetillcraft = 1;
+	
 	furnacemenu men;
 
 	void onplayerclick() {
@@ -67,7 +68,13 @@ struct furnacecomp :gameobject::component {
 		int l = 1;
 	}
 	void update() {
-		timetillcraft -= timename::dt;
+		float scale1 = (1 - men.blkcont.attributes.timetillcraft) / 10;
+		v2::Vector2 center = v2::Vector2(0, .2) + v2::Vector2(scale1/2 , .1);
+		v2::Vector2 scale = v2::Vector2(scale1, .03);
+		Box2d progbox = Box2d(center, scale/2);
+		men.progressbar->box = progbox;
+
+	
 		
 		blockname::block* getblockbelow = grid::getobjatgrid(objutil::toblk(owner).pos - Coord(0, 1, 0));
 		men.blkcont.state.cancraft = false;
@@ -93,6 +100,7 @@ struct furnacecomp :gameobject::component {
 		{
 			men.close();
 		}
+	
 	}
 	void ondestroy() {
 		if (owner->state == gameobject::beingroughdestroyed)
@@ -123,7 +131,9 @@ inline void furnaceinit(blockname::block* blk) {
 		blk->addcomponent<furnacecomp>();
 
 	}
-	blk->getcomponent<furnacecomp>().men.blkcont.attributes.timetocraft = .3;
+	
+
+	blk->getcomponent<furnacecomp>().men.blkcont.attributes.timetocraft = 1;
 	blk->getcomponent<furnacecomp>().men.blkcont.attributes.isauto = true;
 	blk->addcomponentptr<loottable>()->addelem(furnaceitem, 1, false);
 }

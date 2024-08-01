@@ -125,7 +125,7 @@ biometype getbiometype(float biomeval){
 }
 bool shouldbeore(float feturemap) {
 
-	if (inrange(feturemap, 0, .002f))
+	if (inrange(feturemap, 0, .0002f))
 	{
 		return true;
 	}
@@ -135,7 +135,7 @@ bool shouldbeore(float feturemap) {
 
 bool shouldbeironore(float feturemap) {
 
-	if (inrange(feturemap, .002, .02f))
+	if (inrange(feturemap, .0002, .001f))
 	{
 		return true;
 	}
@@ -166,8 +166,10 @@ int idfromnoise(Coord pos, float nint, float mint, float bint, float fint) {
 	//if between the value is negitive if above positive
 	float distto = 2 * (sigmoid(nint - (mint)) - .5);
 	int biomeval = getbiometype(bint);
+	bool covered = false;
 	if (inrange(nint, -mint, mint))
 	{
+		covered = true;
 		if (biomeval==mossybiome)
 		{
 			neid = minecrafttreestone;
@@ -179,34 +181,43 @@ int idfromnoise(Coord pos, float nint, float mint, float bint, float fint) {
 
 		}
 	}
-	if (shouldbeore(fint))
+	if (covered)
 	{
-		neid = minecraftcrystal;
-	}
-	if (shouldbeironore(fint))
-	{
-		neid = minecraftironore;
-	}
-	switch (biomeval)
-	{
-	case mossybiome:
-		if (shouldbemoss(fint, distto))
-		{
-			neid = minecraftmoss;
-		}
-		break;
-	case normalbiome:
-		break;
-	case lavabiome:
-		if (shouldbemoss(fint, distto))
-		{
-			neid = minecraftlava;
-		}
-		break;
-	default:
-		break;
-	}
 
+		if (shouldbeore(fint))
+		{
+			neid = minecraftcrystal;
+		}
+		if (shouldbeironore(fint))
+		{
+			neid = minecraftironore;
+		}
+
+	}
+	if (covered)
+	{
+
+
+		switch (biomeval)
+		{
+		case mossybiome:
+			if (shouldbemoss(fint, distto))
+			{
+				neid = minecraftmoss;
+			}
+			break;
+		case normalbiome:
+			break;
+		case lavabiome:
+			if (shouldbemoss(fint, distto))
+			{
+				neid = minecraftlava;
+			}
+			break;
+		default:
+			break;
+		}
+	}
 	return neid;
 
 }
@@ -285,7 +296,7 @@ Chunk::chunk* chunkload(Coord location)
 	newchunk.blockbuf = new block[chunksize];
 	int ind = 0;
 	noisemap* map = genperlin(location * 16,  2,.5f,.1f, 1.2,normalnoise);
-	noisemap* feturemap= genperlin((location + Coord(0, 1010, 0) )* 16 , 1, .5f, .01f, 1.2, normalnoise);
+	noisemap* feturemap= genperlin((location + Coord(0, 1010, 0) )* 16 , 1, .5f, .08f, 1.2, normalnoise);
 
 	noisemap* biomemap = genperlin((location+Coord(10,202,0)) * 16, 1, .5f, .003f, 1.2, normalnoise);
 	noisemap* lavalayermap= genperlin2d(Vector3(location.x,-10,location.z) *16, 1, .5f, .03f, 1.2, normalnoise);

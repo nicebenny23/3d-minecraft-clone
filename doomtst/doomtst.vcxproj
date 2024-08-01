@@ -193,6 +193,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="block\air.h" />
+    <ClInclude Include="block\altar.h" />
     <ClInclude Include="block\blockinit.h" />
     <ClInclude Include="block\chest.h" />
     <ClInclude Include="block\craftingtable.h" />
@@ -200,6 +201,7 @@
     <ClInclude Include="block\crystaltorch.h" />
     <ClInclude Include="block\furnaceblock.h" />
     <ClInclude Include="block\ironblock.h" />
+    <ClInclude Include="block\sand.h" />
     <ClInclude Include="block\treestone.h" />
     <ClInclude Include="block\glass.h" />
     <ClInclude Include="block\lava.h" />
@@ -225,6 +227,7 @@
     <ClInclude Include="game\transform.h" />
     <ClInclude Include="game\wormobj.h" />
     <ClInclude Include="items\airitem.h" />
+    <ClInclude Include="items\altaritem.h" />
     <ClInclude Include="items\chestitem.h" />
     <ClInclude Include="items\craftingtableitem.h" />
     <ClInclude Include="items\crystalbottom.h" />
@@ -234,12 +237,15 @@
     <ClInclude Include="items\crystaltop.h" />
     <ClInclude Include="items\crystaltorchitem.h" />
     <ClInclude Include="items\furnaceitem.h" />
+    <ClInclude Include="items\glassbottle.h" />
     <ClInclude Include="items\ironbottomitem.h" />
     <ClInclude Include="items\ironitem.h" />
     <ClInclude Include="items\ironoreitem.h" />
     <ClInclude Include="items\ironpick.h" />
     <ClInclude Include="items\ironsword.h" />
     <ClInclude Include="items\irontopitem.h" />
+    <ClInclude Include="items\plank.h" />
+    <ClInclude Include="items\sand.h" />
     <ClInclude Include="items\treestoneitem.h" />
     <ClInclude Include="items\itemslot.h" />
     <ClInclude Include="items\item.h" />

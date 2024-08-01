@@ -50,7 +50,7 @@ namespace blkinitname {
 		case minecrafttorch:
 			torchinit(blk);
 			break;
-		case minecraftwood:
+		case minecraftsand:
 			woodinit(blk);
 			break;
 		case minecraftcraftingtable:
@@ -126,7 +126,7 @@ namespace blkinitname {
 
 			torchdelete(blk);
 			break;
-		case minecraftwood:
+		case minecraftsand:
 
 			wooddelete(blk);
 			break;

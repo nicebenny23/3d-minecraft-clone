@@ -36,9 +36,9 @@ struct extrarecipeattributes {
 		isauto = false;
 		timetocraft = 0;
 	}
-	extrarecipeattributes(bool isreversable, float craftingtime) {
-		timetillcraft = 0;
-		isauto = !isreversable;
+	extrarecipeattributes(bool doneauto, float craftingtime) {
+		timetillcraft = craftingtime;
+		isauto = doneauto;
 		timetocraft = craftingtime;
 	}
 };

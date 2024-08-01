@@ -12,7 +12,7 @@ entityname::entityref player::goblin;
 
 void player::initplayer()
 {
-	goblin = entityname::createentity(Vector3(0,2,10), "");
+	goblin = entityname::createentity(Vector3(0,300,10), "");
 	goblin.toent()->addcomponent<estate>(10,true);
 	goblin->addcomponent<playereat>();
 	goblin.toent()->addcomponent<playerhealth>();

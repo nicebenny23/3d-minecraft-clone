@@ -32,6 +32,7 @@ enum blocktex {
 	ironoretex=21,
 	furnacefronton=22,
 	furnacesideon=23,
+	logtoppng=24
 };
 using namespace v3;
 
@@ -48,7 +49,7 @@ namespace blockname {
 		minecraftwater = 5,
 		minecraftcrystal = 6,
 		minecrafttorch = 7,
-		minecraftwood = 8,
+		minecraftsand = 8,
 		minecraftcraftingtable=9,
 		minecraftcrystaltorch=10,
 		minecraftrope=11,
@@ -57,6 +58,7 @@ namespace blockname {
 		minecraftchest=14,
 		minecraftfurnace=15,
 		minecraftironore=16,
+		minecraftaltar=17,
 	};
 	struct blockmesh;
 	struct face {

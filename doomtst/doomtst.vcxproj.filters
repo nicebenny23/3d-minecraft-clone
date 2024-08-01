@@ -497,6 +497,24 @@
     <ClInclude Include="items\crystalbottom.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="items\plank.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\glassbottle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\sand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\sand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\altar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\altaritem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag1.vs" />

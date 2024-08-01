@@ -5,6 +5,7 @@ void recipemanager::destroy() {
     newitemlocation->destroy();
     resourcecontainer->destroy();
 }
+//todo add offset
 void recipemanager::createcontainers() {
 
     newitemlocation = new Container(1, 1, 2.5, 3.5);
@@ -58,6 +59,7 @@ autocraftstatetype recipemanager::autocraft()
         }
         if (attributes.timetillcraft < 0)
         {
+            craft();
             newitemlocation->at(0).giveitem(currecipe->itemcreated.id, currecipe->itemcreated.amt);
             return crafted;
 
@@ -184,18 +186,19 @@ void recipemanager::autoupdate()
             {
 
                 attributes.timetillcraft -= timename::dt;
-                if (currstate==crafted)
-                {
-                    state.craftedthisframe = true;
-                }
+              
             }
             if (currstate!=iscrafting)
             {
-
-                state.craftedthisframe = false;
-                attributes.timetillcraft = attributes.timetocraft;
+attributes.timetillcraft = attributes.timetocraft;
             }
-           
+            if (currstate == crafted)
+            {
+                state.craftedthisframe = true;
+            }
+            else {
+                state.craftedthisframe = false;
+            }
 
 
         }
@@ -273,6 +276,7 @@ void recipemanager::save()
 
 void recipemanager::enable()
 {
+
     state.enabled = true;
     newitemlocation->enable();
     resourcecontainer->enable();
