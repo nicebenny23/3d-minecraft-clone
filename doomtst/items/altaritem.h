@@ -1,25 +1,15 @@
 #include "item.h"
-#include "../items/loottable.h"
+#include "../block/block.h"
 #ifndef altaritem_HPP
 #define altaritem_HPP
-#define altaritemblockid_HPP
-inline void altariteminit(blockname::block* blk) {
-	blk->mesh.setfaces(mosstex, mosstex, mosstex, mosstex, mosstex, mosstex);
+#define altaritemblockid blockname::altaritem
+inline void initaltaritem(item* itm) {
+	itm->properties.pickaxepower = 1;
 
-	blk->solid = true;
-	blk->transparent = false;
-	blk->emitedlight = 0;
-	blk->minedfastwithpick = 1;
-	blk->mininglevel = .3f;
-	blk->mesh.scale = blockname::unitscale;
-	blk->createaabb();
-	blk->addcomponentptr<loottable>()->addelem(mossitem, 1, true);
+	itm->maxamt = 64;
+	itm->properties.placeable = true;
 
-	blk->minedfastwithpick = false;
+	itm->itemtype = count;
+	itm->itemui.itemsprite = createitembox("images\\ultraaltar.png");
 }
-inline void altardelete(blockname::block* blk) {
-	blk->removecomponent<aabb::Collider>();
-	blk->removecomponent<loottable>();
-
-}
-#endif // !wood_HPP
+#endif // !grassitem_HPP

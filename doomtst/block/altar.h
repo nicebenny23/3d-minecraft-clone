@@ -12,7 +12,7 @@ inline void altarinit(blockname::block* blk) {
 	blk->mininglevel = .3f;
 	blk->mesh.scale = blockname::unitscale;
 	blk->createaabb();
-	blk->addcomponentptr<loottable>()->addelem(mossitem, 1, true);
+	blk->addcomponentptr<loottable>()->addelem(altaritem, 1, true);
 
 	blk->minedfastwithpick = false;
 }
