@@ -32,5 +32,5 @@ inventory::inventory()
 		hotbar = Container(6, 1, 0, -4.5);
 		hotbar.enable();
 		selected = nullptr;
-		givestartitems(furnaceitem,torchitem,ironoreitem);
+		givestartitems(furnaceitem,sanditem,playertpsword);
 }

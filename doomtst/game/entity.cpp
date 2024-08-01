@@ -5,6 +5,7 @@ array<entity*> entityname::objectfromguid;
 array<entity*> todelete;
 array<entity*> initobj;
 int entityname::totalcount;
+bool entityname::shouldspawnfinalboss;
 void entityname::initobjs() {
 	totalcount = 0;
 	objectfromguid = array<entity*>(entsize);
@@ -15,7 +16,7 @@ void entityname::initobjs() {
 	todelete = array<entity*>();
 	initobj = array<entity*>();
 
-
+	shouldspawnfinalboss = false;
 
 }
 
@@ -173,21 +174,15 @@ void entityname::runupdateloop() {
 				Vector3 mm = camera::campos;
 				Vector3 griddd = grid::gridpos;
 				entity* ent = objectfromguid.at(i);
-				if (ent->hastag("player"))
-				{
-					block* n = grid::getobjatgrid(objectfromguid.at(i)->transform.position, true);
-					
-				//	Assert("cant destroy player");
-				}
-				else
-				{
+				
+				
 					if (objectfromguid.at(i)->canbedestroyed)
 					{
 
 						destroy(objectfromguid.at(i), false);
 
 					}
-				}
+				
 			}
 
 

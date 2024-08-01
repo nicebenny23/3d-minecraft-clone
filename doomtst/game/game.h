@@ -26,7 +26,7 @@
 #include "../entities/slime.h"
 #include "../game/navigation.h"
 #include "../entities/entityspawner.h"
-// settings
+#include "../game/finalbossstart.h"
 #include "../renderer/grandrenderer.h"
 #include "../entities/antifreezeboss.h"
 #include "../world/noise.h"
@@ -87,6 +87,7 @@ void update() {
     preupdate();
     updateobjs();
     spawn();
+    testgameifspawn();
     gridutil::gridupdate();
     rendergame();
     endupdate();
@@ -96,7 +97,7 @@ void init() {
     std::string o1 = std::string("C:/Users/bchar/source/repos/doomtst/doomtst/worldstorage");
 
     std::string o2 = std::string("C:/Users/User/source/repos/nicebenny23/3d-minecraft-clone/doomtst/worldstorage");
-    deleteFilesInFolder(o1);
+    deleteFilesInFolder(o2);
 
     timename::inittime();
     randominit();

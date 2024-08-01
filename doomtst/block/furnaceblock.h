@@ -19,7 +19,7 @@ struct furnacemenu :menu {
 		blkcont = recipemanager("crafting\\furnace.txt", 1,1);
 		progressbar->shouldrender = false;
 		enabled = false;
-		blkcont.attributes = extrarecipeattributes(true, 1);
+		blkcont.attributes = extrarecipeattributes(true, 2);
 	}
 	void custominit() {
 
@@ -68,7 +68,7 @@ struct furnacecomp :gameobject::component {
 		int l = 1;
 	}
 	void update() {
-		float scale1 = (1 - men.blkcont.attributes.timetillcraft) / 10;
+		float scale1 = (2 - men.blkcont.attributes.timetillcraft) / 10;
 		v2::Vector2 center = v2::Vector2(0, .2) + v2::Vector2(scale1/2 , .1);
 		v2::Vector2 scale = v2::Vector2(scale1, .03);
 		Box2d progbox = Box2d(center, scale/2);

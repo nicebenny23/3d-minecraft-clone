@@ -3,10 +3,15 @@
 #include "slime.h"
 #include "../world/grid.h"
 #include"../world/voxeltraversal.h"
+#include "../renderer/blockrender.h"
 #ifndef entityspawner_HPP
 #define entityspawner_HPP
 #define enemytag 1
 void spawn() {
+	if (!blockrender::enablelighting)
+	{
+		return;
+	}
 	float spawnthreshold=.001f;
 	float randomnum = random();
 	

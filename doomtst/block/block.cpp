@@ -112,7 +112,7 @@ blockname::block::block(v3::Coord location, int blockid)
 
 	state = gameobject::beinginitiated;
 	emitedlight = 0;
-	complist = (array<gameobject::component*>());
+	complist = (array<gameobject::component*>(2));
 	type = gameobject::block;
 	mininglevel = 0;
 	id = blockid;
@@ -133,20 +133,6 @@ blockname::block::block()
 	id = -1;
 	pos = v3::zeroiv;
 	type = gameobject::block;
-
-
-}
-
-void blockname::block::initasgameobj()
-{
-	transparent = false;
-	solid = false;
-
-	emitedlight = 0;
-	complist = (array<gameobject::component*>());
-	type = gameobject::block;
-
-
 
 
 }

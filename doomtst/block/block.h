@@ -11,7 +11,7 @@ enum blocktex {
 	treestonetex = 0,
 	grasstex = 1,
 	stonetex = 2,
-	stonetex1 = 3,
+	altartex = 3,
 	glasstex = 4,
 	watertex = 5,
 	torchtex = 6,
@@ -32,7 +32,10 @@ enum blocktex {
 	ironoretex=21,
 	furnacefronton=22,
 	furnacesideon=23,
-	logtoppng=24
+	logtoppng=24,
+	ultraaltarpngultrapng=25,
+	sandtex=26,
+	
 };
 using namespace v3;
 
@@ -142,11 +145,17 @@ namespace blockname {
 
 
 
+	struct blockstate {
 
+		bool broken;
+		blockstate() {
+			broken = false;
+		}
+	};
 
 	struct block:gameobject::obj
 	{
-
+		blockstate bstate;
 		bool minedfastwithpick;
 		face& operator[](int index);
 		bool transparent;
@@ -165,7 +174,7 @@ namespace blockname {
 
 		 block(v3::Coord location,int blockid);
 		 block();
-		 void initasgameobj();
+		
 		 void createaabb(bool effector=false);
 		
 	};

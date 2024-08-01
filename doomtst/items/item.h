@@ -42,6 +42,12 @@ enum itemid {
 	crystalbottom=25,
 	treestoneitem=26,
 	altaritem=27,
+	obsidianitem=28,
+	sanditem=29,
+	glassitem=30,
+	glassbottleitem=31,
+	lavabottleitem=32,
+	playertpsword=33,
 };
 enum itemstate {
 	beingheld = 0,
@@ -78,12 +84,12 @@ struct item
 	struct itemproperties {
 		float pickaxepower;
 		float foodval;
-
+		int onuse;
 		int dmg;
 		float armor;
 		bool placeable;
 		itemproperties() {
-
+			onuse = -1;
 			pickaxepower = 0;
 			foodval = 0;
 			dmg = 1;

@@ -114,6 +114,7 @@ struct playerbreak:gameobject::component
 		{
 			timeuntilbreak = currmining->mininglevel;
 			wearduribilty();
+			objutil::toblk(closest.box->owner).bstate.broken = true; 
 			gridutil::setblock(toblk(closest.box->owner).pos, minecraftair);
 
 		}

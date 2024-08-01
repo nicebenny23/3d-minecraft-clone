@@ -44,7 +44,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableASAN>Yes</EnableASAN>
+    <EnableASAN>false</EnableASAN>
     <EnableFuzzer>false</EnableFuzzer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -220,6 +220,7 @@
     <ClInclude Include="entities\entityspawner.h" />
     <ClInclude Include="entities\rotatetovelocity.h" />
     <ClInclude Include="entities\slime.h" />
+    <ClInclude Include="entities\wisp.h" />
     <ClInclude Include="game\collutil.h" />
     <ClInclude Include="game\entityutil.h" />
     <ClInclude Include="game\game.h" />
@@ -238,14 +239,17 @@
     <ClInclude Include="items\crystaltorchitem.h" />
     <ClInclude Include="items\furnaceitem.h" />
     <ClInclude Include="items\glassbottle.h" />
+    <ClInclude Include="items\glassitem.h" />
     <ClInclude Include="items\ironbottomitem.h" />
     <ClInclude Include="items\ironitem.h" />
     <ClInclude Include="items\ironoreitem.h" />
     <ClInclude Include="items\ironpick.h" />
     <ClInclude Include="items\ironsword.h" />
     <ClInclude Include="items\irontopitem.h" />
+    <ClInclude Include="items\obsidianitem.h" />
     <ClInclude Include="items\plank.h" />
     <ClInclude Include="items\sand.h" />
+    <ClInclude Include="items\tpsword.h" />
     <ClInclude Include="items\treestoneitem.h" />
     <ClInclude Include="items\itemslot.h" />
     <ClInclude Include="items\item.h" />
@@ -267,6 +271,7 @@
     <ClInclude Include="player\playerclimb.h" />
     <ClInclude Include="player\playereat.h" />
     <ClInclude Include="player\playerplace.h" />
+    <ClInclude Include="player\playertpsword.h" />
     <ClInclude Include="renderer\grandrenderer.h" />
     <ClInclude Include="renderer\mesh.h" />
     <ClInclude Include="renderer\model.h" />

@@ -1,7 +1,7 @@
 #include "item.h"
 #ifndef rockitem_HPP
-#define rockitemitem_HPP
-#define rockitemblockid -1
+#define rockitem_HPP
+#define rockitemblockid 
 inline void rockiteminit(item* itm) {
 	itm->properties.pickaxepower = 2;
 	itm->properties.placeable = false;

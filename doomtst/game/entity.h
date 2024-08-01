@@ -7,13 +7,13 @@
 #define entsize 16*16*16
 #ifndef entity_HPP
 #define entity_HPP
-#define playertag 3
+
 inline std::string str(const char* charlist) {
 
 	return 	std::string(charlist);
 }
 namespace entityname {
-
+	extern bool shouldspawnfinalboss;
 
 
 	extern int totalcount;

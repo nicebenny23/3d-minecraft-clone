@@ -27,11 +27,25 @@ texture::texture(const char* file, textype imgtype)
 	int height;
 
 	int colchannel=0;
-	
-	unsigned char* data = stbi_load(file, &width,&height, &colchannel, STBI_rgb_alpha);
 
+	unsigned char* data = stbi_load(file, &width, &height, &colchannel, STBI_rgb_alpha);
+
+	for (int i = 0; i < 10; i++)
+	{
+		if (data==nullptr)
+		{
+			data = stbi_load(file, &width, &height, &colchannel, STBI_rgb_alpha);
+		}
+		else
+		{
+			break;
+		}
+	}
 	if (data==nullptr)
 	{
+		
+			std::cerr << "Failed to load texture: " << stbi_failure_reason() << std::endl;
+		
 		Assert("texture doesent exist");
 
 		std::abort();

@@ -12,6 +12,7 @@
 #include "crystaldaggers.h"
 #ifndef ultraantifreezefinalboss_HPP
 #define ultraantifreezefinalboss_HPP
+
 enum bosstate {
     following=0,
     shooting=1,
@@ -31,7 +32,7 @@ struct firedaggerfinalboss :gameobject::component {
       
             //currtransform.position = pos;
             currtransform.orient(pos);
-            currtransform.position += currtransform.getnormaldirection() * .01f;
+            currtransform.position += currtransform.getnormaldirection() * .02f;
 
             if (random() < timename::smoothdt * 1 / 20.f) {
                 state = shooting;
@@ -47,7 +48,7 @@ struct firedaggerfinalboss :gameobject::component {
         if (state == shooting)
         {
             currtransform.orientbase(Vector3(0, 1, 0));
-            currtransform.position += currtransform.getnormaldirection() * .01f;
+            currtransform.position += currtransform.getnormaldirection()*timename::dt * 4;
 
             //currtransform.position += Vector3(1, 0, 0)*.002f;
             if (timetillshoot<0&&0<shotsleft)
@@ -55,7 +56,7 @@ struct firedaggerfinalboss :gameobject::component {
 
                 v3::Vector3 pos = owner->getcomponent<model>()[0].transform.position + owner->getcomponent<model>()[0].transform.getnormaldirection() * 4;
                 Vector3 ppos = player::goblin.toent()->transform.position;
-                Vector3 velocity = normal(pos-ppos) * -6;
+                Vector3 velocity = normal(pos-ppos) * -6+(Vector3(random(),random(),random())-unitv/2);
                 spawndagger(pos, velocity, 0);
                 shotsleft--;
                 timetillshoot = .1;
@@ -73,7 +74,7 @@ struct firedaggerfinalboss :gameobject::component {
 
             //currtransform.position = pos;
             currtransform.orient(pos);
-            currtransform.position += currtransform.getnormaldirection() * .03f;
+            currtransform.position += currtransform.getnormaldirection() * timename::dt*9;
             timetillshoot -= timename::smoothdt;
             if (timetillshoot<0)
             {
@@ -82,18 +83,25 @@ struct firedaggerfinalboss :gameobject::component {
 
         }
     }
+    void destroy() {
+
+        player::goblin->transform.position = Vector3(0, 300, 0);
+
+        blockrender::enablelighting = true;
+
+    }
 
 };
 inline entityname::entityref createfinalboss(v3::Vector3 pos) {
     
-    entityname::entityref refmodel = entityname::createentity(pos, "enemy");
+    entityname::entityref refmodel = entityname::createentity(zerov, "enemy");
     refmodel.toent()->addcomponentptr<model>();
-
+    Coord cpos = pos;
     //  refmodel.toent()->getcomponent<model>().add("slime2.obj", "images\\slimetex.png");
     for (int i = 0; i <160; i++)
     {
-        refmodel.toent()->getcomponent<model>().add("newtest.obj", "images\\bosstex.png", Vector3(i, 0, 0));
-        refmodel.toent()->addcomponentptr<aabb::Collider>(Vector3(i,0,0), unitscale, true)->isunmovable=true;
+        refmodel.toent()->getcomponent<model>().add("objs\\finalboss.obj", "images\\bosstex.png", Vector3(i, 0, 0)+cpos);
+        refmodel.toent()->addcomponentptr<aabb::Collider>(Vector3(i,0,0)+cpos, unitscale, true)->isunmovable=true;
 
         refmodel.toent()->getcomponent<model>()[i].transform.yaw = 0;
     }
@@ -103,7 +111,7 @@ inline entityname::entityref createfinalboss(v3::Vector3 pos) {
     refmodel.toent()->addcomponent<dmgonhit>(4, "player", 6);
    
    // refmodel.toent()->addcomponent<rigidbody>();
-    refmodel.toent()->transform.scale = unitscale*2;
+    refmodel.toent()->transform.scale = unitv;
     refmodel.toent()->addcomponent<worm>(160,1);
     refmodel->canbedestroyed = false;
     return refmodel;

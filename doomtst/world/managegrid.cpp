@@ -187,7 +187,7 @@ void gridutil::destroyblockatloc(int x, int y, int z)
 	{
 		location->senddestroycall();
 		blkinitname::setair(location);
-
+		
 		for (int faceind = 0; faceind < 6; faceind++)
 		{
 			computecover((location->mesh)[faceind]);

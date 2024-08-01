@@ -14,6 +14,7 @@ struct lootelement
 	lootelement() {
 		itemid = -1;
 		maxamt = -1;
+		israndom = false;
 	}
 	int itemid;
 	float maxamt;
@@ -41,6 +42,7 @@ struct lootelement
 };
 struct  loottable :gameobject::component
 {
+
 	bool playerinteract;
 	void onplayerclick() {
 		playerinteract = true;
@@ -48,7 +50,7 @@ struct  loottable :gameobject::component
 	}
 	void start() {
 		playerinteract = false;
-		lootlist =  array<lootelement>();
+		lootlist =  array<lootelement>(1);
 	}
 	~loottable()
 	{
@@ -73,6 +75,13 @@ struct  loottable :gameobject::component
 		{
 			if (!playerinteract) {
 				return;
+			}
+		}
+		if (owner->type == gameobject::block)
+		{
+			if (objutil::toblk(owner).bstate.broken != true)
+			{
+				lootlist.destroy();
 			}
 		}
 		for (int i = 0; i < lootlist.length; i++)

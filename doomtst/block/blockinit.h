@@ -16,6 +16,8 @@
 #include "chest.h"
 #include "furnaceblock.h"
 #include "ironblock.h"
+#include "altar.h"
+#include "sand.h"
 //provides utility functions for blocks
 using namespace blockname;
 #ifndef blockinit_H
@@ -51,7 +53,7 @@ namespace blkinitname {
 			torchinit(blk);
 			break;
 		case minecraftsand:
-			woodinit(blk);
+			sandinit(blk);
 			break;
 		case minecraftcraftingtable:
 			tableinit(blk);
@@ -77,7 +79,9 @@ namespace blkinitname {
 		case minecraftironore:
 			ironinit(blk);
 			break;
-
+		case minecraftaltar:
+			altarinit(blk);
+			break;
 		}
 
 		blk->state = gameobject::active;
@@ -128,7 +132,7 @@ namespace blkinitname {
 			break;
 		case minecraftsand:
 
-			wooddelete(blk);
+		sanddelete(blk);
 			break;
 		case minecraftwater:
 
@@ -159,6 +163,10 @@ namespace blkinitname {
 		case minecraftironore:
 			irondelete(blk);
 			break;
+		case minecraftaltar:
+			altardelete(blk);
+			break;
+	
 		default:
 			Assert("need valid id in set blk");
 		}

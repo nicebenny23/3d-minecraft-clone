@@ -13,11 +13,13 @@ entityname::entityref player::goblin;
 void player::initplayer()
 {
 	goblin = entityname::createentity(Vector3(0,300,10), "");
+	goblin->canbedestroyed = false;
 	goblin.toent()->addcomponent<estate>(10,true);
 	goblin->addcomponent<playereat>();
 	goblin.toent()->addcomponent<playerhealth>();
 	goblin.toent()->addcomponent<inventory>();
 	goblin.toent()->addtag("player");
+	goblin->addcomponent<playertpcomp>();
 	goblin->addcomponent<playerclimb>();
 		goblin.toent()->addcomponent<Collider>(zerov, unitv / 2.3f, true);
 	goblin.toent()->addcomponent<playermovement>();

@@ -223,6 +223,15 @@ int idfromnoise(Coord pos, float nint, float mint, float bint, float fint) {
 }
 int generatechunkvalfromnoise(Coord pos,noisemap* map, noisemap* modulatedmap, noisemap* biomemap, noisemap* feturemap,noisemap* lavamap)
 {
+
+	if (pos.y>10010)
+	{
+		return minecraftair;
+	}
+	if (pos.y>10000)
+	{
+		return minecraftobsidian;
+	}
 	Coord localpos;
 	localpos.x = modabs(pos.x,16);
 

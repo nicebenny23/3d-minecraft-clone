@@ -28,6 +28,11 @@
 #include "crystaldagger.h"
 #include "plank.h"
 #include "altaritem.h"
+#include "obsidianitem.h"
+#include "glassitem.h"
+#include "glassbottle.h"
+#include "sand.h"
+#include "tpsword.h"
 #ifndef itemutil_HPP
 #define itemutil_HPP
 inline void inititemproperties(item* itm) {
@@ -115,6 +120,22 @@ inline void inititemproperties(item* itm) {
 		break;
 	case altaritem:
 		initaltaritem(itm);
+		break;
+	case obsidianitem:
+		initobsidianitem(itm);
+		break;
+	case sanditem:
+		sanditeminit(itm);
+		break;
+	case glassitem:
+		glassiteminit(itm);
+		break;
+	case glassbottleitem:
+
+		glassbottleiteminit(itm);
+		break;
+	case playertpsword:
+		initfinalsworditem(itm);
 		break;
 	default:
 	//	Assert("null item not initiated");
@@ -234,8 +255,24 @@ inline int blockidfromitemid(item* itm) {
 	case plankitem:
 		return plankitemblockid;
 		break;
+	case obsidianitem:
+		return obsidianasblockid;
+		break;
 	case altaritem:
 		return altaritemblockid;
+		break;
+	case sanditem:
+		return sanditemblockid;
+     break;
+	case glassitem:
+		return glassitemblockid;
+		break;
+	case glassbottleitem:
+		return glassbottleitemblockid;
+		break;
+
+	case playertpsword:
+		return tpswordblockid;
 	default:
 		break;
 	}

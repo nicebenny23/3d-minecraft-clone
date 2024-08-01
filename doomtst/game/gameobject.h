@@ -289,7 +289,7 @@ namespace gameobject {
 
 		comp->start();
 		comp->active = true;
-		comp->id = compidfromname((char*)(typeid(T).name()));
+		comp->id = id;
 
 		complist.append(comp);
 		return comp;
@@ -336,7 +336,7 @@ namespace gameobject {
 
 		comp->start();
 
-		comp->id = compidfromname((char*)(typeid(T).name()));
+		comp->id = id;
 		comp->active = true;
 		complist.append(comp);
 

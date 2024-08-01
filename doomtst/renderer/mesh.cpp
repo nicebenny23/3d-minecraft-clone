@@ -89,7 +89,7 @@ void meshname::rendermesh(mesh* torender)
 
 	torender->tex.apply();
 	array<float> databuf;
-	renderer::changerendertype(renderer::rendermodel);
+
 	torender->setmodeluniform();
 
 	for (int i = 0; i < torender->vertexindices.length; i++)

@@ -2,8 +2,9 @@
 #include "../items/loottable.h"
 #ifndef altar_HPP
 #define altar_HPP
+
 inline void altarinit(blockname::block* blk) {
-	blk->mesh.setfaces(mosstex, mosstex, mosstex, mosstex, mosstex, mosstex);
+	blk->mesh.setfaces(altartex, altartex, obsidiantex, obsidiantex, altartex, altartex);
 
 	blk->solid = true;
 	blk->transparent = false;
@@ -13,7 +14,7 @@ inline void altarinit(blockname::block* blk) {
 	blk->mesh.scale = blockname::unitscale;
 	blk->createaabb();
 	blk->addcomponentptr<loottable>()->addelem(altaritem, 1, true);
-
+	entityname::shouldspawnfinalboss = true;
 	blk->minedfastwithpick = false;
 }
 inline void altardelete(blockname::block* blk) {

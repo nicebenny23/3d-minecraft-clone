@@ -7,13 +7,14 @@
 #include "vertexobject.h"
 #include "../game/transform.h"
 
-#define _CRT_SECURE_NO_WARNINGS
-#define _CRT_SECURE_NO_DEPRECATE
+
 using namespace dynamicarray;
 using namespace v3;
 using namespace vobj;
 #ifndef  mesh_H
 #define  mesh_H
+#define _CRT_SECURE_NO_WARNINGS
+#define _CRT_SECURE_NO_DEPRECATE
 namespace meshname {
 	
 	struct mesh

@@ -78,7 +78,14 @@ namespace grid {
 				{
 					continue;
 				}
-
+				if (blk.id == minecraftmoss)
+				{
+					continue;
+				}
+				if (blk.id==minecraftobsidian)
+				{
+					continue;
+				}
 				if (gameobject::shouldbeupdated(&blk))
 				{
 
@@ -114,7 +121,7 @@ namespace grid {
 
 			int ind = gridindfromchunkpos(xchunk, ychunk, zchunk);
 			block& blockatpos = chunklist[ind]->blockbuf[Chunk::indexfrompos(x, y, z)];
-			if (countnonsolids || blockatpos.id != minecraftair)
+			if (countnonsolids ||( blockatpos.id != minecraftair))
 			{
 				return &blockatpos;
 			}

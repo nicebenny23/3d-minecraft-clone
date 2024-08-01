@@ -127,7 +127,8 @@ void emitface(int face, block& torender, array<float>& datbuf, array<unsigned in
 			}
 			else
 			{
-				databuffer.append(15);
+				
+				datbuf.append(15);
 			}
 		}
 
@@ -280,7 +281,7 @@ void blockrender::initblockrendering()
 	texlist[0] = "images\\treestone.png";
 	texlist[1] = "images\\grass.png";
 	texlist[2] = "images\\stone.png";
-	texlist[3] = "images\\stone.png";
+	texlist[3] = "images\\crystalaltarside.png";
 	texlist[4] = "images\\glass.png";
 	texlist[5] = "images\\water.png";
 	texlist[6] = "images\\torch.png";
@@ -305,6 +306,8 @@ void blockrender::initblockrendering()
 	texlist[furnacesideon] = "images\\furnaceon.png";
 	texlist[furnacefronton] = "images\\furnacetopon.png";
 	texlist[logtoppng] = "images\\log.png";
+	texlist[ultraaltarpngultrapng] = "images\\ultraaltar.png";
+	texlist[sandtex] = "images\\sand.png";
 	texarray = texturearray(16, 16, texlist);
 	texarray.apply();
 	enablelighting = true;

@@ -21,6 +21,7 @@ model::model(meshconnecttype connectmethod )
 
 void model::renderupdate()
 {
+	renderer::changerendertype(renderer::rendermodel);
 	glm::mat4* model =new glm::mat4(transformtomat(objutil::toent(owner).transform));
 	for (int i = 0; i < meshlist.length; i++)
 	{

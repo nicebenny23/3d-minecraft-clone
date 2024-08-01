@@ -86,6 +86,13 @@ return        array<navnode>();
                 shortestind = i;
             }
         }
+        if (shortestind == -1)
+        {
+            openlist.destroy();
+            closedlist.destroy();
+            break;
+        }
+
         navnode current = openlist[shortestind];
         navnode* newnode = new navnode(current);
         todeallocatelist.append(newnode);
@@ -106,13 +113,7 @@ return        array<navnode>();
             openlist.destroy();
             return toret;
         }
-        if (shortestind==-1)
-        {
-            openlist.destroy();
-            closedlist.destroy();
-            break;
-        }
-       
+    
       
         // checks if goal
         if (current == goal) {

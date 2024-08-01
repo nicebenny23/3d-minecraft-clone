@@ -12,11 +12,11 @@ inline void obsidianinit(blockname::block* blk) {
 	blk->createaabb(false);
 	blk->mininglevel = 5;
 	blk->minedfastwithpick = true;
-	//blk->addcomponentptr<loottable>()->addelem(obsidianitem, 2, true);
+	blk->addcomponentptr<loottable>()->addelem(obsidianitem, 1, false);
 }
 inline void obsidiandelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();
-
+	blk->removecomponent<loottable>();
 }
 #endif // !wood_HPP
 
