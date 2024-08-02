@@ -109,7 +109,7 @@ inline entityname::entityref createfinalboss(v3::Vector3 pos) {
     refmodel.toent()->addcomponent<estate>(100, false);
 
     refmodel.toent()->addcomponent<dmgonhit>(4, "player", 6);
-   
+    refmodel.toent()->addcomponentptr<loottable>()->addelem(playertpsword, 512);
    // refmodel.toent()->addcomponent<rigidbody>();
     refmodel.toent()->transform.scale = unitv;
     refmodel.toent()->addcomponent<worm>(160,1);

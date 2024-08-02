@@ -49,9 +49,8 @@ void preupdate() {
     camera::setcamerapos(player::goblin.toentnotnull()->transform.position);
 
     timename::calcfps();
-
-    window::processInput();
-
+    
+    managemenus();
 
 }
 void testtransform() {
@@ -72,12 +71,12 @@ void testtransform() {
 void updateobjs() {
 
 
+    collision::sendplayercameraray();
     collision::update();
 
     grid::runblockupdates();
     entityname::runupdateloop();
 
-    collision::sendplayercameraray();
     camera::cameraupdate();
 
 

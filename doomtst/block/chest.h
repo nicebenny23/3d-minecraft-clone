@@ -56,10 +56,10 @@ struct chestcomp :gameobject::component {
 
 	chestmenu men;
 	void onplayerclick() {
-		if (userinput::getinputkey('p').pressed)
-		{
+		if (userinput::mouseright.pressed) {
 			men.open();
 		}
+		
 
 		
 	}

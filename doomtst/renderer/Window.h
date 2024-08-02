@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 namespace window {
 
+	extern     GLFWwindow* awindow;
 
 
 	void setcursor(bool mode);

@@ -22,7 +22,17 @@ void spawn() {
 				if (distance(player::goblin.toent()->transform.position,pos)>8)
 				{
 					int entityswitchnum = randomint(4);
-					createslime(pos);
+					float pprob= sigmoid(player::goblin->transform.position.y / 100);
+					if (random()<pprob)
+					{
+
+						createslime(pos, false);
+					}
+					else
+					{
+
+						createslime(pos, true);
+					}
 				}
 			
 				

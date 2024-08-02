@@ -35,7 +35,7 @@ enum blocktex {
 	logtoppng=24,
 	ultraaltarpngultrapng=25,
 	sandtex=26,
-	
+	planktex=27,
 };
 using namespace v3;
 
@@ -62,6 +62,7 @@ namespace blockname {
 		minecraftfurnace=15,
 		minecraftironore=16,
 		minecraftaltar=17,
+		minecraftplank=18,
 	};
 	struct blockmesh;
 	struct face {

@@ -2,7 +2,7 @@
 #include "../block/block.h"
 #ifndef plankitem_HPP
 #define plankitem_HPP
-#define plankitemblockid -1
+#define plankitemblockid blockname::minecraftplank
 inline void initplankitem(item* itm) {
 	itm->properties.pickaxepower = 1;
 

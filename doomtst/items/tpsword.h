@@ -5,7 +5,7 @@
 inline void initfinalsworditem(item* itm) {
 	itm->properties.pickaxepower = 0;
 	itm->properties.placeable = false;
-	itm->maxamt = 1024;
+	itm->maxamt = 512;
 	
 	itm->properties.dmg = 10;
 

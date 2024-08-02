@@ -32,7 +32,8 @@ struct menu
 	virtual void testclick();
 	virtual void custominit();
 };
-
+;
 extern menu* openmenu;
 extern menu* inventorylocation;
+void managemenus();
 #endif // ! menu_HPP

@@ -55,10 +55,14 @@ struct craftingtablecomp :gameobject::component {
 	
 	craftingmenu men;
 	void onplayerclick() {
-		if (userinput::getinputkey('p').pressed)
+		if (owner->state==gameobject::active)
 		{
-			men.open();
+			if (userinput::mouseright.pressed)
+			{
+				men.open();
+			}
 		}
+	
 		
 		int l = 1;
 	}

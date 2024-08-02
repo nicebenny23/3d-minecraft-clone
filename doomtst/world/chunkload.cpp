@@ -109,7 +109,7 @@ enum biometype {
 };
 biometype getbiometype(float biomeval){
 
-	if (inrange(biomeval, -.3, .3))
+	if (inrange(biomeval, -.5, .3))
 	{
 	return normalbiome;
 	}
@@ -117,7 +117,7 @@ biometype getbiometype(float biomeval){
 	{
 		return mossybiome;
 	}
-	if (inrange(biomeval, -1, -.3))
+	if (inrange(biomeval, -1, -.5))
 	{
 		return lavabiome;
 	}
@@ -125,7 +125,7 @@ biometype getbiometype(float biomeval){
 }
 bool shouldbeore(float feturemap) {
 
-	if (inrange(feturemap, 0, .0002f))
+	if (inrange(feturemap, .15, .15004f))
 	{
 		return true;
 	}
@@ -135,7 +135,7 @@ bool shouldbeore(float feturemap) {
 
 bool shouldbeironore(float feturemap) {
 
-	if (inrange(feturemap, .0002, .001f))
+	if (inrange(feturemap, .20002, .201f))
 	{
 		return true;
 	}

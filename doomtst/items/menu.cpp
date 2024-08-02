@@ -1,5 +1,6 @@
 #include "menu.h"
-
+#include "../renderer/Window.h"
+#include "../util/userinput.h"
 menu* openmenu;
 menu* inventorylocation;
 bool ismenuopen() {
@@ -11,6 +12,25 @@ bool ismenuopen() {
 		return true;
 	}
 	return false;
+}
+void managemenus()
+{
+
+	if (userinput::esckey.pressed) {
+		if (openmenu != nullptr)
+		{
+			openmenu->close();
+			return;
+		}
+		if (inventorylocation->enabled)
+		{
+			inventorylocation->close();
+			return;
+		}
+		else {
+			glfwSetWindowShouldClose(window::awindow, true);
+		}
+	}
 }
 void menu::close()
 {

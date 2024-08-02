@@ -28,6 +28,7 @@ void model::renderupdate()
 		meshlist[i]->modelmatrix =model;
 		meshname::rendermesh(meshlist[i]);
 	}
+	delete model;
 }
 
 void model::destroy()

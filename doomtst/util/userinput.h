@@ -14,6 +14,10 @@ namespace userinput {
 		bool held;
 		bool released;
 		bool pressed;
+		bool xorheld(){
+
+			return held && !released;
+		}
      		inputkey() {
 
 			held = false;
@@ -22,11 +26,12 @@ namespace userinput {
 	     	}
 	};
 		extern inputkey mouseleft;
+		extern inputkey esckey;
 		extern inputkey mouseright;
 	void initiate();
 
 	void updatekey(int code, int pressedorrelesed);
-	void updatemousebutton(int button, int pressedorrelesed);
+	void updateotherkeys(int button, int pressedorrelesed);
 	void endupdate();
 	//inputkey Getkey(char keyval)
 	

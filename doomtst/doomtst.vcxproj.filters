@@ -515,6 +515,24 @@
     <ClInclude Include="items\altaritem.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="entities\wisp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\glassitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\obsidianitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\tpsword.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playertpsword.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\plank.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag1.vs" />

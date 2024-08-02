@@ -13,6 +13,7 @@
 
 array<navnode> getneighborslime(navnode& node);
 struct slimemove :gameobject::component {
+    bool ctype;
     float timesincejump;
     void jump() {
         owner->getcomponent<rigidbody>().velocity.y = 9;
@@ -36,31 +37,62 @@ struct slimemove :gameobject::component {
             {
                 if (timesincejump<0)
                 {
+
                     timesincejump = 3;
                     jump();
                 }
             }
           
-            objutil::toent(owner).transform.position += normal(gotopos) * timename::smoothdt;
-            }
+           if (ctype)
+           {
+
+               objutil::toent(owner).transform.position += normal(gotopos) * timename::smoothdt*2;
+
+           }
+           else {
+
+               objutil::toent(owner).transform.position += normal(gotopos) * timename::smoothdt * 2;
+
+               }
+           }
 
     }
 };
 
-inline entityname::entityref createslime(v3::Vector3 pos) {
+inline entityname::entityref createslime(v3::Vector3 pos,bool type) {
 
     entityname::entityref refmodel = entityname::createentity(pos, "slime");
    
   //  refmodel.toent()->getcomponent<model>().add("slime2.obj", "images\\slimetex.png");
-   refmodel.toent()->addcomponentptr<model>()->add("slime2.obj", "images\\slimetex.png");
-    refmodel.toent()->addcomponentptr<loottable>()->addelem(slimeballitem, 1, false);
-    refmodel.toent()->addcomponent<estate>(10, false);
-    refmodel.toent()->addcomponent<aabb::Collider>(zerov, unitscale/2, true);
+    if (type)
+    {
 
-    refmodel.toent()->addcomponent<dmgonhit>(3,"player",6);
+        refmodel.toent()->addcomponentptr<model>()->add("slime2.obj", "images\\slimetexred.png");
+
+    }
+    else {
+        refmodel.toent()->addcomponentptr<model>()->add("slime2.obj", "images\\slimetex.png");
+
+    }
+    refmodel.toent()->addcomponentptr<loottable>()->addelem(slimeballitem, 1, false);
+    float hp= 9;
+    if (type == true) {
+        hp = 15;
+
+    }
+    refmodel.toent()->addcomponent<estate>(hp, false);
+    refmodel.toent()->addcomponent<aabb::Collider>(zerov, unitscale/2, true);
+    float dmg = 3;
+    if (type == true) {
+        dmg = 5;
+
+    }
+    refmodel.toent()->addcomponent<dmgonhit>(dmg,"player",dmg*2);
     refmodel.toent()->addcomponent<rigidbody>();
     refmodel.toent()->addcomponent<navigator>(player::goblin, getneighborslime);
     refmodel.toent()->addcomponent<slimemove>();
+
+    refmodel->getcomponent<slimemove>().ctype = type;
     refmodel.toent()->transform.scale = unitscale/2;
     return refmodel;
 }

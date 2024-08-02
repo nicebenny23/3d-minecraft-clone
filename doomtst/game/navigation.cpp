@@ -210,6 +210,7 @@ void navigator::calcpath()
 
         headed = currpos;
     }
+    finding.destroy();
 }
 
 bool navigator::noblockinrange(Coord pos)

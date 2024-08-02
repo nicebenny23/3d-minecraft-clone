@@ -22,7 +22,7 @@ struct irecipe {
 	int xsize;
 	int ysize;
 	iteminrecipe itemcreated;
-	bool cancraft(Container* resourcecont);
+	bool cancraft(Container* resourcecont,bool exact=false);
 	irecipe(iteminrecipe* itemarray,iteminrecipe created,int sizex,int sizey);
 
 	array<iteminrecipe> recipe;

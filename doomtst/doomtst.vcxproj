@@ -201,6 +201,7 @@
     <ClInclude Include="block\crystaltorch.h" />
     <ClInclude Include="block\furnaceblock.h" />
     <ClInclude Include="block\ironblock.h" />
+    <ClInclude Include="block\plank.h" />
     <ClInclude Include="block\sand.h" />
     <ClInclude Include="block\treestone.h" />
     <ClInclude Include="block\glass.h" />

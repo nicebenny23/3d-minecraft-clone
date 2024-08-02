@@ -17,6 +17,7 @@
 #include "furnaceblock.h"
 #include "ironblock.h"
 #include "altar.h"
+#include "plank.h"
 #include "sand.h"
 //provides utility functions for blocks
 using namespace blockname;
@@ -82,6 +83,8 @@ namespace blkinitname {
 		case minecraftaltar:
 			altarinit(blk);
 			break;
+		case minecraftplank:
+			plankinit(blk);
 		}
 
 		blk->state = gameobject::active;
@@ -166,7 +169,9 @@ namespace blkinitname {
 		case minecraftaltar:
 			altardelete(blk);
 			break;
-	
+		case minecraftplank:
+			plankdelete(blk);
+			break;
 		default:
 			Assert("need valid id in set blk");
 		}

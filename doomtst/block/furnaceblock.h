@@ -43,7 +43,7 @@ struct furnacemenu :menu {
 	void testclick() {
 
 
-		
+
 			blkcont.updatestate();
 		
 
@@ -60,8 +60,8 @@ struct furnacecomp :gameobject::component {
 	furnacemenu men;
 
 	void onplayerclick() {
-		if (userinput::getinputkey('p').pressed)
-		{
+
+		if (userinput::mouseright.pressed) {
 			men.open();
 		}
 

@@ -5,7 +5,7 @@ void recipemanager::destroy() {
     newitemlocation->destroy();
     resourcecontainer->destroy();
 }
-//todo add offset
+//todo add proper previews
 void recipemanager::createcontainers() {
 
     newitemlocation = new Container(1, 1, 2.5, 3.5);
@@ -70,21 +70,23 @@ autocraftstatetype recipemanager::autocraft()
 }
 //feture exclusive to normal crafting
 void recipemanager::preview() {
-    bool shouldredorecipe = !previewvalid() || state.craftedthisframe;
-   
+
+    bool shouldredorecipe = !previewvalid();
+    bool cancheck = state.craftedthisframe && newitemlocation->at(0).empty();
+    shouldredorecipe |= cancheck;
         //if preview is invalid or if we have crafted this frame
         if (shouldredorecipe)
         {
             
             if (!isitempreview())
             {
-                newitemlocation->update();
+          //      newitemlocation->update();
                 
             }
    
-
+            
+            newitemlocation->databuf[0].destroyitem();
             currecipe = searchrecipe();
-
             if (currecipe != nullptr)
             {
 
@@ -150,17 +152,22 @@ void recipemanager::updatestate()
                     {
                         if (newitemlocation->clicked())
                         {
+                            if (freeditem==nullptr)
+                            {
+
+                                craft();
 
 
-                            craft();
-                            newitemlocation->update();
+                                newitemlocation->update();
+                            }
+                          
                         }
                     }
 
                         
                     
                 }
-                return;
+              
         }
         else
         {
@@ -299,7 +306,7 @@ bool recipemanager::previewvalid()
     return currecipe->cancraft(resourcecontainer);
 }
 
-bool irecipe::cancraft(Container* resourcecont) {
+bool irecipe::cancraft(Container* resourcecont,bool exact) {
     if (xsize != resourcecont->sizex) {
         Assert("size != recipesize");
     }
@@ -326,7 +333,13 @@ bool irecipe::cancraft(Container* resourcecont) {
         if (recipe[i].id != itematpos->id) {
             return false;
         }
+        if (exact)
+        {
 
+            if (itematpos->amt !=recipe[i].amt) {
+                return false;
+            }
+        }
         if (itematpos->amt < recipe[i].amt) {
             return false;
         }

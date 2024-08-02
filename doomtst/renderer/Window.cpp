@@ -12,10 +12,15 @@ namespace window {
     }
     void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
     {
-        userinput::updatemousebutton(button, action);
+        userinput::updateotherkeys(button, action);
      }
   static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
+      if (key == GLFW_KEY_ESCAPE)
+      {
+          userinput::updateotherkeys(256, action);
+      }
+      
         userinput::updatekey(key, action);
     }
   static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
@@ -84,8 +89,6 @@ namespace window {
     void processInput()
     {
 
-        if (glfwGetKey(awindow, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-            glfwSetWindowShouldClose(awindow, true);
     }
     bool shouldclose() {
         return glfwWindowShouldClose(awindow);

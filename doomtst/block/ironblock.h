@@ -12,7 +12,7 @@ inline void ironinit(blockname::block* blk) {
 	blk->createaabb(false);
 	blk->mininglevel = 3;
 	blk->minedfastwithpick = true;
-	blk->addcomponentptr<loottable>()->addelem(crystalitem, 2, true);
+	blk->addcomponentptr<loottable>()->addelem(ironoreitem, 1, false);
 }
 inline void irondelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();

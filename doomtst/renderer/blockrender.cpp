@@ -308,6 +308,7 @@ void blockrender::initblockrendering()
 	texlist[logtoppng] = "images\\log.png";
 	texlist[ultraaltarpngultrapng] = "images\\ultraaltar.png";
 	texlist[sandtex] = "images\\sand.png";
+	texlist[planktex] = "images\\treestoneblock.png";
 	texarray = texturearray(16, 16, texlist);
 	texarray.apply();
 	enablelighting = true;

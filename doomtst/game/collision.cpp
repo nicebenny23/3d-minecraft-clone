@@ -164,6 +164,7 @@ void moveobj(v3::Vector3 force,entityname::entity* object) {
 		collist[i]->prevpos+= force;
 	}
 	object->transform.position += force;
+	collist.destroy();
 }
 void collision::handleduelentitycollisions()
 {
