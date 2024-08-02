@@ -2,7 +2,7 @@
 #include "../block/block.h"
 #ifndef torchitem_HPP
 #define torchitem_HPP
-#define torchitemblockid blockname::minecraftlava
+#define torchitemblockid blockname::minecrafttorch
 inline void inittorchitem(item* itm) {
 	itm->properties.pickaxepower = 1;
 	itm->maxamt = 64;

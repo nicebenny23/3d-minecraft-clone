@@ -8,7 +8,7 @@
 #define entityspawner_HPP
 #define enemytag 1
 void spawn() {
-	return;
+	
 	if (!blockrender::enablelighting)
 	{
 		return;

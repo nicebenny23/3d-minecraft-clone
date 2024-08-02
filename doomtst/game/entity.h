@@ -20,6 +20,7 @@ namespace entityname {
 
 	struct entity : gameobject::obj
 	{
+
 		bool canbedestroyed = false;
 		const char* name;
 		array<std::string*> tags;

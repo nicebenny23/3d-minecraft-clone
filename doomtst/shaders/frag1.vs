@@ -22,6 +22,6 @@ void main()
   depth=(exp(depth/8));
   vec4 col= vec4(depth,depth,depth,1);
   col =vec4(1,1,1,1);
-    FragColor =vec4((Color+4)/16,1)*texture(tex,  vec3( fragcoord))*col;
+    FragColor =vec4((Color+1)/16,1)*texture(tex,  vec3( fragcoord))*col;
   
 } 

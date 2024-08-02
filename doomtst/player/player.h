@@ -14,6 +14,7 @@ namespace player {
 	void initplayer();
 	extern bool playeractive;
 	void calculateyawandpitch();
+
 }
 
 #endif // !player_H

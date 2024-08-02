@@ -7,45 +7,48 @@ array<navnode> getneighborslime(navnode& node)
     {
         for (int yind = -1; yind <= 1; yind++)
         {
+
+
             for (int zind = -1; zind <= 1; zind++)
             {
                 Coord offset = Coord(xind, yind, zind);
-                if (yind==0)
+
+                if (yind == 0)
                 {
+
+
                     if (xind != 0 && zind != 0) {
 
                         continue;
                     }
                 }
-                if (magnitude(offset) <= 1.01)
+
+
+
+
+                v3::Vector3 neiborpoint = offset + node.pos;
+                Coord place = neiborpoint;
+                v3::Vector3 center = place + unitv / 2;
+                v3::Vector3 scale = unitscale * v3::Vector3(.99f, .99f, .99f) / 2;
+                geometry::Box bx = geometry::Box(node.pos + unitv / 2, scale);
+                bool cango = true;
+                if (node.gcost > 1.2 && node.hcost >1.2)
                 {
-                    if (offset.x == 0)
+
+
+                    if (yind != -1)
                     {
-                        if (offset.z == 0)
+
+
+                        Coord testblock = Coord(offset.x, offset.y - 1, offset.z);
+                        if (getobjatgrid(testblock + node.pos, false) == nullptr)
                         {
                             continue;
                         }
                     }
                 }
 
-
-                v3::Vector3 neiborpoint = offset + node.pos;
-                Coord place = neiborpoint;
-                v3::Vector3 center = place + unitscale / 2;
-                v3::Vector3 scale = unitscale * v3::Vector3(.99f, .99f, .99f) / 2;
-                geometry::Box bx = geometry::Box(node.pos + unitv / 2, scale);
-                bool cango = true;
-                if (yind != -1)
-                {
-                    Coord testblock = Coord(offset.x, offset.y - 1, offset.z);
-                    if (getobjatgrid(testblock + node.pos, false) == nullptr)
-                    {
-                        continue;
-                    }
-
-
-                }
-                if (!(node.gcost <= 1.f ))
+                if (!(node.gcost <= 1.f))
                 {
 
                     for (int i = 0; i < 3; i++)
@@ -53,15 +56,15 @@ array<navnode> getneighborslime(navnode& node)
                         switch (i)
                         {
                         case 0:
-                            
-                            bx.center += v3::Vector3(0, offset.y, 0);
-                            break;
+
+                                bx.center += v3::Vector3(0, offset.y, 0);
+                                break;
                         case 1:
-                          
+
                             bx.center += v3::Vector3(offset.x, 0, 0);
                             break;
                         case 2:
-                            
+
                             bx.center += v3::Vector3(0, 0, offset.z);
                             break;
                         }
@@ -71,14 +74,14 @@ array<navnode> getneighborslime(navnode& node)
                         }
                     }
                 }
-            
+
                 if (cango)
                 {
                     neighbors.append(navnode(neiborpoint));
                 }
             }
-                
-            
+
+
         }
     }
 

@@ -263,7 +263,6 @@ void gridutil::setblock(Coord loc, int blockid)
 	else
 	{
 
-		//redolighting();
 		gridutil::redoallighting = true;
 
 		

@@ -196,17 +196,50 @@ navigator::navigator(entityname::entityref parentref, array<navnode>(*testfunc)(
     testfunction = testfunc;
 }
 
+Vector3 transformnormal(Vector3 pos, Vector3 scale)
+{
+    pos.y = floor(pos.y);
+    pos = (pos);
+    Vector3  low = pos - scale;
+    Vector3  high = pos + scale;
+
+    for (int xind = low.x; xind < high.x; xind++)
+    {
+
+        for (int zind = low.z; zind < high.z; zind++)
+        {
+           
+
+                Vector3 center = Vector3(xind, pos.y - 1, zind);
+                geometry::Box posbx = geometry::Box(center+unitv/2, unitscale);
+                if (!voxtra::Boxcollwithgrid(posbx))
+                {
+                    continue;
+                }
+                center += Vector3( 0,1,0);
+                posbx.center += Vector3(0, 1, 0);
+                if (voxtra::Boxcollwithgrid(posbx) == true)
+                {
+                    return Vector3(xind, pos.y, zind);
+                }
+        }
+
+
+    }
+    return pos;
+}
+
 void navigator::calcpath()
 {
     
-    Coord currpos = voxtra::getcurrvoxel(objutil::toent(owner).transform.position);
+    Coord currpos = voxtra::getcurrvoxel( objutil::toent(owner).transform.position);
 
-    Vector3 gotopos = voxtra::getcurrvoxel(goingtwords.toent()->transform.position);
+    Vector3 gotopos = voxtra::getcurrvoxel(goingtwords->transform.position);
  
     array<navnode>  finding = astarpathfinding(currpos,Coord(gotopos), testfunction);
     if (finding.length>1)
     {
-        headed = finding[1].pos;
+        headed = finding[1].pos+unitv/2;
     }
     else {
 
@@ -240,11 +273,12 @@ bool navigator::noblockinrange(Coord pos)
 
 void navigator::update()
 {
-    v3::Vector3 loc = objutil::toent(owner).transform.position-objutil::toent(owner).transform.scale;
+    v3::Vector3 loc = objutil::toent(owner).transform.position;
     timetillupdate -= timename::smoothdt;
+    calcpath();
     if (timetillupdate<=0||dist2(loc,headed)<.01)
     {
-        calcpath();
+      //  calcpath();
         timetillupdate =.3f;
     }
   

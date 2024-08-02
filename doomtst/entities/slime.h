@@ -29,11 +29,11 @@ struct slimemove :gameobject::component {
         Vector3 pos = objutil::toent(owner ).transform.position;
         v3::Vector3 headed = owner->getcomponent<navigator>().headed;
         
-            v3::Vector3 gotopos = headed -voxtra::getcurrvoxel( pos);
+            v3::Vector3 gotopos = headed - pos;
             if (gotopos!=zerov)
             {
 
-           if (gotopos.y>.53f)
+           if (gotopos.y>.6f)
             {
                 if (timesincejump<0)
                 {

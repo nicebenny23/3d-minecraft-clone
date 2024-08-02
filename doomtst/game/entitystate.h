@@ -5,9 +5,15 @@
 #include "objecthelper.h"
 #ifndef  entitystate_HPP
 #define  entitystate_HPP
+struct entityeffects {
+	float timetilllavaover;
+
+};                 
 
 struct estate :gameobject::component
 {
+	entityeffects effects;
+	
 	bool inliquid;
 	bool takesfalldmg;
 	int health;

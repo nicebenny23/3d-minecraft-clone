@@ -32,5 +32,5 @@ inventory::inventory()
 		hotbar = Container(6, 1, 0, -4.5);
 		hotbar.enable();
 		selected = nullptr;
-		//givestartitems(treestoneitem,0,0);
+		givestartitems(torchitem,ironsworditem,ironpickitem);
 }

@@ -177,15 +177,20 @@ int idfromnoise(Coord pos, float nint, float mint, float bint, float fint) {
 	if (inrange(nint, -mint + offset, mint + offset))
 	{
 		covered = true;
+	//todo convert to switch
 		if (biomeval==mossybiome)
 		{
 			neid = minecrafttreestone;
 		}
 		else
 		{
-
-			neid = minecraftstone;
-
+			if (biomeval==lavabiome)
+			{
+				neid = minecraftlava;
+			}
+			else {
+				neid = minecraftstone;
+			}
 		}
 	}
 	if (covered)
@@ -219,15 +224,11 @@ int idfromnoise(Coord pos, float nint, float mint, float bint, float fint) {
 				neid = minecraftsand;
 			}
 			break;
-		case lavabiome:
-			if (shouldbemoss(fint, distto))
-			{
-				neid = minecraftlava;
-			}
-			break;
+	
 		default:
 			break;
 		}
+		
 	}
 	return neid;
 

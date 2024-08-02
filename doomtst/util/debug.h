@@ -5,7 +5,7 @@
 //good
 constexpr bool debuggeneral = true;
 constexpr bool debugrender = false;
-constexpr bool generateflat = true;
+constexpr bool generateflat = false;
 constexpr bool debugnodeath = false;
 
 inline void Assert(char* msg) {
