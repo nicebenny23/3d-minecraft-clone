@@ -10,7 +10,7 @@ inline void plankinit(blockname::block* blk) {
 	blk->emitedlight = 0;
 	blk->mesh.scale = blockname::unitscale;
 	blk->createaabb();
-
+	blk->mininglevel = .4;
 	blk->addcomponentptr<loottable>()->addelem(plankitem, 1, false);
 	blk->createaabb(false);
 }

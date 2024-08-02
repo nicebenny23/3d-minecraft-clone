@@ -8,9 +8,11 @@ inline void lavainit(blockname::block* blk) {
 	blk->solid = false;
 	blk->transparent = true;
 	blk->emitedlight = 6;
-	blk->mesh.scale = blockname::unitscale;
-	blk->addcomponent<liquidprop>(5);
+	blk->mesh.scale = blockname::unitscale*.8;
 	blk->createaabb(true);
+	blk->mesh.scale = blockname::unitscale ;
+	blk->addcomponent<liquidprop>(5);
+
 	blk->addcomponent<dmgonhit>(1,"entity",0);
 	blk->minedfastwithpick = false;
 }

@@ -33,7 +33,7 @@ struct slimemove :gameobject::component {
             if (gotopos!=zerov)
             {
 
-           if (gotopos.y>.2f)
+           if (gotopos.y>.53f)
             {
                 if (timesincejump<0)
                 {
@@ -80,7 +80,7 @@ inline entityname::entityref createslime(v3::Vector3 pos,bool type) {
         hp = 15;
 
     }
-    refmodel.toent()->addcomponent<estate>(hp, false);
+    refmodel.toent()->addcomponent<estate>(hp, true);
     refmodel.toent()->addcomponent<aabb::Collider>(zerov, unitscale/2, true);
     float dmg = 3;
     if (type == true) {

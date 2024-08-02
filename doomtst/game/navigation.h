@@ -9,7 +9,12 @@
 
 struct navnode {
     Coord pos;
-    float gcost, hcost;
+
+    //distance to objective
+    float gcost;
+
+    //distance to start
+        float hcost;
     navnode* parent;
     int pathlen;
     navnode() {
@@ -31,6 +36,7 @@ struct navnode {
             pathlen = parentnode->pathlen + 1;
         }pos = position;
         gcost = 0;
+        //distance to objective
         hcost = 0;
         parent = parentnode;
     }

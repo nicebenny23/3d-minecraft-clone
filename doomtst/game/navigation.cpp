@@ -70,10 +70,12 @@ return        array<navnode>();
     array<navnode> openlist;
     array<navnode> closedlist;
     array<navnode*> todeallocatelist;
+    start.gcost = distance(start.pos, goal.pos);
+
     openlist.append(start);
+    
     const int maxiter = 200;
     int iter = 0;
-
     while (openlist.length > 0) {
         iter += 1;
         // Find the node with the lowest f cost

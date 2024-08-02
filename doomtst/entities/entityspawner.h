@@ -8,6 +8,7 @@
 #define entityspawner_HPP
 #define enemytag 1
 void spawn() {
+	return;
 	if (!blockrender::enablelighting)
 	{
 		return;
@@ -18,7 +19,7 @@ void spawn() {
 	if (randomnum<spawnthreshold)
 	{
 		
-	Vector3 pos= voxtra::findemptyspace(unitv);
+	Vector3 pos= voxtra::findground(unitv);
 				if (distance(player::goblin.toent()->transform.position,pos)>8)
 				{
 					int entityswitchnum = randomint(4);

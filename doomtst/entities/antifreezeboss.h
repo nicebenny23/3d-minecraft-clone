@@ -54,7 +54,7 @@ struct firedaggerfinalboss :gameobject::component {
             if (timetillshoot<0&&0<shotsleft)
             {
 
-                v3::Vector3 pos = owner->getcomponent<model>()[0].transform.position + owner->getcomponent<model>()[0].transform.getnormaldirection() * 4;
+                v3::Vector3 pos = owner->getcomponent<model>()[0].transform.position + owner->getcomponent<model>()[0].transform.getnormaldirection() * 4+Vector3(random(),random(),random());
                 Vector3 ppos = player::goblin.toent()->transform.position;
                 Vector3 velocity = normal(pos-ppos) * -6+(Vector3(random(),random(),random())-unitv/2);
                 spawndagger(pos, velocity, 0);

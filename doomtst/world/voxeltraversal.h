@@ -54,5 +54,18 @@ namespace voxtra {
 		} while (Boxcollwithgrid(loadbox, countnormal));
 		return loadbox.center;
 	}
+	inline Vector3 findground(v3::Vector3 scale) {
+		Vector3 pos = zerov;
+		bool shouldcontinue = true;
+		do
+		{
+			pos = findemptyspace(scale);
+			geometry::Box testbox = geometry::Box(pos - Vector3(0, scale.y + .5, 0), scale);
+			shouldcontinue = !Boxcollwithgrid(testbox, countnormal);
+
+		} while (shouldcontinue);
+	
+		return pos - Vector3(0, scale.y, 0);
+	}
 }
 #endif
