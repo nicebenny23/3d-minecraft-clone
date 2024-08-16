@@ -3,6 +3,11 @@
 #include "../util/dynamicarray.h"
 
 #include <glad/glad.h>
+inline GLint getcurvoa(){
+	GLint vaoID;
+	glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &vaoID);
+	return vaoID;
+}
 namespace vobj {
 	struct vao
 	{
@@ -91,6 +96,25 @@ namespace vobj {
 
 
 			glBufferData(type, sizeof(T)*data.length, data.getdata(), GL_STATIC_DRAW);
+		}
+		template<class T>
+		void tfillbuffer(dynamicarray::array<T>& data) {
+			GLint prevID;
+			switch (type)
+			{
+			case GL_ARRAY_BUFFER:
+
+					glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &prevID);
+					break;
+			case GL_ELEMENT_ARRAY_BUFFER_BINDING:
+				glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &prevID);
+				break;
+			}
+			bind();
+
+			glBufferData(type, sizeof(T) * data.length, data.getdata(), GL_STATIC_DRAW);
+			glBindBuffer(type, prevID);
+		
 		}
 		//fills data unnasotided
 		void fillbuffer(void* data,int size) {

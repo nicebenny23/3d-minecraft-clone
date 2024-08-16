@@ -78,7 +78,7 @@
     <ClCompile Include="world\managegrid.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="renderer\uirender.cpp">
+    <ClCompile Include="renderer\uibox.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="world\noise.cpp">
@@ -142,6 +142,39 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="player\playermodification.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="block\liquid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="world\tick.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\ui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sound\soundsource.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sound\soundbuf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sound\soundlistener.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sound\sound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Source1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\algorthm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\dynamicmempool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\staticmempool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -224,7 +257,7 @@
     <ClInclude Include="util\debug.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="renderer\algorthm.h">
+    <ClInclude Include="util\algorthm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="util\mathutil.h">
@@ -245,7 +278,7 @@
     <ClInclude Include="util\queue.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="renderer\uirender.h">
+    <ClInclude Include="renderer\uibox.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="util\fileloader.h">
@@ -531,6 +564,42 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="block\plank.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="world\tick.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\sharedptr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sound\sound.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\api.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sound\soundfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sound\soundsource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sound\soundbuf.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sound\soundlistener.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\memorypool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\dynamicmempool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\staticmempool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

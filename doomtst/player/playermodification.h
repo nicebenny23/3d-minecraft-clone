@@ -1,4 +1,4 @@
-#include "../renderer/uirender.h"
+#include "../renderer/uibox.h"
 #include "../game/gameobject.h"
 #include "../game/collision.h"
 #include "../world/managegrid.h"
@@ -26,7 +26,7 @@ struct playerbreak:gameobject::component
 		pickaxe = nullptr;
 	
 		closest.box=nullptr;
-		texture tex = texture("images\\menutex.png",png);
+		texture tex = texture("images\\menutex.png");
 	
 	}
 	bool caninteract() {
@@ -100,7 +100,7 @@ struct playerbreak:gameobject::component
 			if (currmining!=nullptr)
 			{
 
-				timeuntilbreak = currmining->mininglevel;
+				timeuntilbreak = currmining->mininglevel/5.f;
 
 			}
 	}
@@ -112,7 +112,7 @@ struct playerbreak:gameobject::component
 		testifmining();
 		if (timeuntilbreak<=0)
 		{
-			timeuntilbreak = currmining->mininglevel;
+			timeuntilbreak = currmining->mininglevel/5.f;
 			wearduribilty();
 			objutil::toblk(closest.box->owner).bstate.broken = true; 
 			gridutil::setblock(toblk(closest.box->owner).pos, minecraftair);

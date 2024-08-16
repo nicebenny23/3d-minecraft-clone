@@ -18,7 +18,6 @@ namespace collision {
 	voxtra::RayCollisionWithGrid raycastall(ray nray, gameobject::obj* orgin=nullptr,voxtra::gridtrav travmode = voxtra::countnormal);
 
 	voxtra::RayCollisionWithGrid raycastentity(ray nray, gameobject::obj* orgin=nullptr);
-	voxtra::RayCollisionWithGrid raycastCollisionWithGrid(ray nray);
 	void handleduelentitycollisions();
 	void handleCollisionWithGrid(Collider& entity);
 }

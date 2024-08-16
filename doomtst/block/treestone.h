@@ -6,8 +6,8 @@
 inline void treestoneinit(blockname::block* blk) {
 
 	blk->mesh.setfaces( treestonetex,treestonetex,logtoppng,logtoppng,treestonetex,treestonetex);
-	blk->solid = true;
-	blk->transparent = false;
+	blk->attributes.solid = true;
+	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
 	blk->mesh.scale = blockname::unitscale;
 

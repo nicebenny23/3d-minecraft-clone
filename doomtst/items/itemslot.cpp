@@ -2,7 +2,7 @@
 #include "../util/mathutil.h"
 
 void destroyonclick(itemslot& toremove) {
-	toremove.helditem->itemui.itemsprite->shouldrender = false;
+	toremove.helditem->itemui.itemsprite->state.enabled= false;
 }
 Box2d getboxfrominvloc(int xloc, int yloc) {
 
@@ -14,7 +14,7 @@ Box2d getboxfrominvloc(int xloc, int yloc) {
 
 itemslot::itemslot(int xloc, int yloc) {
 	Box2d frameboxsize = getboxfrominvloc(xloc, yloc);
-	framedecal = uirender::newbox("images\\blockholder.png",frameboxsize.scale, frameboxsize.center, 13);
+	framedecal = ui::createuielement<uibox>("images\\blockholder.png",frameboxsize.scale, frameboxsize.center, 13);
 	helditem = nullptr;
 
 	dtype = normaldecal;
@@ -22,31 +22,39 @@ itemslot::itemslot(int xloc, int yloc) {
 }
 
 
-void itemslot::givefreeamt(int amt)
+bool itemslot::givefreeamt(int amt)
 {
 
-
+	
 	if (amt<=0)
 	{
-		return;
+		return false;
 	}
 	if (helditem==nullptr)
 	{
 		Assert("cant give item to other from nullptr");
+
+		return false;
 	}
 	if (freeditem==nullptr)
 	{
 		freeditem = inititem(helditem->id,0);
 		
-		freeditem->setviewable(framedecal->shouldrender);
+		freeditem->setviewable(framedecal->state.enabled);
 
 		freeditem->state = beingheld;
 	}
-	freeditem->amt += amt;
-	helditem->amt -= amt;
-	freeditem->updateui();
-	freeditem->itemui.itemsprite->box.center = framedecal->box.center;
+	if (freeditem->canadd(amt))
+	{
 
+
+		freeditem->amt += amt;
+		helditem->amt -= amt;
+		freeditem->updateui();
+		freeditem->itemui.itemsprite->box.center = framedecal->box.center;
+		return true;
+	}
+	return false;
 
 }
 void itemslot::giveitem(int id,int amt) {
@@ -56,7 +64,7 @@ void itemslot::giveitem(int id,int amt) {
 		return;
 	}
 	helditem = inititem(id,amt);
-	helditem->setviewable(framedecal->shouldrender);
+	helditem->setviewable(framedecal->state.enabled);
 	helditem->state = ininventoryblock;
 	
 	helditem->itemui.itemsprite->box.center = framedecal->box.center;
@@ -94,8 +102,8 @@ void itemslot::destroyitem() {
 
 void itemslot::enable() {
 	
-	framedecal->shouldrender = true;
-	if (helditem != nullptr && helditem->itemui.itemsprite != nullptr) {
+	framedecal->state.enabled = true;
+	if (helditem != nullptr && helditem->itemui.itemsprite.ptr() != nullptr) {
 		helditem->setviewable(true);
 	}
 }
@@ -112,61 +120,42 @@ void itemslot::setdecal(decaltype toset)
 	dtype = toset;
 	if (toset==importantdecal) {
 		
-		framedecal->tex = texture("images\\importantblockholder.png", png);
+		framedecal->tex = texture("images\\importantblockholder.png");
 	
 		return;
 	}
 	if (toset == normaldecal) {
-		framedecal->tex = texture("images\\blockholder.png", png);
+		framedecal->tex = texture("images\\blockholder.png");
 	
 		return;
 	}
 	if (toset == destroydecal) {
 
-		framedecal->tex = texture("images\\x.png", png);
+		framedecal->tex = texture("images\\x.png");
 		
 		return;
 	}
 	if (toset == leggingdecal) {
 
-		framedecal->tex = texture("images\\leggingdecal.png", png);
+		framedecal->tex = texture("images\\leggingdecal.png");
 
 		return;
 	}
 	if (toset == chestdecal) {
 
-		framedecal->tex = texture("images\\chestdecal.png", png);
+		framedecal->tex = texture("images\\chestdecal.png");
 
 		return;
 	}
 }
 void itemslot::disable() {
 
-	framedecal->shouldrender = false;
-	if (helditem != nullptr && helditem->itemui.itemsprite != nullptr) {
+	framedecal->state.enabled = false;
+	if (helditem != nullptr && helditem->itemui.itemsprite.ptr() != nullptr) {
 		helditem->setviewable(false);
 	}
 }
-bool itemslot::hasbeenleftclicked()
-{
-	
-		if (framedecal->mouseonblock() && userinput::mouseleft.pressed) {
 
-			return true;
-		}
-	
-	return false;
-}
-bool itemslot::hasbeenrightclicked()
-{
-
-	if (framedecal->mouseonblock() && userinput::mouseright.pressed) {
-
-		return true;
-	}
-
-	return false;
-}
 
 void itemslot::updatestate() {
 
@@ -177,7 +166,7 @@ void itemslot::updatestate() {
 		{
 
 
-			if (hasbeenleftclicked()) {
+			if (framedecal->state.leftclicked) {
 				if (freeditem != nullptr && helditem != nullptr)
 				{
 
@@ -195,7 +184,7 @@ void itemslot::updatestate() {
 				transferitem(freeditem);
 			}
 
-			if (hasbeenrightclicked()) {
+			if (framedecal->state.rightclicked) {
 				if (helditem != nullptr)
 				{
 					int giveamt = helditem->amt / 2;

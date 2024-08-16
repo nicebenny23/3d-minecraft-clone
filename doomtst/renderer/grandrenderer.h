@@ -12,7 +12,7 @@
 #include "../renderer/blockrender.h"
 
 
-#include "../renderer/uirender.h"
+#include "../renderer/uibox.h"
 
 #include "../renderer/textrender.h"
 
@@ -27,9 +27,8 @@ void rendergame() {
     entityname::runrenderloop();
     blockrender::renderblocks(false);
 
-
-    uirender::renderuilist();
-    rendertextlist();
+    //apply postprossising
+    ui::updateui();
 
 
 }

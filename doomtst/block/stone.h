@@ -4,15 +4,15 @@
 inline void stoneinit(blockname::block* blk) {
 	blk->mesh.setfaces(stonetex, stonetex, stonetex, stonetex, stonetex, stonetex);
 
-	blk->solid = true;
-	blk->transparent = false;
+	blk->attributes.solid = true;
+	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
 	blk->mesh.scale = blockname::unitscale;
 
 	blk->createaabb(false);
-	blk->mininglevel = 1;
+	blk->mininglevel = 5;
 	blk->minedfastwithpick = true;
-	blk->addcomponentptr<loottable>()->addelem(stoneitem,1,false);
+	blk->addcomponent<loottable>()->addelem(stoneitem,1,false);
 		
 }
 inline void stonedelete(blockname::block* blk) {

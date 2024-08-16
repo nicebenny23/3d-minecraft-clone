@@ -21,7 +21,7 @@ struct playermovement:gameobject::component
         priority = 11;
     }float lastgroundy;
 	virtual void update() {
-
+       //objutil::toent(owner).transform.position += Vector3(0, 16, 0);
         Vector3& pos = objutil::toent(owner).transform.position;
         float slowdown = 2;
         Vector3& velocity = owner->getcomponent<rigidbody>().velocity;
@@ -49,8 +49,9 @@ struct playermovement:gameobject::component
         if ( owner->getcomponent<rigidbody>().inliquid)
         {
             normalstate = false;
-            if (userinput::getinputkey('z').held)
+            if (userinput::getinputkey(shiftkey).held)
             {
+                
                 velocity.y = -10;
             }
             if (userinput::getinputkey(' ').held )
@@ -60,9 +61,9 @@ struct playermovement:gameobject::component
         }
         if (owner->getcomponent<playerclimb>().onrope)
         {
-
+            
             normalstate = false;
-            if (userinput::getinputkey('z').held)
+            if (userinput::getinputkey(shiftkey).held)
             {
                 velocity.y = -5;
             }
@@ -80,7 +81,7 @@ struct playermovement:gameobject::component
                 velocity.y = 150 * speed / 200;
             }
 
-            if (userinput::getinputkey('z').held)
+            if (userinput::getinputkey(shiftkey).held)
             {
                 velocity.y -= 1 * effectivespeed;
             }

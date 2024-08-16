@@ -5,7 +5,7 @@
 #include "../util/fileloader.h"
 #include "../block/blockinit.h"
 #include "../block/block.h"
-#include "../renderer/algorthm.h"
+#include "../util/algorthm.h"
 
 #include "../util/dynamicarray.h"
 #include "../renderer/renderer.h"
@@ -17,10 +17,10 @@ block& Chunk::chunk::operator[](int index)
 
 int Chunk::indexfrompos(int x, int y, int z)
 {
-	x = modabs(x, 16);
-	y = modabs(y, 16);
-	z = modabs(z, 16);
-	return	256 * x + 16 * y + z;
+	x = modabs(x, chunkaxis);
+	y = modabs(y, chunkaxis);
+	z = modabs(z, chunkaxis);
+	return	chunkaxis* chunkaxis * x + chunkaxis * y + z;
 }
 
 
@@ -29,6 +29,10 @@ void Chunk::chunkmesh::genbufs()
 	Voa.generate();
 	VBO.generate(GL_ARRAY_BUFFER);
 	ibo.generate(GL_ELEMENT_ARRAY_BUFFER);
+
+	transparentVoa.generate();
+	transparentVBO.generate(GL_ARRAY_BUFFER);
+	transparentibo.generate(GL_ELEMENT_ARRAY_BUFFER);
 }
 
 
@@ -49,11 +53,16 @@ void Chunk::chunkmesh::sortbuf()
 
 void Chunk::chunkmesh::destroy()
 {
+	transparentVoa.destroy();
+
+	transparentVBO.destroy();
+	transparentibo.destroy();
+
 	Voa.destroy();
-	ibo.destroy();
 	VBO.destroy();
-	datbuf.destroy();
-	indbuf.destroy();
+	ibo.destroy();
+
+	
 	facebuf.destroy();
 }
 
@@ -68,25 +77,30 @@ Chunk::chunk* Chunk::airload(Coord location)
 {
 	chunk& newchunk = *(new chunk());
 	newchunk.modified = false;
+	int newind = 0;
 	newchunk.loc = location;
 	int ind = 0;
 	createchunkmesh(&newchunk);
 	newchunk.blockbuf = new block[chunksize];
-	for (int x = 0; x < 16; x++)
+	for (int x = 0; x < chunkaxis; x++)
 	{
-		for (int y = 0; y < 16; y++) {
-			for (int z = 0; z < 16; z++)
+		for (int y = 0; y < chunkaxis; y++) {
+			for (int z = 0; z < chunkaxis; z++)
 			{
-				Coord blockpos = Coord(x, y, z) + location * 16;
+				Coord blockpos = Coord(x, y, z) + location * chunkaxis;
 				int neid = minecraftair;
 				newchunk.blockbuf[ind] = blockname::block(blockpos, neid);
-
+				if (neid==minecraftair)
+				{
+					newind++;
+				}
 				blkinitname::genblock(&newchunk.blockbuf[ind], neid, blockpos, 0, 0);
 
 				ind++;
 			}
 		}
 	}
+	std::cout << newind;
 	return &newchunk;
 }
 //complete
@@ -96,14 +110,12 @@ Chunk::chunk* Chunk::airload(Coord location)
 const char* Chunk::getcorefilename(Coord pos)
 {
 	std::string* strng = (new std::string());
-	strng->append("worldstorage\\");
-	strng->append("t");
+	strng->append("worldstorage\\Chunk");
 	strng->append(std::to_string(pos.x));
-	strng->append("t");
+	strng->append(",");
 	strng->append(std::to_string(pos.y));
-	strng->append("t");
+	strng->append(",");
 	strng->append(std::to_string(pos.z));
-
 	return 	strng->data();
 }
 void appendspecialbytelist(array<short>& bytelist, int index, block* blk) {
@@ -111,23 +123,23 @@ void appendspecialbytelist(array<short>& bytelist, int index, block* blk) {
 	liquidprop* getliq = blk->getcomponentptr<liquidprop>();
 	if (getliq != nullptr)
 	{
-		bytelist[4096+ index] = getliq->liqval;
+		bytelist[chunksize+ index] = getliq->liqval;
 
 	}
 	if (blk->hascomponent<craftingtablecomp>())
 	{
 		
-		bytelist[4096+index] =blk->getcomponent<craftingtablecomp>().men.blkcont.getcombinedid();
+		bytelist[chunksize+index] =blk->getcomponent<craftingtablecomp>().men.blkcont.getcombinedid();
 
 	}
 	if (blk->hascomponent<chestcomp>())
 	{
-		bytelist[4096 + index] = blk->getcomponent<chestcomp>().men.blkcont.containerid;
+		bytelist[chunksize+ index] = blk->getcomponent<chestcomp>().men.blkcont.containerid;
 		
 	}
 	if (blk->hascomponent<furnacecomp>())
 	{
-		bytelist[4096 + index] = blk->getcomponent<furnacecomp>().men.blkcont.getcombinedid();
+		bytelist[chunksize + index] = blk->getcomponent<furnacecomp>().men.blkcont.getcombinedid();
 
 	}
 }
@@ -146,7 +158,7 @@ void Chunk::chunk::write()
 	}
 	for (int i = 0; i < chunksize; i++)
 	{
-		bytelist[4096 + i] = 0;
+		bytelist[chunksize + i] = 0;
 		appendspecialbytelist(bytelist, i, &blockbuf[i]);
 	}
 	file.write<short>(bytelist.getdata(), bytelist.length);
@@ -171,6 +183,8 @@ void Chunk::chunk::destroy()
 	for (int i = 0; i < chunksize; i++) {
 
 		//blkinitname::setair(&blockbuf[i]);
+		
+	
 		gameobject::immidiatedestroy(&blockbuf[i],false);
 
 		//delete blockbuf[i]

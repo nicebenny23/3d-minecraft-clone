@@ -11,38 +11,40 @@ namespace dynamicarray {
 	template<class T>
 	class array
 	{
+	
 	public:
 
 		array();
 		array(T* arr, int size);
 		T& operator[](int index);
 		T getelem(int index);
-		
+	
 		void writelist();
-		array(int size);
+		array(int size, bool shouldinit );
 		void destroy();
 		T& at(int ind);
-		T& fastat(int ind);
+		T& fastat(const int ind);
 		void append(array arr);
 		void append(T * arr,int otherlen);
 		bool cutind(int startindex, int endindex);
 		void slice(int startindex, int endindex);
 		void insertind(int index, T value);
-		void merge(int index, const array& arr);
 		bool deleteind(int index);
 		
 		T& gettop();
 		void setlist(array* arr);
-		void append(T value);
+		void append(const T value);
 		T* getdata();
-		array(const array& arr);
-		int length;
+		explicit	array(const array& arr);
 		T* list;
+		unsigned int length;
+		
 		bool resize(int size = 0);
+		void shrink();
+	unsigned int capacity;
 
-		int capacity;
-
-
+	private:
+		bool shouldinit;
 	};
 
 	//sets a list to another list while deleting the other said list,creates no memry as deletes fist list 
@@ -81,32 +83,6 @@ namespace dynamicarray {
 		{
 			std::cout << list[i] << '\n';
 		}
-	}
-	template<class T>
-	void array<T>::merge(int index, const array& arr) {
-		if (index < 0)
-		{
-			Assert("index for merge less than 0");
-		}
-		if (index + arr.length >= length)
-		{
-			return;
-		}
-		int otherlength = arr.length;
-		if (length + otherlength >= capacity)
-		{
-			resize(resizelen (length + otherlength));
-		}
-
-		for (int i = index; i < length; i++)
-		{
-			list[i + otherlength] = list[i];
-		}
-		for (int i = 0; i < otherlength; i++)
-		{
-			list[i + index] = arr.list[i];
-		}
-		length += otherlength;
 	}
 	template<class T>
 	T& array<T>::gettop() {
@@ -187,7 +163,7 @@ namespace dynamicarray {
 
 	//copies an array and uses memory this is used when setting varybles i think
 	template<class T>
-	array<T>::array(const array& arr) {
+array<T>::array(const array& arr) {
 		length = arr.length;
 		capacity = arr.capacity;
 		list = new T[capacity];
@@ -206,7 +182,7 @@ namespace dynamicarray {
 	}
 	//copies and appends an element to the list(!!!issues with pointers!!!)
 	template<class T>
-	void array<T>::append(T value) {
+	void array<T>::append(const T value) {
 		if (length >= capacity)//sees if wee need more memory due to not enogh space
 		{
 			resize(resizelen(length));
@@ -287,8 +263,8 @@ namespace dynamicarray {
 			if (!resize(resizelen(index)))//array resize failed
 			{
 				std::cout << length;
-				Assert("could not allocate correctly");
-				return *list;//to avoid error in case of memory fail and derenfrence it because its cool
+			Assert("could not allocate correctly");
+		//	return *list;//to avoid error in case of memory fail and derenfrence it because its cool
 			}
 		}
 		if (index >= length) {//max index is length
@@ -303,13 +279,6 @@ namespace dynamicarray {
 		}
 
 
-		if (length > capacity) {
-			if (!resize(resizelen(length)))//array resize failed
-			{
-				Assert("resize fail");//again to avoid error in case of memory fail and derenfrence it because its cool
-			}
-
-		}
 
 		return list[index];
 
@@ -329,16 +298,16 @@ namespace dynamicarray {
 		}
 
 
-		T val = list[index];
+		
 		return list[index];
 
 
 	}
 	//unsafe
 	template<class T>
-	inline T& array<T>::fastat(int ind)
+	inline T& array<T>::fastat(const int ind)
 	{
-		T val = list[ind];
+		
 		return list[ind];
 	}
 	//appends a list to the end of the list(doesent delete it)(!!!caution with pointer lists!!!)
@@ -381,12 +350,7 @@ namespace dynamicarray {
 	bool array<T>::resize(int size) {
 		//returns if success
 
-		if (list == nullptr || length == 0)
-		{
-		//	length = 0;
-		//	*this = array<T>(2);
-		//	return true;
-		}
+		
 		if (size == 0)
 		{
 			size = 2 * length + 2;//default case
@@ -394,10 +358,29 @@ namespace dynamicarray {
 
 		if (size > capacity)//so it cant be shrunk
 		{
-			void* newlist= realloc((void*)list, sizeof(T) * size);
+
+			void* newlist;
+			if (capacity!=0)
+			{
+				newlist= realloc((void*)list, sizeof(T) * size);
+			}
+			else
+			{
+				
+				newlist = malloc(sizeof(T) * size);
+			}
 		//	T* newlist = new T[size];
 
 
+			list = ((T*)newlist);
+
+			if (shouldinit)
+			{
+				for (int i = capacity ; i < size; i++) {
+
+					new (list + i)T();
+				}
+			}
 			if (newlist == nullptr)
 			{
 
@@ -410,9 +393,6 @@ namespace dynamicarray {
 
 
 
-
-			list = (T*)newlist;
-
 			capacity = size;
 			return true;
 		}
@@ -420,22 +400,29 @@ namespace dynamicarray {
 	}
 
 	template<class T>
-	array<T>::array(int size) {
+	inline void array<T>::shrink()
+	{	for (int i = length; i < capacity; i++)
+		{
+			delete list[i];
+		}
+		capacity = length;
+	}
 
+	template<class T>
+	array<T>::array(int size, bool init) {
+
+		shouldinit = init;
 		length = 0;
-		capacity = size;
-		list = new T[size];
-
-		for (int i = 0; i < size; i++)
+		capacity = 0;
+		if (0 < size)
 		{
-			list[i] = T();
-		}
-		if (list == nullptr)
-		{
-			delete[] list;
 
-			return;
+			resize(size);
 		}
+		else
+		{
+			list = nullptr;
+		} 
 
 	}
 
@@ -447,7 +434,7 @@ namespace dynamicarray {
 		length = 0;
 		capacity = 0;
 		list = nullptr;
-
+		shouldinit = false;
 
 
 
@@ -455,16 +442,20 @@ namespace dynamicarray {
 	}
 
 	template<class T>
-	inline array<T>::array(T* arr, int size)
+	inline array<T>::array(T* arr, int size )
 	{
 		length = size;
 		capacity = size;
 		list = new T[size];
 
-		for (int i = 0; i < size; i++)
-		{
-			list[i] = arr[i];
-		}
+
+		shouldinit = false;
+
+			for (int i = 0; i < size; i++)
+			{
+				list[i] = arr[i];
+			}
+		
 		if (list == nullptr)
 		{
 			delete[] list;

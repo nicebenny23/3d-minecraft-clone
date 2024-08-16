@@ -1,5 +1,5 @@
 #include "../util/dynamicarray.h"
-#include "../renderer/uirender.h"
+#include "../renderer/uibox.h"
 #include "../game/gameobject.h"
 #include <conio.h>
 #include "../game/entitystate.h"
@@ -17,14 +17,14 @@ struct playerhealth:gameobject::component
 	
 	
 	}
-	array<uirender::uibox*> healthboxes;
+	array<Cptr::cptr<uibox>> healthboxes;
 	void start(){
 		priority = -224;
 		v2::Vector2 scale = v2::unitv / 100;
-		healthboxes = array<uirender::uibox*>();
+		healthboxes = array<Cptr::cptr<uibox>>(10,true);
 		for (int i = 0; i < 10; i++) {
 			v2::Vector2 pos = v2::Vector2(i / 40.f-.4f, -.45);
-			healthboxes.append(uirender::newbox("images\\health.png",scale,pos,55));
+			healthboxes.append(ui::createuielement<uibox>("images\\health.png",scale,pos,55));
 		}
 	}
 	void update() {
@@ -69,11 +69,11 @@ struct playerhealth:gameobject::component
 			}
 			for (int i = 0; i < health; i++) {
 
-				healthboxes[i]->shouldrender = true;
+				healthboxes[i]->state.enabled = true;
 			}
 			for (int i = health; i < 10; i++) {
 
-				healthboxes[i]->shouldrender = false;
+				healthboxes[i]->state.enabled = false;
 			}
 		}
 	}

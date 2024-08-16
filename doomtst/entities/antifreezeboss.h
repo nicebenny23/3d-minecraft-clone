@@ -95,13 +95,13 @@ struct firedaggerfinalboss :gameobject::component {
 inline entityname::entityref createfinalboss(v3::Vector3 pos) {
     
     entityname::entityref refmodel = entityname::createentity(zerov, "enemy");
-    refmodel.toent()->addcomponentptr<model>();
+    refmodel.toent()->addcomponent<model>();
     Coord cpos = pos;
     //  refmodel.toent()->getcomponent<model>().add("slime2.obj", "images\\slimetex.png");
     for (int i = 0; i <160; i++)
     {
         refmodel.toent()->getcomponent<model>().add("objs\\finalboss.obj", "images\\bosstex.png", Vector3(i, 0, 0)+cpos);
-        refmodel.toent()->addcomponentptr<aabb::Collider>(Vector3(i,0,0)+cpos, unitscale, true)->isunmovable=true;
+        refmodel.toent()->addcomponent<aabb::Collider>(Vector3(i,0,0)+cpos, unitscale, true)->isunmovable=true;
 
         refmodel.toent()->getcomponent<model>()[i].transform.yaw = 0;
     }
@@ -109,7 +109,7 @@ inline entityname::entityref createfinalboss(v3::Vector3 pos) {
     refmodel.toent()->addcomponent<estate>(100, false);
 
     refmodel.toent()->addcomponent<dmgonhit>(4, "player", 6);
-    refmodel.toent()->addcomponentptr<loottable>()->addelem(playertpsword, 512);
+    refmodel.toent()->addcomponent<loottable>()->addelem(playertpsword, 512);
    // refmodel.toent()->addcomponent<rigidbody>();
     refmodel.toent()->transform.scale = unitv;
     refmodel.toent()->addcomponent<worm>(160,1);

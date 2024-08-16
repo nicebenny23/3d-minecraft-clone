@@ -1,6 +1,6 @@
 #include "../game/entity.h"
 #include "../game/collision.h"
-#include "../renderer/uirender.h"
+#include "../renderer/uibox.h"
 #include "playermovment.h"
 #include "playermodification.h"
 #include "../game/entitystate.h"

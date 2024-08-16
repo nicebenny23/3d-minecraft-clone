@@ -108,6 +108,57 @@ namespace renderer {
 
 
     }
+    void renderquadlist(vao VAO, vbuf ibo, vbuf VBO, int size)
+    {
+        VBO.bind();
+
+
+
+        //uv
+        VAO.bind();
+        VAO.set_attr(0, 3, GL_FLOAT, 7 * sizeof(float), 0);
+        glEnableVertexAttribArray(0);
+        //texture coords,inclusing the texture in the array 
+        VAO.set_attr(1, 3, GL_FLOAT, 7 * sizeof(float), 3 * sizeof(float));
+        glEnableVertexAttribArray(1);
+        VAO.set_attr(2, 1, GL_FLOAT, 7 * sizeof(float), 6 * sizeof(float));
+        glEnableVertexAttribArray(2);
+        ibo.bind();
+      
+        if (userinput::getinputkey('t').held)
+        {
+            glDrawElements(GL_LINES, size, GL_UNSIGNED_INT, 0);
+        }
+
+        else
+        {
+            glDrawElements(GL_TRIANGLES, size, GL_UNSIGNED_INT, 0);
+        }
+
+
+    }
+    void prerenderquadlist(vao VAO, vbuf ibo, vbuf VBO, dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist)
+    {
+
+        VBO.bind();
+
+        VBO.fillbuffer<float>(pointlist);
+
+
+
+        //uv
+        VAO.bind();
+        VAO.set_attr(0, 3, GL_FLOAT, 7 * sizeof(float), 0);
+        glEnableVertexAttribArray(0);
+        //texture coords,inclusing the texture in the array 
+        VAO.set_attr(1, 3, GL_FLOAT, 7 * sizeof(float), 3 * sizeof(float));
+        glEnableVertexAttribArray(1);
+        VAO.set_attr(2, 1, GL_FLOAT, 7 * sizeof(float), 6 * sizeof(float));
+        glEnableVertexAttribArray(2);
+        ibo.bind();
+        ibo.fillbuffer<unsigned int>(indicelist);
+
+    }
     void setrenderingmatrixes()
     {
         shaderlist[currshader].setmatval(proj, "projection");
@@ -172,7 +223,7 @@ namespace renderer {
         fov = 90;
         view = glm::mat4(0);
         setprojmatrix(90, .21f, 100);
-        shaderlist = dynamicarray::array<shader>(1);
+        shaderlist = dynamicarray::array<shader>(1,false);
         shaderlist[uishader] = shader::shader("shaders\\uivertex.vs", "shaders\\uifragment.vs");
             shaderlist[uishader].attach();
         

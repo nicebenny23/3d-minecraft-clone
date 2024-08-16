@@ -55,7 +55,7 @@ inline int max2ddirection(v3::Vector3 point) {
 		return 4 + (1 - sign(point.z)) / 2;
 	}
 }
-inline v3::Vector3 dirfromint(int face) {
+inline v3::Vector3 dirfromint(const int face) {
 
 	switch (face)
 	{

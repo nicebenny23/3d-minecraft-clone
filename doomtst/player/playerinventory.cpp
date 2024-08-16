@@ -25,7 +25,6 @@ inventory::inventory()
 {
 
 	selectedind = -1;
-	texture mtex = texture("images\\slimetex.png", png);
 	playermenu = inventorymen(v2::Vector2(.5f, .5f));
 	playermenu.menutype = inventorymenu;
 	inventorylocation = &playermenu;

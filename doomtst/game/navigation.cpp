@@ -15,7 +15,7 @@ float appdist(const navnode& a, const navnode& b) {
 
 array<navnode> getneighborsdefault( navnode& node) {
     
-    array<navnode> neighbors=array<navnode>(6);
+    array<navnode> neighbors= array<navnode>(6,false);
     for (int i = 0; i < 6; i++) {
         v3::Vector3 neiborpoint = dirfromint(i) + node.pos;
         if (i == 3) {
@@ -36,7 +36,7 @@ continue;
            
         
     }
-    return neighbors;
+    return array<navnode>( neighbors);
 }
 
 array<navnode> reconstructpath(navnode* node) {
@@ -52,7 +52,7 @@ array<navnode> reconstructpath(navnode* node) {
     for (int i = 0; i < searchlength; i++) {
         std::swap( path[i],path[ path.length - 1 - i]);
          }
-    return path;
+    return dynamicarray::array<navnode>( path);
 }
 
 bool normaltestfunc(Coord pos, int dir)
@@ -113,7 +113,7 @@ return        array<navnode>();
             closedlist.destroy();
             todeallocatelist.destroy();
             openlist.destroy();
-            return toret;
+            return array<navnode>( toret);
         }
     
       
@@ -129,7 +129,7 @@ return        array<navnode>();
             closedlist.destroy();
            todeallocatelist.destroy();
             openlist.destroy();
-            return toret;
+            return array<navnode>(toret);
         }
 
         closedlist.append(current);
@@ -232,9 +232,9 @@ Vector3 transformnormal(Vector3 pos, Vector3 scale)
 void navigator::calcpath()
 {
     
-    Coord currpos = voxtra::getcurrvoxel( objutil::toent(owner).transform.position);
+    Coord currpos = grid::getvoxellocation( objutil::toent(owner).transform.position);
 
-    Vector3 gotopos = voxtra::getcurrvoxel(goingtwords->transform.position);
+    Vector3 gotopos = grid::getvoxellocation(goingtwords->transform.position);
  
     array<navnode>  finding = astarpathfinding(currpos,Coord(gotopos), testfunction);
     if (finding.length>1)
@@ -273,13 +273,22 @@ bool navigator::noblockinrange(Coord pos)
 
 void navigator::update()
 {
+    float timetillupdatespeed = .3;
+
+    Vector3 gotopos = grid::getvoxellocation(goingtwords->transform.position);
+
     v3::Vector3 loc = objutil::toent(owner).transform.position;
+    float dist = distance(loc, gotopos);
+    float addoffset = Max(0,(sigmoid(dist / 10)-.5)*2);
+    timetillupdatespeed = .3 + addoffset;
     timetillupdate -= timename::smoothdt;
-    calcpath();
-    if (timetillupdate<=0||dist2(loc,headed)<.01)
+ 
+    if (timetillupdate<=0||dist2(loc,headed)<.04)
     {
+        calcpath();
+
       //  calcpath();
-        timetillupdate =.3f;
+        timetillupdate =timetillupdatespeed;
     }
   
 }

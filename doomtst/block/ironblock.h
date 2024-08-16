@@ -4,15 +4,15 @@
 inline void ironinit(blockname::block* blk) {
 
 	blk->mesh.setfaces(ironoretex, ironoretex, ironoretex, ironoretex, ironoretex, ironoretex);
-	blk->solid = true;
-	blk->transparent = false;
+	blk->attributes.solid = true;
+	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
 	blk->mesh.scale = blockname::unitscale;
 
 	blk->createaabb(false);
 	blk->mininglevel = 3;
 	blk->minedfastwithpick = true;
-	blk->addcomponentptr<loottable>()->addelem(ironoreitem, 1, false);
+	blk->addcomponent<loottable>()->addelem(ironoreitem, 1, false);
 }
 inline void irondelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();

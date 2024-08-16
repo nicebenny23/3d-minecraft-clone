@@ -16,11 +16,7 @@ namespace window {
      }
   static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
     {
-      if (key == GLFW_KEY_ESCAPE)
-      {
-          userinput::updateotherkeys(256, action);
-      }
-      
+
         userinput::updatekey(key, action);
     }
   static void cursor_position_callback(GLFWwindow* window, double xpos, double ypos)
@@ -38,30 +34,32 @@ namespace window {
         glViewport(0, 0, widt1h, heigh1t);
 
     }
- void setcursor(bool mode)
+ void error_callback(int error, const char* description)
  {
-     if (mode)
-     {
-         glfwSetInputMode(awindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-     }
-     else
-     {
-         glfwSetInputMode(awindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-     }
-    
+     fprintf(stderr, "Error: %s\n", description);
  }
+ void enablecursor()
+ {
+     glfwSetInputMode(awindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+ }
+ void disablecursor()
+ {
+     glfwSetInputMode(awindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+ }
+ 
  void createwindow(int scrwidth, int scrheight)
     {
      
         glfwInit();
         glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+
         glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         GLFWmonitor* monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode* mode = glfwGetVideoMode(monitor);
         width = mode->width;
         height = mode->height;
-        awindow = glfwCreateWindow(width, height, "benny render 3d",NULL, NULL);
+        awindow = glfwCreateWindow(width, height, "ANTIFREEZE",NULL, NULL);
         if (awindow == NULL)
         {
             
@@ -73,12 +71,12 @@ namespace window {
        
 
         
-        setcursor(false);
+        window::disablecursor();
         glfwSetCursorPosCallback(awindow, cursor_position_callback);
         glfwSetFramebufferSizeCallback(awindow, framebuffer_size_callback);
         glfwSetMouseButtonCallback(awindow, mouse_button_callback);
         glfwSetKeyCallback(awindow, key_callback);
-      
+        glfwSetErrorCallback(error_callback);
     }
     
 

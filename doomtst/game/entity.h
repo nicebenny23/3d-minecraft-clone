@@ -1,4 +1,4 @@
-
+#include "../util/memorypool.h"
 #include "gameobject.h"
 #include "aabb.h"
 #include "../util/vector3.h"
@@ -25,7 +25,7 @@ namespace entityname {
 		const char* name;
 		array<std::string*> tags;
 		int amtcount;
-		int guid;
+		int index;
 		void removetag(std::string tag);
 		void addtag(std::string tag);
 		bool hastag(std::string tag);
@@ -35,13 +35,15 @@ namespace entityname {
 amtcount = totalcount;
 			totalcount += 1;
 			state = gameobject::beinginitiated;
+		type = gameobject::entity;
 
+		
 		
 		}
 	};
 
+	extern ptrmempool<entity> entitypool;
 
-	extern array<entity*> objectfromguid;
 	struct entityref
 	{
 		entity* operator->() {
@@ -51,7 +53,7 @@ amtcount = totalcount;
 		int sharedcount;
 		int guid;
 		entityref(entity& object) {
-			guid = object.guid;
+			guid = object.index;
 			sharedcount = object.amtcount;
 		}
 		entity* toent()
@@ -61,7 +63,7 @@ amtcount = totalcount;
 				return nullptr;
 			}
 			
-			entity* toreturn = (entity*)(objectfromguid[guid]);
+			entity* toreturn = (entity*)(entitypool[guid]);
 			if (toreturn==nullptr)
 			{
 				guid = -1;
@@ -93,7 +95,7 @@ amtcount = totalcount;
 
 	void destroy(entity* ent,bool soft =true);
 	entityref createentity(v3::Vector3 ipos, const char* _name);
-	void runupdateloop();
+	
 	void runrenderloop();
 	void deleteobjs();
 	void initobjs();

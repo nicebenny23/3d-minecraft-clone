@@ -1,10 +1,11 @@
 #include "voxeltraversal.h"
 using namespace blockname;
 using	 namespace voxtra;
+using namespace grid;
 //by implementing inner search loop acuracy scales quadraticlly
 //aproxomate voxel traversel algorthm,the accuracy scales linearly with time complexity,
 bool isvoxelvalid(block* blk, gridtrav trav) {
-	if ((trav == countsolid || trav == countnormal) && !blk->solid)
+	if ((trav == countsolid || trav == countnormal) && !blk->attributes.solid)
 	{
 		return false;
 
@@ -24,10 +25,10 @@ voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc, gridtrav trav
 	float maxdist = nray.length();
 	v3::Vector3 offdist = (nray.end - nray.start) / acc;
 	v3::Vector3 pos = nray.start;
-	Coord prevpos = pos;
+	Coord prevpos =grid::tovoxelspace( pos);
 	for (int i = 0; i < maxdist * acc; i++)
 	{
-		Coord curvox = voxtra::getcurrvoxel(pos);
+		Coord curvox = grid::getvoxellocation(pos);
 		if (curvox != prevpos)
 		{
 
@@ -53,7 +54,7 @@ voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc, gridtrav trav
 				
 			}
 		}
-		prevpos = getcurrvoxel(pos);
+		prevpos = getvoxellocation(pos);
 		pos += offdist;
 
 	}
@@ -65,10 +66,10 @@ bool voxtra::raycolllideswithgrid(ray nray, float acc, gridtrav trav)
 	float maxdist = nray.length();
 	v3::Vector3 offdist = (nray.end - nray.start) / acc;
 	v3::Vector3 pos = nray.start;
-	Coord prevpos = pos;
+	Coord prevpos =grid::tovoxelspace( pos);
 	for (int i = 0; i < maxdist * acc; i++)
 	{
-		Coord curvox = voxtra::getcurrvoxel(pos);
+		Coord curvox = grid::getvoxellocation(pos);
 		if (curvox != prevpos)
 		{
 
@@ -90,7 +91,7 @@ bool voxtra::raycolllideswithgrid(ray nray, float acc, gridtrav trav)
 				}
 			}
 		}
-		prevpos = getcurrvoxel(pos);
+		prevpos = getvoxellocation(pos);
 		pos += offdist;
 
 	}
@@ -100,21 +101,13 @@ bool voxtra::raycolllideswithgrid(ray nray, float acc, gridtrav trav)
 bool voxtra::Boxcollwithgrid(geometry::Box bx, gridtrav trav )
 {
 
-	v3::Vector3 lowpos = bx.center - bx.scale - unitv;
+array<block*>& blks= 	grid::voxelinrange(bx);
 
-	v3::Coord lowest = v3::Coord(floorabs(lowpos.x), floorabs(lowpos.y), floorabs(lowpos.z));
-	v3::Vector3 highpos = bx.center + bx.scale + unitv;
-
-	v3::Coord highest = v3::Coord(ceilabs(highpos.x), ceilabs(highpos.y), ceilabs(highpos.z));
-
-	for (int x = lowest.x; x < highest.x; x++)
+	for (int ind=0; ind < blks.length; ind++)
 	{
-		for (int y = lowest.y; y < highest.y; y++)
-		{
-			for (int z = lowest.z; z < highest.z; z++)
-			{
+		
 
-				blockname::block* tocollide = grid::getobjatgrid(x, y, z, false);
+		blockname::block* tocollide = blks.at(ind);
 				if (tocollide == nullptr)
 				{
 					continue;
@@ -135,18 +128,15 @@ bool voxtra::Boxcollwithgrid(geometry::Box bx, gridtrav trav )
 
 					if (collided)
 					{
+						blks.destroy();
 						return true;
 					}
 				}
 
 
-			}
-
-
-		}
 	
 	}
-
+	blks.destroy();
 	return false;
 
 
@@ -154,20 +144,20 @@ bool voxtra::Boxcollwithgrid(geometry::Box bx, gridtrav trav )
 
 }
 
-
+//todo remove this will not be needed as we will do a better function
 	block* voxtra::findprevblock(ray nray, float acc,gridtrav trav)
 	{
 		float maxdist = nray.length();
 		v3::Vector3 offdist = (nray.end - nray.start) / acc;
 		v3::Vector3 pos = nray.start;
 		Coord prevpos = pos;
-		block* prevblock;
+	
 		for (int i = 0; i < maxdist * acc; i++)
 		{
-			Coord curvox = voxtra::getcurrvoxel(pos);
+			Coord curvox = grid::getvoxellocation(pos);
 			if (curvox != prevpos)
 			{
-				prevblock = grid::getobjatgrid(prevpos);
+				
 				block* blk = grid::getobjatgrid(curvox);
 				if (blk != nullptr)
 				{
@@ -179,14 +169,14 @@ bool voxtra::Boxcollwithgrid(geometry::Box bx, gridtrav trav )
 						{
 
 
-							return prevblock;
+							return grid::getobjatgrid(prevpos);
 						}
 					}
 				}
 
 			}
 
-			prevpos = getcurrvoxel(pos);
+			prevpos = getvoxellocation(pos);
 			pos += offdist;
 
 		}

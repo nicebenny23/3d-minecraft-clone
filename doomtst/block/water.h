@@ -4,8 +4,8 @@
 #define water_HPP
 inline void waterinit(blockname::block* blk) {
 	blk->mesh.setfaces(watertex,watertex,watertex,watertex,watertex,watertex);
-	blk->solid = false;
-	blk->transparent = true;
+	blk->attributes.solid = false;
+	blk->attributes.transparent = true;
 	blk->emitedlight = 0;
 	blk->mesh.scale = blockname::unitscale;
 	blk->addcomponent<liquidprop>(15);

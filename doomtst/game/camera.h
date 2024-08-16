@@ -13,7 +13,6 @@ namespace camera {
 	void initilize();
 	void updatetoplayer();
 	void sendoffviewmatrix();
-	void setcamerapos(v3::Vector3 newpos);
 	void cameraupdate();
 }
 

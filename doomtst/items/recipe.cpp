@@ -15,11 +15,11 @@ void recipemanager::createcontainers() {
 void recipemanager::addrecipe(irecipe recipe)
     {
     
-    for (int i = 0; i < recipelist->length; i++) {
-        if (recipelist->at(i).xsize != resourcecontainer->sizex) {
+    for (int i = 0; i < recipelist.length; i++) {
+        if (recipelist.at(i).xsize != resourcecontainer->sizex) {
             Assert("xsize not correct for recipe manager");
         }
-        if (recipelist[i].at(i).ysize != resourcecontainer->sizey) {
+        if (recipelist.at(i).ysize != resourcecontainer->sizey) {
             Assert("ysize not correct for recipe manager");
         }
     }
@@ -78,12 +78,7 @@ void recipemanager::preview() {
         if (shouldredorecipe)
         {
             
-            if (!isitempreview())
-            {
-          //      newitemlocation->update();
-                
-            }
-   
+    
             
             newitemlocation->databuf[0].destroyitem();
             currecipe = searchrecipe();
@@ -113,14 +108,14 @@ irecipe* recipemanager::searchrecipe() {
     int maxamt = 0;
  
 
-    for (int i = 0; i < recipelist->length; i++) {
-        if (!recipelist->at(i).cancraft(resourcecontainer)) {
+    for (int i = 0; i < recipelist.length; i++) {
+        if (!recipelist.at(i).cancraft(resourcecontainer)) {
             continue;
         }
 
 
           
-            return  &recipelist->at(i);
+            return  &recipelist.at(i);
         
     }
 
@@ -133,6 +128,15 @@ void recipemanager::updatestate()
     {
         autoupdate();
         return;
+    }
+    if (userinput::getinputkey('m').held)
+    {
+        state.shouldmax = true;
+    }
+    else
+    {
+        state.shouldmax = false;
+
     }
         if (state.enabled)
         {
@@ -152,13 +156,15 @@ void recipemanager::updatestate()
                     {
                         if (newitemlocation->clicked())
                         {
-                            if (freeditem==nullptr)
+                            if (freeditem==nullptr||freeditem->id==currecipe->itemcreated.id)
                             {
+                    //returns if inventory can get freed amt so if you cant put it in inventory crafting doeswnt occur
+                                if (newitemlocation->at(0).givefreeamt(currecipe->itemcreated.amt))
+                                {
 
-                                craft();
+                                    craft();
 
-
-                                newitemlocation->update();
+                                }   
                             }
                           
                         }
@@ -216,7 +222,7 @@ attributes.timetillcraft = attributes.timetocraft;
 
 recipemanager::recipemanager(const char* filename, int sizex, int sizey)
 {
-recipelist= new array<irecipe>();
+recipelist=  array<irecipe>();
 xsize = sizex;
 ysize = sizey;
 currecipe = nullptr;
@@ -262,7 +268,7 @@ currecipe = nullptr;
              {
 
                  irecipe newrecipe = irecipe(recipearr.getdata(), recipearr[recipearr.length - 1], xsize, ysize);
-                 recipelist->append(newrecipe);
+                 recipelist.append(newrecipe);
                  recipearr.destroy();
                  linenumber = 0;
                  continue;
@@ -402,4 +408,25 @@ bool recipemanager::isitempreview()
         }
     }
     return  false;
+}
+
+//assumes crafting can happen;
+int recipemanager::timecancraft()
+{
+    int times=10100;
+    for (int i = 0; i < resourcecontainer->databuf.length; i++) {
+        
+        if (currecipe->recipe[i].id == 0) {
+            continue;
+        }
+        if (resourcecontainer->databuf[i].helditem->itemtype == wear)
+        {
+            times = Min(times, 1);
+        }
+        else
+        {   int itemtimes =resourcecontainer->databuf[i].helditem->amt / currecipe->itemcreated.amt;
+        times = Min(times, itemtimes);
+        }
+    }
+    return -1;
 }

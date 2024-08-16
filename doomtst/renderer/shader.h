@@ -1,9 +1,10 @@
-#ifndef shader_hpp
-#define shader_hpp
 #include <glad/glad.h>
 #include <glm/mat4x4.hpp>
 
 #include "../util/debug.h"
+#ifndef shader_hpp
+#define shader_hpp
+
 struct shader
 {
 
@@ -48,9 +49,5 @@ struct shader
 	void attach();
 	
 };
-
-
-
-#endif // !shader_hpp
-
+#endif
 

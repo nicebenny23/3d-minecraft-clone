@@ -1,4 +1,4 @@
-#include "../renderer/uirender.h"
+#include "../renderer/uibox.h"
 #include "../game/gameobject.h"
 #include "../game/collision.h"
 #include "../world/managegrid.h"
@@ -51,11 +51,15 @@ struct playerplace :gameobject::component
 		ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
 		block* plamentblock = voxtra::findprevblock(cameraray, 1000,voxtra::countsolid);
 		//this must be kept because it can somtimers bug out do to presosion errors;
-		if (plamentblock->solid)
+		if (plamentblock!=nullptr)
 		{
-			return;
+
+			if (plamentblock->attributes.solid)
+			{
+				return;
+			}
 		}
-		int dir = maxdirection(closest.box->center - plamentblock->center());
+		int dir = maxdirection(closest.box->box.center - plamentblock->center());
 	
 		int blockdirection = max2ddirection(Vector3(camera::campos) - closest.colpoint);
 

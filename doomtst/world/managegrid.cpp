@@ -1,5 +1,7 @@
 #include "managegrid.h"
 #include "../block/blockinit.h"
+
+
 queue<block*> lightingq;
 bool gridutil::redoallighting = true;
 void gridutil::sendrecreatemsg()
@@ -21,10 +23,10 @@ void gridutil::computecover(face& blkface)
 
 {
 
-	if (!apx(blkface.mesh->scale, (unitscale)))
+	if (!apx(blkface.mesh->scale, unitscale))
 	{
 		
-
+		blkface.covercomputed = true;
 			blkface.covered = false;
 			return;
 		
@@ -32,47 +34,93 @@ void gridutil::computecover(face& blkface)
 	}
 	blkface.covered = true;
 
-
+	
 	Coord pos = blkface.mesh->blk->pos + dirfromint(blkface.facenum);
 	block* blk = getobjatgrid(pos, true);
 	if (blk == nullptr)
 	{
-		blkface.covered = !blkface.mesh->blk->transparent;
+
+
+		blkface.covercomputed = false;
+		blkface.covered = !blkface.mesh->blk->attributes.transparent;
 		return;
 	}
-	if (blkface.mesh->blk->transparent)
+	if (blkface.mesh->blk->attributes.transparent)
 	{
-		blkface.covered = blk->transparent && (blk->id == blkface.mesh->blk->id);
+		if (blkface.mesh->blk->id!=minecraftair)
+		{
 
+			blkface.covercomputed = true;
+			blkface.covered = blk->attributes.transparent && (blk->id == blkface.mesh->blk->id);
+
+		}
 
 	}
 	else {
-		blkface.covered = !blk->transparent;
+		blkface.covercomputed = true;
+		blkface.covered = !blk->attributes.transparent;
 		
 
 	}
 
 }
+#include <thread>
+#include <vector>
+#include <mutex>
+
+void processChunks(int startChunk, int endChunk)
+{
+	for (int gridind = startChunk; gridind < endChunk; ++gridind)
+	{
+		Chunk::chunk* chk = chunklist[gridind];
+		for (int blockind = 0; blockind < chunksize; ++blockind)
+		{
+			block& blk = chk->blockbuf[blockind];
+			for (int faceind = 0; faceind < 6; ++faceind)
+			{
+				face& tocover = blk[faceind];
+				if (!tocover.covercomputed)
+				{
+					gridutil::computecover(tocover);
+				}
+			}
+		}
+	}
+}
 
 void gridutil::computeallcover()
 {
-	for (int gridind = 0; gridind < totalgridsize; gridind++)
+	// Determine the number of threads to use
+	const int numThreads = 3; // Or choose a specific number
 
+	// Create a vector to hold thread objects
+	std::vector<std::thread> threads;
+
+	// Calculate the range of chunks for each thread
+	int chunkRange = totalgridsize / numThreads;
+
+	for (int t = 0; t < numThreads; ++t)
 	{
-		
-		for (int blockind = 0; blockind < chunksize; blockind++) {
+		int startChunk = t * chunkRange;
+		int endChunk = (t == numThreads - 1) ? totalgridsize : (t + 1) * chunkRange;
 
-			for (int faceind = 0; faceind < 6; faceind++)
-			{
-
-				face* tocover = &(chunklist[gridind]->blockbuf[blockind])[faceind];
-
-				computecover(*tocover);
-			}
-
-		}
+		// Create and launch a thread to process the chunk range
+		threads.emplace_back(processChunks, startChunk, endChunk);
 	}
+
+	// Wait for all threads to complete
+	for (auto& th : threads)
+	{
+		th.join();
+	}
+
+	// Optionally, synchronize final operations like sending messages
 	sendrecreatemsg();
+}
+void gridutil::computepartialcover()
+{
+
+
 }
 
 void gridutil::emitlight()
@@ -82,17 +130,17 @@ void gridutil::emitlight()
 
 
 		block* blk = lightingq.pop();
-		if (blk->transparent)
+		if (blk->attributes.transparent)
 		{
 
 
 			for (int i = 0; i < 6; i++)
 			{
-				v3::Vector3 dir = dirfromint(i);
+				Coord dir = dirfromint(i);
 				block* blocklight = getobjatgrid(blk->pos + dir, true);
 				if (blocklight != nullptr)
 				{
-					if (blocklight->transparent) {
+					if (blocklight->attributes.transparent) {
 
 						if (blocklight->lightval < blk->lightval - 1)
 						{
@@ -117,6 +165,8 @@ void gridutil::emitlight()
 
 void gridutil::redolighting()
 {
+
+	
 	if (redoallighting)
 	{
 
@@ -128,12 +178,14 @@ void gridutil::redolighting()
 			for (int blockind = 0; blockind < chunksize; blockind++)
 			{
 				block* blk = &(*chunklist[chunkind])[blockind];
-				blk->lightval = 0;
+				
+				
 				for (int faceind = 0; faceind < 6; faceind++)
 				{
-					(blk->mesh)[faceind].light = 0;
+					
+					(blk->mesh.faces)[faceind].light = 0;
 				}
-				blk->lightval = blk->emitedlight;
+			     blk->lightval = blk->emitedlight;
 				if (0 < blk->emitedlight)
 				{
 					lightingq.append(blk);
@@ -141,6 +193,28 @@ void gridutil::redolighting()
 			}
 		}
 		emitlight();
+	}
+	
+}
+void blockchangecoverupdate(blockname::block* location) {
+
+	for (int faceind = 0; faceind < 6; faceind++)
+	{
+		(location->mesh)[faceind].covercomputed = false;
+		gridutil::computecover((location->mesh)[faceind]);
+	}
+	for (int blkind = 0; blkind < 6; blkind++)
+	{
+		block* blockatpos = getobjatgrid(dirfromint(blkind) + location->pos);
+		for (int faceind = 0; faceind < 6; faceind++) {
+			(blockatpos->mesh)[faceind].covercomputed = false;
+			if (blockatpos != nullptr)
+			{
+
+
+				gridutil::computecover(((blockatpos->mesh))[faceind]);
+			}
+		}
 	}
 }
 void gridutil::placeblockatloc(int x, int y, int z, int blockid)
@@ -155,28 +229,8 @@ void gridutil::placeblockatloc(int x, int y, int z, int blockid)
 		location->id = blockid;
 		blkinitname::blockinit(location);
 
-		for (int faceind = 0; faceind < 6; faceind++)
-		{
-			computecover((location->mesh)[faceind]);
-		}
-		for (int blkind = 0; blkind < 6; blkind++)
-		{
-			block* blockatpos = getobjatgrid(dirfromint(blkind) + location->pos);
-			for (int faceind = 0; faceind < 6; faceind++) {
-
-				if (blockatpos != nullptr)
-				{
-
-
-					computecover(((blockatpos->mesh))[faceind]);
-				}
-			}
-		}
+		blockchangecoverupdate(location);
 	}
-	sendrecreatemsg();
-	redoallighting = true;
-
-
 }
 
 void gridutil::destroyblockatloc(int x, int y, int z)
@@ -185,28 +239,11 @@ void gridutil::destroyblockatloc(int x, int y, int z)
 
 	if (location != nullptr)
 	{
-		location->senddestroycall();
+	//	location->senddestroycall();
 		blkinitname::setair(location);
-		
-		for (int faceind = 0; faceind < 6; faceind++)
-		{
-			computecover((location->mesh)[faceind]);
-		}
-		for (int blkind = 0; blkind < 6; blkind++)
-		{
-			block* blockatpos = getobjatgrid(dirfromint(blkind) + location->pos);
-			for (int faceind = 0; faceind < 6; faceind++) {
-				if (blockatpos!=nullptr)
-				{
+		blockchangecoverupdate(location);
 
-					computecover((blockatpos->mesh)[faceind]);
-
-				}
-			}
-		}
 	}
-	sendrecreatemsg();
-	redoallighting = true;
 
 }
 
@@ -225,7 +262,32 @@ void gridutil::gridupdate()
 	gridutil::redolighting();
 
 }
+void blockchangelighting(int prevlight, int newlight, Coord loc) {
+	if (newlight >= prevlight)
+	{
+		grid::getobjatgrid(loc, true)->lightval = grid::getobjatgrid(loc, true)->emitedlight;
+		lightingq.append(grid::getobjatgrid(loc, true));
+		for (int i = 0; i < 6; i++)
+		{
+			v3::Vector3 dir = dirfromint(i);
+			block* blocklight = getobjatgrid(loc + dir, true);
+			if (blocklight != nullptr)
+			{
+				lightingq.append(blocklight);
+			}
+		}
+		gridutil::emitlight();
+	}
+	else
+	{
 
+		gridutil::redoallighting = true;
+
+
+
+	}
+
+}
 //the setblock function is what should be used
 void gridutil::setblock(Coord loc, int blockid)
 {
@@ -242,31 +304,10 @@ void gridutil::setblock(Coord loc, int blockid)
 		destroyblockatloc(loc.x, loc.y, loc.z);
 
 	}
+
+	sendrecreatemsg();
+
 	int currlightemit = grid::getobjatgrid(loc, true)->emitedlight;
-	bool transparent = grid::getobjatgrid(loc, true)->transparent;
-	if (currlightemit >= prevemit)
-	{
-		gridutil::redoallighting = true;
-
-		lightingq.append(grid::getobjatgrid(loc, true));
-		for (int i = 0; i < 6; i++)
-		{
-			v3::Vector3 dir = dirfromint(i);
-			block* blocklight = getobjatgrid(loc + dir, true);
-			if (blocklight != nullptr)
-			{
-				lightingq.append(blocklight);
-			}
-		}
-		emitlight();
-	}
-	else
-	{
-
-		gridutil::redoallighting = true;
-
-		
-
-	}
+	blockchangelighting(prevemit, currlightemit, loc);
 }
 

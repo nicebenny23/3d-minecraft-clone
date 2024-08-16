@@ -1,11 +1,12 @@
 #include "userinput.h"
 #include <GLFW/glfw3.h>
 namespace userinput {
+
 	glm::vec2 mousepos;
 	glm::vec2 mouseposdt;
 	inputkey mouseleft;
 	inputkey mouseright;
-	inputkey esckey;
+
 	v2::Vector2 normedmousepos;
 	dynamicarray::array<inputkey> keylist;
 
@@ -20,8 +21,7 @@ namespace userinput {
 		mouseleft.released = false;
 		mouseright.pressed = false;
 		mouseright.released = false;
-		esckey.released = false;
-		esckey.pressed = false;
+	
 	}
 
 	void initiate()
@@ -30,8 +30,7 @@ namespace userinput {
 		mouseright = inputkey();
 		mousepos = glm::vec2(0, 0);
 		mouseposdt = glm::vec2(0, 0);
-		esckey = inputkey();
-		keylist = dynamicarray::array<inputkey>(GLFW_KEY_LAST);
+	keylist = dynamicarray::array<inputkey>(GLFW_KEY_LAST,true);
 		for (int i = 0; i < keylist.capacity; i++)
 		{
 			keylist[i]=inputkey();
@@ -59,22 +58,7 @@ namespace userinput {
 
 	void updateotherkeys(int button, int pressedorrelesed)
 	{
-		if (button == 256)
-		{
-			if (pressedorrelesed == GLFW_PRESS)
-			{
 
-				esckey.pressed = true;
-				esckey.held = true;
-
-			}
-			if (pressedorrelesed == GLFW_RELEASE)
-			{
-				esckey.pressed = false;
-				esckey.held = false;
-				esckey.released = true;
-			}
-		}
 		if (button==GLFW_MOUSE_BUTTON_RIGHT)
 		{
 			if (pressedorrelesed == GLFW_PRESS)
@@ -111,7 +95,7 @@ namespace userinput {
 
 	
 	
-	int convertchartoglfwkey(const char key) {
+	int convertchartoglfwkey(const int key) {
 		if ('a' <= key&&key<='z')
 		{
 			return key - 32;
@@ -121,7 +105,7 @@ namespace userinput {
 
 	}
 
-	inputkey getinputkey(const char key) {
+	inputkey getinputkey(const int key) {
 		return keylist[convertchartoglfwkey(key)];
 	}
 

@@ -7,6 +7,8 @@
 #include "../util/ray.h"
 #include "../util/geometry.h"
 #include "../util/random.h"
+
+#include "../util/memorypool.h"
 #include <cmath>
 
 namespace aabb {
@@ -27,11 +29,12 @@ namespace aabb {
 
     struct Collider : gameobject::component {
         v3::Vector3 collideroffset;
-        v3::Vector3 center;
-        v3::Vector3 scale;
+       
+
+        geometry::Box box;
         v3::Vector3 prevpos;
         bool isunmovable=false;
-        int index;
+        unsigned short index;
         bool effector;
 
         Collider() = default;
@@ -45,10 +48,9 @@ namespace aabb {
 
     void initCollider();
     bool aabbboxintersect(geometry::Box p1, Collider& p2);
-    bool aabbsintersect(Collider& p1, Collider& p2);
-    v3::Vector3 collideaabb(Collider p1, Collider p2);
+   v3::Vector3 collideaabb(Collider p1, Collider p2);
 
-    extern dynamicarray::array<Collider*> Colliderlist;
+    extern ptrmempool<Collider> Colliderlist;
 }
 
 #endif // AABB_HPP

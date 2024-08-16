@@ -6,14 +6,14 @@
 inline void mossinit(blockname::block* blk) {
 	blk->mesh.setfaces(mosstex, mosstex, mosstex, mosstex, mosstex, mosstex);
 
-	blk->solid = true;
-	blk->transparent = false;
+	blk->attributes.solid = true;
+	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
 	blk->minedfastwithpick = 1;
 	blk->mininglevel = .3f;
 	blk->mesh.scale = blockname::unitscale;
 	blk->createaabb();
-	blk->addcomponentptr<loottable>()->addelem(mossitem, 1,true);
+	blk->addcomponent<loottable>()->addelem(mossitem, 1,true);
 
 	blk->minedfastwithpick = false;
 }

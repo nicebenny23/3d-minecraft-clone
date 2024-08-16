@@ -118,7 +118,7 @@ struct safefile
 				preAssert("attempted to read a file but only");
 				std::cout << read << "out of " << amt<<"elements were read";
 
-				Assert("reading ");
+				Assert(" ");
 			}
 			return newarr;
 		}

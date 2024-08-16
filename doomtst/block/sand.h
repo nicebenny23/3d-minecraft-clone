@@ -13,10 +13,10 @@ struct sandfall : gameobject::component {
     void update() {
         if (timetilltest > 0) {
 
-            timetilltest -= timename::dt;
+            timetilltest -= tick::tickdt;
             return;
         }
-        timetilltest = .4f;
+        timetilltest = .29f;
         Coord pos = objutil::toblk(owner).pos;
         Coord lowpos = pos - Coord(0, 1, 0);
 
@@ -25,7 +25,7 @@ struct sandfall : gameobject::component {
 
         // Check if the block below is empty or can be replaced
         if (obj != nullptr) {
-            if (!obj->solid)
+            if (!obj->attributes.solid)
             {
 
                 gridutil::setblock(lowpos, minecraftsand);
@@ -34,20 +34,25 @@ struct sandfall : gameobject::component {
         }
     
     }
+ 
+    sandfall() {
+        utype = gameobject::updatetick;
+
+    }
     ~sandfall() = default;
 };
 
 inline void sandinit(blockname::block* blk) {
     blk->mesh.setfaces(sandtex, sandtex, sandtex, sandtex, sandtex, sandtex);
-    blk->solid = true;
-    blk->transparent = false;
+    blk->attributes.solid = true;
+    blk->attributes.transparent = false;
     blk->emitedlight = 0;
     blk->mininglevel = .5f;
     blk->mesh.scale = blockname::unitscale;
     blk->createaabb();
     blk->addcomponent<sandfall>();
-
-     blk->addcomponentptr<loottable>()->addelem(sanditem,1, false);
+    
+     blk->addcomponent<loottable>()->addelem(sanditem,1, false);
 }
 
 inline void sanddelete(blockname::block* blk) {

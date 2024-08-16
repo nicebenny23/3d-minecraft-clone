@@ -26,8 +26,8 @@ using namespace blockname;
 namespace blkinitname {
 
 	inline void blockinit(block* blk) {
-
-		switch (blk->id)
+		///blk->bstate.broken = false;
+	switch (blk->id)
 		{
 		case minecraftair:
 			airinit(blk);
@@ -100,6 +100,7 @@ namespace blkinitname {
 
 	}
 	inline void setair(block* blk) {
+		//blk->bstate.broken = false;
 		blk->state = gameobject::beingsoftdestroyed;
 		switch (blk->id)
 		{
@@ -176,7 +177,6 @@ namespace blkinitname {
 			Assert("need valid id in set blk");
 		}
 		airinit(blk);
-
 	}
 	inline void deleteandset(block* blk, int id)
 	{

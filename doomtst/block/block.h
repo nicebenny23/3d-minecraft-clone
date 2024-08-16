@@ -4,9 +4,11 @@
 #include "../game/gameobject.h"
 #include "../game/aabb.h"
 #include "../game/camera.h"
-
 #ifndef block_HPP
+
 #define block_HPP
+
+constexpr auto blocksize = 1.f;
 enum blocktex {
 	treestonetex = 0,
 	grasstex = 1,
@@ -40,7 +42,7 @@ enum blocktex {
 using namespace v3;
 
 namespace blockname {
-	const v3::Vector3 unitscale = unitv * 1 / 2.002f;
+	const v3::Vector3 unitscale = unitv*blocksize * 1 / 2.002f;
 	enum id
 	{
 		minecraftair = 0,
@@ -64,16 +66,23 @@ namespace blockname {
 		minecraftaltar=17,
 		minecraftplank=18,
 	};
+	
 	struct blockmesh;
 	struct face {
 		
+
 		blockmesh* mesh;
-		bool covered;
-		byte tex;
-		int facenum;
+
 		float cameradist;
-		int light;
+		byte tex;
+		int facenum:4;
+		byte light;
+	
+
+		bool covercomputed;
+		bool covered;
 		face() {
+			covercomputed = false;
 			mesh= nullptr;
 			covered = false;
 			facenum = -1;
@@ -84,9 +93,9 @@ namespace blockname {
 		face(byte texval, int num, blockmesh* owner) {
 			tex = texval;
 			facenum = num;
+			covercomputed = false;
 			mesh = owner;
 			light = 0;
-			calccameradist();
 		}
 		Vector3 center();
 		void calccameradist();
@@ -95,11 +104,6 @@ namespace blockname {
 	struct block;
 
 
-	enum directionmode {
-		attachdir = 0,
-		orientdir=1,
-		ignoredir=2,
-	};
 	struct blockmesh
 	{
 
@@ -115,16 +119,11 @@ namespace blockname {
 			scale = zerov;
 			blk = parent;
 		}
-		int direction;
-		int attachdir;
+		byte direction;
+		byte attachdir;
 		Vector3 pos;
 		Vector3 scale;
-		face up;
-		face left;
-		face right;
-		face down;
-		face front;
-		face back;
+		face faces[6];
 		block* blk;
 		
 		face& operator[](int index);
@@ -153,30 +152,37 @@ namespace blockname {
 			broken = false;
 		}
 	};
-
-	struct block:gameobject::obj
+	struct blockatt
 	{
-		blockstate bstate;
-		bool minedfastwithpick;
-		face& operator[](int index);
 		bool transparent;
-		int emitedlight;
-		int lightval;
 		bool solid;
-		byte id;
-		v3::Coord pos;
+	};
+	struct  block:gameobject::obj
+	{
+
 		blockmesh mesh;
-		float mininglevel;
+
+		v3::Coord pos;
+		byte emitedlight;
+		byte lightval;
+		byte id;
+
+		blockstate bstate;
 	
+		face& operator[](int index);
+		blockatt attributes;
+		
+		
+		byte mininglevel;
+		bool minedfastwithpick;
 		Vector3 center() {
-			return pos + unitv / 2;
+			return Vector3( pos)*blocksize + unitv *blocksize/ 2;
 	    }
 		
 
 		 block(v3::Coord location,int blockid);
 		 block();
-		
-		 void createaabb(bool effector=false);
+		 	 void createaabb(bool effector=false);
 		
 	};
 

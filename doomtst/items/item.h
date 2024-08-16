@@ -1,12 +1,13 @@
-#include "../renderer/uirender.h"
+#include "../renderer/uibox.h"
 #include "../renderer/texture.h"
 #include "../block/block.h"
 #include "../renderer/textrender.h"
+#include "../renderer/uibox.h"
 #ifndef item_HPP
 #define item_HPP
-inline uirender::uibox* createitembox(const char* boxname) {
+inline cptr<uiboxname::uibox> createitembox(const char* boxname) {
 
-	return uirender::newbox(boxname, v2::unitv / 40.f, v2::zerov, 100);
+	return ui::createuielement<uiboxname::uibox>(boxname, v2::unitv / 40.f, v2::zerov, 100);
 }
 enum itemid {
 
@@ -69,16 +70,16 @@ struct item
 	void setviewable(bool isviewable) {
 
 
-		itemui.textvalue->shouldrender = isviewable;
-		itemui.itemsprite->shouldrender = isviewable;
+		itemui.textvalue->state.enabled = isviewable;
+		itemui.itemsprite->state.enabled = isviewable;
 	}
 	item(int itemid);
-	
+	item(int itemid,int amt);
 	item() {
 		maxamt = 0;
 		amt = 0;
 		properties.foodval = 0;
-		itemui.textvalue = createinteger(v2::zerov, 1 / 70.f);
+		itemui.textvalue = ui::createuielement<integertext>(v2::zerov, 1 / 70.f);
 	}
 
 	struct itemproperties {
@@ -101,8 +102,8 @@ struct item
 
 	struct  itemuistruct
 	{
-		integertext* textvalue;
-		uirender::uibox* itemsprite;
+		cptr<integertext> textvalue;
+		cptr<uiboxname::uibox> itemsprite;
 	};
 
 	itemproperties properties;

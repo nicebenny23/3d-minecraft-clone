@@ -6,13 +6,13 @@
 inline void ropeinit(blockname::block* blk) {
 	blk->mesh.setfaces(ropetex, ropetex, ropetex, ropetex, ropetex, ropetex);
 	blk->mesh.scale = v3::Vector3(1 / 8.f, .5f, 1 / 8.f);
-	blk->solid = true;
-	blk->transparent = true;
+	blk->attributes.solid = true;
+	blk->attributes.transparent = true;
 	blk->emitedlight = 0;
 	blk->minedfastwithpick = 1;
 	blk->mininglevel = .3f;
 	blk->createaabb(true);
-	blk->addcomponentptr<loottable>()->addelem(ropeitem, 1, false);
+	blk->addcomponent<loottable>()->addelem(ropeitem, 1, false);
 
 	blk->minedfastwithpick = false;
 }

@@ -1,6 +1,6 @@
 #include "item.h"
 #include "../util/vector3.h"
-#include "../renderer/uirender.h"
+#include "../renderer/uibox.h"
 #include  "../util/userinput.h"
 #include "itemutil.h"
 #include "menu.h"
@@ -20,7 +20,7 @@ enum decaltype {
 struct itemslot
 {
 	itemslot() {
-		Assert("invblockconstrutur cant be used just to get complier to work");
+	//	Assert("invblockconstrutur cant be used just to get complier to work");
 
 	}
 	item* helditem;
@@ -28,7 +28,7 @@ struct itemslot
 	//(0...9),(0...14)
 	Coord location;
 	
-	uirender::uibox* framedecal;
+	Cptr::cptr<uibox> framedecal;
 	decaltype dtype;
 	
 	itemslot(int xloc, int yloc);
@@ -36,7 +36,7 @@ struct itemslot
 
 		return (helditem == nullptr);
 	}
-	void givefreeamt(int amt);
+	bool givefreeamt(int amt);
 	void giveitem(int id,int amt);
 	void transferitem(item* otherholder);
 	void destroyitem();

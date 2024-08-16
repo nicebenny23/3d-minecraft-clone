@@ -1,6 +1,8 @@
 #include <cmath>
+#include <limits.h>
 #ifndef mathutil_HPP
 #define mathutil_HPP
+#define NaNf std::numeric_limits<float>::max()
 inline bool aproxequal(float v1, float v2) {
 
 	if (abs(v1 - v2) < .0001)
@@ -24,6 +26,11 @@ inline float clamp(float val, float low, float high)
 	return val;
 }
 
+inline float lerp(float val, float val2, float selector)
+{
+	return val2 * selector + val * (1 - selector);
+}
+
 
 inline int clamp(int val, int low, int high)
 {
@@ -40,6 +47,19 @@ inline int clamp(int val, int low, int high)
 
 
 inline bool inrange(float val, float low, float high)
+{
+	if (val > high)
+	{
+		return false;
+	}
+	if (val < low)
+	{
+		return false;
+	}
+	return true;
+}
+
+inline bool inrangeint(int	 val, int low, int high)
 {
 	if (val > high)
 	{
@@ -79,24 +99,25 @@ inline float Min(float v1, float v2) {
 		return v1;
 	}
 	return v2;
-}
-inline int modabs(int x, int m) {
-
-	if (x < 0)
-	{
-		if (static_cast<double>(x) / m == int(x / m))
-		{
-			//so (-16,-16) is now a part of the correct chunk this has to bedon due to the inverse taken
-			return 0;
-		}
-		else {
-			return m - ((-x) % m);
-		}
+}inline int modabs(int x, int m) {
+	// Ensure m is positive to avoid division by zero issues
+	if (m <= 0) {
+		return 0; // Handle invalid m by returning 0 or you could throw an exception
 	}
-	else
-	{
+
+	// When x is negative
+	if (x < 0) {
+		// Calculate the modular value for negative x
+		int mod = (-x % m);
+		return (mod == 0) ? 0 : m - mod;
+	}
+	else {
+		// When x is non-negative
 		return x % m;
 	}
+}
+inline int FastFloor(float f) {
+	return f >= 0 ? (int)f : (int)f - 1;
 }
 
 inline float floorabs(float x) {

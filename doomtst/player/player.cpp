@@ -12,7 +12,7 @@ entityname::entityref player::goblin;
 
 void player::initplayer()
 {
-	goblin = entityname::createentity(Vector3(0,300,10), "");
+	goblin = entityname::createentity(Vector3(0,00,0), "");
 	goblin->canbedestroyed = false;
 	goblin.toent()->addcomponent<estate>(10,true);
 	goblin->addcomponent<playereat>();
@@ -37,7 +37,7 @@ void player::calculateyawandpitch()
 	
 		if (!ismenuopen())
 		{
-			window::setcursor(false);
+			window::disablecursor();
 
 			float xoffset = -userinput::mouseposdt.x;
 			float yoffset = userinput::mouseposdt.y;
@@ -65,7 +65,7 @@ void player::calculateyawandpitch()
 		}
 		else
 		{
-			window::setcursor(true);
+			window::enablecursor();
 		}
 	
 }

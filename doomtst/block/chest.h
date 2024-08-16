@@ -9,9 +9,9 @@ struct chestmenu :menu {
 	Container blkcont;
 
 	chestmenu(v2::Vector2 size) {
-		menubox = newbox("images\\menutex.png", size, v2::zerov, 11);
+		menubox = ui::createuielement<uibox>("images\\menutex.png", size, v2::zerov, 11);
 
-		menubox->shouldrender = false;
+		menubox->state.enabled = false;
 		menutype = normalmenu;
 
 		blkcont= Container(3,3,0,3);
@@ -82,8 +82,8 @@ struct chestcomp :gameobject::component {
 inline void chestinit(blockname::block* blk) {
 
 	blk->mesh.setfaces(chestside, chestside, chestside, chestside, chestfront, chestside);
-	blk->solid = true;
-	blk->transparent = false;
+	blk->attributes.solid = true;
+	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
 	blk->mininglevel = 1;
 	blk->mesh.scale = blockname::unitscale;
@@ -95,7 +95,7 @@ inline void chestinit(blockname::block* blk) {
 		blk->addcomponent<chestcomp>();
 
 	}
-blk->addcomponentptr < loottable > ()->addelem(chestitem, 1, false);
+blk->addcomponent < loottable > ()->addelem(chestitem, 1, false);
 }
 inline void chestdelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();

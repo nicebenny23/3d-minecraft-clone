@@ -5,9 +5,11 @@
 #define lava_HPP
 inline void lavainit(blockname::block* blk) {
 	blk->mesh.setfaces(lavatex, lavatex, lavatex, lavatex, lavatex, lavatex);
-	blk->solid = false;
-	blk->transparent = true;
+	blk->attributes.solid = false;
+	blk->attributes.transparent = true;
 	blk->emitedlight = 6;
+
+	//`blk->lightval = 6;
 	blk->mesh.scale = blockname::unitscale*.8;
 	blk->createaabb(true);
 	blk->mesh.scale = blockname::unitscale ;

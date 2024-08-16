@@ -67,14 +67,14 @@ inline entityname::entityref createslime(v3::Vector3 pos,bool type) {
     if (type)
     {
 
-        refmodel.toent()->addcomponentptr<model>()->add("slime2.obj", "images\\slimetexred.png");
+        refmodel.toent()->addcomponent<model>()->add("slime2.obj", "images\\slimetexred.png");
 
     }
     else {
-        refmodel.toent()->addcomponentptr<model>()->add("slime2.obj", "images\\slimetex.png");
+        refmodel.toent()->addcomponent<model>()->add("slime2.obj", "images\\slimetex.png");
 
     }
-    refmodel.toent()->addcomponentptr<loottable>()->addelem(slimeballitem, 1, false);
+    refmodel.toent()->addcomponent<loottable>()->addelem(slimeballitem, 1, false);
     float hp= 9;
     if (type == true) {
         hp = 15;

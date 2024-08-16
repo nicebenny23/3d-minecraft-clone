@@ -9,7 +9,7 @@ void model::draw()
 }
 void model::add(const char* meshname,const char * meshtexname,Vector3 pos)
 {
-		texture meshtex = texture(meshtexname,png);
+		texture meshtex = texture(meshtexname);
 	meshlist.append(meshname::loadmesh(meshname, meshtex, zerov));
 meshlist[meshlist.length - 1]->transform.position = pos;
 }

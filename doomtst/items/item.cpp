@@ -8,8 +8,8 @@ item::item(int itemid)
 		id = itemid;
 
 		properties.foodval = 0;
-	itemui.itemsprite = nullptr;
-	itemui.textvalue=createinteger(v2::zerov,1/80.0f);
+	itemui.itemsprite =Cptr::cptr< uiboxname::uibox>( nullptr);
+	itemui.textvalue= ui::createuielement<integertext>(v2::zerov,1/80.0f);
 	maxamt = 0;
 	properties.pickaxepower = 1;
 	properties.dmg = 1;
@@ -18,7 +18,7 @@ bool item::canadd(int amtto)
 {
 	int cap = maxamt-amt;
 
-	if (amtto<cap)
+	if (amtto<=cap)
 	{
 		return true;
 	}

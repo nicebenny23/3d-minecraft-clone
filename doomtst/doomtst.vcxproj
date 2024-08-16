@@ -79,7 +79,7 @@
     <LibraryPath>C:\opengl\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\opengl\include;C:\opengl;$(IncludePath)</IncludePath>
+    <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\opengl\lib;C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -123,7 +123,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -142,11 +142,12 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>false</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="block\liquid.cpp" />
     <ClCompile Include="entities\slime.cpp" />
     <ClCompile Include="game\entity.cpp" />
     <ClCompile Include="game\navigation.cpp" />
@@ -157,17 +158,26 @@
     <ClCompile Include="items\menu.cpp" />
     <ClCompile Include="items\recipe.cpp" />
     <ClCompile Include="player\playermodification.cpp" />
+    <ClCompile Include="util\algorthm.cpp" />
     <ClCompile Include="renderer\mesh.cpp" />
     <ClCompile Include="game\particles.cpp" />
     <ClCompile Include="player\player.cpp" />
     <ClCompile Include="player\playerinventory.cpp" />
     <ClCompile Include="renderer\model.cpp" />
+    <ClCompile Include="renderer\Source1.cpp" />
     <ClCompile Include="renderer\textrender.cpp" />
+    <ClCompile Include="renderer\ui.cpp" />
+    <ClCompile Include="sound\sound.cpp" />
+    <ClCompile Include="sound\soundbuf.cpp" />
+    <ClCompile Include="sound\soundlistener.cpp" />
+    <ClCompile Include="sound\soundsource.cpp" />
+    <ClCompile Include="util\dynamicmempool.cpp" />
     <ClCompile Include="util\fileloader.cpp" />
     <ClCompile Include="game\aabb.cpp" />
     <ClCompile Include="block\block.cpp" />
-    <ClCompile Include="renderer\uirender.cpp" />
+    <ClCompile Include="renderer\uibox.cpp" />
     <ClCompile Include="util\geometry.cpp" />
+    <ClCompile Include="util\staticmempool.cpp" />
     <ClCompile Include="util\time.cpp" />
     <ClCompile Include="world\chunkload.cpp" />
     <ClCompile Include="world\managegrid.cpp" />
@@ -188,6 +198,7 @@
     <ClCompile Include="renderer\texture.cpp" />
     <ClCompile Include="util\userinput.cpp" />
     <ClCompile Include="world\noise.cpp" />
+    <ClCompile Include="world\tick.cpp" />
     <ClCompile Include="world\voxeltraversal.cpp" />
     <ClCompile Include="renderer\Window.cpp" />
   </ItemGroup>
@@ -273,6 +284,7 @@
     <ClInclude Include="player\playereat.h" />
     <ClInclude Include="player\playerplace.h" />
     <ClInclude Include="player\playertpsword.h" />
+    <ClInclude Include="renderer\api.h" />
     <ClInclude Include="renderer\grandrenderer.h" />
     <ClInclude Include="renderer\mesh.h" />
     <ClInclude Include="renderer\model.h" />
@@ -282,16 +294,26 @@
     <ClInclude Include="player\playerhealth.h" />
     <ClInclude Include="player\playerinventory.h" />
     <ClInclude Include="renderer\textrender.h" />
+    <ClInclude Include="renderer\ui.h" />
+    <ClInclude Include="sound\sound.h" />
+    <ClInclude Include="sound\soundbuf.h" />
+    <ClInclude Include="sound\soundfile.h" />
+    <ClInclude Include="sound\soundlistener.h" />
+    <ClInclude Include="sound\soundsource.h" />
+    <ClInclude Include="util\dynamicmempool.h" />
     <ClInclude Include="util\geometry.h" />
     <ClInclude Include="util\fileloader.h" />
     <ClInclude Include="game\aabb.h" />
     <ClInclude Include="player\playermodification.h" />
     <ClInclude Include="game\rigidbody.h" />
-    <ClInclude Include="renderer\uirender.h" />
+    <ClInclude Include="renderer\uibox.h" />
+    <ClInclude Include="util\memorypool.h" />
+    <ClInclude Include="util\sharedptr.h" />
+    <ClInclude Include="util\staticmempool.h" />
     <ClInclude Include="world\chunkload.h" />
     <ClInclude Include="world\managegrid.h" />
     <ClInclude Include="util\queue.h" />
-    <ClInclude Include="renderer\algorthm.h" />
+    <ClInclude Include="util\algorthm.h" />
     <ClInclude Include="block\block.h" />
     <ClInclude Include="renderer\blockrender.h" />
     <ClInclude Include="game\camera.h" />
@@ -319,6 +341,7 @@
     <ClInclude Include="external\stb_image.h" />
     <ClInclude Include="renderer\texture.h" />
     <ClInclude Include="renderer\vertexobject.h" />
+    <ClInclude Include="world\tick.h" />
     <ClInclude Include="world\voxeltraversal.h" />
     <ClInclude Include="renderer\Window.h" />
   </ItemGroup>

@@ -1,5 +1,5 @@
 #include "../world/grid.h"
-#include "algorthm.h"
+#include "../util/algorthm.h"
 #ifndef blockrender_HPP
 #define blockrender_HPP
 namespace blockrender {

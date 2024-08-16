@@ -1,30 +1,56 @@
 #include "textrender.h"
 #include "renderer.h"
-array<integertext*> textlist; 
 texturearray textarray;
 integertext::integertext(v2::Vector2 textcenter, float textscale)
 {
 	center = textcenter;
-	scale = textscale;
-	shouldrender = false;
+	scale = textscale; 
+	priority = 105500;
+	state.enabled = false;
 }
 
  void integertext::recalculateword()
 {
 	 word.clear();
 	word= std::to_string(value);
-	int l = value;
-}
-void integertext::destroy()
-{
-	word.clear();
-	textlist[id] = nullptr;
 
 }
+void integertext::customdestroy()
+{
+	word.clear();
+	
+
+}
+
+array<float> datbuf;
+array<unsigned int> indbuf;
+void integertext::render()
+{
+	indbuf = array<unsigned int>();
+	datbuf = array<float>();
+	renderer::changerendertype(renderer::rendertext);
+	recalculateword();
+
+	write();
+	vao Voa = vao();
+	vbuf VBO = vbuf();
+	vbuf ibo = vbuf();
+	Voa.generate();
+	VBO.generate(GL_ARRAY_BUFFER);
+	ibo.generate(GL_ELEMENT_ARRAY_BUFFER);
+	textarray.apply();
+	renderer::render2dtextarray(Voa, ibo, VBO, datbuf, indbuf);
+	datbuf.destroy();
+	indbuf.destroy();
+	Voa.destroy();
+	VBO.destroy();
+	ibo.destroy();
+}
+
 
 void inittextarray()
 {
-	inittextlist();
+
     array<const char*> texlist = array<const char*>();
     texlist[0] = "bitmaptext\\zeroimg.png";
     texlist[1] = "bitmaptext\\oneimg.png";
@@ -39,8 +65,6 @@ void inittextarray()
     textarray = texturearray(16, 16, texlist);
    
 }
-array<float> datbuf;
-array<unsigned int> indbuf;
 void writeletter(geometry::Box2d location, int letter)
 {
 	const int baselocation = datbuf.length / 5;
@@ -83,56 +107,4 @@ void integertext::write()
 		charlocation.center += increse;
 	}
 
-}
-
-integertext* createinteger(v2::Vector2 textcenter, float textscale)
-{
-	integertext* newtext = new integertext(textcenter, textscale);
-	for (int i = 0; i < maxtextamount; i++)
-	{
-
-		if (textlist[i] == nullptr) {
-
-			textlist[i] = newtext;
-			newtext->id= i;
-			break;
-		}
-	}
-	return newtext;
-}
-
-void rendertextlist()
-{
-
-	 indbuf = array<unsigned int>();
-	 datbuf = array<float>();
-
-	renderer::changerendertype(renderer::rendertext);
-	textarray.apply();
-	for (int i = 0; i < maxtextamount; i++)
-	{
-		if (textlist[i]!=nullptr)
-		{
-			if (textlist[i]->shouldrender)
-			{
-				textlist[i]->recalculateword();
-
-				textlist[i]->write();
-			}
-		
-		}
-	}
-	vao Voa=vao();
-	vbuf VBO=vbuf();
-	vbuf ibo=vbuf();
-	Voa.generate();
-	VBO.generate(GL_ARRAY_BUFFER);
-	ibo.generate(GL_ELEMENT_ARRAY_BUFFER);
-	textarray.apply();
-	renderer::render2dtextarray(Voa, ibo, VBO, datbuf, indbuf);
-	datbuf.destroy();
-	indbuf.destroy();
-	Voa.destroy();
-	VBO.destroy();
-	ibo.destroy();
 }

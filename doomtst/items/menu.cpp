@@ -16,7 +16,7 @@ bool ismenuopen() {
 void managemenus()
 {
 
-	if (userinput::esckey.pressed) {
+	if (userinput::getinputkey(esckey).pressed) {
 		if (openmenu != nullptr)
 		{
 			openmenu->close();
@@ -38,14 +38,14 @@ void menu::close()
 	{
 
 		enabled = false;
-		menubox->shouldrender = false;
+		menubox->state.enabled = false;
 		customclose();
 		return;
 	}
 
 	enabled = false;
 	openmenu = nullptr;
-	menubox->shouldrender=false;
+	menubox->state.enabled=false;
 	customclose();
 	inventorylocation->close();
 }
@@ -56,7 +56,7 @@ void menu::open()
 	{
 
 
-		menubox->shouldrender = true;
+		menubox->state.enabled = true;
 		enabled = true;
 		customopen();
 		return;
@@ -69,17 +69,22 @@ void menu::open()
 	}
 
 
-
+	
 	if (openmenu!=nullptr)
 	{
 			openmenu->close();
 	}
+	menubox->state.enabled = true;
+	enabled = true;
+	openmenu = this;
+	customopen();
+	if (menutype == settingsmenu)
+	{
+		return;
+	}
 	
 	inventorylocation->open();
-			menubox->shouldrender = true;
-			enabled = true;
-			openmenu = this;
-			customopen();
+	
 }
 
 void menu::customclose()
@@ -95,8 +100,8 @@ void menu::customopen()
 menu::menu(v2::Vector2 size)
 {
 
-	menubox = newbox("images\\menutex.png", size,v2::zerov,11);
-	menubox->shouldrender = false;
+	menubox = ui::createuielement<uibox>("images\\menutex.png", size,v2::zerov,11);
+	menubox->state.enabled = false;
 	enabled = false;
 }
  void menu::testclick()
@@ -107,6 +112,5 @@ menu::menu(v2::Vector2 size)
 
  void menu::custominit()
  {
-	 int l = 1;
 
  }

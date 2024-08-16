@@ -55,7 +55,7 @@ void particleemiter::update()
 			 {
 				 entityname::entityref newparticle = entityname::createentity(position, "");
 				 
-				 newparticle.toent()->addcomponentptr<particle>()->endtime= timename::gametime+particlelifetime;
+				 newparticle.toent()->addcomponent<particle>()->endtime= timename::gametime+particlelifetime;
 				 newparticle->getcomponent<particle>().ind = i;
 				 newparticle->getcomponent<particle>().emit = this;
 				 (*particleinit)(newparticle.toent());
@@ -129,7 +129,7 @@ void particleemiter::renderparticles()
 void initbaseparticle(entityname::entity* newent) {
 	newent->transform.position += Vector3(random(), 1, random())/10;
 	newent->addcomponent<aabb::Collider>(newent->transform.position, unitv / 9, true);
-	newent->addcomponentptr<rigidbody>(1,.1)->velocity=Vector3(random(),1,random())*2;
+	newent->addcomponent<rigidbody>(1,.1)->velocity=Vector3(random(),1,random())*2;
 	newent->transform.scale = unitscale / 22;
 	
 }

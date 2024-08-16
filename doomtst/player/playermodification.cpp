@@ -8,7 +8,7 @@ void initbreakparticle(entityname::entity* newent)
 
 		
 		newent->addcomponent<aabb::Collider>(newent->transform.position, unitscale / 22, true,true);
-		newent->addcomponentptr<rigidbody>(1, .1)->velocity = Vector3(random()-.5, random()-.2, random()-.5) * 2;
+		newent->addcomponent<rigidbody>(1, .1)->velocity = Vector3(random()-.5, random()-.2, random()-.5) * 2;
 		newent->transform.scale = unitscale / 22;
 		newent->addcomponent<destroyonhit>("!particle");
 

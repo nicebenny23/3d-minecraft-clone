@@ -2,7 +2,7 @@
 
 array<navnode> getneighborslime(navnode& node)
 {
-    array<navnode> neighbors = array<navnode>(6);
+    array<navnode> neighbors = array<navnode>(6,false);
     for (int xind= -1; xind <= 1; xind++)
     {
         for (int yind = -1; yind <= 1; yind++)
@@ -87,5 +87,5 @@ array<navnode> getneighborslime(navnode& node)
 
 
     
-    return neighbors;
+    return array<navnode>( neighbors);
 }

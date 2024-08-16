@@ -8,9 +8,9 @@ struct craftingmenu :menu {
 	recipemanager blkcont;
 	
 	craftingmenu(v2::Vector2 size) {
-		menubox = newbox("images\\menutex.png", size, v2::zerov, 11);
+		menubox = ui::createuielement<uibox>("images\\menutex.png", size, v2::zerov, 11);
 
-		menubox->shouldrender = false;
+		menubox->state.enabled = false;
 		menutype = normalmenu;
 	
 		blkcont = recipemanager("crafting\\3x3craft.txt", 3, 3);
@@ -89,8 +89,8 @@ struct craftingtablecomp :gameobject::component {
 inline void tableinit(blockname::block* blk) {
 
 	blk->mesh.setfaces(craftingtableside, craftingtableside,craftingtabletop, craftingtableside, craftingtableside, craftingtableside);
-	blk->solid = true;
-	blk->transparent = false;
+	blk->attributes.solid = true;
+	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
 	blk->mininglevel = 1;
 	blk->mesh.scale = blockname::unitscale;
@@ -103,7 +103,7 @@ inline void tableinit(blockname::block* blk) {
 		blk->addcomponent<craftingtablecomp>();
 
 	}
-	blk->addcomponentptr<loottable>()->addelem(craftingtableitem, 1, false);
+	blk->addcomponent<loottable>()->addelem(craftingtableitem, 1, false);
 }
 inline void tabledelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();

@@ -19,7 +19,12 @@ namespace camera {
 	}
 	void updatetoplayer()
 	{
-		campos = player::goblin->transform.position.glm();
+		Vector3 offset = player::goblin->transform.getnormaldirection();
+		offset.y = 0;
+		offset = normal(offset)/2;
+		offset += Vector3(0, 1, 0);
+		offset /= 2;
+		campos = player::goblin->transform.position.glm() + offset.glm();
 		pitch = player::goblin->transform.pitch;
 		yaw= player::goblin->transform.yaw;
 	}
@@ -36,26 +41,18 @@ namespace camera {
 	void sendoffviewmatrix()
 	
 	{
-		glm::vec3 direction;
-		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-		direction.y = sin(glm::radians(pitch));
-		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-		glm::vec3 cameraFront = glm::normalize(direction);
-		glm::vec3 Right = glm::normalize(glm::cross(cameraFront, glm::vec3(0, 1, 0)));  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
-		glm::vec3    Up = glm::normalize(glm::cross(Right, cameraFront));
-		upvec = v3::Vector3(Up);
-		rightvec= v3::Vector3(Right);
-		frontvec= v3::Vector3(cameraFront);
-
+		frontvec	= player::goblin.toent()->transform.getnormaldirection().glm();
+		rightvec=  normal(crossprod(frontvec, Vector3(0, 1, 0)));;
+upvec= normal(crossprod(rightvec, frontvec));
+		glm::vec3 cameraFront = frontvec.glm();
+		glm::vec3 Right = rightvec.glm();  // normalize the vectors, because their length gets closer to 0 the more you look up or down which results in slower movement.
+			glm::vec3 Up = upvec.glm();
+		
 		renderer::setviewmatrix(glm::lookAt(campos, campos + cameraFront, Up));
 		
 	
 	}
 
-	void setcamerapos(v3::Vector3 newpos)
-	{
-		campos = newpos.glm();
-	}
 	
 	void cameraupdate()
 	{

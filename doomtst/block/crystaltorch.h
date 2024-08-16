@@ -5,8 +5,8 @@
 inline void crystaltorchinit(blockname::block* blk) {
 	blk->mesh.setfaces(crystaltorchtex,crystaltorchtex, crystaltorchtoptex, crystaltorchtoptex,crystaltorchtex, crystaltorchtex);
 
-	blk->solid = true;
-	blk->transparent = true;
+	blk->attributes.solid = true;
+	blk->attributes.transparent = true;
 	blk->emitedlight = 15;
 	blk->lightval = 15;
 	blk->mesh.scale = v3::Vector3(1 / 8.f, .375, 1 / 8.f);

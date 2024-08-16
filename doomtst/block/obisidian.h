@@ -4,15 +4,15 @@
 inline void obsidianinit(blockname::block* blk) {
 
 	blk->mesh.setfaces(obsidiantex, obsidiantex, obsidiantex, obsidiantex, obsidiantex, obsidiantex);
-	blk->solid = true;
-	blk->transparent = false;
+	blk->attributes.solid = true;
+	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
 	blk->mesh.scale = blockname::unitscale;
 
 	blk->createaabb(false);
 	blk->mininglevel = 5;
 	blk->minedfastwithpick = true;
-	blk->addcomponentptr<loottable>()->addelem(obsidianitem, 1, false);
+	blk->addcomponent<loottable>()->addelem(obsidianitem, 1, false);
 }
 inline void obsidiandelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();

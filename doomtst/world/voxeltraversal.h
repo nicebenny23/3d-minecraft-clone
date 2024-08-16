@@ -5,9 +5,7 @@
 #ifndef voxtrav_Hpp
 #define voxtrav_Hpp
 namespace voxtra {
-	inline Coord   getcurrvoxel(Vector3 pos) {
-		return  Coord(std::floor(pos.x), std::floor(pos.y), std::floor(pos.z));
-	}
+
 	struct RayCollisionWithGrid
 	{
 		aabb::Collider* box;
@@ -38,7 +36,7 @@ namespace voxtra {
 	block* findprevblock(ray nray, float acc, gridtrav trav = countnormal);
 	inline v3::Vector3 findemptyspace(v3::Vector3 scale) {
 		geometry::Box loadbox;
-
+		int test = 0;
 		bool notinblock = false;
 		do
 		{
@@ -49,7 +47,13 @@ namespace voxtra {
 			float rany = (random() - .5) * 2;
 
 			float ranz = (random() - .5) * 2;
-			v3::Vector3 offset = (Vector3(ranx, rany, ranz) * (2 * loadamt + 1) / 2 +grid::gridpos) * 16;
+			
+			v3::Vector3 offset = (Vector3(ranx, rany, ranz) * (2 * loadamt + 1) / 2 +grid::gridpos) * chunkaxis;
+			test++;
+			if (1000 < test)
+			{
+				return offset;
+			}
 			loadbox = geometry::Box(offset, scale);
 		} while (Boxcollwithgrid(loadbox, countnormal));
 		return loadbox.center;
@@ -62,7 +66,10 @@ namespace voxtra {
 			pos = findemptyspace(scale);
 			geometry::Box testbox = geometry::Box(pos - Vector3(0, scale.y + .5, 0), scale);
 			shouldcontinue = !Boxcollwithgrid(testbox, countnormal);
-
+			if (random()<.001)
+			{
+				shouldcontinue = false;
+			}
 		} while (shouldcontinue);
 	
 		return pos - Vector3(0, scale.y, 0);

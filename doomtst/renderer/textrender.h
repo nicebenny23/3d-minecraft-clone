@@ -3,11 +3,12 @@
 #include "../util/dynamicarray.h"
 #include <string>
 #include "../util/geometry.h"
+#include "ui.h"
 using namespace dynamicarray;
 using namespace geometry;
 #ifndef  textrender_HPP
 #define textrender_HPP
-#define maxtextamount 100
+
 extern texturearray textarray;
 void inittextarray();
 const v2::Vector2 cubeuv[] = {
@@ -36,10 +37,8 @@ v2::Vector2(-1, 1),
 v2::Vector2(1, 1)
 
 };
-struct integertext
-{
-	bool shouldrender;
-	float scale;
+struct integertext:ui::uielement
+{	float scale;
 	v2::Vector2 center;
 	
 	integertext(v2::Vector2 textcenter,float textscale);
@@ -48,22 +47,9 @@ struct integertext
 	int value;
 	std::string word;
 		void recalculateword();
-	void destroy();
-	
+	void customdestroy();
+	void render();
 
-	int id;
 };
-integertext* createinteger(v2::Vector2 textcenter, float textscale);
 
-void rendertextlist();
-extern array<integertext*> textlist;
-inline void inittextlist() {
-	
-	textlist = array<integertext*>(maxtextamount);
-	for (int i = 0; i < textlist.length; i++)
-	{
-		textlist[i] = nullptr;
-	}
-}
-;
 #endif // ! textrender_HPP

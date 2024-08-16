@@ -11,13 +11,13 @@ struct inventorymen :menu
 	Container deletecont;
 	recipemanager manager;
 	inventorymen(v2::Vector2 size) {
-		menubox = newbox("images\\menutex.png", size, v2::zerov, 11);
+		menubox = ui::createuielement<uibox>("images\\menutex.png", size, v2::zerov, 11);
 		
-		menubox->shouldrender = false;
+		menubox->state.enabled = false;
 		
 		manager=recipemanager("crafting\\2x2craft.txt", 1, 1);
 		blkcont = Container(8, 4, 0, 0);
-		armor= Container(1, 2, 5, 4);
+		armor= Container(1, 2, -4, 4);
 		deletecont = Container(1, 1, 5, -5);
 		enabled = false;
 		armor.at(0).setdecal(leggingdecal);

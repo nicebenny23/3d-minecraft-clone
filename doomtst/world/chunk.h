@@ -2,7 +2,10 @@
 #include "../renderer/chunkrender.h"
 #ifndef Chunk_HPP
 #define Chunk_HPP
-#define chunksize 16*16*16
+
+constexpr int chunklength = 16;
+constexpr int chunkaxis =chunklength/blocksize;
+constexpr auto chunksize = chunkaxis*chunkaxis*chunkaxis;
 using namespace blockname;
 namespace Chunk {
 
@@ -12,16 +15,19 @@ namespace Chunk {
 		chunkmesh() = default;
 		vbuf VBO;
 		vbuf ibo;
+
 		vao Voa;
+		vbuf transparentVBO;
+		vbuf transparentibo;
+		vao transparentVoa;
 		//voa vertexspec;
 		void genbufs();
-
+		int meshsize;
 		bool meshrecreateneeded;
 		chunk* aschunk;
-		array<float> datbuf;
-		array<unsigned int> indbuf;
 		array<face> facebuf;
 		void sortbuf();
+
 
 		//todo  get basic mesh and        reupdsted working
 
@@ -38,9 +44,9 @@ namespace Chunk {
 		bool modified;
 		void write();
 		chunk();
-
-		Coord center() {
-			return loc*16 + unitv * 8;
+		
+		Vector3 center() {
+			return (loc+ unitv /2.f)*chunklength;
 		}
 		block& operator[](int index);
 		block* blockbuf;

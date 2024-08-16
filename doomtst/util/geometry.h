@@ -76,9 +76,6 @@ namespace geometry {
 			point = p1;
 		}
 
-		float distancetoorgin() {
-			// Function body needed
-		}
 
 		float distanceToPoint(const Vector3& p) const {
 			return dotproduct(normal, p - point);
@@ -111,7 +108,7 @@ namespace geometry {
 			float slp = distance(dirray.start, pointonray);
 
 			// Calculate the radius at the projection point
-			double currentRadius = slope * slp;
+			double currentRadius =double( slope * slp);
 
 			// Distance from the point to the cone's surface
 			double distanceToSurface = pointdist - currentRadius;
@@ -122,6 +119,21 @@ namespace geometry {
 			return distancefrompoint(sph.center) <= sph.radius;
 		}
 	};
+
+	inline bool  boxboxintersect(geometry::Box p1, geometry::Box p2)
+	{
+		if (abs(p1.center.x - p2.center.x) < p1.scale.x + p2.scale.x)
+		{
+			if (abs(p1.center.y - p2.center.y) < p1.scale.y + p2.scale.y)
+			{
+				if (abs(p1.center.z - p2.center.z) < p1.scale.z + p2.scale.z)
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 
 	inline bool Box::rayintersects(ray fray) {
 		Vector3 dir = fray.end - fray.start;
@@ -146,6 +158,43 @@ namespace geometry {
 
 		return actualminval < actualmaxval && actualminval > 0;
 	}
+
+	inline  v3::Vector3 intersectionpoint (Box box,ray fray) {
+		
+			v3::Vector3 dir = fray.end - fray.start;
+
+			//not actually max
+			float xval1 = (box.center.x - box.scale.x - fray.start.x) / dir.x;
+			float xval2 = (box.center.x + box.scale.x - fray.start.x) / dir.x;
+			float maxxval = fmax(xval1, xval2);
+			float minxval = fmin(xval1, xval2);
+			float yval1 = (box.center.y - box.scale.y - fray.start.y) / dir.y;
+			float yval2 = (box.center.y + box.scale.y - fray.start.y) / dir.y;
+			float maxyval = fmax(yval1, yval2);
+			float minyval = fmin(yval1, yval2);
+			float zval1 = (box.center.z - box.scale.z - fray.start.z) / dir.z;
+			float zval2 = (box.center.z + box.scale.z - fray.start.z) / dir.z;
+			float maxzval = fmax(zval1, zval2);
+			float minzval = fmin(zval1, zval2);
+			float actualminval = fmax(fmax(minxval, minyval), minzval);
+			float actualmaxval = fmin(fmin(maxxval, maxyval), maxzval);
+
+			if (actualminval < actualmaxval)
+			{
+				float closestt = actualminval;
+				if (0 < actualminval)
+				{
+				return dir* closestt + fray.start;
+
+				}
+
+			}
+			
+
+			return Vector3(NaNf,NaNf,NaNf);
+
+		}
+	
 
 }
 

@@ -12,12 +12,12 @@ struct lootelement
 	
 	bool israndom;
 	lootelement() {
-		itemid = -1;
-		maxamt = -1;
+		itemid = 0;
+		maxamt = 0;
 		israndom = false;
 	}
-	int itemid;
-	float maxamt;
+	byte itemid;
+	char maxamt;
 	void drop() {
 		int dropamt = maxamt;
 		if (israndom)
@@ -48,9 +48,15 @@ struct  loottable :gameobject::component
 		playerinteract = true;
 		
 	}
-	void start() {
+	loottable() {
+
 		playerinteract = false;
-		lootlist =  array<lootelement>(1);
+		lootlist = array<lootelement>(1, false);
+		utype = gameobject::updatenone;
+	}
+	void start() {
+		
+		
 	}
 	~loottable()
 	{

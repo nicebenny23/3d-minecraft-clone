@@ -1,7 +1,8 @@
 #include "item.h"
+#include "../block/block.h"
 #ifndef ironpickitem_HPP
 #define ironpickitem_HPP
-#define ironpickblockid -1
+#define ironpickblockid blockname::minecraftwater
 inline void ironpickinit(item* itm) {
 	itm->properties.pickaxepower = 4.9;
 	itm->properties.placeable = false;

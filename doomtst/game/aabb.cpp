@@ -2,41 +2,24 @@
 #include "../util/geometry.h"
 //simple aabb class without collision implemented 
 namespace aabb {
-
-    dynamicarray::array<Collider*> Colliderlist;
+    
+    ptrmempool<Collider> Colliderlist;
     void initCollider()
     {
-        Colliderlist = dynamicarray::array<Collider*>(1000);
-        for (int i = 0; i < 1000; i++)
-        {
-            Colliderlist[i] = nullptr;
-        }
+        Colliderlist = ptrmempool<Collider>();
+        Colliderlist.instantiate(1000, false, true);
+        
     }
-    bool aabbsintersect(Collider & p1, Collider & p2)
-    {
-        if (abs(p1.center.x - p2.center.x) < p1.scale.x + p2.scale.x)
-        {
-            if (abs(p1.center.y - p2.center.y) < p1.scale.y + p2.scale.y)
-            {
-                if (abs(p1.center.z - p2.center.z) < p1.scale.z + p2.scale.z)
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-    
     v3::Vector3 collideaabb(Collider p1, Collider p2)
     {
-        int sgnx = p1.center.x > p2.center.x?1 : -1;
-        int sgny = p1.center.y > p2.center.y ? 1 : -1;
-        int sgnz = p1.center.z> p2.center.z ? 1 : -1;
-        if (aabbsintersect(p1, p2)) {
+        int sgnx = p1.box.center.x > p2.box.center.x?1 : -1;
+        int sgny = p1.box.center.y > p2.box.center.y ? 1 : -1;
+        int sgnz = p1.box.center.z> p2.box.center.z ? 1 : -1;
+        if (geometry::boxboxintersect(p1.box, p2.box)) {
 
-            float xdepth = sgnx * (p1.scale.x + p2.scale.x) - (p1.center.x - p2.center.x);
-            float ydepth = sgny * (p1.scale.y + p2.scale.y) - (p1.center.y - p2.center.y);
-            float zdepth = sgnz * (p1.scale.z + p2.scale.z) - (p1.center.z - p2.center.z);
+            float xdepth = sgnx * (p1.box.scale.x + p2.box.scale.x) - (p1.box.center.x - p2.box.center.x);
+            float ydepth = sgny * (p1.box.scale.y + p2.box.scale.y) - (p1.box.center.y - p2.box.center.y);
+            float zdepth = sgnz * (p1.box.scale.z + p2.box.scale.z) - (p1.box.center.z - p2.box.center.z);
             if (abs(xdepth) < abs(ydepth)) {
                 if (abs(xdepth) < abs(zdepth))
                 {
@@ -58,12 +41,12 @@ namespace aabb {
 
     bool Collider::pointinbox(v3::Vector3 pos)
     {
-        pos -= center;
-        if (abs(pos.x)<=scale.x)
+        pos -= box.center;
+        if (abs(pos.x)<=box.scale.x)
         {
-            if (abs(pos.y) <= scale.y)
+            if (abs(pos.y) <= box.scale.y)
             {
-                if (abs(pos.z) <= scale.z)
+                if (abs(pos.z) <= box.scale.z)
                 {
                     return true;
                 }
@@ -76,77 +59,48 @@ namespace aabb {
     {
         if (owner->type!=gameobject::block)
         {
-            Colliderlist[index]=nullptr;
+            Colliderlist.remove(this);
             int l = 1;
         }
     }
-
     Collider::Collider(const v3::Vector3& objcenter, const v3::Vector3& objscale,bool appendtolist, bool iseffector)
     {
         effector = iseffector;
-     
-        center = objcenter;
+        utype = gameobject::updatenone;
+        box.center = objcenter;
         collideroffset = objcenter;
-        scale = objscale;
+        box.scale = objscale;
         index = -1;
         if (appendtolist) {
            
-            while (index == -1)
-            {
                 
-                int l = randomint(1000);
-                if (Colliderlist[l] == nullptr)
-                {
-                    Colliderlist[l] = this;
-                    index = l;
-                }
-
-        
-            }
+                    Colliderlist.append(this);
         
         
         }
+     
 
     }
     aabbraycolinfo Collider::distanceonray(ray fray)
     {
         aabbraycolinfo toreturn = aabbraycolinfo();
-        
-        v3::Vector3 dir = fray.end - fray.start;
-
-        //not actually max
-        float xval1 = (center.x - scale.x - fray.start.x) / dir.x;
-        float xval2 = (center.x + scale.x - fray.start.x) / dir.x;
-        float maxxval = fmax(xval1, xval2);
-        float minxval = fmin(xval1, xval2);
-        float yval1 = (center.y - scale.y - fray.start.y) / dir.y;
-        float yval2 = (center.y + scale.y - fray.start.y) / dir.y;
-        float maxyval = fmax(yval1, yval2);
-        float minyval = fmin(yval1, yval2);
-        float zval1 = (center.z - scale.z - fray.start.z) / dir.z;
-        float zval2 = (center.z + scale.z - fray.start.z) / dir.z;
-        float maxzval = fmax(zval1, zval2);
-        float minzval = fmin(zval1, zval2);
-        float actualminval = fmax(fmax(minxval, minyval), minzval);
-        float actualmaxval = fmin(fmin(maxxval, maxyval), maxzval);
-        
-        if (actualminval < actualmaxval)
+   
+        Vector3 intersectionpoint = geometry::intersectionpoint(box, fray);
+        if (intersectionpoint.x!=NaNf)
         {
-            float closestt = actualminval;
-            if (0 < actualminval)
-            {
-                toreturn.collided = true;
-                toreturn.intersectionpoint = dir * closestt + fray.start;
 
-                toreturn.dist = v3::distance(fray.start, toreturn.intersectionpoint);
+            toreturn.collided = true;
+            toreturn.intersectionpoint = intersectionpoint;
 
+            toreturn.dist = v3::distance(fray.start, toreturn.intersectionpoint);
 
-            }
+        
 
         }
 
         return toreturn;
-        
+ 
+
     }
 
 
@@ -154,17 +108,7 @@ namespace aabb {
 
     bool  aabbboxintersect(geometry::Box p1, Collider& p2)
     {
-        if (abs(p1.center.x - p2.center.x) < p1.scale.x + p2.scale.x)
-        {
-            if (abs(p1.center.y - p2.center.y) < p1.scale.y + p2.scale.y)
-            {
-                if (abs(p1.center.z - p2.center.z) < p1.scale.z + p2.scale.z)
-                {
-                    return true;
-                }
-            }
-        }
-        return false;
+        return geometry::boxboxintersect(p1, p2.box);
     }
 
 }

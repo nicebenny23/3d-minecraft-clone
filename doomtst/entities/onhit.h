@@ -44,11 +44,14 @@ entityname::destroy(&objutil::toent(owner),false);
 		}
 	}
 
-
+	~destroyonhit() = default;
 	destroyonhit() = default;
 };
+
 struct dmgonhit:gameobject::component
 {
+
+	
 	float knockback;
 	std::string tagtoeffect;
 	int dmgdone;
@@ -57,7 +60,8 @@ struct dmgonhit:gameobject::component
 		tagtoeffect=affecttag ;
 	dmgdone = dmg;
 	knockback = kb;
-		
+	utype = gameobject::updatenone;
+	
 	}
 	void oncollision(gameobject::obj* collidedwith) {
 
@@ -85,7 +89,7 @@ struct dmgonhit:gameobject::component
 			
 		}
 	}
-
+	~dmgonhit() = default;
 };
 
 #endif // !properties.dmgonhit_HPP

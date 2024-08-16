@@ -4,19 +4,26 @@
 #include "../world/grid.h"
 #include "../world/managegrid.h"
 #include "../util/time.h"
+#include "../game/rigidbody.h"
 #ifndef  liquid_HPP
+#define liquid_HPP
+extern float liquidtick;
+
+void updateltick();
 struct liquidprop :gameobject::component {
 	int maxliq;
 	int liqval;
+
 	liquidprop(int value) {
 		int maxliquid = 0;
 		maxliq = value;
+	
 		liqval = value;
 	}
 	float diffusetime;
 	void start() {
 		diffusetime = 0;
-
+		utype = gameobject::updatetick;
 
 	}
 	void oncollision(gameobject::obj* collidedwith) {
@@ -41,7 +48,7 @@ struct liquidprop :gameobject::component {
 		{
 			if (blk->id == objutil::toblk(owner).id)
 			{
-				if (liqval >= 1)
+				if (liqval > 1)
 				{
 
 
@@ -90,20 +97,25 @@ struct liquidprop :gameobject::component {
 	}
 
 	void update() {
-		diffusetime += timename::dt;
-		if (.4<diffusetime)
-		{
-			updateinface(0);
-			updateinface(1);
-			updateinface(3);
-			updateinface(4);
-			diffusetime = 0;
-			updateinface(5);
-		}
-		if (liqval<=0)
-		{
-			gridutil::setblock(toblk(owner).pos, minecraftair);
-		}
+		
+
+
+			diffusetime +=tick::tickdt;
+			if (.4 < diffusetime)
+			{
+				diffusetime = 0;
+
+				updateinface(3);
+				updateinface(0);
+				updateinface(1);
+				updateinface(4);
+				updateinface(5);
+			}
+			if (liqval <= 0)
+			{
+				gridutil::setblock(objutil::toblk(owner).pos, minecraftair);
+			}
+		
 	}
 
 

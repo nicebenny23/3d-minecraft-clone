@@ -2,6 +2,7 @@
 #include "../renderer/mesh.h"
 #include "../renderer/shader.h"
 #include <iostream>
+#include "../sound/sound.h"
 #include <cmath>
 #include "../renderer/texture.h"
 #include "../renderer/Window.h"
@@ -17,7 +18,7 @@
 #include "../world/managegrid.h"
 #include "../util/time.h"
 #include "../game/collision.h"
-#include "../renderer/uirender.h"
+#include "../renderer/uibox.h"
 #include "../player/playermodification.h"
 #include "../util/fileloader.h"
 #include "../renderer/textrender.h"
@@ -30,14 +31,15 @@
 #include "../renderer/grandrenderer.h"
 #include "../entities/antifreezeboss.h"
 #include "../world/noise.h"
-
+#include "../world/tick.h"
+#include "../block/liquid.h"
 #ifndef game_HPP
 #define game_HPP
 void endupdate() {
     entityname::deleteobjs();
 
     userinput::endupdate();
-
+    updateltick();
     window::swapbuffer();
     glfwPollEvents();
     renderer::clear();
@@ -46,36 +48,18 @@ void endupdate() {
 void preupdate() {
 
 
-    camera::setcamerapos(player::goblin.toentnotnull()->transform.position);
-
     timename::calcfps();
     
     managemenus();
 
 }
-void testtransform() {
 
-    
-    for (int i = 0; i < 300; i++)
-    {
-        Transform a = Transform();
-        Vector3 l = randompointonsphere(Vector3(1, 0, i));
-        a.orient(l);
-        if (!apx( a.getnormaldirection(),l))
-        {
-            Assert("ttestfail");
-        }
-    }
-  
-}
 void updateobjs() {
 
 
     collision::sendplayercameraray();
     collision::update();
-
-    grid::runblockupdates();
-    entityname::runupdateloop();
+    gameobject::updatecomponents();
 
     camera::cameraupdate();
 
@@ -86,7 +70,9 @@ void update() {
     preupdate();
     updateobjs();
     spawn();
+    tick::trytick();
     testgameifspawn();
+    soundname::soundobj.updatesounds();
     gridutil::gridupdate();
     rendergame();
     endupdate();
@@ -96,7 +82,7 @@ void init() {
     std::string o1 = std::string("C:/Users/bchar/source/repos/doomtst/doomtst/worldstorage");
 
     std::string o2 = std::string("C:/Users/User/source/repos/nicebenny23/3d-minecraft-clone/doomtst/worldstorage");
-    deleteFilesInFolder(o2);
+    deleteFilesInFolder(o1);
 
     timename::inittime();
     randominit();
@@ -104,7 +90,9 @@ void init() {
     userinput::initiate();
     gameobject::initmap();
     entityname::initobjs();
+    soundname::soundinit();
 
+    gameobject::initmanagerlist();
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         Assert("Failed to initialize GLAD");
@@ -114,7 +102,7 @@ void init() {
     aabb::initCollider();
 
     inittextarray();
-    uirender::initrenderlist();
+    ui::createuilist();
     player::initplayer();
     initrandomdirs();
     renderer::load();
@@ -125,11 +113,10 @@ void init() {
 
 
 
-  
     grid::initgrid();
     gridutil::computeallcover();
     gridutil::redolighting();
-    uirender::newbox("images\\crosshair.png", v2::unitv / 32, v2::zerov, -3);
+    ui::createuielement<uibox>("images\\crosshair.png", v2::unitv / 32, v2::zerov, -3);
     userinput::endupdate();
   
     glfwSwapInterval(0);
@@ -144,9 +131,8 @@ void rungame()
 {
 
     init();
-    testtransform();
+  //  testtransform();
     
-    createslime(zerov, false);
     float lastupdate = 0;
     while (!window::shouldclose())
     {

@@ -3,6 +3,7 @@
 #include "../util/mathutil.h"
 #include "../util/vector2.h"
 #include "chunkload.h"	
+#include "../util/geometry.h"
 using namespace v3;
 
 namespace grid {
@@ -26,7 +27,7 @@ namespace grid {
 		return chunkloaded(loc.x, loc.y, loc.z);
 	}
 	//normed pos is when pos is in the range [0...2*loadamt+1) for each direction;
-	int gridindexfromnormedchunkpos(int xchunk, int ychunk, int zchunk) {
+	int gridindexfromnormedchunkpos(const int xchunk, const int ychunk, const int zchunk) {
 
 		return xchunk + ychunk * (2 * loadamt + 1) + zchunk * (2 * loadamt + 1) * (2 * loadamt + 1);
 	}
@@ -37,19 +38,44 @@ namespace grid {
 	}
 
 	int gridindfromchunkpos(int xchunk, int ychunk, int zchunk) {
+
 		xchunk += loadamt - gridpos.x;
 		zchunk += loadamt - gridpos.z;
 		ychunk += loadamt - gridpos.y;
 		return gridindexfromnormedchunkpos(xchunk, ychunk, zchunk);
 	}
-
-
+	constexpr int powof2(int num) {
+		float newnum = num;
+		int shifts = 0;
+		while (newnum > 1)
+		{
+			shifts++;
+			newnum /= 2;
+		}
+		if (newnum == 1)
+		{
+			return shifts;
+		}
+		static_assert("chunkaxis msut be a power of 2");
+		return -1;
+	}
+	constexpr int shift = powof2(chunkaxis);
+	Coord chunkfromblockpos(const int x, const int y, const int z)
+	{
+		int xchunk =x>>shift;
+		int ychunk = y>> shift;
+		int zchunk = z >> shift;
+		return Coord(xchunk, ychunk, zchunk);
+	}
+	
 
 	Chunk::chunk* chunkatpos(int x, int y, int z)
 	{
-		int xchunk = x >> 4;
-		int zchunk = z >> 4;
-		int ychunk = y >> 4;
+		Coord chnk = chunkfromblockpos(x, y, z);
+		int xchunk = chnk.x;
+
+		int ychunk = chnk.y;
+		int zchunk = chnk.z;
 		if (chunkloaded(xchunk, ychunk, zchunk))
 		{
 
@@ -59,69 +85,38 @@ namespace grid {
 		return nullptr;
 	}
 
-	void runblockupdates()
+	Coord getvoxellocation(Vector3 pos)
 	{
-		for (int gridind = 0; gridind < totalgridsize; gridind++)
-		{
-			for (int chunkind = 0; chunkind < chunksize; chunkind++)
-			{
+		return  Coord(std::floor(pos.x / blocksize), std::floor(pos.y / blocksize), std::floor(pos.z / blocksize));
 
-				block& blk = (*chunklist[gridind])[chunkind];
-				if (blk.id == minecraftair) {
-
-					continue;
-				}
-				if (blk.id==minecrafttreestone)
-				{
-					continue;
-				}if (blk.id == minecraftstone)
-				{
-					continue;
-				}
-				if (blk.id == minecraftmoss)
-				{
-					continue;
-				}
-				if (blk.id==minecraftobsidian)
-				{
-					continue;
-				}
-				if (gameobject::shouldbeupdated(&blk))
-				{
-
-					for (int compind = 0; compind < blk.complist.length; compind++)
-					{
-
-						if (blk.complist[compind]->active)
-						{
-
-							blk.complist[compind]->update();
-
-						}
-					}
-				}
-			}
-		}
 	}
-
+	block* getvoxel(Vector3 pos)
+	{
+		return getobjatgrid(getvoxellocation(pos), true);
+	}
+	
 
 	Coord prevgridpos()
 	{
 		return gridpos - griddt;
 	}
-
-	block* getobjatgrid(int x, int y, int z, bool countnonsolids)
+	
+	block* getobjatgrid(const int x, const int y, const int z,const  bool countnonsolids)
 	{
 
-		int xchunk = x >> 4;
-		int zchunk = z >> 4;
-		int ychunk = y >> 4;
+		Coord chnk = chunkfromblockpos(x, y, z);
+		int xchunk = chnk.x;
+
+		int ychunk = chnk.y;
+		int zchunk = chnk.z;
+		
 		if (chunkloaded(xchunk, ychunk, zchunk))
 		{
 
-			int ind = gridindfromchunkpos(xchunk, ychunk, zchunk);
-			block& blockatpos = chunklist[ind]->blockbuf[Chunk::indexfrompos(x, y, z)];
-			if (countnonsolids ||( blockatpos.id != minecraftair))
+		const int ind = gridindfromchunkpos(xchunk, ychunk, zchunk);
+			int blkind = Chunk::indexfrompos(x, y, z);
+			block& blockatpos = chunklist[ind]->blockbuf[blkind];
+			if (countnonsolids ||( !blockatpos.attributes.solid))
 			{
 				return &blockatpos;
 			}
@@ -132,16 +127,18 @@ namespace grid {
 	}
 
 
-	block* getobjatgrid(v3::Coord pos, bool counttransparent)
+	block* getobjatgrid(const v3::Coord pos,const  bool counttransparent)
 	{
 		return getobjatgrid(pos.x, pos.y, pos.z, counttransparent);
 	}
 
 	bool issolidatpos(int x, int y, int z, bool countoob)
 	{
-		int xchunk = x >> 4;
-		int zchunk = z >> 4;
-		int ychunk = y >> 4;
+		Coord chnk = chunkfromblockpos(x, y, z);
+		int xchunk = chnk.x;
+
+		int ychunk = chnk.y;
+		int zchunk = chnk.z;
 		if (chunkloaded(xchunk, ychunk, zchunk))
 		{
 			//normilized the chunk
@@ -150,7 +147,7 @@ namespace grid {
 			block& blockatpos = chunklist[gridindex]->blockbuf[Chunk::indexfrompos(x, y, z)];
 
 			//todo seperate for transperent,solid
-			if (!blockatpos.transparent)
+			if (!blockatpos.attributes.transparent)
 			{
 				return true;
 			}
@@ -164,7 +161,7 @@ namespace grid {
 	void initgrid()
 	{
 
-		gridpos = camera::campos/16.f;
+		gridpos = camera::campos/ float(chunkaxis);
 		griddt = zerov;
 		const int size = (2 * loadamt + 1);
 
@@ -252,11 +249,43 @@ namespace grid {
 		//(16,0)->(1,0)
 
 	}
+	Vector3 tovoxelspace(Vector3 point)
+	{
+		return point / blocksize;
+	}
+	
+	array<block*>& voxelinrange(geometry::Box span)
+	{
+		array<block*>* blockarr= new array<block*>;
+		span.center = tovoxelspace( span.center);
+		span.scale= tovoxelspace( span.scale);
+		v3::Vector3 lowpos = ((span.center - span.scale) - unitv);
+
+		v3::Coord lowest = v3::Coord(floorabs(lowpos.x), floorabs(lowpos.y), floorabs(lowpos.z));
+		v3::Vector3 highpos = ((span.center + span.scale) + unitv);
+
+		v3::Coord highest = v3::Coord(ceilabs(highpos.x), ceilabs(highpos.y), ceilabs(highpos.z));
+
+		for (int x = lowest.x; x < highest.x; x++)
+		{
+			for (int y = lowest.y; y < highest.y; y++)
+			{
+				for (int z = lowest.z; z < highest.z; z++)
+				{
+
+					blockarr->append(getobjatgrid(x, y, z));
+				}
+
+			}
+
+		}
+		return *blockarr;
+	}
 	void reupdatechunkborders()
 	{
 
 		Vector3 pos = Vector3(camera::campos);
-		pos /= 16;
+		pos /= chunklength;
 		pos.x = floor(pos.x);
 		pos.y = floor(pos.y);
 		pos.z = floor(pos.z);

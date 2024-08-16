@@ -4,15 +4,13 @@
 #include <cmath>
 #include "../util/dynamicarray.h"
 #include "../util/vector3.h"
+#include "../util/algorthm.h"
 #ifndef noise_HPP
 #define noise_HPP
-#define distrubutionsize 4096
+#define distrubutionsize 1000
 using namespace v3;
 using namespace dynamicarray;
 extern array<v3::Vector3> seededdirections;
-
-
-void initrandomdirs();
 
 enum noisetype {
     normalnoise = 0,
@@ -20,71 +18,114 @@ enum noisetype {
     billowed = 2,
 };
 
-struct noisemap
+struct noiseparams
 {
-    dynamicarray::array<float> values;
-    noisemap(v3::Coord location,Coord chksize);
-    float& operator[](Vector3 pos);
-    float operator[](int ind);
-    float operator[](Coord pos);
-    Coord size;
-    float& at(int ind);
-    void addlayer(float scale, float intensity,noisetype type);
-    void destroy();
-    v3::Coord loc;
-    float maxint;
+    noiseparams() {
+        octaves = -1;
+        scalefactor = 0;
+        startscale = 0;
+        amplificationfactor = 0;
+        type = normalnoise;
+    }
+    noisetype type;
+    float scalefactor;    // Controls how scale is multiplied across octaves
+    float startscale;       // Initial scale value for the noise
+    int octaves;            // Number of octaves used in the noise generation
+    float amplificationfactor;// Controls how amplitude 
+    noiseparams(float startingscale, float scalemultiplyer, unsigned int noiseoctaves, float ampfactor,noisetype ntype) {
+
+        startscale = startingscale;
+        scalefactor = scalemultiplyer;
+        octaves = noiseoctaves;
+        amplificationfactor = ampfactor;
+        type = ntype;
+    }
 };
 
-inline float interpolate(float v, float v1, float w) {
+void initrandomdirs();
 
-     w = (6*w*w- 15*w + 10)*w*w*w;
+struct noisemap
+{
+    dynamicarray::array<float> distribution;
+    void createdist();
+    noiseparams properties;
+    
+    noisemap();
+    float operator[](Vector3 pos);
+ 
+    float operator[](Coord pos);
+   
+  
+    void create();
+    void destroy();
+    
+ inline   float applydist(const float val);
+};
+inline float  interoplatequintic(const float& t) {
+
+    return (6 * t*t- 15 * t + 10) * t *t * t;
+
+}
+inline float interpolate(const float & v, const float &v1, const float &w) {
+
     return (v1 - v) * w + v;
 
 }
 
+inline Vector3 randompointonsphere(int x, int y, int z);
 
-inline v3::Vector3 randompointonsphere(Coord pnt) {
-    return(seededdirections.fastat(randomushortfromdir(pnt.x, pnt.y, pnt.z)));
+float interpolatenoisemap(float x, float y, float z);
+float computenoiseatpoint(Vector3 point, noiseparams params);
+
+int comparefloat(const void* b, const void* a);
+
+
+inline int getbucket(float value) {
+
+    value += 1;
+    value /= 2;
+    value *= distrubutionsize;
+    return clamp(int( value),0,distrubutionsize-1);
+}
+inline void noisemap::createdist() {
+    
+distribution = array<float>(distrubutionsize,false);
+array<float> codistribution = array<float>(distrubutionsize, false);
+
+    for (int i = 0; i < distrubutionsize; i++)
+    {
+        Vector3 tstpnt = Vector3(51.838, 1193.38 * i, -54.49) + randompointonsphere(6,  1000 * i, 90);
+     
+            float val = computenoiseatpoint(tstpnt, properties);
+            codistribution[i] = val;
+            distribution[i] = 0;
+    }
+    std::qsort(codistribution.list, codistribution.length, sizeof(float), comparefloat);
+  
+    for (int i = 0; i < distrubutionsize; i++)
+    {
+        distribution[getbucket(codistribution[i])] = 2 * float(i) /float( distrubutionsize )- 1.f;
+    }
+    //removing gaps
+    float lastValue = -1; // Start with the minimum value
+    for (int i = 0; i < distrubutionsize; i++) {
+        if (distribution[i] != 0) {
+            lastValue = distribution[i];
+        }
+        else {
+            distribution[i] = lastValue;
+        }
+    }
+    codistribution.destroy();
 }
 
-inline noisemap* genperlin(Coord chunk,int octaves,  float scalemul, float startscale, float ampmul,noisetype type) {
 
-    float intensity = 1;
-    noisemap* map = new noisemap(chunk,unitv*16);
-    float scale = startscale;
-    for (int i = 0; i < octaves; i++)
-    {
+inline noisemap* genperlin(int octaves,  float scalemul, float startscale, float ampmul,noisetype type) {
+    noisemap* map = new noisemap();
+    map->properties = noiseparams(startscale, scalemul, octaves, ampmul,type);
 
-        map->addlayer(scale, intensity,type);
+    map->create();
 
-
-
-        scale *= scalemul;
-
-
-        intensity *= ampmul;
-    }
-
-    return map;
-}
-
-inline noisemap* genperlin2d(Coord chunk, int octaves, float scalemul, float startscale, float ampmul, noisetype type) {
-
-    float intensity = 1;
-    noisemap* map = new noisemap(chunk, Coord(16,1,16));
-    float scale = startscale;
-    for (int i = 0; i < octaves; i++)
-    {
-
-        map->addlayer(scale, intensity, type);
-
-
-
-        scale *= scalemul;
-
-
-        intensity *= ampmul;
-    }
 
     return map;
 }

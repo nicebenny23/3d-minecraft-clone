@@ -1,6 +1,7 @@
 #include "../util/vector3.h"
 #include "../util/dynamicarray.h"
-
+#include "../world/tick.h"
+#include "../util/dynamicmempool.h"
 #include <unordered_map>
 #pragma once
 
@@ -24,361 +25,353 @@ namespace gameobject {
 	};
 
 	//these 3 function are used to get a unique component number f
-	extern std::unordered_map<char*, int> stringtoint;
+	extern std::unordered_map<const char*, int> stringtoint;
 	extern int curid;
-	inline void initmap() {
 
 
+	enum updatetype {
 
-		stringtoint = std::unordered_map<char*, int>();
-		curid = 0;
-	}
+		updatenone = 0,
+		updatedefault = 1,
+		updatetick = 2,
+	};
 
-	inline	int idfromnameadd(char* name) {
-		if (stringtoint.count(name) == 0)
-		{
+	struct component;
 
-			stringtoint.emplace(name, curid);
-			curid++;
-		}
-
-		return stringtoint[name];
-	}
-
-
-	inline int compidfromname(char* name) {
-		if (stringtoint.count(name) == 0)
-		{
-			_STATIC_ASSERT("type in name of componenent");
-			return -1;
-		}
-
-
-		return stringtoint[name];
-	}
-
-
-
-
-
-
-
+	struct componentmanager
+	{
+		componentmanager();
+		void create(int mid,int bytesize);
+		updatetype utype;
+		int priority;
+		int id;
+		int componentamt;
+		dynamicmempool::dynamicpool pool;
+		array<component*> componentlist;
+		void append(component* comp);
+		void remove(int id);
+		void init(component* sample);
+	};
 
 
 
 	struct obj;
+	void initmanagerlist();
+	extern array<componentmanager> managerlist;
+	void updatecomponents();
+	componentmanager* managerof(component* comp);
+	inline void initmap() {
 
 
-	extern array<obj*> objectfromguid;
-	
-	struct component
-	{
-		int priority ;
-		//called on destroy used for deallocation
-		virtual void ondestroy();
-		obj* owner;
-		virtual ~component() = default;
-		virtual void setobj(obj* object) {
-			owner = object;
-		}
-		bool active;
-		component() {
-			active = true;
-			owner = nullptr;
-			id = -1;
-		};
-		virtual component* copydat(component* orgin);
-		virtual void start();
-		virtual void renderupdate();
-		virtual void update();
-		virtual void onplayerclick();
-	
-		virtual void oncollision(obj* collidedwith);
 
-		int id;
-
-	};
-	//determanes the type of object a give object is,
-	enum objtype {
-		block = 0,
-		entity = 1
-
-	};
-	struct obj
-	{
-
-
-		array<component*> complist;
-
-		//obj(v3::Vector3 ipos, const char* _name);
-
-		
-		objtype type;
-		objstate state;
-		template <class T>
-		T& getcomponent();
-		template <class T>
-		T* getcomponent(int i);
-		template <class T>
-		T* getcomponentptr();
-		template <class T>
-		bool hascomponent();
-		//removes a component
-		template <class T>
-		void removecomponent();
-
-		
-		template <class T>
-		array<T*>  getcomponents();
-
-		template <class T, typename... types>
-		void addcomponent(types&&... initval);
-		template <class T, typename... types>
-		T* addcomponentptr(types&&... initval);
-		//todo -mid proiorty implement;
-	
-		obj();
-		void senddestroycall() {
-
-			for (int i = 0; i < complist.length; i++)
-			{
-				complist[i]->ondestroy();
-			}
-		}
-	};
-
-
-	void destroy(obj* object);
-	inline bool shouldbeupdated(obj* object) {
-
-		if (object->state == active)
-		{
-			return true;
-		}
-		if (object->state == beinginitiated)
-		{
-			object->state = active;
-			return true;
-		}
-		return false;
+		stringtoint = std::unordered_map<const char*, int>();
+		curid = 1;
 	}
 
-	template <class T>
-	void obj::removecomponent()
-	{
-		int id = compidfromname((char*)(typeid(T).name()));
-		if (id == -1)
+	inline	int idfromnameadd(const char* name) {
+		int toret = stringtoint[name];
+		if (toret==0)
 		{
-			return;
+			stringtoint[name] = curid;
+			curid++;
+			return stringtoint[name];
 		}
-		for (int i = 0; i < complist.length; i++)
-		{
-			int l = complist[i]->id;
-			if (id == complist[i]->id) {
-				complist[i]->ondestroy();
-				complist.deleteind(i);
-				i--;
-
-			}
-		}
-		return;
+		return toret;
 	}
 
 
-
-	template <class T>
-	T& obj::getcomponent()
-	{
-
-
-		int id = compidfromname((char*)(typeid(T).name()));
-		if (id == -1)
+	inline int compidfromname(const char* name) {
+		int toret = stringtoint[name];
+		if (toret == 0)
 		{
-			Assert("trying to get undefined component");
+			return -1;
 		}
-		for (int i = 0; i < complist.length; i++)
-		{
-
-			if (id == complist[i]->id) {
-
-
-				return *((T*)complist[i]);
-			}
-		}
-		static_assert("", "");
-	}
-
-	template<class T>
-	inline T* obj::getcomponent(int i)
-	{
-		int id = compidfromname((char*)(typeid(T).name()));
-		if (id == -1)
-		{
-			Assert("trying to get undefined component");
-		}
-		for (int i1 = 0; i1 < complist.length; i1++)
-		{
-
-			if (id == complist[i1]->id&&i==0) {
-
-
-				return ((T*)complist[i1]);
-			}
-			i--;
-		}
-		Assert("couldnet be found");
+		return toret;
 	}
 
 
-	template<class T>
-	inline T* obj::getcomponentptr()
-	{
-		int id = compidfromname((char*)(typeid(T).name()));
-		for (int i = 0; i < complist.length; i++)
+inline 	bool shouldupdate(const updatetype& utype) {
+		switch (utype)
 		{
-
-			if (id == complist[i]->id) {
-
-
-				return ((T*)complist[i]);
-			}
-		}
-		return nullptr;
-	}
-
-	template <class T>
-	bool obj::hascomponent()
-	{
-
-
-		int id = compidfromname((char*)(typeid(T).name()));
-		if (id == -1)
-		{
-	//no assert because it should be safe to do this 
-
+		case gameobject::updatenone:
 			return false;
-		}
-		for (int i = 0; i < complist.length; i++)
-		{
+			break;
+		case gameobject::updatedefault:
+			return true;
 
-			if (id == complist[i]->id) {
-
-
+			break;
+		case gameobject::updatetick:
+			if (tick::tickframe)
+			{
 				return true;
 			}
+
 		}
-		return false;
 	}
-
-
-
-
-	template<class T, typename ...types>
-	inline T* obj::addcomponentptr(types && ...initval)
-	{
-
-
-		int id = idfromnameadd((char*)(typeid(T).name()));
-		//fix
-			//Assert(std::is_constructible_v<T, types...>, "no constructer takes these parameters");
-		//	Assert(std::is_base_of<component, T>::value, "T is not a component");
-
-		T* comp = new T(std::forward<types>(initval)...);
-
-		comp->setobj(this);
-
-		comp->start();
-		comp->active = true;
-		comp->id = id;
-
-		complist.append(comp);
-		return comp;
-	}
-
-	template<class T>
-	inline array<T*> obj::getcomponents()
-	{
-		int id = idfromnameadd((char*)(typeid(T).name()));
-		if (id == -1)
+		
+		struct component
 		{
-			Assert("compopnent does not exist");
-		}
-		array<T*> comps = *(new array<T*>());
-		for (int i = 0; i < complist.length; i++)
-		{
-			if (id == complist[i]->id) {
-				comps.append((T*)(complist[i]));
+		public:
+		
+			short priority;
+			updatetype utype;
+		
+
+			unsigned int index;
+			//for component manager 
+			bool active;
+			//called on destroy used for deallocation
+			
+			obj* owner;
+			virtual void ondestroy();
+
+
+			virtual ~component() = default;
+			
+
+			component() {
+				active = true;
+				owner = nullptr;
+			//	id = -1;
+				index = -1;
+				utype = updatedefault;
+			};
+			void destroy() {
+				ondestroy();
+				managerlist[id].pool.free(this);
+				if (managerof(this)->utype!=updatenone)
+				{
+					
+					managerlist[id].remove(index);
+				}
 			}
+			virtual void start();
+			virtual void renderupdate();
+			virtual void update();
+			virtual void onplayerclick();
+
+			virtual void oncollision(obj* collidedwith);
+
+		unsigned short id;
+
+		};
+		//determanes the type of object a give object is,
+		enum objtype {
+			block = 0,
+			entity = 1
+
+		};
+
+		struct obj
+		{
+
+
+			array<component*> componentlist;
+			
+
+			objtype type;
+			objstate state;
+			template <class T>
+			T& getcomponent();
+			
+			template <class T>
+			T* getcomponentptr();
+			template <class T>
+			bool hascomponent();
+			//removes a component
+			template <class T>
+			void removecomponent();
+		
+			template <class T>
+			array<T*>& getcomponents();
+
+			
+			template <class T, typename... types>
+			T* addcomponent(types&&... initval);
+			//todo -mid proiorty implement;
+
+			obj();
+			void senddestroycall() {
+
+				for (int i = 0; i < componentlist.length; i++)
+				{
+					componentlist[i]->destroy();
+				}
+			}
+		};
+
+
+		void destroy(obj * object);
+		template <class T>
+		void obj::removecomponent()
+		{
+			int id = compidfromname((typeid(T).raw_name()));
+			if (id == -1)
+			{
+				return;
+			}
+			for (int i = 0; i < componentlist.length; i++)
+			{
+				
+				if (id == componentlist[i]->id) {
+					componentlist[i]->destroy();
+					componentlist.deleteind(i);
+					i--;
+
+				}
+			}
+			return;
 		}
-		return comps;
-	}
+
+
+
+		template <class T>
+		T& obj::getcomponent()
+		{
+
+			T* ptr = getcomponentptr<T>();
+			if (ptr!=nullptr)
+			{
+				return *ptr;
+			}
+			Assert("owner does not have requested component");
+		}
+		template<class T>
+		inline T* obj::getcomponentptr()
+		{
+			int id = compidfromname((typeid(T).raw_name()));
+			for (int i = 0; i < componentlist.length; i++)
+			{
+
+				if (id == componentlist[i]->id) {
+
+
+					return ((T*)componentlist[i]);
+				}
+			}
+			return nullptr;
+		}
+
+		template <class T>
+		bool obj::hascomponent()
+		{
+
+
+			int id = compidfromname((typeid(T).raw_name()));
+			if (id == -1)
+			{
+				//no assert because it should be safe to do this 
+
+				return false;
+			}
+			for (int i = 0; i < componentlist.length; i++)
+			{
+
+				if (id == componentlist[i]->id) {
+
+
+					return true;
+				}
+			}
+			return false;
+		}
+
+
+
+
+		template<class T>
+		inline array<T*>& obj::getcomponents()
+		{
+			int id = compidfromname((typeid(T).raw_name()));
+			if (id == -1)
+			{
+				Assert("compopnent does not exist");
+			}
+			array<T*>* comps = (new array<T*>());
+			for (int i = 0; i < componentlist.length; i++)
+			{
+				if (id == componentlist[i]->id) {
+					comps->append((T*)(componentlist[i]));
+				}
+			}
+			return *comps;
+		}
+
+
+		template <class T, typename... types>
+
+
+		T* obj::addcomponent(types&&... initval)
+		{
+
+
+
+			T* comp;
+			 const char* idname = (typeid(T).raw_name());
+			int id = idfromnameadd(idname);
+			if (managerlist[id].id == -1)
+			{
+				managerlist[id].create(id, sizeof(T));
+				void* mem = (managerlist[id].pool.allocate());
+			comp = new (mem) T(std::forward<types>(initval)...);
+				managerlist[id].init(comp);
+			}
+			else
+			{
+				void* mem = (managerlist[id].pool.allocate());
+				comp = new (mem) T(std::forward<types>(initval)...);
+			}
 	
-
-	template <class T, typename... types>
-
-
-	void obj::addcomponent(types&&... initval)
-	{
-
-
-
 		
 
-
-		int id = idfromnameadd((char*)(typeid(T).name()));
-		//fix
-			//Assert(std::is_constructible_v<T, types...>, "no constructer takes these parameters");
-		//	Assert(std::is_base_of<component, T>::value, "T is not a component");
-
-		T* comp = new T(std::forward<types>(initval)...);
-
-		comp->setobj(this);
-
-		comp->start();
-
-		comp->id = id;
-		comp->active = true;
-		complist.append(comp);
-
-	}
-	
-	
-	//is a guid with 2 numbers one for hashing and another for checking this basicly ellimiantes any prossiblity for collision as the other one can go to 2billion
-
-
-
-
-
-	inline void immidiatedestroy(obj* object,bool soft) {
+			comp->owner = this;
+			comp->start();
+			comp->active = true;
+			comp->id = id;
 		
-		if (soft)
-		{
-			object->state = beingsoftdestroyed;
+			if (comp->utype!=updatenone)
+			{
+				managerof(comp)->append(comp);
+			}
+			componentlist.append(comp);
+			return comp;
+
 		}
-		else {
 
 
-			object->state = beingroughdestroyed;
-		}
-		for (int i = 0; i < object->complist.length; i++)
-		{
-			object->complist[i]->ondestroy();
-			//deletes component refered to by pointer
+		//is a guid with 2 numbers one for hashing and another for checking this basicly ellimiantes any prossiblity for collision as the other one can go to 2billion
+
+
+
+
+
+		inline void immidiatedestroy(obj * object, bool soft) {
+
+			if (soft)
+			{
+				object->state = beingsoftdestroyed;
+			}
+			else {
+
+
+				object->state = beingroughdestroyed;
+			}
+			for (int i = 0; i < object->componentlist.length; i++)
+			{
+				object->componentlist[i]->destroy();
+				
+
+			}
 			if (!soft)
 			{
-				delete object->complist[i];
+				//deletes pointer itsekf
+				object->componentlist.destroy();
+				//makes it so "object is now freed"
 			}
-		
-
 		}
-		if (!soft)
-		{
-			//deletes pointer itsekf
-			object->complist.destroy();
-			//makes it so "object from guid is now freed"
-		}
-	}
+	
 
 
 }
-#endif#pragma once
+
+#endif

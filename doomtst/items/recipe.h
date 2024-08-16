@@ -20,6 +20,12 @@ struct iteminrecipe {
 
 struct irecipe {
 	int xsize;
+	irecipe() {
+
+				xsize = -1;
+		ysize = -1;
+		
+	}
 	int ysize;
 	iteminrecipe itemcreated;
 	bool cancraft(Container* resourcecont,bool exact=false);
@@ -47,7 +53,8 @@ struct managerstate {
 	bool cancraft;
 	bool enabled;
 	bool craftedthisframe;
-	
+	bool shouldmax;
+	iteminrecipe crafted;
 	managerstate() {
 		
 		cancraft = true;
@@ -78,10 +85,10 @@ struct recipemanager {
 	void preview(); 
 	void craft();
 	bool isitempreview();
-	
+	int timecancraft();
 	autocraftstatetype autocraft();
 		irecipe* searchrecipe();
-	array<irecipe>* recipelist;
+	array<irecipe> recipelist;
 	irecipe* currecipe;
 	void save();
 	void enable();

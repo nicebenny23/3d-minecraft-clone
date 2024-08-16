@@ -71,29 +71,17 @@ namespace queuename {
 	template<typename T>
 	T queue<T>::pop()
 	{
-		if (length == 1)
-		{
-			ptrandelem<T>* cursor = bottom;
-			T val = bottom->elem;
-
-			top = nullptr;
-			bottom = nullptr;
-			delete cursor;
-			length--;
-			return val;
-		}
+		
 		if (!empty())
 		{
 			ptrandelem<T>* cursor = bottom;
 			T val = bottom->elem;
-
-			bottom = bottom->ptrnext;
-			delete cursor;
-			length--;
+			remove();
 			return val;
 		}
 
-		return T();
+
+		Assert("queue empty");
 
 	}
 
@@ -157,7 +145,7 @@ namespace queuename {
 		top = newelem;
 		bottom = newelem;
 		++length;
-
+		
 
 	}
 

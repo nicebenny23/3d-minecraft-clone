@@ -5,8 +5,10 @@
 #include <glm/glm.hpp>
 #ifndef Userinput_HPP
 #define Userinput_HPP
-
+#define esckey GLFW_KEY_ESCAPE
+#define shiftkey GLFW_KEY_LEFT_SHIFT
 namespace userinput {
+
 	extern glm::vec2 mouseposdt;
 	extern glm::vec2 mousepos;
 	extern v2::Vector2 normedmousepos;
@@ -26,7 +28,7 @@ namespace userinput {
 	     	}
 	};
 		extern inputkey mouseleft;
-		extern inputkey esckey;
+	
 		extern inputkey mouseright;
 	void initiate();
 
@@ -35,9 +37,9 @@ namespace userinput {
 	void endupdate();
 	//inputkey Getkey(char keyval)
 	
-	int convertchartoglfwkey(const char key);
+	int convertchartoglfwkey(const int key);
 
-		inputkey getinputkey(const char key);
+		inputkey getinputkey(const int key);
 	
 
 

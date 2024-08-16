@@ -7,8 +7,8 @@ namespace window {
 
 	extern     GLFWwindow* awindow;
 
-
-	void setcursor(bool mode);
+	void enablecursor();
+	void disablecursor();
 
 void		createwindow(int scrwidth, int scrheight);
 void swapbuffer();

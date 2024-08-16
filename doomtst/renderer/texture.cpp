@@ -21,7 +21,7 @@ void settextureparams() {
 
 
 }
-texture::texture(const char* file, textype imgtype)
+texture::texture(const char* file)
 {
 	int width;
 	int height;
@@ -54,15 +54,9 @@ texture::texture(const char* file, textype imgtype)
 
 	glBindTexture(GL_TEXTURE_2D, id);
 	int type = 0;
-	if (imgtype ==png)
-	{
+
 		type = GL_RGBA;
-	}
-	if (imgtype == jpeg)
-	{
-		type = GL_RGB;
 	
-	}
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, type, GL_UNSIGNED_BYTE, data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	stbi_image_free(data);
@@ -86,7 +80,7 @@ void texture::destroy()
 
 }
 //only works for png
-texturearray::texturearray(int width, int height, array<const char*> textures)
+texturearray::texturearray(int width, int height, array<const char*>& textures)
 {
 	array<unsigned char*> data = array<unsigned char*>();
 

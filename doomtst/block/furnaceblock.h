@@ -9,15 +9,15 @@
 struct furnacemenu :menu {
 
 	recipemanager blkcont;
-	uibox* progressbar;
+	Cptr::cptr<uibox> progressbar;
 	furnacemenu(v2::Vector2 size) {
-		menubox = newbox("images\\menutex.png", size, v2::zerov, 1);
+		menubox = ui::createuielement<uibox>("images\\menutex.png", size, v2::zerov, 1);
 	
-		menubox->shouldrender = false;
+		menubox->state.enabled = false;
 		menutype = normalmenu;
-		progressbar = newbox("images\\greenbar.png", v2::Vector2(0, .1) , v2::Vector2(0, 0), 100);
+		progressbar = ui::createuielement<uibox>("images\\greenbar.png", v2::Vector2(0, .1) , v2::Vector2(0, 0), 100);
 		blkcont = recipemanager("crafting\\furnace.txt", 1,1);
-		progressbar->shouldrender = false;
+		progressbar->state.enabled= false;
 		enabled = false;
 		blkcont.attributes = extrarecipeattributes(true, 2);
 	}
@@ -30,12 +30,12 @@ struct furnacemenu :menu {
 
 	}
 	void customopen() {
-		progressbar->shouldrender = true;
+		progressbar->state.enabled= true;
 		enabled = true;
 		blkcont.enable();
 	}
 	void customclose() {
-		progressbar->shouldrender = false;
+		progressbar->state.enabled = false;
 		enabled = false;
 		blkcont.disable();
 
@@ -117,8 +117,8 @@ struct furnacecomp :gameobject::component {
 inline void furnaceinit(blockname::block* blk) {
 	
 	blk->mesh.setfaces(stonetex, stonetex, furnacefront, stonetex, furnaceside, stonetex);
-	blk->solid = true;
-	blk->transparent = false;
+	blk->attributes.solid = true;
+	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
 	blk->mininglevel = 1;
 	blk->mesh.scale = blockname::unitscale;
@@ -135,7 +135,7 @@ inline void furnaceinit(blockname::block* blk) {
 
 	blk->getcomponent<furnacecomp>().men.blkcont.attributes.timetocraft = 1;
 	blk->getcomponent<furnacecomp>().men.blkcont.attributes.isauto = true;
-	blk->addcomponentptr<loottable>()->addelem(furnaceitem, 1, false);
+	blk->addcomponent<loottable>()->addelem(furnaceitem, 1, false);
 }
 inline void furnacedelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();

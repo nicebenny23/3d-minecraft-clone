@@ -25,8 +25,8 @@ struct rigidbody : gameobject::component {
     void calculateonground() {
 
         inliquid = false;
-        Vector3 boxcenter = objutil::toent(owner).transform.position - Vector3(0, boundingbox->scale.y + .05, 0);
-        geometry::Box checkbox = geometry::Box(boxcenter, Vector3(boundingbox->scale.x, .1, boundingbox->scale.z) * unitscale);
+        Vector3 boxcenter = objutil::toent(owner).transform.position - Vector3(0, boundingbox->box.scale.y + .05, 0);
+        geometry::Box checkbox = geometry::Box(boxcenter, Vector3(boundingbox->box.scale.x, .1, boundingbox->box.scale.z) * .999);
         isonground = (voxtra::Boxcollwithgrid(checkbox ));
     }
     // Constructor

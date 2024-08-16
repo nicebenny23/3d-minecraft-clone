@@ -1,14 +1,14 @@
-#include "../renderer/uirender.h"
+#include "../renderer/uibox.h"
 
 
-using namespace uirender;
+using namespace uiboxname;
 using namespace dynamicarray;
 #ifndef  menu_HPP
 #define menu_HPP
 enum type {
 	inventorymenu=1,
 	normalmenu=2,
-
+	settingsmenu=3,
 };
 bool ismenuopen();
 struct menu
@@ -16,7 +16,7 @@ struct menu
 	
 	void close();
 	void(*closeinven);
-		uibox* menubox;
+	Cptr::cptr<uibox> menubox;
 		type menutype;
 		
 	bool enabled;
@@ -25,7 +25,7 @@ struct menu
 
 	virtual void customopen();
 	menu() {
-		menubox = nullptr;
+		menubox = Cptr::cptr<uibox>( nullptr);
 		closeinven = nullptr;
 	};
 	menu(v2::Vector2 size);

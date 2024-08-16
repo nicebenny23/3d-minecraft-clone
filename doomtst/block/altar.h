@@ -6,14 +6,14 @@
 inline void altarinit(blockname::block* blk) {
 	blk->mesh.setfaces(altartex, altartex, obsidiantex, obsidiantex, altartex, altartex);
 
-	blk->solid = true;
-	blk->transparent = false;
+	blk->attributes.solid = true;
+	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
 	blk->minedfastwithpick = 1;
 	blk->mininglevel = .3f;
 	blk->mesh.scale = blockname::unitscale;
 	blk->createaabb();
-	blk->addcomponentptr<loottable>()->addelem(altaritem, 1, true);
+	blk->addcomponent<loottable>()->addelem(altaritem, 1, true);
 	entityname::shouldspawnfinalboss = true;
 	blk->minedfastwithpick = false;
 }

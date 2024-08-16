@@ -76,6 +76,8 @@ meshname::mesh* meshname::loadmesh(const char* name, texture TEX, Vector3 positi
 			newmesh->texindices.append(uvIndex[0]);
 			newmesh->texindices.append(uvIndex[1]);
 			newmesh->texindices.append(uvIndex[2]);
+			delete[] uvIndex;
+			delete[] vertexIndex;
 		}
 
 		delete[] header;
