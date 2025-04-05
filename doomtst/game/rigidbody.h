@@ -25,8 +25,8 @@ struct rigidbody : gameobject::component {
     void calculateonground() {
 
         inliquid = false;
-        Vector3 boxcenter = objutil::toent(owner).transform.position - Vector3(0, boundingbox->box.scale.y + .05, 0);
-        geometry::Box checkbox = geometry::Box(boxcenter, Vector3(boundingbox->box.scale.x, .1, boundingbox->box.scale.z) * .999);
+        Vector3 boxcenter = objutil::toent(owner).transform.position - Vector3(0, boundingbox->globalbox().scale.y + .05, 0);
+        geometry::Box checkbox = geometry::Box(boxcenter, Vector3(boundingbox->globalbox().scale.x, .1, boundingbox->globalbox().scale.z) * .999);
         isonground = (voxtra::Boxcollwithgrid(checkbox ));
     }
     // Constructor
@@ -66,7 +66,7 @@ struct rigidbody : gameobject::component {
 
     // Integrate the acceleration to update velocity and position
     void integrate() {
-        float deltaTime = timename::smoothdt;
+        float deltaTime = timename::dt;
         velocity += acceleration * deltaTime;
         if (isonground)
         {
@@ -85,10 +85,7 @@ struct rigidbody : gameobject::component {
         acceleration = Vector3(0, 0, 0);  // Reset acceleration after integration
     }
 
-    // Compute collision with another collision rectangle
-    void computecollision(aabb::Collider* Collider, Vector3 force) {
-       
-    }
+  
 };
 
 #endif // RIGIDBODY_HPP

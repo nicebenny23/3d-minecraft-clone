@@ -1,58 +1,37 @@
 #include "random.h"
 
-uint64_t val = 0;
-float   random()
-{
-    //xorshift 64
+uint64_t seed64 = 0;
+inline void randomize() {
 
+    seed64 ^= seed64 << 13;
+    seed64 ^= seed64 >> 7;
+    seed64 ^= seed64 << 17;
 
-
-    val ^= val << 13;
-    val ^= val >> 7;
-    val ^= val << 17;
-
-    return static_cast<double>(val) / UINT64_MAX;
-
+}
+float random(){
+    randomize();
+    return static_cast<double>(seed64) / UINT64_MAX;
 }
 bool randombool() {
-    val ^= val << 13;
-    val ^= val >> 7;
-    val ^= val << 17;
-
-    return val % 2;
+    randomize();
+    return seed64 % 2;
 }
 
-unsigned int randomint()
-{
-
-    val ^= val << 13;
-    val ^= val >> 7;
-    val ^= val << 17;
-
-    return (static_cast<double>(val) *UINT32_MAX)/ UINT64_MAX;
-}
-
-void randomcoord(unsigned int& seed)
-{
+void randomcoord(unsigned int& seed){
     seed ^= seed << 13;
     seed ^= seed >> 17;
     seed ^= seed << 5;
 
-    
-}
-unsigned int randomushortfromdir(unsigned int x, unsigned int y, unsigned int z)
-{
-    const unsigned long long bigprime = 0x9e3779b97f4a7c15ULL; // use unsigned long long to ensure 64-bit operations
-    x ^= y + bigprime + (x << 6) + (x >> 2);
-    x ^= z + bigprime + (x << 6) + (x >> 2);
-    x = (x + ((y + x) << 3) + (x >> 7)) ^ (((z + x) << 11) ^ (x >> 5));
 
-    randomcoord(x);
-
-    return x & (MAXSHORT - 1);
 }
-v3::Vector3 randomseeded(unsigned int x, unsigned int y, unsigned int z)
-{
+
+unsigned int randomint(){
+
+    randomize();
+    return (static_cast<double>(seed64) *UINT32_MAX)/ UINT64_MAX;
+}
+
+v3::Vector3 randomseeded(unsigned int x, unsigned int y, unsigned int z){
    
     // Use a mix of XOR and multiplication to combine the seeds
     x ^= y + 0x9e3779b97f4a7c15 + (x << 6) + (x >> 2);
@@ -70,35 +49,15 @@ v3::Vector3 randomseeded(unsigned int x, unsigned int y, unsigned int z)
     return point;
 }
 
-float random(float max)
-{
+float random(float max){
 
-    val ^= val << 13;
-    val ^= val >> 7;
-    val ^= val << 17;
-
-    return max *( static_cast<double>(val) / UINT64_MAX);
+    return random() * max;
 }
-template <typename T>
 
-bool randombool(float truechance) {
-
-
-    if (random(100) <= truechance)
-    {
-        return true;
-    }
-    return false;
-}
-int randomint(int max)
-{
+int randomint(int max){
 
     return (randomint()%max);
 }
-void  randominit()
-{
-    
-
-    val = 1;
-
+void initrandom(){
+    seed64 = 1;
 }

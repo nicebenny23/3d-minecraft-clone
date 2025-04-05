@@ -17,7 +17,7 @@ void initbreakparticle(entityname::entity* newent);
 struct playerbreak:gameobject::component
 {
 	
-	voxtra::RayCollisionWithGrid closest;
+	voxtra::RayWorldIntersection closest;
 	item* pickaxe;
 	block* currmining;
 	
@@ -25,7 +25,7 @@ struct playerbreak:gameobject::component
 	void start() {
 		pickaxe = nullptr;
 	
-		closest.box=nullptr;
+		closest.collider=nullptr;
 		texture tex = texture("images\\menutex.png");
 	
 	}
@@ -34,11 +34,11 @@ struct playerbreak:gameobject::component
 	
 
 
-		if (closest.box == nullptr)
+		if (closest.collider == nullptr)
 		{
 			return false;
 		}
-		if (closest.box->owner->type!=gameobject::block)
+		if (closest.collider->owner->type!=gameobject::block)
 		{
 			return false;
 		}
@@ -75,7 +75,7 @@ struct playerbreak:gameobject::component
 			if (currmining != nullptr)
 			{
 				
-				if (currmining == ((block*)(closest.box->owner)))
+				if (currmining == ((block*)(closest.collider->owner)))
 				{
 				
 
@@ -96,7 +96,7 @@ struct playerbreak:gameobject::component
 					
 				}
 			}
-			currmining = (block*)(closest.box->owner);
+			currmining = (block*)(closest.collider->owner);
 			if (currmining!=nullptr)
 			{
 
@@ -114,8 +114,8 @@ struct playerbreak:gameobject::component
 		{
 			timeuntilbreak = currmining->mininglevel/5.f;
 			wearduribilty();
-			objutil::toblk(closest.box->owner).bstate.broken = true; 
-			gridutil::setblock(toblk(closest.box->owner).pos, minecraftair);
+			objutil::toblk(closest.collider->owner).bstate.broken = true; 
+			gridutil::setblock(toblk(closest.collider->owner).pos, minecraftair);
 
 		}
 	}
@@ -124,7 +124,7 @@ struct playerbreak:gameobject::component
 		 
 		pickaxe = owner->getcomponent<inventory>().selected;
 
-		ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
+		ray cameraray = ray(toent( owner).transform.position, toent(owner).transform.position+ toent(owner).transform.getnormaldirection()*7);
 		closest = collision::raycastall(cameraray,owner,voxtra::countsolid);
 		if (!caninteract())
 		{
@@ -133,7 +133,7 @@ struct playerbreak:gameobject::component
 
 
 
-		if (userinput::mouseleft.held)
+		if (userinput::mouseleft().held)
 		{
 
 

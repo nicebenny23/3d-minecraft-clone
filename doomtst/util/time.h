@@ -10,27 +10,21 @@ using namespace std::chrono;
 namespace timename {
 	extern float fps;
 	extern float dt;
-	extern float gametime;
-	extern float tfps;
-	extern float averagedt;
-	extern float smoothdt;
+	extern float realtime;
 	void inittime(); 
 
 	inline void calcfps() {
 
 		auto currtime = glfwGetTime();
-		dt = currtime - gametime;
+		float roughdt = currtime - realtime;
 		//to prevent erros in debug
-		if (averagedt==0)
-		{
-			averagedt = 1/60.f;
-		}
-		averagedt = averagedt * .95f+ Min( dt,.2f)* .05f;
-		smoothdt =Min(averagedt, .05f);
+		float speedchange = .05;
+		//slowly change and clamp it so it does not get out of control also we control for timescale
+		dt =clamp(.0001f,lerp(dt,roughdt,speedchange), .05f);
 		
-		fps = 1000 / smoothdt;
-
-		gametime = currtime;
+		fps = 1.f / roughdt;
+		
+		realtime = currtime;
 	}
 
 }

@@ -1,97 +1,59 @@
 #include "userinput.h"
 #include <GLFW/glfw3.h>
 namespace userinput {
-
-	glm::vec2 mousepos;
-	glm::vec2 mouseposdt;
-	inputkey mouseleft;
-	inputkey mouseright;
-
+	//([0-width],[0,height])
+	v2::Vector2 mousepos;
+	v2::Vector2 mouseposdt;
+	//from ([-1,1],[-1,1])
 	v2::Vector2 normedmousepos;
-	dynamicarray::array<inputkey> keylist;
+	dynamicarray::array<inputkey,true> keylist;
 
 	void endupdate(){
-		mouseposdt = glm::vec2(0, 0);
+		mouseposdt = v2::Vector2(0, 0);
 		for (int i = 0; i < keylist.capacity; i++)
 		{
 			keylist[i].pressed = false;
 			keylist[i].released = false;
 		}
-		mouseleft.pressed = false;
-		mouseleft.released = false;
-		mouseright.pressed = false;
-		mouseright.released = false;
-	
+		
+	}
+
+	inputkey mouseleft()
+	{
+		return keylist[Mouse_leftindex];
+	}
+
+	inputkey mouseright()
+	{
+		return keylist[Mouse_rightindex];
 	}
 
 	void initiate()
 	{
-		mouseleft = inputkey();
-		mouseright = inputkey();
-		mousepos = glm::vec2(0, 0);
-		mouseposdt = glm::vec2(0, 0);
-	keylist = dynamicarray::array<inputkey>(GLFW_KEY_LAST,true);
+
+		mousepos = v2::Vector2(0, 0);
+		mouseposdt = v2::Vector2(0, 0);
+	keylist = dynamicarray::array<inputkey,true>(GLFW_KEY_LAST+ Extra_keys);
 		for (int i = 0; i < keylist.capacity; i++)
 		{
 			keylist[i]=inputkey();
 			
 		}
 	}
-	void updatekey(int code, int pressedorrelesed) {
+	void updatekey(int code, int action) {
 
-		
-		if (pressedorrelesed == GLFW_PRESS)
+		if (code< keylist.length)
 		{
+			keylist[code].update(action);
 
-			keylist[code].pressed = true;
-			keylist[code].held = true;
-
+			
 		}
-		if (pressedorrelesed == GLFW_RELEASE)
+		else
 		{
-			keylist[code].pressed = false;
-			keylist[code].held= false;
-			keylist[code].released = true;
-		}
-		
-	}
-
-	void updateotherkeys(int button, int pressedorrelesed)
-	{
-
-		if (button==GLFW_MOUSE_BUTTON_RIGHT)
-		{
-			if (pressedorrelesed == GLFW_PRESS)
-			{
-
-				mouseright.pressed = true;
-				mouseright.held = true;
-
-			}
-			if (pressedorrelesed == GLFW_RELEASE)
-			{
-				mouseright.pressed = false;
-				mouseright.held = false;
-				mouseright.released = true;
-			}
-		}if (button == GLFW_MOUSE_BUTTON_LEFT)
-		{
-			if (pressedorrelesed == GLFW_PRESS)
-			{
-
-				mouseleft.pressed = true;
-				mouseleft.held = true;
-
-			}
-			if (pressedorrelesed == GLFW_RELEASE)
-			{
-				mouseleft.pressed = false;
-				mouseleft.held = false;
-				mouseleft.released = true;
-			}
+				Assert("error code");
 		}
 	}
-	
+
 
 	
 	
@@ -107,6 +69,23 @@ namespace userinput {
 
 	inputkey getinputkey(const int key) {
 		return keylist[convertchartoglfwkey(key)];
+	}
+
+	void inputkey::update(int action)
+	{
+		if (action == GLFW_PRESS)
+		{
+
+		pressed = true;
+		held = true;
+
+		}
+		if (action == GLFW_RELEASE)
+		{
+			pressed = false;
+			held = false;
+			released = true;
+		}
 	}
 
 }

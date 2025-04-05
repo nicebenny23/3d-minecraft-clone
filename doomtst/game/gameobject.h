@@ -1,7 +1,7 @@
 #include "../util/vector3.h"
 #include "../util/dynamicarray.h"
 #include "../world/tick.h"
-#include "../util/dynamicmempool.h"
+#include "../util/chainpool.h"
 #include <unordered_map>
 #pragma once
 
@@ -13,15 +13,11 @@ using namespace dynamicarray;
 
 namespace gameobject {
 
-	enum objstate
+	enum objstate : byte
 	{
 		beinginitiated=0,
 		active=1,
-		
-		//deleting components but keeping object
-		beingsoftdestroyed=2,
-		//deleting object and components
-		beingroughdestroyed=3
+		destroying=2,
 	};
 
 	//these 3 function are used to get a unique component number f
@@ -29,7 +25,7 @@ namespace gameobject {
 	extern int curid;
 
 
-	enum updatetype {
+	enum updatetype : byte {
 
 		updatenone = 0,
 		updatedefault = 1,
@@ -45,11 +41,9 @@ namespace gameobject {
 		updatetype utype;
 		int priority;
 		int id;
-		int componentamt;
-		dynamicmempool::dynamicpool pool;
-		array<component*> componentlist;
-		void append(component* comp);
-		void remove(int id);
+		chainpool::chainedpool<component> pool;
+		
+
 		void init(component* sample);
 	};
 
@@ -57,7 +51,7 @@ namespace gameobject {
 
 	struct obj;
 	void initmanagerlist();
-	extern array<componentmanager> managerlist;
+	extern array<componentmanager,true> managerlist;
 	void updatecomponents();
 	componentmanager* managerof(component* comp);
 	inline void initmap() {
@@ -112,19 +106,23 @@ inline 	bool shouldupdate(const updatetype& utype) {
 		struct component
 		{
 		public:
-		
-			short priority;
-			updatetype utype;
-		
+
+			obj* owner;
 
 			unsigned int index;
+			short priority=0;
+		
+
+			byte id;
 			//for component manager 
+			updatetype utype = updatedefault;
+
 			bool active;
 			//called on destroy used for deallocation
 			
-			obj* owner;
 			virtual void ondestroy();
-
+			//use for blockmove
+			//virtual void transfer(component& obj);
 
 			virtual ~component() = default;
 			
@@ -132,19 +130,14 @@ inline 	bool shouldupdate(const updatetype& utype) {
 			component() {
 				active = true;
 				owner = nullptr;
-			//	id = -1;
+				id = -1;
 				index = -1;
-				utype = updatedefault;
+				
 			};
 			void destroy() {
 				ondestroy();
 				managerlist[id].pool.free(this);
-				if (managerof(this)->utype!=updatenone)
-				{
-					
-					managerlist[id].remove(index);
-				}
-			}
+						}
 			virtual void start();
 			virtual void renderupdate();
 			virtual void update();
@@ -152,7 +145,6 @@ inline 	bool shouldupdate(const updatetype& utype) {
 
 			virtual void oncollision(obj* collidedwith);
 
-		unsigned short id;
 
 		};
 		//determanes the type of object a give object is,
@@ -184,7 +176,7 @@ inline 	bool shouldupdate(const updatetype& utype) {
 		
 			template <class T>
 			array<T*>& getcomponents();
-
+			 
 			
 			template <class T, typename... types>
 			T* addcomponent(types&&... initval);
@@ -201,7 +193,7 @@ inline 	bool shouldupdate(const updatetype& utype) {
 		};
 
 
-		void destroy(obj * object);
+	
 		template <class T>
 		void obj::removecomponent()
 		{
@@ -224,18 +216,8 @@ inline 	bool shouldupdate(const updatetype& utype) {
 		}
 
 
+		void destroy(obj* object);
 
-		template <class T>
-		T& obj::getcomponent()
-		{
-
-			T* ptr = getcomponentptr<T>();
-			if (ptr!=nullptr)
-			{
-				return *ptr;
-			}
-			Assert("owner does not have requested component");
-		}
 		template<class T>
 		inline T* obj::getcomponentptr()
 		{
@@ -253,27 +235,26 @@ inline 	bool shouldupdate(const updatetype& utype) {
 		}
 
 		template <class T>
+		T& obj::getcomponent()
+		{
+
+			T* ptr = getcomponentptr<T>();
+			if (ptr == nullptr)
+			{
+				throw std::invalid_argument("object does not requested component");
+			}
+
+			return *ptr;
+
+		}
+		template <class T>
 		bool obj::hascomponent()
 		{
 
 
-			int id = compidfromname((typeid(T).raw_name()));
-			if (id == -1)
-			{
-				//no assert because it should be safe to do this 
-
-				return false;
-			}
-			for (int i = 0; i < componentlist.length; i++)
-			{
-
-				if (id == componentlist[i]->id) {
-
-
-					return true;
-				}
-			}
-			return false;
+			T* ptr = getcomponentptr<T>();
+			return (ptr != nullptr);
+			
 		}
 
 
@@ -282,11 +263,8 @@ inline 	bool shouldupdate(const updatetype& utype) {
 		template<class T>
 		inline array<T*>& obj::getcomponents()
 		{
-			int id = compidfromname((typeid(T).raw_name()));
-			if (id == -1)
-			{
-				Assert("compopnent does not exist");
-			}
+			int id = compidfromname(typeid(T).raw_name());
+			
 			array<T*>* comps = (new array<T*>());
 			for (int i = 0; i < componentlist.length; i++)
 			{
@@ -309,19 +287,20 @@ inline 	bool shouldupdate(const updatetype& utype) {
 			T* comp;
 			 const char* idname = (typeid(T).raw_name());
 			int id = idfromnameadd(idname);
-			if (managerlist[id].id == -1)
+			bool newmanager = (managerlist[id].id == -1);
+			if (newmanager)
 			{
 				managerlist[id].create(id, sizeof(T));
-				void* mem = (managerlist[id].pool.allocate());
+			
+			}
+			void* mem = (managerlist[id].pool.alloc());
 			comp = new (mem) T(std::forward<types>(initval)...);
-				managerlist[id].init(comp);
-			}
-			else
+			if (newmanager)
 			{
-				void* mem = (managerlist[id].pool.allocate());
-				comp = new (mem) T(std::forward<types>(initval)...);
+
+				managerlist[id].init(comp);
+
 			}
-	
 		
 
 			comp->owner = this;
@@ -329,45 +308,33 @@ inline 	bool shouldupdate(const updatetype& utype) {
 			comp->active = true;
 			comp->id = id;
 		
-			if (comp->utype!=updatenone)
-			{
-				managerof(comp)->append(comp);
-			}
+		
 			componentlist.append(comp);
 			return comp;
 
 		}
 
 
-		//is a guid with 2 numbers one for hashing and another for checking this basicly ellimiantes any prossiblity for collision as the other one can go to 2billion
 
 
 
 
+		inline void destroycomponents(obj * object) {
 
-		inline void immidiatedestroy(obj * object, bool soft) {
+			
 
-			if (soft)
-			{
-				object->state = beingsoftdestroyed;
-			}
-			else {
-
-
-				object->state = beingroughdestroyed;
-			}
+				object->state = destroying;
+			
 			for (int i = 0; i < object->componentlist.length; i++)
 			{
 				object->componentlist[i]->destroy();
 				
 
 			}
-			if (!soft)
-			{
-				//deletes pointer itsekf
+			
+				
 				object->componentlist.destroy();
-				//makes it so "object is now freed"
-			}
+				
 		}
 	
 

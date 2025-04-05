@@ -32,19 +32,12 @@ Chunk::chunk* chunkfileload(Coord location)
 				{
 					Coord blockpos = Coord(x, y, z) + location * chunkaxis;
 					byte blockid = bytelist[i] & 255;
-					newchunk.blockbuf[i] = blockname::block(blockpos, blockid);
-
-					initblockmesh(&newchunk.blockbuf[i], zerov, unitscale);
 					byte dirprop = bytelist[i] >> 8;
 
 
-					byte attachdir = dirprop >> 3;
+					byte mesh_attachdir = dirprop >> 3;
 					byte dir = dirprop & 7;
-					newchunk.blockbuf[i].mesh.attachdir = attachdir;
-
-
-					newchunk.blockbuf[i].mesh.direction = dir;
-					blkinitname::blockinit(&newchunk.blockbuf[i]);
+					blkinitname::genblock(&newchunk.blockbuf[i], blockid, blockpos, mesh_attachdir, dir);
 
 					if (newchunk.blockbuf[i].hascomponent<liquidprop>())
 					{
@@ -226,6 +219,8 @@ int generatechunkvalfromnoise(Vector3 pos,noisemap* map,  noisemap* biomemap, no
 	float fint = 0;
 //	float mint = (*modulatedmap)[localpos];
 	float lint = 0;
+
+
 	return idfromnoise(pos, nint, 0, nint2, fint,nint2,nint3);
 	const float allow = .9;
 	nint4 *= 4.f;
@@ -233,17 +228,7 @@ int generatechunkvalfromnoise(Vector3 pos,noisemap* map,  noisemap* biomemap, no
 	nint4+= biomebias;
 	nint4= clamp(nint4, -1.0f, 1.0f);
 	//nint *= clamp(biomebias + 1, .4, 1.4);
-	if (generateflat)
-	{
 	
-		
-		if (pos.y<0)
-		{
-			return minecrafttreestone;
-		}
-		return minecraftair;
-
-	}
 	if (pos.y==100)
 	{
 		return minecraftobsidian;
@@ -323,7 +308,7 @@ struct idmap
 		 biomemap = nullptr;
 		lavalayermap = genperlin(1, .5f, .03f, 1.2, normalnoise);
 		loc = location ;
-		ids = array<idblock>(chunksize,false);
+		ids = array<idblock>(chunksize);
 		int ind = 0;
 		for (int x = 0; x < chunkaxis; x++)
 		{
@@ -387,21 +372,21 @@ for (int i = 0; i < ids.length; i++)
 
 	}
 };
-Chunk::chunk* chunkload(Coord location)
+Chunk::chunk* loadchunk(Coord location)
 {
 
 	if (fileexists(Chunk::getcorefilename(location)))
 	{
 		return chunkfileload(location);
 	}
-	Chunk::chunk& newchunk = *(new Chunk::chunk());
-	newchunk.modified = false;
-	newchunk.loc = location;
-	createchunkmesh(&newchunk);
-	newchunk.blockbuf = new block[chunksize];
+	Chunk::chunk* newchunk = (new Chunk::chunk());
+	
+	newchunk->loc = location;
+	createchunkmesh(newchunk);
+	newchunk->blockbuf = new block[chunksize];
 
-	idmap mapx = idmap(location);
-	mapx.smooth();
+	idmap statemap= idmap(location);
+	statemap.smooth();
 	
 
 	int ind = 0;
@@ -410,16 +395,16 @@ Chunk::chunk* chunkload(Coord location)
 		for (int y = 0; y < chunkaxis; y++) {
 			for (int z = 0; z < chunkaxis; z++)
 			{
-				Coord pos = mapx.ids[ind].pos;
-				int id = mapx.ids[ind].id;
-				newchunk.blockbuf[ind] = blockname::block(pos, id);
+				Coord pos = statemap.ids[ind].pos;
+				int id = statemap.ids[ind].id;
+				
 
-				blkinitname::genblock(&newchunk.blockbuf[ind], id,pos, 0, 0);
+				blkinitname::genblock(&newchunk->blockbuf[ind], id,pos, 0, 0);
 
 				ind++;
 			}
 		}
 	}
-	mapx.destroy();
-	return &newchunk;
+	statemap.destroy();
+	return newchunk;
 }

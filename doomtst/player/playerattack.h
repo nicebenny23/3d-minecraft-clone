@@ -32,26 +32,26 @@ struct playerattackcomp:gameobject::component
 	void update() {
 
 	
-		voxtra::RayCollisionWithGrid closest;
+		voxtra::RayWorldIntersection closest;
 		ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
-		closest = collision::raycastall(cameraray);
-		if (closest.box == nullptr)
+		closest = collision::raycastall(cameraray,owner);
+		if (closest.collider == nullptr)
 		{
 			return;
 		}
-		if (closest.box->owner->type != gameobject::entity)
+		if (closest.collider->owner->type != gameobject::entity)
 		{
 			return;
 		}
-		if (closest.box->owner->hascomponent<estate>()&&userinput::mouseleft.pressed)
+		if (closest.collider->owner->hascomponent<estate>()&&userinput::mouseleft().pressed)
 		{
-			if (closest.box->owner->hascomponent<rigidbody>())
+			if (closest.collider->owner->hascomponent<rigidbody>())
 			{
-				kb(closest.colpoint, 7,& toent(closest.box->owner));
+				kb(closest.colpoint, 7,& toent(closest.collider->owner));
 				
 			}
 			int dmgdone = computeattackdmg();
-			closest.box->owner->getcomponent<estate>().damage(dmgdone);
+			closest.collider->owner->getcomponent<estate>().damage(dmgdone);
 			wearduribilty();
 		
 		}

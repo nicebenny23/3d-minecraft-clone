@@ -22,6 +22,7 @@ struct model:gameobject::component
 	array<meshname::mesh*> meshlist;
 	void destroy();
 	void start();
+	void setmodelshader();
 };
 extern array<model> modellist;
 

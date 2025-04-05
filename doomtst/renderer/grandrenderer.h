@@ -18,7 +18,7 @@
 
 
 #include "../renderer/model.h"
-
+#include "guirender.h"
 #ifndef grandrenderer_HPP
 #define grandrenderer_HPP
 
@@ -29,8 +29,8 @@ void rendergame() {
 
     //apply postprossising
     ui::updateui();
-
+    guirender::rendergui();
 
 }
 
-#endif // !grandrenderer_HPP
+#endif 

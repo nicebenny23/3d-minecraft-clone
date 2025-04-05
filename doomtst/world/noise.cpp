@@ -1,6 +1,7 @@
 #include "noise.h"
 using namespace dynamicarray;
 array<v3::Vector3> seededdirections;
+#include "../util/mathutil.h"
 noisemap::noisemap()
 {
 
@@ -82,23 +83,23 @@ float interpolatenoisemap(float x, float y, float z)
 	n0 = dotGridGradient(x0, y0, z0, xd0,yd0,zd0);
 
 	n1 = dotGridGradient(x1, y0, z0, xd1, yd0, zd0);
-	ix0 = interpolate(n0, n1, xs);
+	ix0 = lerp(n0, n1, xs);
 
 	n0 = dotGridGradient(x0, y1, z0, xd0, yd1, zd0);
 	n1 = dotGridGradient(x1, y1, z0,  xd1, yd1, zd0);
-	ix1 = interpolate(n0, n1, xs);
+	ix1 = lerp(n0, n1, xs);
 
-	value1 = interpolate(ix0, ix1, ys);
+	value1 = lerp(ix0, ix1, ys);
 	n0 = dotGridGradient(x0, y0, z1, xd0, yd0, zd1);
 	n1 = dotGridGradient(x1, y0, z1, xd1, yd0, zd1);
-	ix0 = interpolate(n0, n1, xs);
+	ix0 = lerp(n0, n1, xs);
 
 	n0 = dotGridGradient(x0, y1, z1, xd0, yd1, zd1);
 	n1 = dotGridGradient(x1, y1, z1, xd1, yd1, zd1);
-	ix1 = interpolate(n0, n1, xs);
+	ix1 = lerp(n0, n1, xs);
 
-	value2 = interpolate(ix0, ix1, ys);
- return interpolate(value1, value2, zs);
+	value2 = lerp(ix0, ix1, ys);
+ return lerp(value1, value2, zs);
 
 	
 }
@@ -168,7 +169,7 @@ void initrandomdirs()
 		randomcoord(noiseval);
 	}
 	float nabs = 0;
-	seededdirections = array<Vector3>(USHRT_MAX,false);
+	seededdirections = array<Vector3>(USHRT_MAX);
 	for (int i = 0; i < USHRT_MAX; i++)
 	{
 		
@@ -191,7 +192,7 @@ void initrandomdirs()
 			gradatind /= static_cast<float>(MAXUINT32);
 			gradatind -= unitv / 2;
 			gradatind * 2;
-		} while (magnitude2(gradatind)>1);
+		} while (mag2(gradatind)>1);
 		seededdirections[i] = normal(gradatind);
 	}
 

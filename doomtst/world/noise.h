@@ -66,11 +66,6 @@ inline float  interoplatequintic(const float& t) {
     return (6 * t*t- 15 * t + 10) * t *t * t;
 
 }
-inline float interpolate(const float & v, const float &v1, const float &w) {
-
-    return (v1 - v) * w + v;
-
-}
 
 inline Vector3 randompointonsphere(int x, int y, int z);
 
@@ -89,8 +84,8 @@ inline int getbucket(float value) {
 }
 inline void noisemap::createdist() {
     
-distribution = array<float>(distrubutionsize,false);
-array<float> codistribution = array<float>(distrubutionsize, false);
+distribution = array<float>(distrubutionsize);
+array<float> codistribution = array<float>(distrubutionsize);
 
     for (int i = 0; i < distrubutionsize; i++)
     {

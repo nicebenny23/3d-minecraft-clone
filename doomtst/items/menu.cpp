@@ -4,10 +4,12 @@
 menu* openmenu;
 menu* inventorylocation;
 bool ismenuopen() {
+	
 	if (openmenu!=nullptr)
 	{
 		return true;
-	}if (inventorylocation->enabled)
+	}
+	if (inventorylocation->enabled)
 	{
 		return true;
 	}
@@ -22,7 +24,7 @@ void managemenus()
 			openmenu->close();
 			return;
 		}
-		if (inventorylocation->enabled)
+		if (inventorylocation&&inventorylocation->enabled)
 		{
 			inventorylocation->close();
 			return;

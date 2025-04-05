@@ -5,64 +5,35 @@
 using namespace objutil;
 void collision::update()
 {
-	for (int i = 0; i < Colliderlist.size; i++)
+	for (int iters = 0; iters < collisioniterations; iters++)
 	{
 
-		if (Colliderlist[i] != nullptr) {
-			Vector3 off = Colliderlist[i]->collideroffset;
-			Colliderlist[i]->box.center = off + objutil::toent(Colliderlist[i]->owner).transform.position;
-		}
-	}
-	for (int i = 0; i < Colliderlist.size; i++)
-	{
-		if (Colliderlist[i] != nullptr) {
-			handleCollisionWithGrid(*Colliderlist[i]);
+
+		for (int i = 0; i < Colliderlist.size; i++)
+		{
+			if (Colliderlist[i] != nullptr) {
+				handleCollisionWithGrid(*Colliderlist[i]);
 
 
+			}
 		}
-	}
-	handleduelentitycollisions();
-	for (int i = 0; i < Colliderlist.size; i++)
-	{
-		if (Colliderlist[i] != nullptr) {
-
-			Colliderlist[i]->prevpos = Colliderlist[i]->box.center;
-		}
+		handleduelentitycollisions();
 	}
 }
 
-void collision::sendplayercameraray()
-{
-
-	ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
-	voxtra::RayCollisionWithGrid 	closest = collision::raycastall(cameraray);
-	if (closest.box!=nullptr)
-	{
-		for (int i = 0; i < closest.box->owner->componentlist.length; i++) {
-			closest.box->owner->componentlist[i]->onplayerclick();
-
-		}
-	}
-}
 
 bool collision::boxCollidesWithEntity(geometry::Box blk, gameobject::obj* orgin )
 {
-	bool orginwelldefined = false;
-	if (orgin!=nullptr)
-	{
-		orginwelldefined = true;
-	}
 	for (int i = 0; i < Colliderlist.size; i++)
 	{
 		if (Colliderlist[i] != nullptr)
 		{
-			if (orginwelldefined)
-			{
+		
 				if (Colliderlist[i]->owner == orgin)
 				{
 					continue;
 				}
-			}
+			
 			if (aabbboxintersect(blk,*Colliderlist[i]))
 			{
 				return true;
@@ -73,14 +44,10 @@ bool collision::boxCollidesWithEntity(geometry::Box blk, gameobject::obj* orgin 
 	return false;
 }
 
-voxtra::RayCollisionWithGrid collision::raycastentity(ray nray, gameobject::obj* orgin )
+voxtra::RayWorldIntersection collision::raycastentity(ray nray, gameobject::obj* orgin )
 {
-	bool orginwelldefined = false;
-	if (orgin != nullptr)
-	{
-		orginwelldefined = true;
-	}
-	voxtra::RayCollisionWithGrid closest = voxtra::RayCollisionWithGrid();
+
+	voxtra::RayWorldIntersection closest = voxtra::RayWorldIntersection();
 	closest.dist = INFINITY;
 	//
 	for (int i = 0; i < Colliderlist.size; i++)
@@ -95,14 +62,15 @@ voxtra::RayCollisionWithGrid collision::raycastentity(ray nray, gameobject::obj*
 
 
 			Collider* coll = Colliderlist[i];
-			if (distance(coll->box.center, nray.start) < nray.length())
+			if (dist(coll->globalbox().center, nray.start) < nray.length())
 			{
 
-				aabbraycolinfo blkinter = coll->distanceonray(nray);
+				geointersect::boxraycollision blkinter = geointersect::intersection( coll->globalbox(), nray);
 				if (blkinter.collided && blkinter.dist < closest.dist)
 				{
+					closest.Ray = nray;
 					closest.colpoint = blkinter.intersectionpoint;
-					closest.box = coll;
+					closest.collider = coll;
 					closest.dist = blkinter.dist;
 				}
 			}
@@ -111,28 +79,74 @@ voxtra::RayCollisionWithGrid collision::raycastentity(ray nray, gameobject::obj*
 	return closest;
 }
 
-void componentcollisionsend(gameobject::obj* reciever, gameobject::obj* collided) {
+void propagatecollisionmessage(gameobject::obj* o1, gameobject::obj* o2) {
 
-	for (int i = 0; i < reciever->componentlist.length; i++)
+	for (int i = 0; i < o1->componentlist.length; i++)
 	{
-		reciever->componentlist[i]->oncollision(collided);
+		o1->componentlist[i]->oncollision(o2);
+	}
+	for (int j= 0; j < o2->componentlist.length; j++)
+	{
+		o2->componentlist[j]->oncollision(o1);
 	}
 }
-void moveobj(v3::Vector3 force,entityname::entity* object) {
-	array<Collider*>& collist = object->getcomponents<Collider>();
-	if (magnitude(force)>1000)
+void moveobj(v3::Vector3 force,gameobject::obj* object) {
+	
+	if (object->type==gameobject::block)
 	{
-		force /= 2;
+		Assert("block rigidbodies not supported yet");
 	}
-	for (int i = 0; i < collist.length; i++)
+	else
 	{
-		collist[i]->box.center += force;
 
-		collist[i]->prevpos+= force;
+		toent(object).transform.position += force;
+		
+
 	}
-	object->transform.position += force;
-	collist.destroy();
-	delete& collist;
+}
+void distributeforce( gameobject::obj* p1, gameobject::obj* p2,Vector3 force) {
+
+	float totalforcemag = 0;
+	float e1mass = 0;
+	float e2mass = 0;
+	if (p1->hascomponent<rigidbody>())
+	{
+		e1mass = p1->getcomponent<rigidbody>().mass;
+
+
+	}
+
+	if (p2->hascomponent<rigidbody>())
+	{
+		e1mass = p2->getcomponent<rigidbody>().mass;
+
+
+	}
+
+
+	totalforcemag = e1mass + e2mass;
+
+
+	if (totalforcemag == 0)
+	{
+		return;
+	}
+	if (e2mass == 0)
+	{
+		moveobj(force, p1);
+		return;
+	}
+	if (e1mass == 0)
+	{
+		moveobj(force * -1, p2);
+		return;
+	}
+
+	moveobj(force * e2mass / totalforcemag, p1);
+
+	moveobj(force * e1mass / totalforcemag * -1, p2);
+
+
 }
 void collision::handleduelentitycollisions()
 {
@@ -157,50 +171,30 @@ void collision::handleduelentitycollisions()
 			}
 
 			v3::Vector3 force = aabb::collideaabb(*Colliderlist[i], *Colliderlist[j]);
-			if (v3::magnitude(force) > 0.01f)
+			if (v3::mag(force) > 0.01f)
 			{
 			
-				componentcollisionsend(Colliderlist[i]->owner, Colliderlist[j]->owner);
-				componentcollisionsend(Colliderlist[j]->owner, Colliderlist[i]->owner);
-
+				propagatecollisionmessage(Colliderlist[i]->owner, Colliderlist[j]->owner);
+				
 				if (Colliderlist[i]->effector || Colliderlist[j]->effector) {
 
 					continue;
 				}
-				force /= 2;
-				if (Colliderlist[i]->isunmovable)
-				{
-					force *= 2;
-
-				}
-				if (Colliderlist[j]->isunmovable)
-				{
-					force *= 2;
-
-				}
 				
-				if (!Colliderlist[i]->isunmovable)
-				{
-
-					moveobj(force, &toent(Colliderlist[i]->owner));
-
-				}
-				if (!Colliderlist[j]->isunmovable)
-				{
-					moveobj(force* -1, &toent(Colliderlist[j]->owner));
-				}
+				distributeforce(Colliderlist[i]->owner, Colliderlist[j]->owner, force);
+				
 			}
 		}
 	}
 }
 bool collision::aabbCollidesWithEntity(Collider* blk, gameobject::obj* orgin ) {
-	return collision::boxCollidesWithEntity(blk->box, orgin);
+	return collision::boxCollidesWithEntity(blk->globalbox(), orgin);
 }
 
-voxtra::RayCollisionWithGrid collision::raycastall(ray nray, gameobject::obj* orgin, voxtra::gridtrav travmode)
+voxtra::RayWorldIntersection collision::raycastall(ray nray, gameobject::obj* orgin, voxtra::gridtrav travmode)
 {
-	voxtra::RayCollisionWithGrid gridcol = voxtra::travvox(nray,200,travmode);
-	voxtra::RayCollisionWithGrid entcol = raycastentity(nray,orgin);
+	voxtra::RayWorldIntersection gridcol = voxtra::travvox(nray,200,travmode);
+	voxtra::RayWorldIntersection entcol = raycastentity(nray,orgin);
 	if (gridcol.dist<entcol.dist)
 	{
 		return gridcol;
@@ -228,8 +222,8 @@ Vector3 colideentandblock(Collider& entity, block* tocollide) {
 			}
 
 
-			componentcollisionsend(entity.owner, tocollide);
-			componentcollisionsend(tocollide, entity.owner);
+			propagatecollisionmessage(entity.owner, tocollide);
+		
 
 			if (!blockcol.effector && !entity.effector)
 			{
@@ -245,48 +239,37 @@ Vector3 colideentandblock(Collider& entity, block* tocollide) {
 
 void collision::handleCollisionWithGrid(Collider& entity)
 {
-	array<block*>& blklist = grid::voxelinrange(geometry::Box(entity.box.center, entity.box.scale));
+	array<block*>& blklist = grid::voxelinrange(entity.globalbox());
 
-	std::swap(entity.box.center, entity.prevpos);
-	for (int i = 0; i < 3; i++)
-	{
+	//std::swap(entity.box.center, entity.prevpos);
+	
 		
-		switch (i)
-		{
-
-		case 0:
-			entity.box.center.y = entity.prevpos.y;
-			break;
-		case 1:
-			entity.box.center.z = entity.prevpos.z;
-			break;
-		case 2:
-			entity.box.center.x = entity.prevpos.x;
-			break;
-		}
-
+	
 		Vector3 minforce = zerov;
-
+		block* minblock=nullptr;
 		for (int ind = 0; ind < blklist.length; ind++)
 		{
 
 
-			//getting solid at grid is optimization
-
+	
 			Vector3 force = colideentandblock(entity, blklist[ind]);
 
-			if (magnitude(force) > magnitude(minforce) || magnitude(minforce) == 0)
+			if (mag(force) > mag(minforce) || mag(minforce) == 0)
 			{
-
+				minblock = blklist[ind];
 				minforce = force;
 			}
 		}
-		if (!entity.isunmovable)
+		if (minblock!=nullptr)
 		{
+			if (!entity.effector)
+			{
 
-			moveobj(minforce, &toent(entity.owner));
+				distributeforce(entity.owner, minblock, minforce);
+
+			}
 		}
-	}
+	
 	blklist.destroy();
 
 	delete& blklist;

@@ -7,10 +7,10 @@ inline void stoneinit(blockname::block* blk) {
 	blk->attributes.solid = true;
 	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
-	blk->mesh.scale = blockname::unitscale;
+	blk->mesh.box.scale = blockname::blockscale;
 
-	blk->createaabb(false);
-	blk->mininglevel = 5;
+	blk->createdefaultaabb(false);
+	blk->mininglevel = 2;
 	blk->minedfastwithpick = true;
 	blk->addcomponent<loottable>()->addelem(stoneitem,1,false);
 		

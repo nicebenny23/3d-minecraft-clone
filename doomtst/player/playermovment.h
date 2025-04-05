@@ -26,25 +26,28 @@ struct playermovement:gameobject::component
         float slowdown = 2;
         Vector3& velocity = owner->getcomponent<rigidbody>().velocity;
         float speed = 16;
-        float effectivespeed = (timename::smoothdt * speed);
-        prevonground = owner->getcomponent<rigidbody>().isonground;
-
+        float effectivespeed = (timename::dt * speed) * slowdown;
+        Vector3 fv =normal( Vector3(camera::frontvec.x, 0, camera::frontvec.z));
+        Vector3 rv =normal( Vector3(camera::rightvec.x, 0, camera::rightvec.z));
+   
         if (userinput::getinputkey('s').held)
         {
-            velocity -= v3::Vector3(cos(glm::radians(camera::yaw)), 0, sin(glm::radians(camera::yaw)))*effectivespeed*slowdown;
+            velocity -=  fv*effectivespeed;
         }
         if (userinput::getinputkey('w').held)
         {
-         velocity += v3::Vector3(cos(glm::radians(camera::yaw)), 0, sin(glm::radians(camera::yaw))) * effectivespeed * slowdown;
+         velocity += fv * effectivespeed;
         }
         if (userinput::getinputkey('a').held)
         {
-           velocity += v3::Vector3(sin(glm::radians(camera::yaw)), 0, -cos(glm::radians(camera::yaw))) * effectivespeed * slowdown;
+           velocity -= rv * effectivespeed ;
         }
         if (userinput::getinputkey('d').held)
         {
-            velocity-= v3::Vector3(sin(glm::radians(camera::yaw)), 0, -cos(glm::radians(camera::yaw)))*effectivespeed * slowdown;
+            velocity+=rv *effectivespeed ;
         }
+        prevonground = owner->getcomponent<rigidbody>().isonground;
+
         bool normalstate = true;
         if ( owner->getcomponent<rigidbody>().inliquid)
         {
@@ -58,6 +61,7 @@ struct playermovement:gameobject::component
             {
                 velocity.y = 10;
             }
+
         }
         if (owner->getcomponent<playerclimb>().onrope)
         {

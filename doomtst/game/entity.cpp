@@ -5,14 +5,14 @@ using namespace entityname;
 ptrmempool<entity> entityname::entitypool;
 array<entity*> todelete;
 array<entity*> initobj;
-int entityname::totalcount;
+int entityname::entityalloccounter;
 bool entityname::shouldspawnfinalboss;
 void entityname::initobjs() {
-	totalcount = 0;
+	entityalloccounter = 0;
 
 	todelete = array<entity*>();
 	initobj = array<entity*>();
-	entitypool.instantiate(entsize);
+	entitypool.instantiate(maxentities);
 	shouldspawnfinalboss = false;
 
 }
@@ -84,18 +84,12 @@ bool entityname::entity::hastag(std::string tag)
 	return false;
 }
 
-void entityname::destroy(entity* ent,bool soft)
+void entityname::destroy(entity* ent)
 {
 	if (ent!=nullptr)
 	{
-		if (soft)
-		{
-			ent->state = gameobject::beingsoftdestroyed;
-		}
-		else
-		{
-			ent->state = gameobject::beingroughdestroyed;
-		}
+		
+	
 		todelete.append(ent);
 	}
 	

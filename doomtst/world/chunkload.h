@@ -7,6 +7,6 @@
 Chunk::chunk* chunkfileload(Coord location);
 
 int generatechunkvalfromnoise(float noiselevel, Coord position, float feturemap, float modulatedmap, float biomemap,float map2);
- Chunk::chunk* chunkload(Coord location);
+ Chunk::chunk* loadchunk(Coord location);
 
 #endif // chunkload_HPP

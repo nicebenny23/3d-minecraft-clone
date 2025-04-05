@@ -56,7 +56,7 @@ struct chestcomp :gameobject::component {
 
 	chestmenu men;
 	void onplayerclick() {
-		if (userinput::mouseright.pressed) {
+		if (userinput::mouseright().pressed) {
 			men.open();
 		}
 		
@@ -86,9 +86,9 @@ inline void chestinit(blockname::block* blk) {
 	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
 	blk->mininglevel = 1;
-	blk->mesh.scale = blockname::unitscale;
+	blk->mesh.box.scale = blockname::blockscale;
 
-	blk->createaabb(false);
+	blk->createdefaultaabb(false);
 	if (!blk->hascomponent<chestcomp>())
 	{
 

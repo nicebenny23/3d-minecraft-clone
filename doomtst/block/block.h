@@ -4,6 +4,8 @@
 #include "../game/gameobject.h"
 #include "../game/aabb.h"
 #include "../game/camera.h"
+
+#include "../util/geometry.h"
 #ifndef block_HPP
 
 #define block_HPP
@@ -40,9 +42,9 @@ enum blocktex {
 	planktex=27,
 };
 using namespace v3;
-
+#define  unitscale   unitv * 1 / 2.002f
 namespace blockname {
-	const v3::Vector3 unitscale = unitv*blocksize * 1 / 2.002f;
+	const v3::Vector3 blockscale = unitscale * blocksize;
 	enum id
 	{
 		minecraftair = 0,
@@ -74,8 +76,9 @@ namespace blockname {
 		blockmesh* mesh;
 
 		float cameradist;
+		
 		byte tex;
-		int facenum:4;
+		byte facenum;
 		byte light;
 	
 
@@ -90,12 +93,12 @@ namespace blockname {
 			tex = 0;
 			light = 0;
 		}
-		face(byte texval, int num, blockmesh* owner) {
+	
+		void create(byte texval, int num, blockmesh* owner) {
+			covercomputed = false;
 			tex = texval;
 			facenum = num;
-			covercomputed = false;
 			mesh = owner;
-			light = 0;
 		}
 		Vector3 center();
 		void calccameradist();
@@ -106,25 +109,23 @@ namespace blockname {
 
 	struct blockmesh
 	{
-
-		blockmesh() {
-
-			pos = zerov;
-			scale = zerov;
-			blk = nullptr;
-		}
-		blockmesh(block* parent) {
-
-			pos = zerov;
-			scale = zerov;
-			blk = parent;
-		}
 		byte direction;
 		byte attachdir;
-		Vector3 pos;
-		Vector3 scale;
-		face faces[6];
+		blockmesh() {
+
+			box.center = zerov;
+			box.scale = zerov;
+			blk = nullptr;
+		}	
+	
+		blockmesh(block* parent,  Vector3 blkscale);
+		geometry::Box box;
 		block* blk;
+	
+		
+		face faces[6];
+		
+		
 		
 		face& operator[](int index);
 		void attachindirection();
@@ -172,21 +173,19 @@ namespace blockname {
 		face& operator[](int index);
 		blockatt attributes;
 		
-		
+	
 		byte mininglevel;
 		bool minedfastwithpick;
 		Vector3 center() {
 			return Vector3( pos)*blocksize + unitv *blocksize/ 2;
 	    }
-		
+		void create(v3::Coord location, int blockid, byte blkattachface, byte blkdirection);
 
-		 block(v3::Coord location,int blockid);
-		 block();
-		 	 void createaabb(bool effector=false);
+		block() {};
+		 	 void createdefaultaabb(bool effector=false);
 		
 	};
 
-	void initblockmesh(block* blk, Vector3 pos, Vector3 scale);
 
 }
 //if you have a\

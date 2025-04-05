@@ -11,12 +11,12 @@ void meshname::mesh::setmodeluniform()
 	glm::mat4 trans2 = transformtomat(transform);
 	
 	trans *= trans2;
-	renderer::shaderlist[renderer::modelshader].setmatval(trans, "model");
+	renderer::shaderlist[renderer::modelshader].setMat4(trans, "model");
 }
 void meshname::mesh::setmodeluniform(glm::mat4 model)
 {
 
-	renderer::shaderlist[renderer::modelshader].setmatval(model, "model");
+	renderer::shaderlist[renderer::modelshader].setMat4(model, "model");
 }
 meshname::mesh::mesh()
 {	transform = Transform();
@@ -52,12 +52,13 @@ meshname::mesh* meshname::loadmesh(const char* name, texture TEX, Vector3 positi
 		}
 		if (strcmp(header, "v") == 0) {
 			Vector3 vertex;
-			fscanf(meshfile.fp, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
+			meshfile.fscanf(3, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
 			newmesh->vertices.append(vertex);
 		}
 		if (strcmp(header, "vt") == 0) {
 			v2::Vector2 texcoord;
-			fscanf(meshfile.fp, "%f %f\n", &texcoord.x, &texcoord.y);
+			meshfile.fscanf(2,"%f %f\n", &texcoord.x, &texcoord.y);
+		
 			newmesh->texcoords.append(texcoord);
 		}
 		if (strcmp(header, "f") == 0) {
@@ -65,11 +66,7 @@ meshname::mesh* meshname::loadmesh(const char* name, texture TEX, Vector3 positi
 			unsigned int* vertexIndex, * uvIndex;
 			vertexIndex = new unsigned int[3];
 			uvIndex = new unsigned int[3];
-			int matches = fscanf(meshfile.fp, "%u/%u %u/%u %u/%u\n", &vertexIndex[0], &uvIndex[0], &vertexIndex[1], &uvIndex[1], &vertexIndex[2], &uvIndex[2]);
-			if (matches != 6)
-			{
-				Assert("Mesh not triangulated correctly ");
-			}
+			 meshfile.fscanf(6,"%u/%u %u/%u %u/%u\n", &vertexIndex[0], &uvIndex[0], &vertexIndex[1], &uvIndex[1], &vertexIndex[2], &uvIndex[2]);
 			newmesh->vertexindices.append(vertexIndex[0]);
 			newmesh->vertexindices.append(vertexIndex[1]);
 			newmesh->vertexindices.append(vertexIndex[2]);

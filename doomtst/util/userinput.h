@@ -7,10 +7,14 @@
 #define Userinput_HPP
 #define esckey GLFW_KEY_ESCAPE
 #define shiftkey GLFW_KEY_LEFT_SHIFT
-namespace userinput {
 
-	extern glm::vec2 mouseposdt;
-	extern glm::vec2 mousepos;
+#define Mouse_leftindex GLFW_KEY_LAST+ GLFW_MOUSE_BUTTON_LEFT
+#define Mouse_rightindex GLFW_KEY_LAST + GLFW_MOUSE_BUTTON_RIGHT
+#define Extra_keys 2
+namespace userinput {
+	
+	extern v2::Vector2 mouseposdt;
+	extern v2::Vector2 mousepos;
 	extern v2::Vector2 normedmousepos;
 		struct inputkey {
 		bool held;
@@ -20,22 +24,24 @@ namespace userinput {
 
 			return held && !released;
 		}
-     		inputkey() {
+     		
+		inputkey() {
 
 			held = false;
 			pressed = false;
 			released = false;
-	     	}
+	     	
+		}
+
+		void update(int action);
 	};
-		extern inputkey mouseleft;
+		inputkey mouseleft();
 	
-		extern inputkey mouseright;
+		inputkey mouseright();
 	void initiate();
 
 	void updatekey(int code, int pressedorrelesed);
-	void updateotherkeys(int button, int pressedorrelesed);
 	void endupdate();
-	//inputkey Getkey(char keyval)
 	
 	int convertchartoglfwkey(const int key);
 

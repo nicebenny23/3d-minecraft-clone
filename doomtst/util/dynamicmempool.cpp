@@ -1,4 +1,5 @@
 #include "dynamicmempool.h"
+#include <stdexcept>
 #include <cstring> // For std::memset
 
 namespace allocutil {
@@ -22,13 +23,13 @@ namespace allocutil {
     }
 
     void poolqueue::push(blockmetadata* node) {
-        if (!empty()) {
-
-            end->next = node;
+        if (empty()) {
+            start = node;
             end = node;
         }
         else {
-            start = node;
+
+            end->next = node;
             end = node;
         }
         length++;
@@ -54,7 +55,7 @@ namespace dynamicmempool {
 
 
 
-    void* dynamicpool::allocate() {
+    void* dynamicpool::alloc() {
         void* block = findFreeBlock();
         if (block == nullptr) {
             throw std::bad_alloc(); // No free blocks available
@@ -64,10 +65,11 @@ namespace dynamicmempool {
 
     void dynamicpool::free(void* ptr) {
 
-        blockmetadata* node = getblockmetadata(ptr);
+        blockmetadata* node = GetMetaData(ptr);
         if (node->free)
         {
-            Assert("cant free an already freed pointer");
+            throw std::logic_error("pointer already freed");
+        
         }
         node->free = true;
         freeBlocks.push(node);
@@ -79,14 +81,14 @@ namespace dynamicmempool {
 
         for (size_t i = 0; i < poolSize; ++i) {
             void* block = nthblock(newPool, i);
-            blockmetadata* node = getblockmetadata(block);
+            blockmetadata* node = GetMetaData(block);
             node->free = true;
             node->next = nullptr;
             freeBlocks.push(node);
         }
     }
 
-    blockmetadata* dynamicpool::getblockmetadata(void* ptr) {
+    blockmetadata* dynamicpool::GetMetaData(void* ptr) {
         return reinterpret_cast<blockmetadata*>(reinterpret_cast<char*>(ptr) + blockSize);
     }
 
@@ -101,19 +103,27 @@ namespace dynamicmempool {
 
     void* dynamicpool::operator[](int index)
     {
-        if (index < 0)
+        if (index < 0|| poolSize * poollist.length <= index)
         {
-            Assert("index less than zero");
-        }
-        if (poolSize * poollist.length <= index)
-        {
-            Assert("attempted to acess invalid pool");
+            throw std::invalid_argument(" attempted to acess invalid pool");
         }
         int floorind = floor(index / poolSize);
 
         int modind = index - floorind * poolSize;
 
         return nthblock(poollist[floorind], modind);
+    }
+    //destroys all allocated memory
+    void dynamicpool::destroy()
+    {
+        for (int i = 0; i < poollist.length; i++)
+        {
+            delete[]  poollist[i];
+        }
+        poollist.destroy();
+        freeBlocks.length = 0;
+        freeBlocks.start =new blockmetadata();
+        freeBlocks.end= new blockmetadata();
     }
 
     void* dynamicpool::findFreeBlock() {

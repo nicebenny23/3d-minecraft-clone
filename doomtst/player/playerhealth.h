@@ -17,11 +17,11 @@ struct playerhealth:gameobject::component
 	
 	
 	}
-	array<Cptr::cptr<uibox>> healthboxes;
+	array<Cptr::cptr<uibox>,true> healthboxes;
 	void start(){
 		priority = -224;
 		v2::Vector2 scale = v2::unitv / 100;
-		healthboxes = array<Cptr::cptr<uibox>>(10,true);
+		healthboxes = array<Cptr::cptr<uibox>,true>(10);
 		for (int i = 0; i < 10; i++) {
 			v2::Vector2 pos = v2::Vector2(i / 40.f-.4f, -.45);
 			healthboxes.append(ui::createuielement<uibox>("images\\health.png",scale,pos,55));

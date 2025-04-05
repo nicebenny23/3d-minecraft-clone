@@ -22,7 +22,7 @@ namespace staticmempool {
         size_t blockSize; // Size of each block
         size_t poolSize;  // Number of blocks in the pool
         void allocatepool();
-        allocutil::blockmetadata* getblockmetadata(void* ptr);
+        allocutil::blockmetadata* GetMetaData(void* ptr);
         void* getblockfrometadata(allocutil::blockmetadata* metadata);
         void* nthblock(void* base, int ind);
         void* operator[](int index);

@@ -1,29 +1,31 @@
 #pragma once
 namespace queuename {
 	template <typename T>
-	struct ptrandelem
+	struct queuenode
 	{
 
-		ptrandelem<T>* ptrnext;
+		queuenode<T>* ptrnext;
 		T elem;
 
-		ptrandelem(T val);
-		ptrandelem(T val, ptrandelem<T>* nextelem);
+		queuenode(const T& val);
+	
 	};
 
 
 	template<typename T>
 	class queue {
 
-		ptrandelem<T>* top;
-		ptrandelem<T>* bottom;
+		queuenode<T>* top;
+		queuenode<T>* bottom;
 	public:
-		bool swaptop(T val);
+		
 		T pop();
-		T peek();
-		bool remove();
+		T& peek();
+		T& peek() const;
+		void destroy();
+		void removefront();
 		int length;
-		void append(T val);
+		void push(const T& val);
 		queue();
 		bool empty();
 
@@ -42,31 +44,14 @@ namespace queuename {
 	}
 
 	template<typename T>
-	ptrandelem<T>::ptrandelem(T val)
+	queuenode<T>::queuenode(const T& val)
 	{
 
 		elem = T(val);
-		ptrnext = this;
+		ptrnext = nullptr;
 	}
 
-	template<typename T>
-	ptrandelem<T>::ptrandelem(T val, ptrandelem<T>* nextelem)
-	{
-
-		ptrnext = nextelem;
-		elem = val;
-	}
-
-	template<typename T>
-	bool queue<T>::swaptop(T val)
-	{
-		if (!empty())
-		{
-			top->elem = val;
-			return true;
-		}
-		return false;
-	}
+	
 
 	template<typename T>
 	T queue<T>::pop()
@@ -74,92 +59,98 @@ namespace queuename {
 		
 		if (!empty())
 		{
-			ptrandelem<T>* cursor = bottom;
+			queuenode<T>* cursor = bottom;
 			T val = bottom->elem;
-			remove();
+			removefront();
 			return val;
 		}
 
 
-		Assert("queue empty");
+		throw std::out_of_range("Error: Attempted to pop from an empty queue.");
 
 	}
 
 	template<typename T>
-	T queue<T>::peek()
+	T& queue<T>::peek()
 	{
 		if (!empty())
 		{
 			return bottom->elem;
 		}
-		return T();
+		throw std::out_of_range("Error: Attempted to peek from an empty queue.");
 	}
 
 	template<typename T>
-	bool queue<T>::remove()
+	 T& queue<T>::peek() const
 	{
+		 if (!empty())
+		 {
+			 return bottom->elem;
+		 }
+		 throw std::out_of_range("Error: Attempted to peek from an empty queue.");
+	}
+
+	 template<typename T>
+	 inline void queue<T>::destroy()
+	 {
+		 while (!empty())
+		 {
+			 removefront();
+		 }
+	 }
+
+	template<typename T>
+	void queue<T>::removefront()
+	{
+		if (empty())
+		{
+			throw std::out_of_range("Error: Attempted to remove the top element of an empty queue.");
+		}
+		queuenode<T>* cursor = bottom;
 		if (length == 1)
 		{
-			ptrandelem<T>* cursor = bottom;
-
-
-
 			top = nullptr;
 			bottom = nullptr;
-			delete cursor;
-			length--;
-			return true;
 		}
-		if (!empty())
+		else
 		{
-			ptrandelem<T>* cursor = bottom;
-
-
 			bottom = bottom->ptrnext;
-
-
-
-			delete cursor;
-			length--;
-			return true;
 		}
-
-		return false;
+		delete cursor;
+		length--;
+		
+	
 	}
 
 	template<typename T>
-	void queue<T>::append(T val)
+	void queue<T>::push(const T& val)
 	{
 
-		if (!empty())
-		{
-
-			ptrandelem<T>* newelem = new ptrandelem<T>(val);
-			top->ptrnext = newelem;
-			top = newelem;
-
-			length++;
-			return;
-		}
-		ptrandelem<T>* newelem = new ptrandelem<T>(val);
-		top = newelem;
-		bottom = newelem;
-		++length;
+		queuenode<T>* newelem = new queuenode<T>(val);
 		
+
+		if (empty())
+		{
+			//since it is the first element it goes on bottom
+			bottom = newelem;
+		}
+		else
+		{
+			//
+			top->ptrnext = newelem;
+		}
+		top = newelem; 
+		length++;
+		return;
+
 
 	}
 
 	template<typename T>
 	bool queue<T>::empty()
 	{
-		if (length == 0) {
-
-			return true;
-
-		}
-		return false;
+		return  (length == 0);
 	}
-
 
 
 }

@@ -25,7 +25,7 @@ struct Container
 	void writetofile();
 	bool enabled;
 	
-	array<itemslot> databuf;
+	array<itemslot,true> databuf;
 	itemslot& getlocalat(int xpos,int ypos) {
 		return databuf[xpos + ypos * sizex];
 	}
@@ -37,7 +37,7 @@ struct Container
 		{
 			return false;
 		}
-		if (!userinput::mouseleft.pressed)
+		if (!userinput::mouseleft().pressed)
 		{
 			return false;
 		}
@@ -140,7 +140,7 @@ struct Container
 		sizey = ysize;
 		offset = v2::Vector2(xoff, yoff);
 		int ind = 0;
-		databuf = array<itemslot>(xsize * ysize,true);
+		databuf = array<itemslot,true>(xsize * ysize);
 		for (int j = 0; j < ysize; j++)
 		{
 			for (int i = 0; i < xsize; i++)

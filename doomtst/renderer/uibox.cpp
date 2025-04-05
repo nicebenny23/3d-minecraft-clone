@@ -2,6 +2,7 @@
 #include "../util/geometry.h"
 #include "../util/userinput.h"
 #include "../util/mathutil.h"
+#include "Window.h"
 using namespace uiboxname;
 constexpr int listsize= 400;
 const float cubeuv[] = {
@@ -28,19 +29,14 @@ void uiboxname::uibox::update()
 	if (mouseonblock())
 	{
 		state.hovered = true;
-		if (userinput::mouseleft.pressed)
-		{
-			state.leftclicked = true;
-		}
-		if (userinput::mouseright.pressed)
-		{
-			state.rightclicked = true;
-		}
+		state.leftclicked = userinput::mouseleft().pressed;
+		state.rightclicked = userinput::mouseright().pressed;
+	
 	}
 }
 bool uiboxname::uibox::mouseonblock()
 {
-	v2::Vector2 normedpos = userinput::normedmousepos;
+	v2::Vector2 normedpos = window::aspectAdjustedCoord(userinput::mousepos);
 	normedpos -= box.center;
 	if ( abs(normedpos.x)<box.scale.x)
 	{
@@ -58,7 +54,7 @@ uiboxname::uibox::uibox(uibox& toreplace)
 	tex = toreplace.tex;
 	box = toreplace.box;
 	
-	ui::uielemlist[id].cset<uibox>(* new cptr<uibox>(this));
+	ui::uielemlist[id].set<uibox>(* new cptr<uibox>(this));
 	priority = toreplace.priority;
 	state.enabled = toreplace.state.enabled;
 

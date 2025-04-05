@@ -1,26 +1,31 @@
 #include "grid.h"
 #include "../util/ray.h"
 #include "../game/aabb.h"
+#include "../util/intersection.h"
 #include "../util/geometry.h"
 #ifndef voxtrav_Hpp
 #define voxtrav_Hpp
 namespace voxtra {
 
-	struct RayCollisionWithGrid
+	struct RayWorldIntersection
 	{
-		aabb::Collider* box;
+		aabb::Collider* collider;
 		v3::Vector3 colpoint;
+		ray Ray;
 		float dist;
+		bool intersected() {
 
-		RayCollisionWithGrid(float distance, aabb::Collider* closestbox, v3::Vector3 intpoint) {
-
+			return (collider != nullptr);
+		}
+		RayWorldIntersection(float distance, aabb::Collider* closestbox, v3::Vector3 intpoint,ray emitedray) {
+			Ray = emitedray;
 			dist = distance;
-			box = closestbox;
+			collider = closestbox;
 			colpoint = intpoint;
 		}
-		RayCollisionWithGrid() {
-			box = nullptr;
-			dist = 1;
+		RayWorldIntersection() {
+			collider = nullptr;
+			dist = -1;
 			colpoint = zerov;
 		}
 	};
@@ -32,7 +37,7 @@ namespace voxtra {
 	};
 	bool raycolllideswithgrid(ray nray, float acc, gridtrav trav =countnormal);
 	bool Boxcollwithgrid(geometry::Box bx, gridtrav trav = countnormal);
-	RayCollisionWithGrid travvox(ray nray, float acc, gridtrav trav = countnormal);
+	RayWorldIntersection travvox(ray nray, float acc, gridtrav trav = countnormal);
 	block* findprevblock(ray nray, float acc, gridtrav trav = countnormal);
 	inline v3::Vector3 findemptyspace(v3::Vector3 scale) {
 		geometry::Box loadbox;

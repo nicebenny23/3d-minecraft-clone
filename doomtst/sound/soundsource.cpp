@@ -1,6 +1,6 @@
 #include "soundsource.h"
 #include <include/al.h>
-#include "../util/debug.h"
+#include "../debugger/debug.h"
 
 soundsource::soundsource() {
     id = 0;

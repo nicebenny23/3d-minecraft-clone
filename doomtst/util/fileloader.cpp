@@ -29,6 +29,35 @@ void safefile::movetoend()
     offset = size;
 }
 
+int safefile::fscanf(const char* format, ...)
+{
+    if (fp == nullptr) {
+
+        Assert("file is not defined yet cant use fscanf");
+    }
+    va_list args;
+    va_start(args, format);
+    //fscanf(meshfile.fp, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
+// Call the original fscanf function and pass the file and format
+    int result = vfscanf(fp, format, args);
+
+    va_end(args);
+    return result;
+}
+
+void safefile::fscanf(int expectedargs, const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    int result = fscanf(format, args);
+    if (expectedargs != result)
+        va_end(args);
+    if (expectedargs != result) {
+        Assert("unexpected amount of arguments found");
+    }
+
+}
+
 safefile::safefile(const char* filepath, mode openmode)
 {
 
@@ -55,7 +84,7 @@ safefile::safefile(const char* filepath, mode openmode)
 
     if (!fp) {
         fprintf(stderr, strerror(errno));
-        preAssert("Failed to open file");
+        debug("Failed to open file");
 
 
         Assert(filepath);
@@ -97,7 +126,7 @@ safefile::safefile(char* filepath, mode openmode)
     }
 
     if (!fp) {
-        preAssert("Failed to open file");
+        debug("Failed to open file");
         Assert(filepath);
 
     }

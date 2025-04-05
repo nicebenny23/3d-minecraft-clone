@@ -1,5 +1,5 @@
 #include "vector3.h"
-#include "debug.h"
+#include "../debugger/debug.h"
 #ifndef dir_H
 #define dir_H
 
@@ -20,7 +20,7 @@ enum dir2d
 	front2d = 4,
 	back2d = 5,
 };
-inline int invdir(int dir) {
+inline int invdirind(int dir) {
 
 	return dir + 1 - 2 * modabs(dir, 2);
 }

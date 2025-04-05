@@ -5,13 +5,13 @@
 #define ropeblock_HPP
 inline void ropeinit(blockname::block* blk) {
 	blk->mesh.setfaces(ropetex, ropetex, ropetex, ropetex, ropetex, ropetex);
-	blk->mesh.scale = v3::Vector3(1 / 8.f, .5f, 1 / 8.f);
+	blk->mesh.box.scale = v3::Vector3(1 / 8.f, .5f, 1 / 8.f);
 	blk->attributes.solid = true;
 	blk->attributes.transparent = true;
 	blk->emitedlight = 0;
 	blk->minedfastwithpick = 1;
 	blk->mininglevel = .3f;
-	blk->createaabb(true);
+	blk->createdefaultaabb(true);
 	blk->addcomponent<loottable>()->addelem(ropeitem, 1, false);
 
 	blk->minedfastwithpick = false;

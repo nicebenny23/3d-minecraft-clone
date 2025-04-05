@@ -8,11 +8,11 @@ inline void plankinit(blockname::block* blk) {
 	blk->attributes.solid = true;
 	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
-	blk->mesh.scale = blockname::unitscale;
-	blk->createaabb();
+	blk->mesh.box.scale = blockname::blockscale;
+	blk->createdefaultaabb();
 	blk->mininglevel = .4;
 	blk->addcomponent<loottable>()->addelem(plankitem, 1, false);
-	blk->createaabb(false);
+	blk->createdefaultaabb(false);
 }
 inline void plankdelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();

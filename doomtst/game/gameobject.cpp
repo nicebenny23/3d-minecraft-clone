@@ -12,8 +12,6 @@
 
 using namespace gameobject;
 
-
-//todo make my own hashmap
 std::unordered_map<const char*, int> gameobject::stringtoint;
 int gameobject::curid;
 
@@ -26,7 +24,6 @@ void gameobject::component::ondestroy()
 
 void gameobject::component::start()
 {
-	priority = 0;
 }
 void gameobject::component::renderupdate()
 {
@@ -62,12 +59,12 @@ obj::obj() {
 	
 
 };
-array<componentmanager> gameobject::managerlist;
+array<componentmanager,true> gameobject::managerlist;
 //gets a gameobject from a refrence to it;
 
 void gameobject::initmanagerlist()
 {
-	managerlist = array<componentmanager>(0, true);
+	managerlist = array<componentmanager,true>(0);
 }
 
 int comparemanager(const void* b, const void* a) {
@@ -95,20 +92,19 @@ void gameobject::updatecomponents()
 
 	}
 
-	std::qsort(managerref.getdata(), managerref.length, sizeof(int), comparemanager);
+	std::qsort(managerref.list, managerref.length, sizeof(int), comparemanager);
 	for (int j = 0; j < managerref.length; j++)
 	{
 		componentmanager* manager = &managerlist[managerref[j]];
-		for (int i = 0; i < manager->componentlist.capacity; i++)
+		for (component& comps :manager->pool)
 		{
-			if (manager->componentlist[i]!=nullptr)
-			{
+			
 
-				if (manager->componentlist[i]->active)
+				if (comps.active)
 				{
-					manager->componentlist[i]->update();
+					comps.update();
 				}
-			}
+			
 		}
 	}
 	managerref.destroy();
@@ -132,9 +128,8 @@ void gameobject::destroy(obj* object)
 
 gameobject::componentmanager::componentmanager()
 {
-	componentlist = array<component*>(0, true);
+	
 	id = -1;
-	componentamt = -1;
 	priority = -1;
 	utype = updatenone;
 	
@@ -144,60 +139,16 @@ void gameobject::componentmanager::create(int mid, int bytesize)
 {
 
 	id = mid;
-	componentamt = 0;
 
 
-	pool = dynamicmempool::dynamicpool(bytesize, 10000);
+	pool = chainpool::chainedpool<component>(bytesize, 10000);
 }
 
 void gameobject::componentmanager::init(component* sample)
 {
 	priority = sample->priority;
 
-	componentlist = array<component*>(0, true);
 	utype = sample->utype;
 }
 
 
-void gameobject::componentmanager::append(component* comp)
-{
-
-	float componentdensisty =0;
-
-	if (componentlist.capacity==0)
-	{
-		componentdensisty = 1;
-	}
-	else
-	{
-		componentdensisty = float(componentamt )/ float(componentlist.capacity);
-	}
-
-	//randomly chosen value
-	if (.9f<componentdensisty)
-	{
-		comp->index = componentlist.capacity;
-		componentlist[componentlist.capacity] = comp;
-	}
-	else {
-
-
-	
-			int testind;
-		component* 	componentatval=nullptr;
-			do {
-				testind= randomint(componentlist.capacity);
-				componentatval= componentlist[testind];
-			} while (componentatval!= nullptr);
-			componentatval = comp;
-			comp->index = testind;
-		
-	}
-	componentamt++;
-}
-
-void gameobject::componentmanager::remove(int id)
-{
-	componentlist[id] = nullptr;
-	componentamt--;
-}

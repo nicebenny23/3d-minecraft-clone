@@ -55,7 +55,7 @@ namespace ui {
 		};
 		virtual void render() {};
 	};
-	extern array<cptr< uielement>> uielemlist;
+	extern array<cptr< uielement>,true> uielemlist;
 	void createuilist();
 	void updateui();
 	template <class T, typename... types>
@@ -66,7 +66,7 @@ namespace ui {
 		for (int i = 0; i < uisize; i++)
 		{
 			if (uielemlist[i] == nullptr) {
-				uielemlist[i].cset<T>(obj);
+				uielemlist[i].set<T>(obj);
 				obj->id = i;
 				obj->state.parent =cptr<uielement>( nullptr);
 				return obj;

@@ -30,7 +30,7 @@ struct liquidprop :gameobject::component {
 		if (collidedwith->hascomponent<rigidbody>())
 		{
 			collidedwith->getcomponent<rigidbody>().inliquid = true;
-			collidedwith->getcomponent<rigidbody>().velocity *= 1 - timename::smoothdt * 5;
+			collidedwith->getcomponent<rigidbody>().velocity *= 1 - timename::dt * 5;
 		}
 	}
 	void updateinface(int face) {

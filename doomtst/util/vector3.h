@@ -1,8 +1,10 @@
 #include <cmath>
-#ifndef v3_HPP
+
 #include "mathutil.h"
 #include <Windows.h>
+#include "vector2.h"
 #include <glm/glm.hpp>
+#ifndef v3_HPP
 #define v3_HPP
 namespace v3 {
 	
@@ -37,7 +39,7 @@ namespace v3 {
 		Vector3 operator-(const Vector3& p1) const;
 		void operator=(const Vector3& p1);
 		Coord(const Vector3& p1);
-		Coord(const Vector3& p1,bool useless);
+		
 	};
 
 	const  Coord zeroiv = Coord(0, 0, 0);
@@ -181,7 +183,10 @@ namespace v3 {
 		Vector3 operator*(float scale) const;
 		Vector3& operator*=(float scale);
 
-
+		v2::Vector2 xy() const;
+		v2::Vector2 xz() const;
+		v2::Vector2 yz() const;
+	
 		Vector3 operator/(float scale) const;
 
 		Vector3& operator/=(float scale);
@@ -197,7 +202,26 @@ namespace v3 {
 
 	const  Vector3 zerov = Vector3(0, 0,0);
 	const  Vector3 unitv = Vector3(1, 1,1);
-	
+	const Vector3 left = Vector3(1, 0, 0);
+
+	const Vector3 up = Vector3(0, 1, 0);
+
+	const Vector3 foward = Vector3(0, 0, 1);
+	inline v2::Vector2 Vector3::xy() const {
+
+		return v2::Vector2(x, y);
+	}
+	inline v2::Vector2 Vector3::xz() const{
+
+		return v2::Vector2(x,z);
+	}
+
+	inline v2::Vector2 Vector3::yz() const {
+		
+		return v2::Vector2(y, z);
+	}
+
+
 	inline Vector3::Vector3() {
 		x = 0;
 		y = 0;
@@ -274,8 +298,10 @@ namespace v3 {
 
 
 	}
+	//pointwise scales by the vector
 	inline Vector3 Vector3::operator*(const Vector3& scale) const
 	{
+		
 		return Vector3(x*scale.x,y*scale.y,z*scale.z);
 	}
 	inline Vector3& Vector3::operator-=(const Vector3& p1) {
@@ -305,12 +331,6 @@ namespace v3 {
 		return *this;
 
 	}
-	inline Coord::Coord(const Vector3& p1, bool useless)
-	{
-		x = round(abs(p1.x))*sign(p1.x);
-		y = round(abs(p1.y)) * sign(p1.y);
-		z = round(abs(p1.z)) ;
-	}
 	inline Vector3 Vector3::operator/(float scale) const {
 
 		return Vector3(x / scale, y / scale,z/scale);
@@ -339,7 +359,7 @@ namespace v3 {
 	
 	inline bool Vector3::operator!=(const Vector3& p1)
 	{
-		return(p1.x != x || p1.y != y||z!=p1.z);
+		return(x!=p1.x  || y!=p1.y ||z!=p1.z);
 
 	}
 
@@ -349,36 +369,44 @@ namespace v3 {
 	}
 
 
-	inline float distance(const Vector3& p, const Vector3& p1) {
-
-		return(sqrt((p.x - p1.x) * (p.x - p1.x) + (p.y - p1.y) * (p.y - p1.y) + (p1.z - p.z) * (p1.z - p.z)));
-	}
+	
 	inline float dist2(const Vector3& p, const Vector3& p1) {
 
 		return((p.x - p1.x) * (p.x - p1.x) + (p.y - p1.y) * (p.y - p1.y) + (p1.z - p.z) * (p1.z - p.z));
 	}
+	inline float dist(const Vector3& p, const Vector3& p1) {
 
+		return(sqrt(dist2(p, p1)));
+	}
 
-	inline float dotproduct(const Vector3& p, const Vector3& p1) {
+	inline float dot(const Vector3& p, const Vector3& p1) {
 
 		return (p.x * p1.x + p.y * p1.y + p.z * p1.z);
 	}
 
-	
 
-
-	inline float magnitude(const Vector3& p) {
+	inline float mag(const Vector3& p) {
 
 		return(sqrt(p.x * p.x + p.y * p.y + p.z * p.z));
 	}
-	inline float magnitude2(const Vector3& p) {
+	inline float mag2(const Vector3& p) {
 
 		return((p.x * p.x + p.y * p.y + p.z * p.z));
 	}
 	inline Vector3 normal(const Vector3& p) {
 
-		return(p / magnitude(p));
+		return(p / mag(p));
 	}
+
+	inline Vector3 YawPitch(float yaw, float pitch) {
+
+		v3::Vector3 dir = v3::zerov;
+		dir.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		dir.y = sin(glm::radians(pitch));
+		dir.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+		return normal(dir);
+	}
+
 	inline Vector3 crossprod(const Vector3& p, const Vector3& p1) {
 		Vector3 crosspoint;
 		crosspoint.x = p.y * p1.z - p.z * p1.y;

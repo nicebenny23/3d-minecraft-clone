@@ -10,9 +10,9 @@ inline void lavainit(blockname::block* blk) {
 	blk->emitedlight = 6;
 
 	//`blk->lightval = 6;
-	blk->mesh.scale = blockname::unitscale*.8;
-	blk->createaabb(true);
-	blk->mesh.scale = blockname::unitscale ;
+	blk->mesh.box.scale = blockname::blockscale*.8;
+	blk->createdefaultaabb(true);
+	blk->mesh.box.scale = blockname::blockscale ;
 	blk->addcomponent<liquidprop>(5);
 
 	blk->addcomponent<dmgonhit>(1,"entity",0);

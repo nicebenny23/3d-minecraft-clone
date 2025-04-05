@@ -7,40 +7,51 @@
 #include "playereat.h"
 #include "../renderer/Window.h"
 #include "daggerthrow.h"
+#include "playertpsword.h"
 using namespace player;
 entityname::entityref player::goblin;
 
 void player::initplayer()
 {
+
+	float playerfric = 5;
 	goblin = entityname::createentity(Vector3(0,00,0), "");
 	goblin->canbedestroyed = false;
 	goblin.toent()->addcomponent<estate>(10,true);
+	goblin->addtag("player");
+	goblin->transform.scale = unitv / 2;
+	goblin->addcomponent<inventory>();
+	goblin->addcomponent<Collider>(zerov, unitv / 2.3f, true, false);
+	goblin->addcomponent<rigidbody>(playerfric);
+
 	goblin->addcomponent<playereat>();
-	goblin.toent()->addcomponent<playerhealth>();
-	goblin.toent()->addcomponent<inventory>();
-	goblin.toent()->addtag("player");
+	goblin->addcomponent<playerhealth>();
+	
 	goblin->addcomponent<playertpcomp>();
 	goblin->addcomponent<playerclimb>();
-		goblin.toent()->addcomponent<Collider>(zerov, unitv / 2.3f, true);
-	goblin.toent()->addcomponent<playermovement>();
-	goblin.toent()->addcomponent< playerbreak>();
-	goblin.toent()->addcomponent< playerplace>();
-	float playerfric = 5;
-	goblin.toent()->transform.scale = unitscale;
-	goblin.toent()->addcomponent<rigidbody>(playerfric);
-	goblin.toent()->addcomponent<playerattackcomp>();
-	goblin.toent()->addcomponent<playerdaggercomp>();
-}
+	
+	
+	goblin->addcomponent< playerbreak>();
+	goblin->addcomponent< playerplace>();
+	
+
+	goblin->addcomponent<playerattackcomp>();
+	goblin->addcomponent<playerdaggercomp>();
+	
+
+	goblin->addcomponent<playercam>();
+	goblin->addcomponent<playermovement>();
+	}
 
 void player::calculateyawandpitch()
 {
 	
 		if (!ismenuopen())
 		{
-			window::disablecursor();
+			window::disableCursor();
 
-			float xoffset = -userinput::mouseposdt.x;
-			float yoffset = userinput::mouseposdt.y;
+			float xoffset = userinput::mouseposdt.x;
+			float yoffset = -userinput::mouseposdt.y;
 
 			float sensitivity = 0.3;
 
@@ -57,15 +68,12 @@ void player::calculateyawandpitch()
 			goblin->transform.yaw += xoffset;
 			goblin->transform.pitch += yoffset;
 
-			if (goblin->transform.pitch > 89.0f)
-				goblin->transform.pitch = 89.0f;
-			if (goblin->transform.pitch < -89.0f)
-				goblin->transform.pitch = -89.0f;
+			goblin->transform.pitch=clamp(goblin->transform.pitch, -89.99, 89.99);
 
 		}
 		else
 		{
-			window::enablecursor();
+			window::enableCursor();
 		}
 	
 }

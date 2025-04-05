@@ -13,141 +13,132 @@
 #include "../world/chunk.h"
 #include "../game/objecthelper.h"
 #include "../world/grid.h"
-#include "../game/particles.h"
+
+//#include "../game/particles.h"
 #include "../renderer/blockrender.h"
 #include "../world/managegrid.h"
 #include "../util/time.h"
 #include "../game/collision.h"
-#include "../renderer/uibox.h"
-#include "../player/playermodification.h"
 #include "../util/fileloader.h"
-#include "../renderer/textrender.h"
 #include "../player/player.h"
-#include "../entities/onhit.h"
-#include "../entities/slime.h"
 #include "../game/navigation.h"
-#include "../entities/entityspawner.h"
-#include "../game/finalbossstart.h"
 #include "../renderer/grandrenderer.h"
-#include "../entities/antifreezeboss.h"
 #include "../world/noise.h"
 #include "../world/tick.h"
 #include "../block/liquid.h"
+#include "../debugger/console.h"
 #ifndef game_HPP
 #define game_HPP
-void endupdate() {
+void endframe() {
     entityname::deleteobjs();
 
     userinput::endupdate();
     updateltick();
-    window::swapbuffer();
+    window::swapBuffers();
     glfwPollEvents();
-    renderer::clear();
+    renderer::clearscreen();
 
 }
-void preupdate() {
+void startframe() {
 
 
     timename::calcfps();
-    
-    managemenus();
+     tick::trytick();
+   managemenus();
 
 }
 
-void updateobjs() {
+void updateworld() {
 
-
-    collision::sendplayercameraray();
+    
+    
     collision::update();
     gameobject::updatecomponents();
 
+   
+    gridutil::gridupdate();
     camera::cameraupdate();
-
 
 }
 void update() {
 
-    preupdate();
-    updateobjs();
-    spawn();
-    tick::trytick();
-    testgameifspawn();
-    soundname::soundobj.updatesounds();
-    gridutil::gridupdate();
+    startframe();
+    updateworld();
     rendergame();
-    endupdate();
+    endframe();
 }
-void init() {
-
+void deleteolddata() {
     std::string o1 = std::string("C:/Users/bchar/source/repos/doomtst/doomtst/worldstorage");
 
     std::string o2 = std::string("C:/Users/User/source/repos/nicebenny23/3d-minecraft-clone/doomtst/worldstorage");
     deleteFilesInFolder(o1);
 
-    timename::inittime();
-    randominit();
-    window::createwindow(1600, 1200);
+}
+void init() {
+    
+    deleteolddata();
+
+    window::createWindow();
     userinput::initiate();
+
+
+    timename::inittime();
+    initrandom();
+    initrandomdirs();
+  
+    
     gameobject::initmap();
     entityname::initobjs();
-    soundname::soundinit();
 
     gameobject::initmanagerlist();
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        Assert("Failed to initialize GLAD");
-
-    }
+  
 
     aabb::initCollider();
 
-    inittextarray();
     ui::createuilist();
+    inittextarray();
+  
     player::initplayer();
-    initrandomdirs();
+
     renderer::load();
     blockrender::initblockrendering();
+    
     camera::initilize();
-
-//    createfinalboss(zerov);
-
-
+    ui::createuielement<uibox>("images\\crosshair.png", v2::unitv / 32, v2::zerov, -3);
 
     grid::initgrid();
     gridutil::computeallcover();
     gridutil::redolighting();
-    ui::createuielement<uibox>("images\\crosshair.png", v2::unitv / 32, v2::zerov, -3);
     userinput::endupdate();
-  
+
     glfwSwapInterval(0);
 }
-void render() {
 
+void endgame() {
 
-
+    guirender::destroygui();
+    glfwTerminate();
 
 }
 void rungame()
 {
-
     init();
-  //  testtransform();
     
     float lastupdate = 0;
-    while (!window::shouldclose())
+    while (!window::shouldClose())
     {
+        
         update();
         lastupdate += timename::dt;
         if (lastupdate > 1)
         {
 
             lastupdate = 0;
-            // Vector3 pos1 = human.toent()->pos;
-            std::cout << 1 / timename::dt << '\n';
+         
+         warn(timename::fps);
         }
     }
-
-    glfwTerminate();
+    endgame();
     return;
 }
 

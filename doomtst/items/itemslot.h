@@ -7,7 +7,7 @@
 using namespace v3;
 #ifndef invblock_HPP
 #define invblock_HPP
-const int xamt = 20;
+const int xamt = 30;
 const int yamt = 30;
 enum decaltype {
 
@@ -44,8 +44,6 @@ struct itemslot
 	void setdecal(decaltype toset);
 	
 	void disable();
-	bool hasbeenrightclicked();
-	bool hasbeenleftclicked();
 	void updatestate();
 };
 

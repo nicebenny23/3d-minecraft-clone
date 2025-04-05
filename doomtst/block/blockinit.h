@@ -30,7 +30,7 @@ namespace blkinitname {
 	switch (blk->id)
 		{
 		case minecraftair:
-			airinit(blk);
+			setdefault(blk);
 			break;
 		case minecrafttreestone:
 			treestoneinit(blk);
@@ -89,19 +89,18 @@ namespace blkinitname {
 
 		blk->state = gameobject::active;
 	}
-	inline void genblock(block* blk, int blkid, Coord location, byte attachface, byte direction) {
+	inline void genblock(block* blk, int blkid, Coord location, byte attachface, byte direction)  {
 
-		*blk = blockname::block(location, blkid);
+		blk->create(location, blkid,attachface,direction);
 
-		initblockmesh(blk, zerov, unitscale);
 
 		blkinitname::blockinit(blk);
 
 
 	}
 	inline void setair(block* blk) {
-		//blk->bstate.broken = false;
-		blk->state = gameobject::beingsoftdestroyed;
+		
+		blk->state = gameobject::destroying;
 		switch (blk->id)
 		{
 		case minecraftair:
@@ -168,23 +167,17 @@ namespace blkinitname {
 			irondelete(blk);
 			break;
 		case minecraftaltar:
-			altardelete(blk);
+		altardelete(blk);
 			break;
 		case minecraftplank:
 			plankdelete(blk);
 			break;
 		default:
-			Assert("need valid id in set blk");
+			throw std::invalid_argument("need valid id in set blk");
 		}
-		airinit(blk);
+		setdefault(blk);
 	}
-	inline void deleteandset(block* blk, int id)
-	{
-		setair(blk);
-		blk->id = id;
-		blockinit(blk);
 	
-	}
 }
 
 #endif // !blockinit_H

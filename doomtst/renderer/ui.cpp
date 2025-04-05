@@ -1,10 +1,10 @@
 #include "ui.h"
 #include <glm/common.hpp>
-array<cptr<ui::uielement>> ui::uielemlist;
+array<cptr<ui::uielement>,true> ui::uielemlist;
 
 void ui::createuilist()
 {
-	uielemlist = array<cptr<uielement>>(uisize,true);
+	uielemlist = array<cptr<uielement>,true>(uisize);
 	for (int i = 0; i < uisize; i++)
 	{
 		uielemlist[i] = cptr<uielement> ();

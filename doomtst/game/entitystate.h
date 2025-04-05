@@ -26,7 +26,7 @@ struct estate :gameobject::component
 	float timetilldmg;
 	void update() {
 
-		timetilldmg -= timename::smoothdt;
+		timetilldmg -= timename::dt;
 		if (owner->hascomponent<rigidbody>())
 		{
 			velocitylast = owner->getcomponent<rigidbody>().velocity * .03f + velocitylast * .97f;

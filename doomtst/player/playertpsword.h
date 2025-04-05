@@ -40,13 +40,13 @@ struct playertpcomp :gameobject::component
 			{
 				if (timetilluse < 0)
 				{
-					if (userinput::mouseleft.released)
+					if (userinput::mouseleft().released)
 					{
 						Vector3 pos = toent(owner).transform.position;
 						Vector3 offset = toent(owner).transform.getnormaldirection()*  chargetime * chargetime;
 						ray moveray = ray(pos, pos + offset);
-					voxtra::RayCollisionWithGrid grid=	voxtra::travvox(moveray, 100, voxtra::countall);
-					if (grid.box==nullptr)
+					voxtra::RayWorldIntersection grid=	voxtra::travvox(moveray, 100, voxtra::countall);
+					if (grid.collider==nullptr)
 					{
 
 						toent(owner).transform.position += offset;
@@ -65,7 +65,7 @@ struct playertpcomp :gameobject::component
 			}
 			if (timetilluse < 0)
 			{
-				if (userinput::mouseleft.held||userinput::mouseleft.released)
+				if (userinput::mouseleft().held || userinput::mouseleft().released)
 				{
 					chargetime += timename::dt;
 					chargetime = Min(3, chargetime);

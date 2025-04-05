@@ -1,6 +1,7 @@
 #include "renderer.h"
 #include "../util/userinput.h"
-
+#include "Window.h"
+#include "../game/Settings.h"
 namespace renderer {
 
     
@@ -12,19 +13,16 @@ namespace renderer {
     rendertype currendertype;
     float fov;
     void changerendertype(rendertype rentype) {
-
+     
         if (rentype==currendertype)
         {
             return;
         }
-        else
-        {
+        
             currendertype = rentype;
-        }
+        
         switch (rentype) {
-        case rendersolid:
-       
-            break;
+   
         case rendermodel:
             glDepthFunc(GL_LESS);
             glDepthMask(GL_TRUE);
@@ -38,8 +36,7 @@ namespace renderer {
             glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
             
             break;
-        case rendertransparent:
-      break;
+       
         case renderui:
            
             glDisable(GL_DEPTH_TEST);
@@ -48,7 +45,8 @@ namespace renderer {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             currshader = uishader;
             shaderlist[uishader].attach();
-            
+            //glUniform1f()
+            setaspectratio();
             break;
         case renderparticle:
 
@@ -59,6 +57,7 @@ namespace renderer {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             currshader = particleshader;
             shaderlist[particleshader].attach();
+         
             setrenderingmatrixes();
             break;
         case rendertext:
@@ -69,7 +68,7 @@ namespace renderer {
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
             currshader = textshader;
             shaderlist[textshader].attach();
-           
+               setaspectratio();
             glBindTexture(GL_TEXTURE_2D, 0);
             break;
         }
@@ -95,7 +94,7 @@ namespace renderer {
         ibo.bind();
         ibo.fillbuffer<unsigned int>(indicelist);
         
-        if (userinput::getinputkey('t').held)
+        if ((settings::Gamesettings.viewmode))
         {
             glDrawElements(GL_LINES, indicelist.length, GL_UNSIGNED_INT, 0);
         }
@@ -108,13 +107,8 @@ namespace renderer {
 
 
     }
-    void renderquadlist(vao VAO, vbuf ibo, vbuf VBO, int size)
-    {
-        VBO.bind();
+    void setquadattributes(vao VAO, vbuf ibo, vbuf VBO) {
 
-
-
-        //uv
         VAO.bind();
         VAO.set_attr(0, 3, GL_FLOAT, 7 * sizeof(float), 0);
         glEnableVertexAttribArray(0);
@@ -123,9 +117,34 @@ namespace renderer {
         glEnableVertexAttribArray(1);
         VAO.set_attr(2, 1, GL_FLOAT, 7 * sizeof(float), 6 * sizeof(float));
         glEnableVertexAttribArray(2);
+    }
+    void fillquadbuffers(vao VAO, vbuf ibo, vbuf VBO, dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist)
+    {
+
+        VBO.bind();
+
+        VBO.fillbuffer<float>(pointlist);
+
+
+
+        //uv
+        setquadattributes(VAO, ibo, VBO);
+        ibo.bind();
+        ibo.fillbuffer<unsigned int>(indicelist);
+
+    }
+    void renderquadlist(vao VAO, vbuf ibo, vbuf VBO, int size)
+    {
+        VBO.bind();
+
+
+
+        //uv
+        VAO.bind();
+        setquadattributes(VAO, ibo, VBO);
         ibo.bind();
       
-        if (userinput::getinputkey('t').held)
+        if (settings::Gamesettings.viewmode)
         {
             glDrawElements(GL_LINES, size, GL_UNSIGNED_INT, 0);
         }
@@ -137,32 +156,16 @@ namespace renderer {
 
 
     }
-    void prerenderquadlist(vao VAO, vbuf ibo, vbuf VBO, dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist)
-    {
+    
+    void setaspectratio() {
 
-        VBO.bind();
-
-        VBO.fillbuffer<float>(pointlist);
-
-
-
-        //uv
-        VAO.bind();
-        VAO.set_attr(0, 3, GL_FLOAT, 7 * sizeof(float), 0);
-        glEnableVertexAttribArray(0);
-        //texture coords,inclusing the texture in the array 
-        VAO.set_attr(1, 3, GL_FLOAT, 7 * sizeof(float), 3 * sizeof(float));
-        glEnableVertexAttribArray(1);
-        VAO.set_attr(2, 1, GL_FLOAT, 7 * sizeof(float), 6 * sizeof(float));
-        glEnableVertexAttribArray(2);
-        ibo.bind();
-        ibo.fillbuffer<unsigned int>(indicelist);
-
+        shaderlist[currshader].setf(window::getAspectRatio(), "aspectratio");
     }
     void setrenderingmatrixes()
     {
-        shaderlist[currshader].setmatval(proj, "projection");
-        shaderlist[currshader].setmatval(view, "view");
+     
+        shaderlist[currshader].setMat4(proj, "projection");
+        shaderlist[currshader].setMat4(view, "view");
     }
     void render2dquadlist(vao VAO, vbuf ibo, vbuf VBO, array<float>& pointlist, array<unsigned int>& indicelist)
     {
@@ -223,7 +226,7 @@ namespace renderer {
         fov = 90;
         view = glm::mat4(0);
         setprojmatrix(90, .21f, 100);
-        shaderlist = dynamicarray::array<shader>(1,false);
+        shaderlist = dynamicarray::array<shader>(1);
         shaderlist[uishader] = shader::shader("shaders\\uivertex.vs", "shaders\\uifragment.vs");
             shaderlist[uishader].attach();
         
@@ -251,7 +254,7 @@ namespace renderer {
             view = viewmat;
     }
 
-    void clear()
+    void clearscreen()
     {
           glClearColor(0, 0, 0, 0.0f);
             glDepthMask(GL_TRUE);

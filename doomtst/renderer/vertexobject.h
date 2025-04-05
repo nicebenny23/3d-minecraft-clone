@@ -34,7 +34,8 @@ namespace vobj {
 		//this line copied from internet
 		void set_attr(GLuint index, GLint compnumb, GLenum type, GLsizei stride, size_t offset) {
 
-			//size is total size
+			
+			//note the empty switch statments are intentional 
 			switch (type) {
 			case GL_BYTE:
 			case GL_UNSIGNED_BYTE:
@@ -45,8 +46,13 @@ namespace vobj {
 				glVertexAttribIPointer(index, compnumb, type, stride, (void*)offset);
 				break;
 				//for noninteger values
-			default:
+			case GL_FLOAT:
+			case GL_DOUBLE:
+
 				glVertexAttribPointer(index, compnumb, type, GL_FALSE, stride, (void*)offset);
+				break;
+			default:
+				Assert("attempted to set unsuported type of attribute");
 				break;
 			}
 		}
@@ -90,40 +96,45 @@ namespace vobj {
 		}
 
 
-		//use when data is of one type
-		template<class T>
-		void fillbuffer(dynamicarray::array<T>& data) {
-
-
-			glBufferData(type, sizeof(T)*data.length, data.getdata(), GL_STATIC_DRAW);
-		}
+	
 		template<class T>
 		void tfillbuffer(dynamicarray::array<T>& data) {
-			GLint prevID;
-			switch (type)
-			{
+			GLint prevID; // Variable to store the previously bound buffer ID
+			GLint buffertype; // Variable to store the buffer type (array buffer or element array buffer)
+			// Determine the buffer type (GL_ARRAY_BUFFER or GL_ELEMENT_ARRAY_BUFFER)
+			switch (type) {
 			case GL_ARRAY_BUFFER:
-
-					glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &prevID);
-					break;
-			case GL_ELEMENT_ARRAY_BUFFER_BINDING:
-				glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &prevID);
+				buffertype = GL_ARRAY_BUFFER_BINDING;  // Set the binding type to GL_ARRAY_BUFFER_BINDING
+				break;
+			case GL_ELEMENT_ARRAY_BUFFER:
+				buffertype = GL_ELEMENT_ARRAY_BUFFER_BINDING;  // Set the binding type to GL_ELEMENT_ARRAY_BUFFER_BINDING
+				break;
+			default:
+				Assert("unsupported buffertype");  // Error handling for unsupported buffer types
 				break;
 			}
-			bind();
+			// Get the current bound buffer ID for the specified buffer type
+			glGetIntegerv(buffertype, &prevID);  // Retrieve the ID of the currently bound buffer (GL_ARRAY_BUFFER or GL_ELEMENT_ARRAY_BUFFER)
+			// Bind this buffer to the current buffer type
+			bind();  // Binds the current buffer (this function is defined elsewhere in the code)
 
-			glBufferData(type, sizeof(T) * data.length, data.getdata(), GL_STATIC_DRAW);
-			glBindBuffer(type, prevID);
-		
+			// Fill the buffer with the new data from the dynamic array
+			fillbuffer(data.list, sizeof(T) * data.length);  // Fills the buffer with data from the array
+
+			// Restore the previous buffer binding to prevent any side-effects
+			glBindBuffer(type, prevID);  // Bind the previous buffer ID back to its original state
 		}
+
 		//fills data unnasotided
 		void fillbuffer(void* data,int size) {
-
-
 			glBufferData(type, size, data, GL_STATIC_DRAW);
 
 		}
-		
+			//use when data is of one type
+		template<class T>
+		void fillbuffer(dynamicarray::array<T>& data) {
+			fillbuffer(data.list, data.length*sizeof(T));
+		}
 
 		
 	};

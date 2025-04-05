@@ -30,7 +30,7 @@ struct destroyonhit :gameobject::component {
 			{
 				if (!collidedwith->getcomponent<Collider>().effector)
 				{
-					entityname::destroy(&objutil::toent(owner), false);
+					entityname::destroy(&objutil::toent(owner));
 				}
 				
 				return;
@@ -39,7 +39,7 @@ struct destroyonhit :gameobject::component {
 		{
 			if (objutil::toent(collidedwith).hastag(tagtoeffect)^isnottag)
 			{
-entityname::destroy(&objutil::toent(owner),false);
+entityname::destroy(&objutil::toent(owner));
 			}
 		}
 	}

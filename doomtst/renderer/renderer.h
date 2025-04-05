@@ -23,28 +23,27 @@ namespace renderer {
 	};
 	void renderquadlist(vao VAO, vbuf ibo, vbuf VBO, dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist);
 	void renderquadlist(vao VAO, vbuf ibo, vbuf VBO,int size);
-	void prerenderquadlist(vao VAO, vbuf ibo, vbuf VBO, dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist);
+	void fillquadbuffers(vao VAO, vbuf ibo, vbuf VBO, dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist);
 	void render2dquadlist(vao VAO, vbuf ibo, vbuf VBO, array<float>& pointlist, array<unsigned int>& indicelist);
 
 	void render2dtextarray(vao VAO, vbuf ibo, vbuf VBO, array<float>& pointlist, array<unsigned int>& indicelist);
 	void load();
 	void setviewmatrix(glm::mat4 viewmat);
-	void clear();
+	void clearscreen();
 	extern glm::mat4 proj,view;
 	extern int currshader;
 	extern float fov;
 	extern dynamicarray::array<shader> shaderlist;
 	void setrenderingmatrixes();
-	
+	void setaspectratio();
 	
 	enum rendertype
 	{
-		rendersolid = 0,
-		rendertransparent=1,
-		renderui=2,
-		rendermodel= 3,
-		renderparticle=4,
-		rendertext=5,
+		renderui=0,
+		rendertext = 1,
+		rendermodel= 2,
+		renderparticle=3,
+	
 	}; 
 	extern rendertype currendertype;
 		void changerendertype(rendertype rentype);

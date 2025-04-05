@@ -2,7 +2,7 @@
 #define _CRT_SECURE_NO_DEPRECATE
 #include <fcntl.h>
 #include <cstdio>
-#include "debug.h"
+#include "../debugger/debug.h"
 #include <sys/stat.h>
 #include <direct.h>
 #include <iostream>
@@ -32,10 +32,10 @@ inline void createdirectory(const char* name) {
 	
 //DONT USE UNLESS NESSEARY AND CHECKED
 inline void deletedirectory(const char* name) {
-
+	
 	if (_rmdir(name) != 0) {
 
-		Assert("error creating directory");
+		Assert("error deleting directory");
 	}
 }
 
@@ -46,25 +46,14 @@ enum mode
 	fileappend,
 };
 inline bool canread(mode type) {
-	if (type == fileread)
-	{
-		return true;
-	}
-	return false;
+	return (type == fileread);
 }
 inline bool canwrite(mode type) {
-	if (type == filewrite)
-	{
-		return true;
-	}
-	return false;
+	return (type == filewrite);
 }
 inline bool canappend(mode type) {
-	if (type == fileappend)
-	{
-		return true;
-	}
-	return false;
+	return (type == fileappend);
+	
 }
 struct safefile
 {
@@ -75,7 +64,9 @@ struct safefile
 	long offset;
 	long getsize();
 	void movetoend();
-
+	int fscanf(const char* format, ...);
+	void fscanf(int expectedargs, const char* format, ...);
+	
 	safefile(const char* filepath, mode openmode);
 	safefile(char* filepath, mode openmode);
 	void close();
@@ -114,8 +105,8 @@ struct safefile
 			size_t read = fread(newarr, sizeof(T), amt, fp);
 			if (read != amt)
 			{
-				preAssert("reading failed");
-				preAssert("attempted to read a file but only");
+				debug("reading failed");
+				debug("attempted to read a file but only");
 				std::cout << read << "out of " << amt<<"elements were read";
 
 				Assert(" ");

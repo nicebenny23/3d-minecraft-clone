@@ -46,7 +46,7 @@ void Chunk::chunkmesh::sortbuf()
 	{
 		facebuf[i].calccameradist();
 	}
-	std::qsort(facebuf.getdata(), facebuf.length, sizeof(face), compare);
+	std::qsort(facebuf.list, facebuf.length, sizeof(face), compare);
 
 }
 
@@ -76,31 +76,6 @@ void Chunk::createchunkmesh(Chunk::chunk* aschunk)
 Chunk::chunk* Chunk::airload(Coord location)
 {
 	chunk& newchunk = *(new chunk());
-	newchunk.modified = false;
-	int newind = 0;
-	newchunk.loc = location;
-	int ind = 0;
-	createchunkmesh(&newchunk);
-	newchunk.blockbuf = new block[chunksize];
-	for (int x = 0; x < chunkaxis; x++)
-	{
-		for (int y = 0; y < chunkaxis; y++) {
-			for (int z = 0; z < chunkaxis; z++)
-			{
-				Coord blockpos = Coord(x, y, z) + location * chunkaxis;
-				int neid = minecraftair;
-				newchunk.blockbuf[ind] = blockname::block(blockpos, neid);
-				if (neid==minecraftair)
-				{
-					newind++;
-				}
-				blkinitname::genblock(&newchunk.blockbuf[ind], neid, blockpos, 0, 0);
-
-				ind++;
-			}
-		}
-	}
-	std::cout << newind;
 	return &newchunk;
 }
 //complete
@@ -161,7 +136,7 @@ void Chunk::chunk::write()
 		bytelist[chunksize + i] = 0;
 		appendspecialbytelist(bytelist, i, &blockbuf[i]);
 	}
-	file.write<short>(bytelist.getdata(), bytelist.length);
+	file.write<short>(bytelist.list, bytelist.length);
 	bytelist.destroy();
 	file.close();
 }
@@ -169,6 +144,7 @@ void Chunk::chunk::write()
 Chunk::chunk::chunk()
 {
 	loc = zeroiv;
+	modified = false;
 	blockbuf = nullptr;
 	mesh = nullptr;
 }
@@ -185,7 +161,7 @@ void Chunk::chunk::destroy()
 		//blkinitname::setair(&blockbuf[i]);
 		
 	
-		gameobject::immidiatedestroy(&blockbuf[i],false);
+		gameobject::destroycomponents(&blockbuf[i]);
 
 		//delete blockbuf[i]
 	}

@@ -7,9 +7,9 @@ inline void obsidianinit(blockname::block* blk) {
 	blk->attributes.solid = true;
 	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
-	blk->mesh.scale = blockname::unitscale;
+	blk->mesh.box.scale = blockname::blockscale;
 
-	blk->createaabb(false);
+	blk->createdefaultaabb(false);
 	blk->mininglevel = 5;
 	blk->minedfastwithpick = true;
 	blk->addcomponent<loottable>()->addelem(obsidianitem, 1, false);

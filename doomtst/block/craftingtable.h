@@ -57,7 +57,7 @@ struct craftingtablecomp :gameobject::component {
 	void onplayerclick() {
 		if (owner->state==gameobject::active)
 		{
-			if (userinput::mouseright.pressed)
+			if (userinput::mouseright().pressed)
 			{
 				men.open();
 			}
@@ -75,7 +75,7 @@ struct craftingtablecomp :gameobject::component {
 		}
 	}
 	void ondestroy(){
-		if (owner->state == gameobject::beingroughdestroyed)
+		if (owner->state == gameobject::destroying)
 		{
 			men.blkcont.save();
 		}
@@ -93,9 +93,9 @@ inline void tableinit(blockname::block* blk) {
 	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
 	blk->mininglevel = 1;
-	blk->mesh.scale = blockname::unitscale;
+	blk->mesh.box.scale = blockname::blockscale;
 
-	blk->createaabb(false);
+	blk->createdefaultaabb(false);
 	//stupid thing
 	if (!blk->hascomponent<craftingtablecomp>())
 	{

@@ -38,24 +38,28 @@ v3::Vector3 Transform::getnormaldirection()
     return v3::normal(direction);
 }
 
+v3::Vector3 Transform::getrightdirection()
+{
+    return normal(crossprod(getnormaldirection(),v3::up));
+}
+
+v3::Vector3 Transform::getupdirection()
+{
+    return crossprod(getrightdirection(),getnormaldirection());
+}
+
 
 void Transform::orientbase(v3::Vector3 base)
 {
     base = normal(base);
-    float newpitch = std::asin(base.y);
-    float newyaw = std::atan2(base.z, base.x);
-    pitch = (glm::degrees(newpitch));
-    yaw = (glm::degrees(newyaw));
+
+    pitch = (glm::degrees(std::asin(base.y)));
+    yaw = (glm::degrees(std::atan2(base.z, base.x)));
 
 }
 void Transform::orient(v3::Vector3 to)
 {
-    Transform newtransofm = Transform();
-    
-    to -= position;
-    Vector3 ag = getnormaldirection();
-    glm::mat4 a = transformtomat(newtransofm);
-    orientbase(to);
+    orientbase(to-position);
 }
 glm::mat4 rotationmatfromvec(Vector3 vec) {
     

@@ -1,5 +1,6 @@
 #include "blockrender.h"
 #include "../util/geometry.h"
+#include "../util/intersection.h"
 bool blockrender::enablelighting;
 dynamicarray::array<float> databuffer;
 dynamicarray::array<unsigned int> indicebuffer;
@@ -28,16 +29,17 @@ const float cubeuv[] = {
 texturearray blockrender::texarray;
 // Check if a chunk is viewable within the camera's frustum
 bool chunkviewable(Chunk::chunk* chk) {
+	return true;
 	float slope = tan(renderer::fov / 2);
 	geometry::Box chkb = geometry::Box(chk->center(), unitv * float( chunklength )/ 2.f);
-	ray camray = ray(camera::campos, v3::Vector3(camera::campos) + camera::frontvec * 1);
+	ray camray = ray(camera::campos, camera::campos+ camera::frontvec * 1);
 	geometry::cone ncone = geometry::cone(camray, slope);
 	geometry::Plane pln = geometry::Plane(camera::frontvec, camray.start);
 	bool srf = false;
 	for (int i = 0; i < 8; i++)
 	{
 		Vector3 vertex = chk->center() + (vert[i] - unitv / 2.f) *float( chunklength);
-		if (dotproduct(vertex - camera::campos, camera::frontvec) > 0) {
+		if (dot(vertex - camera::campos, camera::frontvec) > 0) {
 
 			srf = true;
 		}
@@ -47,12 +49,13 @@ bool chunkviewable(Chunk::chunk* chk) {
 	{
 		return false;
 	}
-	return ncone.intersectssphere(geometry::sphere(chkb));
+	return geointersect::intersects(ncone, geometry::sphere(chkb));
+
 }
 
 // Calculate UV coordinates for a face centered at the mesh
 v2::Vector2 facecoordtouv(const face* fce, int ind) {
-	const v3::Vector3& meshscale = fce->mesh->scale;
+	const v3::Vector3& meshscale = fce->mesh->box.scale;
 	int facetype = fce->facenum / 2;
 	v2::Vector2 offset;
 
@@ -96,8 +99,8 @@ void emitface(const int face, block& torender, array<float>& datbuf, array<unsig
 		if (!torender.mesh.faces[face].covered) {
 			const int baselocation = datbuf.length / 7;
 			const int* uniqueInds = &uniqueindices[4 * face];
-			const Vector3& scale = torender.mesh.scale;
-			const Vector3& position = torender.mesh.pos;
+			const Vector3& scale = torender.mesh.box.scale;
+			const Vector3& position = torender.mesh.box.center;
 
 			// Precompute texture number and lighting
 			const int textureNumber = torender.mesh[face].tex;
@@ -177,7 +180,7 @@ void recreatechunkmesh(Chunk::chunk* aschunk) {
 		}
 		
 	}
-	renderer::prerenderquadlist(aschunk->mesh->Voa, aschunk->mesh->ibo, aschunk->mesh->VBO, datbuf, indbuf);
+	renderer::fillquadbuffers(aschunk->mesh->Voa, aschunk->mesh->ibo, aschunk->mesh->VBO, datbuf, indbuf);
 	aschunk->mesh->meshsize = indbuf.length;
 	datbuf.destroy();
 	indbuf.destroy();
@@ -202,38 +205,36 @@ void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 		indbuf.destroy();
 	}
 }
+void setrenderblock_base() {
 
-void blockrender::setrendertransparent()
-{
 	glDepthFunc(GL_LESS);
-	glDepthMask(GL_FALSE);
 	glDisable(GL_CULL_FACE);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	renderer::currshader = renderer::normalshader;
 	renderer::shaderlist[renderer::normalshader].attach();
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
-	texarray.apply();
+	blockrender::texarray.apply();
 	renderer::setrenderingmatrixes();
+	renderer::setaspectratio();
+}
+void blockrender::setrendertransparent()
+{
+	setrenderblock_base();
+	glDepthMask(GL_FALSE);
 
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	renderer::currshader = renderer::normalshader;
+	
 }
 
 void blockrender::setrendersolid()
 {
-	glDepthFunc(GL_LESS);
+	setrenderblock_base();
 	glDepthMask(GL_TRUE);
 	glDisable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-
-	glDisable(GL_BLEND);
-	renderer::currshader = renderer::normalshader;
-	renderer:: shaderlist[renderer::normalshader].attach();
-
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	texarray.apply();
-	renderer::setrenderingmatrixes();
+	
 }
 
 // Initialize the data buffer and render chunks
@@ -257,7 +258,7 @@ void blockrender::renderblocks(bool rendertransparent) {
 		}
 	}
 
-	oalgorithm::quicksort<Chunk::chunk>(tosort.getdata(), tosort.length);
+	oalgorithm::quicksort<Chunk::chunk>(tosort.list, tosort.length);
 	setrendersolid();
 	int renderamt = 0;
 		for (int i = 0; i < tosort.length; i++) {
@@ -285,23 +286,23 @@ void blockrender::initblockrendering()
 	renderer::shaderlist[renderer::normalshader].attach();
 	renderer::currshader = renderer::normalshader;
 	array<const char*> texlist = array<const char*>();
-	texlist[0] = "images\\treestone.png";
-	texlist[1] = "images\\grass.png";
-	texlist[2] = "images\\stone.png";
-	texlist[3] = "images\\crystalaltarside.png";
-	texlist[4] = "images\\glass.png";
-	texlist[5] = "images\\water.png";
-	texlist[6] = "images\\torch.png";
-	texlist[7] = "images\\torchtop.png";
-	texlist[8] = "images\\crystalore.png";
-	texlist[9] = "images\\craftingtabletop.png";
-	texlist[10] = "images\\craftingtableside.png";
-	texlist[11] = "images\\crystaltorch.png";
-	texlist[12] = "images\\crystaltorchtop.png";
-	texlist[13] = "images\\moss.png";
-	texlist[14] = "images\\rope.png";
-	texlist[15] = "images\\lava.png";
-	texlist[16] = "images\\obb.png";
+	texlist[treestonetex] = "images\\treestone.png";
+	texlist[grasstex] = "images\\grass.png";
+	texlist[stonetex] = "images\\stone.png";
+	texlist[altartex] = "images\\crystalaltarside.png";
+	texlist[glasstex] = "images\\glass.png";
+	texlist[watertex] = "images\\water.png";
+	texlist[torchtex] = "images\\torch.png";
+	texlist[torchtoptex] = "images\\torchtop.png";
+	texlist[crystaloretex] = "images\\crystalore.png";
+	texlist[craftingtabletop] = "images\\craftingtabletop.png";
+	texlist[craftingtableside] = "images\\craftingtableside.png";
+	texlist[crystaltorchtex] = "images\\crystaltorch.png";
+	texlist[crystaltorchtoptex] = "images\\crystaltorchtop.png";
+	texlist[mosstex] = "images\\moss.png";
+	texlist[ropetex] = "images\\rope.png";
+	texlist[lavatex] = "images\\lava.png";
+	texlist[obsidiantex] = "images\\obb.png";
 	texlist[chestfront] = "images\\chest.png";
 
 	texlist[chestside] = "images\\chestsides.png";

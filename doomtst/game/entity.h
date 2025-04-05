@@ -4,10 +4,10 @@
 #include "../util/vector3.h"
 #include "transform.h"
 #include <string>
-#define entsize 16*16*16
 #ifndef entity_HPP
 #define entity_HPP
 
+constexpr auto maxentities = 16 * 16 * 16;
 inline std::string str(const char* charlist) {
 
 	return 	std::string(charlist);
@@ -16,7 +16,7 @@ namespace entityname {
 	extern bool shouldspawnfinalboss;
 
 
-	extern int totalcount;
+	extern int entityalloccounter;
 
 	struct entity : gameobject::obj
 	{
@@ -32,8 +32,8 @@ namespace entityname {
 		Transform transform;
 		entity() {
 			
-amtcount = totalcount;
-			totalcount += 1;
+amtcount = entityalloccounter;
+			entityalloccounter += 1;
 			state = gameobject::beinginitiated;
 		type = gameobject::entity;
 
@@ -93,7 +93,7 @@ amtcount = totalcount;
 	};
 
 
-	void destroy(entity* ent,bool soft =true);
+	void destroy(entity* ent);
 	entityref createentity(v3::Vector3 ipos, const char* _name);
 	
 	void runrenderloop();

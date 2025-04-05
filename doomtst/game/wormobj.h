@@ -35,7 +35,7 @@ struct worm:gameobject::component
 			Transform& local = meshatpos->transform;
 			local.position += currtransform.getnormaldirection() * speed;
 
-			colatpos->collideroffset = currtransform.position;
+			
 			Transform shouldbetransform = currtransform;
           shouldbetransform.position-=currtransform.getnormaldirection()* magoffset;
          local.pitch = lerpfloat(local.pitch, shouldbetransform.pitch, lerpv);

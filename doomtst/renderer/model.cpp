@@ -48,3 +48,19 @@ void model::start()
 
 	}
 }
+
+void model::setmodelshader()
+{
+	glDepthFunc(GL_LESS);
+	glDepthMask(GL_TRUE);
+	glDisable(GL_CULL_FACE);
+	glEnable(GL_DEPTH_TEST);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glDisable(GL_BLEND);
+renderer::currshader = renderer::modelshader;
+	renderer::shaderlist[renderer::modelshader].attach();
+	renderer::setrenderingmatrixes();
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+
+	
+}

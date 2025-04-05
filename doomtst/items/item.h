@@ -3,6 +3,7 @@
 #include "../block/block.h"
 #include "../renderer/textrender.h"
 #include "../renderer/uibox.h"
+#include "../renderer/Window.h"
 #ifndef item_HPP
 #define item_HPP
 inline cptr<uiboxname::uibox> createitembox(const char* boxname) {
@@ -12,16 +13,12 @@ inline cptr<uiboxname::uibox> createitembox(const char* boxname) {
 enum itemid {
 
 	nullitemid = 0,
-
 	stoneitem = 1,
 	plankitem = 2,
-	
 	crystalitem =3,
 	metalroditem=4,
 	torchitem = 5,
-
 	sworditem =6,
-
 	pickitemid = 7,
 	craftingtableitem=8,
 	crystalpickitemid=9,
@@ -116,9 +113,10 @@ struct item
 	void updateui() {
 		if (state==beingheld)
 		{
-			itemui.itemsprite->box.center = userinput::normedmousepos;
+			//adjust for apwect ratio 
+			itemui.itemsprite->box.center = window::aspectAdjustedCoord( userinput::mousepos);
 		}
-		itemui.textvalue->center = itemui.itemsprite->box.center-itemui.itemsprite->box.scale*v2::Vector2(-1.4,.8)/1.14f;
+		itemui.textvalue->center = itemui.itemsprite->box.center-itemui.itemsprite->box.scale;
 		itemui.textvalue->value= amt;
 		if (itemtype==wear)
 		{

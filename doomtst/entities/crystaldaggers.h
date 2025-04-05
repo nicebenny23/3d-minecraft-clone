@@ -17,7 +17,7 @@ inline entityname::entityref spawndagger(v3::Vector3 pos,v3::Vector3 velocity,fl
     entityname::entityref refmodel = entityname::createentity(pos, "dagger");
   refmodel.toent()->addcomponent<model>()->add("objs\\crystaldagger.obj", "images\\crystaldagger.png");
    
-    refmodel->addcomponent<aabb::Collider>(zerov, unitscale / 2, true);
+    refmodel->addcomponent<aabb::Collider>(zerov, blockscale / 2, true);
 
     refmodel.toent()->addcomponent<dmgonhit>(3, "entity", 7);
     refmodel.toent()->addcomponent<destroyonhit>("");
@@ -27,7 +27,7 @@ inline entityname::entityref spawndagger(v3::Vector3 pos,v3::Vector3 velocity,fl
 
     refmodel.toent()->getcomponent<rigidbody>().gravityscale=gravscale;
     refmodel.toent()->getcomponent<rigidbody>().friction = .7f *gravscale/ .4f  ;
-    refmodel.toent()->transform.scale = unitscale / 2;
+    refmodel.toent()->transform.scale = blockscale / 2;
     return refmodel;
 }
 

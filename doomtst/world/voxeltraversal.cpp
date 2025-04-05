@@ -4,7 +4,7 @@ using	 namespace voxtra;
 using namespace grid;
 //by implementing inner search loop acuracy scales quadraticlly
 //aproxomate voxel traversel algorthm,the accuracy scales linearly with time complexity,
-bool isvoxelvalid(block* blk, gridtrav trav) {
+bool counttablevoxel(block* blk, gridtrav trav) {
 	if ((trav == countsolid || trav == countnormal) && !blk->attributes.solid)
 	{
 		return false;
@@ -20,88 +20,11 @@ bool isvoxelvalid(block* blk, gridtrav trav) {
 	}
 	return true;
 }
-voxtra::RayCollisionWithGrid  voxtra::travvox(ray nray, float acc, gridtrav trav )
-{
-	float maxdist = nray.length();
-	v3::Vector3 offdist = (nray.end - nray.start) / acc;
-	v3::Vector3 pos = nray.start;
-	Coord prevpos =grid::tovoxelspace( pos);
-	for (int i = 0; i < maxdist * acc; i++)
-	{
-		Coord curvox = grid::getvoxellocation(pos);
-		if (curvox != prevpos)
-		{
-
-			block* blk = grid::getobjatgrid(curvox);
-			if (blk != nullptr)
-			{
-
-				aabb::Collider* col = blk->getcomponentptr<aabb::Collider>();
-				if (col != nullptr)
-				{
-					if (isvoxelvalid(blk,trav))
-					{
-						aabb::aabbraycolinfo rayinfo = col->distanceonray(nray);
-						if (rayinfo.collided)
-						{
-
-
-							return voxtra::RayCollisionWithGrid(rayinfo.dist, &blk->getcomponent<aabb::Collider>(), rayinfo.intersectionpoint);
-						}
-					}
-				}
-					
-				
-			}
-		}
-		prevpos = getvoxellocation(pos);
-		pos += offdist;
-
-	}
-	return voxtra::RayCollisionWithGrid();
-}
-
-bool voxtra::raycolllideswithgrid(ray nray, float acc, gridtrav trav)
-{
-	float maxdist = nray.length();
-	v3::Vector3 offdist = (nray.end - nray.start) / acc;
-	v3::Vector3 pos = nray.start;
-	Coord prevpos =grid::tovoxelspace( pos);
-	for (int i = 0; i < maxdist * acc; i++)
-	{
-		Coord curvox = grid::getvoxellocation(pos);
-		if (curvox != prevpos)
-		{
-
-			block* blk = grid::getobjatgrid(curvox);
-			if (blk != nullptr)
-			{
-				
-				if (isvoxelvalid(blk, trav))
-				{
-				
-						aabb::aabbraycolinfo rayinfo = blk->getcomponent<aabb::Collider>().distanceonray(nray);
-						if (rayinfo.collided)
-						{
-
-
-							return true;
-						}
-					
-				}
-			}
-		}
-		prevpos = getvoxellocation(pos);
-		pos += offdist;
-
-	}
-	return false;
-}
 
 bool voxtra::Boxcollwithgrid(geometry::Box bx, gridtrav trav )
 {
 
-array<block*>& blks= 	grid::voxelinrange(bx);
+array<block*>& blks= grid::voxelinrange(bx);
 
 	for (int ind=0; ind < blks.length; ind++)
 	{
@@ -119,14 +42,14 @@ array<block*>& blks= 	grid::voxelinrange(bx);
 				aabb::Collider& blockcol = tocollide->getcomponent<aabb::Collider>();
 
 			
-				if (isvoxelvalid(tocollide, trav))
+				if (counttablevoxel(tocollide, trav))
 				{
 
 
-					bool collided = aabb::aabbboxintersect(bx, blockcol);
+				
 
 
-					if (collided)
+					if (aabb::aabbboxintersect(bx, blockcol))
 					{
 						blks.destroy();
 						return true;
@@ -144,41 +67,57 @@ array<block*>& blks= 	grid::voxelinrange(bx);
 
 }
 
-//todo remove this will not be needed as we will do a better function
-	block* voxtra::findprevblock(ray nray, float acc,gridtrav trav)
+voxtra::RayWorldIntersection  voxtra::travvox(ray nray, float acc, gridtrav trav)
+{
+	float maxdist = nray.length();
+	v3::Vector3 offdist = (nray.end - nray.start) / acc;
+	v3::Vector3 pos = nray.start;
+	Coord prevpos = grid::scaletoblocksize(pos);
+	for (int i = 0; i < maxdist * acc; i++)
 	{
-		float maxdist = nray.length();
-		v3::Vector3 offdist = (nray.end - nray.start) / acc;
-		v3::Vector3 pos = nray.start;
-		Coord prevpos = pos;
-	
-		for (int i = 0; i < maxdist * acc; i++)
+		Coord curvox = grid::getvoxellocation(pos);
+		if (curvox != prevpos)
 		{
-			Coord curvox = grid::getvoxellocation(pos);
-			if (curvox != prevpos)
+
+			block* blk = grid::getobjatgrid(curvox);
+			if (blk != nullptr)
 			{
-				
-				block* blk = grid::getobjatgrid(curvox);
-				if (blk != nullptr)
+
+				aabb::Collider* col = blk->getcomponentptr<aabb::Collider>();
+				if (col != nullptr)
 				{
-		
-					if (isvoxelvalid(blk, trav))
+					if (counttablevoxel(blk, trav))
 					{
-						aabb::aabbraycolinfo rayinfo = blk->getcomponent<aabb::Collider>().distanceonray(nray);
+						geointersect::boxraycollision rayinfo = geointersect::intersection(col->globalbox(), nray);
 						if (rayinfo.collided)
 						{
 
 
-							return grid::getobjatgrid(prevpos);
+							return voxtra::RayWorldIntersection(rayinfo.dist, &blk->getcomponent<aabb::Collider>(), rayinfo.intersectionpoint, nray);
 						}
 					}
 				}
 
+
 			}
-
-			prevpos = getvoxellocation(pos);
-			pos += offdist;
-
 		}
-		return nullptr;
+		prevpos = getvoxellocation(pos);
+		pos += offdist;
+
+	}
+	return voxtra::RayWorldIntersection();
+}
+
+//todo remove this will not be needed as we will do a better function
+//essentially goes to the next block and then goes backwords
+	block* voxtra::findprevblock(ray nray, float acc,gridtrav trav)
+	{
+		RayWorldIntersection inter=  travvox(nray, acc, trav);
+		if (!inter.intersected())
+		{
+			return nullptr;
+		}
+		Vector3 point = inter.colpoint;
+		point -= nray.dir() * .01f;
+	return	(grid::getobjatgrid(grid::getvoxellocation( point)));
 	}

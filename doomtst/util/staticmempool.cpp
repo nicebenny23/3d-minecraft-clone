@@ -22,7 +22,7 @@ namespace staticmempool {
 
     void staticpool::free(void* ptr) {
 
-        blockmetadata* node = getblockmetadata(ptr);
+        blockmetadata* node = GetMetaData(ptr);
         if (node->free)
         {
             Assert("cant free an already freed pointer");
@@ -36,12 +36,12 @@ namespace staticmempool {
 
         for (size_t i = 0; i < poolSize; i++) {
             void* block = nthblock(pool, i);
-            blockmetadata* node = getblockmetadata(block);
+            blockmetadata* node = GetMetaData(block);
             freeBlocks.push(node);
         }
     }
 
-    blockmetadata* staticpool::getblockmetadata(void* ptr) {
+    blockmetadata* staticpool::GetMetaData(void* ptr) {
         return reinterpret_cast<blockmetadata*>(reinterpret_cast<char*>(ptr) + blockSize);
     }
 

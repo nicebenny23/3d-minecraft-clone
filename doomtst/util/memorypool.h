@@ -53,12 +53,12 @@ public:
     void instantiate(int newSize,bool shouldgrow=false,bool instantiateelements=false)
     {
         if (size > 0) {
-            clear();
+            clearscreen();
         }
 
         size = newSize;
         allocatedamt = 0;
-        list = array<T*>(size, instantiateelements);
+        list = array<T*>(size);
         for (int i = 0; i < size; ++i)
         {
             list[i] = nullptr;
@@ -91,7 +91,7 @@ public:
 
   
     // Clear all elements and deallocate memory
-    void clear()
+    void clearscreen()
     {
         for (int i = 0; i < size; ++i)
         {

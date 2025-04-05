@@ -2,7 +2,7 @@
 
 array<navnode> getneighborslime(navnode& node)
 {
-    array<navnode> neighbors = array<navnode>(6,false);
+    array<navnode> neighbors = array<navnode>(6);
     for (int xind= -1; xind <= 1; xind++)
     {
         for (int yind = -1; yind <= 1; yind++)
@@ -29,7 +29,7 @@ array<navnode> getneighborslime(navnode& node)
                 v3::Vector3 neiborpoint = offset + node.pos;
                 Coord place = neiborpoint;
                 v3::Vector3 center = place + unitv / 2;
-                v3::Vector3 scale = unitscale * v3::Vector3(.99f, .99f, .99f) / 2;
+                v3::Vector3 scale = blockscale * v3::Vector3(.99f, .99f, .99f) / 2;
                 geometry::Box bx = geometry::Box(node.pos + unitv / 2, scale);
                 bool cango = true;
                 if (node.gcost > 1.2 && node.hcost >1.2)
@@ -41,7 +41,7 @@ array<navnode> getneighborslime(navnode& node)
 
 
                         Coord testblock = Coord(offset.x, offset.y - 1, offset.z);
-                        if (getobjatgrid(testblock + node.pos, false) == nullptr)
+                        //if (getobjatgrid(testblock + node.pos, false) == nullptr)
                         {
                             continue;
                         }

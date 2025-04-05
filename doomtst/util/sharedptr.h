@@ -1,5 +1,5 @@
 #pragma once
-#include "debug.h"
+#include "../debugger/debug.h"
 namespace sharedptr {
     template <typename T>
     class shared {
@@ -8,23 +8,25 @@ namespace sharedptr {
         unsigned int* count;   // Reference count
 
     public:
-        // Constructor
-        explicit shared(T* p)
-        {
-
-            ptr = p;
-            count = nullptr;
-            if (ptr != nullptr)
-            {
-                count = new unsigned int(1);
-                *count = 1;
-            }
-        }
-         shared()
+      
+        shared()
         {
 
             ptr = nullptr;
             count = nullptr;
+        }
+
+        // Constructor
+        explicit shared(T* pointer)
+        {
+           
+            ptr = pointer;
+            count = nullptr;
+            if (ptr != nullptr)
+            {
+                count = new unsigned int(1);
+               
+            }
         }
         // Copy constructor
         explicit shared(const shared<T>& other) {
@@ -34,16 +36,14 @@ namespace sharedptr {
                 (*count)++;
             }
         }
+        bool isvalid() {
+
+            return (count && ptr);
+        }
         void free() {
 
-            if (count == nullptr)
-            {
-                return;
-            }
-            if (ptr == nullptr)
-            {
-                return;
-            }
+            
+            if (isvalid())
             {
 
                 (*count)--;
@@ -53,16 +53,13 @@ namespace sharedptr {
                     destroy();
                 }
 
+
+                ptr = nullptr;
+                count = nullptr;
             }
-            ptr = nullptr;
-            count = nullptr;
         }
         // Move constructor
-        shared(shared<T>&& other) noexcept
-            : ptr(other.ptr), count(other.count) {
-            other.ptr = nullptr;
-            other.count = nullptr;
-        }
+      
 
         // Destructor
 
@@ -77,29 +74,17 @@ namespace sharedptr {
             }
             return *this;
         }
-
+        
         // Template Assignment Operator for Derived Types
         template <typename U>
         shared& operator=(const shared<U>& other) {
             static_assert(std::is_base_of<T, U>::value, "U must be derived from T");
-            reset();
             ptr= other.ptr;
+            count = other.count;
             return *this;
         }
 
-        // Move assignment operator
-        shared<T>& operator=(shared<T>&& other) noexcept {
-
-            if (this != &other) {
-                free();
-                ptr = other.ptr;
-                count = other.count;
-                other.ptr = nullptr;
-                other.count = nullptr;
-
-            }
-            return *this;
-        }
+      
         bool operator==(T* other) {
             return ptr == other;
         }
@@ -108,24 +93,17 @@ namespace sharedptr {
         }
         // Release the current object
         void destroy() {
-            if (ptr == nullptr)
+            if (!isvalid())
             {
                 Assert( "cant destory nullptr");
             }
-            if (count == nullptr)
-            {
-                int l = 1;
-                Assert("dant destroy null ptr");
+            if (*count != 0) {
+                Assert("element still exists,cant be deleted");
             }
-
-            if (*count == 0) {
                 delete ptr;
                 delete count;
-            }
-            else {
-
-                Assert("cant free null elem");
-            }
+            
+           
             ptr = nullptr;
             count = nullptr;
         }
@@ -156,15 +134,9 @@ namespace sharedptr {
             return ptr;
         }
 
-        // Check if the pointer is unique
-        bool unique() const {
-            return count && *count == 1;
-        }
 
         // Get the reference count
-        unsigned int  usecount() const {
-            return count ? *count : 0;
-        }
+      
     };
 
 }
@@ -175,7 +147,7 @@ namespace Cptr {
     struct cptr {
         cptr() {
             
-            exists = sharedptr::shared<bool>();
+            exists = sharedptr::shared<bool>(nullptr);
             
             pntr = nullptr;
         }
@@ -185,13 +157,12 @@ namespace Cptr {
         //unsafe function
         bool doesexist()
         {
-            if (exists != nullptr)
+            if (!exists.isvalid())
             {
-
-                bool doesexist = *exists;
-                return doesexist;
+                return false;
             }
-            return false;
+            return *exists;
+
         }
         //unsafe function
         void updatestate() {
@@ -205,24 +176,32 @@ namespace Cptr {
         }
 
     public:
-
-        //safe
-        void  destroy() {
-            updatestate();
-            if (pntr == nullptr)
+        explicit cptr(T* p)
+        {
+            pntr = p;
+            if (pntr != nullptr)
             {
-                Assert("cant delete null ptrs");
+
+                exists = sharedptr::shared< bool>(new bool(true));
             }
             else {
-                delete pntr;
-                pntr = nullptr;
-                if (exists != nullptr)
-                {
-                    *exists = false;
-                    exists.free();
-                }
+                exists = sharedptr::shared<bool>(nullptr);
             }
         }
+
+        // Template Assignment Operator for Derived Types
+        template <typename U>
+        void set(cptr<U>& other) {
+            static_assert(std::is_base_of<T, U>::value, "U must be derived from T");
+            exists = other.exists;
+            pntr = other.ptr();
+        }
+        //safe
+        cptr(const cptr<T>& other) {
+            exists = other.exists;
+            pntr = other.pntr;
+        }
+
 
 
         //safe
@@ -231,6 +210,34 @@ namespace Cptr {
             return pntr;
         };
 
+        //safe
+        void  free() {
+            updatestate();
+            if (pntr == nullptr)
+            {
+                Assert("cant delete a nullptr");
+            }
+            //no need to check if exists as if it does not then the pointer becomes nullptr;
+            else {
+                delete pntr;
+                pntr = nullptr;
+             
+                *exists = false;
+                exists.free();
+                
+            }
+        }
+
+
+        T*& operator->() {
+
+            return ptr();
+
+        }
+        //safe
+        T& operator*() {
+            return *ptr();
+        }
 
         //safe
         bool operator==(T* other) {
@@ -242,38 +249,17 @@ namespace Cptr {
 
             return ptr() == other.ptr();
         }
-        //safe
-        T*& operator->()  {
+        bool operator!=(T* other) {
 
-            return ptr();
-
+            return !(*this == other);
         }
         //safe
-        T& operator*() {
-            return *ptr();
-        }
-        //safe
-        explicit cptr(T* p)
-        {
-            exists = sharedptr::shared< bool>(new bool);
-            *exists = true;
-            pntr = p;
+        bool operator!=(cptr<T>& other) {
 
+            return  !(*this == other);
         }
 
-        // Template Assignment Operator for Derived Types
-        template <typename U>
-        void cset(cptr<U>& other) {
-            static_assert(std::is_base_of<T, U>::value, "U must be derived from T");
-            exists = other.exists;
-            pntr= other.ptr();
-        }
-        //safe
-        cptr(const cptr<T>& other) {
-            exists = other.exists;
-            pntr = other.pntr;
-        }
-
+    
     };
 
 }

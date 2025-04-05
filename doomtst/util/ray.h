@@ -8,26 +8,26 @@ struct ray
 	v3::Vector3 end;
 	v3::Vector3 dir() {
 
-		return (end - start) / v3::distance(end, start);
+		return (end - start) / v3::dist(end, start);
 	}
 	float length() {
 
-		return distance(start, end);
+		return dist(start, end);
 	}
 inline	float distancefromray(v3::Vector3 vector) {
-		Vector3 normed  = (end-start) / distance(end,start);
+		Vector3 normed  = (end-start) / dist(end,start);
 		Vector3 aoffset = vector-start;
 		
-		double t = dotproduct(aoffset,normed);
+		double t = dot(aoffset,normed);
 		Vector3 position  = start +  normed*t;
-		return distance(vector,position);
+		return dist(vector,position);
 	}
-inline	Vector3 pointonline(v3::Vector3 vector){
+inline	Vector3 projectpoint(v3::Vector3 vector){
 	
-			Vector3 normed = (end - start) / distance(end, start);
+			Vector3 normed = (end - start) / dist(end, start);
 			Vector3 aoffset = vector - start;
 			
-			float t = dotproduct(aoffset, normed);
+			float t = dot(aoffset, normed);
 			Vector3 position = start + normed * t;
 			
 			return position;

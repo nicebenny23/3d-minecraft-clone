@@ -33,7 +33,7 @@ struct soundbuf {
    
     void fillbuffer() {
        
-        alBufferData(id, format, data.getdata(), data.length, frequency);
+        alBufferData(id, format, data.list, data.length, frequency);
         if (alGetError() != AL_NO_ERROR) {
             Assert("alBufferData error");
         }

@@ -9,9 +9,9 @@ inline void treestoneinit(blockname::block* blk) {
 	blk->attributes.solid = true;
 	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
-	blk->mesh.scale = blockname::unitscale;
+	blk->mesh.box.scale = blockname::blockscale;
 
-	blk->createaabb(false);
+	blk->createdefaultaabb(false);
 	blk->addcomponent<loottable>();
 	blk->mininglevel = .9;
 	blk->minedfastwithpick = false;

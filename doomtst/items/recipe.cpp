@@ -267,7 +267,7 @@ currecipe = nullptr;
              if (linenumber == maxlinesize)
              {
 
-                 irecipe newrecipe = irecipe(recipearr.getdata(), recipearr[recipearr.length - 1], xsize, ysize);
+                 irecipe newrecipe = irecipe(recipearr.list, recipearr[recipearr.length - 1], xsize, ysize);
                  recipelist.append(newrecipe);
                  recipearr.destroy();
                  linenumber = 0;

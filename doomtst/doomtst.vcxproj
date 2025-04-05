@@ -121,9 +121,10 @@
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -148,35 +149,47 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="block\liquid.cpp" />
+    <ClCompile Include="debugger\console.cpp" />
+    <ClCompile Include="debugger\debug.cpp" />
     <ClCompile Include="entities\slime.cpp" />
     <ClCompile Include="game\entity.cpp" />
     <ClCompile Include="game\navigation.cpp" />
+    <ClCompile Include="game\Settings.cpp" />
     <ClCompile Include="game\transform.cpp" />
+    <ClCompile Include="imgui\imgui.cpp" />
+    <ClCompile Include="imgui\imgui_demo.cpp" />
+    <ClCompile Include="imgui\imgui_draw.cpp" />
+    <ClCompile Include="imgui\imgui_impl_glfw.cpp" />
+    <ClCompile Include="imgui\imgui_impl_opengl3.cpp" />
+    <ClCompile Include="imgui\imgui_tables.cpp" />
+    <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="items\itemslot.cpp" />
     <ClCompile Include="items\item.cpp" />
     <ClCompile Include="items\Container.cpp" />
     <ClCompile Include="items\menu.cpp" />
     <ClCompile Include="items\recipe.cpp" />
     <ClCompile Include="player\playermodification.cpp" />
+    <ClCompile Include="renderer\guirender.cpp" />
     <ClCompile Include="util\algorthm.cpp" />
     <ClCompile Include="renderer\mesh.cpp" />
     <ClCompile Include="game\particles.cpp" />
     <ClCompile Include="player\player.cpp" />
     <ClCompile Include="player\playerinventory.cpp" />
     <ClCompile Include="renderer\model.cpp" />
-    <ClCompile Include="renderer\Source1.cpp" />
     <ClCompile Include="renderer\textrender.cpp" />
     <ClCompile Include="renderer\ui.cpp" />
     <ClCompile Include="sound\sound.cpp" />
     <ClCompile Include="sound\soundbuf.cpp" />
     <ClCompile Include="sound\soundlistener.cpp" />
     <ClCompile Include="sound\soundsource.cpp" />
+    <ClCompile Include="util\chainpool.cpp" />
     <ClCompile Include="util\dynamicmempool.cpp" />
     <ClCompile Include="util\fileloader.cpp" />
     <ClCompile Include="game\aabb.cpp" />
     <ClCompile Include="block\block.cpp" />
     <ClCompile Include="renderer\uibox.cpp" />
     <ClCompile Include="util\geometry.cpp" />
+    <ClCompile Include="util\intersection.cpp" />
     <ClCompile Include="util\staticmempool.cpp" />
     <ClCompile Include="util\time.cpp" />
     <ClCompile Include="world\chunkload.cpp" />
@@ -187,7 +200,6 @@
     <ClCompile Include="renderer\chunkrender.cpp" />
     <ClCompile Include="game\collision.cpp" />
     <ClCompile Include="game\component.cpp" />
-    <ClCompile Include="util\debug.cpp" />
     <ClCompile Include="game\gameobject.cpp" />
     <ClCompile Include="external\glad.c" />
     <ClCompile Include="world\grid.cpp" />
@@ -225,6 +237,8 @@
     <ClInclude Include="block\torch.h" />
     <ClInclude Include="block\water.h" />
     <ClInclude Include="block\wood.h" />
+    <ClInclude Include="debugger\console.h" />
+    <ClInclude Include="debugger\debug.h" />
     <ClInclude Include="entities\antifreezeboss.h" />
     <ClInclude Include="entities\crystaldaggers.h" />
     <ClInclude Include="entities\onhit.h" />
@@ -237,8 +251,18 @@
     <ClInclude Include="game\entityutil.h" />
     <ClInclude Include="game\game.h" />
     <ClInclude Include="game\navigation.h" />
+    <ClInclude Include="game\Settings.h" />
     <ClInclude Include="game\transform.h" />
     <ClInclude Include="game\wormobj.h" />
+    <ClInclude Include="imgui\imconfig.h" />
+    <ClInclude Include="imgui\imgui.h" />
+    <ClInclude Include="imgui\imgui_impl_glfw.h" />
+    <ClInclude Include="imgui\imgui_impl_opengl3.h" />
+    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h" />
+    <ClInclude Include="imgui\imgui_internal.h" />
+    <ClInclude Include="imgui\imstb_rectpack.h" />
+    <ClInclude Include="imgui\imstb_textedit.h" />
+    <ClInclude Include="imgui\imstb_truetype.h" />
     <ClInclude Include="items\airitem.h" />
     <ClInclude Include="items\altaritem.h" />
     <ClInclude Include="items\chestitem.h" />
@@ -278,14 +302,15 @@
     <ClInclude Include="items\stoneitem.h" />
     <ClInclude Include="items\sworditem.h" />
     <ClInclude Include="items\torchitem.h" />
+    <ClInclude Include="player\cameracomp.h" />
     <ClInclude Include="player\daggerthrow.h" />
     <ClInclude Include="player\playerattack.h" />
     <ClInclude Include="player\playerclimb.h" />
     <ClInclude Include="player\playereat.h" />
     <ClInclude Include="player\playerplace.h" />
     <ClInclude Include="player\playertpsword.h" />
-    <ClInclude Include="renderer\api.h" />
     <ClInclude Include="renderer\grandrenderer.h" />
+    <ClInclude Include="renderer\guirender.h" />
     <ClInclude Include="renderer\mesh.h" />
     <ClInclude Include="renderer\model.h" />
     <ClInclude Include="game\particles.h" />
@@ -300,6 +325,8 @@
     <ClInclude Include="sound\soundfile.h" />
     <ClInclude Include="sound\soundlistener.h" />
     <ClInclude Include="sound\soundsource.h" />
+    <ClInclude Include="util\chainpool.h" />
+    <ClInclude Include="util\cptrbuf.h" />
     <ClInclude Include="util\dynamicmempool.h" />
     <ClInclude Include="util\geometry.h" />
     <ClInclude Include="util\fileloader.h" />
@@ -307,9 +334,12 @@
     <ClInclude Include="player\playermodification.h" />
     <ClInclude Include="game\rigidbody.h" />
     <ClInclude Include="renderer\uibox.h" />
+    <ClInclude Include="util\intersection.h" />
     <ClInclude Include="util\memorypool.h" />
     <ClInclude Include="util\sharedptr.h" />
+    <ClInclude Include="util\stack.h" />
     <ClInclude Include="util\staticmempool.h" />
+    <ClInclude Include="util\stbiload.h" />
     <ClInclude Include="world\chunkload.h" />
     <ClInclude Include="world\managegrid.h" />
     <ClInclude Include="util\queue.h" />
@@ -321,7 +351,6 @@
     <ClInclude Include="renderer\chunkrender.h" />
     <ClInclude Include="game\collision.h" />
     <ClInclude Include="game\component.h" />
-    <ClInclude Include="util\debug.h" />
     <ClInclude Include="util\dir.h" />
     <ClInclude Include="util\dynamicarray.h" />
     <ClInclude Include="game\entity.h" />
@@ -344,6 +373,7 @@
     <ClInclude Include="world\tick.h" />
     <ClInclude Include="world\voxeltraversal.h" />
     <ClInclude Include="renderer\Window.h" />
+    <ClInclude Include="world\worldintersection.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="items\metalrod.h" />

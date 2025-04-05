@@ -5,7 +5,7 @@
 
 constexpr int chunklength = 16;
 constexpr int chunkaxis =chunklength/blocksize;
-constexpr auto chunksize = chunkaxis*chunkaxis*chunkaxis;
+constexpr int chunksize = chunkaxis*chunkaxis*chunkaxis;
 using namespace blockname;
 namespace Chunk {
 
@@ -52,7 +52,7 @@ namespace Chunk {
 		block* blockbuf;
 		void destroy();
 		float cameradist() {
-			return 	 distance(center(), camera::campos);
+			return 	 dist(center(), camera::campos);
 		}
 		bool operator<(chunk& b) {
 			return b.cameradist() < cameradist();

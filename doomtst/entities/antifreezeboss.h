@@ -34,12 +34,12 @@ struct firedaggerfinalboss :gameobject::component {
             currtransform.orient(pos);
             currtransform.position += currtransform.getnormaldirection() * .02f;
 
-            if (random() < timename::smoothdt * 1 / 20.f) {
+            if (random() < timename::dt * 1 / 20.f) {
                 state = shooting;
                 timetillshoot = .1;
                 shotsleft = 11;
             }
-            if (random() > 1-timename::smoothdt * 1 / 20.f) {
+            if (random() > 1-timename::dt * 1 / 20.f) {
                 state = ramming;
                 timetillshoot = 1.5;
      
@@ -65,7 +65,7 @@ struct firedaggerfinalboss :gameobject::component {
             {
                 state = following;
             }
-            timetillshoot -= timename::smoothdt;
+            timetillshoot -= timename::dt;
         }
         if (state == ramming)
         {
@@ -75,7 +75,7 @@ struct firedaggerfinalboss :gameobject::component {
             //currtransform.position = pos;
             currtransform.orient(pos);
             currtransform.position += currtransform.getnormaldirection() * timename::dt*9;
-            timetillshoot -= timename::smoothdt;
+            timetillshoot -= timename::dt;
             if (timetillshoot<0)
             {
                 state = following;
@@ -101,9 +101,7 @@ inline entityname::entityref createfinalboss(v3::Vector3 pos) {
     for (int i = 0; i <160; i++)
     {
         refmodel.toent()->getcomponent<model>().add("objs\\finalboss.obj", "images\\bosstex.png", Vector3(i, 0, 0)+cpos);
-        refmodel.toent()->addcomponent<aabb::Collider>(Vector3(i,0,0)+cpos, unitscale, true)->isunmovable=true;
-
-        refmodel.toent()->getcomponent<model>()[i].transform.yaw = 0;
+       refmodel.toent()->getcomponent<model>()[i].transform.yaw = 0;
     }
     refmodel.toent()->addcomponent<firedaggerfinalboss>();
     refmodel.toent()->addcomponent<estate>(100, false);

@@ -9,10 +9,10 @@ inline void crystaltorchinit(blockname::block* blk) {
 	blk->attributes.transparent = true;
 	blk->emitedlight = 15;
 	blk->lightval = 15;
-	blk->mesh.scale = v3::Vector3(1 / 8.f, .375, 1 / 8.f);
+	blk->mesh.box.scale = v3::Vector3(1 / 8.f, .375, 1 / 8.f);
 	blk->mesh.attachindirection();
 
-	blk->createaabb(false);
+	blk->createdefaultaabb(false);
 	blk->mininglevel = .25f;
 	blk->minedfastwithpick = true;
 	blk->addcomponent<loottable>();

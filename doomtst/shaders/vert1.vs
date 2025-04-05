@@ -8,16 +8,17 @@ out vec3 Color;
 
 out vec3 fragcoord;
 
-
+uniform float aspectratio;
 uniform mat4 view;
 uniform mat4 projection;
-uniform vec3 aColor;
+
 void main()
 {
    
 
       vec4 pos =  projection * view * vec4(aPos.x,aPos.y,aPos.z, 1.0);
-pos.y=pos.y*1.77;
+
+pos.y=pos.y*aspectratio;
 
 gl_Position=pos;
 

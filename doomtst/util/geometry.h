@@ -9,6 +9,7 @@ using namespace v3;
 
 namespace geometry {
 
+	
 	struct Box {
 		Vector3 center;
 		Vector3 scale;
@@ -32,6 +33,22 @@ namespace geometry {
 			}
 			return false;
 		}
+		bool pointinbox(v3::Vector3 pos)
+		{
+			pos -= center;
+			if (abs(pos.x) <= scale.x)
+			{
+				if (abs(pos.y) <= scale.y)
+				{
+					if (abs(pos.z) <= scale.z)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
 		Box(Vector3 cent, Vector3 scl)
 			: center(cent), scale(scl) {}
 
@@ -78,7 +95,7 @@ namespace geometry {
 
 
 		float distanceToPoint(const Vector3& p) const {
-			return dotproduct(normal, p - point);
+			return dot(normal, p - point);
 		}
 	};
 
@@ -87,7 +104,7 @@ namespace geometry {
 		Vector3 center;
 
 		sphere(Box bx)
-			: radius(magnitude(bx.scale)), center(bx.center) {}
+			: radius(mag(bx.scale)), center(bx.center) {}
 
 		bool isonoraboveplane(const Plane& plane) {
 			return plane.distanceToPoint(center) > -radius;
@@ -101,22 +118,24 @@ namespace geometry {
 		cone(const ray newray, float coneslope)
 			: dirray(newray), slope(coneslope) {}
 
-		float distancefrompoint(Vector3 point) {
-			// Calculate the closest point on the cone's axis
-			Vector3 pointonray = dirray.pointonline(point);
-			float pointdist = distance(point, pointonray);
-			float slp = distance(dirray.start, pointonray);
+		
 
-			// Calculate the radius at the projection point
-			double currentRadius =double( slope * slp);
+		float distanceFromPoint(Vector3 samplePoint) {
+			// Project the sample point onto the cone's central axis (ray)
+			Vector3 axisProjection = dirray.projectpoint(samplePoint);
 
-			// Distance from the point to the cone's surface
-			double distanceToSurface = pointdist - currentRadius;
-			return distanceToSurface * slp / sqrt(currentRadius * currentRadius + slp * slp);
-		}
+			// Compute the perpendicular distance from the sample point to the cone's axis.
+			float distanceToAxis = dist(samplePoint, axisProjection);
 
-		bool intersectssphere(sphere sph) {
-			return distancefrompoint(sph.center) <= sph.radius;
+			// Determine how far along the axis (from the vertex) the projection lies.
+			float distanceAlongAxis = dist(dirray.start, axisProjection);
+
+			// At a distance 'distanceAlongAxis' along the axis, the cone's expected radius is:
+			//     expectedRadius = slope * distanceAlongAxis.
+			// The difference (distanceToAxis - expectedRadius) gives the radial offset from the cone's surface.
+			// We divide by sqrt(1 + slope^2) to convert this radial difference into the true perpendicular distance
+			// to the cone's surface (accounting for the cone's slanted shape).
+			return (distanceToAxis - slope * distanceAlongAxis) / (sqrt(1 + slope * slope));
 		}
 	};
 
@@ -134,68 +153,32 @@ namespace geometry {
 		}
 		return false;
 	}
+inline 	v3::Vector3 collidebox(Box p1, Box p2)
+	{
+		int sgnx = p1.center.x > p2.center.x ? 1 : -1;
+		int sgny = p1.center.y > p2.center.y ? 1 : -1;
+		int sgnz = p1.center.z > p2.center.z ? 1 : -1;
+		if (geometry::boxboxintersect(p1, p2)) {
 
-	inline bool Box::rayintersects(ray fray) {
-		Vector3 dir = fray.end - fray.start;
-
-		float xval1 = (center.x - scale.x - fray.start.x) / dir.x;
-		float xval2 = (center.x + scale.x - fray.start.x) / dir.x;
-		float maxxval = fmax(xval1, xval2);
-		float minxval = fmin(xval1, xval2);
-
-		float yval1 = (center.y - scale.y - fray.start.y) / dir.y;
-		float yval2 = (center.y + scale.y - fray.start.y) / dir.y;
-		float maxyval = fmax(yval1, yval2);
-		float minyval = fmin(yval1, yval2);
-
-		float zval1 = (center.z - scale.z - fray.start.z) / dir.z;
-		float zval2 = (center.z + scale.z - fray.start.z) / dir.z;
-		float maxzval = fmax(zval1, zval2);
-		float minzval = fmin(zval1, zval2);
-
-		float actualminval = fmax(fmax(minxval, minyval), minzval);
-		float actualmaxval = fmin(fmin(maxxval, maxyval), maxzval);
-
-		return actualminval < actualmaxval && actualminval > 0;
-	}
-
-	inline  v3::Vector3 intersectionpoint (Box box,ray fray) {
-		
-			v3::Vector3 dir = fray.end - fray.start;
-
-			//not actually max
-			float xval1 = (box.center.x - box.scale.x - fray.start.x) / dir.x;
-			float xval2 = (box.center.x + box.scale.x - fray.start.x) / dir.x;
-			float maxxval = fmax(xval1, xval2);
-			float minxval = fmin(xval1, xval2);
-			float yval1 = (box.center.y - box.scale.y - fray.start.y) / dir.y;
-			float yval2 = (box.center.y + box.scale.y - fray.start.y) / dir.y;
-			float maxyval = fmax(yval1, yval2);
-			float minyval = fmin(yval1, yval2);
-			float zval1 = (box.center.z - box.scale.z - fray.start.z) / dir.z;
-			float zval2 = (box.center.z + box.scale.z - fray.start.z) / dir.z;
-			float maxzval = fmax(zval1, zval2);
-			float minzval = fmin(zval1, zval2);
-			float actualminval = fmax(fmax(minxval, minyval), minzval);
-			float actualmaxval = fmin(fmin(maxxval, maxyval), maxzval);
-
-			if (actualminval < actualmaxval)
-			{
-				float closestt = actualminval;
-				if (0 < actualminval)
+			float xdepth = sgnx * (p1.scale.x + p2.scale.x) - (p1.center.x - p2.center.x);
+			float ydepth = sgny * (p1.scale.y + p2.scale.y) - (p1.center.y - p2.center.y);
+			float zdepth = sgnz * (p1.scale.z + p2.scale.z) - (p1.center.z - p2.center.z);
+			if (abs(xdepth) < abs(ydepth)) {
+				if (abs(xdepth) < abs(zdepth))
 				{
-				return dir* closestt + fray.start;
-
+					return v3::Vector3(xdepth, 0, 0);
 				}
-
+				return v3::Vector3(0, 0, zdepth);
 			}
-			
-
-			return Vector3(NaNf,NaNf,NaNf);
-
+			if (abs(ydepth) < abs(zdepth))
+			{
+				return v3::Vector3(0, ydepth, 0);
+			}
+			return v3::Vector3(0, 0, zdepth);
 		}
-	
+		return v3::zerov;
 
+	}
 }
 
 #endif // GEOMETRY_HPP

@@ -48,8 +48,8 @@ inline void sandinit(blockname::block* blk) {
     blk->attributes.transparent = false;
     blk->emitedlight = 0;
     blk->mininglevel = .5f;
-    blk->mesh.scale = blockname::unitscale;
-    blk->createaabb();
+    blk->mesh.box.scale = blockname::blockscale;
+    blk->createdefaultaabb();
     blk->addcomponent<sandfall>();
     
      blk->addcomponent<loottable>()->addelem(sanditem,1, false);

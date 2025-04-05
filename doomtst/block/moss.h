@@ -11,8 +11,8 @@ inline void mossinit(blockname::block* blk) {
 	blk->emitedlight = 0;
 	blk->minedfastwithpick = 1;
 	blk->mininglevel = .3f;
-	blk->mesh.scale = blockname::unitscale;
-	blk->createaabb();
+	blk->mesh.box.scale = blockname::blockscale;
+	blk->createdefaultaabb();
 	blk->addcomponent<loottable>()->addelem(mossitem, 1,true);
 
 	blk->minedfastwithpick = false;

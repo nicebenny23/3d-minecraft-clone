@@ -33,7 +33,7 @@ void particleemiter::update()
 			{
 
 
-				if (particlearray[i]->getcomponent<particle>().endtime < timename::gametime)
+				if (particlearray[i]->getcomponent<particle>().endtime < timename::realtime)
 				{
 					entityname::entity* todelete = particlearray[i];
 					entityname::destroy(todelete);
@@ -55,7 +55,7 @@ void particleemiter::update()
 			 {
 				 entityname::entityref newparticle = entityname::createentity(position, "");
 				 
-				 newparticle.toent()->addcomponent<particle>()->endtime= timename::gametime+particlelifetime;
+				 newparticle.toent()->addcomponent<particle>()->endtime= timename::realtime+particlelifetime;
 				 newparticle->getcomponent<particle>().ind = i;
 				 newparticle->getcomponent<particle>().emit = this;
 				 (*particleinit)(newparticle.toent());
@@ -130,7 +130,7 @@ void initbaseparticle(entityname::entity* newent) {
 	newent->transform.position += Vector3(random(), 1, random())/10;
 	newent->addcomponent<aabb::Collider>(newent->transform.position, unitv / 9, true);
 	newent->addcomponent<rigidbody>(1,.1)->velocity=Vector3(random(),1,random())*2;
-	newent->transform.scale = unitscale / 22;
+	newent->transform.scale = blockscale / 22;
 	
 }
 particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) (entityname::entity*),texture newtex)

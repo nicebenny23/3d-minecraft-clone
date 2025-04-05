@@ -5,7 +5,7 @@
 using namespace blockname;
 Vector3 face::center()
 {
-	return dirfromint(facenum) * mesh->scale + mesh->pos;
+	return dirfromint(facenum) * mesh->box.scale + mesh->box.center;
 }
 void face::calccameradist() {
 	cameradist = 128 * dist2((*this).center(), Vector3(camera::campos));
@@ -18,34 +18,35 @@ void blockmesh::setfaces(int leftface, int rightface, int upface, int downface, 
 //3,down
 //4,front
 //5,back
-	faces[2] = face(upface, 2, this);
-	faces[3] = face(downface, 3, this);
+	
+	faces[2].create(upface, 2, this);
+	faces[3].create(downface, 3, this);
 
-	switch (direction)
+	switch (blk->mesh.direction)
 	{
 	case west2d:
-		faces[0] = face(frontface, 0, this);
-		faces[1] = face(backface, 1, this);
-		faces[4] = face(rightface, 4, this);
-		faces[5] = face(leftface, 5, this);
+		faces[0].create(frontface, 0, this);
+		faces[1].create(backface, 1, this);
+		faces[4].create(rightface, 4, this);
+		faces[5].create(leftface, 5, this);
 		break;
 	case east2d:
-		faces[0] = face(backface, 0, this);
-		faces[1] = face(frontface, 1, this);
-		faces[4] = face(leftface, 4, this);
-		faces[5] = face(rightface, 5, this);
+		faces[0].create(backface, 0, this);
+		faces[1].create(frontface, 1, this);
+		faces[4].create(leftface, 4, this);
+		faces[5].create(rightface, 5, this);
 		break;
 	case front2d:
-		faces[0] = face(leftface, 0, this);
-		faces[1] = face(rightface, 1, this);
-		faces[4] = face(frontface, 4, this);
-		faces[5] = face(backface, 5, this);
+		faces[0].create(leftface, 0, this);
+		faces[1].create(rightface, 1, this);
+		faces[4].create(frontface, 4, this);
+		faces[5].create(backface, 5, this);
 		break;
 	case back2d:
-		faces[0] = face(rightface, 0, this);
-		faces[1] = face(leftface, 1, this);
-		faces[4] = face(backface, 4, this);
-		faces[5] = face(frontface, 5, this);
+		faces[0].create(rightface, 0, this);
+		faces[1].create(leftface, 1, this);
+		faces[4].create(backface, 4, this);
+		faces[5].create(frontface, 5, this);
 		break;
 
 	}
@@ -60,96 +61,62 @@ void blockmesh::setfaces(int leftface, int rightface, int upface, int downface, 
 
 face& blockmesh::operator[](int index)
 {
-
-	switch (index)
+	if (index<6&&0<=index)
 	{
-	case 0:
-
-	case 1:
-	case 2:
-	case 3:
-	case 4:
-	case 5:
 		return faces[index];
-		break;
-	default:
-		Assert("index too high/low for faces");
-
-		break;
-
 	}
+
+	
+		Assert("index too high/low for faces");
 
 }
 
 void blockname::blockmesh::attachindirection()
 {
 
-	Vector3 maxpos = blk->center() + scale * dirfromint(attachdir);
-	Vector3 blkpos = dirfromint(attachdir)*blocksize / 2 + blk->center();
-	pos += blkpos - maxpos;
+	Vector3 maxpos = blk->center() + box.scale * dirfromint(blk->mesh.attachdir);
+	Vector3 blkpos = dirfromint(blk->mesh.attachdir)*blocksize / 2 + blk->center();
+	box.center += blkpos - maxpos;
 }
 face& blockname::block::operator[](int index)
 {
 	return (mesh)[index];
 }
 
-void blockname::initblockmesh(blockname::block* blk, Vector3 pos, Vector3 scale) {
-
-
-
-
-	blk->mesh = blockmesh();
-	blk->mesh.scale = scale;
-	blk->mesh.pos = blk->center();
-	blk->mesh.blk = blk;
-	blk->mesh.direction = front2d;
-	blk->mesh.attachdir = 0;
+blockname::blockmesh::blockmesh(block* parent, Vector3 blkscale)
+{
+	blk = parent;
 	
-	
-	
+
+	box.scale = blkscale;
+	box.center = parent->center();
+
 
 }
-//initiates block as gameobject;
-blockname::block::block(v3::Coord location, int blockid)
+
+void blockname::block::create(v3::Coord location, int blockid, byte blkattachface, byte blkdirection)
 {
 
 	state = gameobject::beinginitiated;
 	emitedlight = 0;
-	
-	//componentlist = (array<gameobject::component*>(2,false));
+
 	type = gameobject::block;
 	mininglevel = 0;
 	id = blockid;
 	pos = location;
-	
-	
+
+
 	
 	attributes.transparent = false;
 	attributes.solid = true;
 
-
+	mesh = blockname::blockmesh(this, blockscale);
+	mesh.direction = blkdirection;
+	mesh.attachdir = blkattachface;
 }
 
-blockname::block::block()
+void blockname::block::createdefaultaabb(bool effector)
 {
-
-	state = gameobject::beinginitiated;
-	attributes.transparent = false;
-	attributes.solid = false;
-
-	id = -1;
-	pos = v3::zeroiv;
-	type = gameobject::block;
-
+	addcomponent<aabb::Collider>(zerov, unitscale, false,effector);
 
 }
-
-
-
-void blockname::block::createaabb(bool effector)
-{
-	addcomponent<aabb::Collider>(this->mesh.pos, this->mesh.scale, false,effector);
-
-}
-
-

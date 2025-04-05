@@ -25,7 +25,7 @@ struct slimemove :gameobject::component {
     void update() {
 
 
-        timesincejump -= timename::smoothdt;
+        timesincejump -= timename::dt;
         Vector3 pos = objutil::toent(owner ).transform.position;
         v3::Vector3 headed = owner->getcomponent<navigator>().headed;
         
@@ -46,12 +46,12 @@ struct slimemove :gameobject::component {
            if (ctype)
            {
 
-               objutil::toent(owner).transform.position += normal(gotopos) * timename::smoothdt*2;
+               objutil::toent(owner).transform.position += normal(gotopos) * timename::dt*2;
 
            }
            else {
 
-               objutil::toent(owner).transform.position += normal(gotopos) * timename::smoothdt * 2;
+               objutil::toent(owner).transform.position += normal(gotopos) * timename::dt * 2;
 
                }
            }
@@ -81,7 +81,7 @@ inline entityname::entityref createslime(v3::Vector3 pos,bool type) {
 
     }
     refmodel.toent()->addcomponent<estate>(hp, true);
-    refmodel.toent()->addcomponent<aabb::Collider>(zerov, unitscale/2, true);
+    refmodel.toent()->addcomponent<aabb::Collider>(zerov, blockscale/2, true);
     float dmg = 3;
     if (type == true) {
         dmg = 5;
@@ -93,7 +93,7 @@ inline entityname::entityref createslime(v3::Vector3 pos,bool type) {
     refmodel.toent()->addcomponent<slimemove>();
 
     refmodel->getcomponent<slimemove>().ctype = type;
-    refmodel.toent()->transform.scale = unitscale/2;
+    refmodel.toent()->transform.scale = blockscale/2;
     return refmodel;
 }
 

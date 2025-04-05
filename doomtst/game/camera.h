@@ -8,11 +8,11 @@ namespace camera {
 	extern v3::Vector3 frontvec;
 	extern v3::Vector3 upvec;
 	extern v3::Vector3 rightvec;
-	extern glm::vec3 campos;
+	extern v3::Vector3 campos;
 	v3::Vector3 direction();
 	void initilize();
 	void updatetoplayer();
-	void sendoffviewmatrix();
+	void setviewmatrix();
 	void cameraupdate();
 }
 

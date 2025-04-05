@@ -17,9 +17,9 @@ namespace soundname {
     class alwrapper {
     public:
         listener listen;
-        array<cptr<sound>> soundlist;
+        array<cptr<sound>,true> soundlist;
         alwrapper() {
-            soundlist = array<cptr<sound>>(400, true);
+            soundlist = array<cptr<sound>,true>(400);
             for (int i = 0; i < 400; i++)
             {
                 soundlist[i] = cptr<sound>(nullptr);

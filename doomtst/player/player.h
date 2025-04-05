@@ -6,6 +6,7 @@
 #include "../game/entitystate.h"
 #include"playerhealth.h"
 #include "playertpsword.h"
+#include "cameracomp.h"
 // settings
 #ifndef player_HPP
 #define player_HPP

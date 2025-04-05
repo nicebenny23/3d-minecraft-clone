@@ -5,78 +5,56 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <iostream>
+void shaderstatuscheck(int id, GLint statustype,const char* name) {
+    GLint shadersucsess;
+    char infolog[512];
+    glGetShaderiv(id, statustype, &shadersucsess);
+    if (!shadersucsess)
+    {
 
+        glGetShaderInfoLog(id, 512, NULL, infolog);
+        std::cout << name;
+        Assert(infolog);
+    }
+}
+int compileshader(const char* name, GLint shadertype)
+{
+    std::ifstream shaderstream(name);
+    if (shaderstream.fail())
+    {
+        std::cout<<"shader filestream error"<<"\n" <<"could not find shader named " << name;
+        Assert("shader name error");
+    }
+    std::string shadercode= std::string(std::istreambuf_iterator<char>(shaderstream), std::istreambuf_iterator<char>());
+    shaderstream.close();
+    const char* c_strcode= shadercode.c_str();
+   
+    unsigned int shaderid= glad_glCreateShader(shadertype);
+    glShaderSource(shaderid, 1, &c_strcode, NULL);
+    glCompileShader(shaderid);
+    shaderstatuscheck(shaderid, GL_COMPILE_STATUS, name);
+    return shaderid;
+}
 shader::shader(const char* vertexpath, const char* fragpath)
 {
-
-	std::ifstream ffs(fragpath);//input file stream for fragment
-	std::ifstream vfs(vertexpath);//file stram for vertex
-
-	
-	
-    if (ffs.fail()||vfs.fail())
-    {
-               Assert("filestream error");
-    }
-
-    std::string fastr=std::string(std::istreambuf_iterator<char>(ffs), std::istreambuf_iterator<char>());
-    std::string vastr = std::string(std::istreambuf_iterator<char>(vfs), std::istreambuf_iterator<char>());
-    
-    vfs.close();
-    ffs.close();
-    const char* vstr = vastr.c_str();
-    const char* fstr = fastr.c_str();
-    unsigned int vertexShader = glad_glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vstr, NULL);
-    glCompileShader(vertexShader);
-    
-    GLint versuccess;
-    char infolog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &versuccess);
-    if (!versuccess)
-    {
-
-        glGetShaderInfoLog(vertexShader, 512, NULL, infolog);
-        std::cout << vertexpath;
-        std::cout << "vertex shader error ";
-            Assert(infolog);
-    }
-GLint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fstr, NULL);
-    glCompileShader(fragmentShader);
- 
-    GLint fragsuccess;
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fragsuccess);
-    if (!fragsuccess)
-    {
-        std::cout << fragpath;
-        glGetShaderInfoLog(fragmentShader, 512, NULL, infolog);
-        std::cout << '/n' << "fragment shader error ";
-        Assert(infolog);
-    }
-  
-  
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glad_glLinkProgram(shaderProgram);
-    GLint ssprs;
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &ssprs);
-    if (ssprs !=GL_TRUE)
-    {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, infolog);
-        std::cout << '/n' << "fragment shader error ";
-        Assert(infolog);
-      
-    }
-    id = shaderProgram;
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
+  int VertexShader=   compileshader(vertexpath, GL_VERTEX_SHADER);
+    int FragmentShader = compileshader(fragpath, GL_FRAGMENT_SHADER);
+    id= glCreateProgram();
+    glAttachShader(id, VertexShader);
+    glAttachShader(id, FragmentShader);
+    glad_glLinkProgram(id);
+    shaderstatuscheck(id, GL_LINK_STATUS, "shader program");
+    glDeleteShader(VertexShader);
+    glDeleteShader(FragmentShader);
     
 }
 
 
 void shader::attach()
 {
+    if (id==-1)
+    {
+        Assert("cant attach invalid shader");
+    }
     glUseProgram(id);
 }

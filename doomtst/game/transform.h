@@ -17,6 +17,8 @@ struct Transform
 	v3::Vector3 scale;
 	void rotate(float ptch,float yw);
 	v3::Vector3 getnormaldirection();
+	v3::Vector3 getrightdirection();
+	v3::Vector3 getupdirection();
 	void orient(v3::Vector3 to);
 	void orientbase(v3::Vector3 base);
 };

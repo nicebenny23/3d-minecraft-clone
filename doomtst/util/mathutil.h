@@ -4,12 +4,9 @@
 #define mathutil_HPP
 #define NaNf std::numeric_limits<float>::max()
 inline bool aproxequal(float v1, float v2) {
+	float eps = .0001;
+	return (abs(v1 - v2) < eps);
 
-	if (abs(v1 - v2) < .0001)
-	{
-		return true;
-	}
-	return false;	
 }	
 
 
@@ -25,7 +22,7 @@ inline float clamp(float val, float low, float high)
 	}
 	return val;
 }
-
+//at zero val one is selected at one val2 is selected
 inline float lerp(float val, float val2, float selector)
 {
 	return val2 * selector + val * (1 - selector);

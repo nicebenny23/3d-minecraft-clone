@@ -10,40 +10,49 @@
 
 #include "../util/memorypool.h"
 #include <cmath>
+#include "transform.h"
+#include "objecthelper.h"
 
 namespace aabb {
 
-    struct aabbraycolinfo {
-        bool collided;
-        float dist;
-        v3::Vector3 intersectionpoint;
-
-        aabbraycolinfo()
-            : collided(false), dist(INFINITY), intersectionpoint(v3::zerov) {
-        
-        }
-
-        aabbraycolinfo(bool colided, float orgindist, v3::Vector3 pointofintersection)
-            : collided(colided), dist(orgindist), intersectionpoint(pointofintersection) {}
-    };
-
+    
+  
     struct Collider : gameobject::component {
-        v3::Vector3 collideroffset;
-       
-
-        geometry::Box box;
-        v3::Vector3 prevpos;
-        bool isunmovable=false;
-        unsigned short index;
         bool effector;
+       //local box
+        geometry::Box box;
+        //world box
+        geometry::Box globalbox() {
 
+            geometry::Box global;
+            if (owner->type==gameobject::entity)
+            {
+                Transform transform = objutil::toent(owner).transform;
+                global.center = box.center * transform.scale*2 + transform.position;
+                global.scale = box.scale * transform.scale*2;
+                
+            }
+            if (owner->type == gameobject::block)
+            {
+                Vector3 scale = objutil::toblk(owner).mesh.box.scale;
+                Vector3 pos = objutil::toblk(owner).center();
+                global.center = box.center * scale * 2 + pos;
+                global.scale = box.scale * scale * 2;
+
+            }
+            return global;
+        }
+        
+        short index;
+      
         Collider() = default;
         Collider(const v3::Vector3& objcenter, const v3::Vector3& objscale, bool appendtolist,bool iseffector=false);
         ~Collider() = default;
 
-        bool pointinbox(v3::Vector3 pos);
+       
         void ondestroy();
-        aabbraycolinfo distanceonray(ray fray);
+
+        
     };
 
     void initCollider();

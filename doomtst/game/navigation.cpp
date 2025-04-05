@@ -10,12 +10,12 @@
 
 // Helper function for heuristic calculation (Manhattan distance)
 float appdist(const navnode& a, const navnode& b) {
-    return v3::magnitude(Vector3( a.pos- b.pos));
+    return v3::mag(Vector3( a.pos- b.pos));
 }
 
 array<navnode> getneighborsdefault( navnode& node) {
     
-    array<navnode> neighbors= array<navnode>(6,false);
+    array<navnode> neighbors= array<navnode>(6);
     for (int i = 0; i < 6; i++) {
         v3::Vector3 neiborpoint = dirfromint(i) + node.pos;
         if (i == 3) {
@@ -27,7 +27,7 @@ continue;
         }
         Coord place = neiborpoint;
         v3::Vector3 center = place + unitv / 2;
-        v3::Vector3 scale = unitscale * v3::Vector3(1.1, .9f, 1.1);
+        v3::Vector3 scale = blockscale * v3::Vector3(1.1, .9f, 1.1);
         geometry::Box bx = geometry::Box(center, scale);
         if (!voxtra::Boxcollwithgrid(bx, voxtra::countnormal))
         {
@@ -70,7 +70,7 @@ return        array<navnode>();
     array<navnode> openlist;
     array<navnode> closedlist;
     array<navnode*> todeallocatelist;
-    start.gcost = distance(start.pos, goal.pos);
+    start.gcost = dist(start.pos, goal.pos);
 
     openlist.append(start);
     
@@ -151,7 +151,7 @@ return        array<navnode>();
             }
            // float potentialg = current.gcost + 1;
             
-            float potentialg = current.gcost + distance(current.pos,neighbor->pos);
+            float potentialg = current.gcost + dist(current.pos,neighbor->pos);
 
             // Check if neighbor is in open list
             bool inopenlist = false;
@@ -211,7 +211,7 @@ Vector3 transformnormal(Vector3 pos, Vector3 scale)
            
 
                 Vector3 center = Vector3(xind, pos.y - 1, zind);
-                geometry::Box posbx = geometry::Box(center+unitv/2, unitscale);
+                geometry::Box posbx = geometry::Box(center+unitv/2, blockscale);
                 if (!voxtra::Boxcollwithgrid(posbx))
                 {
                     continue;
@@ -261,10 +261,7 @@ bool navigator::noblockinrange(Coord pos)
             for (int zind = -lowest.z; zind < heighest.z; zind++)
             {
                 Coord pos = Coord(xind, yind, zind);
-                if (grid::issolidatpos(pos.x, pos.y, pos.z, 0))
-                {
-                    return false;
-                }
+                
             }
         }
     }
@@ -278,10 +275,10 @@ void navigator::update()
     Vector3 gotopos = grid::getvoxellocation(goingtwords->transform.position);
 
     v3::Vector3 loc = objutil::toent(owner).transform.position;
-    float dist = distance(loc, gotopos);
-    float addoffset = Max(0,(sigmoid(dist / 10)-.5)*2);
+    float distance = dist(loc, gotopos);
+    float addoffset = Max(0,(sigmoid(distance/ 10)-.5)*2);
     timetillupdatespeed = .3 + addoffset;
-    timetillupdate -= timename::smoothdt;
+    timetillupdate -= timename::dt;
  
     if (timetillupdate<=0||dist2(loc,headed)<.04)
     {

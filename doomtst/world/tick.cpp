@@ -9,7 +9,7 @@
 		}
 
 		tickframe = false;
-		tickdt += timename::smoothdt;
+		tickdt += timename::dt;
 		if (tickdt >ticktime)
 		{
 			

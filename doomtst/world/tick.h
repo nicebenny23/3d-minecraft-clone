@@ -1,7 +1,7 @@
 #include "../util/time.h"
 #ifndef blocktick_HPP
 #define blocktick_HPP
-#define ticktime .15
+constexpr auto ticktime = .15;
 namespace tick {
 
 	void trytick();

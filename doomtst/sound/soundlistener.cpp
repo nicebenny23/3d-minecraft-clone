@@ -1,5 +1,5 @@
 #include "soundlistener.h"
-#include "../util/debug.h" // For Assert function
+#include "../debugger/debug.h" // For Assert function
 
 listener::listener() {
     // Initialize default position

@@ -11,8 +11,8 @@
 using namespace dynamicarray;
 using namespace v3;
 using namespace vobj;
-#ifndef  mesh_H
-#define  mesh_H
+#ifndef  mesh_Hpp
+#define  mesh_Hpp
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_DEPRECATE
 namespace meshname {
@@ -60,4 +60,4 @@ namespace meshname {
 	void rendermesh(mesh* torender);
 
 }
-#endif // ! mesh_H
+#endif // ! mesh.H
