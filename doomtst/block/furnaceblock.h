@@ -11,11 +11,11 @@ struct furnacemenu :menu {
 	recipemanager blkcont;
 	Cptr::cptr<uibox> progressbar;
 	furnacemenu(v2::Vector2 size) {
-		menubox = ui::createuielement<uibox>("images\\menutex.png", size, v2::zerov, 1);
+		menubox = ui::createuielement<uibox>("images\\menutex.png", "MenuTexture", size, v2::zerov, 1);
 	
 		menubox->state.enabled = false;
 		menutype = normalmenu;
-		progressbar = ui::createuielement<uibox>("images\\greenbar.png", v2::Vector2(0, .1) , v2::Vector2(0, 0), 100);
+		progressbar = ui::createuielement<uibox>("images\\greenbar.png", "GreenBarTexture", v2::Vector2(0, .1) , v2::Vector2(0, 0), 100);
 		blkcont = recipemanager("crafting\\furnace.txt", 1,1);
 		progressbar->state.enabled= false;
 		enabled = false;
@@ -61,7 +61,7 @@ struct furnacecomp :gameobject::component {
 
 	void onplayerclick() {
 
-		if (userinput::mouseright().pressed) {
+		if (CtxName::ctx.Inp->mouseright().pressed) {
 			men.open();
 		}
 
@@ -76,7 +76,7 @@ struct furnacecomp :gameobject::component {
 
 	
 		
-		blockname::block* getblockbelow = grid::getobjatgrid(objutil::toblk(owner).pos - Coord(0, 1, 0));
+		blockname::block* getblockbelow = CtxName::ctx.Grid->getBlock(objutil::toblk(owner).pos - Coord(0, 1, 0));
 		men.blkcont.state.cancraft = false;
 	
 		if (getblockbelow != nullptr)
@@ -96,7 +96,7 @@ struct furnacecomp :gameobject::component {
 		}
 		
 		men.testclick();
-		if (userinput::getinputkey('j').pressed)
+		if (CtxName::ctx.Inp->getKey('j').pressed)
 		{
 			men.close();
 		}

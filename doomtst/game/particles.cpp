@@ -22,7 +22,7 @@ const int indices[]{
 };
 void particleemiter::update()
 {
-	timetillspawn = Min(timetillspawn-timename::dt,particlespawntime);
+	timetillspawn = Min(timetillspawn-CtxName::ctx.Time->dt,particlespawntime);
 	for (int i = 0; i < particlearray.length; i++)
 	{
 		if (particlearray[i] != nullptr)
@@ -33,10 +33,10 @@ void particleemiter::update()
 			{
 
 
-				if (particlearray[i]->getcomponent<particle>().endtime < timename::realtime)
+				if (particlearray[i]->getcomponent<particle>().endtime < CtxName::ctx.Time->realtime)
 				{
-					entityname::entity* todelete = particlearray[i];
-					entityname::destroy(todelete);
+					Ent::entity* EntityDeletionBuffer = particlearray[i];
+					objutil::toent(EntityDeletionBuffer).Destroy();
 				
 				
 					particlearray[i] = nullptr;
@@ -53,9 +53,9 @@ void particleemiter::update()
 		 {
 			 if (particlearray[i] == nullptr)
 			 {
-				 entityname::entityref newparticle = entityname::createentity(position, "");
+				 Ent::entityref newparticle = CtxName::ctx.EntMan->CreateEntity(position, "");
 				 
-				 newparticle.toent()->addcomponent<particle>()->endtime= timename::realtime+particlelifetime;
+				 newparticle.toent()->addcomponent<particle>()->endtime= CtxName::ctx.Time->realtime+particlelifetime;
 				 newparticle->getcomponent<particle>().ind = i;
 				 newparticle->getcomponent<particle>().emit = this;
 				 (*particleinit)(newparticle.toent());
@@ -77,7 +77,8 @@ void particleemiter::start()
 
 void particleemiter::renderparticles()
 {
-	tex.apply();
+	renderer::Ren.Textures.Apply(tex);
+	
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
 	renderer::changerendertype(renderer::renderparticle);
@@ -89,9 +90,9 @@ void particleemiter::renderparticles()
 
 		v3::Vector3 center = zerov;
 
-		Vector3 rightvertex = (camera::rightvec)*vertice.x;
+		Vector3 rightvertex = (camera::GetCamRight())*vertice.x;
 
-		Vector3 upvertex = (camera::upvec) * vertice.y ;
+		Vector3 upvertex = (camera::GetCamUp()) * vertice.y ;
 		vertice = upvertex + rightvertex + center;
 			databuf.append(vertice.x);
 		databuf.append(vertice.y);
@@ -100,44 +101,35 @@ void particleemiter::renderparticles()
 
 		databuf.append(cubeuv[2 * i+1]);
 	}
-	emmitervbo.bind();
-
-	emmitervbo.fillbuffer<float>(databuf);
-	emitervoa.bind();        
-	emitervoa.set_attr(0, 3, GL_FLOAT, 5 * sizeof(float), 0);
-	glEnableVertexAttribArray(0);
-	//texture coords,inclusing the texture in the array 
-	emitervoa.set_attr(1, 2, GL_FLOAT, 5* sizeof(float), 3 * sizeof(float));
-	glEnableVertexAttribArray(1);
-
-
+	Ren.Fill(&ParticleMesh, databuf);
+	
 	for (int i = 0; i < particlearray.length; i++)
 	{
 
 		if (particlearray[i]!=nullptr)
 		{
-			renderer::shaderlist[particleshader].SetVector3f(  particlearray[i]->transform.position.glm(), "offset");
-			renderer::shaderlist[particleshader].SetVector3f(particlearray[i]->transform.scale.glm(), "scale");
-
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			}
+			Ren.CurrentShader()->SetVector3f(particlearray[i]->transform.position.glm(), "offset");
+			Ren.CurrentShader()->SetVector3f(particlearray[i]->transform.scale.glm(), "scale");
+			Ren.Render(&ParticleMesh);
+		}
 	}
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBindVertexArray(0);
 	//databuf.destroy();
 }
-void initbaseparticle(entityname::entity* newent) {
+void initbaseparticle(Ent::entity* newent) {
 	newent->transform.position += Vector3(random(), 1, random())/10;
 	newent->addcomponent<aabb::Collider>(newent->transform.position, unitv / 9, true);
 	newent->addcomponent<rigidbody>(1,.1)->velocity=Vector3(random(),1,random())*2;
 	newent->transform.scale = blockscale / 22;
 	
 }
-particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) (entityname::entity*),texture newtex)
+particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) (Ent::entity*),Texture2D* newtex)
 {
 	tex = newtex;
-	emitervoa.generate();
-	emmitervbo.generate(GL_ARRAY_BUFFER);
+	
+	Ren.Gen<false>(&ParticleMesh);
+	ParticleMesh.AddAttribute<float, 3>().AddAttribute<float, 2>();
 	particlelifetime = lifetime;
 	particlespawntime = spawntime;
 	particleinit = initfunc;

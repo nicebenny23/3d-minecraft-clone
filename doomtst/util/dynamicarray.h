@@ -8,17 +8,8 @@
 #pragma once
 
 namespace dynamicarray {
-	enum alloctype {
-		arraydefault,
-		arraymempool,
 
-	};
-	struct arraytype {
-
-		alloctype alltype;
-		bool inittype;
-
-	};
+	
 	// Resizing function that doubles the size of the array when needed.
 	// If the length is 0, it initializes to a default size of 2.
 	inline int resizelength(int length) {
@@ -31,6 +22,8 @@ namespace dynamicarray {
 		// Debugging function to print the contents of the list (useful for debugging).
 		void debuglist();
 
+
+		bool empty();
 		// Standard operator[] that returns a reference to the element at the given index.
 		T& operator[](int index);
 
@@ -38,7 +31,7 @@ namespace dynamicarray {
 		T& at(int index);
 
 		// Unsafe method to directly access an element at the specified index.
-		T& fastat(const int index);
+		T& UncheckedAt(const int index);
 
 		// Cut a range of elements from startindex to endindex.
 		void cutind(int startindex, int endindex);
@@ -66,10 +59,6 @@ namespace dynamicarray {
 
 
 
-		// Resize the array to a specific size (or double the size if not specified).
-		void resize(int size = 0);
-
-
 
 		// Destroy the array by deallocating memory and resetting values.
 		void destroy();
@@ -86,7 +75,7 @@ namespace dynamicarray {
 
 		// Constructor that initializes the array from a raw pointer and size.
 		array(T* arr, int size);
-
+		
 		// Move constructor.
 		array(array&& other) noexcept;
 
@@ -95,7 +84,8 @@ namespace dynamicarray {
 
 		// Move assignment operator.
 		array& operator=(array&& other) noexcept;
-
+		array& operator=(const array& other);
+		
 		// Pointer to the dynamically allocated array.
 		T* list;
 		// Current number of elements in the array.
@@ -110,6 +100,10 @@ namespace dynamicarray {
 			T* ptr;  // Pointer to the current element in the array.
 
 		public:
+			using value_type = T;
+			using iterator = Iterator;
+			using const_iterator = const T*;
+			using size_type = std::size_t;
 			// Constructor initializes the iterator with a pointer.
 			Iterator(T* p) : ptr(p) {}
 
@@ -128,6 +122,11 @@ namespace dynamicarray {
 			bool operator!=(const Iterator& other) const {
 				return ptr != other.ptr;
 			}
+			bool operator==(const Iterator& other) const {
+				return ptr == other.ptr;
+			}	
+		
+
 		};
 
 		// Methods to get the beginning and end iterators for range-based for loops.
@@ -148,6 +147,10 @@ namespace dynamicarray {
 		bool is_undefined(const T& value) const {
 			return value == T();  // Assuming that the default constructor of T indicates an undefined value.
 		}
+
+		private:
+			// Resize the array to a specific size (or double the size if not specified).
+			void resize(int size = 0);
 	};
 
 	
@@ -164,6 +167,12 @@ namespace dynamicarray {
 
 	//deletes content of list(not pointers!!)
 	
+	template<class T, bool initelems>
+	inline bool array<T, initelems>::empty()
+	{
+		return (length==0);
+	}
+
 	//returns alias to index
 	template<class T, bool initelems >
 	T& array<T, initelems>::operator[](int index) {
@@ -202,7 +211,7 @@ namespace dynamicarray {
 	}
 	//unsafe
 	template<class T, bool initelems>
-	inline T& array<T, initelems>::fastat(const int ind)
+	inline T& array<T, initelems>::UncheckedAt(const int ind)
 	{
 
 		return list[ind];
@@ -300,11 +309,6 @@ namespace dynamicarray {
 
 		list[index] = value;
 
-
-		if (index >= length)
-		{
-			length = index;
-		}
 		length++;
 	}
 	
@@ -440,7 +444,7 @@ namespace dynamicarray {
 		capacity = size;
 		list = new T[size];
 		if constexpr (std::is_trivially_copyable_v<T>) {
-			std::memcpy(list, arr, size);  // Fast copy for trivially copyable types
+			std::memcpy(list, arr, sizeof(T)*size);  // Fast copy for trivially copyable types
 		}
 		else {
 			for (int i = 0; i < size; i++) {
@@ -473,6 +477,17 @@ namespace dynamicarray {
 		if (this != &other) {  
 			destroy();  
 			swap(other);
+		}
+		return *this;
+	}
+
+	template<class T, bool initelems>
+	array<T,initelems>& array<T, initelems>::operator=(const array<T,initelems>& other)
+	{
+		if (this != &other) {
+			destroy();
+			array temp(other);
+			swap(temp);
 		}
 		return *this;
 	}

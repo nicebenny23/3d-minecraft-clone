@@ -19,16 +19,17 @@ namespace uiboxname {
 	struct uibox:ui::uielement
 	{
 		uibox() = default;
-		texture tex;
+		Texture2D* tex;
 		geometry::Box2d box;
 		void update();
 		bool mouseonblock();
 		uibox(uibox& toreplace);
 		void render();
 		void customdestroy();
-		uibox(const char* texloc, v2::Vector2 scl, v2::Vector2 position, float boxpriority);
+		void LoadTex(const char* texloc, const char* texture);
+		uibox(const char* texloc, const char* TextureName, v2::Vector2 scl, v2::Vector2 position, float boxpriority);
 	};
-
+	
 }
 
 

@@ -19,11 +19,13 @@ struct Transform
 	v3::Vector3 getnormaldirection();
 	v3::Vector3 getrightdirection();
 	v3::Vector3 getupdirection();
-	void orient(v3::Vector3 to);
-	void orientbase(v3::Vector3 base);
+	void Orient(v3::Vector3 to);
+	void OrientDir(v3::Vector3 base);
+	glm::mat4 ToMatrix();
+	
 };
-glm::mat4 transformtomat(Transform& transform);
-glm::mat4 tcompose(Transform& t1, Transform& t2);
-Transform compose(Transform& t1, Transform& t2);
+glm::mat4 LookAt(Transform& transform);
+Transform Compose(Transform& t1, Transform& t2);
+Transform Decompose(const glm::mat4& matrix);
 
 #endif // ! transform_HPP

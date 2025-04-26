@@ -1,5 +1,5 @@
 #include "console.h"
-#include "../renderer/Window.h"
+#include "../game/Core.h"
 #include <iostream>
 #include <streambuf>
 #include <string>
@@ -7,7 +7,7 @@
 #include <string>
 #include "../util/dynamicarray.h"
 
-
+#include "../game/GameContext.h"
 
     console::ImGuiStreamBuf::ImGuiStreamBuf() {
 
@@ -70,7 +70,7 @@ void console::CreateConsoleBuffer()
 }
 void console::consoleendloop()
 {
-    while (!window::shouldClose())
+    while (!CtxName::ctx.Window->shouldClose())
     {
         renderconsole();
     }
@@ -118,15 +118,16 @@ void console::renderconsole()
     if (isNearBottom) {
         ImGui::SetScrollHereY(1.0f);
     }
+    ImGui::EndChild();
+    
+    ImGui::BeginChild("Settings", ImVec2(0, 50), true, 0);
+    ImGui::Checkbox("xray", &settings::Gamesettings.viewmode);
+
     //doesssent work yet make sure to implement fix for arrays from chainpool library
     if (ImGui::Button("reset"))
     {
         CreateConsoleBuffer();
     }
-    ImGui::EndChild();
-    ImGui::BeginChild("Settings", ImVec2(0, 50), true, 0);
-    ImGui::Checkbox("xray", &settings::Gamesettings.viewmode);
-    
     ImGui::EndChild();
 
     ImGui::End();

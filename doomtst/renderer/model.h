@@ -1,4 +1,4 @@
-#include "mesh.h"
+#include "ModelMesh.h"
 #include "../game/gameobject.h"
 #include "texture.h"
 #include "../game/transform.h"
@@ -11,15 +11,15 @@ enum  meshconnecttype
 };
 struct model:gameobject::component
 {
-	meshname::mesh& operator[](int index);
+	ModelMeshName::ModelMesh& operator[](int index);
 
 	meshconnecttype connectiontype;
 	void draw();
 	void add(const char* meshname, const char* meshtexname,Vector3 pos=zerov);
 	model(meshconnecttype connectmethod = normalmeshconnect);
-	void renderupdate();
+	void update();
 
-	array<meshname::mesh*> meshlist;
+	array<ModelMeshName::ModelMesh*> meshlist;
 	void destroy();
 	void start();
 	void setmodelshader();

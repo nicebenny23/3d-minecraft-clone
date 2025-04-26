@@ -9,6 +9,6 @@ inline void initsworditem(item* itm) {
 	itm->properties.dmg = 4;
 
 	itm->itemtype = wear;
-itm->itemui.itemsprite = createitembox("images\\sword.png");
+itm->itemui.itemsprite = createitembox("images\\sword.png","SwordTexture");
 }
 #endif // !sworditem_HPP

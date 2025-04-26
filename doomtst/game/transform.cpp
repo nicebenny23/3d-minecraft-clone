@@ -19,8 +19,8 @@ Transform::Transform(v3::Vector3 pos, float newyaw, float newpitch, v3::Vector3 
 	yaw = newyaw;
 	pitch = newpitch;
 	scale = newscale;
-    glm::mat4 a = transformtomat(*this);
-    int l = 1;
+ 
+
 }
 
 void Transform::rotate(float ptch, float yw)
@@ -31,105 +31,97 @@ void Transform::rotate(float ptch, float yw)
 
 v3::Vector3 Transform::getnormaldirection()
 {
-	v3::Vector3 direction;
-	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	direction.y = sin(glm::radians(pitch));
-	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-    return v3::normal(direction);
+    return YawPitch(yaw, pitch);
 }
 
 v3::Vector3 Transform::getrightdirection()
 {
-    return normal(crossprod(getnormaldirection(),v3::up));
+    return normal(Cross(getnormaldirection(),v3::up));
 }
 
 v3::Vector3 Transform::getupdirection()
 {
-    return crossprod(getrightdirection(),getnormaldirection());
+    return Cross(getrightdirection(),getnormaldirection());
 }
 
 
-void Transform::orientbase(v3::Vector3 base)
+void Transform::OrientDir(v3::Vector3 Direction)
 {
-    base = normal(base);
+    Direction = normal(Direction);
 
-    pitch = (glm::degrees(std::asin(base.y)));
-    yaw = (glm::degrees(std::atan2(base.z, base.x)));
+    pitch = (glm::degrees(std::asin(Direction.y)));
+    yaw = (glm::degrees(std::atan2(Direction.z, Direction.x)));
 
 }
-void Transform::orient(v3::Vector3 to)
+void Transform::Orient(v3::Vector3 LookTowards)
 {
-    orientbase(to-position);
+    OrientDir(LookTowards-position);
 }
-glm::mat4 rotationmatfromvec(Vector3 vec) {
+glm::mat4 lookRotationMatrix(Vector3 vec) {
     
-    glm::vec3 forward = (vec).glm();
+    Vector3 forward = vec;
 
     // Define a default up vector
-    glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
-    if (glm::length(glm::cross(forward, up)) < 0.0001f) {
+    Vector3 WorldUp = up;
+    if (apx(Cross(forward, WorldUp), zerov)) {
         // If forward vector is collinear with up vector, use a different up vector
-        up = glm::vec3(1.0f, 0.0f, 0.0f);
+        WorldUp= Vector3(1.0f, 0.0f, 0.0f);
     }
 
-    // Calculate the right vector
-    glm::vec3 right = normalize(glm::cross(up, forward));
-    // Recompute the true up vector
-    glm::vec3 trueUp = normalize(glm::cross(forward, right));
-
-    // Create rotation matrix
+   
+    Vector3 right = normal(Cross(WorldUp, forward));
+    Vector3 trueUp = normal(Cross(forward, right));
     glm::mat4 rotation = glm::mat4(1.0f);
-    rotation[0] = glm::vec4(right, 0.0f);
-    rotation[1] = glm::vec4(trueUp, 0.0f);
-    rotation[2] = glm::vec4(forward, 0.0f);
+    rotation[0] = glm::vec4( right.glm(), 0.0f);
+    rotation[1] = glm::vec4(trueUp.glm(), 0.0f);
+    rotation[2] = glm::vec4(forward.glm(), 0.0f);
     return rotation;
 }
-// Convert a Transform to a glm::mat4
-glm::mat4 transformtomat( Transform& transform) {
-   
-    //set to face foward from not
-   
-  glm::mat4 rotation =rotationmatfromvec( transform.getnormaldirection());
 
-  glm::mat4 scaleMat = glm::scale(glm::mat4(1.0f), transform.scale.glm());
+glm::mat4 LookAt(Transform& transform)
+{
 
-    // Create translation matrix
-  glm::mat4 translation = glm::translate(glm::mat4(1.0f), transform.position.glm());
+    return  glm::lookAt(transform.position.glm(), transform.position.glm() + transform.getnormaldirection().glm(), transform.getupdirection().glm());
+}
+
+glm::mat4 Transform::ToMatrix()
+{
+    glm::mat4 rotation = lookRotationMatrix(getnormaldirection());
+    glm::mat4 scaleMat = glm::scale(glm::mat4(1.0f), scale.glm());
+    glm::mat4 translation = glm::translate(glm::mat4(1.0f), position.glm());
 
     // Combine all transformations (scale * rotation * translation)
-    glm::mat4 modelMatrix = translation *rotation* scaleMat;
+    glm::mat4 modelMatrix = translation * rotation * scaleMat;
     return modelMatrix;
 }
 
+
 // Helper function to decompose a glm::mat4 into a Transform
-void decompose(const glm::mat4& matrix, Transform& transform) {
-    glm::vec3 scale;
-    glm::vec3 pos;
+Transform Decompose(const glm::mat4& matrix) {
+    glm::vec3 scale,pos,skew;
     glm::quat quatRotation;
-    glm::vec3 skew;
     glm::vec4 perspective;
+    
+    bool success= glm::decompose(matrix, scale, quatRotation, pos, skew, perspective);
+    if (!success)
+    {
+        throw std::logic_error("decomposition did not succeed");
+    }
 
-    glm::decompose(matrix, scale, quatRotation, pos, skew, perspective);
-
-    transform.position = Vector3(pos);
     glm::vec3 eulerRotation = glm::eulerAngles(quatRotation);
 
+    Transform transform = Transform();
+    transform.position = Vector3(pos);
     transform.yaw = glm::degrees(eulerRotation.y);
     transform.pitch = glm::degrees(eulerRotation.x);
     transform.scale = Vector3(scale);
+    return transform;
 }
 // Function to combine two Transforms into a new Transform
-Transform compose(Transform& t1, Transform& t2) {
-    glm::mat4 mat1 = transformtomat(t1);
-    glm::mat4 mat2 = transformtomat(t2);
+Transform Compose(Transform& t1, Transform& t2) {
+    glm::mat4 mat1 = (t1.ToMatrix());
+    glm::mat4 mat2 = (t2.ToMatrix());
     glm::mat4 composed = mat2 * mat1;
-    Transform* newtrat = new Transform();
-     decompose(composed,*newtrat);
-     return *newtrat;
-}
-glm::mat4 tcompose(Transform& t1, Transform& t2) {
-    glm::mat4 mat1 = transformtomat(t1);
-    glm::mat4 mat2 = transformtomat(t2);
-    glm::mat4 composed = mat2 * mat1;
-    return composed;
+    return Decompose(composed);
+     
 }

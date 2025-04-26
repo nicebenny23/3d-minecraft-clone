@@ -1,7 +1,6 @@
 #include "vector3.h"
 #include "../debugger/debug.h"
-#ifndef dir_H
-#define dir_H
+#pragma once
 
 enum dir3d
 {
@@ -22,7 +21,7 @@ enum dir2d
 };
 inline int invdirind(int dir) {
 
-	return dir + 1 - 2 * modabs(dir, 2);
+	return dir + 1 - 2 * symmetric_mod(dir, 2);
 }
 inline int maxdirection(v3::Vector3 point) {
 
@@ -30,15 +29,15 @@ inline int maxdirection(v3::Vector3 point) {
 	float max = Max(abs(point.x), Max(abs(point.y), abs(point.z)));
 	if (abs(point.x)==max)
 	{
-		return (1-sign(point.x))/2;
+		return ((1-sign(point.x))/2);
 	}
 	if (abs(point.y) == max)
 	{
-		return 2+(1 - sign(point.y)) / 2;
+		return 2+((1 - sign(point.y)) / 2);
 	}
 	if (abs(point.z) == max)
 	{
-		return 4 + (1 - sign(point.z)) / 2;
+		return 4 + ((1 - sign(point.z)) / 2);
 	}
 }
 inline int max2ddirection(v3::Vector3 point) {
@@ -55,32 +54,31 @@ inline int max2ddirection(v3::Vector3 point) {
 		return 4 + (1 - sign(point.z)) / 2;
 	}
 }
-inline v3::Vector3 dirfromint(const int face) {
+inline v3::Coord dirfromint(const int face) {
 
 	switch (face)
 	{
 	case 0:
-		return  v3::Vector3(1, 0, 0);//left
+		return  v3::Coord(1, 0, 0);//left
 	case 1:
-		return v3::Vector3(-1, 0, 0);//right
+		return v3::Coord(-1, 0, 0);//right
 	
 	case 2:
-		return v3::Vector3(0, 1, 0);//north
+		return v3::Coord(0, 1, 0);//north
 	case 3:
-		return v3::Vector3(0, -1, 0);//south
+		return v3::Coord(0, -1, 0);//south
 	case 4:
-		return v3::Vector3(0, 0, 1);//front
+		return v3::Coord(0, 0, 1);//front
 	case 5:
-		return v3::Vector3(0, 0, -1);//back
+		return v3::Coord(0, 0, -1);//back
 	
 	
 	default:
-		Assert("atempetd to acess a nonexistant direction");
+		throw std::invalid_argument("Attempted to acess invalid direction " + face);
+		
 
 		break;
 	}
 
 
 }
-
-#endif // !dir_H

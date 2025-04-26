@@ -10,6 +10,6 @@ inline void initplankitem(item* itm) {
 	itm->properties.placeable = true;
 
 	itm->itemtype = count;
-	itm->itemui.itemsprite = createitembox("images\\treestoneblock.png");
+	itm->itemui.itemsprite = createitembox("images\\treestoneblock.png","TreestoneBlockTexture");
 }
 #endif // !grassitem_HPP

@@ -3,6 +3,7 @@
 #include "../game/aabb.h"
 #include "../util/intersection.h"
 #include "../util/geometry.h"
+#include "../game/GameContext.h"
 #ifndef voxtrav_Hpp
 #define voxtrav_Hpp
 namespace voxtra {
@@ -29,16 +30,18 @@ namespace voxtra {
 			colpoint = zerov;
 		}
 	};
-	enum gridtrav {
+	enum GridTraverseMode {
 		countnormal = 0,
 		countall = 1,
 		countsolid = 2,
 
 	};
-	bool raycolllideswithgrid(ray nray, float acc, gridtrav trav =countnormal);
-	bool Boxcollwithgrid(geometry::Box bx, gridtrav trav = countnormal);
-	RayWorldIntersection travvox(ray nray, float acc, gridtrav trav = countnormal);
-	block* findprevblock(ray nray, float acc, gridtrav trav = countnormal);
+
+
+	bool Boxcollwithgrid(geometry::Box Box);
+	RayWorldIntersection travvox(ray nray, float acc, GridTraverseMode trav = countnormal);
+	block* findprevblock(ray nray, float acc, GridTraverseMode trav = countnormal);
+
 	inline v3::Vector3 findemptyspace(v3::Vector3 scale) {
 		geometry::Box loadbox;
 		int test = 0;
@@ -53,14 +56,14 @@ namespace voxtra {
 
 			float ranz = (random() - .5) * 2;
 			
-			v3::Vector3 offset = (Vector3(ranx, rany, ranz) * (2 * loadamt + 1) / 2 +grid::gridpos) * chunkaxis;
+			v3::Vector3 offset = (Vector3(ranx, rany, ranz) * (2 * CtxName::ctx.Grid->rad + 1) / 2 +CtxName::ctx.Grid->gridpos) * chunkaxis;
 			test++;
 			if (1000 < test)
 			{
 				return offset;
 			}
 			loadbox = geometry::Box(offset, scale);
-		} while (Boxcollwithgrid(loadbox, countnormal));
+		} while (Boxcollwithgrid(loadbox));
 		return loadbox.center;
 	}
 	inline Vector3 findground(v3::Vector3 scale) {
@@ -70,7 +73,7 @@ namespace voxtra {
 		{
 			pos = findemptyspace(scale);
 			geometry::Box testbox = geometry::Box(pos - Vector3(0, scale.y + .5, 0), scale);
-			shouldcontinue = !Boxcollwithgrid(testbox, countnormal);
+			shouldcontinue = !Boxcollwithgrid(testbox);
 			if (random()<.001)
 			{
 				shouldcontinue = false;

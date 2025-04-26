@@ -10,6 +10,6 @@ inline void initaltaritem(item* itm) {
 	itm->properties.placeable = true;
 
 	itm->itemtype = count;
-	itm->itemui.itemsprite = createitembox("images\\crystalaltarside.png");
+	itm->itemui.itemsprite = createitembox("images\\crystalaltarside.png","CrystalAltarSideTexture");
 }
 #endif // !grassitem_HPP

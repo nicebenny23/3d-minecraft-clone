@@ -18,13 +18,13 @@ namespace objutil {
 	inline blockname::block& toblk(gameobject::obj& object) {
 
 		return *((blockname::block*)(&object));
-	}inline entityname::entity& toent(gameobject::obj* object) {
+	}inline Ent::entity& toent(gameobject::obj* object) {
 
-		return *((entityname::entity*)(object));
+		return *((Ent::entity*)(object));
 	}
-	inline entityname::entity& toent(gameobject::obj& object) {
+	inline Ent::entity& toent(gameobject::obj& object) {
 
-		return *((entityname::entity*)(&object));
+		return *((Ent::entity*)(&object));
 	}
 
 
@@ -37,7 +37,7 @@ namespace objutil {
 	}
 	if (object.type==gameobject::entity)
 	{
-		((entityname::entity*)(&object))->transform.position;
+		((Ent::entity*)(&object))->transform.position;
 	}
 }
 //returns id ob object only works for block

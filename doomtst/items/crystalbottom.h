@@ -10,6 +10,6 @@ inline void initcrystalbottomitem(item* itm) {
 	itm->properties.dmg = 0;
 	itm->properties.armor = .7;
 	itm->itemtype = wear;
-	itm->itemui.itemsprite = createitembox("images\\crystalbottom.png");
+	itm->itemui.itemsprite = createitembox("images\\crystalbottom.png","CrystalBottomTexture");
 }
 #endif // !ironsworditem_HPP

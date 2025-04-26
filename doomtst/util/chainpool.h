@@ -2,7 +2,6 @@
 //essientially a linked list with very fast allocation times,unfortonatly not <T> supported yet but i might add support if i need a linked list
 #include <iterator>
 #include "dynamicarray.h"
-using namespace dynamicarray;
 
 #include <cstddef>
 namespace chainutil {
@@ -78,7 +77,9 @@ namespace chainpool {
                 return  *this;
             }
 
-
+            bool operator==(const Iterator& other) const {
+                return ptr == other.ptr;
+            }
             bool operator!=(const Iterator& other) const {
                 return ptr != other.ptr;
             }
@@ -139,7 +140,7 @@ namespace chainpool {
         size_t poolSize;  // Number of blocks in the pool
         metalist usedBlocks; // Array to track free blocks
         metalist freeBlocks; // Array to track free blocks
-        array<char*> poollist;   // Pointer to the memory pool
+       dynamicarray::array<char*> poollist;   // Pointer to the memory pool
 
         T* findFreeBlock(); // Find a free block index
 
@@ -219,6 +220,7 @@ namespace  chainpool {
             freeBlocks.push(node);
         }
     }
+    
     template < typename T>
     blockmetadata* chainedpool<T>::GetMetaData(T* element) {
         return reinterpret_cast<blockmetadata*>(reinterpret_cast<char*>(element) + ElemSize);
@@ -228,6 +230,7 @@ namespace  chainpool {
     {
         return reinterpret_cast<T*>(reinterpret_cast<char*>(metadata) - ElemSize);
     }
+    //gets block Blockindex in pool pool
     template < typename T>
     T* chainedpool<T>::GetBlockInPool(int pool, int BlockIndex) {
         return reinterpret_cast<T*>(poollist[pool]+ BlockSize * BlockIndex);
@@ -245,6 +248,7 @@ namespace  chainpool {
 
         return GetBlockInPool(pool, poolIndex);
     }
+    //destructor not needed as these objects are always global
     template < typename T>
     void chainedpool<T>::destroy()
     {

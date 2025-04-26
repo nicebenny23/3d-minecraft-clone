@@ -28,7 +28,7 @@ struct playereat :gameobject::component
 	bool caneat() {
 
 
-		if (!userinput::mouseright().held)
+		if (!CtxName::ctx.Inp->mouseright().held)
 		{
 			return false;
 		}
@@ -74,7 +74,7 @@ struct playereat :gameobject::component
 	void tryeat() {
 		if (caneat())
 		{
-			timetoeat -= timename::dt;
+			timetoeat -= CtxName::ctx.Time->dt;
 			if (timetoeat < 0) {
 
 				timetoeat = 1;

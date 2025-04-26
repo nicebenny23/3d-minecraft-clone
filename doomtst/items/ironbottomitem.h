@@ -8,6 +8,6 @@ inline void initironbottomitem(item* itm) {
 	itm->properties.dmg = 0;
 	itm->properties.armor = .8;
 	itm->itemtype = wear;
-	itm->itemui.itemsprite = createitembox("images\\ironbottom.png");
+	itm->itemui.itemsprite = createitembox("images\\ironbottom.png","IronBottomTexture");
 }
 #endif // !ironsworditem_HPP

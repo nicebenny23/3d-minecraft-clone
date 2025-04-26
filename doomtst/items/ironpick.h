@@ -9,7 +9,7 @@ inline void ironpickinit(item* itm) {
 	itm->maxamt = 256;
 	itm->amt = 64;
 	itm->itemtype = wear;
-	itm->itemui.itemsprite = createitembox("images\\ironpick.png");
+	itm->itemui.itemsprite = createitembox("images\\ironpick.png","IronPickTexture");
 }
 
 #endif // !ironpickitem_HPP

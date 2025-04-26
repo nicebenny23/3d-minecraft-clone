@@ -89,7 +89,7 @@ namespace geometry {
 		Plane(Vector3 p1, Vector3 p2, Vector3 p3) {
 			Vector3 v1 = p2 - p1;
 			Vector3 v2 = p3 - p1;
-			normal = v3::normal(crossprod(v1, v2));
+			normal = v3::normal(Cross(v1, v2));
 			point = p1;
 		}
 

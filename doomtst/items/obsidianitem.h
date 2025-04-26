@@ -10,7 +10,7 @@ inline void initobsidianitem(item* itm) {
 
 	itm->itemtype = count;
 	itm->properties.placeable = true;
-	itm->itemui.itemsprite = createitembox("images\\obb.png");
+	itm->itemui.itemsprite = createitembox("images\\obb.png","ObsidianTexture");
 }
 
 

@@ -1,22 +1,28 @@
 #include "noise.h"
 using namespace dynamicarray;
-array<v3::Vector3> seededdirections;
 #include "../util/mathutil.h"
+
+//todo move this to random
+
+static const int PrimeX = 501125321;
+static const int PrimeY = 1136930381;
+static const int PrimeZ = 1720413743;
+
 noisemap::noisemap()
 {
 
 }
 
 
-float noisemap::operator[](Coord pos)
+float noisemap::Eval(Coord pos)
 {
 
-	return applydist(computenoiseatpoint(pos+Vector3(8.31553,8.7191,3.40505), properties));
+	return Eval(Vector3(pos));
 }
-float noisemap::operator[](Vector3 pos)
+float noisemap::Eval(Vector3 pos)
 {
 
-	return applydist(computenoiseatpoint(pos+ Vector3(7.3113f, 8.74191f, 3.40505f), properties));
+	return equalizer.apply_distribution((EvaluateNoiseAtPoint(pos+ NoiseOffset, properties)));
 }
 
 
@@ -32,24 +38,6 @@ inline float dotGridGradient( const int& x, const int& y, const int& z, const Ve
 	
 }
 
-static const int PrimeX = 501125321;
-static const int PrimeY = 1136930381;
-static const int PrimeZ = 1720413743;
-static int Hash(int seed, int xPrimed, int yPrimed, int zPrimed)
-{
-	int hash = seed ^ xPrimed ^ yPrimed ^ zPrimed;
-
-	hash *= 0x27d4eb2d;
-	return hash;
-}
-inline Vector3 randompointonsphere(int x, int y, int z) {
-	int seed = 3;
-	int hash = Hash(seed, x, y, z);
-	hash ^= hash >> 15;
-	hash &= MAXSHORT - 1;
-	return seededdirections.fastat(hash);
-	
-}
 inline float dotGridGradient( int x, int y, int z, float xd, float yd, float zd)
 {
 	Vector3 pos = randompointonsphere(x, y, z);
@@ -104,7 +92,7 @@ float interpolatenoisemap(float x, float y, float z)
 	
 }
 
-float computenoiseatpoint(Vector3 point,noiseparams params)
+float EvaluateNoiseAtPoint(Vector3 point,noiseparams params)
 {
 	float value = 0;
 	float maxintensity = 0;
@@ -134,10 +122,6 @@ float computenoiseatpoint(Vector3 point,noiseparams params)
 	}
 	return value / maxintensity;
 }
-int comparefloat(const void* b, const void* a)
-{
-	return sign(*((float*)a) - *((float*)b));
-}
 void noisemap::create()
 {	
 	createdist();
@@ -147,53 +131,8 @@ void noisemap::create()
 void noisemap::destroy()
 {
 
-	distribution.destroy();
+	equalizer.destroy();
 	
 	
 }
 
-inline float noisemap::applydist(const float val)
-{
-
-return distribution.fastat(getbucket(val));
-
-}
-
-void initrandomdirs()
-{
-	const int startingseed = 5;
-	
-	unsigned int noiseval = startingseed;
-	for (int i = 0; i < 100; i++)
-	{
-		randomcoord(noiseval);
-	}
-	float nabs = 0;
-	seededdirections = array<Vector3>(USHRT_MAX);
-	for (int i = 0; i < USHRT_MAX; i++)
-	{
-		
-		Vector3 gradatind;
-		do
-		{
-
-			randomcoord(noiseval);
-			randomcoord(noiseval);
-			randomcoord(noiseval);
-			gradatind.x = noiseval;
-			randomcoord(noiseval);
-			randomcoord(noiseval);
-			randomcoord(noiseval);
-			gradatind.y = noiseval;
-			randomcoord(noiseval);
-			randomcoord(noiseval);
-			randomcoord(noiseval);
-			gradatind.z = noiseval;
-			gradatind /= static_cast<float>(MAXUINT32);
-			gradatind -= unitv / 2;
-			gradatind * 2;
-		} while (mag2(gradatind)>1);
-		seededdirections[i] = normal(gradatind);
-	}
-
-}

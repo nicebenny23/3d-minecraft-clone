@@ -12,6 +12,6 @@ inline void initcrystaltopitem(item* itm) {
 
 	itm->properties.armor = .7;
 	itm->itemtype = wear;
-	itm->itemui.itemsprite = createitembox("images\\crystaltop.png");
+	itm->itemui.itemsprite = createitembox("images\\crystaltop.png","CrystalTopTexture");
 }
 #endif // !ironsworditem_HPP

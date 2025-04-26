@@ -9,7 +9,7 @@ inline void initironitem(item* itm) {
 
 	itm->itemtype = count;
 	itm->properties.placeable = true;
-	itm->itemui.itemsprite = createitembox("images\\iron.png");
+	itm->itemui.itemsprite = createitembox("images\\iron.png","IronTexture");
 }
 
 

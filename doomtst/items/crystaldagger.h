@@ -10,7 +10,7 @@ inline void initcrystaldaggeritem(item* itm) {
 
 	itm->itemtype = count;
 	itm->properties.placeable = true;
-	itm->itemui.itemsprite = createitembox("images\\crystaldagger.png");
+	itm->itemui.itemsprite = createitembox("images\\crystaldagger.png","CrystalDaggerTexture");
 }
 
 

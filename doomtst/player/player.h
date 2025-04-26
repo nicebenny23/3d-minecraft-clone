@@ -11,10 +11,9 @@
 #ifndef player_HPP
 #define player_HPP
 namespace player {
-	extern entityname::entityref goblin;
+	extern Ent::entityref goblin;
 	void initplayer();
 	extern bool playeractive;
-	void calculateyawandpitch();
 
 }
 

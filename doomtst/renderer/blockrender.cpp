@@ -1,6 +1,7 @@
 #include "blockrender.h"
 #include "../util/geometry.h"
 #include "../util/intersection.h"
+#include "../game/GameContext.h"
 bool blockrender::enablelighting;
 dynamicarray::array<float> databuffer;
 dynamicarray::array<unsigned int> indicebuffer;
@@ -26,20 +27,20 @@ const float cubeuv[] = {
 	0, 1,
 	1, 1
 };
-texturearray blockrender::texarray;
+TextureArray* blockrender::texarray;
 // Check if a chunk is viewable within the camera's frustum
 bool chunkviewable(Chunk::chunk* chk) {
 	return true;
 	float slope = tan(renderer::fov / 2);
 	geometry::Box chkb = geometry::Box(chk->center(), unitv * float( chunklength )/ 2.f);
-	ray camray = ray(camera::campos, camera::campos+ camera::frontvec * 1);
+	ray camray = ray(camera::campos(), camera::campos() + camera::GetCamFront() * 1);
 	geometry::cone ncone = geometry::cone(camray, slope);
-	geometry::Plane pln = geometry::Plane(camera::frontvec, camray.start);
+	geometry::Plane pln = geometry::Plane(camera::GetCamFront(), camray.start);
 	bool srf = false;
 	for (int i = 0; i < 8; i++)
 	{
 		Vector3 vertex = chk->center() + (vert[i] - unitv / 2.f) *float( chunklength);
-		if (dot(vertex - camera::campos, camera::frontvec) > 0) {
+		if (dot(vertex - camera::campos(), camera::GetCamFront()) > 0) {
 
 			srf = true;
 		}
@@ -180,7 +181,7 @@ void recreatechunkmesh(Chunk::chunk* aschunk) {
 		}
 		
 	}
-	renderer::fillquadbuffers(aschunk->mesh->Voa, aschunk->mesh->ibo, aschunk->mesh->VBO, datbuf, indbuf);
+	renderer::Ren.Fill(&aschunk->mesh->SolidGeo, datbuf, indbuf);
 	aschunk->mesh->meshsize = indbuf.length;
 	datbuf.destroy();
 	indbuf.destroy();
@@ -190,7 +191,7 @@ void recreatechunkmesh(Chunk::chunk* aschunk) {
 // Render a chunk mesh
 void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 	if (!transparent) {
-		renderer::renderquadlist(mesh.Voa, mesh.ibo, mesh.VBO, mesh.meshsize);
+		renderer::Ren.Render(&mesh.SolidGeo);
 	}
 	else {
 		// Enable 2D render
@@ -200,61 +201,47 @@ void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 		for (int i = 0; i < mesh.facebuf.length; i++) {
 			emitface(mesh.facebuf[i].facenum, *(mesh.facebuf[i].mesh->blk), datbuf, indbuf);
 		}
-		renderer::renderquadlist(mesh.transparentVoa, mesh.transparentibo, mesh.transparentVBO, datbuf, indbuf);
+
+		renderer::Ren.Render(&mesh.TransparentGeo, datbuf, indbuf);
 		datbuf.destroy();
 		indbuf.destroy();
 	}
 }
-void setrenderblock_base() {
-
-	glDepthFunc(GL_LESS);
-	glDisable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	renderer::currshader = renderer::normalshader;
-	renderer::shaderlist[renderer::normalshader].attach();
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-	blockrender::texarray.apply();
-	renderer::setrenderingmatrixes();
-	renderer::setaspectratio();
-}
 void blockrender::setrendertransparent()
 {
-	setrenderblock_base();
-	glDepthMask(GL_FALSE);
 
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	renderer::currshader = renderer::normalshader;
-	
+	renderer::Ren.SetType("TransparentBlock");
+	renderer::Ren.Textures.Apply(blockrender::texarray);
+	renderer::setrenderingmatrixes();
+	renderer::setaspectratio();
 }
 
 void blockrender::setrendersolid()
 {
-	setrenderblock_base();
-	glDepthMask(GL_TRUE);
-	glDisable(GL_CULL_FACE);
+	renderer::Ren.SetType("SolidBlock");
+	renderer::Ren.Textures.Apply(blockrender::texarray);
+	renderer::setrenderingmatrixes();
+	renderer::setaspectratio();
 	
 }
 
 // Initialize the data buffer and render chunks
 void blockrender::renderblocks(bool rendertransparent) {
-	glUseProgram(renderer::shaderlist[renderer::normalshader].id);
-	
+	renderer::Ren.Shaders.Bind("BlockShader");
 
 	array<Chunk::chunk> tosort = array<Chunk::chunk>();
 
-	for (int i = 0; i < totalgridsize; i++) {
+	for (int i = 0; i < CtxName::ctx.Grid->totalChunks; i++) {
 		
-		if (chunkviewable(chunklist[i])) {
-			if (chunklist[i]->mesh->meshrecreateneeded) {
-				recreatechunkmesh(chunklist[i]);
-				chunklist[i]->mesh->meshrecreateneeded = false;
+		if (chunkviewable(CtxName::ctx.GridRef()[i])) {
+			if (CtxName::ctx.GridRef()[i]->mesh->meshrecreateneeded) {
+				recreatechunkmesh(CtxName::ctx.GridRef()[i]);
+				CtxName::ctx.GridRef()[i]->mesh->meshrecreateneeded = false;
 			}
 
-			chunklist[i]->mesh->sortbuf();
+			CtxName::ctx.GridRef()[i]->mesh->sortbuf();
 
-			tosort.append(*(chunklist[i]));
+			tosort.append(* (CtxName::ctx.GridRef()[i]));
 		}
 	}
 
@@ -282,9 +269,10 @@ void blockrender::renderblocks(bool rendertransparent) {
 
 void blockrender::initblockrendering()
 {
-	renderer::shaderlist[renderer::normalshader] = shader::shader("shaders\\vert1.vs", "shaders\\frag1.vs");
-	renderer::shaderlist[renderer::normalshader].attach();
-	renderer::currshader = renderer::normalshader;
+	renderer::Ren.Shaders.Compile( "BlockShader","shaders\\vert1.vs", "shaders\\frag1.vs");
+	renderer::Ren.AddType(RenderMode("SolidBlock", "BlockShader", RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)));
+
+	renderer::Ren.AddType(RenderMode("TransparentBlock", "BlockShader", RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)));
 	array<const char*> texlist = array<const char*>();
 	texlist[treestonetex] = "images\\treestone.png";
 	texlist[grasstex] = "images\\grass.png";
@@ -317,8 +305,8 @@ void blockrender::initblockrendering()
 	texlist[ultraaltarpngultrapng] = "images\\ultraaltar.png";
 	texlist[sandtex] = "images\\sand.png";
 	texlist[planktex] = "images\\treestoneblock.png";
-	texarray = texturearray(16, 16, texlist);
-	texarray.apply();
+	texarray = renderer::Ren.Textures.GetTexArray(texlist,"BlockTextures");
+	renderer::Ren.Textures.Apply(texarray);
 	enablelighting = true;
 }
 

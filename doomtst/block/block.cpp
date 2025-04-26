@@ -5,10 +5,10 @@
 using namespace blockname;
 Vector3 face::center()
 {
-	return dirfromint(facenum) * mesh->box.scale + mesh->box.center;
+	return Vector3( dirfromint(facenum))* mesh->box.scale + mesh->box.center;
 }
 void face::calccameradist() {
-	cameradist = 128 * dist2((*this).center(), Vector3(camera::campos));
+	cameradist = 128 * dist2((*this).center(), Vector3(camera::campos()));
 }
 
 void blockmesh::setfaces(int leftface, int rightface, int upface, int downface, int frontface, int backface) {
@@ -75,7 +75,7 @@ void blockname::blockmesh::attachindirection()
 {
 
 	Vector3 maxpos = blk->center() + box.scale * dirfromint(blk->mesh.attachdir);
-	Vector3 blkpos = dirfromint(blk->mesh.attachdir)*blocksize / 2 + blk->center();
+	Vector3 blkpos = Vector3(dirfromint(blk->mesh.attachdir))*blocksize / 2 + blk->center();
 	box.center += blkpos - maxpos;
 }
 face& blockname::block::operator[](int index)

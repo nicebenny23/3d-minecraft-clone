@@ -30,7 +30,7 @@ struct liquidprop :gameobject::component {
 		if (collidedwith->hascomponent<rigidbody>())
 		{
 			collidedwith->getcomponent<rigidbody>().inliquid = true;
-			collidedwith->getcomponent<rigidbody>().velocity *= 1 - timename::dt * 5;
+			collidedwith->getcomponent<rigidbody>().velocity *= 1 - CtxName::ctx.Time->dt * 5;
 		}
 	}
 	void updateinface(int face) {
@@ -39,7 +39,7 @@ struct liquidprop :gameobject::component {
 
 		Coord newpos = dirfromint(face) + objutil::toblk(owner).pos;
 
-		blockname::block* blk = grid::getobjatgrid(newpos, true);
+		blockname::block* blk = CtxName::ctx.Grid->getBlock(newpos);
 		if (blk == nullptr)
 		{
 			return;

@@ -2,13 +2,7 @@
 #include <GLFW/glfw3.h>
 namespace userinput {
 	//([0-width],[0,height])
-	v2::Vector2 mousepos;
-	v2::Vector2 mouseposdt;
-	//from ([-1,1],[-1,1])
-	v2::Vector2 normedmousepos;
-	dynamicarray::array<inputkey,true> keylist;
-
-	void endupdate(){
+	void InputManager::endupdate(){
 		mouseposdt = v2::Vector2(0, 0);
 		for (int i = 0; i < keylist.capacity; i++)
 		{
@@ -18,29 +12,29 @@ namespace userinput {
 		
 	}
 
-	inputkey mouseleft()
+	inputkey InputManager::mouseleft()
 	{
 		return keylist[Mouse_leftindex];
 	}
 
-	inputkey mouseright()
+	inputkey InputManager::mouseright()
 	{
 		return keylist[Mouse_rightindex];
 	}
 
-	void initiate()
+	 InputManager::InputManager()
 	{
 
 		mousepos = v2::Vector2(0, 0);
 		mouseposdt = v2::Vector2(0, 0);
-	keylist = dynamicarray::array<inputkey,true>(GLFW_KEY_LAST+ Extra_keys);
+		keylist = dynamicarray::array<inputkey,true>(GLFW_KEY_LAST+ Extra_keys);
 		for (int i = 0; i < keylist.capacity; i++)
 		{
 			keylist[i]=inputkey();
 			
 		}
 	}
-	void updatekey(int code, int action) {
+	void InputManager::updatekey(int code, int action) {
 
 		if (code< keylist.length)
 		{
@@ -57,7 +51,7 @@ namespace userinput {
 
 	
 	
-	int convertchartoglfwkey(const int key) {
+	int InputManager::convertchartoglfwkey(const int key) {
 		if ('a' <= key&&key<='z')
 		{
 			return key - 32;
@@ -67,7 +61,7 @@ namespace userinput {
 
 	}
 
-	inputkey getinputkey(const int key) {
+	inputkey InputManager::getKey(const int key) {
 		return keylist[convertchartoglfwkey(key)];
 	}
 

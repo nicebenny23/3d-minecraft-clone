@@ -8,7 +8,7 @@ struct rotatetwordsvel:gameobject::component
 
 		Vector3 vel = owner->getcomponent<rigidbody>().velocity;
 		vel= normal(vel);
-		objutil::toent(owner).transform.orientbase(vel);
+		objutil::toent(owner).transform.OrientDir(vel);
 	}
 };
 

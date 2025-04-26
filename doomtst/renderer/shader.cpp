@@ -35,8 +35,9 @@ int compileshader(const char* name, GLint shadertype)
     shaderstatuscheck(shaderid, GL_COMPILE_STATUS, name);
     return shaderid;
 }
-shader::shader(const char* vertexpath, const char* fragpath)
+shader::shader(const char* ShaderName, const char* vertexpath, const char* fragpath)
 {
+    Name = ShaderName;
   int VertexShader=   compileshader(vertexpath, GL_VERTEX_SHADER);
     int FragmentShader = compileshader(fragpath, GL_FRAGMENT_SHADER);
     id= glCreateProgram();

@@ -5,14 +5,14 @@
 
 #include <assert.h>
 
-
+#pragma once 
 namespace stackname {
 	template <typename T>
 	struct stacknode
 	{
 
-		stacknode<T>* prevnode;
-		T elem;
+		stacknode<T>* PrevNode;
+		T Elem;
 
 		stacknode(const T& val);
 
@@ -22,7 +22,7 @@ namespace stackname {
 	template<typename T>
 	class stack {
 
-		stacknode<T>* top;
+		stacknode<T>* Top;
 	public:
 		T pop();
 		T& peek();
@@ -47,12 +47,12 @@ namespace stackname {
 
 
 	template<typename T>
-	stack<T>::stack() :length(0), top(nullptr) {
+	stack<T>::stack() :length(0), Top(nullptr) {
 
 	}
 
 	template<typename T>
-	stacknode<T>::stacknode(const T& val) : elem(val), prevnode(nullptr)
+	stacknode<T>::stacknode(const T& val) : Elem(val), PrevNode(nullptr)
 	{
 	}
 
@@ -62,7 +62,7 @@ namespace stackname {
 	{
 		if (!empty())
 		{
-			return top->elem;
+			return Top->Elem;
 		}
 		throw std::out_of_range("Error: Attempted to peek an empty stack.");
 	}
@@ -71,7 +71,7 @@ namespace stackname {
 	{
 		if (!empty())
 		{
-			return top->elem;
+			return Top->Elem;
 		}
 		throw std::out_of_range("Error: Attempted to peek an empty stack.");
 	}
@@ -85,8 +85,8 @@ namespace stackname {
 
 
 
-		stacknode<T>* cursor = top;
-		top = top->prevnode;
+		stacknode<T>* cursor = Top;
+		Top = Top->PrevNode;
 		delete cursor;
 		length--;
 
@@ -110,8 +110,8 @@ namespace stackname {
 
 		stacknode<T>* newelem = new stacknode<T>(val);
 
-		newelem->prevnode = top;
-		top = newelem;
+		newelem->PrevNode = Top;
+		Top = newelem;
 		length++;
 
 
@@ -145,20 +145,20 @@ namespace stackname {
 		destroy();  // Clean up current stack
 		length = other.length;
 
-		if (other.top == nullptr)
+		if (other.Top == nullptr)
 		{
 			return *this;
 		}
-		top = new stacknode<T>(other.top->elem);
-		stacknode<T>* iter = other.top->prevnode;
+		Top = new stacknode<T>(other.Top->Elem);
+		stacknode<T>* iter = other.Top->PrevNode;
 
-		stacknode<T>* bottom = top;
+		stacknode<T>* bottom = Top;
 		while (iter != nullptr)
 		{
-			bottom->prevnode = new stacknode<T>(iter->elem);
-			bottom = bottom->prevnode;
+			bottom->PrevNode = new stacknode<T>(iter->Elem);
+			bottom = bottom->PrevNode;
 
-			iter = iter->prevnode;
+			iter = iter->PrevNode;
 
 		}
 
@@ -168,7 +168,7 @@ namespace stackname {
 	}
 
 	template<typename T>
-	stack<T>::stack(const stack& other) :length(0), top(nullptr) {
+	stack<T>::stack(const stack& other) :length(0), Top(nullptr) {
 		*this = other;
 	}
 

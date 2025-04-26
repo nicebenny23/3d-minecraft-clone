@@ -66,7 +66,7 @@ struct rigidbody : gameobject::component {
 
     // Integrate the acceleration to update velocity and position
     void integrate() {
-        float deltaTime = timename::dt;
+        float deltaTime = CtxName::ctx.Time->dt;
         velocity += acceleration * deltaTime;
         if (isonground)
         {

@@ -202,11 +202,11 @@ namespace v3 {
 
 	const  Vector3 zerov = Vector3(0, 0,0);
 	const  Vector3 unitv = Vector3(1, 1,1);
-	const Vector3 left = Vector3(1, 0, 0);
+	const Vector3 right = Vector3(1, 0, 0);
 
 	const Vector3 up = Vector3(0, 1, 0);
 
-	const Vector3 foward = Vector3(0, 0, 1);
+	const Vector3 forward = Vector3(0, 0, 1);
 	inline v2::Vector2 Vector3::xy() const {
 
 		return v2::Vector2(x, y);
@@ -407,7 +407,7 @@ namespace v3 {
 		return normal(dir);
 	}
 
-	inline Vector3 crossprod(const Vector3& p, const Vector3& p1) {
+	inline Vector3 Cross(const Vector3& p, const Vector3& p1) {
 		Vector3 crosspoint;
 		crosspoint.x = p.y * p1.z - p.z * p1.y;
 		crosspoint.y = p.z * p1.x - p.x * p1.z;

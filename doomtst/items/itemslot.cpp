@@ -14,7 +14,7 @@ Box2d getboxfrominvloc(int xloc, int yloc) {
 
 itemslot::itemslot(int xloc, int yloc) {
 	Box2d frameboxsize = getboxfrominvloc(xloc, yloc);
-	framedecal = ui::createuielement<uibox>("images\\blockholder.png",frameboxsize.scale, frameboxsize.center, 13);
+	framedecal = ui::createuielement<uibox>("images\\blockholder.png", "DefaultItemSlotTexture",frameboxsize.scale, frameboxsize.center, 13);
 	helditem = nullptr;
 
 	dtype = normaldecal;
@@ -120,30 +120,30 @@ void itemslot::setdecal(decaltype toset)
 	dtype = toset;
 	if (toset==importantdecal) {
 		
-		framedecal->tex = texture("images\\importantblockholder.png");
+		framedecal->LoadTex("images\\importantblockholder.png","ImportantBlockHolderTexture");
 	
 		return;
 	}
 	if (toset == normaldecal) {
-		framedecal->tex = texture("images\\blockholder.png");
+		framedecal->LoadTex("images\\blockholder.png","BlockHolderTexture");
 	
 		return;
 	}
 	if (toset == destroydecal) {
 
-		framedecal->tex = texture("images\\x.png");
+		framedecal->LoadTex("images\\x.png","XTexture");
 		
 		return;
 	}
 	if (toset == leggingdecal) {
 
-		framedecal->tex = texture("images\\leggingdecal.png");
+		framedecal->LoadTex("images\\leggingdecal.png","LeggingDecalTexture");
 
 		return;
 	}
 	if (toset == chestdecal) {
 
-		framedecal->tex = texture("images\\chestdecal.png");
+		framedecal->LoadTex("images\\chestdecal.png", "ChestDecalTexture");
 
 		return;
 	}

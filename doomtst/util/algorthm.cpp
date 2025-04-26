@@ -24,7 +24,7 @@ float oalgorithm::invertnoisetransform(dynamicarray::array<float>& arr, float se
 	while (true)
 	{
 
-		if (arr.fastat(index)> searchval)
+		if (arr.UncheckedAt(index)> searchval)
 		{
 			high = index - 1;
 

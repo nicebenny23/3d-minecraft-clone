@@ -21,7 +21,7 @@ struct sandfall : gameobject::component {
         Coord lowpos = pos - Coord(0, 1, 0);
 
   
-        block* obj = grid::getobjatgrid(lowpos, true);
+        block* obj = CtxName::ctx.Grid->getBlock(lowpos);
 
         // Check if the block below is empty or can be replaced
         if (obj != nullptr) {

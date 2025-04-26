@@ -11,10 +11,10 @@ constexpr bool debugrender = false;
 constexpr bool generateflat = false;
 constexpr bool debugnodeath = false;
 
-#define debug(msg) std::cout << 'w' << msg << '\n';
+#define debug(msg) std::cout << 'w' << (msg )<< '\n';
 
-#define warn(msg) std::cout << 'y' << msg << '\n';
-#define alert(msg) std::cout << 'r' << msg << '\n';
+#define warn(msg) std::cout << 'y' <<( msg )<< '\n';
+#define alert(msg) std::cout << 'r' << (msg )<< '\n';
 void ShowAssertMessageBox(void* lpParam);
 
 

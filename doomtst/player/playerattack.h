@@ -33,7 +33,7 @@ struct playerattackcomp:gameobject::component
 
 	
 		voxtra::RayWorldIntersection closest;
-		ray cameraray = ray(Vector3(camera::campos), Vector3(camera::campos) + camera::direction() * 7);
+		ray cameraray = ray(camera::campos(), camera::campos() + camera::GetCamFront() * 7);
 		closest = collision::raycastall(cameraray,owner);
 		if (closest.collider == nullptr)
 		{
@@ -43,7 +43,7 @@ struct playerattackcomp:gameobject::component
 		{
 			return;
 		}
-		if (closest.collider->owner->hascomponent<estate>()&&userinput::mouseleft().pressed)
+		if (closest.collider->owner->hascomponent<estate>()&&CtxName::ctx.Inp->mouseleft().pressed)
 		{
 			if (closest.collider->owner->hascomponent<rigidbody>())
 			{

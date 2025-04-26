@@ -1,6 +1,6 @@
 #include "textrender.h"
 #include "renderer.h"
-texturearray textarray;
+TextureArray* textarray;
 integertext::integertext(v2::Vector2 textcenter, float textscale)
 {
 	center = textcenter;
@@ -32,19 +32,16 @@ void integertext::render()
 	recalculateword();
 
 	write();
-	vao Voa = vao();
-	vbuf VBO = vbuf();
-	vbuf ibo = vbuf();
-	Voa.generate();
-	VBO.generate(GL_ARRAY_BUFFER);
-	ibo.generate(GL_ELEMENT_ARRAY_BUFFER);
-	textarray.apply();
-	renderer::render2dtextarray(Voa, ibo, VBO, datbuf, indbuf);
+	Mesh text;
+	text.AddAttribute<float,2>().AddAttribute<float,3>();
+
+
+	renderer::Ren.Gen<true>(&text);
+	renderer::Ren.Textures.Apply(textarray);
+	renderer::Ren.Render(&text, datbuf, indbuf);
 	datbuf.destroy();
 	indbuf.destroy();
-	Voa.destroy();
-	VBO.destroy();
-	ibo.destroy();
+	renderer::Ren.Destroy(&text);
 }
 
 
@@ -62,7 +59,7 @@ void inittextarray()
     texlist[7] = "bitmaptext\\sevenimg.png";
     texlist[8] = "bitmaptext\\eightimg.png";
     texlist[9] = "bitmaptext\\nineimg.png";
-    textarray = texturearray(16, 16, texlist);
+    textarray = renderer::Ren.Textures.GetTexArray(texlist,"Letters");
    
 }
 void writeletter(geometry::Box2d location, int letter)

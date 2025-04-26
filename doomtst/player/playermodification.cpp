@@ -1,6 +1,6 @@
 #include "playermodification.h"
 #include "../world/voxeltraversal.h"
-void initbreakparticle(entityname::entity* newent)
+void initbreakparticle(Ent::entity* newent)
 {
 	newent->transform.position = newent->transform.position;
 

@@ -15,24 +15,23 @@ block& Chunk::chunk::operator[](int index)
 }
 
 
-int Chunk::indexfrompos(int x, int y, int z)
+int Chunk::indexfrompos(Coord pos)
 {
-	x = modabs(x, chunkaxis);
-	y = modabs(y, chunkaxis);
-	z = modabs(z, chunkaxis);
+	int x = symmetric_mod(pos.x, chunkaxis);
+	int y = symmetric_mod(pos.y, chunkaxis);
+	int z = symmetric_mod(pos.z, chunkaxis);
 	return	chunkaxis* chunkaxis * x + chunkaxis * y + z;
 }
 
 
 void Chunk::chunkmesh::genbufs()
 {
-	Voa.generate();
-	VBO.generate(GL_ARRAY_BUFFER);
-	ibo.generate(GL_ELEMENT_ARRAY_BUFFER);
+	renderer::Ren.Gen<true>(&TransparentGeo);
 
-	transparentVoa.generate();
-	transparentVBO.generate(GL_ARRAY_BUFFER);
-	transparentibo.generate(GL_ELEMENT_ARRAY_BUFFER);
+	renderer::Ren.Gen<true>(&SolidGeo);
+	SolidGeo.AddAttribute<float,3>().AddAttribute<float,3>().AddAttribute<float, 1>();
+	TransparentGeo.AddAttribute<float, 3>().AddAttribute<float, 3>().AddAttribute<float, 1>();
+
 }
 
 
@@ -52,15 +51,10 @@ void Chunk::chunkmesh::sortbuf()
 
 
 void Chunk::chunkmesh::destroy()
-{
-	transparentVoa.destroy();
+{			 
 
-	transparentVBO.destroy();
-	transparentibo.destroy();
-
-	Voa.destroy();
-	VBO.destroy();
-	ibo.destroy();
+	renderer::Ren.Destroy(&SolidGeo);
+	renderer::Ren.Destroy(&TransparentGeo);
 
 	
 	facebuf.destroy();
@@ -84,7 +78,7 @@ Chunk::chunk* Chunk::airload(Coord location)
 
 const char* Chunk::getcorefilename(Coord pos)
 {
-	std::string* strng = (new std::string());
+	std::string* strng = new std::string();
 	strng->append("worldstorage\\Chunk");
 	strng->append(std::to_string(pos.x));
 	strng->append(",");
@@ -93,6 +87,7 @@ const char* Chunk::getcorefilename(Coord pos)
 	strng->append(std::to_string(pos.z));
 	return 	strng->data();
 }
+//this whole system has to be completly redone
 void appendspecialbytelist(array<short>& bytelist, int index, block* blk) {
 
 	liquidprop* getliq = blk->getcomponentptr<liquidprop>();

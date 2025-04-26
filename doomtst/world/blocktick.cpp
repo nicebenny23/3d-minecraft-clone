@@ -5,7 +5,7 @@ bool tick::tickframe;
 void tick::trytick() {
 
 	tickframe = false;
-	tickdt -= timename::dt;
+	tickdt -= CtxName::ctx.Time->dt;
 	if (tickdt<0)
 	{
 		tickdt = tick::ticktime;

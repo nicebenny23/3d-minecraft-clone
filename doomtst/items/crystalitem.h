@@ -9,7 +9,7 @@ inline void initcrystalitem(item* itm) {
 
 	itm->itemtype = count;
 	itm->properties.placeable = true;
-	itm->itemui.itemsprite = createitembox("images\\crystal.png");
+	itm->itemui.itemsprite = createitembox("images\\crystal.png","CrystalTexture");
 }
 
 

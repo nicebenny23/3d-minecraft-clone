@@ -1,8 +1,8 @@
 #include "guirender.h"
 
-#include "../renderer/Window.h"
+#include "../game/Core.h"
 #include <iostream>
-
+#include "../game/GameContext.h"
 namespace guirender {
 
     void initgui()
@@ -12,8 +12,8 @@ namespace guirender {
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable keyboard controls
-
-        ImGui_ImplGlfw_InitForOpenGL(window::awindow, true);
+        
+        ImGui_ImplGlfw_InitForOpenGL(CtxName::ctx.Window->WinPtr, true);
         ImGui_ImplOpenGL3_Init("#version 330");
         console::CreateConsoleBuffer();
     }

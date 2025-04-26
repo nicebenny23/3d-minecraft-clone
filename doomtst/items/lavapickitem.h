@@ -8,7 +8,7 @@ inline void lavapickinit(item* itm) {
 	itm->maxamt = 64;
 	itm->amt = 64;
 	itm->itemtype = wear;
-	itm->itemui.itemsprite= createitembox("images\\pikaxe.png");
+	itm->itemui.itemsprite= createitembox("images\\pikaxe.png","PickaxeTexture");
 }
 
 #endif // !lavapickitem_HPP

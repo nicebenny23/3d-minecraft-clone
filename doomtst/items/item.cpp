@@ -63,4 +63,3 @@ void item::maxoutthis(item* itm)
 	this->give(itm->amt);
 }
 item* freeditem;
-texturearray itemidlist;

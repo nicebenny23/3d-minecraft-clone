@@ -10,6 +10,6 @@ inline void initironsworditem(item* itm) {
 	itm->properties.dmg = 6;
 
 	itm->itemtype = wear;
-	itm->itemui.itemsprite = createitembox("images\\ironsword.png");
+	itm->itemui.itemsprite = createitembox("images\\ironsword.png","IronSwordTexture");
 }
 #endif // !ironsworditem_HPP

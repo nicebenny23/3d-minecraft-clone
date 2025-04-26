@@ -1,19 +1,15 @@
 
 #include "gameobject.h"
 
-
+#include "GameContext.h"
 #include "../util/random.h"
 #include <type_traits>
 #include "../renderer/Renderer.h"
 
 
-
-
-
 using namespace gameobject;
 
-std::unordered_map<const char*, int> gameobject::stringtoint;
-int gameobject::curid;
+
 
 
 
@@ -22,10 +18,14 @@ void gameobject::component::ondestroy()
 }
 
 
-void gameobject::component::start()
+void gameobject::component::destroy()
 {
+	ondestroy();
+	ctx->OC->managers[id].pool.free(this);
+
 }
-void gameobject::component::renderupdate()
+
+void gameobject::component::start()
 {
 }
 void gameobject::component::update()
@@ -54,48 +54,43 @@ void gameobject::component::oncollision(obj* collidedwith)
 //not functonal yet
 
 
+void gameobject::obj::SetOCManager(CtxName::Context* ctx)
+{
+	OC= ctx->OC ;
+}
+
+
 obj::obj() {
 	state = beinginitiated;
-	
+	//Manager = &Man;
 
 };
-array<componentmanager,true> gameobject::managerlist;
 //gets a gameobject from a refrence to it;
 
-void gameobject::initmanagerlist()
-{
-	managerlist = array<componentmanager,true>(0);
-}
 
-int comparemanager(const void* b, const void* a) {
-
-	int priorityb = managerlist[*((int*)(b))].priority;
-
-	int prioritya = managerlist[*((int*)(a))].priority;
-	return (prioritya > priorityb) - (priorityb > prioritya);
-
-}
-void gameobject::updatecomponents()
+void gameobject::OCManager::updatecomponents(updatecalltype type)
 {
 
-	array<int> managerref;
+	array<componentmanager*> managerref;
 
-	for (int i = 0; i < managerlist.length; i++)
+	for (int i = 0; i < managers.length; i++)
 	{
 
 
-		if (shouldupdate( managerlist[i].utype))
+		if (shouldupdate( managers[i].utype,type))
 		{
-			managerref.append(i);
+			managerref.append(&managers[i]);
 		}
 		
 
 	}
-
-	std::qsort(managerref.list, managerref.length, sizeof(int), comparemanager);
+	std::sort(&managerref[0], &managerref[0]+managerref.length, [](componentmanager* a, componentmanager* b) {
+		return a->priority>b->priority;
+		});
+	
 	for (int j = 0; j < managerref.length; j++)
 	{
-		componentmanager* manager = &managerlist[managerref[j]];
+		componentmanager* manager = managerref[j];
 		for (component& comps :manager->pool)
 		{
 			
@@ -108,12 +103,6 @@ void gameobject::updatecomponents()
 		}
 	}
 	managerref.destroy();
-}
-
-componentmanager* gameobject::managerof(component* comp)
-{
-	
-	return &managerlist.fastat(comp->id);
 }
 
 void gameobject::destroy(obj* object)
@@ -146,6 +135,8 @@ void gameobject::componentmanager::create(int mid, int bytesize)
 
 void gameobject::componentmanager::init(component* sample)
 {
+	//one method to remove this would involve iterating through all managers during updates
+
 	priority = sample->priority;
 
 	utype = sample->utype;

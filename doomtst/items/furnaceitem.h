@@ -10,6 +10,6 @@ inline void initfurnaceitem(item* itm) {
 	itm->itemtype = count;
 	itm->properties.armor = 1.f;
 	itm->properties.placeable = true;
-	itm->itemui.itemsprite = createitembox("images\\furnace.png");
+	itm->itemui.itemsprite = createitembox("images\\furnace.png","FurnaceTexture");
 }
 #endif // !grassitem_HPP

@@ -9,7 +9,7 @@ using namespace geometry;
 #ifndef  textrender_HPP
 #define textrender_HPP
 
-extern texturearray textarray;
+extern TextureArray* textarray;
 void inittextarray();
 const v2::Vector2 cubeuv[] = {
 	v2::Vector2(0, 1),

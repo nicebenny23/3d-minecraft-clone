@@ -9,7 +9,7 @@ inline void sanditeminit(item* itm) {
 	itm->maxamt = 41;
 	itm->amt = 4;
 	itm->itemtype = count;
-	itm->itemui.itemsprite = createitembox("images\\sand.png");
+	itm->itemui.itemsprite = createitembox("images\\sand.png","SandTexture");
 }
 
 #endif // !rockitemitem_HPP

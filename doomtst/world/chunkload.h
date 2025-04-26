@@ -1,12 +1,21 @@
 #include "chunk.h"
-
 #ifndef chunkload_HPP
 #define chunkload_HPP
-
-
-Chunk::chunk* chunkfileload(Coord location);
-
-int generatechunkvalfromnoise(float noiselevel, Coord position, float feturemap, float modulatedmap, float biomemap,float map2);
- Chunk::chunk* loadchunk(Coord location);
-
+namespace grid{
+	struct Grid;
+}
+namespace CtxName {
+	struct Context;
+}
+struct ChunkLoader
+{
+	void Init(CtxName::Context* ctx);
+	
+	Chunk::chunk* LoadChunk(Coord location);
+	Chunk::chunk* AllocChunk(Coord location);
+	Chunk::chunk* LoadFromFile(Coord location);
+	Chunk::chunk* LoadFromNoise(Coord location);
+private:
+	grid::Grid* Grid;
+};
 #endif // chunkload_HPP

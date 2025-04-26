@@ -26,7 +26,7 @@ struct estate :gameobject::component
 	float timetilldmg;
 	void update() {
 
-		timetilldmg -= timename::dt;
+		timetilldmg -= CtxName::ctx.Time->dt;
 		if (owner->hascomponent<rigidbody>())
 		{
 			velocitylast = owner->getcomponent<rigidbody>().velocity * .03f + velocitylast * .97f;
@@ -87,7 +87,7 @@ struct estate :gameobject::component
 				if (!objutil::toent(owner).hastag("player"))
 				{
 
-					entityname::destroy(&objutil::toent(owner));
+					objutil::toent(owner).Destroy();
 				}
 				else
 				{

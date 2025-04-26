@@ -23,7 +23,7 @@ struct playertpcomp :gameobject::component
 		}
 	}
 	void update() {
-		timetilluse -= timename::dt;
+		timetilluse -= CtxName::ctx.Time->dt;
 		item* select = owner->getcomponent<inventory>().selected;
 		if (select == nullptr)
 		{
@@ -40,7 +40,7 @@ struct playertpcomp :gameobject::component
 			{
 				if (timetilluse < 0)
 				{
-					if (userinput::mouseleft().released)
+					if (CtxName::ctx.Inp->mouseleft().released)
 					{
 						Vector3 pos = toent(owner).transform.position;
 						Vector3 offset = toent(owner).transform.getnormaldirection()*  chargetime * chargetime;
@@ -65,9 +65,9 @@ struct playertpcomp :gameobject::component
 			}
 			if (timetilluse < 0)
 			{
-				if (userinput::mouseleft().held || userinput::mouseleft().released)
+				if (CtxName::ctx.Inp->mouseleft().held || CtxName::ctx.Inp->mouseleft().released)
 				{
-					chargetime += timename::dt;
+					chargetime += CtxName::ctx.Time->dt;
 					chargetime = Min(3, chargetime);
 				}
 				else {

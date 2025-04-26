@@ -1,18 +1,28 @@
 #include "../external/stb_image.h"
 #include <iostream>
 #include "../debugger/debug.h"
+#include "vector2.h"
 #pragma once
 
-namespace texdata{
-inline unsigned char* loadtexdata(int* width, int* height, const char* name) {
-	int colchannel = 0;
-	unsigned char* data = stbi_load(name, width, height, &colchannel, STBI_rgb_alpha);
+namespace texdata {
+	inline unsigned char* loadtexdata(int* width, int* height, const char* name) {
+		int colchannel = 0;
+		unsigned char* data = stbi_load(name, width, height, &colchannel, STBI_rgb_alpha);
 
-	if (data == nullptr)
-	{
-		std::cerr << "Failed to load texture: " << stbi_failure_reason() << std::endl;
-		Assert("texture doesent exist");
+		if (data == nullptr)
+		{
+			std::cerr << "Failed to load texture: " << stbi_failure_reason() << std::endl;
+			throw std::invalid_argument(std::string("Failed to load image: ") + name);
+		}
+		return data;
 	}
-	return data;
-}
+inline v2::Coord2d GetImgSize(const char* Img_Path) {
+		int channels;
+		v2::Coord2d size;
+		// Load image to get its info
+		if (!stbi_info(Img_Path, &size.x, &size.y, &channels)) {
+			throw std::invalid_argument(std::string("Failed to load image: ")+Img_Path);
+		}
+		return size;
+	}
 }

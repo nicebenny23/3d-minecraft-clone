@@ -4,7 +4,7 @@
 #define blockrender_HPP
 namespace blockrender {
 	void setrendertransparent();
-	extern texturearray texarray;
+	extern TextureArray* texarray;
 	void setrendersolid();
 	void renderblocks(bool transparent);
 	void initblockrendering();

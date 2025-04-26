@@ -4,24 +4,25 @@
 #include "../game/collision.h"
 #include "../game/entityutil.h"
 #pragma once
-struct playercam :gameobject::component
+struct CameraComp :gameobject::component
 {
+	CameraComp() {
+
+		utype = gameobject::updaterender;
+	}
+	
+	Transform CamTransform;
 	void start() {
+		CamTransform = toent(owner).transform;
 		priority = 10000;
+
 	}
 	void update() {
 
 
+		renderer::setviewmatrix(LookAt(CamTransform));
+		
+		CamTransform = toent(owner).transform;
 
-		ray cameraray = ray( toent(owner).transform.position, toent(owner).transform.position +toent(owner).transform.getnormaldirection()* interactmaxrange);
-		voxtra::RayWorldIntersection closest = collision::raycastall(cameraray);
-		if (closest.intersected())
-		{
-			for (int i = 0; i < closest.collider->owner->componentlist.length; i++) {
-				closest.collider->owner->componentlist[i]->onplayerclick();
-
-			}
-		}
 	}
 };
-

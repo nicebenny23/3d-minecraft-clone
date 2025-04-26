@@ -5,12 +5,11 @@
 #include "../util/dynamicarray.h"
 #include "../util/vector3.h"
 #include "../util/algorthm.h"
-#ifndef noise_HPP
-#define noise_HPP
-#define distrubutionsize 1000
+#include "../util/stats.h"
+#pragma once
+#define NoiseOffset Vector3(.838f, .38f, .49f)
 using namespace v3;
 using namespace dynamicarray;
-extern array<v3::Vector3> seededdirections;
 
 enum noisetype {
     normalnoise = 0,
@@ -20,8 +19,10 @@ enum noisetype {
 
 struct noiseparams
 {
+    int distributionsize;
     noiseparams() {
-        octaves = -1;
+        distributionsize = 1000;
+        octaves = 0;
         scalefactor = 0;
         startscale = 0;
         amplificationfactor = 0;
@@ -33,7 +34,7 @@ struct noiseparams
     int octaves;            // Number of octaves used in the noise generation
     float amplificationfactor;// Controls how amplitude 
     noiseparams(float startingscale, float scalemultiplyer, unsigned int noiseoctaves, float ampfactor,noisetype ntype) {
-
+        distributionsize = 1000;
         startscale = startingscale;
         scalefactor = scalemultiplyer;
         octaves = noiseoctaves;
@@ -42,76 +43,40 @@ struct noiseparams
     }
 };
 
-void initrandomdirs();
-
 struct noisemap
 {
-    dynamicarray::array<float> distribution;
     void createdist();
     noiseparams properties;
     
     noisemap();
-    float operator[](Vector3 pos);
- 
-    float operator[](Coord pos);
+    //evaluates Noise At pos
+    float Eval(Vector3 pos);
+ //evaluates Noise At pos
+    float Eval(Coord pos);
    
-  
+    statistics::HistogramEqualizer equalizer;
     void create();
     void destroy();
     
- inline   float applydist(const float val);
 };
-inline float  interoplatequintic(const float& t) {
-
-    return (6 * t*t- 15 * t + 10) * t *t * t;
-
-}
-
-inline Vector3 randompointonsphere(int x, int y, int z);
 
 float interpolatenoisemap(float x, float y, float z);
-float computenoiseatpoint(Vector3 point, noiseparams params);
+float EvaluateNoiseAtPoint(Vector3 point, noiseparams params);
 
-int comparefloat(const void* b, const void* a);
-
-
-inline int getbucket(float value) {
-
-    value += 1;
-    value /= 2;
-    value *= distrubutionsize;
-    return clamp(int( value),0,distrubutionsize-1);
-}
 inline void noisemap::createdist() {
     
-distribution = array<float>(distrubutionsize);
-array<float> codistribution = array<float>(distrubutionsize);
+    array<float> distribution = array<float>();
+    
+    float ScaleRange =properties.startscale * pow(properties.scalefactor, properties.octaves)/100;
 
-    for (int i = 0; i < distrubutionsize; i++)
-    {
-        Vector3 tstpnt = Vector3(51.838, 1193.38 * i, -54.49) + randompointonsphere(6,  1000 * i, 90);
-     
-            float val = computenoiseatpoint(tstpnt, properties);
-            codistribution[i] = val;
-            distribution[i] = 0;
-    }
-    std::qsort(codistribution.list, codistribution.length, sizeof(float), comparefloat);
-  
-    for (int i = 0; i < distrubutionsize; i++)
-    {
-        distribution[getbucket(codistribution[i])] = 2 * float(i) /float( distrubutionsize )- 1.f;
-    }
-    //removing gaps
-    float lastValue = -1; // Start with the minimum value
-    for (int i = 0; i < distrubutionsize; i++) {
-        if (distribution[i] != 0) {
-            lastValue = distribution[i];
-        }
-        else {
-            distribution[i] = lastValue;
-        }
-    }
-    codistribution.destroy();
+for (int i = 0; i < properties.distributionsize; i++)
+{
+    
+    Vector3 randomPoint =NoiseOffset +randompointonsphere(0,i,0)/ScaleRange;
+    float val = EvaluateNoiseAtPoint(randomPoint, properties);
+    distribution[i]=val;
+}
+equalizer= statistics::HistogramEqualizer(array<float>(distribution));
 }
 
 
@@ -124,4 +89,3 @@ inline noisemap* genperlin(int octaves,  float scalemul, float startscale, float
 
     return map;
 }
-#endif // 

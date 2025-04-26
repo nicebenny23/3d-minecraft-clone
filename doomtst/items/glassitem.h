@@ -9,7 +9,7 @@ inline void glassiteminit(item* itm) {
 	itm->maxamt = 64;
 	itm->amt = 0;
 	itm->itemtype = count;
-	itm->itemui.itemsprite = createitembox("images\\glass.png");
+	itm->itemui.itemsprite = createitembox("images\\glass.png","GlassTexture");
 }
 
 #endif // !rockitemitem_HPP

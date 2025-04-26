@@ -5,7 +5,7 @@
 namespace oalgorithm {
 
 
-
+	
 	template<typename T>
 inline	bool sorted(T* arr, int start, int end) {
 		int prev = arr[start];

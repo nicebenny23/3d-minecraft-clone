@@ -4,7 +4,7 @@
 #define entityutil_HPP
 
 
-inline void kb(Vector3 point, float force,entityname::entity* ent) {
+inline void kb(Vector3 point, float force,Ent::entity* ent) {
 	if (ent->hascomponent<estate>())
 	{
 

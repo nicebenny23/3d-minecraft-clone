@@ -8,7 +8,7 @@ inline void inittorchitem(item* itm) {
 	itm->maxamt = 64;
 
 	itm->itemtype = count;
-	itm->itemui.itemsprite= createitembox("images\\torch.png");
+	itm->itemui.itemsprite= createitembox("images\\torch.png","TorchTexture");
 	itm->properties.placeable = true;
 }
 

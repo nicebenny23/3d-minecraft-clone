@@ -61,7 +61,7 @@ struct playerplace :gameobject::component
 		}
 		int dir = maxdirection(closest.collider->globalbox().center - plamentblock->center());
 	
-		int blockdirection = max2ddirection(camera::campos- closest.colpoint);
+		int blockdirection = max2ddirection(camera::campos() - closest.colpoint);
 
 		plamentblock->mesh.direction = blockdirection;
 		plamentblock->mesh.attachdir = dir;
@@ -104,7 +104,7 @@ struct playerplace :gameobject::component
 
 	
 
-		if (userinput::mouseright().pressed)
+		if (CtxName::ctx.Inp->mouseright().pressed)
 		{
 			
 				if (blockidfromitemid(select) != -1)

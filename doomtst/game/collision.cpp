@@ -191,7 +191,7 @@ bool collision::aabbCollidesWithEntity(Collider* blk, gameobject::obj* orgin ) {
 	return collision::boxCollidesWithEntity(blk->globalbox(), orgin);
 }
 
-voxtra::RayWorldIntersection collision::raycastall(ray nray, gameobject::obj* orgin, voxtra::gridtrav travmode)
+voxtra::RayWorldIntersection collision::raycastall(ray nray, gameobject::obj* orgin, voxtra::GridTraverseMode travmode)
 {
 	voxtra::RayWorldIntersection gridcol = voxtra::travvox(nray,200,travmode);
 	voxtra::RayWorldIntersection entcol = raycastentity(nray,orgin);
@@ -213,6 +213,8 @@ Vector3 colideentandblock(Collider& entity, block* tocollide) {
 
 
 
+			Vector3 my = entity.globalbox().center;
+			Vector3 otherpos = blockcol.globalbox().center;
 			Vector3 force = aabb::collideaabb(entity, blockcol);
 
 
@@ -220,10 +222,9 @@ Vector3 colideentandblock(Collider& entity, block* tocollide) {
 			{
 				return zerov;
 			}
-
-
+			//bug collision was happening twice(fix,improve collision to not collide already destroyed/being destroyed obejcts)/
 			propagatecollisionmessage(entity.owner, tocollide);
-		
+			
 
 			if (!blockcol.effector && !entity.effector)
 			{
@@ -239,7 +240,7 @@ Vector3 colideentandblock(Collider& entity, block* tocollide) {
 
 void collision::handleCollisionWithGrid(Collider& entity)
 {
-	array<block*>& blklist = grid::voxelinrange(entity.globalbox());
+	array<block*>& blklist = CtxName::ctx.Grid->voxelinrange(entity.globalbox());
 
 	//std::swap(entity.box.center, entity.prevpos);
 	

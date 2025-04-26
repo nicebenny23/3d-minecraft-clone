@@ -12,11 +12,8 @@
 #define Mouse_rightindex GLFW_KEY_LAST + GLFW_MOUSE_BUTTON_RIGHT
 #define Extra_keys 2
 namespace userinput {
-	
-	extern v2::Vector2 mouseposdt;
-	extern v2::Vector2 mousepos;
-	extern v2::Vector2 normedmousepos;
-		struct inputkey {
+
+	struct inputkey {
 		bool held;
 		bool released;
 		bool pressed;
@@ -35,19 +32,28 @@ namespace userinput {
 
 		void update(int action);
 	};
+	struct  InputManager
+	{
+		dynamicarray::array<inputkey, true> keylist;
+
+
+		v2::Vector2 mouseposdt;
+		v2::Vector2 mousepos;
+		v2::Vector2 normedmousepos;
 		inputkey mouseleft();
-	
+
 		inputkey mouseright();
-	void initiate();
 
-	void updatekey(int code, int pressedorrelesed);
-	void endupdate();
-	
-	int convertchartoglfwkey(const int key);
+		InputManager();
 
-		inputkey getinputkey(const int key);
-	
+		void updatekey(int code, int pressedorrelesed);
+		void endupdate();
 
+		int convertchartoglfwkey(const int key);
+
+		inputkey getKey(const int key);
+
+	};
 
 
 }

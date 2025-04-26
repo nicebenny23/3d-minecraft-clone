@@ -31,15 +31,15 @@ struct firedaggerfinalboss :gameobject::component {
 
       
             //currtransform.position = pos;
-            currtransform.orient(pos);
+            currtransform.Orient(pos);
             currtransform.position += currtransform.getnormaldirection() * .02f;
 
-            if (random() < timename::dt * 1 / 20.f) {
+            if (random() < CtxName::ctx.Time->dt * 1 / 20.f) {
                 state = shooting;
                 timetillshoot = .1;
                 shotsleft = 11;
             }
-            if (random() > 1-timename::dt * 1 / 20.f) {
+            if (random() > 1-CtxName::ctx.Time->dt * 1 / 20.f) {
                 state = ramming;
                 timetillshoot = 1.5;
      
@@ -47,8 +47,8 @@ struct firedaggerfinalboss :gameobject::component {
         }
         if (state == shooting)
         {
-            currtransform.orientbase(Vector3(0, 1, 0));
-            currtransform.position += currtransform.getnormaldirection()*timename::dt * 4;
+            currtransform.OrientDir(Vector3(0, 1, 0));
+            currtransform.position += currtransform.getnormaldirection()*CtxName::ctx.Time->dt * 4;
 
             //currtransform.position += Vector3(1, 0, 0)*.002f;
             if (timetillshoot<0&&0<shotsleft)
@@ -65,7 +65,7 @@ struct firedaggerfinalboss :gameobject::component {
             {
                 state = following;
             }
-            timetillshoot -= timename::dt;
+            timetillshoot -= CtxName::ctx.Time->dt;
         }
         if (state == ramming)
         {
@@ -73,9 +73,9 @@ struct firedaggerfinalboss :gameobject::component {
 
 
             //currtransform.position = pos;
-            currtransform.orient(pos);
-            currtransform.position += currtransform.getnormaldirection() * timename::dt*9;
-            timetillshoot -= timename::dt;
+            currtransform.Orient(pos);
+            currtransform.position += currtransform.getnormaldirection() * CtxName::ctx.Time->dt*9;
+            timetillshoot -= CtxName::ctx.Time->dt;
             if (timetillshoot<0)
             {
                 state = following;
@@ -87,14 +87,13 @@ struct firedaggerfinalboss :gameobject::component {
 
         player::goblin->transform.position = Vector3(0, 300, 0);
 
-        blockrender::enablelighting = true;
 
     }
 
 };
-inline entityname::entityref createfinalboss(v3::Vector3 pos) {
+inline Ent::entityref createfinalboss(v3::Vector3 pos) {
     
-    entityname::entityref refmodel = entityname::createentity(zerov, "enemy");
+    Ent::entityref refmodel = CtxName::ctx.EntMan->CreateEntity(zerov, "enemy");
     refmodel.toent()->addcomponent<model>();
     Coord cpos = pos;
     //  refmodel.toent()->getcomponent<model>().add("slime2.obj", "images\\slimetex.png");

@@ -23,7 +23,7 @@ struct playerdaggercomp :gameobject::component
 			return;
 		}
 	
-		if (userinput::mouseleft().pressed)
+		if (CtxName::ctx.Inp->mouseleft().pressed)
 		{
 			if (select->id!=crystaldaggeritem)
 			{

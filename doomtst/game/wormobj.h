@@ -30,7 +30,7 @@ struct worm:gameobject::component
 		for (int i =1; i < length; i++)
 		{
 
-			meshname::mesh* meshatpos= owner->getcomponent<model>().meshlist[i];
+			ModelMeshName::ModelMesh* meshatpos= owner->getcomponent<model>().meshlist[i];
 			aabb::Collider* colatpos = collist[i];
 			Transform& local = meshatpos->transform;
 			local.position += currtransform.getnormaldirection() * speed;

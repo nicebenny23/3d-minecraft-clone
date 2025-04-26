@@ -12,7 +12,7 @@ inline void initropeitem(item* itm) {
 	itm->maxamt = 64;
 	itm->properties.dmg = 0;
 	itm->itemtype = count;
-	itm->itemui.itemsprite = createitembox("images\\rope.png");
+	itm->itemui.itemsprite = createitembox("images\\rope.png","RopeItemTexture");
 
 }
 

@@ -57,9 +57,6 @@
     <ClCompile Include="game\collision.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game\component.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="game\gameobject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -108,7 +105,7 @@
     <ClCompile Include="items\recipe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="renderer\mesh.cpp">
+    <ClCompile Include="renderer\ModelMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="game\particles.cpp">
@@ -210,6 +207,33 @@
     <ClCompile Include="game\Settings.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="util\mathutil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\Core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\GameContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\TextureManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\ShaderManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\VertexObjectManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\RenderContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Resources\ResourceManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="util\vector3.h">
@@ -258,9 +282,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game\collision.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="game\component.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game\gameobject.h">
@@ -404,7 +425,7 @@
     <ClInclude Include="game\collutil.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="renderer\mesh.h">
+    <ClInclude Include="renderer\ModelMesh.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="renderer\model.h">
@@ -687,6 +708,54 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game\Settings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playercamcontrols.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\stats.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\Core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\GameContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\SlMove.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\ShaderManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\TextureManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Vao.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\GlUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\VertexObjectManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\RenderProperties.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\UniformManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\UniquePtr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\RenderContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\ResourceManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -1,6 +1,7 @@
 #include "menu.h"
-#include "../renderer/Window.h"
 #include "../util/userinput.h"
+#include "../game/Core.h"
+#include "../game/GameContext.h"
 menu* openmenu;
 menu* inventorylocation;
 bool ismenuopen() {
@@ -18,7 +19,7 @@ bool ismenuopen() {
 void managemenus()
 {
 
-	if (userinput::getinputkey(esckey).pressed) {
+	if (CtxName::ctx.Inp->getKey(esckey).pressed) {
 		if (openmenu != nullptr)
 		{
 			openmenu->close();
@@ -30,7 +31,7 @@ void managemenus()
 			return;
 		}
 		else {
-			glfwSetWindowShouldClose(window::awindow, true);
+			glfwSetWindowShouldClose(CtxName::ctx.Window->WinPtr, true);
 		}
 	}
 }
@@ -102,7 +103,7 @@ void menu::customopen()
 menu::menu(v2::Vector2 size)
 {
 
-	menubox = ui::createuielement<uibox>("images\\menutex.png", size,v2::zerov,11);
+	menubox = ui::createuielement<uibox>("images\\menutex.png", "MenuTexture", size,v2::zerov,11);
 	menubox->state.enabled = false;
 	enabled = false;
 }

@@ -2,7 +2,9 @@
 #include "../util/geometry.h"
 #include "../util/userinput.h"
 #include "../util/mathutil.h"
-#include "Window.h"
+#include "../game/Core.h"
+
+#include "../game/GameContext.h"
 using namespace uiboxname;
 constexpr int listsize= 400;
 const float cubeuv[] = {
@@ -29,14 +31,16 @@ void uiboxname::uibox::update()
 	if (mouseonblock())
 	{
 		state.hovered = true;
-		state.leftclicked = userinput::mouseleft().pressed;
-		state.rightclicked = userinput::mouseright().pressed;
+		state.leftclicked = CtxName::ctx.Inp->mouseleft().pressed;
+		state.rightclicked = CtxName::ctx.Inp->mouseright().pressed;
 	
 	}
 }
 bool uiboxname::uibox::mouseonblock()
+
 {
-	v2::Vector2 normedpos = window::aspectAdjustedCoord(userinput::mousepos);
+	
+	v2::Vector2 normedpos = CtxName::ctx.Window->FitToAspectRatio(CtxName::ctx.Inp->mousepos);
 	normedpos -= box.center;
 	if ( abs(normedpos.x)<box.scale.x)
 	{
@@ -75,17 +79,11 @@ void uiboxname::uibox::render()
 		indbuf[4] = 3;
 		indbuf[5] = 2;
 
-		vao Voa;
-		vbuf VBO;
-		vbuf ibo;
-		Voa.generate();
-		VBO.generate(GL_ARRAY_BUFFER);
-		ibo.generate(GL_ELEMENT_ARRAY_BUFFER);
-
+		Mesh BoxMesh;
+		renderer::Ren.Gen<true>(&BoxMesh);
+		BoxMesh.AddAttribute<float,2>().AddAttribute<float,2>();
 		array<float> databuf = array<float>();
-		texture uitexture = tex;
-		uitexture.apply();
-
+		renderer::Ren.Textures.Apply(tex);
 		for (int j = 0; j < 4; j++)
 		{
 			v2::Vector2 pos = box.center + offset[j] * (box.scale);
@@ -94,14 +92,10 @@ void uiboxname::uibox::render()
 			databuf.append(cubeuv[2 * j]);
 			databuf.append(cubeuv[2 * j + 1]);
 		}
-
-
-		renderer::render2dquadlist(Voa, ibo, VBO, databuf, indbuf);
-		databuf.destroy();
+		renderer::Ren.Render(&BoxMesh,databuf,indbuf);
+	databuf.destroy();
 		indbuf.destroy();
-		Voa.destroy();
-		VBO.destroy();
-		ibo.destroy();
+		renderer::Ren.Destroy(&BoxMesh);
 	}
 	
 }
@@ -110,13 +104,19 @@ void uiboxname::uibox::render()
 
 void uiboxname::uibox::customdestroy()
 {
-	tex.destroy();
 }
 
-uiboxname::uibox::uibox(const char* texloc, v2::Vector2 scl, v2::Vector2 position, float boxpriority)
+void uiboxname::uibox::LoadTex(const char* texloc, const char* texture)
 {
+	tex = renderer::Ren.Textures.Get2dTex(texloc, texture);
+
+}
+
+
+uiboxname::uibox::uibox(const char* texloc, const char* TextureName, v2::Vector2 scl, v2::Vector2 position, float boxpriority)
+{
+	LoadTex(texloc, TextureName);
 	priority = boxpriority;
-	tex = texture(texloc);
 	box.scale = scl;
 	box.center = position;
 	state.enabled = true;

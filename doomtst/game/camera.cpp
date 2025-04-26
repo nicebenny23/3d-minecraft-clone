@@ -4,53 +4,33 @@
 #include "../player/player.h"
 #include "../renderer/Window.h"
 namespace camera {
-	v3::Vector3 campos;
-	float yaw, pitch;
-	v3::Vector3 upvec;
-	v3::Vector3 frontvec;
-	v3::Vector3 rightvec;
-	void initilize()
+	
+	
+	v3::Vector3 GetCamFront()
 	{
-		campos = player::goblin->transform.position;
-		yaw = -90;
-		pitch = 0;
-
+		return GetCam().getnormaldirection();;
 	}
-	void updatetoplayer()
+	v3::Vector3 GetCamUp()
 	{
-	
-		
-	
-		campos = player::goblin->transform.position.glm() ;
-		pitch = player::goblin->transform.pitch;
-		yaw= player::goblin->transform.yaw;
+		return GetCam().getupdirection();
 	}
-    v3::Vector3 direction() {
-		return v3::YawPitch(yaw, pitch);
-	}
-	
-	
-	void setviewmatrix()
-	
+	v3::Vector3 GetCamRight()
 	{
-		frontvec = player::goblin.toent()->transform.getnormaldirection();
-		rightvec = player::goblin.toent()->transform.getrightdirection();
-		upvec = player::goblin.toent()->transform.getupdirection();
-		renderer::setviewmatrix(glm::lookAt(campos.glm(), campos.glm() + frontvec.glm(), upvec.glm()));
-		
-	
+		return GetCam().getrightdirection();
 	}
-
-	
-	void cameraupdate()
+	Transform GetCam()
 	{
-		player::calculateyawandpitch();
-		updatetoplayer();
+		CameraComp* cam = player::goblin->getcomponentptr<CameraComp>();
+		if (cam == nullptr) {
+			throw std::logic_error("Attempted to access Camera before it was created");
+		}
+		return  cam->CamTransform;
+	}
+	v3::Vector3 campos() {
 
-
-		setviewmatrix();
-
-
+		return GetCam().position.glm();
 
 	}
+	
+
 }

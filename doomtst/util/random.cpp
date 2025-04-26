@@ -1,5 +1,6 @@
 #include "random.h"
 
+
 uint64_t seed64 = 0;
 inline void randomize() {
 
@@ -31,23 +32,6 @@ unsigned int randomint(){
     return (static_cast<double>(seed64) *UINT32_MAX)/ UINT64_MAX;
 }
 
-v3::Vector3 randomseeded(unsigned int x, unsigned int y, unsigned int z){
-   
-    // Use a mix of XOR and multiplication to combine the seeds
-    x ^= y + 0x9e3779b97f4a7c15 + (x << 6) + (x >> 2);
-    x ^= z + 0x9e3779b97f4a7c15 + (x << 6) + (x >> 2);
-    x += (x << 3) + (x >> 7);
-    x ^= (x << 11) ^ (x >> 5);
-    v3::Vector3 point;
-    point.x = static_cast<double>(x) / static_cast<float>(MAXUINT32);
-    randomcoord(x);
-  
-    point.y = static_cast<double>(x) / static_cast<float>(MAXUINT32);
-    randomcoord(x);
- 
-    point.z = static_cast<double>(x) / static_cast<float>(MAXUINT32);
-    return point;
-}
 
 float random(float max){
 
@@ -58,6 +42,53 @@ int randomint(int max){
 
     return (randomint()%max);
 }
+ dynamicarray::array<v3::Vector3> seededdirections;
+
+void InitRandomDirections()
+{
+	const int startingseed = 5;
+	const int randomizeiter = 10;
+	unsigned int noiseval = startingseed;
+	for (int i = 0; i < randomizeiter; i++)
+	{
+		randomcoord(noiseval);
+	}
+
+	seededdirections = dynamicarray::array<v3::Vector3>(USHRT_MAX);
+	for (int i = 0; i < USHRT_MAX; i++)
+	{
+
+		v3::Vector3 PointOnCircle;
+		do
+		{
+
+			randomcoord(noiseval);
+			randomcoord(noiseval);
+			randomcoord(noiseval);
+			PointOnCircle.x = noiseval;
+			randomcoord(noiseval);
+			randomcoord(noiseval);
+			randomcoord(noiseval);
+			PointOnCircle.y = noiseval;
+			randomcoord(noiseval);
+			randomcoord(noiseval);
+			randomcoord(noiseval);
+			PointOnCircle.z = noiseval;
+			PointOnCircle /= static_cast<float>(MAXUINT32);
+			PointOnCircle -= v3::unitv / 2;
+			PointOnCircle * 2;
+		} while (mag2(PointOnCircle) > 1);
+		seededdirections[i] = normal(PointOnCircle);
+	}
+}
+int Hash(int seed, int xPrimed, int yPrimed, int zPrimed)
+{
+	int hash = seed ^ xPrimed ^ yPrimed ^ zPrimed;
+	hash *= 0x27d4eb2d;
+	return hash;
+}
+
 void initrandom(){
+	InitRandomDirections();
     seed64 = 1;
 }

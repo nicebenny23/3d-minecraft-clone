@@ -7651,7 +7651,7 @@ static void ShowDemoWindowInputs()
             if (focus_ahead != -1) ImGui::SetKeyboardFocusHere(focus_ahead);
             ImGui::SliderFloat3("Float3", &f3[0], 0.0f, 1.0f);
 
-            ImGui::TextWrapped("NB: Cursor & selection are preserved when refocusing last used item in code.");
+            ImGui::TextWrapped("NB: cursorEnabled & selection are preserved when refocusing last used item in code.");
             ImGui::TreePop();
         }
 

@@ -1,5 +1,5 @@
 #include "tick.h"
-
+#include "../game/GameContext.h"
 	float tick::tickdt = 0;
 	bool tick::tickframe = 0;
 	void tick::trytick() {
@@ -9,7 +9,7 @@
 		}
 
 		tickframe = false;
-		tickdt += timename::dt;
+		tickdt += CtxName::ctx.Time->dt;
 		if (tickdt >ticktime)
 		{
 			

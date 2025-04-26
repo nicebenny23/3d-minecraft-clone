@@ -10,6 +10,6 @@ inline void inittreestoneitem(item* itm) {
 	itm->properties.placeable = true;
 
 	itm->itemtype = count;
-	itm->itemui.itemsprite = createitembox("images\\treestone.png");
+	itm->itemui.itemsprite = createitembox("images\\treestone.png","TreestoneTexture");
 }
 #endif // !grassitem_HPP

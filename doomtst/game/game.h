@@ -1,10 +1,10 @@
 #include "../game/camera.h"
-#include "../renderer/mesh.h"
+#include "../renderer/ModelMesh.h"
 #include "../renderer/shader.h"
 #include <iostream>
 #include "../sound/sound.h"
 #include <cmath>
-#include "../renderer/texture.h"
+#include "../renderer/renderer.h"
 #include "../renderer/Window.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -30,19 +30,19 @@
 #ifndef game_HPP
 #define game_HPP
 void endframe() {
-    entityname::deleteobjs();
+    CtxName::ctx.EntMan->DeleteObjs();
 
-    userinput::endupdate();
+    CtxName::ctx.Inp->endupdate();
     updateltick();
-    window::swapBuffers();
+    CtxName::ctx.Window->SwapBuffers();
     glfwPollEvents();
-    renderer::clearscreen();
+    renderer::Ren.Clear();
 
 }
 void startframe() {
 
 
-    timename::calcfps();
+    CtxName::ctx.Time->calcfps();
      tick::trytick();
    managemenus();
 
@@ -53,11 +53,8 @@ void updateworld() {
     
     
     collision::update();
-    gameobject::updatecomponents();
-
-   
-    gridutil::gridupdate();
-    camera::cameraupdate();
+    CtxName::ctx.OC->updatecomponents(gameobject::Framecall);
+gridutil::gridupdate();
 
 }
 void update() {
@@ -75,41 +72,24 @@ void deleteolddata() {
 
 }
 void init() {
-    
-    deleteolddata();
-
-    window::createWindow();
-    userinput::initiate();
-
-
-    timename::inittime();
     initrandom();
-    initrandomdirs();
-  
-    
-    gameobject::initmap();
-    entityname::initobjs();
 
-    gameobject::initmanagerlist();
-  
-
+    Core::game.ConnectToContext();
+    deleteolddata();
+    Core::game.InitOC();
+    Core::game.createWindow();
+    Core::game.InitEntMan();
     aabb::initCollider();
-
     ui::createuilist();
     inittextarray();
-  
     player::initplayer();
-
     renderer::load();
     blockrender::initblockrendering();
-    
-    camera::initilize();
-    ui::createuielement<uibox>("images\\crosshair.png", v2::unitv / 32, v2::zerov, -3);
-
-    grid::initgrid();
+    ui::createuielement<uibox>("images\\crosshair.png", "CrosshairTexture", v2::unitv / 32, v2::zerov, -3);
+    Core::game.CreateGrid();
     gridutil::computeallcover();
     gridutil::redolighting();
-    userinput::endupdate();
+    CtxName::ctx.Inp->endupdate();
 
     glfwSwapInterval(0);
 }
@@ -125,17 +105,17 @@ void rungame()
     init();
     
     float lastupdate = 0;
-    while (!window::shouldClose())
+    while (!CtxName::ctx.Window->shouldClose())
     {
         
         update();
-        lastupdate += timename::dt;
+        lastupdate += CtxName::ctx.Time->dt;
         if (lastupdate > 1)
         {
 
             lastupdate = 0;
          
-         warn(timename::fps);
+         warn(CtxName::ctx.Time->fps);
         }
     }
     endgame();

@@ -25,7 +25,7 @@ struct slimemove :gameobject::component {
     void update() {
 
 
-        timesincejump -= timename::dt;
+        timesincejump -= CtxName::ctx.Time->dt;
         Vector3 pos = objutil::toent(owner ).transform.position;
         v3::Vector3 headed = owner->getcomponent<navigator>().headed;
         
@@ -46,12 +46,12 @@ struct slimemove :gameobject::component {
            if (ctype)
            {
 
-               objutil::toent(owner).transform.position += normal(gotopos) * timename::dt*2;
+               objutil::toent(owner).transform.position += normal(gotopos) * CtxName::ctx.Time->dt*2;
 
            }
            else {
 
-               objutil::toent(owner).transform.position += normal(gotopos) * timename::dt * 2;
+               objutil::toent(owner).transform.position += normal(gotopos) * CtxName::ctx.Time->dt * 2;
 
                }
            }
@@ -59,9 +59,9 @@ struct slimemove :gameobject::component {
     }
 };
 
-inline entityname::entityref createslime(v3::Vector3 pos,bool type) {
+inline Ent::entityref createslime(v3::Vector3 pos,bool type) {
 
-    entityname::entityref refmodel = entityname::createentity(pos, "slime");
+    Ent::entityref refmodel = CtxName::ctx.EntMan->CreateEntity(pos, "slime");
    
   //  refmodel.toent()->getcomponent<model>().add("slime2.obj", "images\\slimetex.png");
     if (type)

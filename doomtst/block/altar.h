@@ -14,7 +14,7 @@ inline void altarinit(blockname::block* blk) {
 	blk->mesh.box.scale = blockname::blockscale;
 	blk->createdefaultaabb();
 	blk->addcomponent<loottable>()->addelem(altaritem, 1, true);
-	entityname::shouldspawnfinalboss = true;
+	//CtxName::ctx.EntMan->shouldspawnfinalboss = true;
 	blk->minedfastwithpick = false;
 }
 inline void altardelete(blockname::block* blk) {

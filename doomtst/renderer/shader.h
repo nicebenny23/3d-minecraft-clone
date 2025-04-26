@@ -2,17 +2,20 @@
 #include <glm/mat4x4.hpp>
 
 #include "../debugger/debug.h"
-#ifndef shader_hpp
-#define shader_hpp
+#pragma once
+namespace Shaders {
+	class ShaderManager;  // Forward declaration of TextureManager
 
+}
 struct shader
 {
 
 	int id;
-
-	shader(const char* vertexpath, const char* fragpath);
+	std::string Name;
+	
 
 	shader() {
+		Name = "";
 		id = -1;
 	}
 	int uniformlocation(const char* name) {
@@ -54,9 +57,9 @@ struct shader
 		glad_glUniform2f(uniformlocation(name), val.x, val.y);
 	}
 
-
+private:
 	void attach();
-	
+	shader(const char* ShaderName, const char* vertexpath, const char* fragpath);
+	friend class Shaders::ShaderManager;
 };
-#endif
 

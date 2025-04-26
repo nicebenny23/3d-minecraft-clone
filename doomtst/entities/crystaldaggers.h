@@ -12,9 +12,9 @@
 #ifndef crystaldaggers_HPP
 #define crystaldaggers_HPP
 
-inline entityname::entityref spawndagger(v3::Vector3 pos,v3::Vector3 velocity,float gravscale=.4f) {
+inline Ent::entityref spawndagger(v3::Vector3 pos,v3::Vector3 velocity,float gravscale=.4f) {
 
-    entityname::entityref refmodel = entityname::createentity(pos, "dagger");
+    Ent::entityref refmodel = CtxName::ctx.EntMan->CreateEntity(pos, "dagger");
   refmodel.toent()->addcomponent<model>()->add("objs\\crystaldagger.obj", "images\\crystaldagger.png");
    
     refmodel->addcomponent<aabb::Collider>(zerov, blockscale / 2, true);

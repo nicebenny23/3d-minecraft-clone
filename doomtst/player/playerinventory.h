@@ -11,7 +11,7 @@ struct inventorymen :menu
 	Container deletecont;
 	recipemanager manager;
 	inventorymen(v2::Vector2 size) {
-		menubox = ui::createuielement<uibox>("images\\menutex.png", size, v2::zerov, 11);
+		menubox = ui::createuielement<uibox>("images\\menutex.png", "MenuBoxTexture", size, v2::zerov, 11);
 		
 		menubox->state.enabled = false;
 		
@@ -68,36 +68,36 @@ struct inventory :gameobject::component
 	void update() {
 		
 		hotbar.update();
-		if(userinput::getinputkey('j').pressed) {
+		if(CtxName::ctx.Inp->getKey('j').pressed) {
 			playermenu.close();
 		}
 		int prevselectedind = selectedind;
-		if (userinput::getinputkey('e').pressed) {
+		if (CtxName::ctx.Inp->getKey('e').pressed) {
 			playermenu.open();
 		}
-		if (userinput::getinputkey('1').pressed)
+		if (CtxName::ctx.Inp->getKey('1').pressed)
 		{
 			
 			selectedind = 0;
 		}
-		if (userinput::getinputkey('2').pressed)
+		if (CtxName::ctx.Inp->getKey('2').pressed)
 		{
 			selectedind = 1;
 		}
-		if (userinput::getinputkey('3').pressed)
+		if (CtxName::ctx.Inp->getKey('3').pressed)
 		{
 
 			selectedind = 2;
-		}if (userinput::getinputkey('4').pressed)
+		}if (CtxName::ctx.Inp->getKey('4').pressed)
 		{
 			selectedind = 3;
 		}
-		if (userinput::getinputkey('5').pressed)
+		if (CtxName::ctx.Inp->getKey('5').pressed)
 		{
 
 			selectedind = 4;
 		}
-		if (userinput::getinputkey('6').pressed)
+		if (CtxName::ctx.Inp->getKey('6').pressed)
 		{
 			selectedind = 5;
 

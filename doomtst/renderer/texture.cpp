@@ -14,8 +14,10 @@ void settextureparams(GLint texturetype) {
 
 }
 
-texture::texture(const char* file)
+Texture2D::Texture2D(const char* file,const char* name) 
 {
+	Name= name;
+	type = Tex2d;
 	unsigned char* data = texdata::loadtexdata(&size.x, &size.y, file);
 	glGenTextures(1,&id);
 
@@ -29,66 +31,98 @@ texture::texture(const char* file)
 }
 
 
-//only works for png
-texturearray::texturearray(int width, int height, array<const char*>& textures)
+TextureArray::TextureArray()
 {
+	type = TexArray;
+	size = v2::Coord2d(0, 0);
+	length = 0;
+	
+}
+//only works for png
+TextureArray::TextureArray( array<const char*>& textures, const char* name)
+{
+	Name = name;
+	type = TexArray;
 	length = textures.length;
 	id = 0;
 	glGenTextures(1, &id);
 	apply();
+	if (textures.length!=0)
+	{
+		size = texdata::GetImgSize(textures[0]);
+	}
+
+
 	glTexImage3D(
 		GL_TEXTURE_2D_ARRAY //type
 		, 0                 //minmap level
 		, GL_RGBA8            //color format
-		, width, height, textures.length //size
+		, size.x, size.y, textures.length //size
 		, 0,
 		GL_RGBA,//color format
 		GL_UNSIGNED_BYTE, nullptr);//arr
 	array<unsigned char*> data = array<unsigned char*>();
-	size = v2::Coord2d(width, height);
+
 	for (int i = 0; i < textures.length; i++)
 	{
 	//colchannel not used but it hastto be given
-		int twidth = 0;
-		int theight = 0;
-		unsigned char* datatoappend =texdata::loadtexdata(&twidth,& theight, textures[i]);
-		
-		if (v2::Coord2d(twidth, theight) != size)
+		v2::Coord2d ImgSize;
+		unsigned char* datatoappend = texdata::loadtexdata(&ImgSize.x, &ImgSize.y, textures[i]);
+		if (ImgSize != size)
 		{
 			Assert("texture is invalid");
 		}
 		//params,type,minmap level,xoffset,offset,zoffset,width,heigh,depgh,colortype,datatype,and data;
-		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, width, height,1, GL_RGBA, GL_UNSIGNED_BYTE, datatoappend);
+		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, size.x, size.y,1, GL_RGBA, GL_UNSIGNED_BYTE, datatoappend);
 	
 		stbi_image_free(datatoappend);
 	}
 	settextureparams(GL_TEXTURE_2D_ARRAY);
 }
 
-void texturearray::apply()
+void TextureArray::apply()
 {
 	glBindTexture(GL_TEXTURE_2D_ARRAY, id);
 }
 
-texture::texture()
-{
-	id = -1;
-}
-
-void texture::apply()
-{
-	if (id==-1)
-	{
-		Assert("cant apply invalid texture");
-	}
-	glBindTexture(GL_TEXTURE_2D, id);
-}
-void texture::destroy()
+void TextureArray::destroy()
 {
 	if (id == -1)
 	{
 		Assert("cant delete invalid texture");
 	}
 	glDeleteTextures(1, &id);
+	id = -1;
+}
 
+Texture2D::Texture2D() {
+	
+	size = v2::Coord2d(0, 0);
+	type = Tex2d;
+}
+
+
+void Texture2D::apply() 
+{
+	if (id==-1)
+	{
+		throw std::logic_error("cant apply invalid texture");
+	}
+	glBindTexture(GL_TEXTURE_2D, id);
+}
+void Texture2D::destroy()
+{
+	if (id == -1)
+	{
+		throw std::logic_error("cant Delete Invalit Texture");
+	}
+	glDeleteTextures(1, &id);
+	id = -1;
+}
+
+void ITexture::apply() {
+}
+
+void ITexture::destroy()
+{
 }

@@ -9,6 +9,6 @@ inline void initchestitem(item* itm) {
 	itm->itemtype = count;
 
 	itm->properties.placeable = true;
-	itm->itemui.itemsprite = createitembox("images\\chest.png");
+	itm->itemui.itemsprite = createitembox("images\\chest.png","ChestItemTexture");
 }
 #endif // !grassitem_HPP

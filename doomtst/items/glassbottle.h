@@ -10,7 +10,7 @@ inline void glassbottleiteminit(item* itm) {
 	itm->amt = 1;
 	
 	itm->itemtype = count;
-	itm->itemui.itemsprite = createitembox("images\\glassbottle.png");
+	itm->itemui.itemsprite = createitembox("images\\glassbottle.png","GlassBottleTexture");
 }
 
 #endif // !rockitemitem_HPP

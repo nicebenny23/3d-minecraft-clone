@@ -10,6 +10,6 @@ inline void initirontopitem(item* itm) {
 
 	itm->properties.armor = .8;
 	itm->itemtype = wear;
-	itm->itemui.itemsprite = createitembox("images\\irontop.png");
+	itm->itemui.itemsprite = createitembox("images\\irontop.png","IronTopTexture");
 }
 #endif // !ironsworditem_HPP

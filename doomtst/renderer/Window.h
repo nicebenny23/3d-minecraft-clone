@@ -6,67 +6,76 @@
 #include "../external/stb_image.h"
 #include "guirender.h"
 #include "../util/stbiload.h"
+namespace CtxName {
+    struct Context;
 
+}
 namespace window {
+    struct WindowState
+    {
+        bool cursorEnabled;
+        GLFWimage icon;
+        const char* Name;
 
-	extern GLFWwindow* awindow;
-	extern int width;
-	extern int height;
+        const int MinSize = 400;
+
+    };
+
+    struct Window {
+        GLFWwindow* WinPtr = nullptr;
+        GLFWmonitor* MonPtr = nullptr;
+        int width = 0;
+        int height = 0;
+        WindowState state;
+        CtxName::Context* ctx;
+        Window() {
+            WinPtr = nullptr;
+            MonPtr = nullptr;
+            width = 0;
+            height = 0;
+        }
+      
+        
+        Window(const char* name,const char* icon);
+        
+        void ApplyDefaults();
+        
+        void SetIcon(const char* ImgPath);
+        
+        void SwapBuffers() {
+
+            glfwSwapBuffers(WinPtr);
+        }
+
+        void setCursorCallback(GLFWcursorposfun CursorCallback);
+        void SetFrameBufferCallback(GLFWframebuffersizefun FramebufferCallback);
+        void SetMouseCallback(GLFWmousebuttonfun MouseButtonCallback);
+        void SetKeyCallback(GLFWkeyfun KeyCallback);
+        void SetErrorCallBack(GLFWerrorfun ErrorCallback);
+        void EnableCursor();
+        void DisableCursor();
+        float AspectRatio();
+        v2::Vector2 Center(v2::Vector2 pos);
+
+        // Adjusts coordinates to maintain square proportions based on the current aspect ratio.
+          v2::Vector2 FitToAspectRatio(v2::Vector2 pos);
 
 
-
-void createWindow();
-
-
-// Sets the window icon using the image at the specified path.
-inline void setIcon(const char* imagePath)
-{
-    GLFWimage icon;
-    icon.pixels = texdata::loadtexdata(&icon.width, &icon.height, imagePath); // Expects RGBA data.
-    glfwSetWindowIcon(awindow, 1, &icon);
-}
-
-// Swaps the front and back buffers.
-inline  void swapBuffers()
-{
-    glfwSwapBuffers(awindow);
-}
+          bool shouldClose()
+          {
+              return glfwWindowShouldClose(WinPtr);
+          }
+    private:
+        void LoadGlad();
+        void InitGLFW();
+    };
 
 
-inline  void enableCursor()
-{
-    glfwSetInputMode(awindow, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-}
-
-// Disables (hides) the system cursor.
-inline void disableCursor()
-{
-    glfwSetInputMode(awindow, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-}
-
-
-inline bool shouldClose()
-{
-    return glfwWindowShouldClose(awindow);
-}
 // Returns the current window aspect ratio.
 
-inline float getAspectRatio()
-{
-    return static_cast<float>(width) / static_cast<float>(height);
-}
 
-inline v2::Vector2 centerCoord(v2::Vector2 pos)
-{
-    return v2::Vector2((2.0f * pos.x / width) - 1.0f,
-        1.0f - (2.0f * pos.y / height));
-}
 
-// Adjusts coordinates to maintain square proportions based on the current aspect ratio.
-inline v2::Vector2 aspectAdjustedCoord(v2::Vector2 pos)
-{
-    return centerCoord(pos) * v2::Vector2(1.0f, 1.0f / getAspectRatio());
-}
+
 
 }
 

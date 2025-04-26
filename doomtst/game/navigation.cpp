@@ -29,7 +29,7 @@ continue;
         v3::Vector3 center = place + unitv / 2;
         v3::Vector3 scale = blockscale * v3::Vector3(1.1, .9f, 1.1);
         geometry::Box bx = geometry::Box(center, scale);
-        if (!voxtra::Boxcollwithgrid(bx, voxtra::countnormal))
+        if (!voxtra::Boxcollwithgrid(bx))
         {
             neighbors.append(navnode(neiborpoint));
         }
@@ -63,7 +63,7 @@ bool normaltestfunc(Coord pos, int dir)
 }
 
 array<navnode> astarpathfinding(navnode start, navnode goal, array<navnode> (*getconnected)(navnode& pos)) {
-    if (grid::chunkatpos(goal.pos.x,goal.pos.y,goal.pos.z)==nullptr)
+    if (CtxName::ctx.Grid->GetChunk(goal.pos)==nullptr)
     {
 return        array<navnode>();
     }
@@ -141,7 +141,7 @@ return        array<navnode>();
             // Check if neighbor is in closed list
             bool inclosedlist = false;
             for (int j = 0; j < closedlist.length; j++) {
-                if (closedlist.fastat(j) == *neighbor) {
+                if (closedlist.UncheckedAt(j) == *neighbor) {
                     inclosedlist = true;
                     break;
                 }
@@ -156,13 +156,13 @@ return        array<navnode>();
             // Check if neighbor is in open list
             bool inopenlist = false;
             for (int j = 0; j < openlist.length; j++) {
-                if (*neighbor==openlist.fastat(j) ) {
+                if (*neighbor==openlist.UncheckedAt(j) ) {
 
                     inopenlist = true;
                     //updates gcost to be shorter
-                    if (potentialg < openlist.fastat(j).gcost) {
-                        openlist.fastat(j).gcost = potentialg;
-                        openlist.fastat(j).parent = newnode;
+                    if (potentialg < openlist.UncheckedAt(j).gcost) {
+                        openlist.UncheckedAt(j).gcost = potentialg;
+                        openlist.UncheckedAt(j).parent = newnode;
                     }
                     break;
                 }
@@ -188,7 +188,7 @@ return        array<navnode>();
     return array<navnode>(); // No path found
 }
 
-navigator::navigator(entityname::entityref parentref, array<navnode>(*testfunc)(navnode& pos))
+navigator::navigator(Ent::entityref parentref, array<navnode>(*testfunc)(navnode& pos))
 {
     priority = 4411;
     timetillupdate = 0;
@@ -232,9 +232,9 @@ Vector3 transformnormal(Vector3 pos, Vector3 scale)
 void navigator::calcpath()
 {
     
-    Coord currpos = grid::getvoxellocation( objutil::toent(owner).transform.position);
+    Coord currpos = CtxName::ctx.Grid->getvoxellocation( objutil::toent(owner).transform.position);
 
-    Vector3 gotopos = grid::getvoxellocation(goingtwords->transform.position);
+    Vector3 gotopos = CtxName::ctx.Grid->getvoxellocation(goingtwords->transform.position);
  
     array<navnode>  finding = astarpathfinding(currpos,Coord(gotopos), testfunction);
     if (finding.length>1)
@@ -272,13 +272,13 @@ void navigator::update()
 {
     float timetillupdatespeed = .3;
 
-    Vector3 gotopos = grid::getvoxellocation(goingtwords->transform.position);
+    Vector3 gotopos = CtxName::ctx.Grid->getvoxellocation(goingtwords->transform.position);
 
     v3::Vector3 loc = objutil::toent(owner).transform.position;
     float distance = dist(loc, gotopos);
     float addoffset = Max(0,(sigmoid(distance/ 10)-.5)*2);
     timetillupdatespeed = .3 + addoffset;
-    timetillupdate -= timename::dt;
+    timetillupdate -= CtxName::ctx.Time->dt;
  
     if (timetillupdate<=0||dist2(loc,headed)<.04)
     {

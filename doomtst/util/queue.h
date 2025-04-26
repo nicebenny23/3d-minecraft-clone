@@ -1,4 +1,6 @@
+
 #pragma once
+#include <stdexcept>
 namespace queuename {
 	template <typename T>
 	struct queuenode
@@ -15,43 +17,51 @@ namespace queuename {
 	template<typename T>
 	class queue {
 
-		queuenode<T>* top;
-		queuenode<T>* bottom;
+		queuenode<T>* Back;
+		queuenode<T>* Front;
+	
 	public:
+
 		
 		T pop();
 		T& peek();
-		T& peek() const;
+		const T& peek() const;
 		void destroy();
 		void removefront();
 		int length;
 		void push(const T& val);
+		void push( T&& val);
 		queue();
-		bool empty();
-
-
-
+		bool empty() const;
+		queue(const queue<T>& other);
+		queue<T>& operator=(const queue<T>& other);
+		queue(queue<T>&& other) noexcept;
+		queue<T>& operator=(queue<T>&& other) noexcept;
+		~queue() {
+			destroy();
+		}
 	};
-
+	template<typename T>
+	queuenode<T>::queuenode(const T& val) :elem(val), ptrnext(nullptr)
+	{
+	}
 
 	template<typename T>
 	queue<T>::queue() {
 		length = 0;
-		top = nullptr;
-		bottom = nullptr;
+		Back = nullptr;
+		Front = nullptr;
 
 
-	}
-
-	template<typename T>
-	queuenode<T>::queuenode(const T& val)
-	{
-
-		elem = T(val);
-		ptrnext = nullptr;
 	}
 
 	
+
+	template<typename T>
+	bool queue<T>::empty() const
+	{
+		return  (length == 0);
+	}
 
 	template<typename T>
 	T queue<T>::pop()
@@ -59,8 +69,8 @@ namespace queuename {
 		
 		if (!empty())
 		{
-			queuenode<T>* cursor = bottom;
-			T val = bottom->elem;
+			queuenode<T>* cursor = Front;
+			T val = Front->elem;
 			removefront();
 			return val;
 		}
@@ -75,23 +85,23 @@ namespace queuename {
 	{
 		if (!empty())
 		{
-			return bottom->elem;
+			return Front->elem;
 		}
 		throw std::out_of_range("Error: Attempted to peek from an empty queue.");
 	}
 
 	template<typename T>
-	 T& queue<T>::peek() const
+	const T& queue<T>::peek() const
 	{
 		 if (!empty())
 		 {
-			 return bottom->elem;
+			 return Front->elem;
 		 }
 		 throw std::out_of_range("Error: Attempted to peek from an empty queue.");
 	}
 
 	 template<typename T>
-	 inline void queue<T>::destroy()
+	  void queue<T>::destroy()
 	 {
 		 while (!empty())
 		 {
@@ -106,15 +116,15 @@ namespace queuename {
 		{
 			throw std::out_of_range("Error: Attempted to remove the top element of an empty queue.");
 		}
-		queuenode<T>* cursor = bottom;
+		queuenode<T>* cursor = Front;
 		if (length == 1)
 		{
-			top = nullptr;
-			bottom = nullptr;
+			Back = nullptr;
+			Front = nullptr;
 		}
 		else
 		{
-			bottom = bottom->ptrnext;
+			Front = Front->ptrnext;
 		}
 		delete cursor;
 		length--;
@@ -132,25 +142,98 @@ namespace queuename {
 		if (empty())
 		{
 			//since it is the first element it goes on bottom
-			bottom = newelem;
+			Front = newelem;
 		}
 		else
 		{
 			//
-			top->ptrnext = newelem;
+			Back->ptrnext = newelem;
 		}
-		top = newelem; 
+		Back = newelem; 
 		length++;
-		return;
+	
 
 
 	}
 
 	template<typename T>
-	bool queue<T>::empty()
+	 void queue<T>::push( T&& val)
 	{
-		return  (length == 0);
+		queuenode<T>* newelem = new queuenode<T>(std::move(val));
+
+
+		if (empty())
+		{
+			//since it is the first element it goes on bottom
+			Front = newelem;
+		}
+		else
+		{
+			//
+			Back->ptrnext = newelem;
+		}
+		Back = newelem;
+		length++;
+
 	}
+
+	
+
+	template<typename T>
+	 queue<T>::queue(const queue<T>& other) : Front(nullptr), Back(nullptr), length(0)
+	{
+		queuenode<T>* cursor= other.Front;
+		while (cursor)
+		{
+			push(cursor->elem);
+			cursor = cursor->ptrnext;
+		}
+	}
+
+	template<typename T>
+	 queue<T>& queue<T>::operator=(const queue<T>& other)
+	{
+		if (this == &other) {
+
+			return *this;
+		}
+		destroy();
+		queuenode<T>* cursor = other.Front;
+		while (cursor)
+		{
+			push(cursor->elem);
+			cursor = cursor->ptrnext;
+		}
+
+		return *this;
+	}
+
+	 template<typename T>
+	  queue<T>::queue(queue<T>&& other) noexcept :Back(other.Back),Front(other.Front),length(other.length)
+	 {
+		 other.Front = nullptr;
+		 other.Back = nullptr;
+		 other.length = 0;
+	 }
+
+	 template<typename T>
+	  queue<T>& queue<T>::operator=(queue<T>&& other) noexcept
+	 {
+
+		 if (this==&other)
+		 {
+			 return *this;
+		 }
+		 destroy();
+		 Back = other.Back;
+		 Front = other.Front;
+		 length = other.length;
+		 other.length = 0;
+		 other.Front = nullptr;
+		 other.Back = nullptr;
+		 return *this;
+		 // TODO: insert return statement here
+	 }
 
 
 }

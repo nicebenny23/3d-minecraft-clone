@@ -129,7 +129,7 @@ void recipemanager::updatestate()
         autoupdate();
         return;
     }
-    if (userinput::getinputkey('m').held)
+    if (CtxName::ctx.Inp->getKey('m').held)
     {
         state.shouldmax = true;
     }
@@ -198,7 +198,7 @@ void recipemanager::autoupdate()
             if (currstate!=notcrafting)
             {
 
-                attributes.timetillcraft -= timename::dt;
+                attributes.timetillcraft -= CtxName::ctx.Time->dt;
               
             }
             if (currstate!=iscrafting)

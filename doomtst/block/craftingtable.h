@@ -8,7 +8,7 @@ struct craftingmenu :menu {
 	recipemanager blkcont;
 	
 	craftingmenu(v2::Vector2 size) {
-		menubox = ui::createuielement<uibox>("images\\menutex.png", size, v2::zerov, 11);
+		menubox = ui::createuielement<uibox>("images\\menutex.png", "MenuTexture", size, v2::zerov, 11);
 
 		menubox->state.enabled = false;
 		menutype = normalmenu;
@@ -57,7 +57,7 @@ struct craftingtablecomp :gameobject::component {
 	void onplayerclick() {
 		if (owner->state==gameobject::active)
 		{
-			if (userinput::mouseright().pressed)
+			if (CtxName::ctx.Inp->mouseright().pressed)
 			{
 				men.open();
 			}
@@ -69,7 +69,7 @@ struct craftingtablecomp :gameobject::component {
 	void update() {
 
 		men.testclick();
-		if (userinput::getinputkey('j').pressed)
+		if (CtxName::ctx.Inp->getKey('j').pressed)
 		{
 			men.close();
 		}

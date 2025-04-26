@@ -37,7 +37,7 @@ struct Container
 		{
 			return false;
 		}
-		if (!userinput::mouseleft().pressed)
+		if (!CtxName::ctx.Inp->mouseleft().pressed)
 		{
 			return false;
 		}

@@ -224,7 +224,7 @@ typedef khronos_float_t GLclampf;
 typedef double GLclampd;
 #define GL_TEXTURE_BINDING_2D             0x8069
 typedef void (APIENTRYP PFNGLDRAWELEMENTSPROC) (GLenum mode, GLsizei count, GLenum type, const void *indices);
-typedef void (APIENTRYP PFNGLBINDTEXTUREPROC) (GLenum target, GLuint texture);
+typedef void (APIENTRYP PFNGLBINDTEXTUREPROC) (GLenum target, GLuint Texture2D);
 typedef void (APIENTRYP PFNGLDELETETEXTURESPROC) (GLsizei n, const GLuint *textures);
 typedef void (APIENTRYP PFNGLGENTEXTURESPROC) (GLsizei n, GLuint *textures);
 #ifdef GL_GLEXT_PROTOTYPES
@@ -240,7 +240,7 @@ GLAPI void APIENTRY glGenTextures (GLsizei n, GLuint *textures);
 #ifndef GL_VERSION_1_3
 #define GL_TEXTURE0                       0x84C0
 #define GL_ACTIVE_TEXTURE                 0x84E0
-typedef void (APIENTRYP PFNGLACTIVETEXTUREPROC) (GLenum texture);
+typedef void (APIENTRYP PFNGLACTIVETEXTUREPROC) (GLenum Texture2D);
 #ifdef GL_GLEXT_PROTOTYPES
 GLAPI void APIENTRY glActiveTexture (GLenum texture);
 #endif

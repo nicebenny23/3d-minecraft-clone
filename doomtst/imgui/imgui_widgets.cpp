@@ -5383,7 +5383,7 @@ void ImGui::DebugNodeInputTextState(ImGuiInputTextState* state)
     ImStb::StbUndoState* undo_state = &stb_state->undostate;
     Text("ID: 0x%08X, ActiveID: 0x%08X", state->ID, g.ActiveId);
     DebugLocateItemOnHover(state->ID);
-    Text("CurLenA: %d, Cursor: %d, Selection: %d..%d", state->TextLen, stb_state->cursor, stb_state->select_start, stb_state->select_end);
+    Text("CurLenA: %d, cursorEnabled: %d, Selection: %d..%d", state->TextLen, stb_state->cursor, stb_state->select_start, stb_state->select_end);
     Text("BufCapacityA: %d", state->BufCapacity);
     Text("(Internal Buffer: TextA Size: %d, Capacity: %d)", state->TextA.Size, state->TextA.Capacity);
     Text("has_preferred_x: %d (%.2f)", stb_state->has_preferred_x, stb_state->preferred_x);

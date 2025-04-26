@@ -49,13 +49,13 @@ void safefile::fscanf(int expectedargs, const char* format, ...)
 {
     va_list args;
     va_start(args, format);
-    int result = fscanf(format, args);
-    if (expectedargs != result)
-        va_end(args);
-    if (expectedargs != result) {
-        Assert("unexpected amount of arguments found");
-    }
 
+    int result = vfscanf(fp, format, args); // Use the class's FILE* member
+    va_end(args);
+
+    if (expectedargs != result) {
+        Assert("Unexpected number of matched arguments in fscanf");
+    }
 }
 
 safefile::safefile(const char* filepath, mode openmode)

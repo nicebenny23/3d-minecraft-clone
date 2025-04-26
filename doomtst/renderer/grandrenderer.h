@@ -1,5 +1,5 @@
 #include "../game/camera.h"
-#include "../renderer/mesh.h"
+#include "../renderer/ModelMesh.h"
 #include "../renderer/shader.h"
 
 #include "../renderer/texture.h"
@@ -24,7 +24,7 @@
 
 void rendergame() {
 
-    entityname::runrenderloop();
+    CtxName::ctx.OC->updatecomponents(gameobject::Rendercall);
     blockrender::renderblocks(false);
 
     //apply postprossising

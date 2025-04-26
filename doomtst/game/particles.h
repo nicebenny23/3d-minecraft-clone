@@ -17,18 +17,15 @@ struct particleemiter:gameobject::component
 {
 
 	v3::Vector3 position;
-	texture tex;
+	Texture2D* tex;
 	int maxparticles = 1000;
-	vobj::vao emitervoa;
-	//tiny quad
-	vobj::vbuf emmitervbo;
-
-	array<entityname::entity*> particlearray;
+	Mesh ParticleMesh;
+	array<Ent::entity*> particlearray;
 	float particlespawntime;
 	float particlelifetime;
 	float timetillspawn;
-	void (*particleinit) (entityname::entity*);
-	particleemiter(float spawntime,float lifetime, void (*initfunc) (entityname::entity*),texture newtex);
+	void (*particleinit) (Ent::entity*);
+	particleemiter(float spawntime,float lifetime, void (*initfunc) (Ent::entity*),Texture2D* newtex);
 	bool shouldspawnparticle();
 	void update();
 	void start();
@@ -38,7 +35,7 @@ struct particleemiter:gameobject::component
 	}
 	void renderparticles();
 };
-void initbaseparticle(entityname::entity* newent);
+void initbaseparticle(Ent::entity* newent);
 
 struct particle:gameobject::component
 {

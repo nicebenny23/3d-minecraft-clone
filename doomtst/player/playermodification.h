@@ -13,7 +13,7 @@
 using namespace objutil;
 #ifndef  playerplace_Hpp
 #define playerplace_Hpp
-void initbreakparticle(entityname::entity* newent);
+void initbreakparticle(Ent::entity* newent);
 struct playerbreak:gameobject::component
 {
 	
@@ -26,7 +26,7 @@ struct playerbreak:gameobject::component
 		pickaxe = nullptr;
 	
 		closest.collider=nullptr;
-		texture tex = texture("images\\menutex.png");
+		 renderer::Ren.Textures.LoadTexture("images\\menutex.png","MenuTexture");
 	
 	}
 	bool caninteract() {
@@ -89,7 +89,7 @@ struct playerbreak:gameobject::component
 					{
 
 						float timemod = pickpower / (1 + currmining->mininglevel);
-						timeuntilbreak -= timemod*timename::dt;
+						timeuntilbreak -= timemod*CtxName::ctx.Time->dt;
 						return;
 					}
 					
@@ -133,7 +133,7 @@ struct playerbreak:gameobject::component
 
 
 
-		if (userinput::mouseleft().held)
+		if (CtxName::ctx.Inp->mouseleft().held)
 		{
 
 

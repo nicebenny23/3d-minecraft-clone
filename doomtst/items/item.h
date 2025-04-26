@@ -3,12 +3,13 @@
 #include "../block/block.h"
 #include "../renderer/textrender.h"
 #include "../renderer/uibox.h"
-#include "../renderer/Window.h"
+#include "../game/Core.h"
+#include "../game/GameContext.h"
 #ifndef item_HPP
 #define item_HPP
-inline cptr<uiboxname::uibox> createitembox(const char* boxname) {
+inline cptr<uiboxname::uibox> createitembox(const char* boxname,const char* TextureName) {
 
-	return ui::createuielement<uiboxname::uibox>(boxname, v2::unitv / 40.f, v2::zerov, 100);
+	return ui::createuielement<uiboxname::uibox>(boxname, TextureName , v2::unitv / 40.f, v2::zerov, 100);
 }
 enum itemid {
 
@@ -114,7 +115,7 @@ struct item
 		if (state==beingheld)
 		{
 			//adjust for apwect ratio 
-			itemui.itemsprite->box.center = window::aspectAdjustedCoord( userinput::mousepos);
+			itemui.itemsprite->box.center = CtxName::ctx.Window->FitToAspectRatio( CtxName::ctx.Inp->mousepos);
 		}
 		itemui.textvalue->center = itemui.itemsprite->box.center-itemui.itemsprite->box.scale;
 		itemui.textvalue->value= amt;
@@ -132,7 +133,6 @@ struct item
 	void give(int& givenamt);
 	void maxoutthis(item* itm);
 };
-extern texturearray textureidlist;
 extern item* freeditem;
 
 inline void updateitem(item*& itm) {

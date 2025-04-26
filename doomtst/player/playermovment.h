@@ -8,6 +8,7 @@
 #include "../game/entitystate.h"
 #include "../items/menu.h"
 #include "playerclimb.h"
+
 #ifndef player_H
 #define player_H
 struct playermovement:gameobject::component
@@ -26,23 +27,23 @@ struct playermovement:gameobject::component
         float slowdown = 2;
         Vector3& velocity = owner->getcomponent<rigidbody>().velocity;
         float speed = 16;
-        float effectivespeed = (timename::dt * speed) * slowdown;
-        Vector3 fv =normal( Vector3(camera::frontvec.x, 0, camera::frontvec.z));
-        Vector3 rv =normal( Vector3(camera::rightvec.x, 0, camera::rightvec.z));
+        float effectivespeed = (CtxName::ctx.Time->dt * speed) * slowdown;
+        Vector3 fv =normal( Vector3(camera::GetCamFront().x, 0, camera::GetCamFront().z));
+        Vector3 rv =normal( Vector3(camera::GetCamRight().x, 0, camera::GetCamRight().z));
    
-        if (userinput::getinputkey('s').held)
+        if (CtxName::ctx.Inp->getKey('s').held)
         {
             velocity -=  fv*effectivespeed;
         }
-        if (userinput::getinputkey('w').held)
+        if (CtxName::ctx.Inp->getKey('w').held)
         {
          velocity += fv * effectivespeed;
         }
-        if (userinput::getinputkey('a').held)
+        if (CtxName::ctx.Inp->getKey('a').held)
         {
            velocity -= rv * effectivespeed ;
         }
-        if (userinput::getinputkey('d').held)
+        if (CtxName::ctx.Inp->getKey('d').held)
         {
             velocity+=rv *effectivespeed ;
         }
@@ -52,12 +53,12 @@ struct playermovement:gameobject::component
         if ( owner->getcomponent<rigidbody>().inliquid)
         {
             normalstate = false;
-            if (userinput::getinputkey(shiftkey).held)
+            if (CtxName::ctx.Inp->getKey(shiftkey).held)
             {
                 
                 velocity.y = -10;
             }
-            if (userinput::getinputkey(' ').held )
+            if (CtxName::ctx.Inp->getKey(' ').held )
             {
                 velocity.y = 10;
             }
@@ -67,11 +68,11 @@ struct playermovement:gameobject::component
         {
             
             normalstate = false;
-            if (userinput::getinputkey(shiftkey).held)
+            if (CtxName::ctx.Inp->getKey(shiftkey).held)
             {
                 velocity.y = -5;
             }
-            if (userinput::getinputkey(' ').held )
+            if (CtxName::ctx.Inp->getKey(' ').held )
             {
                 velocity.y = 5;
             }
@@ -80,12 +81,12 @@ struct playermovement:gameobject::component
         {
 
         
-            if (userinput::getinputkey(' ').pressed && owner->getcomponent<rigidbody>().isonground)
+            if (CtxName::ctx.Inp->getKey(' ').pressed && owner->getcomponent<rigidbody>().isonground)
             {
                 velocity.y = 150 * speed / 200;
             }
 
-            if (userinput::getinputkey(shiftkey).held)
+            if (CtxName::ctx.Inp->getKey(shiftkey).held)
             {
                 velocity.y -= 1 * effectivespeed;
             }

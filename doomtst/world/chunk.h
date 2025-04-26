@@ -13,13 +13,9 @@ namespace Chunk {
 	struct chunkmesh
 	{
 		chunkmesh() = default;
-		vbuf VBO;
-		vbuf ibo;
-
-		vao Voa;
-		vbuf transparentVBO;
-		vbuf transparentibo;
-		vao transparentVoa;
+		
+		Mesh SolidGeo;
+		Mesh TransparentGeo;
 		//voa vertexspec;
 		void genbufs();
 		int meshsize;
@@ -35,7 +31,7 @@ namespace Chunk {
 		void destroy();
 	};
 	const char* getcorefilename(Coord pos);
-	int indexfrompos(int x, int y, int z);
+	int indexfrompos(Coord pos);
 	struct chunk
 	{
 		bool init;
@@ -52,7 +48,7 @@ namespace Chunk {
 		block* blockbuf;
 		void destroy();
 		float cameradist() {
-			return 	 dist(center(), camera::campos);
+			return 	 dist(center(), camera::campos());
 		}
 		bool operator<(chunk& b) {
 			return b.cameradist() < cameradist();

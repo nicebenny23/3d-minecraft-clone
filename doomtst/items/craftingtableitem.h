@@ -9,6 +9,6 @@ inline void initcraftingtable(item* itm) {
 	itm->itemtype = count;
 
 	itm->properties.placeable = true;
-	itm->itemui.itemsprite = createitembox("images\\craftingtabletop.png");
+	itm->itemui.itemsprite = createitembox("images\\craftingtabletop.png","CraftingTableTopTexture");
 }
 #endif // !grassitem_HPP

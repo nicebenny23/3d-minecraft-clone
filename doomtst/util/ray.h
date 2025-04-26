@@ -6,41 +6,46 @@ struct ray
 {
 	v3::Vector3 start;
 	v3::Vector3 end;
-	v3::Vector3 dir() {
-
-		return (end - start) / v3::dist(end, start);
+	bool degenerate() const {
+		return  dist2(start, end) == 0;
 	}
-	float length() {
-
+	v3::Vector3 diff() const {
+		return end - start;
+	}
+	float length() const {
 		return dist(start, end);
 	}
-inline	float distancefromray(v3::Vector3 vector) {
-		Vector3 normed  = (end-start) / dist(end,start);
-		Vector3 aoffset = vector-start;
-		
-		double t = dot(aoffset,normed);
-		Vector3 position  = start +  normed*t;
-		return dist(vector,position);
+	//slower due to repitition but this code is not preformance critical
+	v3::Vector3 dir() const {
+		return diff() / length();
 	}
-inline	Vector3 projectpoint(v3::Vector3 vector){
-	
-			Vector3 normed = (end - start) / dist(end, start);
-			Vector3 aoffset = vector - start;
-			
-			float t = dot(aoffset, normed);
-			Vector3 position = start + normed * t;
-			
-			return position;
-	}
-//todo get linetraversel working
-	ray(const v3::Vector3& startray, const v3::Vector3& endray)	
-	{
-		if (end==start)
+
+	Vector3 projectpoint(v3::Vector3 vector) const {
+
+
+		Vector3 aoffset = vector - start;
+		if (degenerate())
 		{
-		//	Assert("end cant be equal to start in a ray");
+			return start;
 		}
+		Vector3 normed = dir();
+		float t = dot(aoffset, normed);
+		Vector3 position = start + normed * t;
+		return position;
+	}
+
+	Vector3 pointAt(float t) const {
+		return start + dir() * t;
+	}
+	float distancefromray(v3::Vector3 vector) const {
+		return dist(vector, projectpoint(vector));
+	}
+	ray(const v3::Vector3& startray, const v3::Vector3& endray)
+	{
+
 		start = startray;
 		end = endray;
+
 	}
 
 

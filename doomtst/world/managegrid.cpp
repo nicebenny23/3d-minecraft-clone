@@ -7,9 +7,9 @@ bool gridutil::redoallighting = true;
 void gridutil::sendrecreatemsg()
 {
 
-	for (int i = 0; i < totalgridsize; i++)
+	for (int i = 0; i < CtxName::ctx.Grid->totalChunks; i++)
 	{
-		chunklist[i]->mesh->meshrecreateneeded = true;
+		CtxName::ctx.GridRef()[i]->mesh->meshrecreateneeded = true;
 	}
 
 }
@@ -36,7 +36,7 @@ void gridutil::computecover(face& blkface)
 
 	
 	Coord pos = blkface.mesh->blk->pos + dirfromint(blkface.facenum);
-	block* blk = getobjatgrid(pos, true);
+	block* blk = CtxName::ctx.Grid->getBlock(pos);
 	if (blk == nullptr)
 	{
 
@@ -78,9 +78,9 @@ void processChunks(int startChunk, int endChunk)
 void gridutil::computeallcover()
 {
 		
-	for (int gridind = 0; gridind < totalgridsize; ++gridind)
+	for (int gridind = 0; gridind < CtxName::ctx.Grid->totalChunks; ++gridind)
 	{
-		Chunk::chunk* chk = chunklist[gridind];
+		Chunk::chunk* chk = CtxName::ctx.GridRef()[gridind];
 		for (int blockind = 0; blockind < chunksize; ++blockind)
 		{
 			block& blk = chk->blockbuf[blockind];
@@ -116,7 +116,7 @@ void gridutil::emitlight()
 
 			for (int i = 0; i < 6; i++)
 			{
-				block* blocklight = getobjatgrid(blk->pos + dirfromint(i), true);
+				block* blocklight = CtxName::ctx.Grid->getBlock(blk->pos + dirfromint(i));
 				if (blocklight != nullptr)
 				{
 					if (blocklight->attributes.transparent) {
@@ -152,11 +152,11 @@ void gridutil::redolighting()
 
 		redoallighting = false;
 
-		for (int chunkind = 0; chunkind < totalgridsize; chunkind++)
+		for (int chunkind = 0; chunkind < CtxName::ctx.Grid->totalChunks; chunkind++)
 		{
 			for (int blockind = 0; blockind < chunksize; blockind++)
 			{
-				block* blk = &(*chunklist[chunkind])[blockind];
+				block* blk =&( (*(CtxName::ctx.GridRef()[chunkind]))[blockind]);
 				
 				
 				for (int faceind = 0; faceind < 6; faceind++)
@@ -184,7 +184,7 @@ void blockchangecoverupdate(blockname::block* location) {
 	}
 	for (int blkind = 0; blkind < 6; blkind++)
 	{
-		block* blockatpos = getobjatgrid(dirfromint(blkind) + location->pos);
+		block* blockatpos = CtxName::ctx.Grid->getBlock(dirfromint(blkind) + location->pos);
 		for (int faceind = 0; faceind < 6; faceind++) {
 			(blockatpos->mesh)[faceind].covercomputed = false;
 			if (blockatpos != nullptr)
@@ -200,9 +200,9 @@ void blockchangecoverupdate(blockname::block* location) {
 
 void gridutil::gridupdate()
 {
-	grid::updatechunkborders();
-	grid::load();
-	if (grid::gridchanged())
+	CtxName::ctx.Grid->updateborders();
+	CtxName::ctx.Grid->load();
+	if (CtxName::ctx.Grid->haschanged())
 	{
 		gridutil::computeallcover();
 		gridutil::redoallighting = true;
@@ -216,12 +216,12 @@ void gridutil::gridupdate()
 void blocklightingupdateevent(int prevlight, int newlight, Coord loc) {
 	if (newlight >= prevlight)
 	{
-		grid::getobjatgrid(loc, true)->lightval = grid::getobjatgrid(loc, true)->emitedlight;
-		lightingq.push(grid::getobjatgrid(loc, true));
+		CtxName::ctx.Grid->getBlock(loc)->lightval = CtxName::ctx.Grid->getBlock(loc)->emitedlight;
+		lightingq.push(CtxName::ctx.Grid->getBlock(loc));
 		for (int i = 0; i < 6; i++)
 		{
 			v3::Vector3 dir = dirfromint(i);
-			block* blocklight = getobjatgrid(loc + dir, true);
+			block* blocklight = CtxName::ctx.Grid->getBlock(loc + dir);
 			if (blocklight != nullptr)
 			{
 				lightingq.push(blocklight);
@@ -242,14 +242,14 @@ void blocklightingupdateevent(int prevlight, int newlight, Coord loc) {
 //the setblock function is what should be used
 void gridutil::setblock(Coord loc, int blockid)
 {
-	block* location= getobjatgrid(loc, true);
+	block* location= CtxName::ctx.Grid->getBlock(loc);
 
 		
 		if (location != nullptr)
 		{
 
-			int prevemit = grid::getobjatgrid(loc, true)->emitedlight;
-			chunkatpos(loc.x, loc.y, loc.z)->modified = true;
+			int prevemit = CtxName::ctx.Grid->getBlock(loc)->emitedlight;
+			CtxName::ctx.Grid->GetChunk(loc)->modified = true;
 			blkinitname::setair(location);
 			location->id = blockid;
 			blkinitname::blockinit(location);

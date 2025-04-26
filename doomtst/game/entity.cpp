@@ -1,65 +1,57 @@
 #include "entity.h"
 #include "../world/voxeltraversal.h"
 #include "../world/grid.h"
-using namespace entityname;
-ptrmempool<entity> entityname::entitypool;
-array<entity*> todelete;
-array<entity*> initobj;
-int entityname::entityalloccounter;
-bool entityname::shouldspawnfinalboss;
-void entityname::initobjs() {
-	entityalloccounter = 0;
+using namespace Ent;
 
-	todelete = array<entity*>();
-	initobj = array<entity*>();
+
+Ent::EntityManager::EntityManager()
+{
+
+alloccounter = 0;
+
+	EntityDeletionBuffer = stackname::stack<entity*>();
+
 	entitypool.instantiate(maxentities);
-	shouldspawnfinalboss = false;
+
 
 }
-ptrmempool<entity> objectguid;
-
-void entityname::deleteobjs()
+void Ent::EntityManager::DeleteObjs()
 {
-	int len = todelete.length;
-	for (int ind = 0; ind < len; ind++) {
-
-
-		todelete[ind]->senddestroycall();
-
-
-		entitypool.remove(todelete[ind]);
-	
-
-		todelete[ind]->tags.destroy();
-		//	delete delobjs[ind];
-
-	}
-	if (todelete.length > 0)
+	while (!EntityDeletionBuffer.empty())
 	{
-		//deletes the pointers to the obkjects
-		todelete.destroy();
-
-		todelete = array<entity*>();
-		todelete.length = 0;
+		entity* EntityToDestroy= EntityDeletionBuffer.pop();
+		if (!EntityToDestroy->canbedestroyed)
+		{
+			throw std::logic_error("cannot destroy this entity");
+		}
+		EntityToDestroy->DestroyComponents();
+		entitypool.remove(EntityToDestroy);
+		EntityToDestroy->tags.destroy();
 	}
 
+	
 }
 
-void entityname::entity::removetag(std::string tag)
+void Ent::entity::removetag(std::string tag)
 {
+	bool hasTag = false;
 	for (int i = 0; i < tags.length; i++)
 	{
 		if (*tags[i] == tag)
 		{
+			hasTag = true;
 			tags.deleteind(i);
 			i--;
 		}
 	}
-	
-	Assert("entity must have tags to delete");
+	if (!hasTag) {
+
+
+		warn("Entity Does not have tag");
+	}
 }
 
-void entityname::entity::addtag(std::string tag)
+void Ent::entity::addtag(std::string tag)
 {
 	if (!hastag(tag))
 	{
@@ -72,7 +64,7 @@ void entityname::entity::addtag(std::string tag)
 	}
 }
 
-bool entityname::entity::hastag(std::string tag)
+bool Ent::entity::hastag(std::string tag)
 {
 	for (int i = 0; i <tags.length ; i++)
 	{
@@ -84,55 +76,54 @@ bool entityname::entity::hastag(std::string tag)
 	return false;
 }
 
-void entityname::destroy(entity* ent)
+void Ent::entity::Destroy()
 {
-	if (ent!=nullptr)
-	{
-		
 	
-		todelete.append(ent);
+	if (state==gameobject::destroying)
+	{
+		return;
 	}
+		state = gameobject::destroying;
+
+		EntManager->EntityDeletionBuffer.push(this);
+	
 	
 }
 
 
-entityref entityname::createentity(v3::Vector3 ipos, const char* _name) {
+entityref Ent::EntityManager::CreateEntity(v3::Vector3 ipos, const char* _name) {
 	entity* object = new entity();
-	
+	object->setEntityManager(this);
+	object->SetOCManager(ctx);
+	object->AuthID = alloccounter;
+	alloccounter += 1;
 	object->transform.position = ipos;
-
-
 	object->name = _name;
 	object->componentlist = (array<gameobject::component*>());
 	object->tags = array<std::string*>();
-
-	object->addtag("entity");
-
 	entitypool.append(object);
-	
 	return entityref(*object);
 
 }
 
-
-
-void entityname::runrenderloop()
+entity* Ent::entityref::toent()
 {
-	for (int i = 0; i < entitypool.size; i++)
+	if (guid == -1)
 	{
-
-		if (entitypool[i] != nullptr) {
-
-
-
-
-			int len = entitypool[i]->componentlist.length;
-
-			for (int j = 0; j < len; j++)
-			{
-	
-				entitypool[i]->componentlist[j]->renderupdate();
-			}
-		}
+		return nullptr;
 	}
+
+	entity* RefrencedEntity = (entity*)(EntMan->entitypool[guid]);
+	if (RefrencedEntity == nullptr)
+	{
+		guid = -1;
+		return nullptr;
+	}
+	if (RefrencedEntity->AuthID != AuthID)
+	{
+		guid = -1;
+
+		return nullptr;
+	}
+	return RefrencedEntity;
 }

@@ -8,7 +8,7 @@ inline void initslimeitem(item* itm) {
 	itm->maxamt = 64;
 	itm->properties.dmg = 0;
 	itm->itemtype = count;
-	itm->itemui.itemsprite = createitembox("images\\slime.png");
+	itm->itemui.itemsprite = createitembox("images\\slime.png","SlimeTexture");
 
 }
 

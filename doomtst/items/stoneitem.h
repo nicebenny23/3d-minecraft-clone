@@ -8,7 +8,7 @@ inline void initstoneitem(item* itm) {
 	itm->maxamt = 64;
 	itm->itemtype = count;
 	itm->properties.placeable = true;
-	itm->itemui.itemsprite = createitembox("images\\stone.png");
+	itm->itemui.itemsprite = createitembox("images\\stone.png","StoneTexture");
 }
 
 

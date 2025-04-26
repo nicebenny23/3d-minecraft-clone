@@ -41,7 +41,7 @@ array<navnode> getneighborslime(navnode& node)
 
 
                         Coord testblock = Coord(offset.x, offset.y - 1, offset.z);
-                        //if (getobjatgrid(testblock + node.pos, false) == nullptr)
+                        //if (CtxName::cxt.Grid->getobjatgrid(testblock + node.pos, false) == nullptr)
                         {
                             continue;
                         }
@@ -68,7 +68,7 @@ array<navnode> getneighborslime(navnode& node)
                             bx.center += v3::Vector3(0, 0, offset.z);
                             break;
                         }
-                        if (voxtra::Boxcollwithgrid(bx, voxtra::countnormal))
+                        if (voxtra::Boxcollwithgrid(bx))
                         {
                             cango = false;
                         }

@@ -6,164 +6,18 @@
 #include "../block/blockinit.h"
 
 
-
 using namespace blockname;
-Chunk::chunk* chunkfileload(Coord location)
-{
-	
-		const char* name = Chunk::getcorefilename(location);
-		safefile file = safefile(name, fileread);
-		short* bytelist = file.read<short>(chunksize);
 
-		file.go(chunksize * 2);
-		short* randomproperties = file.read<short>(chunksize);
-		Chunk::chunk& newchunk = *(new Chunk::chunk());
-		newchunk.modified = false;
-		createchunkmesh(&newchunk);
-		newchunk.loc = location;
-		newchunk.blockbuf = new block[chunksize];
-
-
-		int i = 0;
-		for (int x = 0; x < chunkaxis; x++)
-		{
-			for (int y = 0; y < chunkaxis; y++) {
-				for (int z = 0; z < chunkaxis; z++)
-				{
-					Coord blockpos = Coord(x, y, z) + location * chunkaxis;
-					byte blockid = bytelist[i] & 255;
-					byte dirprop = bytelist[i] >> 8;
-
-
-					byte mesh_attachdir = dirprop >> 3;
-					byte dir = dirprop & 7;
-					blkinitname::genblock(&newchunk.blockbuf[i], blockid, blockpos, mesh_attachdir, dir);
-
-					if (newchunk.blockbuf[i].hascomponent<liquidprop>())
-					{
-						newchunk.blockbuf[i].getcomponent<liquidprop>().liqval = randomproperties[i];
-					}
-					if (newchunk.blockbuf[i].hascomponent<craftingtablecomp>())
-					{
-
-						newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.destroy();
-						//we created a contaner so we are going back
-						currentcontid -= 2;
-						int resourceid = randomproperties[i] & 255;
-
-						int newloc = randomproperties[i] / 256.f;
-						newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.resourcecontainer = new Container(resourceid);
-						newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.newitemlocation = new Container(newloc);
-
-					}
-					if (newchunk.blockbuf[i].hascomponent<chestcomp>())
-					{
-
-						newchunk.blockbuf[i].getcomponent<chestcomp>().men.blkcont.destroy();
-						//we created a contaner so we are going back
-						currentcontid -= 1;
-						int resourceid = randomproperties[i] & 255;
-
-				
-						newchunk.blockbuf[i].getcomponent<chestcomp>().men.blkcont=  Container(resourceid);
-				
-					}
-					if (newchunk.blockbuf[i].hascomponent<furnacecomp>())
-					{
-
-						newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.destroy();
-						//we created a contaner so we are going back
-						currentcontid -= 2;
-						int resourceid = randomproperties[i] & 255;
-
-						int newloc = randomproperties[i] / 256.f;
-						newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.resourcecontainer = new Container(resourceid);
-						newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.newitemlocation = new Container(newloc);
-
-					}
-					//if (newchunk.blockbuf[i].hascomponent<>())
-					
-					i++;
-				}
-			}
-		}
-
-		
-		delete[] bytelist;
-		file.close();
-	return &newchunk;
-	
-}
 enum biometype {
 	mossybiome=0,
 	normalbiome=1,
 	lavabiome=2,
 
 };
-biometype getbiometype(float biomeval){
-
-	if (inrange(biomeval, -.3, .3))
-	{
-	return normalbiome;
-	}
-	if (inrange(biomeval,.3,1))
-	{
-		return mossybiome;
-	}
-	if (inrange(biomeval, -1, -.3))
-	{
-		return lavabiome;
-	}
-
-}
-bool shouldbeore(float feturemap) {
-
-	if (inrange(feturemap, .15, .15004f))
-	{
-		return true;
-	}
-	return false;
-
-}
-bool shouldbesand(float feturemap) {
-
-	if (inrange(feturemap, .3f, .33f))
-	{
-		return true;
-	}
-	return false;
-}
-bool shouldbeironore(float feturemap) {
-
-	if (inrange(feturemap, .20002, .201f))
-	{
-		return true;
-	}
-	return false;
-}
-bool shouldbemoss(float feturemap, float distto) {
-
-	if (inrange(feturemap, .0, .1f)||inrange(distto,0,.1f))
-	{
-		return true;
-	}
-
-	return false;
-}
-
-bool shouldbelava(float feturemap) {
-
-	if (inrange(feturemap, .06, .1))
-	{
-		return true;
-	}
-
-	return false;
-}
-int idfromnoise(Coord pos, float nint, float mint, float bint, float fint,float nint2,float nint3) {
+int idfromnoise(Coord pos, float nint, float bint,  float nint3) {
 	const float offset = .5f;
 	const float offset2 = .85;
-	int neid =minecraftstone;
+	int neid = minecraftstone;
 
 	if (.4 < nint3)
 	{
@@ -171,7 +25,7 @@ int idfromnoise(Coord pos, float nint, float mint, float bint, float fint,float 
 
 		if (inrange(nint, -offset, offset))
 		{
-			if (inrange(nint2, -offset, offset))
+			if (inrange(bint, -offset, offset))
 			{
 
 				neid = minecraftair;
@@ -194,66 +48,22 @@ int idfromnoise(Coord pos, float nint, float mint, float bint, float fint,float 
 	return neid;
 
 }
-int generatechunkvalfromnoise(Vector3 pos,noisemap* map,  noisemap* biomemap, noisemap* feturemap,noisemap* lavamap, noisemap* map2)
+int generatechunkvalfromnoise(Vector3 pos, noisemap* map, noisemap* biomemap, noisemap* feturemap, noisemap* lavamap, noisemap* map2)
 {
-	pos*= blocksize;
-	if (pos.y>10010)
-	{
-		return minecraftair;
-	}
-	if (pos.y>10000)
-	{
-		return minecraftobsidian;
-	}
+	pos *= blocksize;
 	
 	Coord localpos;
-	localpos.x = modabs(pos.x, chunkaxis);
+	localpos.x = symmetric_mod (pos.x, chunkaxis);
 
-	localpos.y = modabs(pos.y, chunkaxis);
+	localpos.y = symmetric_mod(pos.y, chunkaxis);
 
-	localpos.z = modabs(pos.z, chunkaxis);
-	float nint = (*map)[pos + Vector3(0, pos.y , 0)];
-	float nint3 = (*map)[Vector3(pos+Vector3(nint*5,0,0))/2 + Coord(0, 103, 40)];
-	float nint2 = (*map)[pos+Coord(101,300,33) + Vector3(0, pos.y , 0)];
-	float nint4 = 0;
-	float fint = 0;
-//	float mint = (*modulatedmap)[localpos];
-	float lint = 0;
+	localpos.z = symmetric_mod(pos.z, chunkaxis);
+	float nint = (*map).Eval(pos + Vector3(0, pos.y, 0));
+	float nint3 = map->Eval(pos + Coord(0, 103, 40));
+	float nint2 = map->Eval(pos + Coord(101, 300, 33));
 
-
-	return idfromnoise(pos, nint, 0, nint2, fint,nint2,nint3);
-	const float allow = .9;
-	nint4 *= 4.f;
-	float biomebias = 2 * (sigmoid(pos.y / 300.f) - .5);
-	nint4+= biomebias;
-	nint4= clamp(nint4, -1.0f, 1.0f);
-	//nint *= clamp(biomebias + 1, .4, 1.4);
+		return idfromnoise(pos, nint, nint2,nint3);
 	
-	if (pos.y==100)
-	{
-		return minecraftobsidian;
-	}
-	if (pos.y<-100)
-	{
-		int maxy = lint * 30 - 130;
-		if (maxy>-120)
-		{
-			maxy = 1000;
-		}
-	
-		if (pos.y<maxy)
-		{
-			return minecraftobsidian;
-
-		}
-		if (pos.y < -30)
-		{
-			return minecraftlava;
-
-		}
-		return minecraftair;
-	}
-	return idfromnoise(pos, nint, allow, nint4, fint,0,0);
 
 
 }
@@ -285,18 +95,18 @@ struct idmap
 	int idatpos(Coord pos) {
 
 		pos -=  loc* chunkaxis;
-		if (inrangeint(int(pos.x),0, chunkaxis-1))
+		if (inrange(int(pos.x),0, chunkaxis-1))
 		{
-			if (inrangeint(int(pos.y), 0, chunkaxis-1))
+			if (inrange(int(pos.y), 0, chunkaxis-1))
 			{
 
-				if (inrangeint(int(pos.z), 0, chunkaxis-1))
+				if (inrange(int(pos.z), 0, chunkaxis-1))
 				{
 					return ids[chunkaxis * chunkaxis * pos.x + chunkaxis * pos.y + pos.z].id;
 				}
 			}
 		}
-		return generatechunkvalfromnoise(pos+loc* chunkaxis, map, biomemap, feturemap, lavalayermap, map2);
+		return minecraftair;
 
 	}
 	idmap(Coord location){
@@ -315,7 +125,8 @@ struct idmap
 			for (int y = 0; y < chunkaxis; y++) {
 				for (int z = 0; z < chunkaxis; z++) {
 					Coord idpos = loc * chunkaxis + Coord(x, y, z);
-					int neid = generatechunkvalfromnoise(idpos, map, biomemap, feturemap, lavalayermap, map2);
+
+					int neid =  generatechunkvalfromnoise(idpos, map, biomemap, feturemap, lavalayermap, map2);
 					ids[ind] = idblock(neid, idpos);
 						ind++;
 				}
@@ -372,22 +183,111 @@ for (int i = 0; i < ids.length; i++)
 
 	}
 };
-Chunk::chunk* loadchunk(Coord location)
+
+
+Chunk::chunk* ChunkLoader::AllocChunk(Coord location)
+{
+	Chunk::chunk& newchunk = *(new Chunk::chunk());
+	newchunk.modified = false;
+	createchunkmesh(&newchunk);
+	newchunk.loc = location;
+	newchunk.blockbuf = new block[chunksize];
+	for (int i = 0; i < chunksize; i++) {
+
+		newchunk.blockbuf[i].SetOCManager(Grid->ctx);
+	}
+	return &newchunk;
+}
+
+Chunk::chunk* ChunkLoader::LoadFromFile(Coord location)
 {
 
-	if (fileexists(Chunk::getcorefilename(location)))
-	{
-		return chunkfileload(location);
-	}
-	Chunk::chunk* newchunk = (new Chunk::chunk());
-	
-	newchunk->loc = location;
-	createchunkmesh(newchunk);
-	newchunk->blockbuf = new block[chunksize];
+	const char* name = Chunk::getcorefilename(location);
+	safefile file = safefile(name, fileread);
+	short* bytelist = file.read<short>(chunksize);
 
-	idmap statemap= idmap(location);
-	statemap.smooth();
+	file.go(chunksize * 2);
+	short* randomproperties = file.read<short>(chunksize);
+	Chunk::chunk& newchunk = *AllocChunk(location);
+	int i = 0;
+	for (int x = 0; x < chunkaxis; x++)
+	{
+		for (int y = 0; y < chunkaxis; y++) {
+			for (int z = 0; z < chunkaxis; z++)
+			{
+				Coord blockpos = Coord(x, y, z) + location * chunkaxis;
+				
+				byte blockid = bytelist[i] & 255;
+				byte dirprop = bytelist[i] >> 8;
+
+
+				byte mesh_attachdir = dirprop >> 3;
+				byte dir = dirprop & 7;
+				blkinitname::genblock(&newchunk.blockbuf[i], blockid, blockpos, mesh_attachdir, dir);
+
+				if (newchunk.blockbuf[i].hascomponent<liquidprop>())
+				{
+					newchunk.blockbuf[i].getcomponent<liquidprop>().liqval = randomproperties[i];
+				}
+				if (newchunk.blockbuf[i].hascomponent<craftingtablecomp>())
+				{
+
+					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.destroy();
+					//we created a contaner so we are going back
+					currentcontid -= 2;
+					int resourceid = randomproperties[i] & 255;
+
+					int newloc = randomproperties[i] / 256.f;
+					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.resourcecontainer = new Container(resourceid);
+					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.newitemlocation = new Container(newloc);
+
+				}
+				if (newchunk.blockbuf[i].hascomponent<chestcomp>())
+				{
+
+					newchunk.blockbuf[i].getcomponent<chestcomp>().men.blkcont.destroy();
+					//we created a contaner so we are going back
+					currentcontid -= 1;
+					int resourceid = randomproperties[i] & 255;
+
+
+					newchunk.blockbuf[i].getcomponent<chestcomp>().men.blkcont = Container(resourceid);
+
+				}
+				if (newchunk.blockbuf[i].hascomponent<furnacecomp>())
+				{
+
+					newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.destroy();
+					//we created a contaner so we are going back
+					currentcontid -= 2;
+					int resourceid = randomproperties[i] & 255;
+
+					int newloc = randomproperties[i] / 256.f;
+					newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.resourcecontainer = new Container(resourceid);
+					newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.newitemlocation = new Container(newloc);
+
+				}
+				//if (newchunk.blockbuf[i].hascomponent<>())
+
+				i++;
+			}
+		}
+	}
+
+
+	delete[] bytelist;
+	file.close();
+	return &newchunk;
+
+}
+
+Chunk::chunk* ChunkLoader::LoadFromNoise(Coord location)
+{
 	
+	Chunk::chunk& newchunk = *AllocChunk(location);
+	idmap statemap = idmap(location);
+	statemap.smooth();
+
 
 	int ind = 0;
 	for (int x = 0; x < chunkaxis; x++)
@@ -399,12 +299,24 @@ Chunk::chunk* loadchunk(Coord location)
 				int id = statemap.ids[ind].id;
 				
 
-				blkinitname::genblock(&newchunk->blockbuf[ind], id,pos, 0, 0);
+				blkinitname::genblock(&newchunk.blockbuf[ind], id, pos, 0, 0);
 
 				ind++;
 			}
 		}
 	}
 	statemap.destroy();
-	return newchunk;
+	return &newchunk;
+}
+void ChunkLoader::Init(CtxName::Context* ctx)
+{
+	Grid = ctx->Grid;
+}
+Chunk::chunk* ChunkLoader::LoadChunk(Coord location)
+{
+	if (fileexists(Chunk::getcorefilename(location)))
+	{
+		return LoadFromFile(location);
+	}
+	return LoadFromNoise(location);
 }
