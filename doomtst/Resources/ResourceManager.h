@@ -8,7 +8,7 @@ struct ResourceManager
 	VaoName::Vao*  CreateVao();
 	vobj::Ebo*  CreateEbo();
 	TextureArray* LoadTexArray(std::string Name);
-	TextureArray* LoadTexArray(const dynamicarray::array<const char*> Files, std::string Name);
+	TextureArray* LoadTexArray(const Cont::array<const char*> Files, std::string Name);
 	Texture2D* LoadTex(std::string Name);
 	Texture2D* LoadTex(const char* File, std::string Name);
 	void CompileShader(const std::string& name, const char* vert, const char* frag);

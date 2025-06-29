@@ -39,14 +39,14 @@ namespace VaoName {
 			return id != 0;
 		}
 		GLuint id;
-		dynamicarray::array<VertexAttribute> attributes;
+		Cont::array<VertexAttribute> attributes;
 		template <typename T, GLint Components>
 		Vao& AddAttribute( ) {
-			attributes.append(VertexAttribute::VertexAttribute(GlUtil::getGLType<T>(), Components));
+			attributes.push(VertexAttribute::VertexAttribute(GlUtil::getGLType<T>(), Components));
 			return *this;
 		}
 		Vao& AddAttribute(GLenum Type,GLint Components) {
-			attributes.append(VertexAttribute(Type,Components));
+			attributes.push(VertexAttribute(Type,Components));
 			return *this;
 		}
 		void ClearAttributes() {

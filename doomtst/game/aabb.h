@@ -8,7 +8,7 @@
 #include "../util/geometry.h"
 #include "../util/random.h"
 
-#include "../util/memorypool.h"
+#include "../util/SparseSet.h"
 #include <cmath>
 #include "transform.h"
 #include "objecthelper.h"
@@ -59,7 +59,7 @@ namespace aabb {
     bool aabbboxintersect(geometry::Box p1, Collider& p2);
    v3::Vector3 collideaabb(Collider p1, Collider p2);
 
-    extern ptrmempool<Collider> Colliderlist;
+    extern Sparse::SparseSet<Collider*> Colliderlist;
 }
 
 #endif // AABB_HPP

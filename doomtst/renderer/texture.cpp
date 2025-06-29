@@ -34,7 +34,7 @@ Texture2D::Texture2D(const char* file,const char* name)
 TextureArray::TextureArray()
 {
 	type = TexArray;
-	size = v2::Coord2d(0, 0);
+	size = v2::Coord2(0, 0);
 	length = 0;
 	
 }
@@ -66,7 +66,7 @@ TextureArray::TextureArray( array<const char*>& textures, const char* name)
 	for (int i = 0; i < textures.length; i++)
 	{
 	//colchannel not used but it hastto be given
-		v2::Coord2d ImgSize;
+		v2::Coord2 ImgSize;
 		unsigned char* datatoappend = texdata::loadtexdata(&ImgSize.x, &ImgSize.y, textures[i]);
 		if (ImgSize != size)
 		{
@@ -97,7 +97,7 @@ void TextureArray::destroy()
 
 Texture2D::Texture2D() {
 	
-	size = v2::Coord2d(0, 0);
+	size = v2::Coord2(0, 0);
 	type = Tex2d;
 }
 

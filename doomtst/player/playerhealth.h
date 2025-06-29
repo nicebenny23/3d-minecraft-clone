@@ -24,7 +24,7 @@ struct playerhealth:gameobject::component
 		healthboxes = array<Cptr::cptr<uibox>,true>(10);
 		for (int i = 0; i < 10; i++) {
 			v2::Vector2 pos = v2::Vector2(i / 40.f-.4f, -.45);
-			healthboxes.append(ui::createuielement<uibox>("images\\health.png","HealthTexture",scale,pos,55));
+			healthboxes.push(ui::createuielement<uibox>("images\\health.png","HealthTexture",scale,pos,55));
 		}
 	}
 	void update() {

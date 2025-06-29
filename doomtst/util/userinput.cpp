@@ -27,7 +27,7 @@ namespace userinput {
 
 		mousepos = v2::Vector2(0, 0);
 		mouseposdt = v2::Vector2(0, 0);
-		keylist = dynamicarray::array<inputkey,true>(GLFW_KEY_LAST+ Extra_keys);
+		keylist = Cont::array<inputkey,true>(GLFW_KEY_LAST+ Extra_keys);
 		for (int i = 0; i < keylist.capacity; i++)
 		{
 			keylist[i]=inputkey();

@@ -123,7 +123,7 @@ void Chunk::chunk::write()
 	for (int i = 0; i < chunksize; i++)
 	{
 		int v1= blockbuf[i].id;
-		int v2= blockbuf[i].mesh.direction | (blockbuf[i].mesh.attachdir * 8);
+		int v2= blockbuf[i].mesh.direction | (blockbuf[i].mesh.attachdir.ind() * 8);
 		bytelist[i] = v1 |(256*v2);
 	}
 	for (int i = 0; i < chunksize; i++)

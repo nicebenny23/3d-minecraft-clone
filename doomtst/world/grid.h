@@ -17,9 +17,9 @@ namespace grid {
 
 		const int rad;
 		const int totalChunks;
-		v3::Vector3 gridpos;
-		v3::Vector3 griddt;
-		dynamicarray::array<Chunk::chunk*> chunklist;
+		v3::Coord gridpos;
+		v3::Coord griddt;
+		Cont::array<Chunk::chunk*> chunklist;
 		CtxName::Context* ctx;
 
 
@@ -39,13 +39,13 @@ namespace grid {
 			return chunklist[index];
 		}
 
-	Vector3 scaletoblocksize(Vector3 point);
+	Vector3 toBlockPos(Vector3 point);
 	Coord chunkfromblockpos(Coord pos);
-	Coord getvoxellocation(Vector3 pos);
+	Coord getVoxel(Vector3 pos);
 
-	bool chunkInBounds(Coord loc);
-	int gridindexfromnormedchunkpos(Coord NormedChunk);
-	int gridindfromchunkpos(Coord Chunk);
+	bool containsChunk(Coord loc);
+	int localChunkIndex(Coord NormedChunk);
+	int chunkIndex(Coord Chunk);
 	Chunk::chunk* GetChunk(Coord pos);
 	block* getBlock(const v3::Coord pos);
 	array<block*>& voxelinrange(geometry::Box span);

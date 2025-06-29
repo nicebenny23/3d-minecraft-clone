@@ -7,7 +7,6 @@ using namespace Ent;
 Ent::EntityManager::EntityManager()
 {
 
-alloccounter = 0;
 
 	EntityDeletionBuffer = stackname::stack<entity*>();
 
@@ -56,7 +55,7 @@ void Ent::entity::addtag(std::string tag)
 	if (!hastag(tag))
 	{
 		std::string* newstring = new std::string(tag);
-		tags.append(newstring);
+		tags.push(newstring);
 	}
 	else
 	{
@@ -94,14 +93,12 @@ void Ent::entity::Destroy()
 entityref Ent::EntityManager::CreateEntity(v3::Vector3 ipos, const char* _name) {
 	entity* object = new entity();
 	object->setEntityManager(this);
-	object->SetOCManager(ctx);
-	object->AuthID = alloccounter;
-	alloccounter += 1;
+	ctx->OC->InitObj(object);
 	object->transform.position = ipos;
 	object->name = _name;
 	object->componentlist = (array<gameobject::component*>());
 	object->tags = array<std::string*>();
-	entitypool.append(object);
+	entitypool.push(object);
 	return entityref(*object);
 
 }
@@ -119,7 +116,7 @@ entity* Ent::entityref::toent()
 		guid = -1;
 		return nullptr;
 	}
-	if (RefrencedEntity->AuthID != AuthID)
+	if (RefrencedEntity->id != id)
 	{
 		guid = -1;
 

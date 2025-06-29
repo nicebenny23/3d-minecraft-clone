@@ -1,8 +1,8 @@
 #include "intersection.h"
 namespace geointersect {
-	boxraycollision intersection(geometry::Box box, ray fray)
+	boxRayCollision intersection(geometry::Box box, ray fray)
 	{
-		v3::Vector3 dir = fray.diff();
+		v3::Vector3 dir = fray.dir();
 
 		//not actually max
 		float xval1 = (box.center.x - box.scale.x - fray.start.x) / dir.x;
@@ -17,9 +17,9 @@ namespace geointersect {
 		float zval2 = (box.center.z + box.scale.z - fray.start.z) / dir.z;
 		float maxzval = Max(zval1, zval2);
 		float minzval = Min(zval1, zval2);
-		float MaxMinValue = Max(Max(minxval, minyval), minzval);
-		float MinMaxValue = Min(Min(maxxval, maxyval), maxzval);
-		boxraycollision toreturn = boxraycollision();
+		float MaxMinValue = Max(minxval, minyval, minzval);
+		float MinMaxValue = Min(maxxval, maxyval, maxzval);
+	
 
 
 		if (MaxMinValue < MinMaxValue)
@@ -27,19 +27,14 @@ namespace geointersect {
 			
 			if (0 < MaxMinValue)
 			{
-
 				float distancealongaxis = MaxMinValue;
-				toreturn.collided = true;
-				toreturn.intersectionpoint = dir * distancealongaxis + fray.start;
-				toreturn.dist = v3::dist(fray.start, toreturn.intersectionpoint);
-				return toreturn;
-
+				return Opt::Construct<RayHit>(fray,distancealongaxis);
 			}
 
 		}
 
 
-		return toreturn;
+		return Opt::None;
 
 
 	}

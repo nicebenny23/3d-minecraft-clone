@@ -259,7 +259,7 @@ currecipe = nullptr;
            }
 
 
-           recipearr.append(iteminrecipe(itemid, itemamt));
+           recipearr.push(iteminrecipe(itemid, itemamt));
        
              
              linenumber++;
@@ -268,7 +268,7 @@ currecipe = nullptr;
              {
 
                  irecipe newrecipe = irecipe(recipearr.list, recipearr[recipearr.length - 1], xsize, ysize);
-                 recipelist.append(newrecipe);
+                 recipelist.push(newrecipe);
                  recipearr.destroy();
                  linenumber = 0;
                  continue;

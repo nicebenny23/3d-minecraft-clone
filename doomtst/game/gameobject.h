@@ -8,7 +8,7 @@
 namespace GameContext {
 
 }
-using namespace dynamicarray;
+using namespace Cont;
 
 namespace CtxName {
 	struct Context;
@@ -36,6 +36,7 @@ namespace gameobject {
 
 	struct component;
 
+	struct obj;
 	struct componentmanager
 	{
 		componentmanager();
@@ -56,12 +57,13 @@ namespace gameobject {
 			managers = array<componentmanager, true>(0);
 			CompHasher = std::unordered_map<const char*, int>();
 			compid = 1;
-
+			ObjId = 1;
 		}
 
 		CtxName::Context* ctx;
 		array<componentmanager, true> managers;
 		int compid;
+		size_t ObjId;
 		std::unordered_map<const char*, int> CompHasher;
 		int GetCompIdAdd(const char* name) {
 			int compId = CompHasher[name];
@@ -83,14 +85,13 @@ namespace gameobject {
 			}
 			return compId;
 		 }
+		 void InitObj(obj* object);
 		 template <class T, typename... types>
-
-		 T* InitComp(types&&... initval);
+		  T* InitComp(types&&... initval);
 		 void updatecomponents(updatecalltype type);
 	};
 
 
-	struct obj;
 	
 
 
@@ -205,7 +206,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			array<T*>& getcomponents();
 			
 
-
+			size_t id;
 			template <class T, typename... types>
 			T* addcomponent(types&&... initval);
 			//todo -mid proiorty implement;
@@ -218,12 +219,12 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 					componentlist[i]->destroy();
 				}
 			}
-			void SetOCManager(CtxName::Context* ctx);
+		
 			
 		private:
 			
 				OCManager* OC;
-				
+				friend struct OCManager;
 		};
 
 
@@ -304,7 +305,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			for (int i = 0; i < componentlist.length; i++)
 			{
 				if (id == componentlist[i]->id) {
-					comps->append((T*)(componentlist[i]));
+					comps->push((T*)(componentlist[i]));
 				}
 			}
 			return *comps;
@@ -324,7 +325,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 
 
 
-			componentlist.append(comp);
+			componentlist.push(comp);
 			comp->owner = this;
 			
 			comp->start();

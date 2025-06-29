@@ -20,7 +20,7 @@ struct ray
 		return diff() / length();
 	}
 
-	Vector3 projectpoint(v3::Vector3 vector) const {
+	Vector3 project(v3::Vector3 vector) const {
 
 
 		Vector3 aoffset = vector - start;
@@ -37,8 +37,8 @@ struct ray
 	Vector3 pointAt(float t) const {
 		return start + dir() * t;
 	}
-	float distancefromray(v3::Vector3 vector) const {
-		return dist(vector, projectpoint(vector));
+	float distance(v3::Vector3 vector) const {
+		return dist(vector, project(vector));
 	}
 	ray(const v3::Vector3& startray, const v3::Vector3& endray)
 	{

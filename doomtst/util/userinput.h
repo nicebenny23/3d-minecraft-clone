@@ -34,7 +34,7 @@ namespace userinput {
 	};
 	struct  InputManager
 	{
-		dynamicarray::array<inputkey, true> keylist;
+		Cont::array<inputkey, true> keylist;
 
 
 		v2::Vector2 mouseposdt;

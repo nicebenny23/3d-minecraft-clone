@@ -3,7 +3,7 @@
 #include <include/alc.h>
 #include "../util/dynamicarray.h"
 
-using namespace dynamicarray;
+using namespace Cont;
 
 #ifndef SOUNDFILE_HPP
 #define SOUNDFILE_HPP

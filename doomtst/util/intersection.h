@@ -1,24 +1,23 @@
 #include "geometry.h"
-
+#include "Option.h"
 #ifndef intersection_HPP
 #define intersection_HPP
 namespace geointersect {
-	struct boxraycollision {
-		bool collided;
+	struct RayHit {
 		float dist;
 		v3::Vector3 intersectionpoint;
-
-		boxraycollision()
-			: collided(false), dist(INFINITY), intersectionpoint(v3::zerov) {
-
+		ray Ray;
+		RayHit() : dist(0.0f), intersectionpoint(v3::zerov) {}
+		// Constructor with parameters
+		RayHit(ray IntRay, float dist) : dist(dist) {
+			intersectionpoint = IntRay.pointAt(dist);
+			Ray = IntRay;
 		}
-
-		boxraycollision(bool colided, float orgindist, v3::Vector3 pointofintersection)
-			: collided(colided), dist(orgindist), intersectionpoint(pointofintersection) {}
 	};
+	using boxRayCollision = Opt::Option<RayHit>;
 
 
-	  boxraycollision intersection(geometry::Box box, ray fray);
+	boxRayCollision intersection(geometry::Box box, ray fray);
 	bool intersects(geometry::cone cone, geometry::sphere sph);
 }
 #endif // !intersection_HPP

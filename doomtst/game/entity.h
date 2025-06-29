@@ -29,7 +29,6 @@ namespace Ent {
 		ptrmempool<entity> entitypool;
 		stackname::stack<entity*> EntityDeletionBuffer;
 		
-		int alloccounter;
 		void DeleteObjs();
 		entityref CreateEntity(v3::Vector3 SpawnPos, const char* _name);
 		CtxName::Context* ctx;
@@ -41,7 +40,7 @@ namespace Ent {
 		bool canbedestroyed ;
 		const char* name;
 		array<std::string*> tags;
-		int AuthID;
+
 		int index;
 		void removetag(std::string tag);
 		void addtag(std::string tag);
@@ -49,7 +48,7 @@ namespace Ent {
 		Transform transform;
 		entity() {
 		tags = array<std::string*>();
-		AuthID = -1;
+	
 		type = gameobject::entity;
 		index = -1;
 		canbedestroyed = false;
@@ -74,18 +73,18 @@ namespace Ent {
 
 			return toent();
 		}
-		int AuthID;
+		int id;
 		int guid;
 		entityref(entity& object) {
 			guid = object.index;
-			AuthID = object.AuthID;
+			id = object.id;
 			EntMan = object.EntManager;
 		}
 		entity* toent();
 		
 		entityref() {
 			EntMan = nullptr;
-			AuthID = 0;
+			id = 0;
 			guid = -1;
 		}
 		entity* toentnotnull() {

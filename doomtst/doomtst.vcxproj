@@ -88,6 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -118,7 +119,7 @@
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>Yes</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -170,6 +171,7 @@
     <ClCompile Include="items\Container.cpp" />
     <ClCompile Include="items\menu.cpp" />
     <ClCompile Include="items\recipe.cpp" />
+    <ClCompile Include="mtest.cpp" />
     <ClCompile Include="renderer\Mesh.cpp" />
     <ClCompile Include="player\playermodification.cpp" />
     <ClCompile Include="renderer\guirender.cpp" />
@@ -190,7 +192,6 @@
     <ClCompile Include="sound\soundlistener.cpp" />
     <ClCompile Include="sound\soundsource.cpp" />
     <ClCompile Include="util\chainpool.cpp" />
-    <ClCompile Include="util\dynamicmempool.cpp" />
     <ClCompile Include="util\fileloader.cpp" />
     <ClCompile Include="game\aabb.cpp" />
     <ClCompile Include="block\block.cpp" />
@@ -198,7 +199,6 @@
     <ClCompile Include="util\geometry.cpp" />
     <ClCompile Include="util\intersection.cpp" />
     <ClCompile Include="util\mathutil.cpp" />
-    <ClCompile Include="util\staticmempool.cpp" />
     <ClCompile Include="util\time.cpp" />
     <ClCompile Include="renderer\VertexObjectManager.cpp" />
     <ClCompile Include="world\chunkload.cpp" />
@@ -245,6 +245,7 @@
     <ClInclude Include="block\torch.h" />
     <ClInclude Include="block\water.h" />
     <ClInclude Include="block\wood.h" />
+    <ClInclude Include="Csn.h" />
     <ClInclude Include="debugger\console.h" />
     <ClInclude Include="debugger\debug.h" />
     <ClInclude Include="entities\antifreezeboss.h" />
@@ -344,9 +345,12 @@
     <ClInclude Include="sound\soundfile.h" />
     <ClInclude Include="sound\soundlistener.h" />
     <ClInclude Include="sound\soundsource.h" />
+    <ClInclude Include="util\KeySet.h" />
+    <ClInclude Include="util\List.h" />
+    <ClInclude Include="util\Option.h" />
+    <ClInclude Include="util\SparseSet.h" />
     <ClInclude Include="util\chainpool.h" />
-    <ClInclude Include="util\cptrbuf.h" />
-    <ClInclude Include="util\dynamicmempool.h" />
+    <ClInclude Include="util\dynpool.h" />
     <ClInclude Include="util\geometry.h" />
     <ClInclude Include="util\fileloader.h" />
     <ClInclude Include="game\aabb.h" />
@@ -358,7 +362,6 @@
     <ClInclude Include="util\sharedptr.h" />
     <ClInclude Include="util\SlMove.h" />
     <ClInclude Include="util\stack.h" />
-    <ClInclude Include="util\staticmempool.h" />
     <ClInclude Include="util\stats.h" />
     <ClInclude Include="util\stbiload.h" />
     <ClInclude Include="renderer\Vao.h" />

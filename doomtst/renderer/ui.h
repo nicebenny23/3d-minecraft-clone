@@ -4,7 +4,7 @@
 #define ui_HPP
 
 #define uisize 400
-using namespace dynamicarray;
+using namespace Cont;
 using namespace Cptr;
 namespace ui {
 	
@@ -86,7 +86,7 @@ inline	void updateui() {
 
 				if (uielemlist[i]->state.enabled) {
 
-					indexerlist.append(i);
+					indexerlist.push(i);
 				}
 
 			}

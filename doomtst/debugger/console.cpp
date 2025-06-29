@@ -45,7 +45,7 @@
          
           // Convert character to string and push it to the log
           if (c == '\n') {
-           log.append(current_line);
+           log.push(current_line);
            current_line.clear();
            }
            else {

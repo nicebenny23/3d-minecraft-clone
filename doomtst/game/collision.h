@@ -16,9 +16,9 @@ namespace collision {
 	bool boxCollidesWithEntity(geometry::Box blk, gameobject::obj* orgin = nullptr);
 
 	bool aabbCollidesWithEntity(Collider* blk, gameobject::obj* orgin = nullptr);
-	voxtra::RayWorldIntersection raycastall(ray nray, gameobject::obj* orgin=nullptr,voxtra::GridTraverseMode travmode = voxtra::countnormal);
+	voxtra::WorldRayCollision raycastall(ray nray, gameobject::obj* orgin=nullptr,voxtra::GridTraverseMode travmode = voxtra::countnormal);
 
-	voxtra::RayWorldIntersection raycastentity(ray nray, gameobject::obj* orgin=nullptr);
+	voxtra::WorldRayCollision raycastentity(ray nray, gameobject::obj* orgin=nullptr);
 	void handleduelentitycollisions();
 	void handleCollisionWithGrid(Collider& entity);
 }

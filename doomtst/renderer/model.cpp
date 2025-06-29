@@ -10,7 +10,7 @@ void model::draw()
 void model::add(const char* meshname,const char * meshtexname,Vector3 pos)
 {
 		Texture2D* meshtex = renderer::Ren.Textures.Get2dTex(meshtexname,meshtexname);
-	meshlist.append(ModelMeshName::loadmesh(meshname, meshtex, zerov));
+	meshlist.push(ModelMeshName::loadmesh(meshname, meshtex, zerov));
 meshlist[meshlist.length - 1]->transform.position = pos;
 }
 model::model(meshconnecttype connectmethod )

@@ -3,8 +3,8 @@
 #include "../util/intersection.h"
 #include "../game/GameContext.h"
 bool blockrender::enablelighting;
-dynamicarray::array<float> databuffer;
-dynamicarray::array<unsigned int> indicebuffer;
+Cont::array<float> databuffer;
+Cont::array<unsigned int> indicebuffer;
 
 using namespace grid;
 
@@ -57,7 +57,7 @@ bool chunkviewable(Chunk::chunk* chk) {
 // Calculate UV coordinates for a face centered at the mesh
 v2::Vector2 facecoordtouv(const face* fce, int ind) {
 	const v3::Vector3& meshscale = fce->mesh->box.scale;
-	int facetype = fce->facenum / 2;
+	int facetype = fce->facenum.ind() / 2;
 	v2::Vector2 offset;
 
 	switch (facetype) {
@@ -131,13 +131,13 @@ void emitface(const int face, block& torender, array<float>& datbuf, array<unsig
 			}
 
 			// Append vertex data in bulk
-			datbuf.append(vertexData, 28);
+			datbuf.push(vertexData, 28);
 
 			// Generate and append indices
 			for (int j = 0; j < 6; j++) {
 				indices[j] = baselocation + indiceoffsetfrombaselocation[j];
 			}
-			indbuf.append(indices, 6);
+			indbuf.push(indices, 6);
 		}
 	
 }
@@ -155,9 +155,9 @@ void emitblock(block& torender, array<float>& datbuf, array<unsigned int>& indbu
 void recreatechunkmesh(Chunk::chunk* aschunk) {
 	
 	aschunk->mesh->facebuf.destroy();
-	aschunk->mesh->facebuf = dynamicarray::array<face>();
-	dynamicarray::array<unsigned int> indbuf = dynamicarray::array<unsigned int>();
-	dynamicarray::array<float> datbuf= dynamicarray::array<float>(0,false);
+	aschunk->mesh->facebuf = Cont::array<face>();
+	Cont::array<unsigned int> indbuf = Cont::array<unsigned int>();
+	Cont::array<float> datbuf= Cont::array<float>(0,false);
 
 	
 	for (int ind = 0; ind < chunksize; ind++) {
@@ -176,7 +176,7 @@ void recreatechunkmesh(Chunk::chunk* aschunk) {
 
 		for (int x = 0; x < 6; x++) {
 					if (!(blockatpos.mesh)[x].covered) {
-						aschunk->mesh->facebuf.append((blockatpos.mesh)[x]);
+						aschunk->mesh->facebuf.push((blockatpos.mesh)[x]);
 					}
 		}
 		
@@ -199,7 +199,7 @@ void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 		array<unsigned int> indbuf = array<unsigned int>();
 
 		for (int i = 0; i < mesh.facebuf.length; i++) {
-			emitface(mesh.facebuf[i].facenum, *(mesh.facebuf[i].mesh->blk), datbuf, indbuf);
+			emitface(mesh.facebuf[i].facenum.ind(), *(mesh.facebuf[i].mesh->blk), datbuf, indbuf);
 		}
 
 		renderer::Ren.Render(&mesh.TransparentGeo, datbuf, indbuf);
@@ -241,7 +241,7 @@ void blockrender::renderblocks(bool rendertransparent) {
 
 			CtxName::ctx.GridRef()[i]->mesh->sortbuf();
 
-			tosort.append(* (CtxName::ctx.GridRef()[i]));
+			tosort.push(* (CtxName::ctx.GridRef()[i]));
 		}
 	}
 

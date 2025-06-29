@@ -162,12 +162,6 @@
     <ClCompile Include="util\algorthm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="util\dynamicmempool.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="util\staticmempool.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="util\intersection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -232,6 +226,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Resources\ResourceManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="mtest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -644,13 +641,7 @@
     <ClInclude Include="util\memorypool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="util\dynamicmempool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="util\staticmempool.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="util\cptrbuf.h">
+    <ClInclude Include="util\dynpool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="util\intersection.h">
@@ -756,6 +747,21 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Resources\ResourceManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Csn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\SparseSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\Option.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\List.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\KeySet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

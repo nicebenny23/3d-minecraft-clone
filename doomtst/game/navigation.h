@@ -24,7 +24,7 @@ struct navnode {
         parent = nullptr;
         pathlen = 1;
     }
-    navnode(Coord position, navnode* parentnode = nullptr)
+    explicit navnode(Coord position, navnode* parentnode = nullptr)
     {
         if (parentnode == nullptr)
         {
@@ -45,12 +45,14 @@ struct navnode {
         return gcost + hcost;
     }
 
-    bool operator==(const navnode& other) {
-        return pos == other.pos;
-    }
-
+  
 
 };
+
+inline bool operator==(const navnode& nav1, const navnode& nav2) {
+    return (Coord(nav1.pos) == Coord(nav2.pos));
+}
+
 array<navnode> getneighborsdefault(navnode& node);
 bool normaltestfunc(Coord  pos, int dir);
 struct navigator:gameobject::component

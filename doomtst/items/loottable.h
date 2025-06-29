@@ -3,7 +3,7 @@
 #include "../player/playerinventory.h"
 #include "../util/random.h"
 #include "../player/player.h"
-using namespace dynamicarray;
+using namespace Cont;
 #ifndef loottable_HPP
 #define loottable_HPP
 const float interacttimeneededfordrop = 1;
@@ -63,7 +63,7 @@ struct  loottable :gameobject::component
 	};
 	array<lootelement> lootlist;
 	void addelem(int itemid, float maxamt,bool israndom=false) {
-		lootlist.append(lootelement(itemid, maxamt,israndom));
+		lootlist.push(lootelement(itemid, maxamt,israndom));
 	}
 	void ondestroy() {
 		

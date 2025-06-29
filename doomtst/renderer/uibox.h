@@ -6,7 +6,7 @@
 
 #include "ui.h"
 #include "../util/geometry.h"
-using namespace dynamicarray;
+using namespace Cont;
 using namespace geometry;
 using namespace Cptr;
 #ifndef uirender_H

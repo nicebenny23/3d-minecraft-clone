@@ -32,13 +32,14 @@ struct playerattackcomp:gameobject::component
 	void update() {
 
 	
-		voxtra::RayWorldIntersection closest;
 		ray cameraray = ray(camera::campos(), camera::campos() + camera::GetCamFront() * 7);
-		closest = collision::raycastall(cameraray,owner);
-		if (closest.collider == nullptr)
+		
+		voxtra::WorldRayCollision Hit = collision::raycastall(cameraray,owner);
+		if (!Hit)
 		{
 			return;
 		}
+		voxtra::RayWorldHit closest = Hit.unwrap();
 		if (closest.collider->owner->type != gameobject::entity)
 		{
 			return;
@@ -47,7 +48,7 @@ struct playerattackcomp:gameobject::component
 		{
 			if (closest.collider->owner->hascomponent<rigidbody>())
 			{
-				kb(closest.colpoint, 7,& toent(closest.collider->owner));
+				kb(closest.Hit.intersectionpoint, 7,& toent(closest.collider->owner));
 				
 			}
 			int dmgdone = computeattackdmg();

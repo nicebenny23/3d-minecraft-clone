@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "random.h"
 #include <stdexcept>
-using namespace dynamicarray;
+using namespace Cont;
 #pragma once
 //not actually a memory pool it is a randomized pool
 template<class T>
@@ -66,7 +66,7 @@ public:
     }
 
     // Append an element to the pool
-    void append(T* elem)
+    void push(T* elem)
     {
 
        

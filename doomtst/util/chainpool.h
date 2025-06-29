@@ -100,47 +100,40 @@ namespace chainpool {
 
 
 
+    public:
 
-
-        chainedpool(size_t poolsize);
-        chainedpool(size_t ElemSize, size_t poolsize);
+        chainedpool(size_t ElemSize);
         explicit chainedpool();
         // Allocate memory for an object
         T* alloc();
 
         // Deallocate memory previously allocated
         void free(T* ptr);
-        int size() {
 
-            return poolSize;
-        }
-        int capacity() {
-
-            return poolSize * poollist.length;
-        }
         //iterayes over all used blocks
 
+        void destroy();
 
     private:
 
         blockmetadata* GetMetaData(T* ptr);
         T* GetElement(blockmetadata* metadata);
-        T* GetBlockInPool(int pool, int ind);
-        T* operator[](int index);//gets nth memeory cell
 
+        blockmetadata* NthMetaData(char* pool, size_t n) {
 
+            return reinterpret_cast<blockmetadata*>(n * BlockSize + pool + ElemSize);
+        }
 
         void CreatePool();
 
 
-        void destroy();
 
         size_t BlockSize;//size of each block and its assosiated metadata
         size_t ElemSize; // Size of each block without metadata
-        size_t poolSize;  // Number of blocks in the pool
+
         metalist usedBlocks; // Array to track free blocks
         metalist freeBlocks; // Array to track free blocks
-       dynamicarray::array<char*> poollist;   // Pointer to the memory pool
+        Cont::array<char*> poollist;   // Pointer to the memory pool
 
         T* findFreeBlock(); // Find a free block index
 
@@ -161,28 +154,19 @@ namespace  chainpool {
 
     template<typename T>
     //ONLY USE WHEN T IS NOT DERIVABLE
-    chainedpool<T>::chainedpool(size_t poolsize)
+    chainedpool<T>::chainedpool()
     {
 
         ElemSize = sizeof(T);
-        poolSize = poolsize;
+
         BlockSize = (ElemSize + sizeof(blockmetadata));
-        CreatePool();
+
     }
     template < typename T>
-    chainedpool<T>::chainedpool(size_t ElementSize, size_t poolsize)
+    chainedpool<T>::chainedpool(size_t ElementSize)
     {
         ElemSize = ElementSize;
-        poolSize = poolsize;
         BlockSize = (ElemSize + sizeof(blockmetadata));
-        CreatePool();
-    }
-    template < typename T>
-    chainedpool<T>::chainedpool()
-    {
-        ElemSize = 0;
-        poolSize = 0;
-        BlockSize = 0;
 
     }
 
@@ -211,16 +195,18 @@ namespace  chainpool {
     }
     template < typename T>
     void chainedpool<T>::CreatePool() {
+
+        int poolnum = poollist.length;
+        size_t poolSize = 1 << poolnum;
         char* newPool = new char[BlockSize * poolSize];
-        poollist.append(newPool);
-        int poolnum = poollist.length - 1;
-        for (size_t i = 0; i < poolSize; ++i) {
-            T* block = GetBlockInPool(poolnum, i);
-            blockmetadata* node = GetMetaData(block);
+        poollist.push(newPool);
+        for (size_t i = 0; i < poolSize; i++) {
+            blockmetadata* node = NthMetaData(newPool, i);
+            new (node) blockmetadata{};
             freeBlocks.push(node);
         }
     }
-    
+
     template < typename T>
     blockmetadata* chainedpool<T>::GetMetaData(T* element) {
         return reinterpret_cast<blockmetadata*>(reinterpret_cast<char*>(element) + ElemSize);
@@ -231,23 +217,7 @@ namespace  chainpool {
         return reinterpret_cast<T*>(reinterpret_cast<char*>(metadata) - ElemSize);
     }
     //gets block Blockindex in pool pool
-    template < typename T>
-    T* chainedpool<T>::GetBlockInPool(int pool, int BlockIndex) {
-        return reinterpret_cast<T*>(poollist[pool]+ BlockSize * BlockIndex);
-    }
-    template < typename T>
-    T* chainedpool<T>::operator[](int index)
-    {
-        if (index < 0 || poolSize * poollist.length <= index)
-        {
-            throw std::invalid_argument("Attempted to acess invalid pool");
-        }
-        int pool = floor(index / poolSize);
 
-        int poolIndex = index - pool * poolSize;
-
-        return GetBlockInPool(pool, poolIndex);
-    }
     //destructor not needed as these objects are always global
     template < typename T>
     void chainedpool<T>::destroy()
@@ -277,4 +247,3 @@ namespace  chainpool {
         return nullptr;
     }
 }
-#pragma once

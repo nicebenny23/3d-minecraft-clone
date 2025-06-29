@@ -16,22 +16,18 @@ float appdist(const navnode& a, const navnode& b) {
 array<navnode> getneighborsdefault( navnode& node) {
     
     array<navnode> neighbors= array<navnode>(6);
-    for (int i = 0; i < 6; i++) {
-        v3::Vector3 neiborpoint = dirfromint(i) + node.pos;
-        if (i == 3) {
+    for (auto dir: Dir::Directions3d) {
+        if (dir==Dir::down3d||dir==Dir::up3d) {
             continue;
         }
-        if (i== 2)
-        {
-continue;
-        }
-        Coord place = neiborpoint;
-        v3::Vector3 center = place + unitv / 2;
+        Coord point= Coord(dir.ToVec() + node.pos);
+
+        v3::Vector3 center = point + unitv / 2;
         v3::Vector3 scale = blockscale * v3::Vector3(1.1, .9f, 1.1);
         geometry::Box bx = geometry::Box(center, scale);
         if (!voxtra::Boxcollwithgrid(bx))
         {
-            neighbors.append(navnode(neiborpoint));
+            neighbors.push(navnode(point));
         }
            
         
@@ -43,7 +39,7 @@ array<navnode> reconstructpath(navnode* node) {
     array<navnode> path;
  
     while (node != nullptr) {
-        path.append(*new navnode(*node));
+        path.push(*new navnode(*node));
        
             node = node->parent;
     }
@@ -52,7 +48,7 @@ array<navnode> reconstructpath(navnode* node) {
     for (int i = 0; i < searchlength; i++) {
         std::swap( path[i],path[ path.length - 1 - i]);
          }
-    return dynamicarray::array<navnode>( path);
+    return Cont::array<navnode>( path);
 }
 
 bool normaltestfunc(Coord pos, int dir)
@@ -72,7 +68,7 @@ return        array<navnode>();
     array<navnode*> todeallocatelist;
     start.gcost = dist(start.pos, goal.pos);
 
-    openlist.append(start);
+    openlist.push(start);
     
     const int maxiter = 200;
     int iter = 0;
@@ -97,7 +93,7 @@ return        array<navnode>();
 
         navnode current = openlist[shortestind];
         navnode* newnode = new navnode(current);
-        todeallocatelist.append(newnode);
+        todeallocatelist.push(newnode);
 
         openlist.deleteind(shortestind);
 
@@ -132,16 +128,16 @@ return        array<navnode>();
             return array<navnode>(toret);
         }
 
-        closedlist.append(current);
+        closedlist.push(current);
 
         array<navnode> neighbors = getconnected(current);
         for (int i = 0; i < neighbors.length; i++) {
-            navnode* neighbor = &neighbors[i];
+            navnode& neighbor = neighbors[i];
 
             // Check if neighbor is in closed list
             bool inclosedlist = false;
             for (int j = 0; j < closedlist.length; j++) {
-                if (closedlist.UncheckedAt(j) == *neighbor) {
+                if (closedlist.at(j) == neighbor) {
                     inclosedlist = true;
                     break;
                 }
@@ -151,18 +147,18 @@ return        array<navnode>();
             }
            // float potentialg = current.gcost + 1;
             
-            float potentialg = current.gcost + dist(current.pos,neighbor->pos);
+            float potentialg = current.gcost + dist(current.pos,neighbor.pos);
 
             // Check if neighbor is in open list
             bool inopenlist = false;
             for (int j = 0; j < openlist.length; j++) {
-                if (*neighbor==openlist.UncheckedAt(j) ) {
+                if (neighbor==openlist.at(j) ) {
 
                     inopenlist = true;
                     //updates gcost to be shorter
-                    if (potentialg < openlist.UncheckedAt(j).gcost) {
-                        openlist.UncheckedAt(j).gcost = potentialg;
-                        openlist.UncheckedAt(j).parent = newnode;
+                    if (potentialg < openlist.at(j).gcost) {
+                        openlist.at(j).gcost = potentialg;
+                        openlist.at(j).parent = newnode;
                     }
                     break;
                 }
@@ -171,10 +167,10 @@ return        array<navnode>();
             if (inopenlist) {
                 continue;
             }
-                neighbor->gcost = potentialg;
-                neighbor->hcost = appdist(*neighbor, goal);
-                neighbor->parent = newnode;
-                openlist.append(*neighbor);
+                neighbor.gcost = potentialg;
+                neighbor.hcost = appdist(neighbor, goal);
+                neighbor.parent = newnode;
+                openlist.push(neighbor);
             
         }
         neighbors.destroy();
@@ -232,11 +228,11 @@ Vector3 transformnormal(Vector3 pos, Vector3 scale)
 void navigator::calcpath()
 {
     
-    Coord currpos = CtxName::ctx.Grid->getvoxellocation( objutil::toent(owner).transform.position);
+    Coord currpos = CtxName::ctx.Grid->getVoxel( objutil::toent(owner).transform.position);
 
-    Vector3 gotopos = CtxName::ctx.Grid->getvoxellocation(goingtwords->transform.position);
+    Vector3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords->transform.position);
  
-    array<navnode>  finding = astarpathfinding(currpos,Coord(gotopos), testfunction);
+    array<navnode>  finding = astarpathfinding(navnode(currpos),navnode(Coord(gotopos)), testfunction);
     if (finding.length>1)
     {
         headed = finding[1].pos+unitv/2;
@@ -250,9 +246,9 @@ void navigator::calcpath()
 
 bool navigator::noblockinrange(Coord pos)
 {
-    Coord lowest = pos-unitv * esize;
+    Coord lowest = Coord(pos-unitv * esize);
 
-    Coord heighest= pos + unitv * esize;
+    Coord heighest=Coord(pos + unitv * esize);
 
     for (int xind= -lowest.x; xind < heighest.x; xind++)
     {
@@ -272,7 +268,7 @@ void navigator::update()
 {
     float timetillupdatespeed = .3;
 
-    Vector3 gotopos = CtxName::ctx.Grid->getvoxellocation(goingtwords->transform.position);
+    Vector3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords->transform.position);
 
     v3::Vector3 loc = objutil::toent(owner).transform.position;
     float distance = dist(loc, gotopos);

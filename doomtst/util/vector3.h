@@ -1,11 +1,9 @@
 #include <cmath>
-
 #include "mathutil.h"
 #include <Windows.h>
 #include "vector2.h"
 #include <glm/glm.hpp>
-#ifndef v3_HPP
-#define v3_HPP
+#pragma once
 namespace v3 {
 	
 	struct Vector3;
@@ -18,7 +16,7 @@ namespace v3 {
 		Coord();
 		void operator=(const Coord& p1);
 		bool operator==(const Coord& p1);
-		bool operator==(const Vector3& p1);
+		
 		bool operator!=(const Coord& p1);
 	
 		Coord& operator+=(const Coord& p1);
@@ -37,8 +35,8 @@ namespace v3 {
 
 		Vector3 operator+(const Vector3& p1) const;
 		Vector3 operator-(const Vector3& p1) const;
-		void operator=(const Vector3& p1);
-		Coord(const Vector3& p1);
+	
+		explicit Coord(const Vector3& p1);
 		
 	};
 
@@ -134,18 +132,6 @@ namespace v3 {
 	}
 
 	
-
-
-
-
-
-
-
-	
-	
-	
-	
-	
 	
 	inline bool Coord::operator==(const Coord& p1)
 	{
@@ -172,7 +158,7 @@ namespace v3 {
 		void operator=(const Vector3& p1);
 		bool operator==(const Vector3& p1);
 		void operator=(const Coord& p1);
-		bool operator==(const Coord& p1);
+		
 		bool operator!=(const Vector3& p1);
 		Vector3& operator+=(const Vector3& p1);
 		Vector3 operator+(const Vector3& p1) const;
@@ -182,7 +168,7 @@ namespace v3 {
 		Vector3 operator*(const Vector3& scale) const;
 		Vector3 operator*(float scale) const;
 		Vector3& operator*=(float scale);
-
+		float& operator[](size_t index);
 		v2::Vector2 xy() const;
 		v2::Vector2 xz() const;
 		v2::Vector2 yz() const;
@@ -331,6 +317,22 @@ namespace v3 {
 		return *this;
 
 	}
+	inline float& Vector3::operator[](size_t index) 
+	{
+		switch (index) {
+		case 0:
+			return x;
+			break;
+		case 1:
+			return y;
+			break;
+		case 2:
+			return z;
+			break;
+		default:
+			throw std::invalid_argument(std::string(index + " is not a valid index for a Vector3"));
+		}
+	}
 	inline Vector3 Vector3::operator/(float scale) const {
 
 		return Vector3(x / scale, y / scale,z/scale);
@@ -432,36 +434,15 @@ namespace v3 {
 	  z = p1.z;
 
 	}
-  inline bool Vector3::operator==(const Coord& p1)
-  {
-	  return (p1.x == x && p1.y == y && p1.z == z);
-  }
 	//this section is for stuff defined in iv3 incorperating a vector;
 	
-  inline Coord::Coord(const Vector3& p1)
-  {
+   inline Coord::Coord(const Vector3& p1)
+	{
 	  x = p1.x;
 	  y = p1.y;
 	  z = p1.z;
-
-  }
-
-
-
-
-  inline void Coord::operator=(const Vector3& p1)
-  {
-	  x = p1.x;
-	  y = p1.y;
-	  z = p1.z;
-	
-  }
-
-  inline bool Coord::operator==(const Vector3& p1)
-  {
-	  return (p1.x == x && p1.y == y && p1.z == z);
-  }
-
+	}
+ 
   inline bool apx(const  Vector3 p, const Vector3& p1)
   {
 	  bool c1 = aproxequal(p.x, p1.x);
@@ -472,15 +453,19 @@ namespace v3 {
   }
 
 
-  inline Vector3 Coord::operator+(const Vector3& p1) const
+	inline Vector3 Coord::operator+(const Vector3& p1) const
 	{
 		return Vector3(p1.x + x, p1.y + y, p1.z + z);
 	}
-
+  
 	inline Vector3 Coord::operator-(const Vector3& p1) const
 	{
 		return Vector3(x-p1.x , y-p1.y , z-p1.z );
 	}
+
+	inline bool operator==(const Vector3& p1, const Coord& p2)
+	{
+		return (p1.x == p2.x && p1.y == p2.y && p1.z == p2.z);
+	}
 	
 }
-#endif

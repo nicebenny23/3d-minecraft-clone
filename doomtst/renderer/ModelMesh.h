@@ -8,7 +8,7 @@
 #include "../game/transform.h"
 #include "renderer.h"
 #pragma once
-using namespace dynamicarray;
+using namespace Cont;
 using namespace v3;
 using namespace vobj;
 

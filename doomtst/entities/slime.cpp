@@ -26,8 +26,7 @@ array<navnode> getneighborslime(navnode& node)
 
 
 
-                v3::Vector3 neiborpoint = offset + node.pos;
-                Coord place = neiborpoint;
+                v3::Coord place= offset + node.pos;
                 v3::Vector3 center = place + unitv / 2;
                 v3::Vector3 scale = blockscale * v3::Vector3(.99f, .99f, .99f) / 2;
                 geometry::Box bx = geometry::Box(node.pos + unitv / 2, scale);
@@ -77,7 +76,7 @@ array<navnode> getneighborslime(navnode& node)
 
                 if (cango)
                 {
-                    neighbors.append(navnode(neiborpoint));
+                    neighbors.push(navnode((place)));
                 }
             }
 

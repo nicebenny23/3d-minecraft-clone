@@ -53,13 +53,13 @@ ModelMesh* ModelMeshName::loadmesh(const char* name, Texture2D* TEX, Vector3 pos
 		if (strcmp(header, "v") == 0) {
 			Vector3 vertex;
 			meshfile.fscanf(3, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
-			newmesh->vertices.append(vertex);
+			newmesh->vertices.push(vertex);
 		}
 		if (strcmp(header, "vt") == 0) {
 			v2::Vector2 texcoord;
 			meshfile.fscanf(2,"%f %f\n", &texcoord.x, &texcoord.y);
 		
-			newmesh->texcoords.append(texcoord);
+			newmesh->texcoords.push(texcoord);
 		}
 		if (strcmp(header, "f") == 0) {
 
@@ -67,12 +67,12 @@ ModelMesh* ModelMeshName::loadmesh(const char* name, Texture2D* TEX, Vector3 pos
 			vertexIndex = new unsigned int[3];
 			uvIndex = new unsigned int[3];
 			 meshfile.fscanf(6,"%u/%u %u/%u %u/%u\n", &vertexIndex[0], &uvIndex[0], &vertexIndex[1], &uvIndex[1], &vertexIndex[2], &uvIndex[2]);
-			newmesh->vertexindices.append(vertexIndex[0]);
-			newmesh->vertexindices.append(vertexIndex[1]);
-			newmesh->vertexindices.append(vertexIndex[2]);
-			newmesh->texindices.append(uvIndex[0]);
-			newmesh->texindices.append(uvIndex[1]);
-			newmesh->texindices.append(uvIndex[2]);
+			newmesh->vertexindices.push(vertexIndex[0]);
+			newmesh->vertexindices.push(vertexIndex[1]);
+			newmesh->vertexindices.push(vertexIndex[2]);
+			newmesh->texindices.push(uvIndex[0]);
+			newmesh->texindices.push(uvIndex[1]);
+			newmesh->texindices.push(uvIndex[2]);
 			delete[] uvIndex;
 			delete[] vertexIndex;
 		}
@@ -96,11 +96,11 @@ void ModelMeshName::rendermesh(ModelMesh* torender)
 		Vector3 vertex = torender->nthvertex(i);
 		v2::Vector2 Texture2D = torender->nthtex(i);
 
-		databuf.append(vertex.x);
-		databuf.append(vertex.y);
-		databuf.append(vertex.z);
-		databuf.append(Texture2D.x);
-		databuf.append(1-Texture2D.y);
+		databuf.push(vertex.x);
+		databuf.push(vertex.y);
+		databuf.push(vertex.z);
+		databuf.push(Texture2D.x);
+		databuf.push(1-Texture2D.y);
 
 	}
 	renderer::Ren.Render(&torender->mesh, databuf);

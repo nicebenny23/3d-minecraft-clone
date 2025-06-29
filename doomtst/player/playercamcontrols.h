@@ -42,11 +42,11 @@ struct playercamcontrols :gameobject::component
 			CtxName::ctx.Window->EnableCursor();
 		}
 		ray cameraray = ray(toent(owner).transform.position, toent(owner).transform.position + toent(owner).transform.getnormaldirection() * interactmaxrange);
-		voxtra::RayWorldIntersection closest = collision::raycastall(cameraray);
-		if (closest.intersected())
+		voxtra::WorldRayCollision closest = collision::raycastall(cameraray);
+		if (closest)
 		{
-			for (int i = 0; i < closest.collider->owner->componentlist.length; i++) {
-				closest.collider->owner->componentlist[i]->onplayerclick();
+			for (int i = 0; i < closest.unwrap().collider->owner->componentlist.length; i++) {
+				closest.unwrap().collider->owner->componentlist[i]->onplayerclick();
 
 			}
 		}

@@ -35,7 +35,7 @@ void gridutil::computecover(face& blkface)
 	blkface.covered = true;
 
 	
-	Coord pos = blkface.mesh->blk->pos + dirfromint(blkface.facenum);
+	Coord pos = blkface.mesh->blk->pos+ blkface.facenum.ToVec();
 	block* blk = CtxName::ctx.Grid->getBlock(pos);
 	if (blk == nullptr)
 	{
@@ -114,9 +114,9 @@ void gridutil::emitlight()
 		{
 
 
-			for (int i = 0; i < 6; i++)
+			for (auto dir: Dir::Directions3d)
 			{
-				block* blocklight = CtxName::ctx.Grid->getBlock(blk->pos + dirfromint(i));
+				block* blocklight = CtxName::ctx.Grid->getBlock(blk->pos +dir.ToVec());
 				if (blocklight != nullptr)
 				{
 					if (blocklight->attributes.transparent) {
@@ -129,7 +129,7 @@ void gridutil::emitlight()
 					}
 					else
 					{
-						int blockface = invdirind(i);
+						int blockface = dir.Inv().ind();
 
 						(*blocklight)[blockface].light = blk->lightval;
 
@@ -184,12 +184,12 @@ void blockchangecoverupdate(blockname::block* location) {
 	}
 	for (int blkind = 0; blkind < 6; blkind++)
 	{
-		block* blockatpos = CtxName::ctx.Grid->getBlock(dirfromint(blkind) + location->pos);
+		block* blockatpos = CtxName::ctx.Grid->getBlock(Dir::Dir3d(blkind).ToVec() + location->pos);
 		for (int faceind = 0; faceind < 6; faceind++) {
-			(blockatpos->mesh)[faceind].covercomputed = false;
+			
 			if (blockatpos != nullptr)
 			{
-
+				(blockatpos->mesh)[faceind].covercomputed = false;
 
 				gridutil::computecover(((blockatpos->mesh))[faceind]);
 			}
@@ -220,7 +220,7 @@ void blocklightingupdateevent(int prevlight, int newlight, Coord loc) {
 		lightingq.push(CtxName::ctx.Grid->getBlock(loc));
 		for (int i = 0; i < 6; i++)
 		{
-			v3::Vector3 dir = dirfromint(i);
+			v3::Coord dir = Dir::Dir3d(i).ToVec();
 			block* blocklight = CtxName::ctx.Grid->getBlock(loc + dir);
 			if (blocklight != nullptr)
 			{

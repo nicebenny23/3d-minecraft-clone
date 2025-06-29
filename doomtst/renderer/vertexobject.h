@@ -28,7 +28,7 @@ namespace vobj {
 		}
 			//use when data is of one type
 		template<class T>
-		void fillbuffer(dynamicarray::array<T>& data) {
+		void fillbuffer(Cont::array<T>& data) {
 			fillbuffer(data.list, data.length*sizeof(T));
 		}
 	protected:
@@ -69,7 +69,7 @@ namespace vobj {
 		Ebo():Buf(GL_ELEMENT_ARRAY_BUFFER) {	
 		}
 		template<class T>
-		void fillbuffer(dynamicarray::array<T>& data) {
+		void fillbuffer(Cont::array<T>& data) {
 			Buf.fillbuffer<T>(data);
 		}
 		void fillbuffer(void* data, int size) {
@@ -102,7 +102,7 @@ namespace vobj {
 		Vbo() :Buf(GL_ARRAY_BUFFER) {
 		}
 		template<class T>
-		void fillbuffer(dynamicarray::array<T>& data) {
+		void fillbuffer(Cont::array<T>& data) {
 			Buf.fillbuffer<T>(data);
 		}
 		void fillbuffer(void* data, int size) {

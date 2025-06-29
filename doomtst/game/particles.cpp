@@ -33,7 +33,7 @@ void particleemiter::update()
 			{
 
 
-				if (particlearray[i]->getcomponent<particle>().endtime < CtxName::ctx.Time->realtime)
+				if (particlearray[i]->getcomponent<particle>().endtime < CtxName::ctx.Time->Time)
 				{
 					Ent::entity* EntityDeletionBuffer = particlearray[i];
 					objutil::toent(EntityDeletionBuffer).Destroy();
@@ -55,7 +55,7 @@ void particleemiter::update()
 			 {
 				 Ent::entityref newparticle = CtxName::ctx.EntMan->CreateEntity(position, "");
 				 
-				 newparticle.toent()->addcomponent<particle>()->endtime= CtxName::ctx.Time->realtime+particlelifetime;
+				 newparticle.toent()->addcomponent<particle>()->endtime= CtxName::ctx.Time->Time+particlelifetime;
 				 newparticle->getcomponent<particle>().ind = i;
 				 newparticle->getcomponent<particle>().emit = this;
 				 (*particleinit)(newparticle.toent());
@@ -94,12 +94,12 @@ void particleemiter::renderparticles()
 
 		Vector3 upvertex = (camera::GetCamUp()) * vertice.y ;
 		vertice = upvertex + rightvertex + center;
-			databuf.append(vertice.x);
-		databuf.append(vertice.y);
-		databuf.append(vertice.z);
-		databuf.append(cubeuv[2 * i]);
+			databuf.push(vertice.x);
+		databuf.push(vertice.y);
+		databuf.push(vertice.z);
+		databuf.push(cubeuv[2 * i]);
 
-		databuf.append(cubeuv[2 * i+1]);
+		databuf.push(cubeuv[2 * i+1]);
 	}
 	Ren.Fill(&ParticleMesh, databuf);
 	

@@ -49,16 +49,16 @@ namespace renderer {
 		void Gen(Mesh* mesh);
 		void Destroy(Mesh* mesh);
 
-		void Fill(Mesh* mesh, dynamicarray::array<float>& pointlist);
-		void Fill(Mesh* mesh, dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist);
+		void Fill(Mesh* mesh, Cont::array<float>& pointlist);
+		void Fill(Mesh* mesh, Cont::array<float>& pointlist, Cont::array<unsigned int>& indicelist);
 
 		void Render(Mesh* mesh);
-		void Render(Mesh* mesh, dynamicarray::array<float>& pointlist);
-		void Render(Mesh* mesh, dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist);
+		void Render(Mesh* mesh, Cont::array<float>& pointlist);
+		void Render(Mesh* mesh, Cont::array<float>& pointlist, Cont::array<unsigned int>& indicelist);
 
 
 		void setaspectratio();	
-		void FillVertexBuffer(Mesh* mesh, dynamicarray::array<float>& pointlist);
+		void FillVertexBuffer(Mesh* mesh, Cont::array<float>& pointlist);
 	};
 	extern Renderer Ren;
 

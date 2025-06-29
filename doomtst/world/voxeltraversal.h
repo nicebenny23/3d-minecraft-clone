@@ -8,28 +8,39 @@
 #define voxtrav_Hpp
 namespace voxtra {
 
-	struct RayWorldIntersection
+	struct RayWorldHit
 	{
 		aabb::Collider* collider;
-		v3::Vector3 colpoint;
-		ray Ray;
-		float dist;
+		
+		geointersect::RayHit Hit;
+	
 		bool intersected() {
 
 			return (collider != nullptr);
 		}
-		RayWorldIntersection(float distance, aabb::Collider* closestbox, v3::Vector3 intpoint,ray emitedray) {
-			Ray = emitedray;
-			dist = distance;
-			collider = closestbox;
-			colpoint = intpoint;
+		RayWorldHit(geointersect::RayHit rayHit, aabb::Collider* WorldCollider) {
+			
+			collider = WorldCollider;
+			Hit = rayHit;
 		}
-		RayWorldIntersection() {
+		
+		RayWorldHit() {
 			collider = nullptr;
-			dist = -1;
-			colpoint = zerov;
+			
+		}
+		Vector3 Intersection() {
+
+			return Hit.intersectionpoint;
+		}
+		
+	float Dist(){
+		return Hit.dist;
+	}
+		ray Ray() {
+			return Hit.Ray;
 		}
 	};
+	using WorldRayCollision = Opt::Option<RayWorldHit>;
 	enum GridTraverseMode {
 		countnormal = 0,
 		countall = 1,
@@ -39,7 +50,7 @@ namespace voxtra {
 
 
 	bool Boxcollwithgrid(geometry::Box Box);
-	RayWorldIntersection travvox(ray nray, float acc, GridTraverseMode trav = countnormal);
+	WorldRayCollision travvox(ray nray, float acc, GridTraverseMode trav = countnormal);
 	block* findprevblock(ray nray, float acc, GridTraverseMode trav = countnormal);
 
 	inline v3::Vector3 findemptyspace(v3::Vector3 scale) {

@@ -12,7 +12,7 @@
 #define particle_HPP
 
 using namespace v3;
-using namespace dynamicarray;
+using namespace Cont;
 struct particleemiter:gameobject::component
 {
 

@@ -1,5 +1,5 @@
 #include "noise.h"
-using namespace dynamicarray;
+using namespace Cont;
 #include "../util/mathutil.h"
 
 //todo move this to random

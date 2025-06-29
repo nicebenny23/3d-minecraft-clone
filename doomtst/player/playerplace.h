@@ -14,7 +14,7 @@ using namespace objutil;
 struct playerplace :gameobject::component
 {
 	int curplaceid;
-	voxtra::RayWorldIntersection closest;
+	voxtra::WorldRayCollision Hit;
 	item* select;
 
 
@@ -22,7 +22,6 @@ struct playerplace :gameobject::component
 	void start() {
 		select = nullptr;
 		curplaceid = 0;
-		closest.collider = nullptr;
 		priority = 101010101;
 	}
 	bool caninteract() {
@@ -33,15 +32,16 @@ struct playerplace :gameobject::component
 		}
 
 
-		if (closest.collider == nullptr)
+		if (!Hit)
 		{
 			return false;
 		}
+		voxtra::RayWorldHit closest = Hit.unwrap();
 		if (closest.collider->owner->type != gameobject::block)
 		{
 			return false;
 		}
-		if (!inrange(closest.dist, -1, interactmaxrange))
+		if (!inrange(closest.Hit.dist, -1, interactmaxrange))
 		{
 			return false;
 		}
@@ -59,9 +59,11 @@ struct playerplace :gameobject::component
 				return;
 			}
 		}
-		int dir = maxdirection(closest.collider->globalbox().center - plamentblock->center());
+
+		voxtra::RayWorldHit closest = Hit.unwrap();
+		Dir::Dir3d dir = Dir::Align(closest.collider->globalbox().center - plamentblock->center());
 	
-		int blockdirection = max2ddirection(camera::campos() - closest.colpoint);
+		int blockdirection = Dir::max2ddirection(camera::campos() - closest.Hit.intersectionpoint);
 
 		plamentblock->mesh.direction = blockdirection;
 		plamentblock->mesh.attachdir = dir;
@@ -94,7 +96,7 @@ struct playerplace :gameobject::component
 		select = owner->getcomponent<inventory>().selected;
 
 		ray cameraray = ray(toent(owner).transform.position, toent(owner).transform.position + toent(owner).transform.getnormaldirection() * 7);
-		closest = collision::raycastall(cameraray,owner);
+		Hit = collision::raycastall(cameraray,owner);
 		if (!caninteract())
 		{
 			return;

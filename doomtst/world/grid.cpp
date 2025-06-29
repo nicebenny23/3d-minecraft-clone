@@ -12,7 +12,8 @@ namespace grid {
 
 
 	//normed pos is when pos is in the range [0...2*CtxName::cxt.Grid->length+1) for each direction;
-	Vector3 Grid::scaletoblocksize(Vector3 point)
+	//scales to block coords
+	Vector3 Grid::toBlockPos(Vector3 point)
 	{
 		return point / blocksize;
 	}
@@ -44,27 +45,27 @@ namespace grid {
 
 
 	//gets the location of the currentvoxel
-	Coord Grid::getvoxellocation(Vector3 pos)
+	Coord Grid::getVoxel(Vector3 pos)
 	{
 		return  Coord(std::floor(pos.x / blocksize), std::floor(pos.y / blocksize), std::floor(pos.z / blocksize));
 
 	}
 	
-	
-	int Grid::gridindexfromnormedchunkpos(Coord NormedChunk)
+	//
+	int Grid::localChunkIndex(Coord NormedChunk)
 	{
 
 		return NormedChunk.x + NormedChunk.y* (dim()) + NormedChunk.z* dim()*dim();
 	}
-	int Grid::gridindfromchunkpos(Coord Chunk)
+	int Grid::chunkIndex(Coord Chunk)
 	{
 		Chunk+= Coord(rad, rad, rad) - gridpos;
-		return gridindexfromnormedchunkpos(Chunk);
+		return localChunkIndex(Chunk);
 	}
 	
 	//gets the voxel at a place in world space
 
-	bool Grid::chunkInBounds(Coord loc)
+	bool Grid::containsChunk(Coord loc)
 	{
 		Coord RelPos = loc - gridpos;
 		return (abs(RelPos.x) <= rad && abs(RelPos.y) <= rad && abs(RelPos.z) <= rad);
@@ -77,10 +78,10 @@ namespace grid {
 	{
 		Coord chnk = chunkfromblockpos(pos);
 
-		if (chunkInBounds(chnk))
+		if (containsChunk(chnk))
 		{
 
-			int ind = gridindfromchunkpos(chnk);
+			int ind = chunkIndex(chnk);
 			return chunklist[ind];
 		}
 		return nullptr;
@@ -91,10 +92,10 @@ namespace grid {
 
 		Coord chnk = chunkfromblockpos(pos);
 		
-		if (chunkInBounds(chnk))
+		if (containsChunk(chnk))
 		{
 
-			const int ind = gridindfromchunkpos(chnk);
+			const int ind = chunkIndex(chnk);
 			int blkind = Chunk::indexfrompos(pos);
 			block& blockatpos = chunklist[ind]->blockbuf[blkind];
 			return &blockatpos;
@@ -109,8 +110,8 @@ namespace grid {
 	array<block*>& Grid::voxelinrange(geometry::Box span)
 	{
 		array<block*>* blockarr = new array<block*>;
-		span.center = scaletoblocksize(span.center);
-		span.scale = scaletoblocksize(span.scale);
+		span.center = toBlockPos(span.center);
+		span.scale = toBlockPos(span.scale);
 		v3::Vector3 lowpos = ((span.center - span.scale) - unitv);
 
 		v3::Coord lowest = v3::Coord(symmetric_floor(lowpos.x), symmetric_floor(lowpos.y), symmetric_floor(lowpos.z));
@@ -128,7 +129,7 @@ namespace grid {
 					if (blk != nullptr)
 					{
 
-						blockarr->append(blk);
+						blockarr->push(blk);
 					}
 				}
 
@@ -148,10 +149,10 @@ namespace grid {
 
 	
 
-		dynamicarray::array<Chunk::chunk*>	newchunklist = dynamicarray::array<Chunk::chunk*>(totalChunks);
-		int indexdxchange = gridindexfromnormedchunkpos(griddt);
+		Cont::array<Chunk::chunk*>	newchunklist = Cont::array<Chunk::chunk*>(totalChunks);
+		int indexdxchange = localChunkIndex(griddt);
 
-		int ind = 0;
+		size_t ind = 0;
 		for (int k = 0; k < dim(); k++)
 		{
 			for (int j = 0; j < dim(); j++) {
@@ -161,7 +162,7 @@ namespace grid {
 					//we  need to check if is null because we call it with load,with a bunch of unitilized chunks
 					bool ChunkLoaded = chunklist[ind] != nullptr;
 					//sadley need the 2 things in an and to clear it up
-					if (ChunkLoaded && chunkInBounds(chunklist[ind]->loc))
+					if (ChunkLoaded && containsChunk(chunklist[ind]->loc))
 					{
 						newchunklist[ind - indexdxchange] = chunklist[ind];
 
@@ -204,8 +205,8 @@ namespace grid {
 		pos.x = floor(pos.x);
 		pos.y = floor(pos.y);
 		pos.z = floor(pos.z);
-		griddt = pos - gridpos;
-		gridpos = pos;
+		griddt = Coord(pos) - gridpos;
+		gridpos = Coord(pos);
 	}
 	void Grid::destroy()
 	{
@@ -221,9 +222,9 @@ namespace grid {
 		ctx = Context;
 		Context->Grid = this;
 		loader.Init(ctx);
-		gridpos = camera::campos() / float(chunkaxis);
-		griddt = zerov;
-		chunklist = dynamicarray::array<Chunk::chunk*>(totalChunks);
+		gridpos =Coord( camera::campos() / float(chunkaxis));
+		griddt = zeroiv;
+		chunklist = Cont::array<Chunk::chunk*>(totalChunks);
 		for (int i = 0; i < totalChunks; i++)
 		{
 			chunklist[i] = nullptr;

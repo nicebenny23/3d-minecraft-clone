@@ -3,18 +3,17 @@
 //simple aabb class without collision implemented 
 namespace aabb {
     
-    ptrmempool<Collider> Colliderlist;
+    Sparse::SparseSet<Collider*> Colliderlist;
     void initCollider()
     {
-        Colliderlist = ptrmempool<Collider>();
-        Colliderlist.instantiate(maxentities, false, true);
+        Colliderlist = Sparse::SparseSet<Collider*>();
         
     }
     v3::Vector3 collideaabb(Collider p1, Collider p2)
     {
         return geometry::collidebox(p1.globalbox(), p2.globalbox());
 
-      }
+     }
         
 
    
@@ -23,8 +22,8 @@ namespace aabb {
         //if index is not null which implies that ojbect is nto null
         if (index!=-1)
         {
-
             Colliderlist.remove(this);
+            
         }
     }
     
@@ -37,8 +36,7 @@ namespace aabb {
         
         index = -1;
         if (appendtolist) {
-Colliderlist.append(this);
-        
+            Colliderlist.push(this);
         
         }
      

@@ -1,7 +1,7 @@
 #include "../util/dynamicarray.h"
 #include "Container.h"
 #include "../util/fileloader.h"
-using namespace dynamicarray;
+using namespace Cont;
 #ifndef recipe_hpp
 #define recipe_hpp
 struct iteminrecipe {

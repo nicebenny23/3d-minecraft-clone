@@ -9,13 +9,13 @@ void collision::update()
 	{
 
 
-		for (int i = 0; i < Colliderlist.size; i++)
+
+		for (Collider* Coll : Colliderlist)
 		{
-			if (Colliderlist[i] != nullptr) {
-				handleCollisionWithGrid(*Colliderlist[i]);
+				handleCollisionWithGrid(*Coll);
 
 
-			}
+			
 		}
 		handleduelentitycollisions();
 	}
@@ -24,57 +24,53 @@ void collision::update()
 
 bool collision::boxCollidesWithEntity(geometry::Box blk, gameobject::obj* orgin )
 {
-	for (int i = 0; i < Colliderlist.size; i++)
+	for (Collider* Collider1:Colliderlist)
 	{
-		if (Colliderlist[i] != nullptr)
-		{
 		
-				if (Colliderlist[i]->owner == orgin)
+		
+				if (Collider1->owner == orgin)
 				{
 					continue;
 				}
 			
-			if (aabbboxintersect(blk,*Colliderlist[i]))
+			if (aabbboxintersect(blk,*Collider1))
 			{
 				return true;
 			}
-		}
+		
 	}
 	
 	return false;
 }
 
-voxtra::RayWorldIntersection collision::raycastentity(ray nray, gameobject::obj* orgin )
+voxtra::WorldRayCollision collision::raycastentity(ray nray, gameobject::obj* orgin )
 {
 
-	voxtra::RayWorldIntersection closest = voxtra::RayWorldIntersection();
-	closest.dist = INFINITY;
+	voxtra::WorldRayCollision closest = Opt::None;
+	
 	//
-	for (int i = 0; i < Colliderlist.size; i++)
+	for (Collider* Collider1 : Colliderlist)
 	{
-		if (Colliderlist[i] != nullptr) {
 
 
-			if (Colliderlist[i]->owner == orgin)
+	
+
+			if (Collider1->owner == orgin)
 			{
 				continue;
 			}
 
 
-			Collider* coll = Colliderlist[i];
-			if (dist(coll->globalbox().center, nray.start) < nray.length())
+			if (dist(Collider1->globalbox().center, nray.start) < nray.length())
 			{
 
-				geointersect::boxraycollision blkinter = geointersect::intersection( coll->globalbox(), nray);
-				if (blkinter.collided && blkinter.dist < closest.dist)
+				geointersect::boxRayCollision blkinter = geointersect::intersection(Collider1->globalbox(), nray);
+				if (blkinter&&(closest==Opt::None|| blkinter.unwrap().dist < closest.unwrap().Dist()))
 				{
-					closest.Ray = nray;
-					closest.colpoint = blkinter.intersectionpoint;
-					closest.collider = coll;
-					closest.dist = blkinter.dist;
+					closest = voxtra::RayWorldHit(blkinter.unwrap(), Collider1);
 				}
 			}
-		}
+		
 	}
 	return closest;
 }
@@ -152,50 +148,54 @@ void collision::handleduelentitycollisions()
 {
 	
 
-	for (int i = 0; i < Colliderlist.size; i++)
+	for (Collider* Collider1: Colliderlist)
 	{
 		
-		if (Colliderlist[i] == nullptr) {
-			continue;
-		}
-		for (int j = 0; j < Colliderlist.size; j++)
+		for (Collider* Collider2 : Colliderlist)
 		{
 
-			if ( Colliderlist[j] == nullptr) {
+	
+
+			if (Collider1->owner== Collider2->owner) {
 
 				continue;
 			}
 
-			if (Colliderlist[i]->owner==Colliderlist[j]->owner) {
-				continue;
-			}
-
-			v3::Vector3 force = aabb::collideaabb(*Colliderlist[i], *Colliderlist[j]);
-			if (v3::mag(force) > 0.01f)
+			v3::Vector3 force = aabb::collideaabb(*Collider1, *Collider2);
+			if (v3::mag(force) < 0.01f)
 			{
-			
-				propagatecollisionmessage(Colliderlist[i]->owner, Colliderlist[j]->owner);
-				
-				if (Colliderlist[i]->effector || Colliderlist[j]->effector) {
+				continue;
+			}
+				propagatecollisionmessage(Collider1->owner, Collider2->owner);
+
+				if (Collider1->effector, Collider2->effector) {
 
 					continue;
 				}
-				
-				distributeforce(Colliderlist[i]->owner, Colliderlist[j]->owner, force);
-				
-			}
+
+				distributeforce(Collider1->owner, Collider2->owner , force);
+
+			
 		}
+		
 	}
 }
 bool collision::aabbCollidesWithEntity(Collider* blk, gameobject::obj* orgin ) {
 	return collision::boxCollidesWithEntity(blk->globalbox(), orgin);
 }
 
-voxtra::RayWorldIntersection collision::raycastall(ray nray, gameobject::obj* orgin, voxtra::GridTraverseMode travmode)
+voxtra::WorldRayCollision collision::raycastall(ray nray, gameobject::obj* orgin, voxtra::GridTraverseMode travmode)
 {
-	voxtra::RayWorldIntersection gridcol = voxtra::travvox(nray,200,travmode);
-	voxtra::RayWorldIntersection entcol = raycastentity(nray,orgin);
-	if (gridcol.dist<entcol.dist)
+	voxtra::WorldRayCollision gridcol = voxtra::travvox(nray, 200, travmode);
+	voxtra::WorldRayCollision entcol = raycastentity(nray,orgin);
+	if (gridcol == Opt::None) {
+		return entcol;
+	}
+	if (entcol==Opt::None)
+	{
+		return gridcol;
+	}
+	if (gridcol.unwrap().Dist()<entcol.unwrap().Dist())
 	{
 		return gridcol;
 	}

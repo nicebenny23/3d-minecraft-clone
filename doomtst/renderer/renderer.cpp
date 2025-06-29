@@ -72,7 +72,7 @@ namespace renderer {
 
     }
 
-    void Renderer::FillVertexBuffer(Mesh* mesh, dynamicarray::array<float>& pointlist)
+    void Renderer::FillVertexBuffer(Mesh* mesh, Cont::array<float>& pointlist)
     {
         if (pointlist.length % mesh->Voa.ComponentsPerVertex() != 0)
         {
@@ -89,7 +89,7 @@ namespace renderer {
         renderer::Ren.Binders.Bind(mesh->Ibo);
     }
 
-    void Renderer::Fill(Mesh* mesh, dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist) {
+    void Renderer::Fill(Mesh* mesh, Cont::array<float>& pointlist, Cont::array<unsigned int>& indicelist) {
         if (!mesh->IsEboMesh)
         {
             throw std::invalid_argument("attempted to intiate a non Ebo mesh with an indice list");
@@ -100,7 +100,7 @@ namespace renderer {
         mesh->length = indicelist.length;
 
     }
-    void Renderer::Fill(Mesh * mesh,dynamicarray::array<float>& pointlist) {
+    void Renderer::Fill(Mesh * mesh,Cont::array<float>& pointlist) {
         if (mesh->IsEboMesh)
         {
             throw std::invalid_argument("attempted to intiate an Ebo Mesh without an indice list");
@@ -149,12 +149,12 @@ namespace renderer {
         }
     }
 
-    void Renderer::Render(Mesh* mesh, dynamicarray::array<float>& pointlist)
+    void Renderer::Render(Mesh* mesh, Cont::array<float>& pointlist)
     {
         Fill(mesh, pointlist);
         Render(mesh);
     }
-    void Renderer::Render(Mesh* mesh, dynamicarray::array<float>& pointlist, dynamicarray::array<unsigned int>& indicelist)
+    void Renderer::Render(Mesh* mesh, Cont::array<float>& pointlist, Cont::array<unsigned int>& indicelist)
     {
         Fill(mesh, pointlist, indicelist);
         Render(mesh);

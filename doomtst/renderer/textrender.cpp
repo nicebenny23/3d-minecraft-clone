@@ -69,26 +69,26 @@ void writeletter(geometry::Box2d location, int letter)
 		// Index of unique vertex in each face
 		v2::Vector2 pointtoappend = location.scale * offset[j] + location.center;
 		// Actual location
-		datbuf.append(pointtoappend.x);
+		datbuf.push(pointtoappend.x);
 
-		datbuf.append(pointtoappend.y);
+		datbuf.push(pointtoappend.y);
 
 		// UV coordinates
 		v2::Vector2 coords = cubeuv[j];
-		datbuf.append(coords.x);
-		datbuf.append(coords.y);
+		datbuf.push(coords.x);
+		datbuf.push(coords.y);
 
-		datbuf.append(letter);
+		datbuf.push(letter);
 
 		
 	}	
 
-	indbuf.append( 0+baselocation);
-	indbuf.append(1+ baselocation);
-	indbuf.append(3 + baselocation);
-	indbuf.append(0 + baselocation);
-		indbuf.append(3 + baselocation);
-	indbuf.append(2 + baselocation);
+	indbuf.push( 0+baselocation);
+	indbuf.push(1+ baselocation);
+	indbuf.push(3 + baselocation);
+	indbuf.push(0 + baselocation);
+		indbuf.push(3 + baselocation);
+	indbuf.push(2 + baselocation);
 
 
 }

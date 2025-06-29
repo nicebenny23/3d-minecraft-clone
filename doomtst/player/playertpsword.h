@@ -45,8 +45,8 @@ struct playertpcomp :gameobject::component
 						Vector3 pos = toent(owner).transform.position;
 						Vector3 offset = toent(owner).transform.getnormaldirection()*  chargetime * chargetime;
 						ray moveray = ray(pos, pos + offset);
-					voxtra::RayWorldIntersection grid=	voxtra::travvox(moveray, 100, voxtra::countall);
-					if (grid.collider==nullptr)
+					voxtra::WorldRayCollision grid=	voxtra::travvox(moveray, 100, voxtra::countall);
+					if (!grid)
 					{
 
 						toent(owner).transform.position += offset;
@@ -54,7 +54,7 @@ struct playertpcomp :gameobject::component
 					}
 					else
 					{
-						toent(owner).transform.position = grid.colpoint;
+						toent(owner).transform.position = grid.unwrap().Intersection();
 					}
 					owner->getcomponent<rigidbody>().velocity.y = 0;
 						wearduribilty();

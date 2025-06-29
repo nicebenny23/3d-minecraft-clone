@@ -7,58 +7,58 @@
 #include <cstring>
 #pragma once
 
-namespace dynamicarray {
+namespace Cont {
 
 	
 	// Resizing function that doubles the size of the array when needed.
 	// If the length is 0, it initializes to a default size of 2.
-	inline int resizelength(int length) {
+	inline size_t resizelength(size_t length) {
 		return (length == 0) ? 2 : 2 * length;  // Double the capacity for efficient reallocation
 	}
 
 	template<class T, bool initelems = true>
 	class array {
 	public:
-		// Debugging function to print the contents of the list (useful for debugging).
+		// Debugging function to prsize_t the contents of the list (useful for debugging).
 		void debuglist();
 
 
 		bool empty();
 		// Standard operator[] that returns a reference to the element at the given index.
-		T& operator[](int index);
+		T& operator[](size_t index);
 
 		// At function that checks if the index is in range before returning the element.
-		T& at(int index);
+		T& at(size_t index);
 
 		// Unsafe method to directly access an element at the specified index.
-		T& UncheckedAt(const int index);
+		T& UncheckedAt(const size_t index);
 
 		// Cut a range of elements from startindex to endindex.
-		void cutind(int startindex, int endindex);
+		void cutind(size_t startindex, size_t endindex);
 
 		// Slice the array between a start and end index.
-		void slice(int startindex, int endindex);
+		void slice(size_t startindex, size_t endindex);
 
 		// Insert an element at a specific index, shifting others.
-		void insertind(int index, T value);
+		void insertind(size_t index, T value);
 
 		// Delete an element at the given index, shifting others.
-		void deleteind(int index);
-
+		void deleteind(size_t index);
+		
 
 	
 		
 		// Append a single value to the array.
-		void append(const T& value);
+		void push(const T& value);
 
 		// Append an array of elements to the current array.
-		void append(T* arr, int otherlen);
+		void push(T* arr, size_t otherlen);
 
 		// Append another array to this one.
-		void append(array arr);
+		void push(array arr);
 
 
-
+		T pop();
 
 		// Destroy the array by deallocating memory and resetting values.
 		void destroy();
@@ -71,10 +71,10 @@ namespace dynamicarray {
 		array();
 
 		// Constructor that initializes the array with a given size.
-		array(int size);
+		array(size_t size);
 
-		// Constructor that initializes the array from a raw pointer and size.
-		array(T* arr, int size);
+		// Constructor that initializes the array from a raw posize_ter and size.
+		array(T* arr, size_t size);
 		
 		// Move constructor.
 		array(array&& other) noexcept;
@@ -86,28 +86,28 @@ namespace dynamicarray {
 		array& operator=(array&& other) noexcept;
 		array& operator=(const array& other);
 		
-		// Pointer to the dynamically allocated array.
+		// Posize_ter to the dynamically allocated array.
 		T* list;
 		// Current number of elements in the array.
-		unsigned int length;
+		 size_t length;
 
 		// Total allocated capacity of the array.
-		unsigned int capacity;
+		 size_t capacity;
 
 		// Iterator class for accessing elements using range-based for loops.
 		class Iterator {
 		private:
-			T* ptr;  // Pointer to the current element in the array.
+			T* ptr;  // Posize_ter to the current element in the array.
 
 		public:
 			using value_type = T;
 			using iterator = Iterator;
 			using const_iterator = const T*;
 			using size_type = std::size_t;
-			// Constructor initializes the iterator with a pointer.
+			// Constructor initializes the iterator with a posize_ter.
 			Iterator(T* p) : ptr(p) {}
 
-			// Dereference operator to return the element pointed to by the iterator.
+			// Dereference operator to return the element posize_ted to by the iterator.
 			T& operator*() {
 				return *ptr;
 			}
@@ -137,6 +137,7 @@ namespace dynamicarray {
 		Iterator end() {
 			return Iterator(list + length);  // Return an iterator past the last element.
 		}
+		using iterator = Iterator;
 
 		// Method to return the current capacity of the array.
 		size_t get_size() const {
@@ -150,7 +151,7 @@ namespace dynamicarray {
 
 		private:
 			// Resize the array to a specific size (or double the size if not specified).
-			void resize(int size = 0);
+			void resize(size_t size = 0);
 	};
 
 	
@@ -159,13 +160,13 @@ namespace dynamicarray {
 	template<class T, bool initelems>
 	inline void array<T, initelems >::debuglist()
 	{
-		for (int i = 0; i < length; i++)
+		for (size_t i = 0; i < length; i++)
 		{
 			debug(list[i]);
 		}
 	}
 
-	//deletes content of list(not pointers!!)
+	//deletes content of list(not posize_ters!!)
 	
 	template<class T, bool initelems>
 	inline bool array<T, initelems>::empty()
@@ -175,11 +176,11 @@ namespace dynamicarray {
 
 	//returns alias to index
 	template<class T, bool initelems >
-	T& array<T, initelems>::operator[](int index) {
+	T& array<T, initelems>::operator[](size_t index) {
 
 		if (index >= capacity)
 		{
-			resize(resizelength(index));//array resize failed
+			resize(resizelength(index));
 
 		}
 		if (index >= length) {//max index is length
@@ -187,10 +188,7 @@ namespace dynamicarray {
 			length = index + 1;
 
 		}
-		if (index < 0)
-		{
-			throw std::invalid_argument("Index out of bounds for []");
-		}
+	
 
 
 
@@ -200,8 +198,8 @@ namespace dynamicarray {
 	}
 	//same as [] but only in bounds
 	template<class T, bool initelems >
-	T& array<T, initelems>::at(int index) {
-		if (index >= length || index < 0) {
+	T& array<T, initelems>::at(size_t index) {
+		if (index >= length) {
 			throw std::invalid_argument("Index out of bounds for insertion");
 		}
 
@@ -211,7 +209,7 @@ namespace dynamicarray {
 	}
 	//unsafe
 	template<class T, bool initelems>
-	inline T& array<T, initelems>::UncheckedAt(const int ind)
+	inline T& array<T, initelems>::UncheckedAt(const size_t ind)
 	{
 
 		return list[ind];
@@ -219,16 +217,16 @@ namespace dynamicarray {
 
 	//keeps a range of indices including [start,end] ind,todo add inclusive exculsive toggle
 	template<class T, bool initelems> 
-	void array<T, initelems>::slice(int startindex, int endindex) {
+	void array<T, initelems>::slice(size_t startindex, size_t endindex) {
 
 
-		if (endindex < startindex || startindex < 0 || endindex >= length)
+		if (endindex < startindex || endindex >= length)
 		{
 
 			throw	std::invalid_argument("Index out of bounds for slice");
 		}
 		//moves indices 
-		for (int i = startindex; i <= endindex; i++)
+		for (size_t i = startindex; i <= endindex; i++)
 		{
 			list[i - startindex] = list[i];
 		}
@@ -241,16 +239,16 @@ namespace dynamicarray {
 	}
 	//removes a range of indexes [start,end]
 	template<class T, bool initelems>
-	void array<T, initelems>::cutind(int startindex, int endindex) {
+	void array<T, initelems>::cutind(size_t startindex, size_t endindex) {
 
-		if (endindex < startindex || startindex < 0 || endindex >= length)
+		if (endindex < startindex || endindex >= length)
 		{
 			throw	std::invalid_argument("Index out of bounds for cutting");
 		}
 
-		int dif = endindex - startindex;
+		size_t dif = endindex - startindex;
 
-		for (int i = endindex + 1; i < length; i++)
+		for (size_t i = endindex + 1; i < length; i++)
 		{
 			list[i - dif - 1] = list[i];
 		}
@@ -262,9 +260,9 @@ namespace dynamicarray {
 	
 	//deleted the element at index
 	template<class T, bool initelems>
-	void array<T, initelems>::deleteind(int index) {
+	void array<T, initelems>::deleteind(size_t index) {
 
-		if (index < 0 || index >= length)
+		if ( index >= length)
 		{
 			throw std::invalid_argument("Index out of bounds for deletion");
 		}
@@ -272,7 +270,7 @@ namespace dynamicarray {
 
 
 		length--;//decrements size
-		for (int i = index; i < length; i++)
+		for (size_t i = index; i < length; i++)
 		{
 
 			list[i] = list[i + 1];//this lets index be removed
@@ -289,8 +287,8 @@ namespace dynamicarray {
 
 
 	template<class T, bool initelems>
-	void array<T, initelems>::insertind(int index, T value) {
-		if (index < 0 || index>length)
+	void array<T, initelems>::insertind(size_t index, T value) {
+		if (index>length)
 		{
 			throw std::invalid_argument("Index out of bounds for insertion");
 
@@ -302,7 +300,7 @@ namespace dynamicarray {
 
 
 
-		for (int i = length; i > index; i--)
+		for (size_t i = length; i > index; i--)
 		{
 			list[i] = list[i - 1];
 		}
@@ -312,9 +310,9 @@ namespace dynamicarray {
 		length++;
 	}
 	
-	//copies and appends an element to the list(!!!issues with pointers!!!)
+	//copies and appends an element to the list(!!!issues with posize_ters!!!)
 	template<class T, bool initelems>
-	void array<T, initelems>::append(const T& value) {
+	void array<T, initelems>::push(const T& value) {
 		if (length >= capacity)
 		{
 			resize(resizelength(length));
@@ -325,7 +323,7 @@ namespace dynamicarray {
 	}
 	//append
 	template<class T, bool initelems >
-	inline void array<T, initelems>::append(T* arr, int otherlen)
+	inline void array<T, initelems>::push(T* arr, size_t otherlen)
 	{
 
 		if (length + otherlen >= capacity)
@@ -334,23 +332,36 @@ namespace dynamicarray {
 		}
 
 
-		for (int i = 0; i < otherlen; i++)
+		for (size_t i = 0; i < otherlen; i++)
 		{
 			list[i + length] = arr[i];
 		}
 		length += otherlen;
 	}
 	//resizes the array
-	//appends a list to the end of the list(doesent delete it)(!!!caution with pointer lists!!!)
+	//appends a list to the end of the list(doesent delete it)(!!!caution with posize_ter lists!!!)
 	template<class T, bool initelems >
-	void array<T, initelems>::append(array arr) {
+	void array<T, initelems>::push(array arr) {
 
-		append(arr.list, arr.length );
+		push(arr.list, arr.length );
+	}
+
+	template<class T, bool initelems>
+	inline T array<T, initelems>::pop()
+	{
+		if (length==0)
+		{
+			throw std::logic_error("Cannot pop empty array");	
+		}
+		T store = list[length - 1];
+		length -= 1;
+		return store;
+
 	}
 	
 
 	template<class T, bool initelems>
-	 void array<T, initelems >::resize(int size) {
+	 void array<T, initelems >::resize(size_t size) {
 		//returns if success
 
 
@@ -374,11 +385,14 @@ namespace dynamicarray {
 				newlist = malloc(sizeof(T) * size);
 			}
 		
-			list = ((T*)newlist);
+			if (!newlist) {
+				throw std::bad_alloc();
+			}
+			list = static_cast<T*>(newlist);
 			//somtimes dont want to init elems so i make it an option to turn it off
 			if (initelems)
 			{
-				for (int i = capacity; i < size; i++) {
+				for (size_t i = capacity; i < size; i++) {
 
 					new (list + i)T();
 				}
@@ -411,7 +425,7 @@ namespace dynamicarray {
 		std::swap(list, other.list);
 	}
 	template<class T, bool initelems >
-	array<T, initelems>::array(int size) {
+	array<T, initelems>::array(size_t size) {
 
 
 		length = 0;
@@ -438,7 +452,7 @@ namespace dynamicarray {
 	}
 
 	template<class T, bool initelems >
-	inline array<T, initelems>::array(T* arr, int size)
+	inline array<T, initelems>::array(T* arr, size_t size)
 	{
 		length = size;
 		capacity = size;
@@ -447,7 +461,7 @@ namespace dynamicarray {
 			std::memcpy(list, arr, sizeof(T)*size);  // Fast copy for trivially copyable types
 		}
 		else {
-			for (int i = 0; i < size; i++) {
+			for (size_t i = 0; i < size; i++) {
 				list[i] = arr[i];
 			}
 		}

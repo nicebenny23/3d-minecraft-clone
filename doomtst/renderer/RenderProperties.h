@@ -40,12 +40,12 @@ public:
     std::string Name;
     RenderProperties prop;
     std::string Shader;
-    dynamicarray::array<UFunc> UniformsCalls;
+    Cont::array<UFunc> UniformsCalls;
     // Default constructor
-    RenderMode() : Name(""), Shader(""), UniformsCalls(dynamicarray::array<UFunc>()){}
+    RenderMode() : Name(""), Shader(""), UniformsCalls(Cont::array<UFunc>()){}
 
-    dynamicarray::array<UFunc>& AddUniform(UFunc UniformCall) {
-        UniformsCalls.append( UniformCall);
+    Cont::array<UFunc>& AddUniform(UFunc UniformCall) {
+        UniformsCalls.push( UniformCall);
         return UniformsCalls;
     }
         // Constructor to initialize RenderType with parameters

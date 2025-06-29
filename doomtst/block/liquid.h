@@ -33,11 +33,11 @@ struct liquidprop :gameobject::component {
 			collidedwith->getcomponent<rigidbody>().velocity *= 1 - CtxName::ctx.Time->dt * 5;
 		}
 	}
-	void updateinface(int face) {
+	void updateinface(Dir::Dir3d face) {
 
 
 
-		Coord newpos = dirfromint(face) + objutil::toblk(owner).pos;
+		Coord newpos =face.ToVec() + objutil::toblk(owner).pos;
 
 		blockname::block* blk = CtxName::ctx.Grid->getBlock(newpos);
 		if (blk == nullptr)
@@ -73,7 +73,8 @@ struct liquidprop :gameobject::component {
 
 		}
 
-		if (liqval <= 1 && face != 3)
+		//instert for what dor==3 was
+		if (liqval <= 1)
 		{
 			return;
 		}
@@ -92,7 +93,7 @@ struct liquidprop :gameobject::component {
 				liqval -= 1;
 			
 	
-		blk->mesh.attachdir = 3;
+		blk->mesh.attachdir = Dir::up3d;
 
 	}
 
@@ -105,11 +106,13 @@ struct liquidprop :gameobject::component {
 			{
 				diffusetime = 0;
 
-				updateinface(3);
-				updateinface(0);
-				updateinface(1);
-				updateinface(4);
-				updateinface(5);
+				for (auto dir: Dir::Directions3d)
+				{
+					if (dir != Dir::up3d) {
+
+						updateinface(dir);
+					}
+				}
 			}
 			if (liqval <= 0)
 			{

@@ -4,7 +4,7 @@
 #include <string>
 #include "../util/geometry.h"
 #include "ui.h"
-using namespace dynamicarray;
+using namespace Cont;
 using namespace geometry;
 #ifndef  textrender_HPP
 #define textrender_HPP

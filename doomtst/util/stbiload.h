@@ -16,9 +16,9 @@ namespace texdata {
 		}
 		return data;
 	}
-inline v2::Coord2d GetImgSize(const char* Img_Path) {
+inline v2::Coord2 GetImgSize(const char* Img_Path) {
 		int channels;
-		v2::Coord2d size;
+		v2::Coord2 size;
 		// Load image to get its info
 		if (!stbi_info(Img_Path, &size.x, &size.y, &channels)) {
 			throw std::invalid_argument(std::string("Failed to load image: ")+Img_Path);

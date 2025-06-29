@@ -5,7 +5,7 @@
 using namespace blockname;
 Vector3 face::center()
 {
-	return Vector3( dirfromint(facenum))* mesh->box.scale + mesh->box.center;
+	return Vector3( facenum.ToVec())* mesh->box.scale + mesh->box.center;
 }
 void face::calccameradist() {
 	cameradist = 128 * dist2((*this).center(), Vector3(camera::campos()));
@@ -24,25 +24,25 @@ void blockmesh::setfaces(int leftface, int rightface, int upface, int downface, 
 
 	switch (blk->mesh.direction)
 	{
-	case west2d:
+	case Dir::dir2d::west2d:
 		faces[0].create(frontface, 0, this);
 		faces[1].create(backface, 1, this);
 		faces[4].create(rightface, 4, this);
 		faces[5].create(leftface, 5, this);
 		break;
-	case east2d:
+	case Dir::dir2d::east2d:
 		faces[0].create(backface, 0, this);
 		faces[1].create(frontface, 1, this);
 		faces[4].create(leftface, 4, this);
 		faces[5].create(rightface, 5, this);
 		break;
-	case front2d:
+	case Dir::dir2d::front2d:
 		faces[0].create(leftface, 0, this);
 		faces[1].create(rightface, 1, this);
 		faces[4].create(frontface, 4, this);
 		faces[5].create(backface, 5, this);
 		break;
-	case back2d:
+	case Dir::dir2d::back2d:
 		faces[0].create(rightface, 0, this);
 		faces[1].create(leftface, 1, this);
 		faces[4].create(backface, 4, this);
@@ -74,8 +74,8 @@ face& blockmesh::operator[](int index)
 void blockname::blockmesh::attachindirection()
 {
 
-	Vector3 maxpos = blk->center() + box.scale * dirfromint(blk->mesh.attachdir);
-	Vector3 blkpos = Vector3(dirfromint(blk->mesh.attachdir))*blocksize / 2 + blk->center();
+	Vector3 maxpos = blk->center() + box.scale * (blk->mesh.attachdir.ToVec());
+	Vector3 blkpos = Vector3(blk->mesh.attachdir.ToVec())*blocksize / 2 + blk->center();
 	box.center += blkpos - maxpos;
 }
 face& blockname::block::operator[](int index)
@@ -111,8 +111,8 @@ void blockname::block::create(v3::Coord location, int blockid, byte blkattachfac
 	attributes.solid = true;
 
 	mesh = blockname::blockmesh(this, blockscale);
-	mesh.direction = blkdirection;
-	mesh.attachdir = blkattachface;
+	mesh.direction = (blkdirection);
+	mesh.attachdir =Dir::Dir3d( blkattachface);
 }
 
 void blockname::block::createdefaultaabb(bool effector)

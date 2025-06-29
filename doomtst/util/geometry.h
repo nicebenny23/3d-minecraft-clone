@@ -33,7 +33,15 @@ namespace geometry {
 			}
 			return false;
 		}
-		bool pointinbox(v3::Vector3 pos)
+		// Minkowski sum operator
+		Box operator+(const Box& other) const {
+			return Box(center + other.center, scale + other.scale);
+		}
+		// Minkowski difference operator
+		Box operator-(const Box& other) const {
+			return Box(center - other.center, scale + other.scale);
+		}
+		bool contains(v3::Vector3 pos)
 		{
 			pos -= center;
 			if (abs(pos.x) <= scale.x)
@@ -48,7 +56,20 @@ namespace geometry {
 			}
 			return false;
 		}
-
+		bool contains_orgin()
+		{
+			if (abs(-center.x) <= scale.x)
+			{
+				if (abs(-center.y) <= scale.y)
+				{
+					if (abs(-center.z) <= scale.z)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
 		Box(Vector3 cent, Vector3 scl)
 			: center(cent), scale(scl) {}
 
@@ -63,7 +84,7 @@ namespace geometry {
 		Box2d(v2::Vector2 cent, v2::Vector2 scl)
 			: center(cent), scale(scl) {}
 
-		bool pointinbox(v2::Vector2 point) {
+		bool contains(v2::Vector2 point) {
 
 			point -= center;
 			if (abs(point.x)<scale.x&&abs(point.y)<scale.y)
@@ -122,7 +143,7 @@ namespace geometry {
 
 		float distanceFromPoint(Vector3 samplePoint) {
 			// Project the sample point onto the cone's central axis (ray)
-			Vector3 axisProjection = dirray.projectpoint(samplePoint);
+			Vector3 axisProjection = dirray.project(samplePoint);
 
 			// Compute the perpendicular distance from the sample point to the cone's axis.
 			float distanceToAxis = dist(samplePoint, axisProjection);
@@ -141,17 +162,8 @@ namespace geometry {
 
 	inline bool  boxboxintersect(geometry::Box p1, geometry::Box p2)
 	{
-		if (abs(p1.center.x - p2.center.x) < p1.scale.x + p2.scale.x)
-		{
-			if (abs(p1.center.y - p2.center.y) < p1.scale.y + p2.scale.y)
-			{
-				if (abs(p1.center.z - p2.center.z) < p1.scale.z + p2.scale.z)
-				{
-					return true;
-				}
-			}
-		}
-		return false;
+		return (p1 - p2).contains_orgin();
+					
 	}
 inline 	v3::Vector3 collidebox(Box p1, Box p2)
 	{
@@ -163,15 +175,10 @@ inline 	v3::Vector3 collidebox(Box p1, Box p2)
 			float xdepth = sgnx * (p1.scale.x + p2.scale.x) - (p1.center.x - p2.center.x);
 			float ydepth = sgny * (p1.scale.y + p2.scale.y) - (p1.center.y - p2.center.y);
 			float zdepth = sgnz * (p1.scale.z + p2.scale.z) - (p1.center.z - p2.center.z);
-			if (abs(xdepth) < abs(ydepth)) {
-				if (abs(xdepth) < abs(zdepth))
-				{
-					return v3::Vector3(xdepth, 0, 0);
-				}
-				return v3::Vector3(0, 0, zdepth);
+			if (abs(xdepth) < abs(ydepth) && abs(xdepth) < abs(zdepth)) {
+				return v3::Vector3(xdepth, 0, 0);
 			}
-			if (abs(ydepth) < abs(zdepth))
-			{
+			if (abs(ydepth) < abs(zdepth)) {
 				return v3::Vector3(0, ydepth, 0);
 			}
 			return v3::Vector3(0, 0, zdepth);
@@ -181,4 +188,4 @@ inline 	v3::Vector3 collidebox(Box p1, Box p2)
 	}
 }
 
-#endif // GEOMETRY_HPP
+#endif

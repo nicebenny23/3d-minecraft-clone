@@ -15,7 +15,7 @@ void randomcoord(unsigned int& seed);
 
 int randomint( int max);
 
-extern dynamicarray::array<v3::Vector3> seededdirections;
+extern Cont::array<v3::Vector3> seededdirections;
 int Hash(int seed, int xPrimed, int yPrimed, int zPrimed);
 inline v3::Vector3 randompointonsphere(int x, int y, int z) {
 	int seed = 3;

@@ -42,7 +42,7 @@ int randomint(int max){
 
     return (randomint()%max);
 }
- dynamicarray::array<v3::Vector3> seededdirections;
+ Cont::array<v3::Vector3> seededdirections;
 
 void InitRandomDirections()
 {
@@ -54,7 +54,7 @@ void InitRandomDirections()
 		randomcoord(noiseval);
 	}
 
-	seededdirections = dynamicarray::array<v3::Vector3>(USHRT_MAX);
+	seededdirections = Cont::array<v3::Vector3>(USHRT_MAX);
 	for (int i = 0; i < USHRT_MAX; i++)
 	{
 

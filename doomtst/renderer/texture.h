@@ -4,7 +4,7 @@
 #include "../debugger/debug.h"
 #ifndef texture_h
 #define texture_h
-using namespace dynamicarray;
+using namespace Cont;
 enum TextureType {
 	TexArray = 0,
 	Tex2d = 1,
@@ -32,7 +32,7 @@ private:
 };
 struct Texture2D:ITexture
 {	Texture2D();
-	v2::Coord2d size;
+	v2::Coord2 size;
 private:
 	void apply() override;
 	void destroy();
@@ -44,7 +44,7 @@ struct TextureArray:ITexture
 {
 	TextureArray();
 	int length;
-	v2::Coord2d size;
+	v2::Coord2 size;
 private:
 	void apply() override;
 	void destroy() override;

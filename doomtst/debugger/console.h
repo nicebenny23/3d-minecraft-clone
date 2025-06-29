@@ -16,7 +16,7 @@ namespace console {
     public:
         ImGuiStreamBuf();
 
-        dynamicarray::array<std::string, true> log;
+        Cont::array<std::string, true> log;
         int sync() override;
         
     protected:

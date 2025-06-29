@@ -78,7 +78,7 @@ namespace blockname {
 		float cameradist;
 		
 		byte tex;
-		byte facenum;
+		Dir::Dir3d facenum;
 		byte light;
 	
 
@@ -88,16 +88,16 @@ namespace blockname {
 			covercomputed = false;
 			mesh= nullptr;
 			covered = false;
-			facenum = -1;
+			facenum = Dir::None3d;
 			cameradist = -1;
 			tex = 0;
 			light = 0;
 		}
 	
-		void create(byte texval, int num, blockmesh* owner) {
+		void create(byte texval,  char num, blockmesh* owner) {
 			covercomputed = false;
 			tex = texval;
-			facenum = num;
+			facenum =Dir::Dir3d(num);
 			mesh = owner;
 		}
 		Vector3 center();
@@ -109,8 +109,8 @@ namespace blockname {
 
 	struct blockmesh
 	{
-		byte direction;
-		byte attachdir;
+		char direction;
+		Dir::Dir3d attachdir;
 		blockmesh() {
 
 			box.center = zerov;

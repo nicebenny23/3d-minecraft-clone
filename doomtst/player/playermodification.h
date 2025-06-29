@@ -17,7 +17,7 @@ void initbreakparticle(Ent::entity* newent);
 struct playerbreak:gameobject::component
 {
 	
-	voxtra::RayWorldIntersection closest;
+	voxtra::WorldRayCollision closest;
 	item* pickaxe;
 	block* currmining;
 	
@@ -25,7 +25,6 @@ struct playerbreak:gameobject::component
 	void start() {
 		pickaxe = nullptr;
 	
-		closest.collider=nullptr;
 		 renderer::Ren.Textures.LoadTexture("images\\menutex.png","MenuTexture");
 	
 	}
@@ -34,15 +33,16 @@ struct playerbreak:gameobject::component
 	
 
 
-		if (closest.collider == nullptr)
+		if (!closest)
 		{
 			return false;
 		}
-		if (closest.collider->owner->type!=gameobject::block)
+		voxtra::RayWorldHit Hit = *closest;
+		if (Hit.collider->owner->type!=gameobject::block)
 		{
 			return false;
 		}
-		if (!inrange(closest.dist, interactminrange, interactmaxrange))
+		if (!inrange(Hit.Dist(), interactminrange, interactmaxrange))
 		{
 			return false;
 		}
@@ -71,11 +71,11 @@ struct playerbreak:gameobject::component
 
 	void testifmining()
 		{
-	
+		voxtra::RayWorldHit Hit = closest.unwrap();
 			if (currmining != nullptr)
 			{
 				
-				if (currmining == ((block*)(closest.collider->owner)))
+				if (currmining == ((block*)(Hit.collider->owner)))
 				{
 				
 
@@ -96,7 +96,7 @@ struct playerbreak:gameobject::component
 					
 				}
 			}
-			currmining = (block*)(closest.collider->owner);
+			currmining = (block*)(Hit.collider->owner);
 			if (currmining!=nullptr)
 			{
 
@@ -114,8 +114,9 @@ struct playerbreak:gameobject::component
 		{
 			timeuntilbreak = currmining->mininglevel/5.f;
 			wearduribilty();
-			objutil::toblk(closest.collider->owner).bstate.broken = true; 
-			gridutil::setblock(toblk(closest.collider->owner).pos, minecraftair);
+			voxtra::RayWorldHit Hit = closest.unwrap();
+			objutil::toblk(Hit.collider->owner).bstate.broken = true; 
+			gridutil::setblock(toblk(Hit.collider->owner).pos, minecraftair);
 
 		}
 	}

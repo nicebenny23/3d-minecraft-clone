@@ -6,22 +6,22 @@
 #define v2_HPP
 namespace v2 {
 	struct Vector2;
-	struct Coord2d
+	struct Coord2
 	{
 
-		Coord2d(int X, int Y);
-		Coord2d();
-		void operator=(const Coord2d& p1);
-		bool operator==(const Coord2d& p1);
-		bool operator!=(const Coord2d& p1);
-		Coord2d& operator+=(const Coord2d& p1);
-		Coord2d operator+(const Coord2d& p1) const;
+		Coord2(int X, int Y);
+		Coord2();
+		void operator=(const Coord2& p1);
+		bool operator==(const Coord2& p1);
+		bool operator!=(const Coord2& p1);
+		Coord2& operator+=(const Coord2& p1);
+		Coord2 operator+(const Coord2& p1) const;
 
-		Coord2d& operator-=(const Coord2d& p1);
-		Coord2d operator-(const Coord2d& p1) const;
+		Coord2& operator-=(const Coord2& p1);
+		Coord2 operator-(const Coord2& p1) const;
 
-		Coord2d operator*(int scale) const;
-		Coord2d& operator*=(int scale);
+		Coord2 operator*(int scale) const;
+		Coord2& operator*=(int scale);
 		bool operator==(const Vector2& p1);
 		Vector2 operator+(const Vector2& p1) const;
 		Vector2 operator-(const Vector2& p1) const;
@@ -35,7 +35,7 @@ namespace v2 {
 
 	
 
-	inline Coord2d::Coord2d() {
+	inline Coord2::Coord2() {
 
 
 
@@ -43,7 +43,7 @@ namespace v2 {
 		y = 0;
 	}
 
-	inline float dotproduct(const Coord2d& p, const Coord2d& p1) {
+	inline float dotproduct(const Coord2& p, const Coord2& p1) {
 
 		return (p.x * p1.x + p.y + p1.y);
 	}
@@ -51,7 +51,7 @@ namespace v2 {
 
 	
 
-	inline void Coord2d::operator=(const Coord2d& p1) {
+	inline void Coord2::operator=(const Coord2& p1) {
 
 		x = p1.x;
 		y = p1.y;
@@ -59,7 +59,7 @@ namespace v2 {
 
 	}
 
-	inline bool Coord2d::operator==(const Coord2d& p1)
+	inline bool Coord2::operator==(const Coord2& p1)
 	{
 		return 	(p1.x ==x &&p1.y == y);
 	}
@@ -67,14 +67,14 @@ namespace v2 {
 
 
 
-	inline Coord2d Coord2d::operator+(const Coord2d& p1) const {
+	inline Coord2 Coord2::operator+(const Coord2& p1) const {
 
 
-		return Coord2d(x + p1.x, y + p1.y);
+		return Coord2(x + p1.x, y + p1.y);
 
 
 	}
-	inline Coord2d& Coord2d::operator+=(const Coord2d& p1) {
+	inline Coord2& Coord2::operator+=(const Coord2& p1) {
 
 
 		x += p1.x;
@@ -87,14 +87,14 @@ namespace v2 {
 
 
 
-	inline Coord2d Coord2d::operator-(const Coord2d& p1) const {
+	inline Coord2 Coord2::operator-(const Coord2& p1) const {
 
 
-		return Coord2d(x - p1.x, y - p1.y);
+		return Coord2(x - p1.x, y - p1.y);
 
 
 	}
-	inline Coord2d& Coord2d::operator-=(const Coord2d& p1) {
+	inline Coord2& Coord2::operator-=(const Coord2& p1) {
 
 
 		x -= p1.x;
@@ -103,15 +103,15 @@ namespace v2 {
 
 	}
 
-	inline Coord2d Coord2d::operator*(int scale) const {
+	inline Coord2 Coord2::operator*(int scale) const {
 
-		return Coord2d(x * scale, y * scale);
+		return Coord2(x * scale, y * scale);
 
 
 
 	}
 
-	inline Coord2d& Coord2d::operator*=(int scale) {
+	inline Coord2& Coord2::operator*=(int scale) {
 
 
 		x *= scale;
@@ -123,13 +123,13 @@ namespace v2 {
 	
 
 
-	inline Coord2d::Coord2d(int X, int Y) {
+	inline Coord2::Coord2(int X, int Y) {
 
 		x = X;
 		y = Y;
 	}
 
-	inline bool Coord2d::operator!=(const Coord2d& p1)
+	inline bool Coord2::operator!=(const Coord2& p1)
 	{
 		return(p1.x != x || p1.y != y);
 
@@ -159,10 +159,10 @@ namespace v2 {
 		Vector2 operator/(float scale) const;
 
 		Vector2& operator/=(float scale);
-		bool operator==(const Coord2d& p1);
+		bool operator==(const Coord2& p1);
 		float x;
 		float y;
-		void operator= (const Coord2d & p1) ;
+		void operator= (const Coord2 & p1) ;
 		Vector2 operator*(Vector2 scale) const;
 
 	};
@@ -327,14 +327,14 @@ namespace v2 {
 	}
 
 	//this section is for stuff defined in v2 incorerating iv2;
-	inline void Vector2::operator=(const Coord2d& p1)  
+	inline void Vector2::operator=(const Coord2& p1)  
 	{
 		x = p1.x;
 		y = p1.y;
 
 	}
 
-	inline bool Vector2::operator==(const Coord2d& p1)
+	inline bool Vector2::operator==(const Coord2& p1)
 	{
 		return (p1.x == x && p1.y == y);
 	}
@@ -344,16 +344,16 @@ namespace v2 {
 
 
 	
-	inline bool Coord2d::operator==(const Vector2& p1)
+	inline bool Coord2::operator==(const Vector2& p1)
 	{
 		return (p1.x == x && p1.y == y );
 	}
-	inline Vector2 Coord2d::operator+(const Vector2& p1) const
+	inline Vector2 Coord2::operator+(const Vector2& p1) const
 	{
 		return Vector2(p1.x + x, p1.y + y);
 	}
 
-	inline Vector2 Coord2d::operator-(const Vector2& p1) const
+	inline Vector2 Coord2::operator-(const Vector2& p1) const
 	{
 		return Vector2(x - p1.x, y - p1.y);
 	}

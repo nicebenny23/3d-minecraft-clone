@@ -1,8 +1,8 @@
 #include <cmath>
 #include <limits.h>
 #include <stdexcept>
-#ifndef mathutil_HPP
-#define mathutil_HPP
+#include <type_traits>
+#pragma once
 #define NaNf std::numeric_limits<float>::max()
 inline bool aproxequal(float v1, float v2) {
 	const float eps = .0001;
@@ -61,15 +61,33 @@ inline  float sigmoid(float v1) {
 	return	1.0/ (1.0+ exp(-v1));
 }
 
-inline  float Max(float v1, float v2) {
-
-	return std::fmax(v1, v2);
+template<typename T1, typename T2, typename... Ts>
+constexpr auto Max(T1 a, T2 b, Ts... rest) -> typename std::common_type<T1, T2, Ts...>::type
+{
+	using Common = typename std::common_type<T1, T2, Ts...>::type;
+	const Common max_ab = (a < b) ? static_cast<Common>(b) : static_cast<Common>(a);
+	if constexpr (sizeof...(Ts) == 0) {
+		return max_ab;
+	}
+	else {
+		return Max(max_ab, static_cast<Common>(rest)...);
+	}
 }
-inline  float Min(float v1, float v2) {
 
-	return std::fmin(v1, v2);
-
+template<typename T1, typename T2, typename... Ts>
+constexpr auto Min(T1 a, T2 b, Ts... rest)-> typename std::common_type<T1, T2, Ts...>::type
+{
+	using Common = typename std::common_type<T1, T2, Ts...>::type;
+	const Common min_ab = (a < b) ? static_cast<Common>(a) : static_cast<Common>(b);
+	if constexpr (sizeof...(Ts) == 0) {
+		return min_ab;
+	}
+	else {
+		return Min(min_ab, static_cast<Common>(rest)...);
+	}
 }
+
+
 //mod(x,m) that behaves intutiivlly (ex mod(-1,2)!=-1)
 inline  int symmetric_mod(int x, int m) {
 	// Ensure m is positive to avoid division by zero issues
@@ -114,11 +132,10 @@ inline int symmetric_ceil(float x) {
 		return ceil(x);
 	}
 }
+//
 inline int sign(float x) {
 	return (x < 0) ? -1 : 1;
 }
 
 
 int comparefloat(const void* b, const void* a);
-
-#endif // !mathutil

@@ -9,7 +9,7 @@ struct soundbuf {
     ALuint id;  
     ALenum format;
     int frequency;
-    dynamicarray::array< char> data;
+    Cont::array< char> data;
 
     soundbuf() : id(0), format(AL_FORMAT_MONO16), frequency(44100) {}
     void generatebuffer() {

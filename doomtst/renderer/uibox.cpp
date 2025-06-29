@@ -87,10 +87,10 @@ void uiboxname::uibox::render()
 		for (int j = 0; j < 4; j++)
 		{
 			v2::Vector2 pos = box.center + offset[j] * (box.scale);
-			databuf.append(pos.x);
-			databuf.append(pos.y);
-			databuf.append(cubeuv[2 * j]);
-			databuf.append(cubeuv[2 * j + 1]);
+			databuf.push(pos.x);
+			databuf.push(pos.y);
+			databuf.push(cubeuv[2 * j]);
+			databuf.push(cubeuv[2 * j + 1]);
 		}
 		renderer::Ren.Render(&BoxMesh,databuf,indbuf);
 	databuf.destroy();

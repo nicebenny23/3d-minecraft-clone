@@ -54,10 +54,6 @@ void gameobject::component::oncollision(obj* collidedwith)
 //not functonal yet
 
 
-void gameobject::obj::SetOCManager(CtxName::Context* ctx)
-{
-	OC= ctx->OC ;
-}
 
 
 obj::obj() {
@@ -67,6 +63,14 @@ obj::obj() {
 };
 //gets a gameobject from a refrence to it;
 
+
+void gameobject::OCManager::InitObj(obj* object)
+{
+	object->id = ObjId;
+	ObjId++;
+	object->OC = ctx->OC;
+
+}
 
 void gameobject::OCManager::updatecomponents(updatecalltype type)
 {
@@ -79,7 +83,7 @@ void gameobject::OCManager::updatecomponents(updatecalltype type)
 
 		if (shouldupdate( managers[i].utype,type))
 		{
-			managerref.append(&managers[i]);
+			managerref.push(&managers[i]);
 		}
 		
 
@@ -130,7 +134,7 @@ void gameobject::componentmanager::create(int mid, int bytesize)
 	id = mid;
 
 
-	pool = chainpool::chainedpool<component>(bytesize, 10000);
+	pool = chainpool::chainedpool<component>(bytesize);
 }
 
 void gameobject::componentmanager::init(component* sample)
