@@ -3,8 +3,7 @@
 #include <glm/mat4x4.hpp>
 #include "../player/player.h"
 #include "../renderer/model.h"
-#ifndef wormobj_HPP
-#define wormobj_HPP
+#pragma once 
 inline float lerpfloat(float f1, float f2, float lval) {
 
 	return f1 * (1 - lval) + f2 * lval;
@@ -49,4 +48,3 @@ struct worm:gameobject::component
 	
 };
 
-#endif

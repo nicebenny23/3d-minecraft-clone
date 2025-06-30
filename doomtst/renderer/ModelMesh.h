@@ -1,3 +1,4 @@
+#pragma once
 #include "../util/dynamicarray.h"
 #include "../util/fileloader.h"
 #include "../util/vector2.h"
@@ -7,7 +8,7 @@
 #include "Vao.h"
 #include "../game/transform.h"
 #include "renderer.h"
-#pragma once
+//fix
 using namespace Cont;
 using namespace v3;
 using namespace vobj;

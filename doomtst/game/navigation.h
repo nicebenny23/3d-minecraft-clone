@@ -1,10 +1,9 @@
-#include <cmath>
+#pragma once
+#include "../util/mathutil.h"
 #include "../world/grid.h"
 #include "../util/dir.h"
-#include <memory>
+
 #include "entity.h"
-#ifndef  nav_HPP
-#define nav_HPP
 
 
 struct navnode {
@@ -70,4 +69,3 @@ struct navigator:gameobject::component
 };
 
 array<navnode> astarpathfinding(navnode start, navnode goal, array<navnode> (*getconnected)(navnode& pos));
-#endif // ! nav_HPP

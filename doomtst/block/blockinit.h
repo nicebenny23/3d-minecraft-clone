@@ -21,8 +21,7 @@
 #include "sand.h"
 //provides utility functions for blocks
 using namespace blockname;
-#ifndef blockinit_H
-#define blockinit_H
+#pragma once  
 namespace blkinitname {
 
 	inline void blockinit(block* blk) {
@@ -179,5 +178,3 @@ namespace blkinitname {
 	}
 	
 }
-
-#endif // !blockinit_H

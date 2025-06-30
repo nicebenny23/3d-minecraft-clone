@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../block/block.h"
-#ifndef chestitem_HPP
-#define chestitem_HPP
+#pragma once 
 #define chestblockid blockname::minecraftchest
 inline void initchestitem(item* itm) {
 	itm->properties.pickaxepower = 0;
@@ -11,4 +10,4 @@ inline void initchestitem(item* itm) {
 	itm->properties.placeable = true;
 	itm->itemui.itemsprite = createitembox("images\\chest.png","ChestItemTexture");
 }
-#endif // !grassitem_HPP
+ // !grassitem_HPP

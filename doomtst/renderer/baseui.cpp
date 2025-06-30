@@ -1,3 +1,4 @@
+#pragma once
 #include "baseui.h"
 
 void uiobj::destroy()

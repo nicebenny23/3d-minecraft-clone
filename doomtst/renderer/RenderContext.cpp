@@ -1,3 +1,4 @@
+#pragma once
 #include "RenderContext.h"
 
 void RenderContext::Context::Bind(vobj::Vbo* Vbo)

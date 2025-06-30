@@ -1,8 +1,7 @@
 #include "../game/gameobject.h"
 #include "../game/rigidbody.h"
 #include "../game/objecthelper.h"
-#ifndef playerclimb_HPP
-#define playerclimb_HPP
+#pragma once 
 struct playerclimb:gameobject::component
 {
 
@@ -35,4 +34,4 @@ struct playerclimb:gameobject::component
 	}
 };
 
-#endif // !playerclimb_H
+ // !playerclimb_H

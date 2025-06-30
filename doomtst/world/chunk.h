@@ -1,8 +1,6 @@
 #include "../block/block.h"
 #include "../renderer/chunkrender.h"
-#ifndef Chunk_HPP
-#define Chunk_HPP
-
+#pragma once 
 constexpr int chunklength = 16;
 constexpr int chunkaxis =chunklength/blocksize;
 constexpr int chunksize = chunkaxis*chunkaxis*chunkaxis;
@@ -63,5 +61,5 @@ namespace Chunk {
 	void createchunkmesh(chunk* aschunk);
 }
 
-#endif // !Chunk_H
+ // !Chunk_H
 #pragma once

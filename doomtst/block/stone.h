@@ -1,6 +1,5 @@
 #include "block.h"
-#ifndef stone_HPP
-#define stone_HPP
+#pragma once 
 inline void stoneinit(blockname::block* blk) {
 	blk->mesh.setfaces(stonetex, stonetex, stonetex, stonetex, stonetex, stonetex);
 
@@ -22,4 +21,4 @@ inline void stonedelete(blockname::block* blk) {
 
 
 }
-#endif // !wood_HPP
+ // !wood_HPP

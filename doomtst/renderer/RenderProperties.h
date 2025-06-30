@@ -1,10 +1,10 @@
+#pragma once
 #include <GLFW/glfw3.h>
 #include <string>
 #include <functional>
 #include <unordered_map>
 #include <stdexcept>
 
-#pragma once
 
 namespace renderer {
     struct  Renderer;

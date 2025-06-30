@@ -2,9 +2,7 @@
 #include "../util/queue.h"
 using namespace grid;
 using namespace queuename;
-#ifndef gridmanager_HPP
-#define gridmanger_HPP
-
+#pragma once 
 namespace gridutil {
 	extern bool redoallighting;
 	void createlightingqueue();
@@ -22,4 +20,4 @@ namespace gridutil {
 	//void removeblockatloc(Coord loc);
 
 }
-#endif // !gridmanager_HPP
+ // !gridmanager_HPP

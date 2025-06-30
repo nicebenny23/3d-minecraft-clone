@@ -1,10 +1,7 @@
-#include <chrono>
-#include "dynamicarray.h"
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "mathutil.h"
-using namespace Cont;
-using namespace std::chrono;
 #pragma once
 namespace timename {
 	struct TimeManager
@@ -14,6 +11,8 @@ namespace timename {
 			fps = 60;
 			dt = 0;
 		}
+		
+		float ElapsedTime;
 		float fps;
 		float dt;
 		void calcfps() {
@@ -29,6 +28,5 @@ namespace timename {
 	private:
 
 		const int MaxFrames = 2000;
-		float ElapsedTime;
 	};
 }

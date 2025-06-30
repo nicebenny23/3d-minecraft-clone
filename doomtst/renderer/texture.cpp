@@ -1,9 +1,7 @@
 #define STB_IMAGE_IMPLEMENTATION
-#include "../external/stb_image.h"
 #include "texture.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <iostream>
 #include "../util/stbiload.h"
 
 void settextureparams(GLint texturetype) {
@@ -70,7 +68,7 @@ TextureArray::TextureArray( array<const char*>& textures, const char* name)
 		unsigned char* datatoappend = texdata::loadtexdata(&ImgSize.x, &ImgSize.y, textures[i]);
 		if (ImgSize != size)
 		{
-			Assert("texture is invalid");
+		throw	std::logic_error("texture is invalid");
 		}
 		//params,type,minmap level,xoffset,offset,zoffset,width,heigh,depgh,colortype,datatype,and data;
 		glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, i, size.x, size.y,1, GL_RGBA, GL_UNSIGNED_BYTE, datatoappend);
@@ -89,7 +87,7 @@ void TextureArray::destroy()
 {
 	if (id == -1)
 	{
-		Assert("cant delete invalid texture");
+		throw std::logic_error("cant delete invalid texture");
 	}
 	glDeleteTextures(1, &id);
 	id = -1;

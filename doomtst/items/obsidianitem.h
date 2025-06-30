@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../block/block.h"
-#ifndef obsidianitem_HPP
-#define obsidianitem_HPP
+#pragma once 
 #define obsidianasblockid blockname::minecraftobsidian
 
 inline void initobsidianitem(item* itm) {
@@ -14,4 +13,4 @@ inline void initobsidianitem(item* itm) {
 }
 
 
-#endif // !stoneitem_HPP
+ // !stoneitem_HPP

@@ -1,8 +1,7 @@
 #include "block.h"
 #include "../items/mossitem.h"
 #include "../items/loottable.h"
-#ifndef Moss_HPP
-#define Moss_HPP
+#pragma once 
 inline void mossinit(blockname::block* blk) {
 	blk->mesh.setfaces(mosstex, mosstex, mosstex, mosstex, mosstex, mosstex);
 
@@ -22,4 +21,4 @@ inline void mossdelete(blockname::block* blk) {
 	blk->removecomponent<loottable>();
 
 }
-#endif // !wood_HPP
+ // !wood_HPP

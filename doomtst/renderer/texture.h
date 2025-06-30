@@ -1,9 +1,7 @@
 #include "../util/vector2.h"
 #include <GLFW/glfw3.h>
 #include "../util/dynamicarray.h"
-#include "../debugger/debug.h"
-#ifndef texture_h
-#define texture_h
+#pragma once 
 using namespace Cont;
 enum TextureType {
 	TexArray = 0,
@@ -54,4 +52,4 @@ private:
 };
 
 
-#endif // !texture_h
+ // !texture_h

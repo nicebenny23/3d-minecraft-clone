@@ -1,11 +1,8 @@
-
+#pragma once
 #include "../entities/antifreezeboss.h"
 #include "../renderer/blockrender.h"
 #include "../player/player.h"
-#ifndef finalbossstart_HPP
-
-#define finalbossstart_HPP
-
+ 
 void spawnfinalboss() {
 	createfinalboss(Vector3(0, 10020, 0));
 	player::goblin->transform.position = Vector3(0, 10010, 0);
@@ -31,4 +28,4 @@ void testgameifspawn() {
 	}
 
 }
-#endif
+

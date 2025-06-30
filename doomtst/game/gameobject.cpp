@@ -2,9 +2,7 @@
 #include "gameobject.h"
 
 #include "GameContext.h"
-#include "../util/random.h"
 #include <type_traits>
-#include "../renderer/Renderer.h"
 
 
 using namespace gameobject;

@@ -1,8 +1,8 @@
+#pragma once
 #include "block.h"
 #include "../items/loottable.h"
 #
-#ifndef treestone_HPP
-#define treestone_HPP
+
 inline void treestoneinit(blockname::block* blk) {
 
 	blk->mesh.setfaces( treestonetex,treestonetex,logtoppng,logtoppng,treestonetex,treestonetex);
@@ -24,4 +24,4 @@ inline void treestonedelete(blockname::block* blk) {
 
 
 }
-#endif // !wood_HPP
+ // !wood_HPP

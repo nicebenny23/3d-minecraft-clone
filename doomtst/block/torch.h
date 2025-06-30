@@ -1,6 +1,5 @@
 #include "block.h"
-#ifndef torch_HPP
-#define torch_HPP
+#pragma once 
 inline void torchinit(blockname::block* blk) {
 	blk->mesh.setfaces(torchtex,torchtex,torchtoptex,planktex,torchtex,torchtex);
 
@@ -23,4 +22,4 @@ inline void torchdelete(blockname::block* blk) {
 	blk->removecomponent<loottable>();
 
 }
-#endif // !torch_HPP
+ // !torch_HPP

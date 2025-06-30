@@ -1,6 +1,5 @@
 #include "block.h"
-#ifndef obsidian_HPP
-#define obsidian_HPP
+#pragma once 
 inline void obsidianinit(blockname::block* blk) {
 
 	blk->mesh.setfaces(obsidiantex, obsidiantex, obsidiantex, obsidiantex, obsidiantex, obsidiantex);
@@ -18,5 +17,5 @@ inline void obsidiandelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();
 	blk->removecomponent<loottable>();
 }
-#endif // !wood_HPP
+ // !wood_HPP
 

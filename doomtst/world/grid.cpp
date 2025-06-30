@@ -1,3 +1,4 @@
+#pragma once
 #include "grid.h"
 #include <cmath>
 #include "../util/mathutil.h"

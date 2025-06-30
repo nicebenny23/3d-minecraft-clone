@@ -1,7 +1,7 @@
+#pragma once
 #include "../util/sharedptr.h"
 #include "../util/dynamicarray.h"
-#ifndef ui_HPP
-#define ui_HPP
+
 
 #define uisize 400
 using namespace Cont;
@@ -100,4 +100,3 @@ inline	void updateui() {
 	}
 }
 
-#endif

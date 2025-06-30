@@ -1,3 +1,4 @@
+#pragma once
 #include "ShaderManager.h"
 
 void Shaders::ShaderManager::Compile(const std::string& name, const char* vert, const char* frag)

@@ -1,6 +1,5 @@
 #include "block.h"
-#ifndef air_HPP
-#define air_HPP
+#pragma once 
 //makes a block air
 inline void setdefault(blockname::block* blk) {
 	blk->attributes.solid = false;
@@ -18,4 +17,4 @@ blk->minedfastwithpick = false;
 }
 
 
-#endif // !wood_HPP
+ // !wood_HPP

@@ -1,6 +1,5 @@
 #include "item.h"
-#ifndef crystalitem_HPP
-#define crystalitem_HPP
+#pragma once 
 #define crystalitemasblockid -1
 
 inline void initcrystalitem(item* itm) {
@@ -13,4 +12,4 @@ inline void initcrystalitem(item* itm) {
 }
 
 
-#endif // !stoneitem_HPP
+ // !stoneitem_HPP

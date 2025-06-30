@@ -1,3 +1,4 @@
+#pragma once
 #include "soundlistener.h"
 #include "../debugger/debug.h" // For Assert function
 

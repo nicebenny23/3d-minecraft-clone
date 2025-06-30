@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../block/block.h"
-#ifndef torchitem_HPP
-#define torchitem_HPP
+#pragma once 
 #define torchitemblockid blockname::minecrafttorch
 inline void inittorchitem(item* itm) {
 	itm->properties.pickaxepower = 1;
@@ -12,4 +11,4 @@ inline void inittorchitem(item* itm) {
 	itm->properties.placeable = true;
 }
 
-#endif // !torchitem_HPP
+ // !torchitem_HPP

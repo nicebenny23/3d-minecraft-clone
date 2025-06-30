@@ -1,5 +1,5 @@
+#pragma once
 #include "playerinventory.h"
-#include "../renderer/texture.h"
 void inventory::givestartitems(int i1, int i2,int i3) {
 	if (i1!=0)
 	{

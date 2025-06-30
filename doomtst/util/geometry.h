@@ -1,9 +1,7 @@
-#ifndef GEOMETRY_HPP
-#define GEOMETRY_HPP
-
+#pragma once
+#include "ray.h"
 #include "vector3.h"
 #include "mathutil.h"
-#include "ray.h"
 #include "vector2.h"
 using namespace v3;
 
@@ -188,4 +186,3 @@ inline 	v3::Vector3 collidebox(Box p1, Box p2)
 	}
 }
 
-#endif

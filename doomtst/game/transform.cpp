@@ -1,10 +1,10 @@
+#pragma once
 #include "transform.h"
 #include <glm/gtx/matrix_decompose.hpp>
-#include <glm/gtx/rotate_vector.hpp> 
-#include <glm/glm.hpp>
+#include <glm/gtx/rotate_vector.hpp> #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/euler_angles.hpp>
-#include <cmath>
+
 using namespace v3;
 Transform::Transform()
 {

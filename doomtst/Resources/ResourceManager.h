@@ -1,3 +1,4 @@
+#pragma once
 #include "../renderer/ShaderManager.h"
 #include "../renderer/TextureManager.h"
 #include "../renderer/VertexObjectManager.h"

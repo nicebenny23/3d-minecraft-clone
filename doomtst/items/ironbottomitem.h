@@ -1,6 +1,5 @@
 #include "item.h"
-#ifndef ironbottomitem_HPP
-#define ironbottomitem_HPP
+#pragma once 
 #define ironbottomitemblockid -1
 inline void initironbottomitem(item* itm) {
 	itm->properties.pickaxepower = 0;
@@ -10,4 +9,4 @@ inline void initironbottomitem(item* itm) {
 	itm->itemtype = wear;
 	itm->itemui.itemsprite = createitembox("images\\ironbottom.png","IronBottomTexture");
 }
-#endif // !ironsworditem_HPP
+ // !ironsworditem_HPP

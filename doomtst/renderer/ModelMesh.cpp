@@ -1,6 +1,5 @@
+#pragma once
 #include "ModelMesh.h"
-#include "renderer.h"
-#include "vertexobject.h"
 #include "../game/camera.h"
 
 using namespace ModelMeshName;

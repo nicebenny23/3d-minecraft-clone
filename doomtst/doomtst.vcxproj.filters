@@ -84,12 +84,6 @@
     <ClCompile Include="player\player.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="util\time.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="util\geometry.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="game\entity.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

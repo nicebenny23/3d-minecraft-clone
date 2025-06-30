@@ -3,8 +3,7 @@
 #include "../world/grid.h"
 #include "../world/voxeltraversal.h"
 using namespace aabb;
-#ifndef collision_HPP
-#define collision_HPP
+#pragma once 
 constexpr auto collisioniterations = 3;
 #define interactmaxrange 6
 #define interactminrange 0
@@ -22,4 +21,3 @@ namespace collision {
 	void handleduelentitycollisions();
 	void handleCollisionWithGrid(Collider& entity);
 }
-#endif

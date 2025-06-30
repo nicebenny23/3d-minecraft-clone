@@ -1,6 +1,6 @@
+#pragma once
 #include "../util/time.h"
-#ifndef blocktick_HPP
-#define blocktick_HPP
+ 
 #define ticktime .05
 namespace tick {
 	
@@ -12,4 +12,3 @@ namespace tick {
 
 }
 
-#endif

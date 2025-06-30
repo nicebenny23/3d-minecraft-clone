@@ -1,6 +1,6 @@
+#pragma once
 #include "particles.h"
 #include "rigidbody.h"
-#include "../world/noise.h"
 using namespace renderer;
 Vector3 vertexlist[]{
 Vector3(-1, -1,0),
@@ -33,7 +33,7 @@ void particleemiter::update()
 			{
 
 
-				if (particlearray[i]->getcomponent<particle>().endtime < CtxName::ctx.Time->Time)
+				if (particlearray[i]->getcomponent<particle>().endtime < CtxName::ctx.Time->ElapsedTime)
 				{
 					Ent::entity* EntityDeletionBuffer = particlearray[i];
 					objutil::toent(EntityDeletionBuffer).Destroy();
@@ -55,7 +55,7 @@ void particleemiter::update()
 			 {
 				 Ent::entityref newparticle = CtxName::ctx.EntMan->CreateEntity(position, "");
 				 
-				 newparticle.toent()->addcomponent<particle>()->endtime= CtxName::ctx.Time->Time+particlelifetime;
+				 newparticle.toent()->addcomponent<particle>()->endtime= CtxName::ctx.Time->ElapsedTime+particlelifetime;
 				 newparticle->getcomponent<particle>().ind = i;
 				 newparticle->getcomponent<particle>().emit = this;
 				 (*particleinit)(newparticle.toent());

@@ -5,8 +5,7 @@
 #include "../world/managegrid.h"
 #include "../util/time.h"
 #include "../game/rigidbody.h"
-#ifndef  liquid_HPP
-#define liquid_HPP
+#pragma once 
 extern float liquidtick;
 
 void updateltick();
@@ -125,4 +124,4 @@ struct liquidprop :gameobject::component {
 
 };
 #define liquid_HPP
-#endif // ! water_Hpp
+ // ! water_Hpp

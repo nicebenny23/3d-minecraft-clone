@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../block/block.h"
-#ifndef altaritem_HPP
-#define altaritem_HPP
+#pragma once 
 #define altaritemblockid blockname::minecraftaltar
 inline void initaltaritem(item* itm) {
 	itm->properties.pickaxepower = 1;
@@ -12,4 +11,4 @@ inline void initaltaritem(item* itm) {
 	itm->itemtype = count;
 	itm->itemui.itemsprite = createitembox("images\\crystalaltarside.png","CrystalAltarSideTexture");
 }
-#endif // !grassitem_HPP
+ // !grassitem_HPP

@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../block/block.h"
-#ifndef ironpickitem_HPP
-#define ironpickitem_HPP
+#pragma once 
 #define ironpickblockid blockname::minecraftwater
 inline void ironpickinit(item* itm) {
 	itm->properties.pickaxepower = 4.9;
@@ -12,4 +11,4 @@ inline void ironpickinit(item* itm) {
 	itm->itemui.itemsprite = createitembox("images\\ironpick.png","IronPickTexture");
 }
 
-#endif // !ironpickitem_HPP
+ // !ironpickitem_HPP

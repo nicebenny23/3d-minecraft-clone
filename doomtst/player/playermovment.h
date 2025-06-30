@@ -1,3 +1,4 @@
+#pragma once
 #include "../game/entity.h"
 #include "../game/objecthelper.h"
 #include "../util/userinput.h"
@@ -6,11 +7,7 @@
 #include "../game/rigidbody.h"
 #include "../world/voxeltraversal.h"
 #include "../game/entitystate.h"
-#include "../items/menu.h"
 #include "playerclimb.h"
-
-#ifndef player_H
-#define player_H
 struct playermovement:gameobject::component
 {
     Vector3 velocitylast;
@@ -95,4 +92,3 @@ struct playermovement:gameobject::component
 
 
 };
-#endif // !player_H

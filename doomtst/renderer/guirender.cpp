@@ -1,7 +1,5 @@
 #include "guirender.h"
-
 #include "../game/Core.h"
-#include <iostream>
 #include "../game/GameContext.h"
 namespace guirender {
 

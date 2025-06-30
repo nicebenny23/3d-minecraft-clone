@@ -1,3 +1,4 @@
+#pragma once
 #include "blocktick.h"
 
 float tick::tickdt;

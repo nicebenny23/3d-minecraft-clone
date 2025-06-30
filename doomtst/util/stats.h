@@ -1,8 +1,6 @@
 #pragma once
-		
 #include "mathutil.h"
 #include <algorithm>
-#include <cmath>
 #include <stdexcept>
 #include "dynamicarray.h"
 

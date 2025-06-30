@@ -1,6 +1,5 @@
 #include "item.h"
-#ifndef crystalpickitem_HPP
-#define crystalpickitem_HPP
+#pragma once 
 #define crystalpickblockid -1
 inline void crystalpickinit(item* itm) {
 	itm->properties.pickaxepower = 7;
@@ -11,4 +10,4 @@ inline void crystalpickinit(item* itm) {
 	itm->itemui.itemsprite = createitembox("images\\crystalpick.png","CrystalPickaxeTexture");
 }
 
-#endif // !crystalpickitem_HPP
+ // !crystalpickitem_HPP

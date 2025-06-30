@@ -1,9 +1,6 @@
 // deuqe.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
-#include <iostream>
-
-#include <assert.h>
 
 #pragma once 
 namespace stackname {

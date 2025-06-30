@@ -1,9 +1,10 @@
+#pragma once
+#include "../game/objecthelper.h"
 #include "ModelMesh.h"
 #include "../game/gameobject.h"
 #include "texture.h"
 #include "../game/transform.h"
-#ifndef model_HPP
-#define model_HPP
+
 enum  meshconnecttype
 {
 	normalmeshconnect = 0,
@@ -25,5 +26,3 @@ struct model:gameobject::component
 	void setmodelshader();
 };
 extern array<model> modellist;
-
-#endif // !modelname

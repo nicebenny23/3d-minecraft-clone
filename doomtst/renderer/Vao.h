@@ -1,8 +1,8 @@
-
+#pragma once
 #include "../util/dynamicarray.h"
 #include <glad/glad.h>
 #include "GlUtil.h"
-#pragma once
+
 namespace VObjMan {
 	class VObjManager; // Forward declaration
 }

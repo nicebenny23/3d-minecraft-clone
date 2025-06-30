@@ -9,9 +9,7 @@
 #include "../items/item.h"
 #include "../items/loottable.h"
 #include "rotatetovelocity.h"
-#ifndef crystaldaggers_HPP
-#define crystaldaggers_HPP
-
+#pragma once 
 inline Ent::entityref spawndagger(v3::Vector3 pos,v3::Vector3 velocity,float gravscale=.4f) {
 
     Ent::entityref refmodel = CtxName::ctx.EntMan->CreateEntity(pos, "dagger");
@@ -33,4 +31,4 @@ inline Ent::entityref spawndagger(v3::Vector3 pos,v3::Vector3 velocity,float gra
 
 
 
-#endif // !slime_HPP
+ // !slime_HPP

@@ -1,6 +1,5 @@
 #include "item.h"
-#ifndef tpsworditem_HPP
-#define tpsworditem_HPP
+#pragma once 
 #define tpswordblockid -1
 inline void initfinalsworditem(item* itm) {
 	itm->properties.pickaxepower = 0;
@@ -12,4 +11,4 @@ inline void initfinalsworditem(item* itm) {
 	itm->itemtype = wear;
 	itm->itemui.itemsprite = createitembox("images\\finalsword.png","FinalSwordTexture");
 }
-#endif // !ironsworditem_HPP
+ // !ironsworditem_HPP

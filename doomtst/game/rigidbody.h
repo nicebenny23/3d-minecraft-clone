@@ -8,10 +8,7 @@
 #include "../world/voxeltraversal.h"
 
 using namespace v3;
-
-#ifndef RIGIDBODY_HPP
-#define RIGIDBODY_HPP
-
+#pragma once 
 struct rigidbody : gameobject::component {
     Vector3 velocity;
     Vector3 unsetpositon;
@@ -87,5 +84,3 @@ struct rigidbody : gameobject::component {
 
   
 };
-
-#endif // RIGIDBODY_HPP

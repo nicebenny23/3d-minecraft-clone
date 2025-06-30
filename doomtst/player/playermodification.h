@@ -5,14 +5,10 @@
 #include "../game/objecthelper.h"
 #include "../world/voxeltraversal.h"
 #include "../util/dynamicarray.h"
-#include "../items/Container.h"
+
 #include "playerinventory.h"
-#include "../entities/onhit.h"
 #include "../items/itemutil.h"
-#include "../game/particles.h"
-using namespace objutil;
-#ifndef  playerplace_Hpp
-#define playerplace_Hpp
+#pragma once 
 void initbreakparticle(Ent::entity* newent);
 struct playerbreak:gameobject::component
 {
@@ -116,7 +112,7 @@ struct playerbreak:gameobject::component
 			wearduribilty();
 			voxtra::RayWorldHit Hit = closest.unwrap();
 			objutil::toblk(Hit.collider->owner).bstate.broken = true; 
-			gridutil::setblock(toblk(Hit.collider->owner).pos, minecraftair);
+			gridutil::setblock(objutil::toblk(Hit.collider->owner).pos, minecraftair);
 
 		}
 	}
@@ -125,7 +121,7 @@ struct playerbreak:gameobject::component
 		 
 		pickaxe = owner->getcomponent<inventory>().selected;
 
-		ray cameraray = ray(toent( owner).transform.position, toent(owner).transform.position+ toent(owner).transform.getnormaldirection()*7);
+		ray cameraray = ray(objutil::toent( owner).transform.position,objutil::toent(owner).transform.position+objutil::toent(owner).transform.getnormaldirection()*7);
 		closest = collision::raycastall(cameraray,owner,voxtra::countsolid);
 		if (!caninteract())
 		{
@@ -144,4 +140,4 @@ struct playerbreak:gameobject::component
 };
 
 
-#endif // ! playerplace_H
+ // ! playerplace_H

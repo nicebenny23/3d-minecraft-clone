@@ -4,8 +4,7 @@
 #include "../util/random.h"
 #include "../player/player.h"
 using namespace Cont;
-#ifndef loottable_HPP
-#define loottable_HPP
+#pragma once 
 const float interacttimeneededfordrop = 1;
 struct lootelement
 {
@@ -92,4 +91,4 @@ struct  loottable :gameobject::component
 
 
 
-#endif // !loottable_HPP
+ // !loottable_HPP

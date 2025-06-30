@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../block/block.h"
-#ifndef plankitem_HPP
-#define plankitem_HPP
+#pragma once 
 #define plankitemblockid blockname::minecraftplank
 inline void initplankitem(item* itm) {
 	itm->properties.pickaxepower = 1;
@@ -12,4 +11,4 @@ inline void initplankitem(item* itm) {
 	itm->itemtype = count;
 	itm->itemui.itemsprite = createitembox("images\\treestoneblock.png","TreestoneBlockTexture");
 }
-#endif // !grassitem_HPP
+ // !grassitem_HPP

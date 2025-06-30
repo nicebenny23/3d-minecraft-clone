@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../block/block.h"
-#ifndef glassitem_HPP
-#define glassitem_HPP
+#pragma once 
 #define glassitemblockid blockname::minecraftglass
 inline void glassiteminit(item* itm) {
 	itm->properties.pickaxepower = 2;
@@ -12,4 +11,4 @@ inline void glassiteminit(item* itm) {
 	itm->itemui.itemsprite = createitembox("images\\glass.png","GlassTexture");
 }
 
-#endif // !rockitemitem_HPP
+ // !rockitemitem_HPP

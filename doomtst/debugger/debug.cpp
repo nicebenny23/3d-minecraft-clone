@@ -1,3 +1,4 @@
+#pragma once
 #include "debug.h"
 
 #pragma warning(disable: 4996)

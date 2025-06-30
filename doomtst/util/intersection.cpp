@@ -1,3 +1,4 @@
+#pragma once
 #include "intersection.h"
 namespace geointersect {
 	boxRayCollision intersection(geometry::Box box, ray fray)

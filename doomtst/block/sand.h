@@ -4,9 +4,7 @@
 #include "../game/objecthelper.h"
 #include "../items/loottable.h"
 #include "../game/gameobject.h"
-#ifndef sandob_HPP
-#define sandob_HPP
-
+#pragma once 
 struct sandfall : gameobject::component {
     float timetilltest = .4f;
     
@@ -61,4 +59,4 @@ inline void sanddelete(blockname::block* blk) {
      blk->removecomponent<loottable>();
 }
 
-#endif // sandob_HPP
+ // sandob_HPP

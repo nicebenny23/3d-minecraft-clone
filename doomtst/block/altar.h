@@ -1,8 +1,6 @@
 #include "block.h"
 #include "../items/loottable.h"
-#ifndef altar_HPP
-#define altar_HPP
-
+#pragma once 
 inline void altarinit(blockname::block* blk) {
 	blk->mesh.setfaces(altartex, altartex, obsidiantex, obsidiantex, altartex, altartex);
 
@@ -22,4 +20,4 @@ inline void altardelete(blockname::block* blk) {
 	blk->removecomponent<loottable>();
 
 }
-#endif // !wood_HPP
+ // !wood_HPP

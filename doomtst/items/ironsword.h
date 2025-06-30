@@ -1,7 +1,5 @@
 #include "item.h"
-
-#ifndef ironsworditem_HPP
-#define ironsworditem_HPP
+#pragma once 
 #define ironsworditemblockid -1
 inline void initironsworditem(item* itm) {
 	itm->properties.pickaxepower = 0;
@@ -12,4 +10,4 @@ inline void initironsworditem(item* itm) {
 	itm->itemtype = wear;
 	itm->itemui.itemsprite = createitembox("images\\ironsword.png","IronSwordTexture");
 }
-#endif // !ironsworditem_HPP
+ // !ironsworditem_HPP

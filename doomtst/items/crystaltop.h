@@ -1,7 +1,6 @@
 
 #include "item.h"
-#ifndef armorctopitem_HPP
-#define armorctopitem_HPP
+#pragma once 
 #define crystaltopitemblockid -1
 inline void initcrystaltopitem(item* itm) {
 	itm->properties.pickaxepower = 0;
@@ -14,4 +13,4 @@ inline void initcrystaltopitem(item* itm) {
 	itm->itemtype = wear;
 	itm->itemui.itemsprite = createitembox("images\\crystaltop.png","CrystalTopTexture");
 }
-#endif // !ironsworditem_HPP
+ // !ironsworditem_HPP

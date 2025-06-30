@@ -1,5 +1,4 @@
 #include "renderer.h"
-#include "../util/userinput.h"
 #include "../game/Core.h"
 #include "../game/Settings.h"
 #include "../game/GameContext.h"

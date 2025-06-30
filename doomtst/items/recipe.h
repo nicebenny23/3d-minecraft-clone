@@ -2,8 +2,7 @@
 #include "Container.h"
 #include "../util/fileloader.h"
 using namespace Cont;
-#ifndef recipe_hpp
-#define recipe_hpp
+#pragma once 
 struct iteminrecipe {
 
 	int id;
@@ -106,4 +105,3 @@ struct recipemanager {
 
 
 };
-#endif

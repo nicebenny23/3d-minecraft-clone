@@ -1,7 +1,6 @@
+#pragma once
 #include "block.h"
 #include "../items/loottable.h"
-#ifndef plank_HPP
-#define plank_HPP
 inline void plankinit(blockname::block* blk) {
 
 	blk->mesh.setfaces(planktex, planktex, planktex, planktex, planktex, planktex);
@@ -18,4 +17,3 @@ inline void plankdelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();
 
 }
-#endif // !wood_HPP

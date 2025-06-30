@@ -1,3 +1,4 @@
+#pragma once
 #include "Container.h"
 #include "../util/fileloader.h"
 int currentcontid;

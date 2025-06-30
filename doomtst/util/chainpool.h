@@ -1,9 +1,7 @@
-#pragma once
+
 //essientially a linked list with very fast allocation times,unfortonatly not <T> supported yet but i might add support if i need a linked list
 #include <iterator>
-#include "dynamicarray.h"
-
-#include <cstddef>
+#include "dynamicarray.h"#include <cstddef>
 namespace chainutil {
     struct blockmetadata {
     public:

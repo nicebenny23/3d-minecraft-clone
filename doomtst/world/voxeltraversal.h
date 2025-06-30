@@ -4,8 +4,7 @@
 #include "../util/intersection.h"
 #include "../util/geometry.h"
 #include "../game/GameContext.h"
-#ifndef voxtrav_Hpp
-#define voxtrav_Hpp
+#pragma once 
 namespace voxtra {
 
 	struct RayWorldHit
@@ -94,4 +93,3 @@ namespace voxtra {
 		return pos - Vector3(0, scale.y, 0);
 	}
 }
-#endif

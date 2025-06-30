@@ -1,6 +1,5 @@
 #include "vertexobject.h"	
 #include "Vao.h"
-#include "../util/dynamicarray.h"
 #pragma once
 struct Mesh
 {

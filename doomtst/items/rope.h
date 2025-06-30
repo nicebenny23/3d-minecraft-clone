@@ -1,10 +1,7 @@
 
 #include "../block/block.h"
 #include "item.h"
-#ifndef ropeitem_HPP
-#define ropeitem_HPP
-
-
+#pragma once 
 #define ropeitemasblock blockname::minecraftrope
 inline void initropeitem(item* itm) {
 
@@ -18,4 +15,4 @@ inline void initropeitem(item* itm) {
 
 
 
-#endif // !ropeitem_HPP
+ // !ropeitem_HPP

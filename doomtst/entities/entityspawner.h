@@ -4,8 +4,7 @@
 #include "../world/grid.h"
 #include"../world/voxeltraversal.h"
 #include "../renderer/blockrender.h"
-#ifndef entityspawner_HPP
-#define entityspawner_HPP
+#pragma once 
 #define enemytag 1
 void spawn() {
 	return;
@@ -45,4 +44,4 @@ void spawn() {
 
 }
 
-#endif // !entityspawner_HPP
+ // !entityspawner_HPP

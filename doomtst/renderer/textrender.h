@@ -4,10 +4,8 @@
 #include <string>
 #include "../util/geometry.h"
 #include "ui.h"
-using namespace Cont;
-using namespace geometry;
-#ifndef  textrender_HPP
-#define textrender_HPP
+#pragma once
+
 
 extern TextureArray* textarray;
 void inittextarray();
@@ -52,4 +50,3 @@ struct integertext:ui::uielement
 
 };
 
-#endif // ! textrender_HPP

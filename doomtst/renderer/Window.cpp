@@ -1,5 +1,6 @@
+#include "../debugger/debug.h"
 #include "Window.h"
-
+#include "../util/stbiload.h"
 constexpr float IDEAL_ASPECT_RATIO = 16.0f / 9.0f;
 namespace window {
 

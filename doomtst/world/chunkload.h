@@ -1,6 +1,5 @@
 #include "chunk.h"
-#ifndef chunkload_HPP
-#define chunkload_HPP
+#pragma once 
 namespace grid{
 	struct Grid;
 }
@@ -18,4 +17,4 @@ struct ChunkLoader
 private:
 	grid::Grid* Grid;
 };
-#endif // chunkload_HPP
+ // chunkload_HPP

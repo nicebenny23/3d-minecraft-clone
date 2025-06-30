@@ -1,3 +1,4 @@
+#pragma once
 #include "tick.h"
 #include "../game/GameContext.h"
 	float tick::tickdt = 0;

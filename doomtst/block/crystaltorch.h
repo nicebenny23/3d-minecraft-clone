@@ -1,7 +1,6 @@
+#pragma once
 #include "block.h"
 #include "../items/loottable.h"
-#ifndef crystaltorch_HPP
-#define crystaltorch_HPP
 inline void crystaltorchinit(blockname::block* blk) {
 	blk->mesh.setfaces(crystaltorchtex,crystaltorchtex, crystaltorchtoptex, crystaltorchtoptex,crystaltorchtex, crystaltorchtex);
 
@@ -24,4 +23,3 @@ inline void crystaltorchdelete(blockname::block* blk) {
 	blk->removecomponent<loottable>();
 
 }
-#endif // !torch_HPP

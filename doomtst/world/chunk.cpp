@@ -1,3 +1,4 @@
+
 #include "chunk.h"
 #include "noise.h"
 #include "../renderer/chunkrender.h"
@@ -5,9 +6,7 @@
 #include "../util/fileloader.h"
 #include "../block/blockinit.h"
 #include "../block/block.h"
-#include "../util/algorthm.h"
-
-#include "../util/dynamicarray.h"
+#include "../util/algorthm.h"#include "../util/dynamicarray.h"
 #include "../renderer/renderer.h"
 block& Chunk::chunk::operator[](int index)
 {

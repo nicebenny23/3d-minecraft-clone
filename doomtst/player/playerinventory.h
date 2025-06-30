@@ -2,8 +2,7 @@
 #include "../game/gameobject.h"
 #include "../util/userinput.h"
 #include "../items/recipe.h"
-#ifndef playerinventory_Hpp
-#define playerinventory_Hpp
+#pragma once 
 struct inventorymen :menu
 {
 	Container blkcont;
@@ -148,4 +147,4 @@ struct inventory :gameobject::component
 
 
 
-#endif // !playerinventory_H
+ // !playerinventory_H

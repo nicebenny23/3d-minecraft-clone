@@ -1,11 +1,7 @@
+#pragma once
 #include "../util/vector3.h"
-#include <GLFW/glfw3.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/quaternion.hpp>
-#include <glm/gtx/quaternion.hpp>
-#ifndef  transform_HPP
-#define transform_HPP
+#include <glm/mat4x4.hpp>
+
 struct Transform
 {
 	Transform();
@@ -27,5 +23,3 @@ struct Transform
 glm::mat4 LookAt(Transform& transform);
 Transform Compose(Transform& t1, Transform& t2);
 Transform Decompose(const glm::mat4& matrix);
-
-#endif // ! transform_HPP

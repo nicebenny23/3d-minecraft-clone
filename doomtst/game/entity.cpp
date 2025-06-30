@@ -1,6 +1,8 @@
+#pragma once
 #include "entity.h"
 #include "../world/voxeltraversal.h"
 #include "../world/grid.h"
+#include "transform.h"
 using namespace Ent;
 
 

@@ -1,8 +1,7 @@
-﻿#include "vector3.h"
-#include "../debugger/debug.h"
-#include "List.h"
-
+﻿
 #pragma once
+#include "vector3.h"
+#include "List.h"
 namespace Dir {
 
 	enum class Ind3d:char {

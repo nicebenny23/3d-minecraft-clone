@@ -1,4 +1,5 @@
-#pragma once#include "dynamicarray.h"
+#pragma once
+#include "dynamicarray.h"
 #include <unordered_map>
 #include <iterator>
 #pragma once

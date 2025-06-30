@@ -3,8 +3,6 @@
 #include "../world/voxeltraversal.h"
 #include "../game/collision.h"
 #include "../game/entityutil.h"
-#include "../renderer/Window.h"
-#include "../game/entityutil.h"
 #include "../items/menu.h"
 #pragma once
 struct playercamcontrols :gameobject::component
@@ -41,7 +39,7 @@ struct playercamcontrols :gameobject::component
 		{
 			CtxName::ctx.Window->EnableCursor();
 		}
-		ray cameraray = ray(toent(owner).transform.position, toent(owner).transform.position + toent(owner).transform.getnormaldirection() * interactmaxrange);
+		ray cameraray = ray(objutil::toent(owner).transform.position,objutil::toent(owner).transform.position +objutil::toent(owner).transform.getnormaldirection() * interactmaxrange);
 		voxtra::WorldRayCollision closest = collision::raycastall(cameraray);
 		if (closest)
 		{

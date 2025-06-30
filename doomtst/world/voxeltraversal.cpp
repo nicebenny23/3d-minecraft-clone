@@ -1,3 +1,4 @@
+#pragma once
 #include "voxeltraversal.h"
 using namespace blockname;
 using	 namespace voxtra;

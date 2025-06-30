@@ -1,3 +1,4 @@
+#pragma once
 #include "ResourceManager.h"
 using namespace vobj;
 using namespace VaoName;

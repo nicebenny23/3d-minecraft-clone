@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../block/block.h"
-#ifndef mossitem_HPP
-#define mossitem_HPP
+#pragma once 
 #define mossitemblockid -1
 inline void initmossitem(item* itm) {
 	itm->properties.pickaxepower = 1;
@@ -12,4 +11,4 @@ inline void initmossitem(item* itm) {
 	itm->itemtype = count;
 	itm->itemui.itemsprite = createitembox("images\\mossitem.png","MossItemTexture");
 }
-#endif // !grassitem_HPP
+ // !grassitem_HPP

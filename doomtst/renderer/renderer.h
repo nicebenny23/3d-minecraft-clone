@@ -1,5 +1,4 @@
 #pragma once
-#include "..//renderer/renderer.h"
 #include "Vao.h"
 #include "vertexobject.h"
 #include "shader.h"
@@ -7,14 +6,13 @@
 #include "../util/vector3.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "texture.h"
-#include <unordered_map>
 #include "ShaderManager.h"
 #include "VertexObjectManager.h"
 #include "TextureManager.h"
 #include "Mesh.h"
 #include "RenderProperties.h"
 using namespace vobj;
-
+//Fix
 namespace renderer {
 
 	

@@ -1,6 +1,5 @@
 #include "item.h"
-#ifndef ironitem_HPP
-#define ironitem_HPP
+#pragma once 
 #define ironitemasblockid -1
 
 inline void initironitem(item* itm) {
@@ -13,4 +12,4 @@ inline void initironitem(item* itm) {
 }
 
 
-#endif // !stoneitem_HPP
+ // !stoneitem_HPP

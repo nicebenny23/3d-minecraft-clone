@@ -3,8 +3,7 @@
 #include "../player/playerhealth.h"
 #include "../game/rigidbody.h"
 #include "../game/entityutil.h"
-#ifndef dmgonhit_HPP
-#define dmgonhit_HPP
+#pragma once 
 struct destroyonhit :gameobject::component {
 
 	std::string tagtoeffect;
@@ -93,4 +92,4 @@ struct dmgonhit:gameobject::component
 	~dmgonhit() = default;
 };
 
-#endif // !properties.dmgonhit_HPP
+ // !properties.dmgonhit_HPP

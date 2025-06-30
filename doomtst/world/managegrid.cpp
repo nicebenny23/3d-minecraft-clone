@@ -1,3 +1,4 @@
+#pragma once
 #include "managegrid.h"
 #include "../block/blockinit.h"
 

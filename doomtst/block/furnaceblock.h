@@ -4,8 +4,7 @@
 #include "../world/voxeltraversal.h"
 #include "../game/objecthelper.h"
 #include "../items/recipe.h"
-#ifndef furnaceblock_HPP
-#define furnaceblock_HPP
+#pragma once 
 struct furnacemenu :menu {
 
 	recipemanager blkcont;
@@ -144,5 +143,5 @@ inline void furnacedelete(blockname::block* blk) {
 
 	blk->removecomponent<loottable>();
 }
-#endif // !wood_HPP
+ // !wood_HPP
 

@@ -1,8 +1,8 @@
+#pragma once
 #include "block.h"
 #include "../items/rope.h"
 #include "../items/loottable.h"
-#ifndef ropeblock_HPP
-#define ropeblock_HPP
+
 inline void ropeinit(blockname::block* blk) {
 	blk->mesh.setfaces(ropetex, ropetex, ropetex, ropetex, ropetex, ropetex);
 	blk->mesh.box.scale = v3::Vector3(1 / 8.f, .5f, 1 / 8.f);
@@ -21,4 +21,4 @@ inline void ropedelete(blockname::block* blk) {
 	blk->removecomponent<loottable>();
 
 }
-#endif // !wood_HPP
+ // !wood_HPP

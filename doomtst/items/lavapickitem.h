@@ -1,6 +1,5 @@
 #include "item.h"
-#ifndef lavapickitem_HPP
-#define lavapickitem_HPP
+#pragma once 
 #define lavapickblockid -1
 inline void lavapickinit(item* itm) {
 	itm->properties.pickaxepower = 3;
@@ -11,4 +10,4 @@ inline void lavapickinit(item* itm) {
 	itm->itemui.itemsprite= createitembox("images\\pikaxe.png","PickaxeTexture");
 }
 
-#endif // !lavapickitem_HPP
+ // !lavapickitem_HPP

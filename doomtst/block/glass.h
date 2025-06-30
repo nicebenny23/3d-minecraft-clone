@@ -1,6 +1,5 @@
+#pragma once
 #include "block.h"
-#ifndef glass_HPP
-#define glass_HPP
 inline void glassinit(blockname::block* blk) {
 
 	blk->attributes.solid = true;
@@ -17,4 +16,3 @@ inline void glassdelete(blockname::block* blk) {
 	blk->removecomponent<aabb::Collider>();
 
 }
-#endif // !wood_HPP

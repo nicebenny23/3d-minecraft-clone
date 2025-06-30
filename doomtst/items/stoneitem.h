@@ -1,6 +1,5 @@
 #include "item.h"
-#ifndef stoneitem_HPP
-#define stoneitem_HPP
+#pragma once 
 #define stoneitemasblockid 3 
 
 inline void initstoneitem(item* itm) {
@@ -12,4 +11,4 @@ inline void initstoneitem(item* itm) {
 }
 
 
-#endif // !stoneitem_HPP
+ // !stoneitem_HPP

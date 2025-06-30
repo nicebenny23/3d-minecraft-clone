@@ -3,8 +3,7 @@
 
 using namespace uiboxname;
 using namespace Cont;
-#ifndef  menu_HPP
-#define menu_HPP
+#pragma once 
 enum type {
 	inventorymenu=1,
 	normalmenu=2,
@@ -36,4 +35,4 @@ struct menu
 extern menu* openmenu;
 extern menu* inventorylocation;
 void managemenus();
-#endif // ! menu_HPP
+ // ! menu_HPP

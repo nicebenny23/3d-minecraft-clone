@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../block/block.h"
-#ifndef crystaldaggeritem_HPP
-#define crystaldaggeritem_HPP
+#pragma once 
 #define crystaldaggeritemasblockid -1
 
 inline void initcrystaldaggeritem(item* itm) {
@@ -14,4 +13,4 @@ inline void initcrystaldaggeritem(item* itm) {
 }
 
 
-#endif // !stoneitem_HPP
+ // !stoneitem_HPP

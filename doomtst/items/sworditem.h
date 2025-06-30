@@ -1,6 +1,5 @@
 #include "item.h"
-#ifndef sworditem_HPP
-#define sworditem_HPP
+#pragma once 
 #define sworditemblockid 9
 inline void initsworditem(item* itm) {
 	itm->properties.pickaxepower = 0;
@@ -11,4 +10,4 @@ inline void initsworditem(item* itm) {
 	itm->itemtype = wear;
 itm->itemui.itemsprite = createitembox("images\\sword.png","SwordTexture");
 }
-#endif // !sworditem_HPP
+ // !sworditem_HPP

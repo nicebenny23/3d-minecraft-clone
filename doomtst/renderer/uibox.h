@@ -1,16 +1,14 @@
+#include "../util/sharedptr.h"
+#include "ui.h"
+#include "texture.h"
 #include "renderer.h"
 #include "../util/dynamicarray.h"
 #include "../util/vector2.h"
-#include "texture.h"
-#include "../util/sharedptr.h"
-
-#include "ui.h"
 #include "../util/geometry.h"
 using namespace Cont;
 using namespace geometry;
 using namespace Cptr;
-#ifndef uirender_H
-#define uirender_H
+#pragma once
 namespace uiboxname {
 
 
@@ -31,7 +29,4 @@ namespace uiboxname {
 	};
 	
 }
-
-
-#endif // !
 

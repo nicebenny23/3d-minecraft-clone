@@ -10,9 +10,7 @@
 #include "../items/loottable.h"
 #include "../game/wormobj.h"
 #include "crystaldaggers.h"
-#ifndef ultraantifreezefinalboss_HPP
-#define ultraantifreezefinalboss_HPP
-
+#pragma once 
 enum bosstate {
     following=0,
     shooting=1,
@@ -116,4 +114,4 @@ inline Ent::entityref createfinalboss(v3::Vector3 pos) {
 
 
 
-#endif // !slime_HPP
+ // !slime_HPP

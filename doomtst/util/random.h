@@ -1,8 +1,7 @@
-#include <limits.h>
+
 #include <stdint.h>
 #include <math.h>
 #include "vector3.h"
-#include <time.h>
 #include "dynamicarray.h"
 
 #pragma once

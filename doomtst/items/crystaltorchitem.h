@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../block/block.h"
-#ifndef crystaltorchitem_HPP
-#define crystaltorchitem_HPP
+#pragma once 
 #define crystaltorchitemblockid 10
 inline void initcrystaltorchitem(item* itm) {
 	itm->properties.pickaxepower = 1;
@@ -12,4 +11,4 @@ inline void initcrystaltorchitem(item* itm) {
 	itm->properties.placeable = true;
 }
 
-#endif // !torchitem_HPP
+ // !torchitem_HPP

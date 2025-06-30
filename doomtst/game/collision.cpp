@@ -1,8 +1,9 @@
+
 #include "collision.h"
 #include "objecthelper.h"
 #include "../world/managegrid.h"
 #include "../game/rigidbody.h"
-using namespace objutil;
+
 void collision::update()
 {
 	for (int iters = 0; iters < collisioniterations; iters++)
@@ -95,7 +96,7 @@ void moveobj(v3::Vector3 force,gameobject::obj* object) {
 	else
 	{
 
-		toent(object).transform.position += force;
+		objutil::toent(object).transform.position += force;
 		
 
 	}

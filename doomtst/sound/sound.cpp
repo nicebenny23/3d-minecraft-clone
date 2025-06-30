@@ -1,3 +1,4 @@
+#pragma once
 #include "sound.h"
 using namespace soundname;
 soundname::alwrapper soundname::soundobj;

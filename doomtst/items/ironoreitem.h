@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../block/block.h"
-#ifndef ironoreitem_HPP
-#define ironoreitem_HPP
+#pragma once 
 #define ironoreitemasblockid blockname::minecraftironore
 
 inline void initironoreitem(item* itm) {
@@ -14,4 +13,4 @@ inline void initironoreitem(item* itm) {
 }
 
 
-#endif // !stoneitem_HPP
+ // !stoneitem_HPP

@@ -2,14 +2,11 @@
 #include "../renderer/renderer.h"
 #include <glm/glm.hpp>
 #include "../game/gameobject.h"
-#include "../game/aabb.h"
+
 #include "../game/camera.h"
 
 #include "../util/geometry.h"
-#ifndef block_HPP
-
-#define block_HPP
-
+#pragma once 
 constexpr auto blocksize = 1.f;
 enum blocktex {
 	treestonetex = 0,
@@ -193,4 +190,4 @@ namespace blockname {
 
 	
 
-#endif // !block_H
+ // !block_H

@@ -1,6 +1,5 @@
 //#pragma once
-#ifndef playertp_HPP
-#define playertp_HPP
+#pragma once 
 #include "../game/entity.h"
 #include "../game/entitystate.h"
 #include "../world/voxeltraversal.h"
@@ -42,19 +41,19 @@ struct playertpcomp :gameobject::component
 				{
 					if (CtxName::ctx.Inp->mouseleft().released)
 					{
-						Vector3 pos = toent(owner).transform.position;
-						Vector3 offset = toent(owner).transform.getnormaldirection()*  chargetime * chargetime;
+						Vector3 pos =objutil::toent(owner).transform.position;
+						Vector3 offset =objutil::toent(owner).transform.getnormaldirection()*  chargetime * chargetime;
 						ray moveray = ray(pos, pos + offset);
 					voxtra::WorldRayCollision grid=	voxtra::travvox(moveray, 100, voxtra::countall);
 					if (!grid)
 					{
 
-						toent(owner).transform.position += offset;
+					 objutil::toent(owner).transform.position += offset;
 
 					}
 					else
 					{
-						toent(owner).transform.position = grid.unwrap().Intersection();
+						objutil::toent(owner).transform.position = grid.unwrap().Intersection();
 					}
 					owner->getcomponent<rigidbody>().velocity.y = 0;
 						wearduribilty();
@@ -86,4 +85,4 @@ struct playertpcomp :gameobject::component
 
 
 
-#endif 
+ 

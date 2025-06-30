@@ -1,7 +1,6 @@
 #include "../game/objecthelper.h"
 #include "../game/rigidbody.h"
-#ifndef velrot_HPP
-#define velrot_HPP
+#pragma once 
 struct rotatetwordsvel:gameobject::component
 {
 	void update() {
@@ -12,4 +11,5 @@ struct rotatetwordsvel:gameobject::component
 	}
 };
 
-#endif // !
+
+// !

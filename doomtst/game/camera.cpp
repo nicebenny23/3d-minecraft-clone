@@ -1,10 +1,11 @@
+
 #include "camera.h"
 #include "../util/vector3.h";
 #include "../items/menu.h"
 #include "../player/player.h"
-#include "../renderer/Window.h"
+#include "../player/cameracomp.h"
 namespace camera {
-	
+
 	
 	v3::Vector3 GetCamFront()
 	{

@@ -1,3 +1,4 @@
+#pragma once
 #include "recipe.h"
 #include "../util/time.h"
 void recipemanager::destroy() {

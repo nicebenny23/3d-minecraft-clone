@@ -1,8 +1,7 @@
 #include "../util/vector2.h"
 #include "itemslot.h"
 #include "menu.h"
-#ifndef itemstorage_HPP
-#define itemstorage_HPP
+#pragma once 
 extern int currentcontid;
 void deleteallcontainerfiles();
 const char* writefilename(int id);
@@ -173,4 +172,4 @@ struct Container
 };
 
 
-#endif // !itemstorage_H
+ // !itemstorage_H

@@ -1,6 +1,5 @@
 #include "../util/time.h"
-#ifndef blocktick_HPP
-#define blocktick_HPP
+#pragma once 
 constexpr auto ticktime = .15;
 namespace tick {
 
@@ -12,4 +11,3 @@ namespace tick {
 
 }
 
-#endif

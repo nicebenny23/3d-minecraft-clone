@@ -1,8 +1,9 @@
+
+#pragma once
+#include <string>
+#include <stdexcept>
 #include <glad/glad.h>
 #include <glm/mat4x4.hpp>
-
-#include "../debugger/debug.h"
-#pragma once
 namespace Shaders {
 	class ShaderManager;  // Forward declaration of TextureManager
 
@@ -21,7 +22,7 @@ struct shader
 	int uniformlocation(const char* name) {
 		if (id==-1)
 		{
-			Assert("invalid id");
+			throw std::logic_error("invalid id");
 		}
 	return	glGetUniformLocation(id, name);
 

@@ -3,8 +3,7 @@
 #include "../world/voxeltraversal.h"
 #include "../game/collision.h"
 #include "../entities/crystaldaggers.h"
-#ifndef playerdagger_HPP
-#define playerdagger_HPP
+#pragma once 
 struct playerdaggercomp :gameobject::component
 {
 	void wearduribilty() {
@@ -29,8 +28,8 @@ struct playerdaggercomp :gameobject::component
 			{
 				return;
 			}
-			Vector3 spawpos = toent(owner).transform.position + toent(owner).transform.getnormaldirection()*3;
-			Vector3 velocity = toent(owner).transform.getnormaldirection() * 10;
+			Vector3 spawpos =objutil::toent(owner).transform.position +objutil::toent(owner).transform.getnormaldirection()*3;
+			Vector3 velocity =objutil::toent(owner).transform.getnormaldirection() * 10;
 
 			spawndagger(spawpos, velocity);
 			wearduribilty();
@@ -46,4 +45,4 @@ struct playerdaggercomp :gameobject::component
 
 
 
-#endif // !gameobject_HPP
+ // !gameobject_HPP

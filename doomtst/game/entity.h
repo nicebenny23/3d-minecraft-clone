@@ -1,12 +1,11 @@
+#pragma once
 #include "../util/memorypool.h"
 #include "gameobject.h"
-#include "aabb.h"
+
 #include "../util/stack.h"
 #include "../util/vector3.h"
 #include "transform.h"
 #include <string>
-#ifndef entity_HPP
-#define entity_HPP
 
 constexpr auto maxentities = 16 * 16 * 16;
 inline std::string str(const char* charlist) {
@@ -89,7 +88,7 @@ namespace Ent {
 		}
 		entity* toentnotnull() {
 
-			entity* ent = toent();
+			entity* ent =toent();
 			if (ent == nullptr)
 			{
 				Assert("ent cant be null");
@@ -105,5 +104,3 @@ namespace Ent {
 	
 	
 }
-
-#endif entity_HPP

@@ -5,8 +5,7 @@
 #include "itemutil.h"
 #include "menu.h"
 using namespace v3;
-#ifndef invblock_HPP
-#define invblock_HPP
+#pragma once 
 const int xamt = 30;
 const int yamt = 30;
 enum decaltype {
@@ -47,4 +46,4 @@ struct itemslot
 	void updatestate();
 };
 
-#endif // !invblock_HPP
+ // !invblock_HPP

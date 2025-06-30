@@ -1,6 +1,5 @@
 #include "item.h"
-#ifndef metalroditem_HPP
-#define metalroditem_HPP
+#pragma once 
 #define metalroditemasblockid -1
 
 inline void initmetalroditem(item* itm) {
@@ -13,4 +12,4 @@ inline void initmetalroditem(item* itm) {
 }
 
 
-#endif // !stoneitem_HPP
+ // !stoneitem_HPP

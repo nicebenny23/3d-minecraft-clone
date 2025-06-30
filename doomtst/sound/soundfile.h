@@ -1,13 +1,9 @@
+#pragma once
 #include "../util/fileloader.h"
 #include <include/al.h>
 #include <include/alc.h>
-#include "../util/dynamicarray.h"
-
+#include "../util/dynamicarray.h"
 using namespace Cont;
-
-#ifndef SOUNDFILE_HPP
-#define SOUNDFILE_HPP
-
 struct wavheader {
     int sampleRate;
     int dataSize;
@@ -51,4 +47,3 @@ struct wavfile {
     }
 };
 
-#endif // !SOUNDFILE_HPP

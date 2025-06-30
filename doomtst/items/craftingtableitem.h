@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../block/block.h"
-#ifndef craftingtableitem_HPP
-#define craftingtableitem_HPP
+#pragma once 
 #define craftingtableblockid 9
 inline void initcraftingtable(item* itm) {
 	itm->properties.pickaxepower = 0;
@@ -11,4 +10,4 @@ inline void initcraftingtable(item* itm) {
 	itm->properties.placeable = true;
 	itm->itemui.itemsprite = createitembox("images\\craftingtabletop.png","CraftingTableTopTexture");
 }
-#endif // !grassitem_HPP
+ // !grassitem_HPP

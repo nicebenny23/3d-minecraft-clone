@@ -1,10 +1,6 @@
 #include <include/al.h>
 #include "soundfile.h"
-#include "../util/dynamicarray.h"
-
-#ifndef soundbuffer_HPP
-#define soundbuffer_HPP
-
+#include "../util/dynamicarray.h"#pragma once 
 struct soundbuf {
     ALuint id;  
     ALenum format;
@@ -50,4 +46,4 @@ struct soundbuf {
     
 }; 
 
-#endif // !soundbuffer_HPP
+ // !soundbuffer_HPP

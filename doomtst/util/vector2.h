@@ -2,8 +2,7 @@
 #include <Windows.h>
 
 #include <glm/glm.hpp>
-#ifndef v2_HPP
-#define v2_HPP
+#pragma once 
 namespace v2 {
 	struct Vector2;
 	struct Coord2
@@ -359,4 +358,3 @@ namespace v2 {
 	}
 
 }
-#endif#pragma once

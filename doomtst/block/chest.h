@@ -2,8 +2,7 @@
 #include "../items/menu.h"
 #include "../util/vector2.h"
 #include "../items/recipe.h"
-#ifndef chestblock_HPP
-#define chestblock_HPP
+#pragma once 
 struct chestmenu :menu {
 
 	Container blkcont;
@@ -104,5 +103,5 @@ inline void chestdelete(blockname::block* blk) {
 
 	blk->removecomponent<loottable>();
 }
-#endif // !wood_HPP
+ // !wood_HPP
 

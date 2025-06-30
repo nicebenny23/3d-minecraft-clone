@@ -1,6 +1,5 @@
-#include <cmath>
+
 #include "mathutil.h"
-#include <Windows.h>
 #include "vector2.h"
 #include <glm/glm.hpp>
 #pragma once

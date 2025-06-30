@@ -1,5 +1,4 @@
-#ifndef Camera_HPP
-#define Camera_HPP
+#pragma once 
 #include "../util/userinput.h"
 #include "../game/transform.h"
 #include "../util/vector3.h"
@@ -14,4 +13,4 @@ v3::Vector3 campos();
 
 }
 
-#endif // !Camera_HPP
+ // !Camera_HPP

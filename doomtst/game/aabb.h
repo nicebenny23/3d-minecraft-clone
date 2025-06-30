@@ -1,6 +1,4 @@
-#ifndef AABB_HPP
-#define AABB_HPP
-
+#pragma once
 #include "../util/vector3.h"
 #include "../game/gameobject.h"
 #include "../util/dynamicarray.h"
@@ -10,8 +8,9 @@
 
 #include "../util/SparseSet.h"
 #include <cmath>
-#include "transform.h"
+
 #include "objecthelper.h"
+#include "transform.h"
 
 namespace aabb {
 
@@ -34,6 +33,7 @@ namespace aabb {
             }
             if (owner->type == gameobject::block)
             {
+                
                 Vector3 scale = objutil::toblk(owner).mesh.box.scale;
                 Vector3 pos = objutil::toblk(owner).center();
                 global.center = box.center * scale * 2 + pos;
@@ -62,4 +62,3 @@ namespace aabb {
     extern Sparse::SparseSet<Collider*> Colliderlist;
 }
 
-#endif // AABB_HPP

@@ -1,3 +1,4 @@
+#pragma once
 #include "textrender.h"
 #include "renderer.h"
 TextureArray* textarray;
@@ -22,12 +23,12 @@ void integertext::customdestroy()
 
 }
 
-array<float> datbuf;
-array<unsigned int> indbuf;
+Cont::array<float> datbuf;
+Cont::array<unsigned int> indbuf;
 void integertext::render()
 {
-	indbuf = array<unsigned int>();
-	datbuf = array<float>();
+	indbuf = Cont::array<unsigned int>();
+	datbuf = Cont::array<float>();
 	renderer::changerendertype(renderer::rendertext);
 	recalculateword();
 
@@ -97,7 +98,7 @@ void integertext::write()
 	v2::Vector2 min = center - (v2::Vector2(1.5f*word.length(), 1.f) * scale) / 2;
 	v2::Vector2 boxoffset = v2::Vector2(1.5, 1) * scale / 2.0;
 	v2::Vector2 increse=  v2::Vector2(1.5,0) * scale;
-	Box2d charlocation = Box2d(min+boxoffset, v2::unitv * scale);
+	geometry::Box2d charlocation = geometry::Box2d(min+boxoffset, v2::unitv * scale);
 	for (int i = 0; i < word.length(); i++)
 	{
 		writeletter(charlocation, int(word[i]-'0'));

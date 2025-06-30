@@ -1,9 +1,9 @@
-#include "../util/vector3.h"
+#pragma once
 #include "../util/dynamicarray.h"
 #include "../world/tick.h"
 #include "../util/chainpool.h"
 #include <unordered_map>
-#pragma once
+
 
 namespace GameContext {
 

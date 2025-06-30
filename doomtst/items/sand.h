@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../block/block.h"
-#ifndef sanditem_HPP
-#define sanditem_HPP
+#pragma once 
 #define sanditemblockid blockname::minecraftsand
 inline void sanditeminit(item* itm) {
 	itm->properties.pickaxepower = 2;
@@ -12,4 +11,4 @@ inline void sanditeminit(item* itm) {
 	itm->itemui.itemsprite = createitembox("images\\sand.png","SandTexture");
 }
 
-#endif // !rockitemitem_HPP
+ // !rockitemitem_HPP

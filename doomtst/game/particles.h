@@ -1,3 +1,4 @@
+#pragma once
 #include "../util/vector3.h"
 #include "../game/gameobject.h"
 #include "../renderer/texture.h"
@@ -6,10 +7,7 @@
 #include "../game/entity.h"
 #include "../util/time.h"
 #include "../renderer/renderer.h"
-#include "../renderer/vertexobject.h"
 #include "camera.h"
-#ifndef  particle_HPP
-#define particle_HPP
 
 using namespace v3;
 using namespace Cont;
@@ -50,4 +48,3 @@ struct particle:gameobject::component
 	}
 	particle() = default;
 }; 
-#endif // ! particle_HPP

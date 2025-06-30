@@ -1,3 +1,4 @@
+#pragma once
 #include "item.h"
 #include "../util/random.h"
 

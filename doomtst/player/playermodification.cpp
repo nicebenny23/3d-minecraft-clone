@@ -1,5 +1,8 @@
+#pragma once
 #include "playermodification.h"
 #include "../world/voxeltraversal.h"
+#include "../game/rigidbody.h"
+#include "../entities/onhit.h"
 void initbreakparticle(Ent::entity* newent)
 {
 	newent->transform.position = newent->transform.position;

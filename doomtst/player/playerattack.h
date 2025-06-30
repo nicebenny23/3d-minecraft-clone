@@ -3,8 +3,7 @@
 #include "../world/voxeltraversal.h"
 #include "../game/collision.h"
 #include "../game/entityutil.h"
-#ifndef playeratt_HPP
-#define playeratt_HPP
+#pragma once 
 struct playerattackcomp:gameobject::component
 {
 	void wearduribilty() {
@@ -48,7 +47,7 @@ struct playerattackcomp:gameobject::component
 		{
 			if (closest.collider->owner->hascomponent<rigidbody>())
 			{
-				kb(closest.Hit.intersectionpoint, 7,& toent(closest.collider->owner));
+				kb(closest.Hit.intersectionpoint, 7,& objutil::toent(closest.collider->owner));
 				
 			}
 			int dmgdone = computeattackdmg();
@@ -68,4 +67,4 @@ struct playerattackcomp:gameobject::component
 
 
 
-#endif // !gameobject_HPP
+ // !gameobject_HPP

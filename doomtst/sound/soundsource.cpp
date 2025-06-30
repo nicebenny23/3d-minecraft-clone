@@ -1,3 +1,4 @@
+#pragma once
 #include "soundsource.h"
 #include <include/al.h>
 #include "../debugger/debug.h"

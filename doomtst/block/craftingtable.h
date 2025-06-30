@@ -1,8 +1,7 @@
 #include "block.h"
 #include "../items/menu.h"
 #include "../util//vector2.h"
-#ifndef tableblock_HPP
-#define tableblock_HPP
+#pragma once 
 struct craftingmenu :menu {
 
 	recipemanager blkcont;
@@ -112,5 +111,5 @@ inline void tabledelete(blockname::block* blk) {
 	
 	blk->removecomponent<loottable>();
 }
-#endif // !wood_HPP
+ // !wood_HPP
 

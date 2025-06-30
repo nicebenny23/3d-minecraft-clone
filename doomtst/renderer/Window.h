@@ -1,11 +1,8 @@
 #pragma once
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "../util/vector2.h"
-#include "../util/userinput.h"
-#include "../external/stb_image.h"
-#include "guirender.h"
-#include "../util/stbiload.h"
+#include "../util/vector2.h"#include "../util/stbiload.h"
+
 namespace CtxName {
     struct Context;
 

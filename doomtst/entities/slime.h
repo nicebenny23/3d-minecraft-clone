@@ -1,3 +1,4 @@
+#pragma once
 #include "onhit.h"
 #include "../game/navigation.h"
 #include "../game/collision.h"
@@ -8,8 +9,6 @@
 #include "../player/player.h"
 #include "../items/item.h"
 #include "../items/loottable.h"
-#ifndef slime_HPP
-#define slime_HPP
 
 array<navnode> getneighborslime(navnode& node);
 struct slimemove :gameobject::component {
@@ -99,4 +98,4 @@ inline Ent::entityref createslime(v3::Vector3 pos,bool type) {
 
 
 
-#endif // !slime_HPP
+ // !slime_HPP

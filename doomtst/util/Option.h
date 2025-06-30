@@ -1,9 +1,5 @@
 #pragma once
-#include <iostream>
-#include <utility>  // for std::move
-#include <stdexcept>
-#include <optional>
-#include <string>   // for std::string in exception message
+#include <utility>  // for std::move#include <string>   // for std::string in exception message
 namespace Opt {
 
     struct NoneType {

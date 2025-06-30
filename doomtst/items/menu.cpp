@@ -1,3 +1,4 @@
+#pragma once
 #include "menu.h"
 #include "../util/userinput.h"
 #include "../game/Core.h"

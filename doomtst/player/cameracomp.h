@@ -3,6 +3,7 @@
 #include "../world/voxeltraversal.h"
 #include "../game/collision.h"
 #include "../game/entityutil.h"
+#include "../game/entity.h"
 #pragma once
 struct CameraComp :gameobject::component
 {
@@ -13,7 +14,7 @@ struct CameraComp :gameobject::component
 	
 	Transform CamTransform;
 	void start() {
-		CamTransform = toent(owner).transform;
+		CamTransform = objutil::toent(owner).transform;
 		priority = 10000;
 
 	}
@@ -22,7 +23,7 @@ struct CameraComp :gameobject::component
 
 		renderer::setviewmatrix(LookAt(CamTransform));
 		
-		CamTransform = toent(owner).transform;
+		CamTransform = objutil::toent(owner).transform;
 
 	}
 };

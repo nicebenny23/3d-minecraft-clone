@@ -1,6 +1,7 @@
+
 #include "block.h"
 #include "../util/vector2.h"
-
+#include "../game/aabb.h"
 
 using namespace blockname;
 Vector3 face::center()

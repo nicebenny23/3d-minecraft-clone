@@ -1,8 +1,8 @@
+#pragma once
 #include <cmath>
 #include <limits.h>
 #include <stdexcept>
 #include <type_traits>
-#pragma once
 #define NaNf std::numeric_limits<float>::max()
 inline bool aproxequal(float v1, float v2) {
 	const float eps = .0001;
@@ -92,7 +92,7 @@ constexpr auto Min(T1 a, T2 b, Ts... rest)-> typename std::common_type<T1, T2, T
 inline  int symmetric_mod(int x, int m) {
 	// Ensure m is positive to avoid division by zero issues
 	if (m <= 0) {
-		throw std::invalid_argument("error ");
+		throw std::invalid_argument("modulus cannot be negitive ");
 	}
 	
 	// When x is negative
@@ -132,9 +132,14 @@ inline int symmetric_ceil(float x) {
 		return ceil(x);
 	}
 }
-//
+//zero is mapped to 1
 inline int sign(float x) {
 	return (x < 0) ? -1 : 1;
+}
+//Zero is mapped to zero
+inline int z_sign(float x) {
+
+	return (x < 0) ? -1 : ((x > 0) ? 1 : 0);
 }
 
 

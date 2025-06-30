@@ -1,6 +1,5 @@
 #include "item.h"
-#ifndef crystalbottomitem_HPP
-#define crystalbottomitem_HPP
+#pragma once 
 #define crystalbottomitemblockid -1
 inline void initcrystalbottomitem(item* itm) {
 	itm->properties.pickaxepower = 0;
@@ -12,4 +11,4 @@ inline void initcrystalbottomitem(item* itm) {
 	itm->itemtype = wear;
 	itm->itemui.itemsprite = createitembox("images\\crystalbottom.png","CrystalBottomTexture");
 }
-#endif // !ironsworditem_HPP
+ // !ironsworditem_HPP

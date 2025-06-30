@@ -1,3 +1,4 @@
+#pragma once
 #include "userinput.h"
 #include <GLFW/glfw3.h>
 namespace userinput {

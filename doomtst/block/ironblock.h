@@ -1,6 +1,5 @@
 #include "block.h"
-#ifndef ironore_HPP
-#define ironore_HPP
+#pragma once 
 inline void ironinit(blockname::block* blk) {
 
 	blk->mesh.setfaces(ironoretex, ironoretex, ironoretex, ironoretex, ironoretex, ironoretex);
@@ -19,5 +18,5 @@ inline void irondelete(blockname::block* blk) {
 	blk->removecomponent<loottable>();
 
 }
-#endif // !wood_HPP
+ // !wood_HPP
 

@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../block/block.h"
-#ifndef glassbottleitem_HPP
-#define glassbottleitem_HPP
+#pragma once 
 #define glassbottleitemblockid -1
 inline void glassbottleiteminit(item* itm) {
 	itm->properties.pickaxepower = 2;
@@ -13,4 +12,4 @@ inline void glassbottleiteminit(item* itm) {
 	itm->itemui.itemsprite = createitembox("images\\glassbottle.png","GlassBottleTexture");
 }
 
-#endif // !rockitemitem_HPP
+ // !rockitemitem_HPP

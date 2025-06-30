@@ -1,6 +1,5 @@
 #include "item.h"
-#ifndef armortopitem_HPP
-#define armortopitem_HPP
+#pragma once 
 #define irontopitemblockid -1
 inline void initirontopitem(item* itm) {
 	itm->properties.pickaxepower = 0;
@@ -12,4 +11,4 @@ inline void initirontopitem(item* itm) {
 	itm->itemtype = wear;
 	itm->itemui.itemsprite = createitembox("images\\irontop.png","IronTopTexture");
 }
-#endif // !ironsworditem_HPP
+ // !ironsworditem_HPP

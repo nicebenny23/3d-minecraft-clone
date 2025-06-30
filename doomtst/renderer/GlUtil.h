@@ -1,5 +1,5 @@
-#include <GLFW/glfw3.h>
 #pragma once
+#include <GLFW/glfw3.h>
 namespace GlUtil {
 	template<typename T>
 	constexpr GLenum getGLType();

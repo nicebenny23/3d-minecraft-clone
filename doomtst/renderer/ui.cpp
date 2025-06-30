@@ -1,5 +1,6 @@
+#pragma once
 #include "ui.h"
-#include <glm/common.hpp>
+#include "../util/mathutil.h"
 array<cptr<ui::uielement>,true> ui::uielemlist;
 
 void ui::createuilist()
@@ -13,7 +14,7 @@ void ui::createuilist()
 
 int ui::compareuielem(const void* b, const void* a)
 {
-	return glm::sign(uielemlist[*(int*)b]->priority - uielemlist[*(int*)a]->priority);
+	return z_sign(uielemlist[*(int*)b]->priority - uielemlist[*(int*)a]->priority);
 }
 
 void ui::uielement::customdestroy()

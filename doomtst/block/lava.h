@@ -1,8 +1,7 @@
 #include "block.h"
 #include "liquid.h"
 #include "../entities/onhit.h"
-#ifndef lava_HPP
-#define lava_HPP
+#pragma once 
 inline void lavainit(blockname::block* blk) {
 	blk->mesh.setfaces(lavatex, lavatex, lavatex, lavatex, lavatex, lavatex);
 	blk->attributes.solid = false;
@@ -24,4 +23,4 @@ inline void lavadelete(blockname::block* blk) {
 	blk->removecomponent<dmgonhit>();
 }
 
-#endif // !wood_HPP
+ // !wood_HPP

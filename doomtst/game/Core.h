@@ -5,6 +5,7 @@
 #include "GameContext.h"
 #include "entity.h"
 #include "../util/time.h"
+#include "../renderer/guirender.h"
 //start of the application
 namespace Core {
     struct Engine

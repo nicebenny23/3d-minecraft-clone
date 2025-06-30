@@ -1,3 +1,4 @@
+
 #include "console.h"
 #include "../game/Core.h"
 #include <iostream>
@@ -5,9 +6,7 @@
 #include <string>
 #include <streambuf>
 #include <string>
-#include "../util/dynamicarray.h"
-
-#include "../game/GameContext.h"
+#include "../util/dynamicarray.h"#include "../game/GameContext.h"
 
     console::ImGuiStreamBuf::ImGuiStreamBuf() {
 

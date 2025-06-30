@@ -1,8 +1,7 @@
 #pragma once
 #include "item.h"
 #include "../block/block.h"
-#ifndef furnaceitem_HPP
-#define furnaceitem_HPP
+#pragma once 
 #define furnaceblockid blockname::minecraftfurnace
 inline void initfurnaceitem(item* itm) {
 	itm->properties.pickaxepower = 0;
@@ -12,4 +11,4 @@ inline void initfurnaceitem(item* itm) {
 	itm->properties.placeable = true;
 	itm->itemui.itemsprite = createitembox("images\\furnace.png","FurnaceTexture");
 }
-#endif // !grassitem_HPP
+ // !grassitem_HPP

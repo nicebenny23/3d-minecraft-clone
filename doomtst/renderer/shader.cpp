@@ -1,10 +1,12 @@
-
+#pragma once
 #include "shader.h"
 #include <fstream>
 #include <sstream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "../debugger/debug.h"
 #include <iostream>
+//Fix
 void shaderstatuscheck(int id, GLint statustype,const char* name) {
     GLint shadersucsess;
     char infolog[512];
@@ -13,7 +15,7 @@ void shaderstatuscheck(int id, GLint statustype,const char* name) {
     {
 
         glGetShaderInfoLog(id, 512, NULL, infolog);
-        std::cout << name;
+        
         Assert(infolog);
     }
 }

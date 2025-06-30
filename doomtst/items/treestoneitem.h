@@ -1,7 +1,6 @@
 #include "item.h"
 #include "../block/block.h"
-#ifndef treestoneitem_HPP
-#define treestoneitem_HPP
+#pragma once 
 #define treestoneitemblockid blockname::minecrafttreestone
 inline void inittreestoneitem(item* itm) {
 	itm->properties.pickaxepower = 1;
@@ -12,4 +11,4 @@ inline void inittreestoneitem(item* itm) {
 	itm->itemtype = count;
 	itm->itemui.itemsprite = createitembox("images\\treestone.png","TreestoneTexture");
 }
-#endif // !grassitem_HPP
+ // !grassitem_HPP

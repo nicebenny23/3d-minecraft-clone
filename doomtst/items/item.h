@@ -5,8 +5,7 @@
 #include "../renderer/uibox.h"
 #include "../game/Core.h"
 #include "../game/GameContext.h"
-#ifndef item_HPP
-#define item_HPP
+#pragma once 
 inline cptr<uiboxname::uibox> createitembox(const char* boxname,const char* TextureName) {
 
 	return ui::createuielement<uiboxname::uibox>(boxname, TextureName , v2::unitv / 40.f, v2::zerov, 100);
@@ -153,4 +152,4 @@ inline void updateitem(item*& itm) {
 	
 
 }
-#endif // !item_HPP
+ // !item_HPP

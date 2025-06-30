@@ -1,5 +1,6 @@
+#pragma once
 #include "model.h"
-#include "../game/objecthelper.h"
+
 ModelMeshName::ModelMesh& model::operator[](int index)
 {
 	return *meshlist[index];

@@ -1,12 +1,11 @@
+#pragma once
 #include "navigation.h"
 #include "objecthelper.h"
 #include "../util/time.h"
-#include "../util/queue.h"
 #include "../util/dynamicarray.h"
 #include "../util/dir.h"
 #include "../world/grid.h"
 #include "../world/voxeltraversal.h"
-#include <cmath> // for std::abs
 
 // Helper function for heuristic calculation (Manhattan distance)
 float appdist(const navnode& a, const navnode& b) {

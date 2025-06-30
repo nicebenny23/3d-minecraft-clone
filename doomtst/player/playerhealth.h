@@ -1,11 +1,11 @@
+#pragma once
 #include "../util/dynamicarray.h"
 #include "../renderer/uibox.h"
 #include "../game/gameobject.h"
 #include <conio.h>
 #include "../game/entitystate.h"
 #include "playerinventory.h"
-#ifndef playerhealth_HPP
-#define playerhealth_HPP
+
 struct playerhealth:gameobject::component
 {
 	bool dmgimmune = false;
@@ -79,6 +79,3 @@ struct playerhealth:gameobject::component
 	}
 };
 
-
-
-#endif // !1

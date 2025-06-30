@@ -8,8 +8,7 @@
 #include "soundbuf.h"
 #include "soundlistener.h"
 #include "../util/sharedptr.h"
-#ifndef sound_HPP
-#define sound_HPP
+#pragma once 
 using namespace Cptr;
 constexpr auto soundamt = 400;
 namespace soundname {
@@ -89,4 +88,4 @@ namespace soundname {
     cptr<sound> createsound(const char* name);
     cptr<sound> createsound(wavfile& file);
 }
-#endif // !sound_HPP
+ // !sound_HPP

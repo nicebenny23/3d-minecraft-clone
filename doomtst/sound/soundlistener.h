@@ -1,6 +1,4 @@
-#ifndef listener_HPP
-#define listener_HPP
-
+#pragma once
 #include <include/al.h>
 
 struct listener {
@@ -15,4 +13,3 @@ struct listener {
     void update();
 };
 
-#endif // !listener_HPP

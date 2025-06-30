@@ -1,17 +1,12 @@
-#include "../renderer/uibox.h"
+
 #include "../game/gameobject.h"
-#include "../game/collision.h"
-#include "../world/managegrid.h"
 #include "../game/objecthelper.h"
-#include "../world/voxeltraversal.h"
 #include "../util/dynamicarray.h"
 #include "../items/Container.h"
 #include "playerinventory.h"
 #include "../player/playerhealth.h"
 #include "../items/itemutil.h"
-using namespace objutil;
-#ifndef  playereat_Hpp
-#define playereat_Hpp
+#pragma once 
 struct playereat :gameobject::component
 {
 
@@ -100,4 +95,4 @@ struct playereat :gameobject::component
 };
 
 
-#endif // ! playerplace_H
+ // ! playerplace_H

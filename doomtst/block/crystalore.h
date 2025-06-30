@@ -1,7 +1,6 @@
+#pragma once
 #include "block.h"
-#include "../items/loottable.h"
-#ifndef crystalore_HPP
-#define crystalore_HPP
+#include "../items/loottable.h"
 inline void crystalinit(blockname::block* blk) {
 
 	blk->mesh.setfaces(crystaloretex, crystaloretex, crystaloretex, crystaloretex, crystaloretex, crystaloretex);
@@ -20,5 +19,3 @@ inline void crystaldelete(blockname::block* blk) {
 	blk->removecomponent<loottable>();
 
 }
-#endif // !wood_HPP
-

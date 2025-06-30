@@ -196,10 +196,8 @@
     <ClCompile Include="game\aabb.cpp" />
     <ClCompile Include="block\block.cpp" />
     <ClCompile Include="renderer\uibox.cpp" />
-    <ClCompile Include="util\geometry.cpp" />
     <ClCompile Include="util\intersection.cpp" />
     <ClCompile Include="util\mathutil.cpp" />
-    <ClCompile Include="util\time.cpp" />
     <ClCompile Include="renderer\VertexObjectManager.cpp" />
     <ClCompile Include="world\chunkload.cpp" />
     <ClCompile Include="world\managegrid.cpp" />

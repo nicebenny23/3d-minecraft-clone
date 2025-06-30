@@ -1,5 +1,4 @@
-#ifndef vertexobj_hpp
-#define vertexobj_hpp
+#pragma once
 #include "../util/dynamicarray.h"
 
 #include <glad/glad.h>
@@ -127,5 +126,3 @@ namespace vobj {
 	};
 }
 
-
-#endif // !vertexobj_H

@@ -1,3 +1,4 @@
+#pragma once
 #include "slime.h"
 
 array<navnode> getneighborslime(navnode& node)

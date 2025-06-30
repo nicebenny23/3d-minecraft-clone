@@ -1,3 +1,4 @@
+#pragma once
 #include "itemslot.h"
 #include "../util/mathutil.h"
 

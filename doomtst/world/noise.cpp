@@ -1,3 +1,4 @@
+#pragma once
 #include "noise.h"
 using namespace Cont;
 #include "../util/mathutil.h"

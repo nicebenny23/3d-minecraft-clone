@@ -3,8 +3,7 @@
 #include "entity.h"
 #include "rigidbody.h"
 #include "objecthelper.h"
-#ifndef  entitystate_HPP
-#define  entitystate_HPP
+#pragma once
 struct entityeffects {
 	float timetilllavaover;
 
@@ -112,4 +111,4 @@ struct estate :gameobject::component
 
 	}
 };
-#endif // ! entitystate_HPP;
+ // ! entitystate_HPP;

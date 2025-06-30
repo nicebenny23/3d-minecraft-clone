@@ -1,6 +1,5 @@
 #include "item.h"
-#ifndef slimeitem_HPP
-#define slimeitem_HPP
+#pragma once 
 #define slimeitemasblock -1
 inline void initslimeitem(item* itm) {
 
@@ -12,4 +11,4 @@ inline void initslimeitem(item* itm) {
 
 }
 
-#endif // !slime_HPP
+ // !slime_HPP

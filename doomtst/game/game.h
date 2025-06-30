@@ -27,8 +27,9 @@
 #include "../world/tick.h"
 #include "../block/liquid.h"
 #include "../debugger/console.h"
-#ifndef game_HPP
-#define game_HPP
+#include "../items/menu.h"
+#include "Core.h"
+#pragma once 
 void endframe() {
     CtxName::ctx.EntMan->DeleteObjs();
 
@@ -122,4 +123,3 @@ void rungame()
     return;
 }
 
-#endif

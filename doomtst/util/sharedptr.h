@@ -1,6 +1,5 @@
 #pragma once
 #include <stdexcept>
-#include "../debugger/debug.h"
 namespace sharedptr {
     template <typename T>
     class shared {

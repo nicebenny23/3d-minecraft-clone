@@ -1,7 +1,6 @@
 #include "geometry.h"
 #include "Option.h"
-#ifndef intersection_HPP
-#define intersection_HPP
+#pragma once 
 namespace geointersect {
 	struct RayHit {
 		float dist;
@@ -20,4 +19,4 @@ namespace geointersect {
 	boxRayCollision intersection(geometry::Box box, ray fray);
 	bool intersects(geometry::cone cone, geometry::sphere sph);
 }
-#endif // !intersection_HPP
+ // !intersection_HPP

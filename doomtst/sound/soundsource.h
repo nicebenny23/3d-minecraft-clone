@@ -1,8 +1,5 @@
-
+#pragma once
 #include <include/al.h>
-#ifndef soundsource_HPP
-#define soundsource_HPP
-
 struct soundproperties {
     bool organic;
     float pitch;                 // Sound pitch (default: 1.0)
@@ -34,5 +31,3 @@ struct soundsource {
     void release();
     void setproperties(soundproperties properties);
 };
-
-#endif // !soundsource_HPP

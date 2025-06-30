@@ -1,6 +1,5 @@
 #include "../util/vector3.h"
-#ifndef ray_hpp
-#define ray_hpp
+#pragma once 
 using namespace v3;
 struct ray
 {
@@ -54,4 +53,4 @@ struct ray
 };
 
 
-#endif // !ray_hpp
+ // !ray_hpp

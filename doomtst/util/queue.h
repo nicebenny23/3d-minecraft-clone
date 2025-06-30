@@ -1,6 +1,6 @@
 
-#pragma once
 #include <stdexcept>
+#pragma once
 namespace queuename {
 	template <typename T>
 	struct queuenode

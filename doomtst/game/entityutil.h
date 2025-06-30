@@ -1,9 +1,6 @@
 #include "rigidbody.h"
 #include "entitystate.h"
-#ifndef  entityutil_HPP
-#define entityutil_HPP
-
-
+#pragma once 
 inline void kb(Vector3 point, float force,Ent::entity* ent) {
 	if (ent->hascomponent<estate>())
 	{
@@ -24,4 +21,4 @@ inline void kb(Vector3 point, float force,Ent::entity* ent) {
 		}
 	}
 }
-#endif // ! entityutil_HPP
+ // ! entityutil_HPP

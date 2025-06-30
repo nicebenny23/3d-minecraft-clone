@@ -3,8 +3,7 @@
 #include "dynamicarray.h"
 #include "vector2.h"
 #include <glm/glm.hpp>
-#ifndef Userinput_HPP
-#define Userinput_HPP
+#pragma once 
 #define esckey GLFW_KEY_ESCAPE
 #define shiftkey GLFW_KEY_LEFT_SHIFT
 
@@ -59,5 +58,5 @@ namespace userinput {
 }
 
 
-#endif // !userinp
+ // !userinp
 

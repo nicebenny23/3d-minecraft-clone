@@ -3,8 +3,7 @@
 #include <process.h>  // For _beginthread
 #include <cstdlib>
 #include <csignal>
-#ifndef debug_HPP
-#define debug_HPP
+#pragma once 
 //good
 constexpr bool debuggeneral = true;
 constexpr bool debugrender = false;
@@ -40,4 +39,4 @@ void writetodebug(std::string string);
 
 
 
-#endif // !debug_HPP
+ // !debug_HPP

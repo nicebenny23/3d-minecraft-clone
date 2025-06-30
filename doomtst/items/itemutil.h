@@ -33,8 +33,7 @@
 #include "glassbottle.h"
 #include "sand.h"
 #include "tpsword.h"
-#ifndef itemutil_HPP
-#define itemutil_HPP
+#pragma once 
 inline void inititemproperties(item* itm) {
 
 	switch (itm->id)
@@ -288,4 +287,4 @@ inline void getitemfromblock() {
 
 
 }
-#endif // !itemutil_HPP
+ // !itemutil_HPP

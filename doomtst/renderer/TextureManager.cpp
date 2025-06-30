@@ -1,6 +1,7 @@
+#pragma once
 #include "TextureManager.h"
 #include "../util/stbiload.h"
-#include <glad/glad.h>
+
 
 
 
