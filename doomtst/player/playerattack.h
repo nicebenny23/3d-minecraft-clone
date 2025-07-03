@@ -39,7 +39,7 @@ struct playerattackcomp:gameobject::component
 			return;
 		}
 		voxtra::RayWorldHit closest = Hit.unwrap();
-		if (closest.collider->owner->type != gameobject::entity)
+		if (closest.collider->owner->type() != gameobject::entity)
 		{
 			return;
 		}
@@ -47,7 +47,7 @@ struct playerattackcomp:gameobject::component
 		{
 			if (closest.collider->owner->hascomponent<rigidbody>())
 			{
-				kb(closest.Hit.intersectionpoint, 7,& objutil::toent(closest.collider->owner));
+				kb(closest.Hit.intersectionpoint, 7, *(closest.collider->owner));
 				
 			}
 			int dmgdone = computeattackdmg();

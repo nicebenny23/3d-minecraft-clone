@@ -11,11 +11,11 @@ inline void ironinit(blockname::block* blk) {
 	blk->createdefaultaabb(false);
 	blk->mininglevel = 3;
 	blk->minedfastwithpick = true;
-	blk->addcomponent<loottable>()->addelem(ironoreitem, 1, false);
+	blk->owner->addcomponent<loottable>()->addelem(ironoreitem, 1, false);
 }
 inline void irondelete(blockname::block* blk) {
-	blk->removecomponent<aabb::Collider>();
-	blk->removecomponent<loottable>();
+	blk->owner->removecomponent<aabb::Collider>();
+	blk->owner->removecomponent<loottable>();
 
 }
  // !wood_HPP

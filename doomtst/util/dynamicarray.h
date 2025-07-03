@@ -1,3 +1,4 @@
+#pragma once
 
 #include "../debugger/debug.h"
 #include <stdexcept>
@@ -9,7 +10,7 @@
 
 namespace Cont {
 
-	
+
 	// Resizing function that doubles the size of the array when needed.
 	// If the length is 0, it initializes to a default size of 2.
 	inline size_t resizelength(size_t length) {
@@ -26,7 +27,7 @@ namespace Cont {
 		bool empty();
 		// Standard operator[] that returns a reference to the element at the given index.
 		T& operator[](size_t index);
-
+		const T& operator[](size_t index) const;
 		// At function that checks if the index is in range before returning the element.
 		T& at(size_t index);
 
@@ -44,10 +45,10 @@ namespace Cont {
 
 		// Delete an element at the given index, shifting others.
 		void deleteind(size_t index);
-		
 
-	
-		
+
+
+
 		// Append a single value to the array.
 		void push(const T& value);
 
@@ -75,7 +76,7 @@ namespace Cont {
 
 		// Constructor that initializes the array from a raw posize_ter and size.
 		array(T* arr, size_t size);
-		
+
 		// Move constructor.
 		array(array&& other) noexcept;
 
@@ -85,14 +86,14 @@ namespace Cont {
 		// Move assignment operator.
 		array& operator=(array&& other) noexcept;
 		array& operator=(const array& other);
-		
+		bool operator==(const array& other) const;
 		// Posize_ter to the dynamically allocated array.
 		T* list;
 		// Current number of elements in the array.
-		 size_t length;
+		size_t length;
 
 		// Total allocated capacity of the array.
-		 size_t capacity;
+		size_t capacity;
 
 		// Iterator class for accessing elements using range-based for loops.
 		class Iterator {
@@ -124,8 +125,8 @@ namespace Cont {
 			}
 			bool operator==(const Iterator& other) const {
 				return ptr == other.ptr;
-			}	
-		
+			}
+
 
 		};
 
@@ -148,13 +149,11 @@ namespace Cont {
 		bool is_undefined(const T& value) const {
 			return value == T();  // Assuming that the default constructor of T indicates an undefined value.
 		}
+		void resize(size_t size = 0);
 
-		private:
-			// Resize the array to a specific size (or double the size if not specified).
-			void resize(size_t size = 0);
 	};
 
-	
+
 
 
 	template<class T, bool initelems>
@@ -167,11 +166,11 @@ namespace Cont {
 	}
 
 	//deletes content of list(not posize_ters!!)
-	
+
 	template<class T, bool initelems>
 	inline bool array<T, initelems>::empty()
 	{
-		return (length==0);
+		return (length == 0);
 	}
 
 	//returns alias to index
@@ -188,13 +187,22 @@ namespace Cont {
 			length = index + 1;
 
 		}
-	
+
 
 
 
 		return list[index];
 
 
+	}
+	template<class T, bool initelems>
+	inline const T& array<T, initelems>::operator[](size_t index) const
+	{
+		if (index >= length) {
+			throw std::invalid_argument("Index out of bounds for const []");
+		}
+
+		return list[index];
 	}
 	//same as [] but only in bounds
 	template<class T, bool initelems >
@@ -216,7 +224,7 @@ namespace Cont {
 	}
 
 	//keeps a range of indices including [start,end] ind,todo add inclusive exculsive toggle
-	template<class T, bool initelems> 
+	template<class T, bool initelems>
 	void array<T, initelems>::slice(size_t startindex, size_t endindex) {
 
 
@@ -257,12 +265,12 @@ namespace Cont {
 		length -= dif + 1;
 
 	}
-	
+
 	//deleted the element at index
 	template<class T, bool initelems>
 	void array<T, initelems>::deleteind(size_t index) {
 
-		if ( index >= length)
+		if (index >= length)
 		{
 			throw std::invalid_argument("Index out of bounds for deletion");
 		}
@@ -288,12 +296,12 @@ namespace Cont {
 
 	template<class T, bool initelems>
 	void array<T, initelems>::insertind(size_t index, T value) {
-		if (index>length)
+		if (index > length)
 		{
 			throw std::invalid_argument("Index out of bounds for insertion");
 
 		}
-		if (length >=capacity )
+		if (length >= capacity)
 		{
 			resize(resizelength(length));
 		}
@@ -309,7 +317,7 @@ namespace Cont {
 
 		length++;
 	}
-	
+
 	//copies and appends an element to the list(!!!issues with posize_ters!!!)
 	template<class T, bool initelems>
 	void array<T, initelems>::push(const T& value) {
@@ -343,25 +351,25 @@ namespace Cont {
 	template<class T, bool initelems >
 	void array<T, initelems>::push(array arr) {
 
-		push(arr.list, arr.length );
+		push(arr.list, arr.length);
 	}
 
 	template<class T, bool initelems>
 	inline T array<T, initelems>::pop()
 	{
-		if (length==0)
+		if (length == 0)
 		{
-			throw std::logic_error("Cannot pop empty array");	
+			throw std::logic_error("Cannot pop empty array");
 		}
 		T store = list[length - 1];
 		length -= 1;
 		return store;
 
 	}
-	
+
 
 	template<class T, bool initelems>
-	 void array<T, initelems >::resize(size_t size) {
+	void array<T, initelems >::resize(size_t size) {
 		//returns if success
 
 
@@ -384,7 +392,7 @@ namespace Cont {
 
 				newlist = malloc(sizeof(T) * size);
 			}
-		
+
 			if (!newlist) {
 				throw std::bad_alloc();
 			}
@@ -402,9 +410,9 @@ namespace Cont {
 
 
 			capacity = size;
-			
+
 		}
-		
+
 	}
 
 	template<class T, bool initelems>
@@ -418,7 +426,7 @@ namespace Cont {
 	}
 
 	template<class T, bool initelems >
-	void array<T, initelems>::swap(array<T, initelems>& other) 
+	void array<T, initelems>::swap(array<T, initelems>& other)
 	{
 		std::swap(length, other.length);
 		std::swap(capacity, other.capacity);
@@ -458,7 +466,7 @@ namespace Cont {
 		capacity = size;
 		list = new T[size];
 		if constexpr (std::is_trivially_copyable_v<T>) {
-			std::memcpy(list, arr, sizeof(T)*size);  // Fast copy for trivially copyable types
+			std::memcpy(list, arr, sizeof(T) * size);  // Fast copy for trivially copyable types
 		}
 		else {
 			for (size_t i = 0; i < size; i++) {
@@ -469,7 +477,7 @@ namespace Cont {
 	}
 	//just 
 	template<class T, bool initelems>
-	array<T, initelems>::array(const array& arr):array(arr.list,arr.length) {
+	array<T, initelems>::array(const array& arr) : array(arr.list, arr.length) {
 
 	}
 	//takes an r value renrennce,
@@ -481,22 +489,22 @@ namespace Cont {
 		list = other.list;
 		other.list = nullptr;  // Reset the source vector
 		other.length = 0;
-		other.capacity= 0;
+		other.capacity = 0;
 
 	}
 	//takes an r value refrence  
 	template<class T, bool initelems>
 	array<T, initelems>& array<T, initelems>::operator=(array<T, initelems>&& other) noexcept {
 		// Prevent self-assignment
-		if (this != &other) {  
-			destroy();  
+		if (this != &other) {
+			destroy();
 			swap(other);
 		}
 		return *this;
 	}
 
 	template<class T, bool initelems>
-	array<T,initelems>& array<T, initelems>::operator=(const array<T,initelems>& other)
+	array<T, initelems>& array<T, initelems>::operator=(const array<T, initelems>& other)
 	{
 		if (this != &other) {
 			destroy();
@@ -505,7 +513,24 @@ namespace Cont {
 		}
 		return *this;
 	}
-	
+
+	template<class T, bool initelems>
+	inline bool array<T, initelems>::operator==(const array& other) const
+	{
+		if (length != other.length)
+		{
+			return false;
+		}
+		for (int i = 0; i < length; i++)
+		{
+			if (other[i] != list[i])
+			{
+				return false;
+			}
+		}
+		return true;
+	}
+
 
 
 }

@@ -25,13 +25,11 @@ struct worm:gameobject::component
 		Transform currtransform= owner->getcomponent<model>()[0].transform;
 		float speed = .01;
 		float lerpv = .01;
-		array<aabb::Collider*>& collist = owner->getcomponents<aabb::Collider>();
-		for (int i =1; i < length; i++)
-		{
+		aabb::Collider& col = owner->getcomponent<aabb::Collider>();
+	
 
 			ModelMeshName::ModelMesh* meshatpos= owner->getcomponent<model>().meshlist[i];
-			aabb::Collider* colatpos = collist[i];
-			Transform& local = meshatpos->transform;
+			Transform& local = col.transform();
 			local.position += currtransform.getnormaldirection() * speed;
 
 			
@@ -43,8 +41,8 @@ struct worm:gameobject::component
 		 currtransform = owner->getcomponent<model>()[i].transform;
 		}
 
-		collist.destroy();
-	}
+		
 	
+
 };
 

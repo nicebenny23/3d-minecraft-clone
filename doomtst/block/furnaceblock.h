@@ -88,7 +88,7 @@ struct furnacecomp :gameobject::component {
 
 				if (men.blkcont.state.craftedthisframe)
 				{
-					getblockbelow->getcomponent<liquidprop>().liqval -= 1;
+					getblockbelow->owner->getcomponent<liquidprop>().liqval -= 1;
 				}
 			}
 
@@ -102,7 +102,7 @@ struct furnacecomp :gameobject::component {
 	
 	}
 	void ondestroy() {
-		if (owner->state == gameobject::destroying)
+		if (owner->state() == gameobject::destroying)
 		{
 			men.blkcont.save();
 		}
@@ -124,24 +124,24 @@ inline void furnaceinit(blockname::block* blk) {
 
 	blk->createdefaultaabb(false);
 	//stupid thing
-	if (!blk->hascomponent<furnacecomp>())
+	if (!blk->owner->hascomponent<furnacecomp>())
 	{
 
-		blk->addcomponent<furnacecomp>();
+		blk->owner->addcomponent<furnacecomp>();
 
 	}
 	
 
-	blk->getcomponent<furnacecomp>().men.blkcont.attributes.timetocraft = 1;
-	blk->getcomponent<furnacecomp>().men.blkcont.attributes.isauto = true;
-	blk->addcomponent<loottable>()->addelem(furnaceitem, 1, false);
+	blk->owner->getcomponent<furnacecomp>().men.blkcont.attributes.timetocraft = 1;
+	blk->owner->getcomponent<furnacecomp>().men.blkcont.attributes.isauto = true;
+	blk->owner->addcomponent<loottable>()->addelem(furnaceitem, 1, false);
 }
 inline void furnacedelete(blockname::block* blk) {
-	blk->removecomponent<aabb::Collider>();
+	blk->owner->removecomponent<aabb::Collider>();
 
-	blk->removecomponent<furnacecomp>();
+	blk->owner->removecomponent<furnacecomp>();
 
-	blk->removecomponent<loottable>();
+	blk->owner->removecomponent<loottable>();
 }
  // !wood_HPP
 

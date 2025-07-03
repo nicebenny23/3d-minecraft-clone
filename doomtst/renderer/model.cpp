@@ -24,7 +24,7 @@ model::model(meshconnecttype connectmethod )
 void model::update()
 {
 	renderer::changerendertype(renderer::rendermodel);
-	glm::mat4* model =new glm::mat4((objutil::toent(owner).transform.ToMatrix()));
+	glm::mat4* model =new glm::mat4((owner->transform().ToMatrix()));
 	for (int i = 0; i < meshlist.length; i++)
 	{
 		meshlist[i]->modelmatrix =model;
@@ -43,7 +43,7 @@ void model::destroy()
 
 void model::start()
 {
-	if (owner->type!=gameobject::block)
+	if (owner->type() !=gameobject::block)
 	{
 
 

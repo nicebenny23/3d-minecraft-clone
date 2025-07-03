@@ -56,13 +56,13 @@ array<navnode> getneighborsdefault(navnode& node);
 bool normaltestfunc(Coord  pos, int dir);
 struct navigator:gameobject::component
 {
-    navigator(Ent::entityref parentref, array<navnode> (*testfunc)(navnode& pos));
+    navigator(gameobject::obj parentref, array<navnode> (*testfunc)(navnode& pos));
     bool isblockvalid;
     v3::Vector3 esize;
     float timetillupdate;
     v3::Vector3 headed;
     array<navnode> (*testfunction)(navnode& pos);
-    Ent::entityref goingtwords;
+    gameobject::obj goingtwords;
     void calcpath();
     bool noblockinrange(Coord pos);
     void update();

@@ -183,7 +183,7 @@ return        array<navnode>();
     return array<navnode>(); // No path found
 }
 
-navigator::navigator(Ent::entityref parentref, array<navnode>(*testfunc)(navnode& pos))
+navigator::navigator(gameobject::obj parentref, array<navnode>(*testfunc)(navnode& pos))
 {
     priority = 4411;
     timetillupdate = 0;
@@ -227,9 +227,9 @@ Vector3 transformnormal(Vector3 pos, Vector3 scale)
 void navigator::calcpath()
 {
     
-    Coord currpos = CtxName::ctx.Grid->getVoxel( objutil::toent(owner).transform.position);
+    Coord currpos = CtxName::ctx.Grid->getVoxel( owner->transform().position);
 
-    Vector3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords->transform.position);
+    Vector3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.transform().position);
  
     array<navnode>  finding = astarpathfinding(navnode(currpos),navnode(Coord(gotopos)), testfunction);
     if (finding.length>1)
@@ -267,9 +267,9 @@ void navigator::update()
 {
     float timetillupdatespeed = .3;
 
-    Vector3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords->transform.position);
+    Vector3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.transform().position);
 
-    v3::Vector3 loc = objutil::toent(owner).transform.position;
+    v3::Vector3 loc = owner->transform().position;
     float distance = dist(loc, gotopos);
     float addoffset = Max(0,(sigmoid(distance/ 10)-.5)*2);
     timetillupdatespeed = .3 + addoffset;

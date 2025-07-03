@@ -14,7 +14,7 @@ bool counttablevoxel(block* blk, GridTraverseMode trav) {
 
 
 	
-	if (blk->getcomponent<aabb::Collider>().effector )
+	if (blk->owner->getcomponent<aabb::Collider>().effector )
 	{
 		return trav != countnormal;
 
@@ -35,7 +35,7 @@ bool voxtra::Boxcollwithgrid(geometry::Box Box )
 					continue;
 				}
 
-				aabb::Collider* Collider = PotentialCollision->getcomponentptr<aabb::Collider>();
+				aabb::Collider* Collider = PotentialCollision->owner->getcomponentptr<aabb::Collider>();
 
 			
 				if (Collider!=nullptr&&PotentialCollision->attributes.solid&&!Collider->effector)
@@ -78,7 +78,7 @@ voxtra::WorldRayCollision  voxtra::travvox(ray nray, float acc, GridTraverseMode
 			{
 				continue;
 			}
-			aabb::Collider* BlockCollider = blk->getcomponentptr<aabb::Collider>();
+			aabb::Collider* BlockCollider = blk->owner->getcomponentptr<aabb::Collider>();
 			if (BlockCollider == nullptr)
 			{
 				continue;
@@ -89,7 +89,7 @@ voxtra::WorldRayCollision  voxtra::travvox(ray nray, float acc, GridTraverseMode
 						geointersect::boxRayCollision Collision= geointersect::intersection(BlockCollider->globalbox(), nray);
 						if (Collision)
 						{
-							return Opt::Construct<RayWorldHit>(Collision.unwrap(), &blk->getcomponent<aabb::Collider>());
+							return Opt::Construct<RayWorldHit>(Collision.unwrap(), &blk->owner->getcomponent<aabb::Collider>());
 						}
 					}
 		}

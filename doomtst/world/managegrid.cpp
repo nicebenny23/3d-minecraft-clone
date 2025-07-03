@@ -84,7 +84,7 @@ void gridutil::computeallcover()
 		Chunk::chunk* chk = CtxName::ctx.GridRef()[gridind];
 		for (int blockind = 0; blockind < chunksize; ++blockind)
 		{
-			block& blk = chk->blockbuf[blockind];
+			block& blk = chk->blockbuf[blockind].getcomponent<block>();
 			for (int faceind = 0; faceind < 6; ++faceind)
 			{
 				face& tocover = blk[faceind];

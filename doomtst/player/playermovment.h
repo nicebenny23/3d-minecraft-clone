@@ -19,8 +19,8 @@ struct playermovement:gameobject::component
         priority = 11;
     }float lastgroundy;
 	virtual void update() {
-       //objutil::toent(owner).transform.position += Vector3(0, 16, 0);
-        Vector3& pos = objutil::toent(owner).transform.position;
+       //owner->transform.position += Vector3(0, 16, 0);
+        Vector3& pos = owner->transform().position;
         float slowdown = 2;
         Vector3& velocity = owner->getcomponent<rigidbody>().velocity;
         float speed = 16;

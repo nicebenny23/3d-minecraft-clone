@@ -162,7 +162,7 @@ void recreatechunkmesh(Chunk::chunk* aschunk) {
 
 	
 	for (int ind = 0; ind < chunksize; ind++) {
-		block& blockatpos = (aschunk->blockbuf[ind]);
+		block& blockatpos = (aschunk->blockbuf[ind].getcomponent<block>());
 		
 		if (!blockatpos.attributes.transparent) {
 			emitblock(blockatpos, datbuf, indbuf);

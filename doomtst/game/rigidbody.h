@@ -22,7 +22,7 @@ struct rigidbody : gameobject::component {
     void calculateonground() {
 
         inliquid = false;
-        Vector3 boxcenter = objutil::toent(owner).transform.position - Vector3(0, boundingbox->globalbox().scale.y + .05, 0);
+        Vector3 boxcenter = owner->transform().position - Vector3(0, boundingbox->globalbox().scale.y + .05, 0);
         geometry::Box checkbox = geometry::Box(boxcenter, Vector3(boundingbox->globalbox().scale.x, .1, boundingbox->globalbox().scale.z) * .999);
         isonground = (voxtra::Boxcollwithgrid(checkbox ));
     }
@@ -38,7 +38,7 @@ struct rigidbody : gameobject::component {
     // Start function to initialize the rigidbody component
     void start() {
         acceleration = zerov;
-        unsetpositon = objutil::toent(owner).transform.position;
+        unsetpositon = owner->transform().position;
         boundingbox = &owner->getcomponent<aabb::Collider>();  
         priority = -111;
     }
@@ -50,7 +50,7 @@ struct rigidbody : gameobject::component {
             applyGravity();
 
         integrate();
-        unsetpositon = objutil::toent(owner).transform.position;
+        unsetpositon = owner->transform().position;
     }
 
     // Apply gravity to the rigidbody
@@ -78,7 +78,7 @@ struct rigidbody : gameobject::component {
 
         velocity.z *= (1 - deltaTime * friction);  // Adjust damping factor to prevent excessive damping
 
-        objutil::toent(owner).transform.position += velocity * deltaTime;
+        owner->transform().position += velocity * deltaTime;
         acceleration = Vector3(0, 0, 0);  // Reset acceleration after integration
     }
 

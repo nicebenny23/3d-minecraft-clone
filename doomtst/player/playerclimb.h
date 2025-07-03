@@ -12,7 +12,7 @@ struct playerclimb:gameobject::component
 		onrope = false;
 	}	
 	void oncollision(gameobject::obj* collidedwith) {
-		if (collidedwith->type==gameobject::block)
+		if (collidedwith->type() ==gameobject::block)
 		{
 			blockname::block* potrope =&objutil::toblk(collidedwith);
 			if (potrope->id==minecraftrope)

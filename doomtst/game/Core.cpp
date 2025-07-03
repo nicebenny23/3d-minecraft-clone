@@ -83,11 +83,7 @@ namespace Core {
     void Engine::InitOC()
     {
         ctx->OC = &OC;
-        ctx->OC->ctx = ctx;
+        ctx->OC->inject_context(ctx);
     }
-    void Engine::InitEntMan()
-    {
-        ctx->EntMan = &EntMan;
-        EntMan.ctx = ctx;
-    }
+   
 }

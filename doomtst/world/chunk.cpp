@@ -10,7 +10,7 @@
 #include "../renderer/renderer.h"
 block& Chunk::chunk::operator[](int index)
 {
-	return blockbuf[index];
+	return blockbuf[index].getcomponent<block>();
 }
 
 
@@ -89,26 +89,26 @@ const char* Chunk::getcorefilename(Coord pos)
 //this whole system has to be completly redone
 void appendspecialbytelist(array<short>& bytelist, int index, block* blk) {
 
-	liquidprop* getliq = blk->getcomponentptr<liquidprop>();
+	liquidprop* getliq = blk->owner->getcomponentptr<liquidprop>();
 	if (getliq != nullptr)
 	{
 		bytelist[chunksize+ index] = getliq->liqval;
 
 	}
-	if (blk->hascomponent<craftingtablecomp>())
+	if (blk->owner->hascomponent<craftingtablecomp>())
 	{
 		
-		bytelist[chunksize+index] =blk->getcomponent<craftingtablecomp>().men.blkcont.getcombinedid();
+		bytelist[chunksize+index] =blk->owner->getcomponent<craftingtablecomp>().men.blkcont.getcombinedid();
 
 	}
-	if (blk->hascomponent<chestcomp>())
+	if (blk->owner->hascomponent<chestcomp>())
 	{
-		bytelist[chunksize+ index] = blk->getcomponent<chestcomp>().men.blkcont.containerid;
+		bytelist[chunksize+ index] = blk->owner->getcomponent<chestcomp>().men.blkcont.containerid;
 		
 	}
-	if (blk->hascomponent<furnacecomp>())
+	if (blk->owner->hascomponent<furnacecomp>())
 	{
-		bytelist[chunksize + index] = blk->getcomponent<furnacecomp>().men.blkcont.getcombinedid();
+		bytelist[chunksize + index] = blk->owner->getcomponent<furnacecomp>().men.blkcont.getcombinedid();
 
 	}
 }
@@ -122,13 +122,13 @@ void Chunk::chunk::write()
 	for (int i = 0; i < chunksize; i++)
 	{
 		int v1= blockbuf[i].id;
-		int v2= blockbuf[i].mesh.direction | (blockbuf[i].mesh.attachdir.ind() * 8);
+		int v2= blockbuf[i].getcomponent<block>().mesh.direction | (blockbuf[i].getcomponent<block>().mesh.attachdir.ind() * 8);
 		bytelist[i] = v1 |(256*v2);
 	}
 	for (int i = 0; i < chunksize; i++)
 	{
 		bytelist[chunksize + i] = 0;
-		appendspecialbytelist(bytelist, i, &blockbuf[i]);
+		appendspecialbytelist(bytelist, i, blockbuf[i].getcomponentptr<block>());
 	}
 	file.write<short>(bytelist.list, bytelist.length);
 	bytelist.destroy();
@@ -146,18 +146,10 @@ Chunk::chunk::chunk()
 void Chunk::chunk::destroy()
 {
 	if (modified)
-	{
-
-		write();
+	{		write();
 	}
-	for (int i = 0; i < chunksize; i++) {
-
-		//blkinitname::setair(&blockbuf[i]);
-		
-	
-		gameobject::destroycomponents(&blockbuf[i]);
-
-		//delete blockbuf[i]
+	for (int i = 0; i < chunksize; i++) {	
+	blockbuf[i].immediate_destroy();
 	}
 	mesh->destroy();
 	delete[] blockbuf;

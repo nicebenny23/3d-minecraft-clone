@@ -34,7 +34,7 @@ struct playerplace :gameobject::component
 			return false;
 		}
 		voxtra::RayWorldHit closest = Hit.unwrap();
-		if (closest.collider->owner->type != gameobject::block)
+		if (closest.collider->owner->type() != gameobject::block)
 		{
 			return false;
 		}
@@ -45,7 +45,7 @@ struct playerplace :gameobject::component
 		return true;
 	}
 	void placeblock() {
-		ray cameraray = ray(objutil::toent(owner).transform.position,objutil::toent(owner).transform.position +objutil::toent(owner).transform.getnormaldirection() * 7);
+		ray cameraray = ray(owner->transform().position,owner->transform().position +owner->transform().getnormaldirection() * 7);
 		block* plamentblock = voxtra::findprevblock(cameraray, 1000,voxtra::countsolid);
 		//this must be kept because it can somtimers bug out do to presosion errors;
 		if (plamentblock!=nullptr)
@@ -92,7 +92,7 @@ struct playerplace :gameobject::component
 		}
 		select = owner->getcomponent<inventory>().selected;
 	
-		ray cameraray = ray(objutil::toent(owner).transform.position, objutil::toent(owner).transform.position + objutil::toent(owner).transform.getnormaldirection() * 7);
+		ray cameraray = ray(owner->transform().position, owner->transform().position + owner->transform().getnormaldirection() * 7);
 		Hit = collision::raycastall(cameraray,owner);
 		if (!caninteract())
 		{

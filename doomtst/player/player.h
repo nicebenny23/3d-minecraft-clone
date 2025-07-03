@@ -5,7 +5,12 @@
 // settings
 
 namespace player {
-	extern Ent::entityref goblin;
+	struct player_tag :gameobject::component {
+
+
+
+	};
+	extern gameobject::obj goblin;
 	void initplayer();
 	extern bool playeractive;
 

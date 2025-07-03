@@ -19,11 +19,11 @@ struct lootelement
 	unsigned char maxamt;
 	void drop() {
 		int dropamt = maxamt;
-player::goblin.toent()->getcomponent<inventory>().hotbar.fill(itemid, dropamt, false);
-		player::goblin.toent()->getcomponent<inventory>().playermenu.blkcont.fill(itemid, dropamt,false);
-		player::goblin.toent()->getcomponent<inventory>().hotbar.fill(itemid, dropamt, true);
+player::goblin.getcomponent<inventory>().hotbar.fill(itemid, dropamt, false);
+		player::goblin.getcomponent<inventory>().playermenu.blkcont.fill(itemid, dropamt,false);
+		player::goblin.getcomponent<inventory>().hotbar.fill(itemid, dropamt, true);
 
-		player::goblin.toent()->getcomponent<inventory>().playermenu.blkcont.fill(itemid, dropamt, true);
+		player::goblin.getcomponent<inventory>().playermenu.blkcont.fill(itemid, dropamt, true);
 	}
 
 	lootelement(int itemid, float maxamt,bool happenrandom)
@@ -67,12 +67,12 @@ struct  loottable :gameobject::component
 	void ondestroy() {
 		
 	
-		if (owner->type==gameobject::entity&& !playerinteract)
+		if (owner->type() ==gameobject::entity&& !playerinteract)
 		{
 			lootlist.destroy();
 			return;
 		}
-		if (owner->type == gameobject::block)
+		if (owner->type() == gameobject::block)
 		{
 			if (objutil::toblk(owner).bstate.broken != true)
 			{

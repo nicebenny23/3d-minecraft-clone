@@ -13,6 +13,6 @@ inline void glassinit(blockname::block* blk) {
 	blk->createdefaultaabb(false);
 }
 inline void glassdelete(blockname::block* blk) {
-	blk->removecomponent<aabb::Collider>();
+	blk->owner->removecomponent<aabb::Collider>();
 
 }

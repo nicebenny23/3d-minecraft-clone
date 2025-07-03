@@ -18,12 +18,12 @@ struct particleemiter:gameobject::component
 	Texture2D* tex;
 	int maxparticles = 1000;
 	Mesh ParticleMesh;
-	array<Ent::entity*> particlearray;
+	array<gameobject::obj> particlearray;
 	float particlespawntime;
 	float particlelifetime;
 	float timetillspawn;
-	void (*particleinit) (Ent::entity*);
-	particleemiter(float spawntime,float lifetime, void (*initfunc) (Ent::entity*),Texture2D* newtex);
+	void (*particleinit) (gameobject::obj);
+	particleemiter(float spawntime,float lifetime, void (*initfunc) (gameobject::obj),Texture2D* newtex);
 	bool shouldspawnparticle();
 	void update();
 	void start();
@@ -33,7 +33,7 @@ struct particleemiter:gameobject::component
 	}
 	void renderparticles();
 };
-void initbaseparticle(Ent::entity* newent);
+void initbaseparticle(gameobject::obj* newent);
 
 struct particle:gameobject::component
 {
@@ -44,7 +44,7 @@ struct particle:gameobject::component
 	particleemiter* emit;
 	~particle() {
 
-		emit->particlearray[ind] = nullptr;
+		emit->particlearray[ind].id=0;
 	}
 	particle() = default;
 }; 

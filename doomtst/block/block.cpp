@@ -95,13 +95,13 @@ blockname::blockmesh::blockmesh(block* parent, Vector3 blkscale)
 
 }
 
-void blockname::block::create(v3::Coord location, int blockid, byte blkattachface, byte blkdirection)
+void blockname::block::create(v3::Coord location, int blockid, char blkattachface, char blkdirection)
 {
 
-	state = gameobject::beinginitiated;
+	owner->state() = gameobject::beinginitiated;
 	emitedlight = 0;
 
-	type = gameobject::block;
+	owner->type() = gameobject::block;
 	mininglevel = 0;
 	id = blockid;
 	pos = location;
@@ -118,6 +118,6 @@ void blockname::block::create(v3::Coord location, int blockid, byte blkattachfac
 
 void blockname::block::createdefaultaabb(bool effector)
 {
-	addcomponent<aabb::Collider>(zerov, unitscale, false,effector);
+	owner->addcomponent<aabb::Collider>(zerov, unitscale, false,effector);
 
 }

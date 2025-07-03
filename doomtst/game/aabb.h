@@ -24,14 +24,14 @@ namespace aabb {
         geometry::Box globalbox() {
 
             geometry::Box global;
-            if (owner->type==gameobject::entity)
+            if (owner->type() ==gameobject::entity)
             {
-                Transform transform = objutil::toent(owner).transform;
+                Transform transform = owner->transform();
                 global.center = box.center * transform.scale*2 + transform.position;
                 global.scale = box.scale * transform.scale*2;
                 
             }
-            if (owner->type == gameobject::block)
+            if (owner->type() == gameobject::block)
             {
                 
                 Vector3 scale = objutil::toblk(owner).mesh.box.scale;

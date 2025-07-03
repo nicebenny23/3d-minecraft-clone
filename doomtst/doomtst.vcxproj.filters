@@ -141,18 +141,6 @@
     <ClCompile Include="renderer\ui.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="sound\soundsource.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sound\soundbuf.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sound\soundlistener.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sound\sound.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="util\algorthm.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -617,21 +605,6 @@
     <ClInclude Include="renderer\ui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="sound\sound.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sound\soundfile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sound\soundsource.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sound\soundbuf.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sound\soundlistener.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="util\memorypool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -756,6 +729,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="util\KeySet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\bitset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\TagIndex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

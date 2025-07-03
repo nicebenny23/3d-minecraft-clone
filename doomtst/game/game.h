@@ -2,14 +2,12 @@
 #include "../renderer/ModelMesh.h"
 #include "../renderer/shader.h"
 #include <iostream>
-#include "../sound/sound.h"
 #include <cmath>
 #include "../renderer/renderer.h"
 #include "../renderer/Window.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include "../util/userinput.h"
-#include "../renderer/renderer.h"
 #include "../world/chunk.h"
 #include "../game/objecthelper.h"
 #include "../world/grid.h"
@@ -31,7 +29,7 @@
 #include "Core.h"
 #pragma once 
 void endframe() {
-    CtxName::ctx.EntMan->DeleteObjs();
+    CtxName::ctx.OC->Delete_deffered_objs();
 
     CtxName::ctx.Inp->endupdate();
     updateltick();
@@ -69,7 +67,7 @@ void deleteolddata() {
     std::string o1 = std::string("C:/Users/bchar/source/repos/doomtst/doomtst/worldstorage");
 
     std::string o2 = std::string("C:/Users/User/source/repos/nicebenny23/3d-minecraft-clone/doomtst/worldstorage");
-    deleteFilesInFolder(o1);
+    deleteFilesInFolder(o2);
 
 }
 void init() {
@@ -79,7 +77,7 @@ void init() {
     deleteolddata();
     Core::game.InitOC();
     Core::game.createWindow();
-    Core::game.InitEntMan();
+    
     aabb::initCollider();
     ui::createuilist();
     inittextarray();

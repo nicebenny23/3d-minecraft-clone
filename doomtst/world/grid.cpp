@@ -98,7 +98,7 @@ namespace grid {
 
 			const int ind = chunkIndex(chnk);
 			int blkind = Chunk::indexfrompos(pos);
-			block& blockatpos = chunklist[ind]->blockbuf[blkind];
+			block& blockatpos = chunklist[ind]->blockbuf[blkind].getcomponent<block>();
 			return &blockatpos;
 		
 

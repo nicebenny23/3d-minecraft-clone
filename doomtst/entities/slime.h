@@ -25,7 +25,7 @@ struct slimemove :gameobject::component {
 
 
         timesincejump -= CtxName::ctx.Time->dt;
-        Vector3 pos = objutil::toent(owner ).transform.position;
+        Vector3 pos = owner->transform().position;
         v3::Vector3 headed = owner->getcomponent<navigator>().headed;
         
             v3::Vector3 gotopos = headed - pos;
@@ -45,12 +45,12 @@ struct slimemove :gameobject::component {
            if (ctype)
            {
 
-               objutil::toent(owner).transform.position += normal(gotopos) * CtxName::ctx.Time->dt*2;
+               owner->transform().position += normal(gotopos) * CtxName::ctx.Time->dt*2;
 
            }
            else {
 
-               objutil::toent(owner).transform.position += normal(gotopos) * CtxName::ctx.Time->dt * 2;
+               owner->transform().position += normal(gotopos) * CtxName::ctx.Time->dt * 2;
 
                }
            }
@@ -58,41 +58,41 @@ struct slimemove :gameobject::component {
     }
 };
 
-inline Ent::entityref createslime(v3::Vector3 pos,bool type) {
+inline gameobject::obj createslime(v3::Vector3 pos,bool type) {
 
-    Ent::entityref refmodel = CtxName::ctx.EntMan->CreateEntity(pos, "slime");
+    gameobject::obj refmodel = CtxName::ctx.OC->CreateEntity(pos);
    
-  //  refmodel.toent()->getcomponent<model>().add("slime2.obj", "images\\slimetex.png");
+  //  refmodel.getcomponent<model>().add("slime2.obj", "images\\slimetex.png");
     if (type)
     {
 
-        refmodel.toent()->addcomponent<model>()->add("slime2.obj", "images\\slimetexred.png");
+        refmodel.addcomponent<model>()->add("slime2.obj", "images\\slimetexred.png");
 
     }
     else {
-        refmodel.toent()->addcomponent<model>()->add("slime2.obj", "images\\slimetex.png");
+        refmodel.addcomponent<model>()->add("slime2.obj", "images\\slimetex.png");
 
     }
-    refmodel.toent()->addcomponent<loottable>()->addelem(slimeballitem, 1, false);
+    refmodel.addcomponent<loottable>()->addelem(slimeballitem, 1, false);
     float hp= 9;
     if (type == true) {
         hp = 15;
 
     }
-    refmodel.toent()->addcomponent<estate>(hp, true);
-    refmodel.toent()->addcomponent<aabb::Collider>(zerov, blockscale/2, true);
+    refmodel.addcomponent<estate>(hp, true);
+    refmodel.addcomponent<aabb::Collider>(zerov, blockscale/2, true);
     float dmg = 3;
     if (type == true) {
         dmg = 5;
 
     }
-    refmodel.toent()->addcomponent<dmgonhit>(dmg,"player",dmg*2);
-    refmodel.toent()->addcomponent<rigidbody>();
-    refmodel.toent()->addcomponent<navigator>(player::goblin, getneighborslime);
-    refmodel.toent()->addcomponent<slimemove>();
+    refmodel.addcomponent<dmgonhit<player::player_tag>>(dmg,dmg*2);
+    refmodel.addcomponent<rigidbody>();
+    refmodel.addcomponent<navigator>(player::goblin, getneighborslime);
+    refmodel.addcomponent<slimemove>();
 
-    refmodel->getcomponent<slimemove>().ctype = type;
-    refmodel.toent()->transform.scale = blockscale/2;
+    refmodel.getcomponent<slimemove>().ctype = type;
+    refmodel.transform().scale = blockscale / 2;
     return refmodel;
 }
 

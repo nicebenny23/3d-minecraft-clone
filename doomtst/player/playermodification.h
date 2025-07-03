@@ -9,7 +9,7 @@
 #include "playerinventory.h"
 #include "../items/itemutil.h"
 #pragma once 
-void initbreakparticle(Ent::entity* newent);
+void initbreakparticle(gameobject::obj newent);
 struct playerbreak:gameobject::component
 {
 	
@@ -34,7 +34,7 @@ struct playerbreak:gameobject::component
 			return false;
 		}
 		voxtra::RayWorldHit Hit = *closest;
-		if (Hit.collider->owner->type!=gameobject::block)
+		if (Hit.collider->owner->type() !=gameobject::block)
 		{
 			return false;
 		}
@@ -121,7 +121,7 @@ struct playerbreak:gameobject::component
 		 
 		pickaxe = owner->getcomponent<inventory>().selected;
 
-		ray cameraray = ray(objutil::toent( owner).transform.position,objutil::toent(owner).transform.position+objutil::toent(owner).transform.getnormaldirection()*7);
+		ray cameraray = ray(owner->transform().position,owner->transform().position+owner->transform().getnormaldirection()*7);
 		closest = collision::raycastall(cameraray,owner,voxtra::countsolid);
 		if (!caninteract())
 		{

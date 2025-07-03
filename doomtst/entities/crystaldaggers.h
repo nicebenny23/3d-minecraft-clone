@@ -10,22 +10,22 @@
 #include "../items/loottable.h"
 #include "rotatetovelocity.h"
 #pragma once 
-inline Ent::entityref spawndagger(v3::Vector3 pos,v3::Vector3 velocity,float gravscale=.4f) {
+inline gameobject::obj spawndagger(v3::Vector3 pos,v3::Vector3 velocity,float gravscale=.4f) {
 
-    Ent::entityref refmodel = CtxName::ctx.EntMan->CreateEntity(pos, "dagger");
-  refmodel.toent()->addcomponent<model>()->add("objs\\crystaldagger.obj", "images\\crystaldagger.png");
+    gameobject::obj refmodel = CtxName::ctx.OC->CreateEntity(pos);
+  refmodel.addcomponent<model>()->add("objs\\crystaldagger.obj", "images\\crystaldagger.png");
    
-    refmodel->addcomponent<aabb::Collider>(zerov, blockscale / 2, true);
+    refmodel.addcomponent<aabb::Collider>(zerov, blockscale / 2, true);
 
-    refmodel.toent()->addcomponent<dmgonhit>(3, "entity", 7);
-    refmodel.toent()->addcomponent<destroyonhit>("");
-    refmodel.toent()->addcomponent<rigidbody>()->velocity=velocity;
+    refmodel.addcomponent<dmgonhit<estate>>(3,  7);
+    //refmodel.addcomponent<destroyonhit<>>();
+    refmodel.addcomponent<rigidbody>()->velocity=velocity;
   
-    refmodel->addcomponent<rotatetwordsvel>();
+    refmodel.addcomponent<rotatetwordsvel>();
 
-    refmodel.toent()->getcomponent<rigidbody>().gravityscale=gravscale;
-    refmodel.toent()->getcomponent<rigidbody>().friction = .7f *gravscale/ .4f  ;
-    refmodel.toent()->transform.scale = blockscale / 2;
+    refmodel.getcomponent<rigidbody>().gravityscale=gravscale;
+    refmodel.getcomponent<rigidbody>().friction = .7f *gravscale/ .4f  ;
+    refmodel.transform().scale = blockscale / 2;
     return refmodel;
 }
 

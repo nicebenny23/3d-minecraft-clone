@@ -124,7 +124,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
@@ -137,14 +137,14 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>Yes</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;OpenAL32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>false</Profile>
     </Link>
   </ItemDefinitionGroup>
@@ -187,10 +187,6 @@
     <ClCompile Include="renderer\model.cpp" />
     <ClCompile Include="renderer\textrender.cpp" />
     <ClCompile Include="renderer\ui.cpp" />
-    <ClCompile Include="sound\sound.cpp" />
-    <ClCompile Include="sound\soundbuf.cpp" />
-    <ClCompile Include="sound\soundlistener.cpp" />
-    <ClCompile Include="sound\soundsource.cpp" />
     <ClCompile Include="util\chainpool.cpp" />
     <ClCompile Include="util\fileloader.cpp" />
     <ClCompile Include="game\aabb.cpp" />
@@ -261,6 +257,7 @@
     <ClInclude Include="game\GameContext.h" />
     <ClInclude Include="game\navigation.h" />
     <ClInclude Include="game\Settings.h" />
+    <ClInclude Include="game\TagIndex.h" />
     <ClInclude Include="game\transform.h" />
     <ClInclude Include="game\wormobj.h" />
     <ClInclude Include="imgui\imconfig.h" />
@@ -338,11 +335,7 @@
     <ClInclude Include="renderer\RenderProperties.h" />
     <ClInclude Include="renderer\UniformManager.h" />
     <ClInclude Include="Resources\ResourceManager.h" />
-    <ClInclude Include="sound\sound.h" />
-    <ClInclude Include="sound\soundbuf.h" />
-    <ClInclude Include="sound\soundfile.h" />
-    <ClInclude Include="sound\soundlistener.h" />
-    <ClInclude Include="sound\soundsource.h" />
+    <ClInclude Include="util\bitset.h" />
     <ClInclude Include="util\KeySet.h" />
     <ClInclude Include="util\List.h" />
     <ClInclude Include="util\Option.h" />

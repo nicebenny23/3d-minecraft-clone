@@ -12,15 +12,14 @@ inline void treestoneinit(blockname::block* blk) {
 	blk->mesh.box.scale = blockname::blockscale;
 
 	blk->createdefaultaabb(false);
-	blk->addcomponent<loottable>();
+	blk->owner->addcomponent<loottable>()->addelem(treestoneitem,1);
 	blk->mininglevel = .9;
 	blk->minedfastwithpick = false;
-	blk->getcomponent<loottable>().addelem(treestoneitem, 1);
 }
 inline void treestonedelete(blockname::block* blk) {
-	blk->removecomponent<aabb::Collider>();
+	blk->owner->removecomponent<aabb::Collider>();
 
-	blk->removecomponent<loottable>();
+	blk->owner->removecomponent<loottable>();
 
 
 }

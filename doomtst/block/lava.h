@@ -1,6 +1,7 @@
 #include "block.h"
 #include "liquid.h"
 #include "../entities/onhit.h"
+#include "../player/playerhealth.h"
 #pragma once 
 inline void lavainit(blockname::block* blk) {
 	blk->mesh.setfaces(lavatex, lavatex, lavatex, lavatex, lavatex, lavatex);
@@ -12,15 +13,15 @@ inline void lavainit(blockname::block* blk) {
 	blk->mesh.box.scale = blockname::blockscale*.8;
 	blk->createdefaultaabb(true);
 	blk->mesh.box.scale = blockname::blockscale ;
-	blk->addcomponent<liquidprop>(5);
+	blk->owner->addcomponent<liquidprop>(5);
 
-	blk->addcomponent<dmgonhit>(1,"entity",0);
+	blk->owner->addcomponent<dmgonhit<estate>>(1,0);
 	blk->minedfastwithpick = false;
 }
 inline void lavadelete(blockname::block* blk) {
-	blk->removecomponent<liquidprop>();
-	blk->removecomponent < aabb::Collider>();
-	blk->removecomponent<dmgonhit>();
+	blk->owner->removecomponent<liquidprop>();
+	blk->owner->removecomponent < aabb::Collider>();
+	blk->owner->removecomponent<dmgonhit<estate>>();
 }
 
  // !wood_HPP

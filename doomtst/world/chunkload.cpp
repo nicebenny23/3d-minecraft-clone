@@ -150,9 +150,10 @@ struct idmap
 		newchunk.modified = false;
 		createchunkmesh(&newchunk);
 		newchunk.loc = location;
-		newchunk.blockbuf = new block[chunksize];
+		newchunk.blockbuf = new gameobject::obj[chunksize];
 		for (int i = 0; i < chunksize; i++) {
 			Grid->ctx->OC->InitObj(&newchunk.blockbuf[i]);
+			newchunk.blockbuf[i].addcomponent < block>();
 		
 		}
 		return &newchunk;
@@ -182,7 +183,7 @@ struct idmap
 
 					byte mesh_attachdir = dirprop >> 3;
 					byte dir = dirprop & 7;
-					blkinitname::genblock(&newchunk.blockbuf[i], blockid, blockpos, mesh_attachdir, dir);
+					blkinitname::genblock(newchunk.blockbuf[i].getcomponentptr<block>(), blockid, blockpos, mesh_attachdir, dir);
 
 					if (newchunk.blockbuf[i].hascomponent<liquidprop>())
 					{
@@ -258,7 +259,7 @@ struct idmap
 					int id = statemap.ids[ind].id;
 
 
-					blkinitname::genblock(&newchunk.blockbuf[ind], id, pos, 0, 0);
+					blkinitname::genblock(newchunk.blockbuf[ind].getcomponentptr<block>(), id, pos, 0, 0);
 
 					ind++;
 				}

@@ -4,59 +4,42 @@
 #include "../game/rigidbody.h"
 #include "../game/entityutil.h"
 #pragma once 
+template<typename T,bool is_not_tag =false>
 struct destroyonhit :gameobject::component {
 
-	std::string tagtoeffect;
-	bool isnottag;
-	destroyonhit(std::string affecttag) {
-		priority = 1111;
-		isnottag = false;
-		if (affecttag.length()>0)
-		{
-			if (affecttag[0]='!')
-			{
-				isnottag = true;
-			}
-			affecttag.erase(1);
-		}
-		tagtoeffect = affecttag;
 	
+
+	destroyonhit() {
+		priority = 1111;
+		utype == gameobject::updatenone;
 	}
 	void oncollision(gameobject::obj* collidedwith) {
 
 		
-			if (tagtoeffect.length() == 0)
-			{
-				if (!collidedwith->getcomponent<Collider>().effector)
-				{
-					objutil::toent(owner).Destroy();
-				}
-				
-				return;
-			}
-		if (collidedwith->type == gameobject::entity)
+		
+		if (collidedwith->type() == gameobject::entity)
 		{
-			if (objutil::toent(collidedwith).hastag(tagtoeffect)^isnottag)
+			if (collidedwith->hascomponent<T>()^is_not_tag)
 			{
-				objutil::toent(owner).Destroy();
+				owner->deffered_destroy();
 			}
 		}
 	}
 
 	~destroyonhit() = default;
-	destroyonhit() = default;
 };
+template<typename T>
 
 struct dmgonhit:gameobject::component
 {
 
 	
 	float knockback;
-	std::string tagtoeffect;
+
 	int dmgdone;
-	dmgonhit(int dmg,std::string affecttag,float kb=0) {
-		priority = 1111;
-		tagtoeffect=affecttag ;
+	dmgonhit(int dmg,float kb=0) {
+	priority = 1111;
+	
 	dmgdone = dmg;
 	knockback = kb;
 	utype = gameobject::updatenone;
@@ -65,22 +48,22 @@ struct dmgonhit:gameobject::component
 	void oncollision(gameobject::obj* collidedwith) {
 
 		
-		if (collidedwith->type == gameobject::entity)
+		if (collidedwith->type() == gameobject::entity)
 		{
 			if (!collidedwith->hascomponent<estate>()) {
 			
 				return;
 			}
-			if (!objutil::toent(collidedwith).hastag(tagtoeffect))
+			if (!(collidedwith->hascomponent<T>()))
 			{
 				return;
 			}
-			v3::Vector3 center = objutil::toent(owner).transform.position;
-				v3::Vector3 othercenter = objutil::toent(collidedwith).transform.position;
+			v3::Vector3 center = owner->transform().position;
+				v3::Vector3 othercenter = collidedwith->transform().position;
 				if (collidedwith->hascomponent<rigidbody>()) {
 				
 
-					kb( center, knockback,&objutil::toent(collidedwith));
+					kb( center, knockback,*collidedwith);
 
 					
 					

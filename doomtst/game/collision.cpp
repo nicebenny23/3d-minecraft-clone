@@ -78,25 +78,25 @@ voxtra::WorldRayCollision collision::raycastentity(ray nray, gameobject::obj* or
 
 void propagatecollisionmessage(gameobject::obj* o1, gameobject::obj* o2) {
 
-	for (int i = 0; i < o1->componentlist.length; i++)
+	for (int i = 0; i < o1->componentlist().length; i++)
 	{
-		o1->componentlist[i]->oncollision(o2);
+		o1->componentlist()[i]->oncollision(o2);
 	}
-	for (int j= 0; j < o2->componentlist.length; j++)
+	for (int j= 0; j < o2->componentlist().length; j++)
 	{
-		o2->componentlist[j]->oncollision(o1);
+		o2->componentlist()[j]->oncollision(o1);
 	}
 }
 void moveobj(v3::Vector3 force,gameobject::obj* object) {
 	
-	if (object->type==gameobject::block)
+	if (object->type() ==gameobject::block)
 	{
 		Assert("block rigidbodies not supported yet");
 	}
 	else
 	{
 
-		objutil::toent(object).transform.position += force;
+		object->transform().position += force;
 		
 
 	}
@@ -206,11 +206,11 @@ Vector3 colideentandblock(Collider& entity, block* tocollide) {
 	
 	if (tocollide != nullptr)
 	{
-		if (tocollide->hascomponent<aabb::Collider>())
+		if (tocollide->owner->hascomponent<aabb::Collider>())
 		{
 
 
-			aabb::Collider& blockcol = tocollide->getcomponent<aabb::Collider>();
+			aabb::Collider& blockcol = tocollide->owner->getcomponent<aabb::Collider>();
 
 
 
@@ -224,7 +224,7 @@ Vector3 colideentandblock(Collider& entity, block* tocollide) {
 				return zerov;
 			}
 			//bug collision was happening twice(fix,improve collision to not collide already destroyed/being destroyed obejcts)/
-			propagatecollisionmessage(entity.owner, tocollide);
+			propagatecollisionmessage(entity.owner, tocollide->owner);
 			
 
 			if (!blockcol.effector && !entity.effector)
@@ -267,7 +267,7 @@ void collision::handleCollisionWithGrid(Collider& entity)
 			if (!entity.effector)
 			{
 
-				distributeforce(entity.owner, minblock, minforce);
+				distributeforce(entity.owner, minblock->owner, minforce);
 
 			}
 		}

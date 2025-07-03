@@ -28,8 +28,8 @@ struct playerdaggercomp :gameobject::component
 			{
 				return;
 			}
-			Vector3 spawpos =objutil::toent(owner).transform.position +objutil::toent(owner).transform.getnormaldirection()*3;
-			Vector3 velocity =objutil::toent(owner).transform.getnormaldirection() * 10;
+			Vector3 spawpos =owner->transform().position + owner->transform().getnormaldirection() * 3;
+			Vector3 velocity =owner->transform().getnormaldirection() * 10;
 
 			spawndagger(spawpos, velocity);
 			wearduribilty();

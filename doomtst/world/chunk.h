@@ -43,7 +43,7 @@ namespace Chunk {
 			return (loc+ unitv /2.f)*chunklength;
 		}
 		block& operator[](int index);
-		block* blockbuf;
+		gameobject::obj* blockbuf;
 		void destroy();
 		float cameradist() {
 			return 	 dist(center(), camera::campos());

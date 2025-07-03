@@ -41,12 +41,12 @@ struct estate :gameobject::component
 
 			if (owner->getcomponent<rigidbody>().isonground && !prevonground)
 			{
-				float ypos = objutil::toent(owner).transform.position.y;
+				float ypos = owner->transform().position.y;
 				float falldmg = Max(3.f, lastongroundy - ypos) - 3.f;
 				if (owner->getcomponent<rigidbody>().velocity.y<-5)
 				{
 
-					damage((falldmg));
+					damage((falldmg/100));
 
 				}
 
@@ -54,14 +54,14 @@ struct estate :gameobject::component
 			if (owner->getcomponent<rigidbody>().isonground) {
 
 
-				lastongroundy = objutil::toent(owner).transform.position.y;
+				lastongroundy = owner->transform().position.y;
 			}
 		}
 	}
 	void start() {
 		priority = 11;
 		health = maxhealth;
-		lastongroundy = objutil::toent(owner).transform.position.y;
+		lastongroundy = owner->transform().position.y;
 	}
 	estate(int maxhp, bool falls) {
 		maxhealth = maxhp;
@@ -83,15 +83,12 @@ struct estate :gameobject::component
 			health -= dmg;
 			if (health <= 0)
 			{
-				if (!objutil::toent(owner).hastag("player"))
+				if (!owner->hascomponent<gameobject::StaticComponent>())
 				{
 
-					objutil::toent(owner).Destroy();
+					owner->deffered_destroy();
 				}
-				else
-				{
-					
-				}
+				
 			}
 			health = clamp(health, 0, maxhealth);
 		}

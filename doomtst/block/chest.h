@@ -88,20 +88,20 @@ inline void chestinit(blockname::block* blk) {
 	blk->mesh.box.scale = blockname::blockscale;
 
 	blk->createdefaultaabb(false);
-	if (!blk->hascomponent<chestcomp>())
+	if (!blk->owner->hascomponent<chestcomp>())
 	{
 
-		blk->addcomponent<chestcomp>();
+		blk->owner->addcomponent<chestcomp>();
 
 	}
-blk->addcomponent < loottable > ()->addelem(chestitem, 1, false);
+blk->owner->addcomponent < loottable > ()->addelem(chestitem, 1, false);
 }
 inline void chestdelete(blockname::block* blk) {
-	blk->removecomponent<aabb::Collider>();
+	blk->owner->removecomponent<aabb::Collider>();
 
-	blk->removecomponent<chestcomp>();
+	blk->owner->removecomponent<chestcomp>();
 
-	blk->removecomponent<loottable>();
+	blk->owner->removecomponent<loottable>();
 }
  // !wood_HPP
 

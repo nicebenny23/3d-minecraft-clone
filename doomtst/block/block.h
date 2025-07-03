@@ -155,15 +155,15 @@ namespace blockname {
 		bool transparent;
 		bool solid;
 	};
-	struct  block:gameobject::obj
+	struct  block:gameobject::component
 	{
 
 		blockmesh mesh;
 
 		v3::Coord pos;
 		byte emitedlight;
-		byte lightval;
-		byte id;
+		char  lightval;
+		char  id;
 
 		blockstate bstate;
 	
@@ -171,12 +171,12 @@ namespace blockname {
 		blockatt attributes;
 		
 	
-		byte mininglevel;
+		char mininglevel;
 		bool minedfastwithpick;
 		Vector3 center() {
 			return Vector3( pos)*blocksize + unitv *blocksize/ 2;
 	    }
-		void create(v3::Coord location, int blockid, byte blkattachface, byte blkdirection);
+		void create(v3::Coord location, int blockid, char  blkattachface, char  blkdirection);
 
 		block() {};
 		 	 void createdefaultaabb(bool effector=false);

@@ -7,35 +7,26 @@
 namespace objutil {
 
 	inline blockname::block* toblock(gameobject::obj& a) {
-		return (a.type == gameobject::block) ? (blockname::block*)(&a) : nullptr;
+		return (a.type() == gameobject::block) ? (blockname::block*)(&a) : nullptr;
 	}
 
-	inline Ent::entity* toentity(gameobject::obj& a) {
-		return (a.type == gameobject::entity) ? (Ent::entity*)(&a) : nullptr;
-	}
 
 	inline blockname::block& toblk(gameobject::obj* object) {
-		return *((blockname::block*)(object));
+		return (object)->getcomponent<blockname::block>();
 	}
 
 	inline blockname::block& toblk(gameobject::obj& object) {
-		return *((blockname::block*)(&object));
+		return object.getcomponent<blockname::block>();
 	}
 
-	inline Ent::entity& toent(gameobject::obj* object) {
-		return *((Ent::entity*)(object));
-	}
-
-	inline Ent::entity& toent(gameobject::obj& object) {
-		return *((Ent::entity*)(&object));
-	}
+	
 
 	inline Vector3 getcenter(gameobject::obj& object) {
-		if (object.type == gameobject::block) {
+		if (object.type() == gameobject::block) {
 			return toblk(object).pos + unitv / 2;
 		}
 		else {
-			return ((Ent::entity*)(&object))->transform.position;
+			return object.transform().position;
 		}
 		
 	}

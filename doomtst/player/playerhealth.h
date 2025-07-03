@@ -19,15 +19,17 @@ struct playerhealth:gameobject::component
 	}
 	array<Cptr::cptr<uibox>,true> healthboxes;
 	void start(){
+		size_t max_health = owner->getcomponent<estate>().maxhealth;
 		priority = -224;
-		v2::Vector2 scale = v2::unitv / 100;
-		healthboxes = array<Cptr::cptr<uibox>,true>(10);
-		for (int i = 0; i < 10; i++) {
+		v2::Vector2 scale = v2::unitv / 1000;
+		healthboxes = array<Cptr::cptr<uibox>,true>(max_health);
+		for (int i = 0; i < max_health; i++) {
 			v2::Vector2 pos = v2::Vector2(i / 40.f-.4f, -.45);
 			healthboxes.push(ui::createuielement<uibox>("images\\health.png","HealthTexture",scale,pos,55));
 		}
 	}
 	void update() {
+		size_t max_health = owner->getcomponent<estate>().maxhealth;
 		float dmgmul = 1;
 		for (int i = 0; i < 2; i++)
 		{
@@ -71,7 +73,7 @@ struct playerhealth:gameobject::component
 
 				healthboxes[i]->state.enabled = true;
 			}
-			for (int i = health; i < 10; i++) {
+			for (int i = health; i < max_health; i++) {
 
 				healthboxes[i]->state.enabled = false;
 			}

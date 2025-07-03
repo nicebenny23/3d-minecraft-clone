@@ -3,10 +3,18 @@
 #include "../world/tick.h"
 #include "../util/chainpool.h"
 #include <unordered_map>
-
-
+#include "../util/SparseSet.h"
+#include <typeindex>
+#include "../util/vector3.h"
+#include "../util/stack.h"
+#include "transform.h"
+#include <stdint.h>
 namespace GameContext {
 
+}
+template <typename T>
+std::type_index get_type_index() {
+	return std::type_index(typeid(T));
 }
 using namespace Cont;
 
@@ -14,29 +22,78 @@ namespace CtxName {
 	struct Context;
 }
 namespace gameobject {
+
+
+
+
+
 	enum updatecalltype {
 		Framecall = 0,
-		Rendercall=1,
+		Rendercall = 1,
 
 
 	};
-	enum objstate : byte
+	enum objstate : char
 	{
-		beinginitiated=0,
-		active=1,
-		destroying=2,
+		beinginitiated = 0,
+		active = 1,
+		destroying = 2,
 	};
-	enum updatetype : byte {
+	enum updatetype : char {
 
 		updatenone = 0,
 		updatedefault = 1,
 		updatetick = 2,
 		updaterender = 3,
 	};
+	enum objtype:char {
+		block = 0,
+		entity = 1
 
+	};
+	
 	struct component;
+	struct OCManager;
+	struct EntityMetadata {
+		array<component*> componentlist;
+		objtype type;
+		objstate state;
+	};
+	struct obj
+	{
+		template <class T>
+		T& getcomponent();
 
-	struct obj;
+		template <class T>
+		T* getcomponentptr();
+		template <class T>
+		bool hascomponent();
+
+		
+		//removes a component
+		template <class T>
+		void removecomponent();
+
+	
+		bool valid();
+		uint32_t gen;
+		 uint32_t id;
+		template <class T, typename... types>
+		T* addcomponent(types&&... initval);
+		//todo -mid proiorty implement;
+		EntityMetadata& meta();
+		array<component*>& componentlist();
+		objtype& type();
+		objstate& state();
+		obj();
+	
+		void immediate_destroy();
+		void deffered_destroy();
+		Transform& transform();
+	private:
+		OCManager* OC;
+		friend struct OCManager;
+	};
 	struct componentmanager
 	{
 		componentmanager();
@@ -45,28 +102,33 @@ namespace gameobject {
 		int priority;
 		int id;
 		chainpool::chainedpool<component> pool;
-		  
+
 
 		void init(component* sample);
 	};
+	
+	
 	struct OCManager {
-
-		OCManager() {
+		void destroy(obj* object);
+		OCManager() :ctx(nullptr), entitymeta(2 << 20) {
 
 
 			managers = array<componentmanager, true>(0);
-			CompHasher = std::unordered_map<const char*, int>();
+			
 			compid = 1;
 			ObjId = 1;
 		}
+		void inject_context(CtxName::Context* context)
+		{
 
-		CtxName::Context* ctx;
-		array<componentmanager, true> managers;
-		int compid;
-		size_t ObjId;
-		std::unordered_map<const char*, int> CompHasher;
-		int GetCompIdAdd(const char* name) {
-			int compId = CompHasher[name];
+			ctx = context;
+		}
+		array<EntityMetadata> entitymeta;
+		
+		void Delete_deffered_objs();
+
+		size_t GetCompIdAdd(std::type_index name) {
+			size_t compId = CompHasher[name];
 			if (compId == 0)
 			{
 				CompHasher[name] = compid;
@@ -75,23 +137,30 @@ namespace gameobject {
 			}
 			return compId;
 		}
-
-
-		 int GetCompId(const char* name) {
-			int compId = CompHasher[name];
-			if (compId== 0)
-			{
-				return -1;
+		void delete_component(component* comp);
+		 size_t GetCompId(std::type_index name) {
+			return CompHasher[name];
 			}
-			return compId;
-		 }
 		 void InitObj(obj* object);
 		 template <class T, typename... types>
 		  T* InitComp(types&&... initval);
 		 void updatecomponents(updatecalltype type);
+
+		 obj CreateEntity(v3::Vector3 SpawnPos);
+		 stackname::stack<obj> EntityDeletionBuffer;
+
+	private:
+		size_t ObjId;
+		size_t compid;
+		CtxName::Context* ctx;
+		array<componentmanager, true> managers;
+		std::unordered_map<std::type_index,size_t> CompHasher;
+
 	};
 
-
+	inline bool operator==(const obj& lhs, const obj& rhs) {
+		return lhs.id == rhs.id&&lhs.id!=0;
+	}
 	
 
 
@@ -138,10 +207,10 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			short priority=0;
 		
 		
-			byte id;
+			char comp_id;
 			//for component manager 
 			updatetype utype = updatedefault;
-
+			
 			bool active;
 			//called on destroy used for deallocation
 			
@@ -155,8 +224,8 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			component() {
 				active = true;
 				owner = nullptr;
-				id = -1;
-				index = -1;
+				comp_id = 0;
+				index = 0;
 				ctx= nullptr;
 			};
 			void destroy(); 
@@ -173,60 +242,21 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			CtxName::Context* ctx;
 
 		};
-		//determanes the type of object a give object is,
-		enum objtype {
-			block = 0,
-			entity = 1
+		
 
-		};
-
-		struct obj
+		struct StaticComponent : gameobject::component
 		{
 
-			
-			array<component*> componentlist;
-			
-		
-			objtype type;
-			objstate state;
-			template <class T>
-			T& getcomponent();
-			
-			template <class T>
-			T* getcomponentptr();
-			template <class T>
-			bool hascomponent();
-			
-			
-			//removes a component
-			template <class T>
-			void removecomponent();
-		
-			template <class T>
-			array<T*>& getcomponents();
-			
 
-			size_t id;
-			template <class T, typename... types>
-			T* addcomponent(types&&... initval);
-			//todo -mid proiorty implement;
+		};
+		struct transform_comp :gameobject::component {
+			Transform transform;
 
-			obj();
-			void DestroyComponents() {
-
-				for (int i = 0; i < componentlist.length; i++)
-				{
-					componentlist[i]->destroy();
-				}
-			}
-		
-			
-		private:
-			
-				OCManager* OC;
-				friend struct OCManager;
 		};
 
+		
+		
+		
 
 	
 		template <class T>
@@ -235,14 +265,14 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			
 			//replace with a get components call
 
-			int id = OC->GetCompId((typeid(T).raw_name()));
+			size_t id = OC->GetCompId(get_type_index<T>());
 			
-			for (int i = 0; i < componentlist.length; i++)
+			for (int i = 0; i < componentlist().length; i++)
 			{
 				
-				if (id == componentlist[i]->id) {
-					componentlist[i]->destroy();
-					componentlist.deleteind(i);
+				if (id == componentlist()[i]->comp_id) {
+					componentlist()[i]->destroy();
+					componentlist().deleteind(i);
 					i--;
 
 				}
@@ -256,14 +286,16 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		template<class T>
 		inline T* obj::getcomponentptr()
 		{
-			int id = OC->GetCompId((typeid(T).raw_name()));
-			for (int i = 0; i < componentlist.length; i++)
+			int id = OC->GetCompId(get_type_index<T>());
+			array<component*>& complist = componentlist();
+		
+			for (int i = 0; i < complist.length; i++)
 			{
 
-				if (id == componentlist[i]->id) {
+				if (id == complist[i]->comp_id) {
 
 
-					return ((T*)componentlist[i]);
+					return ((T*)complist[i]);
 				}
 			}
 			return nullptr;
@@ -272,7 +304,6 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		template <class T>
 		T& obj::getcomponent()
 		{
-
 			T* ptr = getcomponentptr<T>();
 			if (ptr == nullptr)
 			{
@@ -295,21 +326,6 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 
 
 
-		template<class T>
-		inline array<T*>& obj::getcomponents()
-		{
-			
-			int id = OC->GetCompId(typeid(T).raw_name());
-			
-			array<T*>* comps = (new array<T*>());
-			for (int i = 0; i < componentlist.length; i++)
-			{
-				if (id == componentlist[i]->id) {
-					comps->push((T*)(componentlist[i]));
-				}
-			}
-			return *comps;
-		}
 
 
 		template <class T, typename... types>
@@ -321,18 +337,11 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 
 			//transfer this section over to the Update Manager
 			T* comp = OC->InitComp<T>(std::forward<types>(initval)...);
-
-
-
-
-			componentlist.push(comp);
+			componentlist().push(comp);
 			comp->owner = this;
-			
 			comp->start();
 			comp->active = true;
-			
 			return comp;
-
 		}
 
 
@@ -340,23 +349,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 
 
 
-		inline void destroycomponents(obj * object) {
-
-			
-
-				object->state = destroying;
-			
-			for (int i = 0; i < object->componentlist.length; i++)
-			{
-				object->componentlist[i]->destroy();
-				
-
-			}
-			
-				
-				object->componentlist.destroy();
-				
-		}
+	
 	
 
 
@@ -366,8 +359,8 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		//find a way to fix it so i dont have to init the manager extremly late.
 		//onr 
 			T* comp;
-			const char* idname = (typeid(T).raw_name());
-			int id = GetCompIdAdd(idname);
+			
+			size_t id = GetCompIdAdd(get_type_index<T>());
 			bool newmanager = (managers[id].id == -1);
 			if (newmanager)
 			{
@@ -376,7 +369,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			}
 			void* mem = (managers[id].pool.alloc());
 			comp = new (mem) T(std::forward<types>(initval)...);
-			comp->id = id;
+			comp->comp_id = id;
 			comp->SetManager(ctx);
 
 

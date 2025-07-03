@@ -16,7 +16,7 @@ namespace Core {
         void InitTime();
         void InitInput();
         void InitOC();
-        void InitEntMan();
+      
        CtxName::Context* ctx;
 
         timename::TimeManager Time;
@@ -26,7 +26,6 @@ namespace Core {
 
         grid::Grid Grid;
 
-        Ent::EntityManager EntMan;
         gameobject::OCManager OC;
     };
     extern Engine game;

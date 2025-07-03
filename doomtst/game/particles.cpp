@@ -20,26 +20,27 @@ const float cubeuv[] = {
 const int indices[]{
 0,1,3,0,3,2
 };
+
 void particleemiter::update()
 {
 	timetillspawn = Min(timetillspawn-CtxName::ctx.Time->dt,particlespawntime);
 	for (int i = 0; i < particlearray.length; i++)
 	{
-		if (particlearray[i] != nullptr)
+		if (particlearray[i].id!=0)
 		{
 
 
-			if (particlearray[i]->hascomponent<particle>())
+			if (particlearray[i].hascomponent<particle>())
 			{
 
 
-				if (particlearray[i]->getcomponent<particle>().endtime < CtxName::ctx.Time->ElapsedTime)
+				if (particlearray[i].getcomponent<particle>().endtime < CtxName::ctx.Time->ElapsedTime)
 				{
-					Ent::entity* EntityDeletionBuffer = particlearray[i];
-					objutil::toent(EntityDeletionBuffer).Destroy();
+					gameobject::obj EntityDeletionBuffer = particlearray[i];
+					EntityDeletionBuffer.immediate_destroy();
 				
 				
-					particlearray[i] = nullptr;
+					particlearray[i].id=0;
 				}
 			}
 		}
@@ -51,16 +52,16 @@ void particleemiter::update()
 		
 		 for (size_t i = 0; i < maxparticles; i++)
 		 {
-			 if (particlearray[i] == nullptr)
+			 if (particlearray[i].id==0)
 			 {
-				 Ent::entityref newparticle = CtxName::ctx.EntMan->CreateEntity(position, "");
+				 gameobject::obj newparticle = CtxName::ctx.OC->CreateEntity(position);
 				 
-				 newparticle.toent()->addcomponent<particle>()->endtime= CtxName::ctx.Time->ElapsedTime+particlelifetime;
-				 newparticle->getcomponent<particle>().ind = i;
-				 newparticle->getcomponent<particle>().emit = this;
-				 (*particleinit)(newparticle.toent());
-				 newparticle->addtag("particle");
-				 particlearray[i] = newparticle.toent();
+				 newparticle.addcomponent<particle>()->endtime= CtxName::ctx.Time->ElapsedTime+particlelifetime;
+				 newparticle.getcomponent<particle>().ind = i;
+				 newparticle.getcomponent<particle>().emit = this;
+				 (*particleinit)(newparticle);
+				
+				 particlearray[i] = newparticle;
 				 break;
 			 };
 
@@ -72,7 +73,7 @@ void particleemiter::update()
 
 void particleemiter::start()
 {
-	position = objutil::toent(owner).transform.position;
+	position = owner->transform().position;
 }
 
 void particleemiter::renderparticles()
@@ -106,10 +107,10 @@ void particleemiter::renderparticles()
 	for (int i = 0; i < particlearray.length; i++)
 	{
 
-		if (particlearray[i]!=nullptr)
+		if (particlearray[i].id!=0)
 		{
-			Ren.CurrentShader()->SetVector3f(particlearray[i]->transform.position.glm(), "offset");
-			Ren.CurrentShader()->SetVector3f(particlearray[i]->transform.scale.glm(), "scale");
+			Ren.CurrentShader()->SetVector3f(particlearray[i].transform().position.glm(), "offset");
+			Ren.CurrentShader()->SetVector3f(particlearray[i].transform().scale.glm(), "scale");
 			Ren.Render(&ParticleMesh);
 		}
 	}
@@ -117,14 +118,14 @@ void particleemiter::renderparticles()
 	glBindVertexArray(0);
 	//databuf.destroy();
 }
-void initbaseparticle(Ent::entity* newent) {
-	newent->transform.position += Vector3(random(), 1, random())/10;
-	newent->addcomponent<aabb::Collider>(newent->transform.position, unitv / 9, true);
-	newent->addcomponent<rigidbody>(1,.1)->velocity=Vector3(random(),1,random())*2;
-	newent->transform.scale = blockscale / 22;
+void initbaseparticle(gameobject::obj newent) {
+	newent.transform().position += Vector3(random(), 1, random()) / 10;
+	newent.addcomponent<aabb::Collider>(newent.transform().position, unitv / 9, true);
+	newent.addcomponent<rigidbody>(1, .1)->velocity = Vector3(random(), 1, random()) * 2;
+	newent.transform().scale = blockscale / 22;
 	
 }
-particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) (Ent::entity*),Texture2D* newtex)
+particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) (gameobject::obj),Texture2D* newtex)
 {
 	tex = newtex;
 	
@@ -136,7 +137,7 @@ particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) 
 	timetillspawn = spawntime;
 	for ( int i = 0; i < maxparticles; i++)
 	{
-		particlearray[i] = nullptr;
+		particlearray[i].id = 0;
 	}
 }
 

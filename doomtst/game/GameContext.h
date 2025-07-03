@@ -30,14 +30,14 @@ namespace CtxName {
 			Grid = nullptr;
 			Time = nullptr;
 			OC = nullptr;
-			EntMan = nullptr;
+			
 		}
 		userinput::InputManager* Inp;
 		window::Window* Window;
 		timename::TimeManager* Time;
 
 		gameobject::OCManager* OC;
-		Ent::EntityManager* EntMan;
+		
 		
 		grid::Grid* Grid;
 		
