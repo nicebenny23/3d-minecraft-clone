@@ -34,7 +34,7 @@ struct playerplace :gameobject::component
 			return false;
 		}
 		voxtra::RayWorldHit closest = Hit.unwrap();
-		if (closest.collider->owner.type() != gameobject::block)
+		if (!closest.collider->owner.hascomponent<blockname::block>())
 		{
 			return false;
 		}

@@ -43,12 +43,7 @@ void model::destroy()
 
 void model::start()
 {
-	if (owner.type() !=gameobject::block)
-	{
-
-
-
-	}
+	
 }
 
 void model::setmodelshader()

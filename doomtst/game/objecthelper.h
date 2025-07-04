@@ -6,9 +6,6 @@
 // Returns center of object
 namespace objutil {
 
-	inline blockname::block* toblock(gameobject::obj& a) {
-		return (a.type() == gameobject::block) ? (blockname::block*)(&a) : nullptr;
-	}
 
 
 	inline blockname::block& toblk(gameobject::obj* object) {

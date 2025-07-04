@@ -34,7 +34,7 @@ struct playerbreak:gameobject::component
 			return false;
 		}
 		voxtra::RayWorldHit Hit = *closest;
-		if (Hit.collider->owner.type() !=gameobject::block)
+		if (!Hit.collider->owner.hascomponent<blockname::block>())
 		{
 			return false;
 		}
