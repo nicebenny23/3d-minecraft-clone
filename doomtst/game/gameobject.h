@@ -47,17 +47,12 @@ namespace gameobject {
 		updatetick = 2,
 		updaterender = 3,
 	};
-	enum objtype:char {
-		block = 0,
-		entity = 1
-
-	};
 	
 	struct component;
 	struct OCManager;
 	struct EntityMetadata {
 		array<component*> componentlist;
-		objtype type;
+		
 		objstate state;
 		size_t gen_count;
 		EntityMetadata() {
@@ -94,7 +89,7 @@ namespace gameobject {
 		//todo -mid proiorty implement;
 		EntityMetadata& meta();
 		array<component*>& componentlist();
-		objtype& type();
+	
 		objstate& state();
 		constexpr obj() noexcept {
 			Id = 0;
@@ -133,13 +128,13 @@ namespace gameobject {
 			for (size_t i = 0; i < max_size; i++)
 			{
 				free_ids.push(i);
+				
 			}
 			managers = array<componentmanager, true>(0);
 		
 		}
 		void inject_context(CtxName::Context* context)
 		{
-
 			ctx = context;
 		}
 		array<EntityMetadata> entitymeta;
@@ -160,7 +155,6 @@ namespace gameobject {
 	
 		CtxName::Context* ctx;
 		array<componentmanager, true> managers;
-		
 		array<size_t> free_ids;
 	};
 

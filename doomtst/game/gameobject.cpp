@@ -78,10 +78,6 @@ array<component*>& gameobject::obj::componentlist()
 	return meta().componentlist;
 }
 
-objtype& gameobject::obj::type()
-{
-	return meta().type;
-}
 
 
 objstate& gameobject::obj::state()
