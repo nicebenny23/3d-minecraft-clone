@@ -34,7 +34,7 @@ struct playerbreak:gameobject::component
 			return false;
 		}
 		voxtra::RayWorldHit Hit = *closest;
-		if (Hit.collider->owner->type() !=gameobject::block)
+		if (Hit.collider->owner.type() !=gameobject::block)
 		{
 			return false;
 		}
@@ -71,7 +71,7 @@ struct playerbreak:gameobject::component
 			if (currmining != nullptr)
 			{
 				
-				if (currmining == ((block*)(Hit.collider->owner)))
+				if (currmining == Hit.collider->owner.getcomponentptr<block>())
 				{
 				
 
@@ -92,7 +92,7 @@ struct playerbreak:gameobject::component
 					
 				}
 			}
-			currmining = (block*)(Hit.collider->owner);
+			currmining = Hit.collider->owner.getcomponentptr<block>();
 			if (currmining!=nullptr)
 			{
 
@@ -119,10 +119,10 @@ struct playerbreak:gameobject::component
 	 void update() {
 		 
 		 
-		pickaxe = owner->getcomponent<inventory>().selected;
+		pickaxe = owner.getcomponent<inventory>().selected;
 
-		ray cameraray = ray(owner->transform().position,owner->transform().position+owner->transform().getnormaldirection()*7);
-		closest = collision::raycastall(cameraray,owner,voxtra::countsolid);
+		ray cameraray = ray(owner.transform().position,owner.transform().position+owner.transform().getnormaldirection()*7);
+		closest = collision::raycastall(cameraray, collision::HitQuery(owner),voxtra::countsolid);
 		if (!caninteract())
 		{
 			return;

@@ -13,10 +13,10 @@ inline void crystalinit(blockname::block* blk) {
 	blk->createdefaultaabb(false);
 	blk->mininglevel = 4;
 	blk->minedfastwithpick = true;
-	blk->owner->addcomponent<loottable>()->addelem(crystalitem, 2,true);
+	blk->owner.addcomponent<loottable>()->addelem(crystalitem, 2,true);
 }
 inline void crystaldelete(blockname::block* blk) {
-	blk->owner->removecomponent<aabb::Collider>();
-	blk->owner->removecomponent<loottable>();
+	blk->owner.removecomponent<aabb::Collider>();
+	blk->owner.removecomponent<loottable>();
 
 }

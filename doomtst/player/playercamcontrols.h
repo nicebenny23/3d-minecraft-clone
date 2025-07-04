@@ -29,22 +29,22 @@ struct playercamcontrols :gameobject::component
 			xoffset *= sensitivity;
 			yoffset *= sensitivity;
 
-			owner->transform().pitch += yoffset;
+			owner.transform().pitch += yoffset;
 
-			owner->transform().yaw += xoffset;
-			owner->transform().pitch = clamp(owner->transform().pitch, -89.99, 89.99);
+			owner.transform().yaw += xoffset;
+			owner.transform().pitch = clamp(owner.transform().pitch, -89.99, 89.99);
 
 		}
 		else
 		{
 			CtxName::ctx.Window->EnableCursor();
 		}
-		ray cameraray = ray(owner->transform().position,owner->transform().position +owner->transform().getnormaldirection() * interactmaxrange);
-		voxtra::WorldRayCollision closest = collision::raycastall(cameraray);
+		ray cameraray = ray(owner.transform().position,owner.transform().position +owner.transform().getnormaldirection() * interactmaxrange);
+		voxtra::WorldRayCollision closest = collision::raycastall(cameraray, collision::HitQuery());
 		if (closest)
 		{
-			for (int i = 0; i < closest.unwrap().collider->owner->componentlist().length; i++) {
-				closest.unwrap().collider->owner->componentlist()[i]->onplayerclick();
+			for (int i = 0; i < closest.unwrap().collider->owner.componentlist().length; i++) {
+				closest.unwrap().collider->owner.componentlist()[i]->onplayerclick();
 
 			}
 		}

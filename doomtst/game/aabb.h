@@ -5,7 +5,7 @@
 #include "../util/ray.h"
 #include "../util/geometry.h"
 #include "../util/random.h"
-
+#include "../block/block.h"
 #include "../util/SparseSet.h"
 #include <cmath>
 
@@ -24,18 +24,19 @@ namespace aabb {
         geometry::Box globalbox() {
 
             geometry::Box global;
-            if (owner->type() ==gameobject::entity)
+          
+            if (owner.hascomponent<gameobject::transform_comp>())
             {
-                Transform transform = owner->transform();
-                global.center = box.center * transform.scale*2 + transform.position;
-                global.scale = box.scale * transform.scale*2;
-                
+                Transform transform = owner.transform();
+                global.center = box.center * transform.scale * 2 + transform.position;
+                global.scale = box.scale * transform.scale * 2;
+
             }
-            if (owner->type() == gameobject::block)
+            if (owner.hascomponent<blockname::block>())
             {
-                
-                Vector3 scale = objutil::toblk(owner).mesh.box.scale;
-                Vector3 pos = objutil::toblk(owner).center();
+                blockname::block  blk= owner.getcomponent<blockname::block>();
+                Vector3 scale = blk.mesh.box.scale;
+                Vector3 pos = blk.center();
                 global.center = box.center * scale * 2 + pos;
                 global.scale = box.scale * scale * 2;
 

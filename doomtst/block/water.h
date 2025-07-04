@@ -8,14 +8,14 @@ inline void waterinit(blockname::block* blk) {
 	blk->attributes.transparent = true;
 	blk->emitedlight = 0;
 	blk->mesh.box.scale = blockname::blockscale;
-	blk->owner->addcomponent<liquidprop>(15);
+	blk->owner.addcomponent<liquidprop>(15);
 	blk->createdefaultaabb(true);
 
 	blk->minedfastwithpick = false;
 }
 inline void waterdelete (blockname::block* blk) {
-	blk->owner->removecomponent<liquidprop>();
-	blk->owner->removecomponent < aabb::Collider>();
+	blk->owner.removecomponent<liquidprop>();
+	blk->owner.removecomponent < aabb::Collider>();
 }
 
 #endif // !wood_HPP

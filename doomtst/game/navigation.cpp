@@ -227,7 +227,7 @@ Vector3 transformnormal(Vector3 pos, Vector3 scale)
 void navigator::calcpath()
 {
     
-    Coord currpos = CtxName::ctx.Grid->getVoxel( owner->transform().position);
+    Coord currpos = CtxName::ctx.Grid->getVoxel( owner.transform().position);
 
     Vector3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.transform().position);
  
@@ -269,7 +269,7 @@ void navigator::update()
 
     Vector3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.transform().position);
 
-    v3::Vector3 loc = owner->transform().position;
+    v3::Vector3 loc = owner.transform().position;
     float distance = dist(loc, gotopos);
     float addoffset = Max(0,(sigmoid(distance/ 10)-.5)*2);
     timetillupdatespeed = .3 + addoffset;

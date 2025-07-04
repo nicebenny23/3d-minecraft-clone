@@ -21,13 +21,5 @@ namespace objutil {
 
 	
 
-	inline Vector3 getcenter(gameobject::obj& object) {
-		if (object.type() == gameobject::block) {
-			return toblk(object).pos + unitv / 2;
-		}
-		else {
-			return object.transform().position;
-		}
-		
-	}
+	
 }

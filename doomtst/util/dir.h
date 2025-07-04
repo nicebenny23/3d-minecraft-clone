@@ -35,6 +35,10 @@ namespace Dir {
 			dir = static_cast<Ind3d>(direction);
 		}
 		constexpr char ind() const noexcept {
+			if (dir ==Ind3d::None) {
+				throw std::logic_error("Invalid dir");
+			
+			}
 			return static_cast<char>(dir);
 		}
 		// Inverse direction

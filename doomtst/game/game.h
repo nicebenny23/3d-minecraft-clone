@@ -114,7 +114,7 @@ void rungame()
 
             lastupdate = 0;
          
-         warn(CtxName::ctx.Time->fps);
+         debug(CtxName::ctx.Time->fps);
         }
     }
     endgame();

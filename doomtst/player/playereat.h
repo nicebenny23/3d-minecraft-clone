@@ -38,7 +38,7 @@ struct playereat :gameobject::component
 		{
 			return false;
 		}
-		if (owner->getcomponent<estate>().health == 10)
+		if (owner.getcomponent<estate>().health == owner.getcomponent<estate>().maxhealth)
 		{
 			return false;
 		}
@@ -73,7 +73,7 @@ struct playereat :gameobject::component
 			if (timetoeat < 0) {
 
 				timetoeat = 1;
-				owner->getcomponent<estate>().heal(food->amt);
+				owner.getcomponent<estate>().heal(food->amt);
 				wearduribilty();
 			}
 			prevfood = food;
@@ -88,7 +88,7 @@ struct playereat :gameobject::component
 
 
 
-		food = owner->getcomponent<inventory>().selected;
+		food = owner.getcomponent<inventory>().selected;
 		tryeat();
 	
 	}

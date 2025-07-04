@@ -9,6 +9,7 @@
 #include "../util/stack.h"
 #include "transform.h"
 #include <stdint.h>
+#include "../util/type_index.h"
 namespace GameContext {
 
 }
@@ -23,7 +24,7 @@ namespace CtxName {
 }
 namespace gameobject {
 
-
+	
 
 
 
@@ -58,6 +59,16 @@ namespace gameobject {
 		array<component*> componentlist;
 		objtype type;
 		objstate state;
+		size_t gen_count;
+		EntityMetadata() {
+			gen_count=0;
+
+		}
+		void reset() {
+			componentlist.destroy();
+			gen_count++;
+		}
+		
 	};
 	struct obj
 	{
@@ -75,9 +86,9 @@ namespace gameobject {
 		void removecomponent();
 
 	
-		bool valid();
+		bool exists() const;
 		uint32_t gen;
-		 uint32_t id;
+		 uint32_t Id;
 		template <class T, typename... types>
 		T* addcomponent(types&&... initval);
 		//todo -mid proiorty implement;
@@ -85,7 +96,11 @@ namespace gameobject {
 		array<component*>& componentlist();
 		objtype& type();
 		objstate& state();
-		obj();
+		constexpr obj() noexcept {
+			Id = 0;
+			OC = nullptr;
+			gen = 0;
+		}
 	
 		void immediate_destroy();
 		void deffered_destroy();
@@ -93,7 +108,8 @@ namespace gameobject {
 	private:
 		OCManager* OC;
 		friend struct OCManager;
-	};
+	};	
+	static constexpr obj None  = obj();  // (1, 0, 0)
 	struct componentmanager
 	{
 		componentmanager();
@@ -110,13 +126,16 @@ namespace gameobject {
 	
 	struct OCManager {
 		void destroy(obj* object);
-		OCManager() :ctx(nullptr), entitymeta(2 << 20) {
-
-
+		OCManager() :ctx(nullptr){
+			const size_t max_size = static_cast<size_t>(1) << 20;
+			entitymeta = array<EntityMetadata>(max_size);
+			free_ids = array<size_t>(max_size);
+			for (size_t i = 0; i < max_size; i++)
+			{
+				free_ids.push(i);
+			}
 			managers = array<componentmanager, true>(0);
-			
-			compid = 1;
-			ObjId = 1;
+		
 		}
 		void inject_context(CtxName::Context* context)
 		{
@@ -127,20 +146,8 @@ namespace gameobject {
 		
 		void Delete_deffered_objs();
 
-		size_t GetCompIdAdd(std::type_index name) {
-			size_t compId = CompHasher[name];
-			if (compId == 0)
-			{
-				CompHasher[name] = compid;
-				compid++;
-				return CompHasher[name];
-			}
-			return compId;
-		}
+		
 		void delete_component(component* comp);
-		 size_t GetCompId(std::type_index name) {
-			return CompHasher[name];
-			}
 		 void InitObj(obj* object);
 		 template <class T, typename... types>
 		  T* InitComp(types&&... initval);
@@ -148,19 +155,16 @@ namespace gameobject {
 
 		 obj CreateEntity(v3::Vector3 SpawnPos);
 		 stackname::stack<obj> EntityDeletionBuffer;
-
+		 type_id::dense_type_system comp_map;
 	private:
-		size_t ObjId;
-		size_t compid;
+	
 		CtxName::Context* ctx;
 		array<componentmanager, true> managers;
-		std::unordered_map<std::type_index,size_t> CompHasher;
-
+		
+		array<size_t> free_ids;
 	};
 
-	inline bool operator==(const obj& lhs, const obj& rhs) {
-		return lhs.id == rhs.id&&lhs.id!=0;
-	}
+
 	
 
 
@@ -201,7 +205,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		{
 		public:
 
-			obj* owner;
+			obj owner;
 
 			unsigned int index;
 			short priority=0;
@@ -223,7 +227,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 
 			component() {
 				active = true;
-				owner = nullptr;
+				
 				comp_id = 0;
 				index = 0;
 				ctx= nullptr;
@@ -233,7 +237,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			virtual void update();
 			virtual void onplayerclick();
 
-			virtual void oncollision(obj* collidedwith);
+			virtual void oncollision(obj collidedwith);
 			void SetManager(CtxName::Context* man)
 			{
 				ctx = man;
@@ -242,7 +246,10 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			CtxName::Context* ctx;
 
 		};
-		
+		template<typename T>
+		void verify_component() {
+			static_assert(std::derived_from<T, component>, "T must derive from ObjComponent<T>");
+		}
 
 		struct StaticComponent : gameobject::component
 		{
@@ -262,10 +269,10 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		template <class T>
 		void obj::removecomponent()
 		{
-			
 			//replace with a get components call
 
-			size_t id = OC->GetCompId(get_type_index<T>());
+			size_t id = OC->comp_map.get<T>();
+			
 			
 			for (int i = 0; i < componentlist().length; i++)
 			{
@@ -286,7 +293,9 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		template<class T>
 		inline T* obj::getcomponentptr()
 		{
-			int id = OC->GetCompId(get_type_index<T>());
+
+			size_t id = OC->comp_map.get<T>();
+			
 			array<component*>& complist = componentlist();
 		
 			for (int i = 0; i < complist.length; i++)
@@ -304,6 +313,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		template <class T>
 		T& obj::getcomponent()
 		{
+
 			T* ptr = getcomponentptr<T>();
 			if (ptr == nullptr)
 			{
@@ -316,7 +326,6 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		template <class T>
 		bool obj::hascomponent()
 		{
-
 
 			T* ptr = getcomponentptr<T>();
 			return (ptr != nullptr);
@@ -338,7 +347,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			//transfer this section over to the Update Manager
 			T* comp = OC->InitComp<T>(std::forward<types>(initval)...);
 			componentlist().push(comp);
-			comp->owner = this;
+			comp->owner = *this;
 			comp->start();
 			comp->active = true;
 			return comp;
@@ -356,11 +365,11 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		template<class T, typename ...types>
 		inline T* OCManager::InitComp(types && ...initval)
 		{
-		//find a way to fix it so i dont have to init the manager extremly late.
-		//onr 
+
+			verify_component<T>();
 			T* comp;
 			
-			size_t id = GetCompIdAdd(get_type_index<T>());
+			size_t id = comp_map.get<T>();
 			bool newmanager = (managers[id].id == -1);
 			if (newmanager)
 			{
@@ -383,6 +392,9 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			return comp;
 
 		}
+		inline bool operator == (const obj& obj1, const obj& obj2) {
 
+			return (obj1.Id == obj2.Id) && (obj1.gen == obj2.gen)&&obj1.exists();
+		}
 }
 

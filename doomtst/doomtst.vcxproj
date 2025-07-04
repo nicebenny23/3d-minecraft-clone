@@ -120,6 +120,7 @@
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>Yes</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
+      <UseDynamicDebugging>false</UseDynamicDebugging>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -308,6 +309,7 @@
     <ClInclude Include="items\stoneitem.h" />
     <ClInclude Include="items\sworditem.h" />
     <ClInclude Include="items\torchitem.h" />
+    <ClInclude Include="player\playermovment.h" />
     <ClInclude Include="renderer\GlUtil.h" />
     <ClInclude Include="renderer\Mesh.h" />
     <ClInclude Include="player\cameracomp.h" />
@@ -357,6 +359,7 @@
     <ClInclude Include="util\stbiload.h" />
     <ClInclude Include="renderer\Vao.h" />
     <ClInclude Include="renderer\VertexObjectManager.h" />
+    <ClInclude Include="util\type_index.h" />
     <ClInclude Include="util\UniquePtr.h" />
     <ClInclude Include="world\chunkload.h" />
     <ClInclude Include="world\managegrid.h" />

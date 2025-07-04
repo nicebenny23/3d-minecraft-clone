@@ -178,7 +178,9 @@ namespace blockname {
 	    }
 		void create(v3::Coord location, int blockid, char  blkattachface, char  blkdirection);
 
-		block() {};
+		block() {
+			utype = gameobject::updatenone;
+		};
 		 	 void createdefaultaabb(bool effector=false);
 		
 	};

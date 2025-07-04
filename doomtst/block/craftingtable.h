@@ -54,7 +54,7 @@ struct craftingtablecomp :gameobject::component {
 	
 	craftingmenu men;
 	void onplayerclick() {
-		if (owner->state() ==gameobject::active)
+		if (owner.state() ==gameobject::active)
 		{
 			if (CtxName::ctx.Inp->mouseright().pressed)
 			{
@@ -74,7 +74,7 @@ struct craftingtablecomp :gameobject::component {
 		}
 	}
 	void ondestroy(){
-		if (owner->state() == gameobject::destroying)
+		if (owner.state() == gameobject::destroying)
 		{
 			men.blkcont.save();
 		}
@@ -96,20 +96,20 @@ inline void tableinit(blockname::block* blk) {
 
 	blk->createdefaultaabb(false);
 	//stupid thing
-	if (!blk->owner->hascomponent<craftingtablecomp>())
+	if (!blk->owner.hascomponent<craftingtablecomp>())
 	{
 
-		blk->owner->addcomponent<craftingtablecomp>();
+		blk->owner.addcomponent<craftingtablecomp>();
 
 	}
-	blk->owner->addcomponent<loottable>()->addelem(craftingtableitem, 1, false);
+	blk->owner.addcomponent<loottable>()->addelem(craftingtableitem, 1, false);
 }
 inline void tabledelete(blockname::block* blk) {
-	blk->owner->removecomponent<aabb::Collider>();
+	blk->owner.removecomponent<aabb::Collider>();
 
-	blk->owner->removecomponent<craftingtablecomp>();
+	blk->owner.removecomponent<craftingtablecomp>();
 	
-	blk->owner->removecomponent<loottable>();
+	blk->owner.removecomponent<loottable>();
 }
  // !wood_HPP
 

@@ -38,7 +38,7 @@ void gameobject::component::onplayerclick()
 
 
 
-void gameobject::component::oncollision(obj* collidedwith)
+void gameobject::component::oncollision(obj collidedwith)
 {
 }
 
@@ -55,14 +55,22 @@ void gameobject::component::oncollision(obj* collidedwith)
 
 
 
-bool gameobject::obj::valid()
+bool gameobject::obj::exists() const
 {
-	return id != 0;
+	return Id != 0;
 }
 
 EntityMetadata& gameobject::obj::meta()
 {
-	return OC->entitymeta[id];
+	
+	EntityMetadata& met = OC->entitymeta[Id]; 
+		if (met.gen_count==gen)
+		{
+
+			return OC->entitymeta[Id];
+
+		}
+		throw std::logic_error("Cannot acess deleted entity");
 }
 
 array<component*>& gameobject::obj::componentlist()
@@ -81,11 +89,6 @@ objstate& gameobject::obj::state()
 	return meta().state;
 }
 
-obj::obj() {
-	id = 0;
-	OC = nullptr;
-
-}
 
 //gets a gameobject from a refrence to it;
 
@@ -101,7 +104,9 @@ void gameobject::OCManager::destroy(obj* object)
 	}
 
 	complist.destroy();
-	entitymeta[object->id].componentlist.destroy();
+	entitymeta[object->Id].reset();
+	free_ids.push(object->Id);
+
 }
 void gameobject::OCManager::Delete_deffered_objs()
 {
@@ -134,9 +139,9 @@ void gameobject::OCManager::delete_component(component* comp)
 }
 void gameobject::OCManager::InitObj(obj* object)
 {
-	object->id = ObjId;
-	ObjId++;
+	object->Id = free_ids.pop();
 	object->OC = ctx->OC;
+	object->gen= entitymeta[object->Id].gen_count;
 
 }
 
@@ -182,7 +187,6 @@ obj gameobject::OCManager::CreateEntity(v3::Vector3 SpawnPos)
 	obj* object = new obj();
 	InitObj(object);
 
-	object->type() = gameobject::entity;
 	object->componentlist() = array<gameobject::component*>();
 	object->addcomponent<transform_comp>()->transform.position = SpawnPos;
 	return *object;

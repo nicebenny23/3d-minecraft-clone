@@ -164,10 +164,10 @@ struct idmap
 
 		const char* name = Chunk::getcorefilename(location);
 		safefile file = safefile(name, fileread);
-		short* bytelist = file.read<short>(chunksize);
+		unsigned short* bytelist = file.read<unsigned short>(chunksize);
 
 		file.go(chunksize * 2);
-		short* randomproperties = file.read<short>(chunksize);
+		unsigned short* randomproperties = file.read<unsigned short>(chunksize);
 		Chunk::chunk& newchunk = *AllocChunk(location);
 		int i = 0;
 		for (int x = 0; x < chunkaxis; x++)
@@ -177,12 +177,21 @@ struct idmap
 				{
 					Coord blockpos = Coord(x, y, z) + location * chunkaxis;
 
-					byte blockid = bytelist[i] & 255;
-					byte dirprop = bytelist[i] >> 8;
+					byte blockid = bytelist[i] & unsigned char(255);
+					byte dirprop = bytelist[i] >>unsigned char( 8);
 
 
-					byte mesh_attachdir = dirprop >> 3;
-					byte dir = dirprop & 7;
+					byte mesh_attachdir = dirprop >> unsigned char(3);
+					byte dir = dirprop & unsigned char(7);
+					if (dir>5)
+					{
+							throw std::logic_error("Directional corruption error");
+						
+					}if (mesh_attachdir> 5)
+					{
+						throw std::logic_error("Directional corruption error");
+
+					}
 					blkinitname::genblock(newchunk.blockbuf[i].getcomponentptr<block>(), blockid, blockpos, mesh_attachdir, dir);
 
 					if (newchunk.blockbuf[i].hascomponent<liquidprop>())

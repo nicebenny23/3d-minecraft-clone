@@ -51,9 +51,9 @@ struct liquidprop :gameobject::component {
 				{
 
 
-					if (blk->owner->getcomponent<liquidprop>().liqval < liqval) {
+					if (blk->owner.getcomponent<liquidprop>().liqval < liqval) {
 
-						blk->owner->getcomponent<liquidprop>().liqval += 1;
+						blk->owner.getcomponent<liquidprop>().liqval += 1;
 						liqval -= 1;
 					}
 				}
@@ -83,12 +83,12 @@ struct liquidprop :gameobject::component {
 		}
 		gridutil::setblock(blk->pos, objutil::toblk(owner).id);
 
-		if (!blk->owner->hascomponent<liquidprop>())
+		if (!blk->owner.hascomponent<liquidprop>())
 		{
 			Assert("block must be inititated with liquid component");
 		}
 	
-				blk->owner->getcomponent<liquidprop>().liqval = 1;
+				blk->owner.getcomponent<liquidprop>().liqval = 1;
 				liqval -= 1;
 			
 	

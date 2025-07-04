@@ -14,7 +14,7 @@ struct CameraComp :gameobject::component
 	
 	Transform CamTransform;
 	void start() {
-		CamTransform = owner->transform();
+		CamTransform = owner.transform();
 		priority = 10000;
 
 	}
@@ -23,7 +23,7 @@ struct CameraComp :gameobject::component
 
 		renderer::setviewmatrix(LookAt(CamTransform));
 		
-		CamTransform = owner->transform();
+		CamTransform = owner.transform();
 
 	}
 };

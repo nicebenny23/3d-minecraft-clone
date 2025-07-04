@@ -7,7 +7,7 @@
 struct playerattackcomp:gameobject::component
 {
 	void wearduribilty() {
-		item* select =owner->getcomponent<inventory>().selected;
+		item* select =owner.getcomponent<inventory>().selected;
 		if (select!=nullptr)
 		{
 			if (select->itemtype == wear) {
@@ -19,7 +19,7 @@ struct playerattackcomp:gameobject::component
 		
 
 		item* select;
-		select = owner->getcomponent<inventory>().selected;
+		select = owner.getcomponent<inventory>().selected;
 		if (select == nullptr)
 		{
 			return 1;
@@ -33,25 +33,25 @@ struct playerattackcomp:gameobject::component
 	
 		ray cameraray = ray(camera::campos(), camera::campos() + camera::GetCamFront() * 7);
 		
-		voxtra::WorldRayCollision Hit = collision::raycastall(cameraray,owner);
+		voxtra::WorldRayCollision Hit = collision::raycastall(cameraray, collision::HitQuery(owner));
 		if (!Hit)
 		{
 			return;
 		}
 		voxtra::RayWorldHit closest = Hit.unwrap();
-		if (closest.collider->owner->type() != gameobject::entity)
+		if (!closest.collider->owner.hascomponent<estate>())
 		{
 			return;
 		}
-		if (closest.collider->owner->hascomponent<estate>()&&CtxName::ctx.Inp->mouseleft().pressed)
+		if (closest.collider->owner.hascomponent<estate>()&&CtxName::ctx.Inp->mouseleft().pressed)
 		{
-			if (closest.collider->owner->hascomponent<rigidbody>())
+			if (closest.collider->owner.hascomponent<rigidbody>())
 			{
-				kb(closest.Hit.intersectionpoint, 7, *(closest.collider->owner));
+				kb(closest.Hit.intersectionpoint, 7, (closest.collider->owner));
 				
 			}
 			int dmgdone = computeattackdmg();
-			closest.collider->owner->getcomponent<estate>().damage(dmgdone);
+			closest.collider->owner.getcomponent<estate>().damage(dmgdone);
 			wearduribilty();
 		
 		}

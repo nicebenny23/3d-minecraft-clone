@@ -22,13 +22,13 @@ struct worm:gameobject::component
 		updateglobals();
 	}
 	void updateglobals() {
-		Transform currtransform= owner->getcomponent<model>()[0].transform;
+		Transform currtransform= owner.getcomponent<model>()[0].transform;
 		float speed = .01;
 		float lerpv = .01;
-		aabb::Collider& col = owner->getcomponent<aabb::Collider>();
+		aabb::Collider& col = owner.getcomponent<aabb::Collider>();
 	
 
-			ModelMeshName::ModelMesh* meshatpos= owner->getcomponent<model>().meshlist[i];
+			ModelMeshName::ModelMesh* meshatpos= owner.getcomponent<model>().meshlist[i];
 			Transform& local = col.transform();
 			local.position += currtransform.getnormaldirection() * speed;
 
@@ -38,7 +38,7 @@ struct worm:gameobject::component
          local.pitch = lerpfloat(local.pitch, shouldbetransform.pitch, lerpv);
          local.yaw = lerpfloat(local.yaw, shouldbetransform.yaw, lerpv);
 		 local.position = lerp(local.position, shouldbetransform.position, lerpv);
-		 currtransform = owner->getcomponent<model>()[i].transform;
+		 currtransform = owner.getcomponent<model>()[i].transform;
 		}
 
 		

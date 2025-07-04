@@ -23,13 +23,15 @@ void collision::update()
 }
 
 
-bool collision::boxCollidesWithEntity(geometry::Box blk, gameobject::obj* orgin )
+bool collision::boxCollidesWithEntity(geometry::Box blk, HitQuery query)
 {
+	
 	for (Collider* Collider1:Colliderlist)
 	{
 		
 		
-				if (Collider1->owner == orgin)
+
+				if (query.orgin&& Collider1->owner == query.orgin.unwrap())
 				{
 					continue;
 				}
@@ -44,7 +46,7 @@ bool collision::boxCollidesWithEntity(geometry::Box blk, gameobject::obj* orgin 
 	return false;
 }
 
-voxtra::WorldRayCollision collision::raycastentity(ray nray, gameobject::obj* orgin )
+voxtra::WorldRayCollision collision::raycastentity(ray nray, HitQuery query)
 {
 
 	voxtra::WorldRayCollision closest = Opt::None;
@@ -56,7 +58,7 @@ voxtra::WorldRayCollision collision::raycastentity(ray nray, gameobject::obj* or
 
 	
 
-			if (Collider1->owner == orgin)
+			if (query.orgin&& Collider1->owner == query.orgin.unwrap())
 			{
 				continue;
 			}
@@ -76,46 +78,46 @@ voxtra::WorldRayCollision collision::raycastentity(ray nray, gameobject::obj* or
 	return closest;
 }
 
-void propagatecollisionmessage(gameobject::obj* o1, gameobject::obj* o2) {
+void propagatecollisionmessage(gameobject::obj o1, gameobject::obj o2) {
 
-	for (int i = 0; i < o1->componentlist().length; i++)
+	for (int i = 0; i < o1.componentlist().length; i++)
 	{
-		o1->componentlist()[i]->oncollision(o2);
+		o1.componentlist()[i]->oncollision(o2);
 	}
-	for (int j= 0; j < o2->componentlist().length; j++)
+	for (int j= 0; j < o2.componentlist().length; j++)
 	{
-		o2->componentlist()[j]->oncollision(o1);
+		o2.componentlist()[j]->oncollision(o1);
 	}
 }
-void moveobj(v3::Vector3 force,gameobject::obj* object) {
+void moveobj(v3::Vector3 force,gameobject::obj object) {
 	
-	if (object->type() ==gameobject::block)
+	if (object.hascomponent<blockname::block>())
 	{
 		Assert("block rigidbodies not supported yet");
 	}
 	else
 	{
 
-		object->transform().position += force;
+		object.transform().position += force;
 		
 
 	}
 }
-void distributeforce( gameobject::obj* p1, gameobject::obj* p2,Vector3 force) {
+void distributeforce( gameobject::obj p1, gameobject::obj p2,Vector3 force) {
 
 	float totalforcemag = 0;
 	float e1mass = 0;
 	float e2mass = 0;
-	if (p1->hascomponent<rigidbody>())
+	if (p1.hascomponent<rigidbody>())
 	{
-		e1mass = p1->getcomponent<rigidbody>().mass;
+		e1mass = p1.getcomponent<rigidbody>().mass;
 
 
 	}
 
-	if (p2->hascomponent<rigidbody>())
+	if (p2.hascomponent<rigidbody>())
 	{
-		e1mass = p2->getcomponent<rigidbody>().mass;
+		e1mass = p2.getcomponent<rigidbody>().mass;
 
 
 	}
@@ -181,14 +183,14 @@ void collision::handleduelentitycollisions()
 		
 	}
 }
-bool collision::aabbCollidesWithEntity(Collider* blk, gameobject::obj* orgin ) {
-	return collision::boxCollidesWithEntity(blk->globalbox(), orgin);
+bool collision::aabbCollidesWithEntity(Collider* blk, HitQuery query) {
+	return collision::boxCollidesWithEntity(blk->globalbox(), query);
 }
 
-voxtra::WorldRayCollision collision::raycastall(ray nray, gameobject::obj* orgin, voxtra::GridTraverseMode travmode)
+voxtra::WorldRayCollision collision::raycastall(ray nray, HitQuery query, voxtra::GridTraverseMode travmode)
 {
 	voxtra::WorldRayCollision gridcol = voxtra::travvox(nray, 200, travmode);
-	voxtra::WorldRayCollision entcol = raycastentity(nray,orgin);
+	voxtra::WorldRayCollision entcol = raycastentity(nray,query);
 	if (gridcol == Opt::None) {
 		return entcol;
 	}
@@ -206,11 +208,11 @@ Vector3 colideentandblock(Collider& entity, block* tocollide) {
 	
 	if (tocollide != nullptr)
 	{
-		if (tocollide->owner->hascomponent<aabb::Collider>())
+		if (tocollide->owner.hascomponent<aabb::Collider>())
 		{
 
 
-			aabb::Collider& blockcol = tocollide->owner->getcomponent<aabb::Collider>();
+			aabb::Collider& blockcol = tocollide->owner.getcomponent<aabb::Collider>();
 
 
 

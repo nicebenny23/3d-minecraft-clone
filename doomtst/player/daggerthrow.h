@@ -7,7 +7,7 @@
 struct playerdaggercomp :gameobject::component
 {
 	void wearduribilty() {
-		item* select = owner->getcomponent<inventory>().selected;
+		item* select = owner.getcomponent<inventory>().selected;
 		if (select != nullptr)
 		{
 		
@@ -16,7 +16,7 @@ struct playerdaggercomp :gameobject::component
 		}
 	}
 	void update() {
-		item* select = owner->getcomponent<inventory>().selected;
+		item* select = owner.getcomponent<inventory>().selected;
 		if (select==nullptr)
 		{
 			return;
@@ -28,8 +28,8 @@ struct playerdaggercomp :gameobject::component
 			{
 				return;
 			}
-			Vector3 spawpos =owner->transform().position + owner->transform().getnormaldirection() * 3;
-			Vector3 velocity =owner->transform().getnormaldirection() * 10;
+			Vector3 spawpos =owner.transform().position + owner.transform().getnormaldirection() * 3;
+			Vector3 velocity =owner.transform().getnormaldirection() * 10;
 
 			spawndagger(spawpos, velocity);
 			wearduribilty();

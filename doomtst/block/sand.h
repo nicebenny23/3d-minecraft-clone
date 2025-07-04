@@ -48,15 +48,15 @@ inline void sandinit(blockname::block* blk) {
     blk->mininglevel = .5f;
     blk->mesh.box.scale = blockname::blockscale;
     blk->createdefaultaabb();
-    blk->owner->addcomponent<sandfall>();
+    blk->owner.addcomponent<sandfall>();
     
-     blk->owner->addcomponent<loottable>()->addelem(sanditem,1, false);
+     blk->owner.addcomponent<loottable>()->addelem(sanditem,1, false);
 }
 
 inline void sanddelete(blockname::block* blk) {
-    blk->owner->removecomponent<aabb::Collider>();
-    blk->owner->removecomponent<sandfall>();
-     blk->owner->removecomponent<loottable>();
+    blk->owner.removecomponent<aabb::Collider>();
+    blk->owner.removecomponent<sandfall>();
+     blk->owner.removecomponent<loottable>();
 }
 
  // sandob_HPP

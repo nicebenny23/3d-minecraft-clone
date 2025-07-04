@@ -13,13 +13,13 @@ inline void torchinit(blockname::block* blk) {
 	blk->createdefaultaabb(false);
 	blk->mininglevel = 1;
 	blk->minedfastwithpick = true;
-	blk->owner->addcomponent<loottable>();
-	blk->owner->getcomponent<loottable>().addelem(torchitem, 1);
+	blk->owner.addcomponent<loottable>();
+	blk->owner.getcomponent<loottable>().addelem(torchitem, 1);
 }
 
 inline void torchdelete(blockname::block* blk) {
-	blk->owner->removecomponent<aabb::Collider>();
-	blk->owner->removecomponent<loottable>();
+	blk->owner.removecomponent<aabb::Collider>();
+	blk->owner.removecomponent<loottable>();
 
 }
  // !torch_HPP

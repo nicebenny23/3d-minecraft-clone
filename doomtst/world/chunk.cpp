@@ -87,28 +87,28 @@ const char* Chunk::getcorefilename(Coord pos)
 	return 	strng->data();
 }
 //this whole system has to be completly redone
-void appendspecialbytelist(array<short>& bytelist, int index, block* blk) {
+void appendspecialbytelist(array<unsigned short>& bytelist, int index, block* blk) {
 
-	liquidprop* getliq = blk->owner->getcomponentptr<liquidprop>();
+	liquidprop* getliq = blk->owner.getcomponentptr<liquidprop>();
 	if (getliq != nullptr)
 	{
 		bytelist[chunksize+ index] = getliq->liqval;
 
 	}
-	if (blk->owner->hascomponent<craftingtablecomp>())
+	if (blk->owner.hascomponent<craftingtablecomp>())
 	{
 		
-		bytelist[chunksize+index] =blk->owner->getcomponent<craftingtablecomp>().men.blkcont.getcombinedid();
+		bytelist[chunksize+index] =blk->owner.getcomponent<craftingtablecomp>().men.blkcont.getcombinedid();
 
 	}
-	if (blk->owner->hascomponent<chestcomp>())
+	if (blk->owner.hascomponent<chestcomp>())
 	{
-		bytelist[chunksize+ index] = blk->owner->getcomponent<chestcomp>().men.blkcont.containerid;
+		bytelist[chunksize+ index] = blk->owner.getcomponent<chestcomp>().men.blkcont.containerid;
 		
 	}
-	if (blk->owner->hascomponent<furnacecomp>())
+	if (blk->owner.hascomponent<furnacecomp>())
 	{
-		bytelist[chunksize + index] = blk->owner->getcomponent<furnacecomp>().men.blkcont.getcombinedid();
+		bytelist[chunksize + index] = blk->owner.getcomponent<furnacecomp>().men.blkcont.getcombinedid();
 
 	}
 }
@@ -118,19 +118,27 @@ void Chunk::chunk::write()
 	const char* name = getcorefilename(loc);
 
 	safefile file = safefile(getcorefilename(loc), filewrite);
-	array<short> bytelist = array<short>();
+	array<unsigned short> bytelist = array<unsigned short >();
 	for (int i = 0; i < chunksize; i++)
 	{
-		int v1= blockbuf[i].id;
-		int v2= blockbuf[i].getcomponent<block>().mesh.direction | (blockbuf[i].getcomponent<block>().mesh.attachdir.ind() * 8);
-		bytelist[i] = v1 |(256*v2);
+		size_t v1= blockbuf[i].getcomponent<block>().id;
+		size_t dir = blockbuf[i].getcomponent<block>().mesh.direction;
+		size_t attach = (blockbuf[i].getcomponent<block>().mesh.attachdir.ind());
+		
+		size_t v2 = dir | attach << 3;
+		size_t fin = v1 | (v2 << 8);
+		if (dir>5||attach>5)
+		{
+			throw std::logic_error("Directional corruption error");
+		}
+		bytelist[i] = fin;
 	}
 	for (int i = 0; i < chunksize; i++)
 	{
 		bytelist[chunksize + i] = 0;
 		appendspecialbytelist(bytelist, i, blockbuf[i].getcomponentptr<block>());
 	}
-	file.write<short>(bytelist.list, bytelist.length);
+	file.write<unsigned short>(bytelist.list, bytelist.length);
 	bytelist.destroy();
 	file.close();
 }

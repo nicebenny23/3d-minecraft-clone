@@ -67,12 +67,12 @@ struct  loottable :gameobject::component
 	void ondestroy() {
 		
 	
-		if (owner->type() ==gameobject::entity&& !playerinteract)
+		if (!playerinteract)
 		{
 			lootlist.destroy();
 			return;
 		}
-		if (owner->type() == gameobject::block)
+		if (owner.type() == gameobject::block)
 		{
 			if (objutil::toblk(owner).bstate.broken != true)
 			{

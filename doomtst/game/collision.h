@@ -2,6 +2,7 @@
 #include "entity.h"
 #include "../world/grid.h"
 #include "../world/voxeltraversal.h"
+#include "../util/Option.h"
 using namespace aabb;
 #pragma once 
 constexpr auto collisioniterations = 3;
@@ -10,14 +11,23 @@ constexpr auto collisioniterations = 3;
 namespace collision {
 
 	void update();
+	struct HitQuery
+	{
+		Opt::Option<gameobject::obj> orgin;
+		explicit HitQuery():orgin(Opt::None) {
+		}
+		explicit HitQuery(const gameobject::obj& orgin_obj): orgin(orgin_obj){
+
+		}
+
+	};
 	
+	bool boxCollidesWithEntity(geometry::Box blk, HitQuery query);
 
-	bool boxCollidesWithEntity(geometry::Box blk, gameobject::obj* orgin = nullptr);
+	bool aabbCollidesWithEntity(Collider* blk, HitQuery query);
+	voxtra::WorldRayCollision raycastall(ray nray, HitQuery query, voxtra::GridTraverseMode travmode = voxtra::countnormal);
 
-	bool aabbCollidesWithEntity(Collider* blk, gameobject::obj* orgin = nullptr);
-	voxtra::WorldRayCollision raycastall(ray nray, gameobject::obj* orgin=nullptr,voxtra::GridTraverseMode travmode = voxtra::countnormal);
-
-	voxtra::WorldRayCollision raycastentity(ray nray, gameobject::obj* orgin=nullptr);
+	voxtra::WorldRayCollision raycastentity(ray nray,HitQuery query);
 	void handleduelentitycollisions();
 	void handleCollisionWithGrid(Collider& entity);
 }

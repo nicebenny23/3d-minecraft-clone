@@ -5,9 +5,9 @@ struct rotatetwordsvel:gameobject::component
 {
 	void update() {
 
-		Vector3 vel = owner->getcomponent<rigidbody>().velocity;
+		Vector3 vel = owner.getcomponent<rigidbody>().velocity;
 		vel= normal(vel);
-		owner->transform().OrientDir(vel);
+		owner.transform().OrientDir(vel);
 	}
 };
 

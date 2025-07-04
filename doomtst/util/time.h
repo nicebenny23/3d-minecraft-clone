@@ -10,23 +10,28 @@ namespace timename {
 			
 			fps = 60;
 			dt = 0;
+			ElapsedTime = glfwGetTime();
+			real_dt = 1 / 60.f;
+
 		}
-		
 		float ElapsedTime;
+		float real_dt;
+		float dt;		
 		float fps;
-		float dt;
+		
 		void calcfps() {
 
 			float CurrentTime= glfwGetTime();
-			float Roughdt = CurrentTime - ElapsedTime;
+			 real_dt = CurrentTime - ElapsedTime;
 			ElapsedTime = CurrentTime;
 
 		
-			fps = 1.f / Roughdt;
-			dt = clamp(0.f, Roughdt, 1.0f / MaxFrames);
+			fps = 1.f / real_dt;
+			float inter_rate = .03;
+			dt = clamp(0.f, lerp(dt, real_dt,inter_rate), 1.0f / min_frames);
 		}
 	private:
 
-		const int MaxFrames = 2000;
+		const int min_frames = 30;
 	};
 }

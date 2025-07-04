@@ -19,7 +19,7 @@ struct playerhealth:gameobject::component
 	}
 	array<Cptr::cptr<uibox>,true> healthboxes;
 	void start(){
-		size_t max_health = owner->getcomponent<estate>().maxhealth;
+		size_t max_health = owner.getcomponent<estate>().maxhealth;
 		priority = -224;
 		v2::Vector2 scale = v2::unitv / 1000;
 		healthboxes = array<Cptr::cptr<uibox>,true>(max_health);
@@ -29,18 +29,18 @@ struct playerhealth:gameobject::component
 		}
 	}
 	void update() {
-		size_t max_health = owner->getcomponent<estate>().maxhealth;
+		size_t max_health = owner.getcomponent<estate>().maxhealth;
 		float dmgmul = 1;
 		for (int i = 0; i < 2; i++)
 		{
-			item* itm = owner->getcomponent<inventory>().playermenu.armor.at(i).helditem;
+			item* itm = owner.getcomponent<inventory>().playermenu.armor.at(i).helditem;
 			if (itm != nullptr)
 			{
 				dmgmul *= itm->properties.armor;
 			}
 		}
-		owner->getcomponent<estate>().damagemultiplyer = dmgmul;
-		int health = owner->getcomponent<estate>().health;
+		owner.getcomponent<estate>().damagemultiplyer = dmgmul;
+		int health = owner.getcomponent<estate>().health;
 		if (health <= 0)
 		{
 
@@ -48,14 +48,14 @@ struct playerhealth:gameobject::component
 
 
 		}
-		if (owner->getcomponent<estate>().invincablilitymax != owner->getcomponent<estate>().timetilldmg)
+		if (owner.getcomponent<estate>().invincablilitymax != owner.getcomponent<estate>().timetilldmg)
 		{
 			if (!dmgimmune) {
 
 				dmgimmune = true;
 				for (int i = 0; i < 2; i++)
 				{
-					item* itm = owner->getcomponent<inventory>().playermenu.armor.at(i).helditem;
+					item* itm = owner.getcomponent<inventory>().playermenu.armor.at(i).helditem;
 					if (itm != nullptr)
 					{
 						if (itm->properties.armor != 1) {

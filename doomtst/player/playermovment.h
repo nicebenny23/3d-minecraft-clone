@@ -19,10 +19,10 @@ struct playermovement:gameobject::component
         priority = 11;
     }float lastgroundy;
 	virtual void update() {
-       //owner->transform.position += Vector3(0, 16, 0);
-        Vector3& pos = owner->transform().position;
+       //owner.transform.position += Vector3(0, 16, 0);
+        Vector3& pos = owner.transform().position;
         float slowdown = 2;
-        Vector3& velocity = owner->getcomponent<rigidbody>().velocity;
+        Vector3& velocity = owner.getcomponent<rigidbody>().velocity;
         float speed = 16;
         float effectivespeed = (CtxName::ctx.Time->dt * speed) * slowdown;
         Vector3 fv =normal( Vector3(camera::GetCamFront().x, 0, camera::GetCamFront().z));
@@ -44,10 +44,10 @@ struct playermovement:gameobject::component
         {
             velocity+=rv *effectivespeed ;
         }
-        prevonground = owner->getcomponent<rigidbody>().isonground;
+        prevonground = owner.getcomponent<rigidbody>().isonground;
 
         bool normalstate = true;
-        if ( owner->getcomponent<rigidbody>().inliquid)
+        if ( owner.getcomponent<rigidbody>().inliquid)
         {
             normalstate = false;
             if (CtxName::ctx.Inp->getKey(shiftkey).held)
@@ -61,7 +61,7 @@ struct playermovement:gameobject::component
             }
 
         }
-        if (owner->getcomponent<playerclimb>().onrope)
+        if (owner.getcomponent<playerclimb>().onrope)
         {
             
             normalstate = false;
@@ -78,7 +78,7 @@ struct playermovement:gameobject::component
         {
 
         
-            if (CtxName::ctx.Inp->getKey(' ').pressed && owner->getcomponent<rigidbody>().isonground)
+            if (CtxName::ctx.Inp->getKey(' ').pressed && owner.getcomponent<rigidbody>().isonground)
             {
                 velocity.y = 150 * speed / 200;
             }

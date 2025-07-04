@@ -26,11 +26,11 @@ struct estate :gameobject::component
 	void update() {
 
 		timetilldmg -= CtxName::ctx.Time->dt;
-		if (owner->hascomponent<rigidbody>())
+		if (owner.hascomponent<rigidbody>())
 		{
-			velocitylast = owner->getcomponent<rigidbody>().velocity * .03f + velocitylast * .97f;
+			velocitylast = owner.getcomponent<rigidbody>().velocity * .03f + velocitylast * .97f;
 			testfalldamage();
-			prevonground = owner->getcomponent<rigidbody>().isonground;
+			prevonground = owner.getcomponent<rigidbody>().isonground;
 		}
 		
 	}
@@ -39,11 +39,11 @@ struct estate :gameobject::component
 		{
 
 
-			if (owner->getcomponent<rigidbody>().isonground && !prevonground)
+			if (owner.getcomponent<rigidbody>().isonground && !prevonground)
 			{
-				float ypos = owner->transform().position.y;
+				float ypos = owner.transform().position.y;
 				float falldmg = Max(3.f, lastongroundy - ypos) - 3.f;
-				if (owner->getcomponent<rigidbody>().velocity.y<-5)
+				if (owner.getcomponent<rigidbody>().velocity.y<-5)
 				{
 
 					damage((falldmg/100));
@@ -51,17 +51,17 @@ struct estate :gameobject::component
 				}
 
 			}
-			if (owner->getcomponent<rigidbody>().isonground) {
+			if (owner.getcomponent<rigidbody>().isonground) {
 
 
-				lastongroundy = owner->transform().position.y;
+				lastongroundy = owner.transform().position.y;
 			}
 		}
 	}
 	void start() {
 		priority = 11;
 		health = maxhealth;
-		lastongroundy = owner->transform().position.y;
+		lastongroundy = owner.transform().position.y;
 	}
 	estate(int maxhp, bool falls) {
 		maxhealth = maxhp;
@@ -83,10 +83,10 @@ struct estate :gameobject::component
 			health -= dmg;
 			if (health <= 0)
 			{
-				if (!owner->hascomponent<gameobject::StaticComponent>())
+				if (!owner.hascomponent<gameobject::StaticComponent>())
 				{
 
-					owner->deffered_destroy();
+					owner.deffered_destroy();
 				}
 				
 			}

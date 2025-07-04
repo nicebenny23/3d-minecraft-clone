@@ -13,17 +13,15 @@ struct destroyonhit :gameobject::component {
 		priority = 1111;
 		utype == gameobject::updatenone;
 	}
-	void oncollision(gameobject::obj* collidedwith) {
+	void oncollision(gameobject::obj collidedwith) {
 
 		
 		
-		if (collidedwith->type() == gameobject::entity)
-		{
-			if (collidedwith->hascomponent<T>()^is_not_tag)
+			if (collidedwith.hascomponent<T>()^is_not_tag)
 			{
-				owner->deffered_destroy();
+				owner.deffered_destroy();
 			}
-		}
+		
 	}
 
 	~destroyonhit() = default;
@@ -45,32 +43,34 @@ struct dmgonhit:gameobject::component
 	utype = gameobject::updatenone;
 	
 	}
-	void oncollision(gameobject::obj* collidedwith) {
+	void oncollision(gameobject::obj collidedwith) {
 
 		
-		if (collidedwith->type() == gameobject::entity)
-		{
-			if (!collidedwith->hascomponent<estate>()) {
+			if (!collidedwith.hascomponent<estate>()) {
 			
 				return;
 			}
-			if (!(collidedwith->hascomponent<T>()))
+			if (!(collidedwith.hascomponent<T>()))
 			{
 				return;
 			}
-			v3::Vector3 center = owner->transform().position;
-				v3::Vector3 othercenter = collidedwith->transform().position;
-				if (collidedwith->hascomponent<rigidbody>()) {
-				
+			if (collidedwith.hascomponent < Transform>())
+			{
 
-					kb( center, knockback,*collidedwith);
 
-					
-					
+				v3::Vector3 center = owner.transform().position;
+				v3::Vector3 othercenter = collidedwith.transform().position;
+				if (collidedwith.hascomponent<rigidbody>()) {
+
+
+					kb(center, knockback, collidedwith);
+
+
+
 				}
-				collidedwith->getcomponent<estate>().damage(dmgdone);
-			
-		}
+				collidedwith.getcomponent<estate>().damage(dmgdone);
+			}
+		
 	}
 	~dmgonhit() = default;
 };

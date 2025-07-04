@@ -13,7 +13,7 @@ struct playertpcomp :gameobject::component
 	float timetilluse;
 	const float cooldown = 1;
 	void wearduribilty() {
-		item* select = owner->getcomponent<inventory>().selected;
+		item* select = owner.getcomponent<inventory>().selected;
 		if (select != nullptr)
 		{
 
@@ -23,7 +23,7 @@ struct playertpcomp :gameobject::component
 	}
 	void update() {
 		timetilluse -= CtxName::ctx.Time->dt;
-		item* select = owner->getcomponent<inventory>().selected;
+		item* select = owner.getcomponent<inventory>().selected;
 		if (select == nullptr)
 		{
 			return;
@@ -41,21 +41,21 @@ struct playertpcomp :gameobject::component
 				{
 					if (CtxName::ctx.Inp->mouseleft().released)
 					{
-						Vector3 pos =owner->transform().position;
-						Vector3 offset =owner->transform().getnormaldirection() * chargetime * chargetime;
+						Vector3 pos =owner.transform().position;
+						Vector3 offset =owner.transform().getnormaldirection() * chargetime * chargetime;
 						ray moveray = ray(pos, pos + offset);
 					voxtra::WorldRayCollision grid=	voxtra::travvox(moveray, 100, voxtra::countall);
 					if (!grid)
 					{
 
-					 owner->transform().position += offset;
+					 owner.transform().position += offset;
 
 					}
 					else
 					{
-						owner->transform().position = grid.unwrap().Intersection();
+						owner.transform().position = grid.unwrap().Intersection();
 					}
-					owner->getcomponent<rigidbody>().velocity.y = 0;
+					owner.getcomponent<rigidbody>().velocity.y = 0;
 						wearduribilty();
 						chargetime = 0;
 						timetilluse = cooldown;
