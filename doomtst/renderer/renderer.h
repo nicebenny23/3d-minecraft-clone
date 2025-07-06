@@ -11,26 +11,30 @@
 #include "TextureManager.h"
 #include "Mesh.h"
 #include "RenderProperties.h"
-using namespace vobj;
+#include "RenderContext.h"
+using namespace buffer_object;
 //Fix
 namespace renderer {
-
-	
+	void setrenderingmatrixes(renderer::Renderer* renderer);
+	void setAspectRatio(renderer::Renderer* renderer);
 	struct Renderer {
-		RenderMode properties;
+		Renderer(size_t tst);
+		RenderContext::Context context;
+		Base_Material properties;
 		RenderModeManager Modes;
 		void SetType(std::string Name);
-		void AddType(const RenderMode& type) {
+		void AddType(const Base_Material& type) {
 			Modes.AddType(type);
 		}
 		void applyProperties();
 		Renderer() {
+
 		}
 		ITexture* CurrentTexture() {
-			return Textures.CurrentTexture;
+			return context.Get_BoundTexture();
 		};
 		shader* CurrentShader() {
-			return Shaders.BoundShader;
+			return context.Get_BoundShader();
 		}
 		void Clear();
 		Shaders::ShaderManager Shaders;
@@ -55,31 +59,16 @@ namespace renderer {
 		void Render(Mesh* mesh, Cont::array<float>& pointlist, Cont::array<unsigned int>& indicelist);
 
 
-		void setaspectratio();	
 		void FillVertexBuffer(Mesh* mesh, Cont::array<float>& pointlist);
+
+		void setviewmatrix(glm::mat4 viewmat);
+		void setprojmatrix(float newfov, float nearclipplane, float farclipplane);
+		glm::mat4 proj, view;
+
+		float fov;
 	};
-	extern Renderer Ren;
 
-	void load();
-	void setviewmatrix(glm::mat4 viewmat);
-
-	extern glm::mat4 proj,view;
 	
-	extern float fov;
-	
-	void setrenderingmatrixes();
-	void setaspectratio();
-	
-	enum rendertype
-	{
-		renderui=0,
-		rendertext = 1,
-		rendermodel= 2,
-		renderparticle=3,
-	
-	}; 
-	extern rendertype currendertype;
-		void changerendertype(rendertype rentype);
 
 		template<bool HasEbo>
 		inline void Renderer::Gen(Mesh* mesh)

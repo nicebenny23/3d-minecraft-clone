@@ -37,7 +37,8 @@ namespace CtxName {
 		timename::TimeManager* Time;
 
 		gameobject::OCManager* OC;
-		
+
+		renderer::Renderer* Ren;
 		
 		grid::Grid* Grid;
 		

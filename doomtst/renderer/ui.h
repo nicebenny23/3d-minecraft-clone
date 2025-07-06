@@ -1,7 +1,7 @@
 #pragma once
 #include "../util/sharedptr.h"
 #include "../util/dynamicarray.h"
-
+#include "../debugger/debug.h"
 
 #define uisize 400
 using namespace Cont;

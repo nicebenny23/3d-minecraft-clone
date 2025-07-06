@@ -85,5 +85,11 @@ namespace Core {
         ctx->OC = &OC;
         ctx->OC->inject_context(ctx);
     }
+
+    void Engine::InitRenderer()
+    {
+        new (&ren) renderer::Renderer(1);
+        ctx->Ren = &ren;
+    }
    
 }

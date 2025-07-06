@@ -8,7 +8,9 @@
 #include "../util/vector3.h"
 #include "../util/stack.h"
 #include "transform.h"
+#include "../debugger/debug.h"
 #include <stdint.h>
+#include "../util/bitset.h"
 #include "../util/type_index.h"
 namespace GameContext {
 
@@ -47,16 +49,23 @@ namespace gameobject {
 		updatetick = 2,
 		updaterender = 3,
 	};
-	
+	struct Archtype {
+		bitset active;
+		array<size_t> objects;
+		
+	};
 	struct component;
 	struct OCManager;
 	struct EntityMetadata {
 		array<component*> componentlist;
-		
+		size_t arch_id;
+		Archtype* type;
 		objstate state;
 		size_t gen_count;
 		EntityMetadata() {
 			gen_count=0;
+			type = nullptr;
+			arch_id = 0;
 
 		}
 		void reset() {
@@ -104,7 +113,7 @@ namespace gameobject {
 		OCManager* OC;
 		friend struct OCManager;
 	};	
-	static constexpr obj None  = obj();  // (1, 0, 0)
+	static constexpr obj None  = obj();
 	struct componentmanager
 	{
 		componentmanager();
@@ -149,7 +158,7 @@ namespace gameobject {
 		 void updatecomponents(updatecalltype type);
 
 		 obj CreateEntity(v3::Vector3 SpawnPos);
-		 stackname::stack<obj> EntityDeletionBuffer;
+		 Cont::stack<obj> EntityDeletionBuffer;
 		 type_id::dense_type_system comp_map;
 	private:
 	
@@ -160,8 +169,6 @@ namespace gameobject {
 
 
 	
-
-
 
 
 inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {

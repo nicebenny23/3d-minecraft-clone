@@ -21,7 +21,7 @@ struct playerbreak:gameobject::component
 	void start() {
 		pickaxe = nullptr;
 	
-		 renderer::Ren.Textures.LoadTexture("images\\menutex.png","MenuTexture");
+		 CtxName::ctx.Ren->Textures.LoadTexture("images\\menutex.png","MenuTexture");
 	
 	}
 	bool caninteract() {

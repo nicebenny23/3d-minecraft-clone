@@ -4,6 +4,7 @@
 #include "../world/grid.h"
 #include "../world/managegrid.h"
 #include "../util/time.h"
+#include "../debugger/debug.h"
 #include "../game/rigidbody.h"
 #pragma once 
 extern float liquidtick;

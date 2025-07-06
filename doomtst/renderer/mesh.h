@@ -22,8 +22,8 @@ struct Mesh
 		return Voa;
 	}
 	VaoName::Vao Voa;
-	vobj::Ebo Ibo;
-	vobj::Vbo Vbo;
+	buffer_object::Ebo Ibo;
+	buffer_object::Vbo Vbo;
 		
 };
 

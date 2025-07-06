@@ -78,11 +78,11 @@ void particleemiter::start()
 
 void particleemiter::renderparticles()
 {
-	renderer::Ren.Textures.Apply(tex);
+	CtxName::ctx.Ren->context.Bind(*tex);
 	
 
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	renderer::changerendertype(renderer::renderparticle);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE); 
+	CtxName::ctx.Ren->SetType("Particle");
 	array<float> databuf;
 	for (int ind = 0; ind < 6; ind++)
 	{
@@ -102,16 +102,16 @@ void particleemiter::renderparticles()
 
 		databuf.push(cubeuv[2 * i+1]);
 	}
-	Ren.Fill(&ParticleMesh, databuf);
+	CtxName::ctx.Ren->Fill(&ParticleMesh, databuf);
 	
 	for (int i = 0; i < particlearray.length; i++)
 	{
 
 		if (particlearray[i].Id !=0)
 		{
-			Ren.CurrentShader()->SetVector3f(particlearray[i].transform().position.glm(), "offset");
-			Ren.CurrentShader()->SetVector3f(particlearray[i].transform().scale.glm(), "scale");
-			Ren.Render(&ParticleMesh);
+			CtxName::ctx.Ren->CurrentShader()->SetVector3f(particlearray[i].transform().position.glm(), "offset");
+			CtxName::ctx.Ren->CurrentShader()->SetVector3f(particlearray[i].transform().scale.glm(), "scale");
+			CtxName::ctx.Ren->Render(&ParticleMesh);
 		}
 	}
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -129,7 +129,7 @@ particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) 
 {
 	tex = newtex;
 	
-	Ren.Gen<false>(&ParticleMesh);
+	CtxName::ctx.Ren->Gen<false>(&ParticleMesh);
 	ParticleMesh.AddAttribute<float, 3>().AddAttribute<float, 2>();
 	particlelifetime = lifetime;
 	particlespawntime = spawntime;

@@ -33,23 +33,23 @@ public:
     {
     }
 
-    // Accessor and mutator methods can be added if needed
+ 
 };
-class RenderMode {
+class Base_Material {
 public:
     std::string Name;
     RenderProperties prop;
     std::string Shader;
     Cont::array<UFunc> UniformsCalls;
     // Default constructor
-    RenderMode() : Name(""), Shader(""), UniformsCalls(Cont::array<UFunc>()){}
+    Base_Material() : Name(""), Shader(""), UniformsCalls(Cont::array<UFunc>()){}
 
-    Cont::array<UFunc>& AddUniform(UFunc UniformCall) {
+    Base_Material& AddUniform(UFunc UniformCall) {
         UniformsCalls.push( UniformCall);
-        return UniformsCalls;
+        return *this;
     }
         // Constructor to initialize RenderType with parameters
-        RenderMode(const std::string& name, const std::string& shader, const RenderProperties& props = {})
+        Base_Material(const std::string& name, const std::string& shader, const RenderProperties& props = {})
         : Name(name), Shader(shader), prop(props)
     {
     }
@@ -57,11 +57,11 @@ public:
 
 class RenderModeManager {
 private:
-    std::unordered_map<std::string, RenderMode> renderTypes;
+    std::unordered_map<std::string, Base_Material> renderTypes;
 
 public:
     // Add a new RenderType
-    void AddType(const RenderMode& type) {
+    void AddType(const Base_Material& type) {
         if (Has(type.Name)) {
             throw std::runtime_error("RenderType Already Created: " + type.Name);
         }
@@ -75,7 +75,7 @@ public:
 
 
     // Const version of Get method
-    const RenderMode& operator[](const std::string& name) const {
+    const Base_Material& operator[](const std::string& name) const {
 
         if (!Has(name)) {
             throw std::runtime_error("RenderType not found: " + name);

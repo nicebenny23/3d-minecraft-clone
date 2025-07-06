@@ -5,7 +5,7 @@
 namespace VObjMan {
 	class VObjManager; // Forward declaration
 }
-namespace vobj {
+namespace buffer_object {
 	
 	struct BufferObj
 	{
@@ -84,10 +84,8 @@ namespace vobj {
 		void destroy() {
 			Buf.destroy();
 		}
-
 		void Bind() {
 			Buf.bind();
-
 		}
 		friend class VObjMan::VObjManager;
 	};

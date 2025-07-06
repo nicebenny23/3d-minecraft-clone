@@ -5,13 +5,14 @@
 #include "../util/vector3.h"
 #include "texture.h"
 #include "vertexobject.h"
+#include "../game/GameContext.h"
 #include "Vao.h"
 #include "../game/transform.h"
 #include "renderer.h"
 //fix
 using namespace Cont;
 using namespace v3;
-using namespace vobj;
+using namespace buffer_object;
 
 #define _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_DEPRECATE
@@ -35,7 +36,7 @@ namespace ModelMeshName {
 		array<unsigned int> vertexindices;
 		array<unsigned int> texindices;
 		void destroy() {
-			renderer::Ren.Destroy(&mesh);
+			CtxName::ctx.Ren->Destroy(&mesh);
 			vertexindices.destroy();
 			texcoords.destroy();
 			texindices.destroy();
@@ -45,7 +46,7 @@ namespace ModelMeshName {
 		v2::Vector2 nthtex(int i);
 		Mesh mesh;
 		void setvobjs() {
-		renderer::Ren.Gen<false>(&mesh);
+		CtxName::ctx.Ren->Gen<false>(&mesh);
 
 			mesh.AddAttribute<float,2>().AddAttribute<float, 3>();
 		}

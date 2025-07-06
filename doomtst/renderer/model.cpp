@@ -1,5 +1,6 @@
 #pragma once
 #include "model.h"
+#include "../game/GameContext.h"
 
 ModelMeshName::ModelMesh& model::operator[](int index)
 {
@@ -10,7 +11,7 @@ void model::draw()
 }
 void model::add(const char* meshname,const char * meshtexname,Vector3 pos)
 {
-		Texture2D* meshtex = renderer::Ren.Textures.Get2dTex(meshtexname,meshtexname);
+		Texture2D* meshtex = CtxName::ctx.Ren->Textures.Get2dTex(meshtexname,meshtexname);
 	meshlist.push(ModelMeshName::loadmesh(meshname, meshtex, zerov));
 meshlist[meshlist.length - 1]->transform.position = pos;
 }
@@ -23,7 +24,7 @@ model::model(meshconnecttype connectmethod )
 
 void model::update()
 {
-	renderer::changerendertype(renderer::rendermodel);
+	CtxName::ctx.Ren->SetType("Model");
 	glm::mat4* model =new glm::mat4((owner.transform().ToMatrix()));
 	for (int i = 0; i < meshlist.length; i++)
 	{
@@ -48,15 +49,8 @@ void model::start()
 
 void model::setmodelshader()
 {
-	glDepthFunc(GL_LESS);
-	glDepthMask(GL_TRUE);
-	glDisable(GL_CULL_FACE);
-	glEnable(GL_DEPTH_TEST);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glDisable(GL_BLEND);
-	renderer::Ren.Shaders.Bind("ModelShader");
-	renderer::setrenderingmatrixes();
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+	CtxName::ctx.Ren->context.Bind(CtxName::ctx.Ren->Shaders["ModelShader"]);
+	CtxName::ctx.Ren->SetType("Model");
 	
 }

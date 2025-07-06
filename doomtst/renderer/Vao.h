@@ -14,8 +14,6 @@ namespace VaoName {
 		VertexAttribute()
 			: Components(0), Type(GL_NONE), size(0) {}
 
-		// Template constructor
-	
 		VertexAttribute(GLenum type, GLint Comps) {
 			size = Comps * GlUtil::Size(type);
 			Components = Comps;
@@ -24,12 +22,10 @@ namespace VaoName {
 
 		// Calculate the size of the attribute in bytes
 		size_t Size() const {
-
 			return size;
-
 		}
 	private: 
-		size_t 	size;
+		size_t size;
 	};
 
 	struct Vao
@@ -41,46 +37,31 @@ namespace VaoName {
 		GLuint id;
 		Cont::array<VertexAttribute> attributes;
 		template <typename T, GLint Components>
-		Vao& AddAttribute( ) {
-			attributes.push(VertexAttribute::VertexAttribute(GlUtil::getGLType<T>(), Components));
+		Vao& AddAttribute() {
+			attributes.push(VertexAttribute(GlUtil::getGLType<T>(), Components));
 			return *this;
 		}
 		Vao& AddAttribute(GLenum Type,GLint Components) {
 			attributes.push(VertexAttribute(Type,Components));
 			return *this;
 		}
-		void ClearAttributes() {
-
+		void Clear() {
+			id = 0;
 			attributes.destroy();
 		}
-		void removeAttribute(size_t index) {
-			if ( attributes.length<= index ) {
-				throw std::logic_error("Unable to remove invalid attribute");
-			}
-			attributes.deleteind(index);
-
-		}
-		Vao() {
-
-			id = 0;
-		}
-		int ComponentsPerVertex() {
-			int Comps= 0;
-			for (int i = 0; i < attributes.length; i++) {
-
-
-				Comps+= attributes[i].Components;  // Sum up the size for stride calculation
-
+		
+		Vao() :attributes(), id(0) {};
+		size_t ComponentsPerVertex() {
+			size_t Comps= 0;
+			for (VertexAttribute& attribute :attributes) {
+				Comps+= attribute.Components;  // Sum up the size for stride calculation
 			}
 			return Comps;
 		}
-		int GetStride() {
-			int stride = 0;
-			for (int i = 0; i < attributes.length; i++) {
-
-
-				stride += attributes[i].Size();  // Sum up the size for stride calculation
-
+		size_t GetStride() {
+			size_t stride = 0;
+			for (VertexAttribute& attribute : attributes) {
+				stride += attribute.Size();  // Sum up the size for stride calculation
 			}
 			return stride;
 		}
@@ -94,16 +75,15 @@ namespace VaoName {
 			size_t offset = 0;
 			for (int i = 0; i < attributes.length; i++)
 			{
-
-			GlUtil::set_attr(i, attributes[i].Components, attributes[i].Type, stride, offset);
+				GlUtil::set_attr(i, attributes[i].Components, attributes[i].Type, stride, offset);
 				glEnableVertexAttribArray(i);
 				offset += attributes[i].Size();
-
-
 			}
 
 		}
+		
 	private:
+
 		void generate() {
 			if (IsValid())
 			{

@@ -21,7 +21,7 @@ struct CameraComp :gameobject::component
 	void update() {
 
 
-		renderer::setviewmatrix(LookAt(CamTransform));
+		CtxName::ctx.Ren->setviewmatrix(LookAt(CamTransform));
 		
 		CamTransform = owner.transform();
 

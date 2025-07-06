@@ -32,7 +32,7 @@ TextureArray* blockrender::texarray;
 // Check if a chunk is viewable within the camera's frustum
 bool chunkviewable(Chunk::chunk* chk) {
 	return true;
-	float slope = tan(renderer::fov / 2);
+	float slope = tan(CtxName::ctx.Ren->fov / 2);
 	geometry::Box chkb = geometry::Box(chk->center(), unitv * float( chunklength )/ 2.f);
 	ray camray = ray(camera::campos(), camera::campos() + camera::GetCamFront() * 1);
 	geometry::cone ncone = geometry::cone(camray, slope);
@@ -182,7 +182,7 @@ void recreatechunkmesh(Chunk::chunk* aschunk) {
 		}
 		
 	}
-	renderer::Ren.Fill(&aschunk->mesh->SolidGeo, datbuf, indbuf);
+	CtxName::ctx.Ren->Fill(&aschunk->mesh->SolidGeo, datbuf, indbuf);
 	aschunk->mesh->meshsize = indbuf.length;
 	datbuf.destroy();
 	indbuf.destroy();
@@ -192,7 +192,7 @@ void recreatechunkmesh(Chunk::chunk* aschunk) {
 // Render a chunk mesh
 void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 	if (!transparent) {
-		renderer::Ren.Render(&mesh.SolidGeo);
+		CtxName::ctx.Ren->Render(&mesh.SolidGeo);
 	}
 	else {
 		// Enable 2D render
@@ -203,7 +203,7 @@ void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 			emitface(mesh.facebuf[i].facenum.ind(), *(mesh.facebuf[i].mesh->blk), datbuf, indbuf);
 		}
 
-		renderer::Ren.Render(&mesh.TransparentGeo, datbuf, indbuf);
+		CtxName::ctx.Ren->Render(&mesh.TransparentGeo, datbuf, indbuf);
 		datbuf.destroy();
 		indbuf.destroy();
 	}
@@ -211,24 +211,24 @@ void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 void blockrender::setrendertransparent()
 {
 
-	renderer::Ren.SetType("TransparentBlock");
-	renderer::Ren.Textures.Apply(blockrender::texarray);
-	renderer::setrenderingmatrixes();
-	renderer::setaspectratio();
+	CtxName::ctx.Ren->SetType("TransparentBlock");
+	
 }
 
+void ApplyBlockTex(renderer::Renderer* rend) {
+
+rend->context.Bind(*blockrender::texarray);
+}
 void blockrender::setrendersolid()
 {
-	renderer::Ren.SetType("SolidBlock");
-	renderer::Ren.Textures.Apply(blockrender::texarray);
-	renderer::setrenderingmatrixes();
-	renderer::setaspectratio();
+	CtxName::ctx.Ren->SetType("SolidBlock");
+
 	
 }
 
 // Initialize the data buffer and render chunks
 void blockrender::renderblocks(bool rendertransparent) {
-	renderer::Ren.Shaders.Bind("BlockShader");
+	CtxName::ctx.Ren->context.Bind(CtxName::ctx.Ren->Shaders["BlockShader"]);
 
 	array<Chunk::chunk> tosort = array<Chunk::chunk>();
 
@@ -270,10 +270,12 @@ void blockrender::renderblocks(bool rendertransparent) {
 
 void blockrender::initblockrendering()
 {
-	renderer::Ren.Shaders.Compile( "BlockShader","shaders\\vert1.vs", "shaders\\frag1.vs");
-	renderer::Ren.AddType(RenderMode("SolidBlock", "BlockShader", RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)));
+	CtxName::ctx.Ren->Shaders.Compile( "BlockShader","shaders\\vert1.vs", "shaders\\frag1.vs");
+	CtxName::ctx.Ren->AddType(Base_Material("SolidBlock", "BlockShader", RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))
+	.AddUniform(renderer::setAspectRatio).AddUniform(renderer::setrenderingmatrixes).AddUniform(ApplyBlockTex));
 
-	renderer::Ren.AddType(RenderMode("TransparentBlock", "BlockShader", RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)));
+	CtxName::ctx.Ren->AddType(Base_Material("TransparentBlock", "BlockShader", RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).
+	AddUniform(renderer::setAspectRatio).AddUniform(renderer::setrenderingmatrixes).AddUniform(ApplyBlockTex));
 	array<const char*> texlist = array<const char*>();
 	texlist[treestonetex] = "images\\treestone.png";
 	texlist[grasstex] = "images\\grass.png";
@@ -306,8 +308,8 @@ void blockrender::initblockrendering()
 	texlist[ultraaltarpngultrapng] = "images\\ultraaltar.png";
 	texlist[sandtex] = "images\\sand.png";
 	texlist[planktex] = "images\\treestoneblock.png";
-	texarray = renderer::Ren.Textures.GetTexArray(texlist,"BlockTextures");
-	renderer::Ren.Textures.Apply(texarray);
+	texarray = CtxName::ctx.Ren->Textures.GetTexArray(texlist,"BlockTextures");
+	CtxName::ctx.Ren->context.Bind(*texarray);
 	enablelighting = true;
 }
 

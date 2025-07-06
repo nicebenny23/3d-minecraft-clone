@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../debugger/debug.h"
 #include <stdexcept>
 
 #include <new>

@@ -25,9 +25,9 @@ int Chunk::indexfrompos(Coord pos)
 
 void Chunk::chunkmesh::genbufs()
 {
-	renderer::Ren.Gen<true>(&TransparentGeo);
+	CtxName::ctx.Ren->Gen<true>(&TransparentGeo);
 
-	renderer::Ren.Gen<true>(&SolidGeo);
+	CtxName::ctx.Ren->Gen<true>(&SolidGeo);
 	SolidGeo.AddAttribute<float,3>().AddAttribute<float,3>().AddAttribute<float, 1>();
 	TransparentGeo.AddAttribute<float, 3>().AddAttribute<float, 3>().AddAttribute<float, 1>();
 
@@ -52,8 +52,8 @@ void Chunk::chunkmesh::sortbuf()
 void Chunk::chunkmesh::destroy()
 {			 
 
-	renderer::Ren.Destroy(&SolidGeo);
-	renderer::Ren.Destroy(&TransparentGeo);
+	CtxName::ctx.Ren->Destroy(&SolidGeo);
+	CtxName::ctx.Ren->Destroy(&TransparentGeo);
 
 	
 	facebuf.destroy();

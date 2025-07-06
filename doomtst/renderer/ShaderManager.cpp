@@ -12,15 +12,3 @@ void Shaders::ShaderManager::Compile(const std::string& name, const char* vert, 
         shaderlist[name] = CompiledShader;
 
     }
-
-void Shaders::ShaderManager::Bind(const std::string Name)
-{
-    shader* ShaderWithName = shaderlist[Name];
-    if (ShaderWithName==nullptr)
-    {
-        throw std::invalid_argument("Shader " + Name + " Does Not Exist");
-    }
-
-    ShaderWithName->attach();
-    BoundShader = ShaderWithName;
-}

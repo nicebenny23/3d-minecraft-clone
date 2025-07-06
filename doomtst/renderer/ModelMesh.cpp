@@ -1,7 +1,7 @@
 #pragma once
 #include "ModelMesh.h"
 #include "../game/camera.h"
-
+#include "../game/GameContext.h"
 using namespace ModelMeshName;
 void ModelMesh::setmodeluniform()
 {	
@@ -10,12 +10,12 @@ void ModelMesh::setmodeluniform()
 	glm::mat4 trans2 = (transform.ToMatrix());
 	
 	trans *= trans2;
-	renderer::Ren.CurrentShader()->setMat4(trans, "model");
+	CtxName::ctx.Ren->CurrentShader()->setMat4(trans, "model");
 }
 void ModelMesh::setmodeluniform(glm::mat4 model)
 {
 
-	renderer::Ren.CurrentShader()->setMat4(model, "model");
+	CtxName::ctx.Ren->CurrentShader()->setMat4(model, "model");
 }
 ModelMesh::ModelMesh()
 {	transform = Transform();
@@ -84,7 +84,7 @@ ModelMesh* ModelMeshName::loadmesh(const char* name, Texture2D* TEX, Vector3 pos
 
 void ModelMeshName::rendermesh(ModelMesh* torender)
 {
-	renderer::Ren.Textures.Apply(torender->tex);
+	CtxName::ctx.Ren->context.Bind(*torender->tex);
 	
 	array<float> databuf;
 
@@ -102,7 +102,7 @@ void ModelMeshName::rendermesh(ModelMesh* torender)
 		databuf.push(1-Texture2D.y);
 
 	}
-	renderer::Ren.Render(&torender->mesh, databuf);
+	CtxName::ctx.Ren->Render(&torender->mesh, databuf);
 
 
 	//enable position

@@ -154,7 +154,6 @@
     <ClCompile Include="debugger\console.cpp" />
     <ClCompile Include="debugger\debug.cpp" />
     <ClCompile Include="entities\slime.cpp" />
-    <ClCompile Include="game\entity.cpp" />
     <ClCompile Include="game\Core.cpp" />
     <ClCompile Include="game\GameContext.cpp" />
     <ClCompile Include="game\navigation.cpp" />
@@ -311,6 +310,7 @@
     <ClInclude Include="items\torchitem.h" />
     <ClInclude Include="player\playermovment.h" />
     <ClInclude Include="renderer\GlUtil.h" />
+    <ClInclude Include="renderer\gl_id.h" />
     <ClInclude Include="renderer\Mesh.h" />
     <ClInclude Include="player\cameracomp.h" />
     <ClInclude Include="player\daggerthrow.h" />
@@ -338,7 +338,6 @@
     <ClInclude Include="renderer\UniformManager.h" />
     <ClInclude Include="Resources\ResourceManager.h" />
     <ClInclude Include="util\bitset.h" />
-    <ClInclude Include="util\KeySet.h" />
     <ClInclude Include="util\List.h" />
     <ClInclude Include="util\Option.h" />
     <ClInclude Include="util\SparseSet.h" />
@@ -359,6 +358,7 @@
     <ClInclude Include="util\stbiload.h" />
     <ClInclude Include="renderer\Vao.h" />
     <ClInclude Include="renderer\VertexObjectManager.h" />
+    <ClInclude Include="util\topo_sort.h" />
     <ClInclude Include="util\type_index.h" />
     <ClInclude Include="util\UniquePtr.h" />
     <ClInclude Include="world\chunkload.h" />
@@ -373,7 +373,6 @@
     <ClInclude Include="game\collision.h" />
     <ClInclude Include="util\dir.h" />
     <ClInclude Include="util\dynamicarray.h" />
-    <ClInclude Include="game\entity.h" />
     <ClInclude Include="game\gameobject.h" />
     <ClInclude Include="world\grid.h" />
     <ClInclude Include="util\mathutil.h" />

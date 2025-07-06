@@ -1,4 +1,5 @@
 #pragma once
+#include "../debugger/debug.h"
 #include "itemslot.h"
 #include "../util/mathutil.h"
 

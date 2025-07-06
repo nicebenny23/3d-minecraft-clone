@@ -69,7 +69,7 @@ namespace uiboxname {
 
 		if (state.enabled)
 		{
-			renderer::changerendertype(renderer::renderui);
+			CtxName::ctx.Ren->SetType("Ui");
 			array<unsigned int> indbuf = array<unsigned int>();
 			indbuf[0] = 0;
 			indbuf[1] = 1;
@@ -79,10 +79,10 @@ namespace uiboxname {
 			indbuf[5] = 2;
 
 			Mesh BoxMesh;
-			renderer::Ren.Gen<true>(&BoxMesh);
+			CtxName::ctx.Ren->Gen<true>(&BoxMesh);
 			BoxMesh.AddAttribute<float, 2>().AddAttribute<float, 2>();
 			array<float> databuf = array<float>();
-			renderer::Ren.Textures.Apply(tex);
+			CtxName::ctx.Ren->context.Bind(*tex);
 			for (int j = 0; j < 4; j++)
 			{
 				v2::Vector2 pos = box.center + offset[j] * (box.scale);
@@ -91,10 +91,10 @@ namespace uiboxname {
 				databuf.push(cubeuv[2 * j]);
 				databuf.push(cubeuv[2 * j + 1]);
 			}
-			renderer::Ren.Render(&BoxMesh, databuf, indbuf);
+			CtxName::ctx.Ren->Render(&BoxMesh, databuf, indbuf);
 			databuf.destroy();
 			indbuf.destroy();
-			renderer::Ren.Destroy(&BoxMesh);
+			CtxName::ctx.Ren->Destroy(&BoxMesh);
 		}
 
 	}
@@ -107,7 +107,7 @@ namespace uiboxname {
 
 	void uibox::LoadTex(const char* texloc, const char* texture)
 	{
-		tex = renderer::Ren.Textures.Get2dTex(texloc, texture);
+		tex = CtxName::ctx.Ren->Textures.Get2dTex(texloc, texture);
 
 	}
 

@@ -5,9 +5,10 @@
 //Control Resource deletion and loading
 struct ResourceManager
 {
-	vobj::Vbo* CreateVbo();
+
+	buffer_object::Vbo* CreateVbo();
 	VaoName::Vao*  CreateVao();
-	vobj::Ebo*  CreateEbo();
+	buffer_object::Ebo*  CreateEbo();
 	TextureArray* LoadTexArray(std::string Name);
 	TextureArray* LoadTexArray(const Cont::array<const char*> Files, std::string Name);
 	Texture2D* LoadTex(std::string Name);

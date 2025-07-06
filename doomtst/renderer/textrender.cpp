@@ -1,4 +1,5 @@
 #pragma once
+#include "../game/GameContext.h"
 #include "textrender.h"
 #include "renderer.h"
 TextureArray* textarray;
@@ -29,7 +30,7 @@ void integertext::render()
 {
 	indbuf = Cont::array<unsigned int>();
 	datbuf = Cont::array<float>();
-	renderer::changerendertype(renderer::rendertext);
+	CtxName::ctx.Ren->SetType("Text");
 	recalculateword();
 
 	write();
@@ -37,12 +38,12 @@ void integertext::render()
 	text.AddAttribute<float,2>().AddAttribute<float,3>();
 
 
-	renderer::Ren.Gen<true>(&text);
-	renderer::Ren.Textures.Apply(textarray);
-	renderer::Ren.Render(&text, datbuf, indbuf);
+	CtxName::ctx.Ren->Gen<true>(&text);
+	CtxName::ctx.Ren->context.Bind(*textarray);
+	CtxName::ctx.Ren->Render(&text, datbuf, indbuf);
 	datbuf.destroy();
 	indbuf.destroy();
-	renderer::Ren.Destroy(&text);
+	CtxName::ctx.Ren->Destroy(&text);
 }
 
 
@@ -60,7 +61,7 @@ void inittextarray()
     texlist[7] = "bitmaptext\\sevenimg.png";
     texlist[8] = "bitmaptext\\eightimg.png";
     texlist[9] = "bitmaptext\\nineimg.png";
-    textarray = renderer::Ren.Textures.GetTexArray(texlist,"Letters");
+    textarray = CtxName::ctx.Ren->Textures.GetTexArray(texlist,"Letters");
    
 }
 void writeletter(geometry::Box2d location, int letter)

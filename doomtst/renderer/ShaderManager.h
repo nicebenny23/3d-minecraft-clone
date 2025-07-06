@@ -9,9 +9,11 @@ namespace Shaders {
 			shaderlist = std::unordered_map<std::string, shader*>();
 		};
 		void Compile(const std::string& name, const char* vert, const char* frag);
-		void Bind(const std::string Name);
-		std::unordered_map<std::string, shader*> shaderlist;
-		shader* BoundShader;
 		
+		std::unordered_map<std::string, shader*> shaderlist;
+	
+		shader& operator[](std::string Name) {
+			return *shaderlist[Name];
+		}
 	};
 }

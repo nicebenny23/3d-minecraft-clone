@@ -4,72 +4,15 @@
 #include "../game/GameContext.h"
 namespace renderer {
     void setAspectRatio(renderer::Renderer* renderer) {
-        renderer->setaspectratio();
+        renderer->CurrentShader()->setf(CtxName::ctx.Window->AspectRatio(), "aspectratio");
     }
-
-    Renderer renderer::Ren;
-
-    glm::mat4 proj;
-    glm::mat4 view;
-    int currshader;
-    TextureArray texarray;
-    rendertype currendertype;
-    float fov;
-    void changerendertype(rendertype rentype) {
-     
-        if (rentype==currendertype)
-        {
-            return;
-        }
-        
-            currendertype = rentype;
-        
-        switch (rentype) {
-   
-        case rendermodel:
-            
-           
-            Ren.Shaders.Bind("ModelShader");
-            setrenderingmatrixes();
-            
-            glDepthFunc(GL_LESS);
-            glDepthMask(GL_TRUE);
-            glDisable(GL_CULL_FACE);
-            glEnable(GL_DEPTH_TEST);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            glDisable(GL_BLEND); 
-            glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-            
-            break;
-       
-        case renderui:
-            Ren.SetType("Ui");
-           
-            break;
-        case renderparticle:
-
-            glEnable(GL_DEPTH_TEST);
-            glDepthMask(GL_TRUE);
-            glDisable(GL_CULL_FACE);
-            glEnable(GL_BLEND);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-            Ren.Shaders.Bind("ParticleShader");
-            setrenderingmatrixes();
-            break;
-        case rendertext:
-            Ren.SetType("Text");
-            setaspectratio();
-            glBindTexture(GL_TEXTURE_2D, 0);
-            break;
-        }
-    }
-    
-  
-    void Renderer::setaspectratio()
+    void setrenderingmatrixes(renderer::Renderer* renderer)
     {
-        CurrentShader()->setf(CtxName::ctx.Window->AspectRatio(), "aspectratio");
 
+        renderer->CurrentShader()->setMat4(renderer->proj, "projection");
+        renderer->CurrentShader()->setMat4(renderer->view, "view");
     }
+
 
     void Renderer::FillVertexBuffer(Mesh* mesh, Cont::array<float>& pointlist)
     {
@@ -81,11 +24,11 @@ namespace renderer {
         {
             throw std::invalid_argument("Cannot Fill a mesh without Generating buffers first");
         }
-        renderer::Ren.Binders.Bind(mesh->Vbo);
+        context.Bind(mesh->Vbo);
         mesh->Vbo.fillbuffer<float>(pointlist);
-        Ren.Binders.Bind(mesh->Voa);
+        context.Bind(mesh->Voa);
         mesh->Voa.SetAllAttributes();
-        renderer::Ren.Binders.Bind(mesh->Ibo);
+        context.Bind(mesh->Ibo);
     }
 
     void Renderer::Fill(Mesh* mesh, Cont::array<float>& pointlist, Cont::array<unsigned int>& indicelist) {
@@ -94,7 +37,7 @@ namespace renderer {
             throw std::invalid_argument("attempted to intiate a non Ebo mesh with an indice list");
         }
         FillVertexBuffer(mesh, pointlist);
-        renderer::Ren.Binders.Bind(mesh->Ibo);
+        context.Bind(mesh->Ibo);
         mesh->Ibo.fillbuffer<unsigned int>(indicelist);
         mesh->length = indicelist.length;
 
@@ -131,12 +74,12 @@ namespace renderer {
         {
             throw std::logic_error("Cannott render a UnbindedMesh Mesh");
         }
-        renderer::Ren.Binders.Bind(mesh->Vbo);
-        Ren.Binders.Bind(mesh->Voa);
+        context.Bind(mesh->Vbo);
+      context.Bind(mesh->Voa);
         mesh->Voa.SetAllAttributes();
         if (mesh->IsEboMesh)
         {
-            renderer::Ren.Binders.Bind(mesh->Ibo);
+            context.Bind(mesh->Ibo);
         }
         if (settings::Gamesettings.viewmode)
         {
@@ -158,39 +101,26 @@ namespace renderer {
         Fill(mesh, pointlist, indicelist);
         Render(mesh);
     }
-    void setaspectratio() {
-
-        Ren.CurrentShader()->setf(CtxName::ctx.Window->AspectRatio(), "aspectratio");
-    }
-    void setrenderingmatrixes()
-    {
-     
-     Ren.CurrentShader()->setMat4(proj, "projection");
-     Ren.CurrentShader()->setMat4(view, "view");
-    }
    
  
-    void setprojmatrix(float newfov,float nearclipplane, float farclipplane){
-        proj = glm::perspective(glm::radians(newfov), float(4 / 3.f), nearclipplane, farclipplane);
-        fov = newfov;
-    }
-    void load()
+   
+
+    Renderer::Renderer(size_t tst)
     {
         fov = 90;
         view = glm::mat4(0);
         setprojmatrix(90, .21f, 100);
-        Ren.Shaders.Compile("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs");
-       RenderMode Ui= RenderMode("Ui", "UiShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-       Ui.AddUniform(setAspectRatio);
-       Ren.AddType(Ui);
+        Shaders.Compile("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs");
+       Base_Material Ui= Base_Material("Ui", "UiShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).AddUniform(setAspectRatio);
+       AddType(Ui);
            
-        Ren.Shaders.Compile("ModelShader","shaders\\modelvertex.vs", "shaders\\modelfragment.vs");
+        Shaders.Compile("ModelShader","shaders\\modelvertex.vs", "shaders\\modelfragment.vs");
 
-        Ren.AddType(RenderMode("Model", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)));
-        Ren.Shaders.Compile("ParticleShader","shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
-        Ren.AddType(RenderMode("Particle", "ParticleShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)));
-        Ren.Shaders.Compile("TextShader","shaders\\textvertex.vs", "shaders\\textfragment.vs");
-        Ren.AddType(RenderMode("Text", "TextShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)));
+        AddType(Base_Material("Model", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).AddUniform(setAspectRatio).AddUniform(setrenderingmatrixes));
+        Shaders.Compile("ParticleShader","shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
+        AddType(Base_Material("Particle", "ParticleShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)));
+        Shaders.Compile("TextShader","shaders\\textvertex.vs", "shaders\\textfragment.vs");
+        AddType(Base_Material("Text", "TextShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).AddUniform(setAspectRatio));
            
     
        
@@ -198,9 +128,16 @@ namespace renderer {
    
     }
 
-    void setviewmatrix(glm::mat4 viewmat)
+    void Renderer::setviewmatrix(glm::mat4 viewmat)
     {
             view = viewmat;
+    }
+
+    void Renderer::setprojmatrix(float newfov, float nearclipplane, float farclipplane)
+    {
+        proj = glm::perspective(glm::radians(newfov), float(4 / 3.f), nearclipplane, farclipplane);
+        fov = newfov;
+
     }
 
 
@@ -209,7 +146,7 @@ namespace renderer {
     {
 
         properties = Modes[Name];
-        Shaders.Bind(properties.Shader);
+        context.Bind(Shaders[properties.Shader]);
         for (int i = 0; i < properties.UniformsCalls.length; i++)
         {
             properties.UniformsCalls[i](this);

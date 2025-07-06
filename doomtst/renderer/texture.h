@@ -1,11 +1,12 @@
 #include "../util/vector2.h"
 #include <GLFW/glfw3.h>
 #include "../util/dynamicarray.h"
+#include <glad/glad.h>
 #pragma once 
 using namespace Cont;
 enum TextureType {
-	TexArray = 0,
-	Tex2d = 1,
+	TexArray = GL_TEXTURE_2D_ARRAY,
+	Tex2d = GL_TEXTURE_2D,
 	Tex3d = 2,
 	TextureNull = 3,
 }; namespace TextureManager {

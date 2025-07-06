@@ -1,7 +1,7 @@
 #pragma once
 #include "dynamicarray.h"
 
-namespace stackname {
+namespace Cont {
 
     template<typename T>
     struct stack {

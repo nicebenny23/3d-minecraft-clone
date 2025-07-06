@@ -1,33 +1,41 @@
 #pragma once
 #include "RenderContext.h"
 
-void RenderContext::Context::Bind(vobj::Vbo* Vbo)
+void RenderContext::Context::Bind(buffer_object::Vbo& Vbo)
 {
-	glBindBuffer(GL_ARRAY_BUFFER, Vbo->Getid());
-	BoundVbo = Vbo;
+	glBindBuffer(GL_ARRAY_BUFFER, Vbo.Getid());
+	BoundVbo = &Vbo;
 }
 
-void RenderContext::Context::Bind(vobj::Ebo* Ebo)
+void RenderContext::Context::Bind(buffer_object::Ebo& Ebo)
 {
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,Ebo->Getid());
-	BoundEbo = Ebo;
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,Ebo.Getid());
+	BoundEbo = &Ebo;
 }
 
-void RenderContext::Context::Bind(VaoName::Vao* Vao)
+void RenderContext::Context::Bind(VaoName::Vao& Vao)
 {
-	glBindVertexArray(Vao->id);
-	BoundVao = Vao;
+	glBindVertexArray(Vao.id);
+	BoundVao = &Vao;
 }
 
-void RenderContext::Context::Bind(ITexture* Tex)
-{
-	glBindTexture(Tex->type, Tex->id);
-	BoundTexture = Tex;
-}
-
-void RenderContext::Context::Bind(shader* Shader)
+void RenderContext::Context::Bind(ITexture& Tex)
 {
 	
+		glBindTexture(Tex.type, Tex.id);
+		BoundTexture = &Tex;
+	
+	
+}
+
+void RenderContext::Context::Bind(shader& Shader)
+{
+	if (Shader.id==0)
+	{
+		throw std::logic_error("cant attach invalid shader");
+	}
+	glUseProgram(Shader.id);
+	BoundShader = &Shader;
 }
 
 
@@ -52,12 +60,12 @@ void RenderContext::Context::UnbindEbo()
 
 void RenderContext::Context::UnbindTexture()
 {
-	
+	glBindTexture(BoundTexture->type,0);
 	BoundTexture = nullptr;
 }
 
 void RenderContext::Context::UnbindShader()
 {
-	
+	glUseProgram(0);
 	BoundShader = nullptr;
 }

@@ -1,8 +1,8 @@
 #pragma once
 #include "ResourceManager.h"
-using namespace vobj;
+using namespace buffer_object;
 using namespace VaoName;
-vobj::Vbo* ResourceManager::CreateVbo()
+buffer_object::Vbo* ResourceManager::CreateVbo()
 {
 	Vbo*New= new Vbo();
 	Bindings.Create(New);
@@ -16,7 +16,7 @@ VaoName::Vao* ResourceManager::CreateVao()
 	return New;
 }
 
-vobj::Ebo* ResourceManager::CreateEbo()
+buffer_object::Ebo* ResourceManager::CreateEbo()
 {
 	Ebo* New = new Ebo();
 	Bindings.Create(New);
