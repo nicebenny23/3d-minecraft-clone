@@ -22,7 +22,7 @@ namespace aabb {
         //if index is not null which implies that ojbect is nto null
         if (index!=-1)
         {
-            Colliderlist.remove(this);
+            Colliderlist.erase(this);
             
         }
     }

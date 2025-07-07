@@ -64,7 +64,7 @@ void deleteolddata() {
     std::string o1 = std::string("C:/Users/bchar/source/repos/doomtst/doomtst/worldstorage");
 
     std::string o2 = std::string("C:/Users/User/source/repos/nicebenny23/3d-minecraft-clone/doomtst/worldstorage");
-    deleteFilesInFolder(o1);
+    deleteFilesInFolder(o2);
 
 }
 void init() {
@@ -105,7 +105,7 @@ void rungame()
     {
         
         update();
-        lastupdate += CtxName::ctx.Time->dt;
+        lastupdate += CtxName::ctx.Time->real_dt;
         if (lastupdate > 1)
         {
 

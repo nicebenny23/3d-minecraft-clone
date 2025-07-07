@@ -9,9 +9,10 @@
 #include "../util/stack.h"
 #include "transform.h"
 #include "../debugger/debug.h"
-#include <stdint.h>
+#include "../util/Id.h"
 #include "../util/bitset.h"
 #include "../util/type_index.h"
+#
 namespace GameContext {
 
 }
@@ -36,6 +37,8 @@ namespace gameobject {
 
 
 	};
+	struct component;
+	struct OCManager;
 	enum objstate : char
 	{
 		beinginitiated = 0,
@@ -49,15 +52,28 @@ namespace gameobject {
 		updatetick = 2,
 		updaterender = 3,
 	};
+	
 	struct Archtype {
-		bitset active;
-		array<size_t> objects;
+		bitset exists;
+		Cont::array<Ids::Id> objects;
+		OCManager* Man;
+	};
+	
+	struct ComponentHasher {
+
+		size_t operator()(const size_t c) const;
+
+	};
+	struct ComponentMapper {
+		constexpr size_t operator()(component* comp) const noexcept;
+		
+			
 		
 	};
-	struct component;
-	struct OCManager;
+
+	using componentStorage = Sparse::SparseSet < component*, std::hash<size_t>, ComponentMapper >;
 	struct EntityMetadata {
-		array<component*> componentlist;
+		componentStorage componentlist;
 		size_t arch_id;
 		Archtype* type;
 		objstate state;
@@ -69,7 +85,7 @@ namespace gameobject {
 
 		}
 		void reset() {
-			componentlist.destroy();
+			componentlist.clear();
 			gen_count++;
 		}
 		
@@ -91,19 +107,17 @@ namespace gameobject {
 
 	
 		bool exists() const;
-		uint32_t gen;
-		 uint32_t Id;
+		Ids::Id Id;
 		template <class T, typename... types>
 		T* addcomponent(types&&... initval);
 		//todo -mid proiorty implement;
 		EntityMetadata& meta();
-		array<component*>& componentlist();
+		componentStorage& componentlist();
 	
 		objstate& state();
 		constexpr obj() noexcept {
-			Id = 0;
+			Id =Ids::None;
 			OC = nullptr;
-			gen = 0;
 		}
 	
 		void immediate_destroy();
@@ -120,7 +134,8 @@ namespace gameobject {
 		void create(int mid, int bytesize);
 		updatetype utype;
 		int priority;
-		int id;
+		size_t id;
+	
 		chainpool::chainedpool<component> pool;
 
 
@@ -128,6 +143,7 @@ namespace gameobject {
 	};
 	
 	
+
 	struct OCManager {
 		void destroy(obj* object);
 		OCManager() :ctx(nullptr){
@@ -263,8 +279,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		};
 
 		
-		
-		
+	
 
 	
 		template <class T>
@@ -273,19 +288,15 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			//replace with a get components call
 
 			size_t id = OC->comp_map.get<T>();
-			
-			
-			for (int i = 0; i < componentlist().length; i++)
-			{
-				
-				if (id == componentlist()[i]->comp_id) {
-					componentlist()[i]->destroy();
-					componentlist().deleteind(i);
-					i--;
 
-				}
+			componentStorage& complist = componentlist();
+			if (complist.containsKey(id))
+			{
+				size_t found = complist.keyIndex(id);
+				complist[found]->destroy();
+				complist.eraseKey(found);
 			}
-			return;
+			
 		}
 
 
@@ -296,19 +307,8 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		{
 
 			size_t id = OC->comp_map.get<T>();
-			
-			array<component*>& complist = componentlist();
-		
-			for (int i = 0; i < complist.length; i++)
-			{
-
-				if (id == complist[i]->comp_id) {
-
-
-					return ((T*)complist[i]);
-				}
-			}
-			return nullptr;
+			componentStorage& complist = componentlist();
+			return (T*)(complist.getOrDefault(id));
 		}
 
 		template <class T>
@@ -327,9 +327,10 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		template <class T>
 		bool obj::hascomponent()
 		{
+			size_t id = OC->comp_map.get<T>();
 
-			T* ptr = getcomponentptr<T>();
-			return (ptr != nullptr);
+			componentStorage& complist = componentlist();
+			return complist.containsKey(id);
 			
 		}
 
@@ -395,7 +396,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		}
 		inline bool operator == (const obj& obj1, const obj& obj2) {
 
-			return (obj1.Id == obj2.Id) && (obj1.gen == obj2.gen)&&obj1.exists();
+			return obj1.Id == obj2.Id;
 		}
 }
 

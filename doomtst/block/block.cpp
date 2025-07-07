@@ -90,7 +90,9 @@ blockname::blockmesh::blockmesh(block* parent, Vector3 blkscale)
 	
 
 	box.scale = blkscale;
-	box.center = parent->center();
+
+	box.center =Vector3(blk->pos+unitv/2) * blocksize;
+
 
 
 }

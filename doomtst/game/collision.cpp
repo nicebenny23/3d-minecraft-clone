@@ -80,11 +80,11 @@ voxtra::WorldRayCollision collision::raycastentity(ray nray, HitQuery query)
 
 void propagatecollisionmessage(gameobject::obj o1, gameobject::obj o2) {
 
-	for (int i = 0; i < o1.componentlist().length; i++)
+	for (int i = 0; i < o1.componentlist().size(); i++)
 	{
 		o1.componentlist()[i]->oncollision(o2);
 	}
-	for (int j= 0; j < o2.componentlist().length; j++)
+	for (int j= 0; j < o2.componentlist().size(); j++)
 	{
 		o2.componentlist()[j]->oncollision(o1);
 	}

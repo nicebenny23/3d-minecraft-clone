@@ -5,9 +5,11 @@
 #include "GlUtil.h"
 namespace Gl {
     struct gl_id {
-        GLuint id = 0;
-        explicit gl_id(GLuint id_) : id(id_) {}
+        GLuint id;
+        gl_id():id(0)  {
 
+        }
+        explicit gl_id(GLuint id_) : id(id_) {}
         bool IsValid() const { return id != 0; }
         GLuint Get() const { return id; }
 
@@ -19,4 +21,5 @@ namespace Gl {
             return id != other.id;
         }
     };
+    
 }

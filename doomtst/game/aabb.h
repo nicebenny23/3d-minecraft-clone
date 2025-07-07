@@ -28,13 +28,19 @@ namespace aabb {
             if (owner.hascomponent<gameobject::transform_comp>())
             {
                 Transform transform = owner.transform();
+               
+                global.scale = box.scale * transform.scale * 2; 
                 global.center = box.center * transform.scale * 2 + transform.position;
-                global.scale = box.scale * transform.scale * 2;
+               
 
             }
             if (owner.hascomponent<blockname::block>())
             {
-                blockname::block  blk= owner.getcomponent<blockname::block>();
+                blockname::block&  blk= owner.getcomponent<blockname::block>();
+                if (blk.id==7)
+                {
+                    int l = 1;
+                }
                 Vector3 scale = blk.mesh.box.scale;
                 Vector3 pos = blk.center();
                 global.center = box.center * scale * 2 + pos;

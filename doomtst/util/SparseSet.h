@@ -1,60 +1,111 @@
 #include "dynamicarray.h"
-#include <unordered_map>
+#include "robinHood.h"
 #include <iterator>
+#include <utility>
+#include <type_traits> 
 #pragma once
 namespace Sparse {
-	template <typename T, typename Hasher = std::hash<T>>
+	struct Identity {
+		template <typename U>
+		constexpr U&& operator()(U&& t) const noexcept {
+			return std::forward<U>(t);
+		}
+	};
+	template <typename T, typename Hasher = std::hash<T>, typename KeyMap = Identity>
 	struct SparseSet
 	{
-		std::unordered_map<T, size_t, Hasher> sparse;
-		Cont::array<T> dense;
-		void push(const T& elem) {
-			auto [Loc, inserted] = sparse.insert({ elem, dense.length });
-			if (inserted)
-			{
-				dense.push(elem);
-			}
 
+		using KeyType = std::decay_t<decltype(std::declval<KeyMap>()(std::declval<const T&>()))>;
+		robin_hood::unordered_map<KeyType, size_t, Hasher> sparse;
+		Cont::array<T> dense;
+
+		SparseSet() :sparse(), dense() {
 		}
-		void remove(size_t index) {
-			std::swap(dense[index], dense[dense.length - 1]);
-			sparse.erase(dense[dense.length - 1]);
-			sparse[dense[index]] = index;
-			dense.pop();
+
+		// Element -> Key
+		KeyType toKey(const T& elem) const {
+			return  KeyMap{}(elem);
 		}
+
+		// Size of array
 		size_t size() const {
 			return dense.length;
 		}
-		void remove(const T& elem) {
-			remove(find(elem));
-		}
-		bool contains(const T& elem) const {
-			auto it = sparse.find(elem);
-			return (it != sparse.end());
-		}
-		size_t find(const T& elem) const {
 
-
-			auto it = sparse.find(elem);
-			if (it == sparse.end()) throw std::out_of_range("Element not found");
-			return it->second;
-
-		}
 		using iterator = typename Cont::array<T>::iterator;
 
 		iterator begin() { return dense.begin(); }
 		iterator end() { return dense.end(); }
 
-	
-		SparseSet() :sparse(), dense() {
-
+		// Adds an element
+		void push(T&& elem) {
+			auto [Loc, inserted] = sparse.insert({ toKey(elem), dense.length });
+			if (inserted) {
+				dense.push(std::move(elem));
+			}
 		}
-		void Clear() {
-			dense.clear();
+
+		// Removes element at index
+		void erase(const size_t index) {
+			std::swap(dense[index], dense[dense.length - 1]);
+			sparse.erase(toKey(dense[dense.length - 1]));
+			// flips
+			sparse[toKey(dense[index])] = index;
+			dense.pop();
+		}
+
+		// Erases element
+		void erase(const T& elem) {
+			erase(indexOf(elem));
+		}
+
+		// Erases key
+		void eraseKey(const KeyType& key){
+			erase(keyIndex(key));
+		}
+
+		// If it contains element
+		bool contains(const T& elem) const {
+			return containsKey(toKey(elem));
+		}
+
+		// If it contains key
+		bool containsKey(const KeyType& key) const {
+			auto it = sparse.find(key);
+			return (it != sparse.end());
+		}
+
+		// Returns the index of the key
+		size_t keyIndex(const KeyType& key) const{
+			auto it = sparse.find(key);
+			if (it == sparse.end()) throw std::out_of_range("Element not found");
+			return it->second;
+		}
+
+		// Returns the index of element
+		size_t indexOf(const T& elem) const {
+			return keyIndex(toKey(elem));
+		}
+
+		void clear() {
+			dense.destroy();
 			sparse.clear();
 		}
+
 		T& operator[](size_t index) {
 			return dense[index];
+		}
+
+		T& getByKey(const KeyType& key) {
+			return dense[sparse[key]];
+		}
+
+		T getOrDefault(const KeyType& key) const {
+			auto it = sparse.find(key);
+			if (it != sparse.end()) {
+				return dense[it->second];
+			}
+			return T(); 
 		}
 	};
 

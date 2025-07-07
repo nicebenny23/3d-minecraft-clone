@@ -174,8 +174,8 @@ namespace blockname {
 		char mininglevel;
 		bool minedfastwithpick;
 		Vector3 center() {
-			return Vector3( pos)*blocksize + unitv *blocksize/ 2;
-	    }
+			return mesh.box.center;
+		}
 		void create(v3::Coord location, int blockid, char  blkattachface, char  blkdirection);
 
 		block() {

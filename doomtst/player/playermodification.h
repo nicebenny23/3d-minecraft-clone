@@ -5,7 +5,7 @@
 #include "../game/objecthelper.h"
 #include "../world/voxeltraversal.h"
 #include "../util/dynamicarray.h"
-
+#include "../debugger/debug.h"
 #include "playerinventory.h"
 #include "../items/itemutil.h"
 #pragma once 
@@ -38,6 +38,7 @@ struct playerbreak:gameobject::component
 		{
 			return false;
 		}
+		debug(float( Hit.collider->owner.getcomponent<blockname::block>().id));
 		if (!inrange(Hit.Dist(), interactminrange, interactmaxrange))
 		{
 			return false;

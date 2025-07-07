@@ -57,23 +57,23 @@ void gameobject::component::oncollision(obj collidedwith)
 
 bool gameobject::obj::exists() const
 {
-	return Id != 0;
+	return Id.id;
 }
 
 EntityMetadata& gameobject::obj::meta()
 {
 	
-	EntityMetadata& met = OC->entitymeta[Id]; 
-		if (met.gen_count==gen)
+	EntityMetadata& met = OC->entitymeta[Id.id]; 
+		if (met.gen_count==Id.gen)
 		{
 
-			return OC->entitymeta[Id];
+			return met;
 
 		}
 		throw std::logic_error("Cannot acess deleted entity");
 }
 
-array<component*>& gameobject::obj::componentlist()
+componentStorage& gameobject::obj::componentlist()
 {
 	return meta().componentlist;
 }
@@ -91,7 +91,7 @@ objstate& gameobject::obj::state()
 
 void gameobject::OCManager::destroy(obj* object)
 {
-	array< component*>& complist =object->componentlist();
+	array< component*>& complist =object->componentlist().dense;
 
 	object->state() = destroying;
 	for (int i = 0; i < complist.length; i++)
@@ -99,9 +99,8 @@ void gameobject::OCManager::destroy(obj* object)
 		complist[i]->destroy();
 	}
 
-	complist.destroy();
-	entitymeta[object->Id].reset();
-	free_ids.push(object->Id);
+	entitymeta[object->Id.id].reset();
+	free_ids.push(object->Id.id);
 
 }
 void gameobject::OCManager::Delete_deffered_objs()
@@ -135,9 +134,9 @@ void gameobject::OCManager::delete_component(component* comp)
 }
 void gameobject::OCManager::InitObj(obj* object)
 {
-	object->Id = free_ids.pop();
+	object->Id.id = free_ids.pop();
 	object->OC = ctx->OC;
-	object->gen= entitymeta[object->Id].gen_count;
+	object->Id.gen= entitymeta[object->Id.id].gen_count;
 
 }
 
@@ -182,8 +181,7 @@ obj gameobject::OCManager::CreateEntity(v3::Vector3 SpawnPos)
 {
 	obj* object = new obj();
 	InitObj(object);
-
-	object->componentlist() = array<gameobject::component*>();
+	object->componentlist() = componentStorage{};
 	object->addcomponent<transform_comp>()->transform.position = SpawnPos;
 	return *object;
 }
@@ -218,4 +216,12 @@ void gameobject::componentmanager::init(component* sample)
 	utype = sample->utype;
 }
 
+size_t gameobject::ComponentHasher::operator()(const size_t c) const
+{
+	return c;
+}
 
+constexpr size_t gameobject::ComponentMapper::operator()(component* comp) const noexcept
+{
+	return comp->comp_id;
+}
