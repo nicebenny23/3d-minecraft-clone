@@ -24,5 +24,19 @@ namespace Ids {
 		constexpr Id(uint32_t id, uint32_t gen) noexcept :id(id), gen(gen) {};
 
 	};
-	static constexpr Id None = Id();
+	static constexpr Id None = Id();	
+	struct IdFlattener{
+		size_t operator()(const Id& id) const noexcept {
+			return id.id;
+		}
+
+
+
+	};
+
+	struct IdHash{
+		size_t operator()(const Id& id) const noexcept {
+			return std::hash<size_t>{}((size_t(id.gen)<<32)+id.id);
+		}
+	};
 }

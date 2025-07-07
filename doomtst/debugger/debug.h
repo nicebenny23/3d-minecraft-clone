@@ -1,5 +1,5 @@
 #include <iostream>
-#include <windows.h>
+#include "../renderer/Window.h"
 #include <process.h>  // For _beginthread
 #include <cstdlib>
 #include <csignal>

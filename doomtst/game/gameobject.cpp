@@ -137,6 +137,7 @@ void gameobject::OCManager::InitObj(obj* object)
 	object->Id.id = free_ids.pop();
 	object->OC = ctx->OC;
 	object->Id.gen= entitymeta[object->Id.id].gen_count;
+	archtypes[0].add(*object);
 
 }
 
@@ -163,15 +164,24 @@ void gameobject::OCManager::updatecomponents(updatecalltype type)
 	for (int j = 0; j < managerref.length; j++)
 	{
 		componentmanager* manager = managerref[j];
-		for (component& comps :manager->pool)
+		for (Archtype& arch : archtypes)
 		{
-			
 
-				if (comps.active)
+			if (arch.has_component(manager->id))
+			{
+
+
+				for (obj comps : arch.elems)
 				{
-					comps.update();
+					component* comp = comps.componentlist().getByKey(manager->id);
+
+					if (comp->active)
+					{
+						comp->update();
+					}
+
 				}
-			
+			}
 		}
 	}
 	managerref.destroy();
@@ -204,7 +214,7 @@ void gameobject::componentmanager::create(int mid, int bytesize)
 	id = mid;
 
 
-	pool = chainpool::chainedpool<component>(bytesize);
+	pool = dynPool::flux<component>(bytesize);
 }
 
 void gameobject::componentmanager::init(component* sample)

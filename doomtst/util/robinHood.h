@@ -1,1495 +1,2564 @@
-//          Copyright Malte Skarupke 2017.
-// Distributed under the Boost Software License, Version 1.0.
-//    (See http://www.boost.org/LICENSE_1_0.txt)
+//                 ______  _____                 ______                _________
+//  ______________ ___  /_ ___(_)_______         ___  /_ ______ ______ ______  /
+//  __  ___/_  __ \__  __ \__  / __  __ \        __  __ \_  __ \_  __ \_  __  /
+//  _  /    / /_/ /_  /_/ /_  /  _  / / /        _  / / // /_/ // /_/ // /_/ /
+//  /_/     \____/ /_.___/ /_/   /_/ /_/ ________/_/ /_/ \____/ \____/ \__,_/
+//                                      _/_____/
+//
+// Fast & memory efficient hashtable based on robin hood hashing for C++11/14/17/20
+// https://github.com/martinus/robin-hood-hashing
+//
+// Licensed under the MIT License <http://opensource.org/licenses/MIT>.
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2018-2021 Martin Ankerl <http://martin.ankerl.com>
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in all
+// copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
 
-#pragma once
+#ifndef ROBIN_HOOD_H_INCLUDED
+#define ROBIN_HOOD_H_INCLUDED
 
-#include <cstdint>
-#include <cstddef>
-#include <functional>
-#include <cmath>
+// see https://semver.org/
+#define ROBIN_HOOD_VERSION_MAJOR 3  // for incompatible API changes
+#define ROBIN_HOOD_VERSION_MINOR 11 // for adding functionality in a backwards-compatible manner
+#define ROBIN_HOOD_VERSION_PATCH 5  // for backwards-compatible bug fixes
+
 #include <algorithm>
-#include <iterator>
-#include <utility>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
+#include <limits>
+#include <memory> // only to support hash of smart pointers
+#include <stdexcept>
+#include <string>
 #include <type_traits>
-
-#ifdef _MSC_VER
-#define SKA_NOINLINE(...) __declspec(noinline) __VA_ARGS__
-#else
-#define SKA_NOINLINE(...) __VA_ARGS__ __attribute__((noinline))
+#include <utility>
+#if __cplusplus >= 201703L
+#    include <string_view>
 #endif
 
-namespace ska
-{
-    struct prime_number_hash_policy;
-    struct power_of_two_hash_policy;
-    struct fibonacci_hash_policy;
+// #define ROBIN_HOOD_LOG_ENABLED
+#ifdef ROBIN_HOOD_LOG_ENABLED
+#    include <iostream>
+#    define ROBIN_HOOD_LOG(...) \
+        std::cout << __FUNCTION__ << "@" << __LINE__ << ": " << __VA_ARGS__ << std::endl;
+#else
+#    define ROBIN_HOOD_LOG(x)
+#endif
 
-    namespace detailv3
-    {
-        template<typename Result, typename Functor>
-        struct functor_storage : Functor
-        {
-            functor_storage() = default;
-            functor_storage(const Functor& functor)
-                : Functor(functor)
-            {
-            }
-            template<typename... Args>
-            Result operator()(Args &&... args)
-            {
-                return static_cast<Functor&>(*this)(std::forward<Args>(args)...);
-            }
-            template<typename... Args>
-            Result operator()(Args &&... args) const
-            {
-                return static_cast<const Functor&>(*this)(std::forward<Args>(args)...);
-            }
-        };
-        template<typename Result, typename... Args>
-        struct functor_storage<Result, Result(*)(Args...)>
-        {
-            typedef Result(*function_ptr)(Args...);
-            function_ptr function;
-            functor_storage(function_ptr function)
-                : function(function)
-            {
-            }
-            Result operator()(Args... args) const
-            {
-                return function(std::forward<Args>(args)...);
-            }
-            operator function_ptr& ()
-            {
-                return function;
-            }
-            operator const function_ptr& ()
-            {
-                return function;
-            }
-        };
-        template<typename key_type, typename value_type, typename hasher>
-        struct KeyOrValueHasher : functor_storage<size_t, hasher>
-        {
-            typedef functor_storage<size_t, hasher> hasher_storage;
-            KeyOrValueHasher() = default;
-            KeyOrValueHasher(const hasher& hash)
-                : hasher_storage(hash)
-            {
-            }
-            size_t operator()(const key_type& key)
-            {
-                return static_cast<hasher_storage&>(*this)(key);
-            }
-            size_t operator()(const key_type& key) const
-            {
-                return static_cast<const hasher_storage&>(*this)(key);
-            }
-            size_t operator()(const value_type& value)
-            {
-                return static_cast<hasher_storage&>(*this)(value.first);
-            }
-            size_t operator()(const value_type& value) const
-            {
-                return static_cast<const hasher_storage&>(*this)(value.first);
-            }
-            template<typename F, typename S>
-            size_t operator()(const std::pair<F, S>& value)
-            {
-                return static_cast<hasher_storage&>(*this)(value.first);
-            }
-            template<typename F, typename S>
-            size_t operator()(const std::pair<F, S>& value) const
-            {
-                return static_cast<const hasher_storage&>(*this)(value.first);
-            }
-        };
-        template<typename key_type, typename value_type, typename key_equal>
-        struct KeyOrValueEquality : functor_storage<bool, key_equal>
-        {
-            typedef functor_storage<bool, key_equal> equality_storage;
-            KeyOrValueEquality() = default;
-            KeyOrValueEquality(const key_equal& equality)
-                : equality_storage(equality)
-            {
-            }
-            bool operator()(const key_type& lhs, const key_type& rhs)
-            {
-                return static_cast<equality_storage&>(*this)(lhs, rhs);
-            }
-            bool operator()(const key_type& lhs, const value_type& rhs)
-            {
-                return static_cast<equality_storage&>(*this)(lhs, rhs.first);
-            }
-            bool operator()(const value_type& lhs, const key_type& rhs)
-            {
-                return static_cast<equality_storage&>(*this)(lhs.first, rhs);
-            }
-            bool operator()(const value_type& lhs, const value_type& rhs)
-            {
-                return static_cast<equality_storage&>(*this)(lhs.first, rhs.first);
-            }
-            template<typename F, typename S>
-            bool operator()(const key_type& lhs, const std::pair<F, S>& rhs)
-            {
-                return static_cast<equality_storage&>(*this)(lhs, rhs.first);
-            }
-            template<typename F, typename S>
-            bool operator()(const std::pair<F, S>& lhs, const key_type& rhs)
-            {
-                return static_cast<equality_storage&>(*this)(lhs.first, rhs);
-            }
-            template<typename F, typename S>
-            bool operator()(const value_type& lhs, const std::pair<F, S>& rhs)
-            {
-                return static_cast<equality_storage&>(*this)(lhs.first, rhs.first);
-            }
-            template<typename F, typename S>
-            bool operator()(const std::pair<F, S>& lhs, const value_type& rhs)
-            {
-                return static_cast<equality_storage&>(*this)(lhs.first, rhs.first);
-            }
-            template<typename FL, typename SL, typename FR, typename SR>
-            bool operator()(const std::pair<FL, SL>& lhs, const std::pair<FR, SR>& rhs)
-            {
-                return static_cast<equality_storage&>(*this)(lhs.first, rhs.first);
-            }
-        };
-        static constexpr int8_t min_lookups = 4;
-        template<typename T>
-        struct sherwood_v3_entry
-        {
-            sherwood_v3_entry()
-            {
-            }
-            sherwood_v3_entry(int8_t distance_from_desired)
-                : distance_from_desired(distance_from_desired)
-            {
-            }
-            ~sherwood_v3_entry()
-            {
-            }
-            static sherwood_v3_entry* empty_default_table()
-            {
-                static sherwood_v3_entry result[min_lookups] = { {}, {}, {}, {special_end_value} };
-                return result;
-            }
+// #define ROBIN_HOOD_TRACE_ENABLED
+#ifdef ROBIN_HOOD_TRACE_ENABLED
+#    include <iostream>
+#    define ROBIN_HOOD_TRACE(...) \
+        std::cout << __FUNCTION__ << "@" << __LINE__ << ": " << __VA_ARGS__ << std::endl;
+#else
+#    define ROBIN_HOOD_TRACE(x)
+#endif
 
-            bool has_value() const
-            {
-                return distance_from_desired >= 0;
-            }
-            bool is_empty() const
-            {
-                return distance_from_desired < 0;
-            }
-            bool is_at_desired_position() const
-            {
-                return distance_from_desired <= 0;
-            }
-            template<typename... Args>
-            void emplace(int8_t distance, Args &&... args)
-            {
-                new (std::addressof(value)) T(std::forward<Args>(args)...);
-                distance_from_desired = distance;
-            }
+// #define ROBIN_HOOD_COUNT_ENABLED
+#ifdef ROBIN_HOOD_COUNT_ENABLED
+#    include <iostream>
+#    define ROBIN_HOOD_COUNT(x) ++counts().x;
+namespace robin_hood {
+    struct Counts {
+        uint64_t shiftUp{};
+        uint64_t shiftDown{};
+    };
+    inline std::ostream& operator<<(std::ostream& os, Counts const& c) {
+        return os << c.shiftUp << " shiftUp" << std::endl << c.shiftDown << " shiftDown" << std::endl;
+    }
 
-            void destroy_value()
-            {
-                value.~T();
-                distance_from_desired = -1;
-            }
+    static Counts& counts() {
+        static Counts counts{};
+        return counts;
+    }
+} // namespace robin_hood
+#else
+#    define ROBIN_HOOD_COUNT(x)
+#endif
 
-            int8_t distance_from_desired = -1;
-            static constexpr int8_t special_end_value = 0;
-            union { T value; };
-        };
+// all non-argument macros should use this facility. See
+// https://www.fluentcpp.com/2019/05/28/better-macros-better-flags/
+#define ROBIN_HOOD(x) ROBIN_HOOD_PRIVATE_DEFINITION_##x()
 
-        inline int8_t log2(size_t value)
-        {
-            static constexpr int8_t table[64] =
-            {
-                63,  0, 58,  1, 59, 47, 53,  2,
-                60, 39, 48, 27, 54, 33, 42,  3,
-                61, 51, 37, 40, 49, 18, 28, 20,
-                55, 30, 34, 11, 43, 14, 22,  4,
-                62, 57, 46, 52, 38, 26, 32, 41,
-                50, 36, 17, 19, 29, 10, 13, 21,
-                56, 45, 25, 31, 35, 16,  9, 12,
-                44, 24, 15,  8, 23,  7,  6,  5
-            };
-            value |= value >> 1;
-            value |= value >> 2;
-            value |= value >> 4;
-            value |= value >> 8;
-            value |= value >> 16;
-            value |= value >> 32;
-            return table[((value - (value >> 1)) * 0x07EDD5E59A4E28C2) >> 58];
-        }
+// mark unused members with this macro
+#define ROBIN_HOOD_UNUSED(identifier)
 
-        template<typename T, bool>
-        struct AssignIfTrue
-        {
-            void operator()(T& lhs, const T& rhs)
-            {
-                lhs = rhs;
-            }
-            void operator()(T& lhs, T&& rhs)
-            {
-                lhs = std::move(rhs);
-            }
-        };
-        template<typename T>
-        struct AssignIfTrue<T, false>
-        {
-            void operator()(T&, const T&)
-            {
-            }
-            void operator()(T&, T&&)
-            {
-            }
+// bitness
+#if SIZE_MAX == UINT32_MAX
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_BITNESS() 32
+#elif SIZE_MAX == UINT64_MAX
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_BITNESS() 64
+#else
+#    error Unsupported bitness
+#endif
+
+// endianess
+#ifdef _MSC_VER
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_LITTLE_ENDIAN() 1
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_BIG_ENDIAN() 0
+#else
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_LITTLE_ENDIAN() \
+        (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_BIG_ENDIAN() (__BYTE_ORDER__ == __ORDER_BIG_ENDIAN__)
+#endif
+
+// inline
+#ifdef _MSC_VER
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_NOINLINE() __declspec(noinline)
+#else
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_NOINLINE() __attribute__((noinline))
+#endif
+
+// exceptions
+#if !defined(__cpp_exceptions) && !defined(__EXCEPTIONS) && !defined(_CPPUNWIND)
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_EXCEPTIONS() 0
+#else
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_EXCEPTIONS() 1
+#endif
+
+// count leading/trailing bits
+#if !defined(ROBIN_HOOD_DISABLE_INTRINSICS)
+#    ifdef _MSC_VER
+#        if ROBIN_HOOD(BITNESS) == 32
+#            define ROBIN_HOOD_PRIVATE_DEFINITION_BITSCANFORWARD() _BitScanForward
+#        else
+#            define ROBIN_HOOD_PRIVATE_DEFINITION_BITSCANFORWARD() _BitScanForward64
+#        endif
+#        include <intrin.h>
+#        pragma intrinsic(ROBIN_HOOD(BITSCANFORWARD))
+#        define ROBIN_HOOD_COUNT_TRAILING_ZEROES(x)                                       \
+            [](size_t mask) noexcept -> int {                                             \
+                unsigned long index;                                                      \
+                return ROBIN_HOOD(BITSCANFORWARD)(&index, mask) ? static_cast<int>(index) \
+                                                                : ROBIN_HOOD(BITNESS);    \
+            }(x)
+#    else
+#        if ROBIN_HOOD(BITNESS) == 32
+#            define ROBIN_HOOD_PRIVATE_DEFINITION_CTZ() __builtin_ctzl
+#            define ROBIN_HOOD_PRIVATE_DEFINITION_CLZ() __builtin_clzl
+#        else
+#            define ROBIN_HOOD_PRIVATE_DEFINITION_CTZ() __builtin_ctzll
+#            define ROBIN_HOOD_PRIVATE_DEFINITION_CLZ() __builtin_clzll
+#        endif
+#        define ROBIN_HOOD_COUNT_LEADING_ZEROES(x) ((x) ? ROBIN_HOOD(CLZ)(x) : ROBIN_HOOD(BITNESS))
+#        define ROBIN_HOOD_COUNT_TRAILING_ZEROES(x) ((x) ? ROBIN_HOOD(CTZ)(x) : ROBIN_HOOD(BITNESS))
+#    endif
+#endif
+
+// fallthrough
+#ifndef __has_cpp_attribute // For backwards compatibility
+#    define __has_cpp_attribute(x) 0
+#endif
+#if __has_cpp_attribute(clang::fallthrough)
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_FALLTHROUGH() [[clang::fallthrough]]
+#elif __has_cpp_attribute(gnu::fallthrough)
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_FALLTHROUGH() [[gnu::fallthrough]]
+#else
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_FALLTHROUGH()
+#endif
+
+// likely/unlikely
+#ifdef _MSC_VER
+#    define ROBIN_HOOD_LIKELY(condition) condition
+#    define ROBIN_HOOD_UNLIKELY(condition) condition
+#else
+#    define ROBIN_HOOD_LIKELY(condition) __builtin_expect(condition, 1)
+#    define ROBIN_HOOD_UNLIKELY(condition) __builtin_expect(condition, 0)
+#endif
+
+// detect if native wchar_t type is availiable in MSVC
+#ifdef _MSC_VER
+#    ifdef _NATIVE_WCHAR_T_DEFINED
+#        define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_NATIVE_WCHART() 1
+#    else
+#        define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_NATIVE_WCHART() 0
+#    endif
+#else
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_HAS_NATIVE_WCHART() 1
+#endif
+
+// detect if MSVC supports the pair(std::piecewise_construct_t,...) consructor being constexpr
+#ifdef _MSC_VER
+#    if _MSC_VER <= 1900
+#        define ROBIN_HOOD_PRIVATE_DEFINITION_BROKEN_CONSTEXPR() 1
+#    else
+#        define ROBIN_HOOD_PRIVATE_DEFINITION_BROKEN_CONSTEXPR() 0
+#    endif
+#else
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_BROKEN_CONSTEXPR() 0
+#endif
+
+// workaround missing "is_trivially_copyable" in g++ < 5.0
+// See https://stackoverflow.com/a/31798726/48181
+#if defined(__GNUC__) && __GNUC__ < 5 && !defined(__clang__)
+#    define ROBIN_HOOD_IS_TRIVIALLY_COPYABLE(...) __has_trivial_copy(__VA_ARGS__)
+#else
+#    define ROBIN_HOOD_IS_TRIVIALLY_COPYABLE(...) std::is_trivially_copyable<__VA_ARGS__>::value
+#endif
+
+// helpers for C++ versions, see https://gcc.gnu.org/onlinedocs/cpp/Standard-Predefined-Macros.html
+#define ROBIN_HOOD_PRIVATE_DEFINITION_CXX() __cplusplus
+#define ROBIN_HOOD_PRIVATE_DEFINITION_CXX98() 199711L
+#define ROBIN_HOOD_PRIVATE_DEFINITION_CXX11() 201103L
+#define ROBIN_HOOD_PRIVATE_DEFINITION_CXX14() 201402L
+#define ROBIN_HOOD_PRIVATE_DEFINITION_CXX17() 201703L
+
+#if ROBIN_HOOD(CXX) >= ROBIN_HOOD(CXX17)
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_NODISCARD() [[nodiscard]]
+#else
+#    define ROBIN_HOOD_PRIVATE_DEFINITION_NODISCARD()
+#endif
+
+namespace robin_hood {
+
+#if ROBIN_HOOD(CXX) >= ROBIN_HOOD(CXX14)
+#    define ROBIN_HOOD_STD std
+#else
+
+    // c++11 compatibility layer
+    namespace ROBIN_HOOD_STD {
+        template <class T>
+        struct alignment_of
+            : std::integral_constant<std::size_t, alignof(typename std::remove_all_extents<T>::type)> {
         };
 
-        inline size_t next_power_of_two(size_t i)
-        {
-            --i;
-            i |= i >> 1;
-            i |= i >> 2;
-            i |= i >> 4;
-            i |= i >> 8;
-            i |= i >> 16;
-            i |= i >> 32;
-            ++i;
-            return i;
-        }
-
-        template<typename...> using void_t = void;
-
-        template<typename T, typename = void>
-        struct HashPolicySelector
-        {
-            typedef fibonacci_hash_policy type;
-        };
-        template<typename T>
-        struct HashPolicySelector<T, void_t<typename T::hash_policy>>
-        {
-            typedef typename T::hash_policy type;
-        };
-
-        template<typename T, typename FindKey, typename ArgumentHash, typename Hasher, typename ArgumentEqual, typename Equal, typename ArgumentAlloc, typename EntryAlloc>
-        class sherwood_v3_table : private EntryAlloc, private Hasher, private Equal
-        {
-            using Entry = detailv3::sherwood_v3_entry<T>;
-            using AllocatorTraits = std::allocator_traits<EntryAlloc>;
-            using EntryPointer = typename AllocatorTraits::pointer;
-            struct convertible_to_iterator;
-
+        template <class T, T... Ints>
+        class integer_sequence {
         public:
-
             using value_type = T;
-            using size_type = size_t;
-            using difference_type = std::ptrdiff_t;
-            using hasher = ArgumentHash;
-            using key_equal = ArgumentEqual;
-            using allocator_type = EntryAlloc;
-            using reference = value_type&;
-            using const_reference = const value_type&;
-            using pointer = value_type*;
-            using const_pointer = const value_type*;
+            static_assert(std::is_integral<value_type>::value, "not integral type");
+            static constexpr std::size_t size() noexcept {
+                return sizeof...(Ints);
+            }
+        };
+        template <std::size_t... Inds>
+        using index_sequence = integer_sequence<std::size_t, Inds...>;
 
-            sherwood_v3_table()
-            {
-            }
-            explicit sherwood_v3_table(size_type bucket_count, const ArgumentHash& hash = ArgumentHash(), const ArgumentEqual& equal = ArgumentEqual(), const ArgumentAlloc& alloc = ArgumentAlloc())
-                : EntryAlloc(alloc), Hasher(hash), Equal(equal)
-            {
-                rehash(bucket_count);
-            }
-            sherwood_v3_table(size_type bucket_count, const ArgumentAlloc& alloc)
-                : sherwood_v3_table(bucket_count, ArgumentHash(), ArgumentEqual(), alloc)
-            {
-            }
-            sherwood_v3_table(size_type bucket_count, const ArgumentHash& hash, const ArgumentAlloc& alloc)
-                : sherwood_v3_table(bucket_count, hash, ArgumentEqual(), alloc)
-            {
-            }
-            explicit sherwood_v3_table(const ArgumentAlloc& alloc)
-                : EntryAlloc(alloc)
-            {
-            }
-            template<typename It>
-            sherwood_v3_table(It first, It last, size_type bucket_count = 0, const ArgumentHash& hash = ArgumentHash(), const ArgumentEqual& equal = ArgumentEqual(), const ArgumentAlloc& alloc = ArgumentAlloc())
-                : sherwood_v3_table(bucket_count, hash, equal, alloc)
-            {
-                insert(first, last);
-            }
-            template<typename It>
-            sherwood_v3_table(It first, It last, size_type bucket_count, const ArgumentAlloc& alloc)
-                : sherwood_v3_table(first, last, bucket_count, ArgumentHash(), ArgumentEqual(), alloc)
-            {
-            }
-            template<typename It>
-            sherwood_v3_table(It first, It last, size_type bucket_count, const ArgumentHash& hash, const ArgumentAlloc& alloc)
-                : sherwood_v3_table(first, last, bucket_count, hash, ArgumentEqual(), alloc)
-            {
-            }
-            sherwood_v3_table(std::initializer_list<T> il, size_type bucket_count = 0, const ArgumentHash& hash = ArgumentHash(), const ArgumentEqual& equal = ArgumentEqual(), const ArgumentAlloc& alloc = ArgumentAlloc())
-                : sherwood_v3_table(bucket_count, hash, equal, alloc)
-            {
-                if (bucket_count == 0)
-                    rehash(il.size());
-                insert(il.begin(), il.end());
-            }
-            sherwood_v3_table(std::initializer_list<T> il, size_type bucket_count, const ArgumentAlloc& alloc)
-                : sherwood_v3_table(il, bucket_count, ArgumentHash(), ArgumentEqual(), alloc)
-            {
-            }
-            sherwood_v3_table(std::initializer_list<T> il, size_type bucket_count, const ArgumentHash& hash, const ArgumentAlloc& alloc)
-                : sherwood_v3_table(il, bucket_count, hash, ArgumentEqual(), alloc)
-            {
-            }
-            sherwood_v3_table(const sherwood_v3_table& other)
-                : sherwood_v3_table(other, AllocatorTraits::select_on_container_copy_construction(other.get_allocator()))
-            {
-            }
-            sherwood_v3_table(const sherwood_v3_table& other, const ArgumentAlloc& alloc)
-                : EntryAlloc(alloc), Hasher(other), Equal(other), _max_load_factor(other._max_load_factor)
-            {
-                rehash_for_other_container(other);
-                try
-                {
-                    insert(other.begin(), other.end());
-                }
-                catch (...)
-                {
-                    clear();
-                    deallocate_data(entries, num_slots_minus_one, max_lookups);
-                    throw;
-                }
-            }
-            sherwood_v3_table(sherwood_v3_table&& other) noexcept
-                : EntryAlloc(std::move(other)), Hasher(std::move(other)), Equal(std::move(other))
-            {
-                swap_pointers(other);
-            }
-            sherwood_v3_table(sherwood_v3_table&& other, const ArgumentAlloc& alloc) noexcept
-                : EntryAlloc(alloc), Hasher(std::move(other)), Equal(std::move(other))
-            {
-                swap_pointers(other);
-            }
-            sherwood_v3_table& operator=(const sherwood_v3_table& other)
-            {
-                if (this == std::addressof(other))
-                    return *this;
+        namespace detail_ {
+            template <class T, T Begin, T End, bool>
+            struct IntSeqImpl {
+                using TValue = T;
+                static_assert(std::is_integral<TValue>::value, "not integral type");
+                static_assert(Begin >= 0 && Begin < End, "unexpected argument (Begin<0 || Begin<=End)");
 
-                clear();
-                if (AllocatorTraits::propagate_on_container_copy_assignment::value)
-                {
-                    if (static_cast<EntryAlloc&>(*this) != static_cast<const EntryAlloc&>(other))
-                    {
-                        reset_to_empty_state();
-                    }
-                    AssignIfTrue<EntryAlloc, AllocatorTraits::propagate_on_container_copy_assignment::value>()(*this, other);
-                }
-                _max_load_factor = other._max_load_factor;
-                static_cast<Hasher&>(*this) = other;
-                static_cast<Equal&>(*this) = other;
-                rehash_for_other_container(other);
-                insert(other.begin(), other.end());
-                return *this;
-            }
-            sherwood_v3_table& operator=(sherwood_v3_table&& other) noexcept
-            {
-                if (this == std::addressof(other))
-                    return *this;
-                else if (AllocatorTraits::propagate_on_container_move_assignment::value)
-                {
-                    clear();
-                    reset_to_empty_state();
-                    AssignIfTrue<EntryAlloc, AllocatorTraits::propagate_on_container_move_assignment::value>()(*this, std::move(other));
-                    swap_pointers(other);
-                }
-                else if (static_cast<EntryAlloc&>(*this) == static_cast<EntryAlloc&>(other))
-                {
-                    swap_pointers(other);
-                }
-                else
-                {
-                    clear();
-                    _max_load_factor = other._max_load_factor;
-                    rehash_for_other_container(other);
-                    for (T& elem : other)
-                        emplace(std::move(elem));
-                    other.clear();
-                }
-                static_cast<Hasher&>(*this) = std::move(other);
-                static_cast<Equal&>(*this) = std::move(other);
-                return *this;
-            }
-            ~sherwood_v3_table()
-            {
-                clear();
-                deallocate_data(entries, num_slots_minus_one, max_lookups);
-            }
+                template <class, class>
+                struct IntSeqCombiner;
 
-            const allocator_type& get_allocator() const
-            {
-                return static_cast<const allocator_type&>(*this);
-            }
-            const ArgumentEqual& key_eq() const
-            {
-                return static_cast<const ArgumentEqual&>(*this);
-            }
-            const ArgumentHash& hash_function() const
-            {
-                return static_cast<const ArgumentHash&>(*this);
-            }
+                template <TValue... Inds0, TValue... Inds1>
+                struct IntSeqCombiner<integer_sequence<TValue, Inds0...>, integer_sequence<TValue, Inds1...>> {
+                    using TResult = integer_sequence<TValue, Inds0..., Inds1...>;
+                };
 
-            template<typename ValueType>
-            struct templated_iterator
-            {
-                templated_iterator() = default;
-                templated_iterator(EntryPointer current)
-                    : current(current)
-                {
-                }
-                EntryPointer current = EntryPointer();
-
-                using iterator_category = std::forward_iterator_tag;
-                using value_type = ValueType;
-                using difference_type = ptrdiff_t;
-                using pointer = ValueType*;
-                using reference = ValueType&;
-
-                friend bool operator==(const templated_iterator& lhs, const templated_iterator& rhs)
-                {
-                    return lhs.current == rhs.current;
-                }
-                friend bool operator!=(const templated_iterator& lhs, const templated_iterator& rhs)
-                {
-                    return !(lhs == rhs);
-                }
-
-                templated_iterator& operator++()
-                {
-                    do
-                    {
-                        ++current;
-                    } while (current->is_empty());
-                    return *this;
-                }
-                templated_iterator operator++(int)
-                {
-                    templated_iterator copy(*this);
-                    ++*this;
-                    return copy;
-                }
-
-                ValueType& operator*() const
-                {
-                    return current->value;
-                }
-                ValueType* operator->() const
-                {
-                    return std::addressof(current->value);
-                }
-
-                operator templated_iterator<const value_type>() const
-                {
-                    return { current };
-                }
+                using TResult =
+                    typename IntSeqCombiner<typename IntSeqImpl<TValue, Begin, Begin + (End - Begin) / 2,
+                    (End - Begin) / 2 == 1>::TResult,
+                    typename IntSeqImpl<TValue, Begin + (End - Begin) / 2, End,
+                    (End - Begin + 1) / 2 == 1>::TResult>::TResult;
             };
-            using iterator = templated_iterator<value_type>;
-            using const_iterator = templated_iterator<const value_type>;
 
-            iterator begin()
-            {
-                for (EntryPointer it = entries;; ++it)
-                {
-                    if (it->has_value())
-                        return { it };
-                }
-            }
-            const_iterator begin() const
-            {
-                for (EntryPointer it = entries;; ++it)
-                {
-                    if (it->has_value())
-                        return { it };
-                }
-            }
-            const_iterator cbegin() const
-            {
-                return begin();
-            }
-            iterator end()
-            {
-                return { entries + static_cast<ptrdiff_t>(num_slots_minus_one + max_lookups) };
-            }
-            const_iterator end() const
-            {
-                return { entries + static_cast<ptrdiff_t>(num_slots_minus_one + max_lookups) };
-            }
-            const_iterator cend() const
-            {
-                return end();
-            }
+            template <class T, T Begin>
+            struct IntSeqImpl<T, Begin, Begin, false> {
+                using TValue = T;
+                static_assert(std::is_integral<TValue>::value, "not integral type");
+                static_assert(Begin >= 0, "unexpected argument (Begin<0)");
+                using TResult = integer_sequence<TValue>;
+            };
 
-            iterator find(const FindKey& key)
-            {
-                size_t index = hash_policy.index_for_hash(hash_object(key), num_slots_minus_one);
-                EntryPointer it = entries + ptrdiff_t(index);
-                for (int8_t distance = 0; it->distance_from_desired >= distance; ++distance, ++it)
-                {
-                    if (compares_equal(key, it->value))
-                        return { it };
-                }
-                return end();
-            }
-            const_iterator find(const FindKey& key) const
-            {
-                return const_cast<sherwood_v3_table*>(this)->find(key);
-            }
-            size_t count(const FindKey& key) const
-            {
-                return find(key) == end() ? 0 : 1;
-            }
-            std::pair<iterator, iterator> equal_range(const FindKey& key)
-            {
-                iterator found = find(key);
-                if (found == end())
-                    return { found, found };
-                else
-                    return { found, std::next(found) };
-            }
-            std::pair<const_iterator, const_iterator> equal_range(const FindKey& key) const
-            {
-                const_iterator found = find(key);
-                if (found == end())
-                    return { found, found };
-                else
-                    return { found, std::next(found) };
-            }
+            template <class T, T Begin, T End>
+            struct IntSeqImpl<T, Begin, End, true> {
+                using TValue = T;
+                static_assert(std::is_integral<TValue>::value, "not integral type");
+                static_assert(Begin >= 0, "unexpected argument (Begin<0)");
+                using TResult = integer_sequence<TValue, Begin>;
+            };
+        } // namespace detail_
 
-            template<typename Key, typename... Args>
-            std::pair<iterator, bool> emplace(Key&& key, Args &&... args)
-            {
-                size_t index = hash_policy.index_for_hash(hash_object(key), num_slots_minus_one);
-                EntryPointer current_entry = entries + ptrdiff_t(index);
-                int8_t distance_from_desired = 0;
-                for (; current_entry->distance_from_desired >= distance_from_desired; ++current_entry, ++distance_from_desired)
-                {
-                    if (compares_equal(key, current_entry->value))
-                        return { { current_entry }, false };
-                }
-                return emplace_new_key(distance_from_desired, current_entry, std::forward<Key>(key), std::forward<Args>(args)...);
-            }
+        template <class T, T N>
+        using make_integer_sequence = typename detail_::IntSeqImpl<T, 0, N, (N - 0) == 1>::TResult;
 
-            std::pair<iterator, bool> insert(const value_type& value)
-            {
-                return emplace(value);
+        template <std::size_t N>
+        using make_index_sequence = make_integer_sequence<std::size_t, N>;
+
+        template <class... T>
+        using index_sequence_for = make_index_sequence<sizeof...(T)>;
+
+    } // namespace ROBIN_HOOD_STD
+
+#endif
+
+    namespace detail {
+
+        // make sure we static_cast to the correct type for hash_int
+#if ROBIN_HOOD(BITNESS) == 64
+        using SizeT = uint64_t;
+#else
+        using SizeT = uint32_t;
+#endif
+
+        template <typename T>
+        T rotr(T x, unsigned k) {
+            return (x >> k) | (x << (8U * sizeof(T) - k));
+        }
+
+        // This cast gets rid of warnings like "cast from 'uint8_t*' {aka 'unsigned char*'} to
+        // 'uint64_t*' {aka 'long unsigned int*'} increases required alignment of target type". Use with
+        // care!
+        template <typename T>
+        inline T reinterpret_cast_no_cast_align_warning(void* ptr) noexcept {
+            return reinterpret_cast<T>(ptr);
+        }
+
+        template <typename T>
+        inline T reinterpret_cast_no_cast_align_warning(void const* ptr) noexcept {
+            return reinterpret_cast<T>(ptr);
+        }
+
+        // make sure this is not inlined as it is slow and dramatically enlarges code, thus making other
+        // inlinings more difficult. Throws are also generally the slow path.
+        template <typename E, typename... Args>
+        [[noreturn]] ROBIN_HOOD(NOINLINE)
+#if ROBIN_HOOD(HAS_EXCEPTIONS)
+            void doThrow(Args&&... args) {
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-array-to-pointer-decay)
+            throw E(std::forward<Args>(args)...);
+        }
+#else
+            void doThrow(Args&&... ROBIN_HOOD_UNUSED(args) /*unused*/) {
+            abort();
+        }
+#endif
+
+        template <typename E, typename T, typename... Args>
+        T* assertNotNull(T* t, Args&&... args) {
+            if (ROBIN_HOOD_UNLIKELY(nullptr == t)) {
+                doThrow<E>(std::forward<Args>(args)...);
             }
-            std::pair<iterator, bool> insert(value_type&& value)
-            {
-                return emplace(std::move(value));
-            }
-            template<typename... Args>
-            iterator emplace_hint(const_iterator, Args &&... args)
-            {
-                return emplace(std::forward<Args>(args)...).first;
-            }
-            iterator insert(const_iterator, const value_type& value)
-            {
-                return emplace(value).first;
-            }
-            iterator insert(const_iterator, value_type&& value)
-            {
-                return emplace(std::move(value)).first;
+            return t;
+        }
+
+        template <typename T>
+        inline T unaligned_load(void const* ptr) noexcept {
+            // using memcpy so we don't get into unaligned load problems.
+            // compiler should optimize this very well anyways.
+            T t;
+            std::memcpy(&t, ptr, sizeof(T));
+            return t;
+        }
+
+        // Allocates bulks of memory for objects of type T. This deallocates the memory in the destructor,
+        // and keeps a linked list of the allocated memory around. Overhead per allocation is the size of a
+        // pointer.
+        template <typename T, size_t MinNumAllocs = 4, size_t MaxNumAllocs = 256>
+        class BulkPoolAllocator {
+        public:
+            BulkPoolAllocator() noexcept = default;
+
+            // does not copy anything, just creates a new allocator.
+            BulkPoolAllocator(const BulkPoolAllocator& ROBIN_HOOD_UNUSED(o) /*unused*/) noexcept
+                : mHead(nullptr)
+                , mListForFree(nullptr) {
             }
 
-            template<typename It>
-            void insert(It begin, It end)
-            {
-                for (; begin != end; ++begin)
-                {
-                    emplace(*begin);
-                }
-            }
-            void insert(std::initializer_list<value_type> il)
-            {
-                insert(il.begin(), il.end());
+            BulkPoolAllocator(BulkPoolAllocator&& o) noexcept
+                : mHead(o.mHead)
+                , mListForFree(o.mListForFree) {
+                o.mListForFree = nullptr;
+                o.mHead = nullptr;
             }
 
-            void rehash(size_t num_buckets)
-            {
-                num_buckets = std::max(num_buckets, static_cast<size_t>(std::ceil(num_elements / static_cast<double>(_max_load_factor))));
-                if (num_buckets == 0)
-                {
-                    reset_to_empty_state();
-                    return;
-                }
-                auto new_prime_index = hash_policy.next_size_over(num_buckets);
-                if (num_buckets == bucket_count())
-                    return;
-                int8_t new_max_lookups = compute_max_lookups(num_buckets);
-                EntryPointer new_buckets(AllocatorTraits::allocate(*this, num_buckets + new_max_lookups));
-                EntryPointer special_end_item = new_buckets + static_cast<ptrdiff_t>(num_buckets + new_max_lookups - 1);
-                for (EntryPointer it = new_buckets; it != special_end_item; ++it)
-                    it->distance_from_desired = -1;
-                special_end_item->distance_from_desired = Entry::special_end_value;
-                std::swap(entries, new_buckets);
-                std::swap(num_slots_minus_one, num_buckets);
-                --num_slots_minus_one;
-                hash_policy.commit(new_prime_index);
-                int8_t old_max_lookups = max_lookups;
-                max_lookups = new_max_lookups;
-                num_elements = 0;
-                for (EntryPointer it = new_buckets, end = it + static_cast<ptrdiff_t>(num_buckets + old_max_lookups); it != end; ++it)
-                {
-                    if (it->has_value())
-                    {
-                        emplace(std::move(it->value));
-                        it->destroy_value();
-                    }
-                }
-                deallocate_data(new_buckets, num_buckets, old_max_lookups);
+            BulkPoolAllocator& operator=(BulkPoolAllocator&& o) noexcept {
+                reset();
+                mHead = o.mHead;
+                mListForFree = o.mListForFree;
+                o.mListForFree = nullptr;
+                o.mHead = nullptr;
+                return *this;
             }
 
-            void reserve(size_t num_elements)
-            {
-                size_t required_buckets = num_buckets_for_reserve(num_elements);
-                if (required_buckets > bucket_count())
-                    rehash(required_buckets);
+            BulkPoolAllocator&
+                // NOLINTNEXTLINE(bugprone-unhandled-self-assignment,cert-oop54-cpp)
+                operator=(const BulkPoolAllocator& ROBIN_HOOD_UNUSED(o) /*unused*/) noexcept {
+                // does not do anything
+                return *this;
             }
 
-            // the return value is a type that can be converted to an iterator
-            // the reason for doing this is that it's not free to find the
-            // iterator pointing at the next element. if you care about the
-            // next iterator, turn the return value into an iterator
-            convertible_to_iterator erase(const_iterator to_erase)
-            {
-                EntryPointer current = to_erase.current;
-                current->destroy_value();
-                --num_elements;
-                for (EntryPointer next = current + ptrdiff_t(1); !next->is_at_desired_position(); ++current, ++next)
-                {
-                    current->emplace(next->distance_from_desired - 1, std::move(next->value));
-                    next->destroy_value();
-                }
-                return { to_erase.current };
+            ~BulkPoolAllocator() noexcept {
+                reset();
             }
 
-            iterator erase(const_iterator begin_it, const_iterator end_it)
-            {
-                if (begin_it == end_it)
-                    return { begin_it.current };
-                for (EntryPointer it = begin_it.current, end = end_it.current; it != end; ++it)
-                {
-                    if (it->has_value())
-                    {
-                        it->destroy_value();
-                        --num_elements;
-                    }
+            // Deallocates all allocated memory.
+            void reset() noexcept {
+                while (mListForFree) {
+                    T* tmp = *mListForFree;
+                    ROBIN_HOOD_LOG("std::free")
+                        std::free(mListForFree);
+                    mListForFree = reinterpret_cast_no_cast_align_warning<T**>(tmp);
                 }
-                if (end_it == this->end())
-                    return this->end();
-                ptrdiff_t num_to_move = std::min(static_cast<ptrdiff_t>(end_it.current->distance_from_desired), end_it.current - begin_it.current);
-                EntryPointer to_return = end_it.current - num_to_move;
-                for (EntryPointer it = end_it.current; !it->is_at_desired_position();)
-                {
-                    EntryPointer target = it - num_to_move;
-                    target->emplace(it->distance_from_desired - num_to_move, std::move(it->value));
-                    it->destroy_value();
-                    ++it;
-                    num_to_move = std::min(static_cast<ptrdiff_t>(it->distance_from_desired), num_to_move);
-                }
-                return { to_return };
+                mHead = nullptr;
             }
 
-            size_t erase(const FindKey& key)
-            {
-                auto found = find(key);
-                if (found == end())
-                    return 0;
-                else
-                {
-                    erase(found);
-                    return 1;
+            // allocates, but does NOT initialize. Use in-place new constructor, e.g.
+            //   T* obj = pool.allocate();
+            //   ::new (static_cast<void*>(obj)) T();
+            T* allocate() {
+                T* tmp = mHead;
+                if (!tmp) {
+                    tmp = performAllocation();
+                }
+
+                mHead = *reinterpret_cast_no_cast_align_warning<T**>(tmp);
+                return tmp;
+            }
+
+            // does not actually deallocate but puts it in store.
+            // make sure you have already called the destructor! e.g. with
+            //  obj->~T();
+            //  pool.deallocate(obj);
+            void deallocate(T* obj) noexcept {
+                *reinterpret_cast_no_cast_align_warning<T**>(obj) = mHead;
+                mHead = obj;
+            }
+
+            // Adds an already allocated block of memory to the allocator. This allocator is from now on
+            // responsible for freeing the data (with free()). If the provided data is not large enough to
+            // make use of, it is immediately freed. Otherwise it is reused and freed in the destructor.
+            void addOrFree(void* ptr, const size_t numBytes) noexcept {
+                // calculate number of available elements in ptr
+                if (numBytes < ALIGNMENT + ALIGNED_SIZE) {
+                    // not enough data for at least one element. Free and return.
+                    ROBIN_HOOD_LOG("std::free")
+                        std::free(ptr);
+                }
+                else {
+                    ROBIN_HOOD_LOG("add to buffer")
+                        add(ptr, numBytes);
                 }
             }
 
-            void clear()
-            {
-                for (EntryPointer it = entries, end = it + static_cast<ptrdiff_t>(num_slots_minus_one + max_lookups); it != end; ++it)
-                {
-                    if (it->has_value())
-                        it->destroy_value();
-                }
-                num_elements = 0;
-            }
-
-            void shrink_to_fit()
-            {
-                rehash_for_other_container(*this);
-            }
-
-            void swap(sherwood_v3_table& other)
-            {
+            void swap(BulkPoolAllocator<T, MinNumAllocs, MaxNumAllocs>& other) noexcept {
                 using std::swap;
-                swap_pointers(other);
-                swap(static_cast<ArgumentHash&>(*this), static_cast<ArgumentHash&>(other));
-                swap(static_cast<ArgumentEqual&>(*this), static_cast<ArgumentEqual&>(other));
-                if (AllocatorTraits::propagate_on_container_swap::value)
-                    swap(static_cast<EntryAlloc&>(*this), static_cast<EntryAlloc&>(other));
-            }
-
-            size_t size() const
-            {
-                return num_elements;
-            }
-            size_t max_size() const
-            {
-                return (AllocatorTraits::max_size(*this)) / sizeof(Entry);
-            }
-            size_t bucket_count() const
-            {
-                return num_slots_minus_one ? num_slots_minus_one + 1 : 0;
-            }
-            size_type max_bucket_count() const
-            {
-                return (AllocatorTraits::max_size(*this) - min_lookups) / sizeof(Entry);
-            }
-            size_t bucket(const FindKey& key) const
-            {
-                return hash_policy.index_for_hash(hash_object(key), num_slots_minus_one);
-            }
-            float load_factor() const
-            {
-                size_t buckets = bucket_count();
-                if (buckets)
-                    return static_cast<float>(num_elements) / bucket_count();
-                else
-                    return 0;
-            }
-            void max_load_factor(float value)
-            {
-                _max_load_factor = value;
-            }
-            float max_load_factor() const
-            {
-                return _max_load_factor;
-            }
-
-            bool empty() const
-            {
-                return num_elements == 0;
+                swap(mHead, other.mHead);
+                swap(mListForFree, other.mListForFree);
             }
 
         private:
-            EntryPointer entries = Entry::empty_default_table();
-            size_t num_slots_minus_one = 0;
-            typename HashPolicySelector<ArgumentHash>::type hash_policy;
-            int8_t max_lookups = detailv3::min_lookups - 1;
-            float _max_load_factor = 0.5f;
-            size_t num_elements = 0;
+            // iterates the list of allocated memory to calculate how many to alloc next.
+            // Recalculating this each time saves us a size_t member.
+            // This ignores the fact that memory blocks might have been added manually with addOrFree. In
+            // practice, this should not matter much.
+            ROBIN_HOOD(NODISCARD) size_t calcNumElementsToAlloc() const noexcept {
+                auto tmp = mListForFree;
+                size_t numAllocs = MinNumAllocs;
 
-            static int8_t compute_max_lookups(size_t num_buckets)
-            {
-                int8_t desired = detailv3::log2(num_buckets);
-                return std::max(detailv3::min_lookups, desired);
-            }
-
-            size_t num_buckets_for_reserve(size_t num_elements) const
-            {
-                return static_cast<size_t>(std::ceil(num_elements / std::min(0.5, static_cast<double>(_max_load_factor))));
-            }
-            void rehash_for_other_container(const sherwood_v3_table& other)
-            {
-                rehash(std::min(num_buckets_for_reserve(other.size()), other.bucket_count()));
-            }
-
-            void swap_pointers(sherwood_v3_table& other)
-            {
-                using std::swap;
-                swap(hash_policy, other.hash_policy);
-                swap(entries, other.entries);
-                swap(num_slots_minus_one, other.num_slots_minus_one);
-                swap(num_elements, other.num_elements);
-                swap(max_lookups, other.max_lookups);
-                swap(_max_load_factor, other._max_load_factor);
-            }
-
-            template<typename Key, typename... Args>
-            SKA_NOINLINE(std::pair<iterator, bool>) emplace_new_key(int8_t distance_from_desired, EntryPointer current_entry, Key&& key, Args &&... args)
-            {
-                using std::swap;
-                if (num_slots_minus_one == 0 || distance_from_desired == max_lookups || num_elements + 1 > (num_slots_minus_one + 1) * static_cast<double>(_max_load_factor))
-                {
-                    grow();
-                    return emplace(std::forward<Key>(key), std::forward<Args>(args)...);
+                while (numAllocs * 2 <= MaxNumAllocs && tmp) {
+                    auto x = reinterpret_cast<T***>(tmp);
+                    tmp = *x;
+                    numAllocs *= 2;
                 }
-                else if (current_entry->is_empty())
-                {
-                    current_entry->emplace(distance_from_desired, std::forward<Key>(key), std::forward<Args>(args)...);
-                    ++num_elements;
-                    return { { current_entry }, true };
+
+                return numAllocs;
+            }
+
+            // WARNING: Underflow if numBytes < ALIGNMENT! This is guarded in addOrFree().
+            void add(void* ptr, const size_t numBytes) noexcept {
+                const size_t numElements = (numBytes - ALIGNMENT) / ALIGNED_SIZE;
+
+                auto data = reinterpret_cast<T**>(ptr);
+
+                // link free list
+                auto x = reinterpret_cast<T***>(data);
+                *x = mListForFree;
+                mListForFree = data;
+
+                // create linked list for newly allocated data
+                auto* const headT =
+                    reinterpret_cast_no_cast_align_warning<T*>(reinterpret_cast<char*>(ptr) + ALIGNMENT);
+
+                auto* const head = reinterpret_cast<char*>(headT);
+
+                // Visual Studio compiler automatically unrolls this loop, which is pretty cool
+                for (size_t i = 0; i < numElements; ++i) {
+                    *reinterpret_cast_no_cast_align_warning<char**>(head + i * ALIGNED_SIZE) =
+                        head + (i + 1) * ALIGNED_SIZE;
                 }
-                value_type to_insert(std::forward<Key>(key), std::forward<Args>(args)...);
-                swap(distance_from_desired, current_entry->distance_from_desired);
-                swap(to_insert, current_entry->value);
-                iterator result = { current_entry };
-                for (++distance_from_desired, ++current_entry;; ++current_entry)
-                {
-                    if (current_entry->is_empty())
-                    {
-                        current_entry->emplace(distance_from_desired, std::move(to_insert));
-                        ++num_elements;
-                        return { result, true };
+
+                // last one points to 0
+                *reinterpret_cast_no_cast_align_warning<T**>(head + (numElements - 1) * ALIGNED_SIZE) =
+                    mHead;
+                mHead = headT;
+            }
+
+            // Called when no memory is available (mHead == 0).
+            // Don't inline this slow path.
+            ROBIN_HOOD(NOINLINE) T* performAllocation() {
+                size_t const numElementsToAlloc = calcNumElementsToAlloc();
+
+                // alloc new memory: [prev |T, T, ... T]
+                size_t const bytes = ALIGNMENT + ALIGNED_SIZE * numElementsToAlloc;
+                ROBIN_HOOD_LOG("std::malloc " << bytes << " = " << ALIGNMENT << " + " << ALIGNED_SIZE
+                    << " * " << numElementsToAlloc)
+                    add(assertNotNull<std::bad_alloc>(std::malloc(bytes)), bytes);
+                return mHead;
+            }
+
+            // enforce byte alignment of the T's
+#if ROBIN_HOOD(CXX) >= ROBIN_HOOD(CXX14)
+            static constexpr size_t ALIGNMENT =
+                (std::max)(std::alignment_of<T>::value, std::alignment_of<T*>::value);
+#else
+            static const size_t ALIGNMENT =
+                (ROBIN_HOOD_STD::alignment_of<T>::value > ROBIN_HOOD_STD::alignment_of<T*>::value)
+                ? ROBIN_HOOD_STD::alignment_of<T>::value
+                : +ROBIN_HOOD_STD::alignment_of<T*>::value; // the + is for walkarround
+#endif
+
+            static constexpr size_t ALIGNED_SIZE = ((sizeof(T) - 1) / ALIGNMENT + 1) * ALIGNMENT;
+
+            static_assert(MinNumAllocs >= 1, "MinNumAllocs");
+            static_assert(MaxNumAllocs >= MinNumAllocs, "MaxNumAllocs");
+            static_assert(ALIGNED_SIZE >= sizeof(T*), "ALIGNED_SIZE");
+            static_assert(0 == (ALIGNED_SIZE % sizeof(T*)), "ALIGNED_SIZE mod");
+            static_assert(ALIGNMENT >= sizeof(T*), "ALIGNMENT");
+
+            T* mHead{ nullptr };
+            T** mListForFree{ nullptr };
+        };
+
+        template <typename T, size_t MinSize, size_t MaxSize, bool IsFlat>
+        struct NodeAllocator;
+
+        // dummy allocator that does nothing
+        template <typename T, size_t MinSize, size_t MaxSize>
+        struct NodeAllocator<T, MinSize, MaxSize, true> {
+
+            // we are not using the data, so just free it.
+            void addOrFree(void* ptr, size_t ROBIN_HOOD_UNUSED(numBytes) /*unused*/) noexcept {
+                ROBIN_HOOD_LOG("std::free")
+                    std::free(ptr);
+            }
+        };
+
+        template <typename T, size_t MinSize, size_t MaxSize>
+        struct NodeAllocator<T, MinSize, MaxSize, false> : public BulkPoolAllocator<T, MinSize, MaxSize> {};
+
+        // c++14 doesn't have is_nothrow_swappable, and clang++ 6.0.1 doesn't like it either, so I'm making
+        // my own here.
+        namespace swappable {
+#if ROBIN_HOOD(CXX) < ROBIN_HOOD(CXX17)
+            using std::swap;
+            template <typename T>
+            struct nothrow {
+                static const bool value = noexcept(swap(std::declval<T&>(), std::declval<T&>()));
+            };
+#else
+            template <typename T>
+            struct nothrow {
+                static const bool value = std::is_nothrow_swappable<T>::value;
+            };
+#endif
+        } // namespace swappable
+
+    } // namespace detail
+
+    struct is_transparent_tag {};
+
+    // A custom pair implementation is used in the map because std::pair is not is_trivially_copyable,
+    // which means it would  not be allowed to be used in std::memcpy. This struct is copyable, which is
+    // also tested.
+    template <typename T1, typename T2>
+    struct pair {
+        using first_type = T1;
+        using second_type = T2;
+
+        template <typename U1 = T1, typename U2 = T2,
+            typename = typename std::enable_if<std::is_default_constructible<U1>::value&&
+            std::is_default_constructible<U2>::value>::type>
+        constexpr pair() noexcept(noexcept(U1()) && noexcept(U2()))
+            : first()
+            , second() {
+        }
+
+        // pair constructors are explicit so we don't accidentally call this ctor when we don't have to.
+        explicit constexpr pair(std::pair<T1, T2> const& o) noexcept(
+            noexcept(T1(std::declval<T1 const&>())) && noexcept(T2(std::declval<T2 const&>())))
+            : first(o.first)
+            , second(o.second) {
+        }
+
+        // pair constructors are explicit so we don't accidentally call this ctor when we don't have to.
+        explicit constexpr pair(std::pair<T1, T2>&& o) noexcept(noexcept(
+            T1(std::move(std::declval<T1&&>()))) && noexcept(T2(std::move(std::declval<T2&&>()))))
+            : first(std::move(o.first))
+            , second(std::move(o.second)) {
+        }
+
+        constexpr pair(T1&& a, T2&& b) noexcept(noexcept(
+            T1(std::move(std::declval<T1&&>()))) && noexcept(T2(std::move(std::declval<T2&&>()))))
+            : first(std::move(a))
+            , second(std::move(b)) {
+        }
+
+        template <typename U1, typename U2>
+        constexpr pair(U1&& a, U2&& b) noexcept(noexcept(T1(std::forward<U1>(
+            std::declval<U1&&>()))) && noexcept(T2(std::forward<U2>(std::declval<U2&&>()))))
+            : first(std::forward<U1>(a))
+            , second(std::forward<U2>(b)) {
+        }
+
+        template <typename... U1, typename... U2>
+        // MSVC 2015 produces error "C2476: ‘constexpr’ constructor does not initialize all members"
+        // if this constructor is constexpr
+#if !ROBIN_HOOD(BROKEN_CONSTEXPR)
+        constexpr
+#endif
+            pair(std::piecewise_construct_t /*unused*/, std::tuple<U1...> a,
+                std::tuple<U2...>
+                b) noexcept(noexcept(pair(std::declval<std::tuple<U1...>&>(),
+                    std::declval<std::tuple<U2...>&>(),
+                    ROBIN_HOOD_STD::index_sequence_for<U1...>(),
+                    ROBIN_HOOD_STD::index_sequence_for<U2...>())))
+            : pair(a, b, ROBIN_HOOD_STD::index_sequence_for<U1...>(),
+                ROBIN_HOOD_STD::index_sequence_for<U2...>()) {
+        }
+
+        // constructor called from the std::piecewise_construct_t ctor
+        template <typename... U1, size_t... I1, typename... U2, size_t... I2>
+        pair(std::tuple<U1...>& a, std::tuple<U2...>& b, ROBIN_HOOD_STD::index_sequence<I1...> /*unused*/, ROBIN_HOOD_STD::index_sequence<I2...> /*unused*/) noexcept(
+            noexcept(T1(std::forward<U1>(std::get<I1>(
+                std::declval<std::tuple<
+                U1...>&>()))...)) && noexcept(T2(std::
+                    forward<U2>(std::get<I2>(
+                        std::declval<std::tuple<U2...>&>()))...)))
+            : first(std::forward<U1>(std::get<I1>(a))...)
+            , second(std::forward<U2>(std::get<I2>(b))...) {
+            // make visual studio compiler happy about warning about unused a & b.
+            // Visual studio's pair implementation disables warning 4100.
+            (void)a;
+            (void)b;
+        }
+
+        void swap(pair<T1, T2>& o) noexcept((detail::swappable::nothrow<T1>::value) &&
+            (detail::swappable::nothrow<T2>::value)) {
+            using std::swap;
+            swap(first, o.first);
+            swap(second, o.second);
+        }
+
+        T1 first;  // NOLINT(misc-non-private-member-variables-in-classes)
+        T2 second; // NOLINT(misc-non-private-member-variables-in-classes)
+    };
+
+    template <typename A, typename B>
+    inline void swap(pair<A, B>& a, pair<A, B>& b) noexcept(
+        noexcept(std::declval<pair<A, B>&>().swap(std::declval<pair<A, B>&>()))) {
+        a.swap(b);
+    }
+
+    template <typename A, typename B>
+    inline constexpr bool operator==(pair<A, B> const& x, pair<A, B> const& y) {
+        return (x.first == y.first) && (x.second == y.second);
+    }
+    template <typename A, typename B>
+    inline constexpr bool operator!=(pair<A, B> const& x, pair<A, B> const& y) {
+        return !(x == y);
+    }
+    template <typename A, typename B>
+    inline constexpr bool operator<(pair<A, B> const& x, pair<A, B> const& y) noexcept(noexcept(
+        std::declval<A const&>() < std::declval<A const&>()) && noexcept(std::declval<B const&>() <
+            std::declval<B const&>())) {
+        return x.first < y.first || (!(y.first < x.first) && x.second < y.second);
+    }
+    template <typename A, typename B>
+    inline constexpr bool operator>(pair<A, B> const& x, pair<A, B> const& y) {
+        return y < x;
+    }
+    template <typename A, typename B>
+    inline constexpr bool operator<=(pair<A, B> const& x, pair<A, B> const& y) {
+        return !(x > y);
+    }
+    template <typename A, typename B>
+    inline constexpr bool operator>=(pair<A, B> const& x, pair<A, B> const& y) {
+        return !(x < y);
+    }
+
+    inline size_t hash_bytes(void const* ptr, size_t len) noexcept {
+        static constexpr uint64_t m = UINT64_C(0xc6a4a7935bd1e995);
+        static constexpr uint64_t seed = UINT64_C(0xe17a1465);
+        static constexpr unsigned int r = 47;
+
+        auto const* const data64 = static_cast<uint64_t const*>(ptr);
+        uint64_t h = seed ^ (len * m);
+
+        size_t const n_blocks = len / 8;
+        for (size_t i = 0; i < n_blocks; ++i) {
+            auto k = detail::unaligned_load<uint64_t>(data64 + i);
+
+            k *= m;
+            k ^= k >> r;
+            k *= m;
+
+            h ^= k;
+            h *= m;
+        }
+
+        auto const* const data8 = reinterpret_cast<uint8_t const*>(data64 + n_blocks);
+        switch (len & 7U) {
+        case 7:
+            h ^= static_cast<uint64_t>(data8[6]) << 48U;
+            ROBIN_HOOD(FALLTHROUGH); // FALLTHROUGH
+        case 6:
+            h ^= static_cast<uint64_t>(data8[5]) << 40U;
+            ROBIN_HOOD(FALLTHROUGH); // FALLTHROUGH
+        case 5:
+            h ^= static_cast<uint64_t>(data8[4]) << 32U;
+            ROBIN_HOOD(FALLTHROUGH); // FALLTHROUGH
+        case 4:
+            h ^= static_cast<uint64_t>(data8[3]) << 24U;
+            ROBIN_HOOD(FALLTHROUGH); // FALLTHROUGH
+        case 3:
+            h ^= static_cast<uint64_t>(data8[2]) << 16U;
+            ROBIN_HOOD(FALLTHROUGH); // FALLTHROUGH
+        case 2:
+            h ^= static_cast<uint64_t>(data8[1]) << 8U;
+            ROBIN_HOOD(FALLTHROUGH); // FALLTHROUGH
+        case 1:
+            h ^= static_cast<uint64_t>(data8[0]);
+            h *= m;
+            ROBIN_HOOD(FALLTHROUGH); // FALLTHROUGH
+        default:
+            break;
+        }
+
+        h ^= h >> r;
+
+        // not doing the final step here, because this will be done by keyToIdx anyways
+        // h *= m;
+        // h ^= h >> r;
+        return static_cast<size_t>(h);
+    }
+
+    inline size_t hash_int(uint64_t x) noexcept {
+        // tried lots of different hashes, let's stick with murmurhash3. It's simple, fast, well tested,
+        // and doesn't need any special 128bit operations.
+        x ^= x >> 33U;
+        x *= UINT64_C(0xff51afd7ed558ccd);
+        x ^= x >> 33U;
+
+        // not doing the final step here, because this will be done by keyToIdx anyways
+        // x *= UINT64_C(0xc4ceb9fe1a85ec53);
+        // x ^= x >> 33U;
+        return static_cast<size_t>(x);
+    }
+
+    // A thin wrapper around std::hash, performing an additional simple mixing step of the result.
+    template <typename T, typename Enable = void>
+    struct hash : public std::hash<T> {
+        size_t operator()(T const& obj) const
+            noexcept(noexcept(std::declval<std::hash<T>>().operator()(std::declval<T const&>()))) {
+            // call base hash
+            auto result = std::hash<T>::operator()(obj);
+            // return mixed of that, to be save against identity has
+            return hash_int(static_cast<detail::SizeT>(result));
+        }
+    };
+
+    template <typename CharT>
+    struct hash<std::basic_string<CharT>> {
+        size_t operator()(std::basic_string<CharT> const& str) const noexcept {
+            return hash_bytes(str.data(), sizeof(CharT) * str.size());
+        }
+    };
+
+#if ROBIN_HOOD(CXX) >= ROBIN_HOOD(CXX17)
+    template <typename CharT>
+    struct hash<std::basic_string_view<CharT>> {
+        size_t operator()(std::basic_string_view<CharT> const& sv) const noexcept {
+            return hash_bytes(sv.data(), sizeof(CharT) * sv.size());
+        }
+    };
+#endif
+
+    template <class T>
+    struct hash<T*> {
+        size_t operator()(T* ptr) const noexcept {
+            return hash_int(reinterpret_cast<detail::SizeT>(ptr));
+        }
+    };
+
+    template <class T>
+    struct hash<std::unique_ptr<T>> {
+        size_t operator()(std::unique_ptr<T> const& ptr) const noexcept {
+            return hash_int(reinterpret_cast<detail::SizeT>(ptr.get()));
+        }
+    };
+
+    template <class T>
+    struct hash<std::shared_ptr<T>> {
+        size_t operator()(std::shared_ptr<T> const& ptr) const noexcept {
+            return hash_int(reinterpret_cast<detail::SizeT>(ptr.get()));
+        }
+    };
+
+    template <typename Enum>
+    struct hash<Enum, typename std::enable_if<std::is_enum<Enum>::value>::type> {
+        size_t operator()(Enum e) const noexcept {
+            using Underlying = typename std::underlying_type<Enum>::type;
+            return hash<Underlying>{}(static_cast<Underlying>(e));
+        }
+    };
+
+#define ROBIN_HOOD_HASH_INT(T)                           \
+    template <>                                          \
+    struct hash<T> {                                     \
+        size_t operator()(T const& obj) const noexcept { \
+            return hash_int(static_cast<uint64_t>(obj)); \
+        }                                                \
+    }
+
+#if defined(__GNUC__) && !defined(__clang__)
+#    pragma GCC diagnostic push
+#    pragma GCC diagnostic ignored "-Wuseless-cast"
+#endif
+    // see https://en.cppreference.com/w/cpp/utility/hash
+    ROBIN_HOOD_HASH_INT(bool);
+    ROBIN_HOOD_HASH_INT(char);
+    ROBIN_HOOD_HASH_INT(signed char);
+    ROBIN_HOOD_HASH_INT(unsigned char);
+    ROBIN_HOOD_HASH_INT(char16_t);
+    ROBIN_HOOD_HASH_INT(char32_t);
+#if ROBIN_HOOD(HAS_NATIVE_WCHART)
+    ROBIN_HOOD_HASH_INT(wchar_t);
+#endif
+    ROBIN_HOOD_HASH_INT(short);
+    ROBIN_HOOD_HASH_INT(unsigned short);
+    ROBIN_HOOD_HASH_INT(int);
+    ROBIN_HOOD_HASH_INT(unsigned int);
+    ROBIN_HOOD_HASH_INT(long);
+    ROBIN_HOOD_HASH_INT(long long);
+    ROBIN_HOOD_HASH_INT(unsigned long);
+    ROBIN_HOOD_HASH_INT(unsigned long long);
+#if defined(__GNUC__) && !defined(__clang__)
+#    pragma GCC diagnostic pop
+#endif
+    namespace detail {
+
+        template <typename T>
+        struct void_type {
+            using type = void;
+        };
+
+        template <typename T, typename = void>
+        struct has_is_transparent : public std::false_type {};
+
+        template <typename T>
+        struct has_is_transparent<T, typename void_type<typename T::is_transparent>::type>
+            : public std::true_type {
+        };
+
+        // using wrapper classes for hash and key_equal prevents the diamond problem when the same type
+        // is used. see https://stackoverflow.com/a/28771920/48181
+        template <typename T>
+        struct WrapHash : public T {
+            WrapHash() = default;
+            explicit WrapHash(T const& o) noexcept(noexcept(T(std::declval<T const&>())))
+                : T(o) {
+            }
+        };
+
+        template <typename T>
+        struct WrapKeyEqual : public T {
+            WrapKeyEqual() = default;
+            explicit WrapKeyEqual(T const& o) noexcept(noexcept(T(std::declval<T const&>())))
+                : T(o) {
+            }
+        };
+
+        // A highly optimized hashmap implementation, using the Robin Hood algorithm.
+        //
+        // In most cases, this map should be usable as a drop-in replacement for std::unordered_map, but
+        // be about 2x faster in most cases and require much less allocations.
+        //
+        // This implementation uses the following memory layout:
+        //
+        // [Node, Node, ... Node | info, info, ... infoSentinel ]
+        //
+        // * Node: either a DataNode that directly has the std::pair<key, val> as member,
+        //   or a DataNode with a pointer to std::pair<key,val>. Which DataNode representation to use
+        //   depends on how fast the swap() operation is. Heuristically, this is automatically choosen
+        //   based on sizeof(). there are always 2^n Nodes.
+        //
+        // * info: Each Node in the map has a corresponding info byte, so there are 2^n info bytes.
+        //   Each byte is initialized to 0, meaning the corresponding Node is empty. Set to 1 means the
+        //   corresponding node contains data. Set to 2 means the corresponding Node is filled, but it
+        //   actually belongs to the previous position and was pushed out because that place is already
+        //   taken.
+        //
+        // * infoSentinel: Sentinel byte set to 1, so that iterator's ++ can stop at end() without the
+        //   need for a idx variable.
+        //
+        // According to STL, order of templates has effect on throughput. That's why I've moved the
+        // boolean to the front.
+        // https://www.reddit.com/r/cpp/comments/ahp6iu/compile_time_binary_size_reductions_and_cs_future/eeguck4/
+        template <bool IsFlat, size_t MaxLoadFactor100, typename Key, typename T, typename Hash,
+            typename KeyEqual>
+        class Table
+            : public WrapHash<Hash>,
+            public WrapKeyEqual<KeyEqual>,
+            detail::NodeAllocator<
+            typename std::conditional<
+            std::is_void<T>::value, Key,
+            robin_hood::pair<typename std::conditional<IsFlat, Key, Key const>::type, T>>::type,
+            4, 16384, IsFlat> {
+        public:
+            static constexpr bool is_flat = IsFlat;
+            static constexpr bool is_map = !std::is_void<T>::value;
+            static constexpr bool is_set = !is_map;
+            static constexpr bool is_transparent =
+                has_is_transparent<Hash>::value && has_is_transparent<KeyEqual>::value;
+
+            using key_type = Key;
+            using mapped_type = T;
+            using value_type = typename std::conditional<
+                is_set, Key,
+                robin_hood::pair<typename std::conditional<is_flat, Key, Key const>::type, T>>::type;
+            using size_type = size_t;
+            using hasher = Hash;
+            using key_equal = KeyEqual;
+            using Self = Table<IsFlat, MaxLoadFactor100, key_type, mapped_type, hasher, key_equal>;
+
+        private:
+            static_assert(MaxLoadFactor100 > 10 && MaxLoadFactor100 < 100,
+                "MaxLoadFactor100 needs to be >10 && < 100");
+
+            using WHash = WrapHash<Hash>;
+            using WKeyEqual = WrapKeyEqual<KeyEqual>;
+
+            // configuration defaults
+
+            // make sure we have 8 elements, needed to quickly rehash mInfo
+            static constexpr size_t InitialNumElements = sizeof(uint64_t);
+            static constexpr uint32_t InitialInfoNumBits = 5;
+            static constexpr uint8_t InitialInfoInc = 1U << InitialInfoNumBits;
+            static constexpr size_t InfoMask = InitialInfoInc - 1U;
+            static constexpr uint8_t InitialInfoHashShift = 0;
+            using DataPool = detail::NodeAllocator<value_type, 4, 16384, IsFlat>;
+
+            // type needs to be wider than uint8_t.
+            using InfoType = uint32_t;
+
+            // DataNode ////////////////////////////////////////////////////////
+
+            // Primary template for the data node. We have special implementations for small and big
+            // objects. For large objects it is assumed that swap() is fairly slow, so we allocate these
+            // on the heap so swap merely swaps a pointer.
+            template <typename M, bool>
+            class DataNode {};
+
+            // Small: just allocate on the stack.
+            template <typename M>
+            class DataNode<M, true> final {
+            public:
+                template <typename... Args>
+                explicit DataNode(M& ROBIN_HOOD_UNUSED(map) /*unused*/, Args&&... args) noexcept(
+                    noexcept(value_type(std::forward<Args>(args)...)))
+                    : mData(std::forward<Args>(args)...) {
+                }
+
+                DataNode(M& ROBIN_HOOD_UNUSED(map) /*unused*/, DataNode<M, true>&& n) noexcept(
+                    std::is_nothrow_move_constructible<value_type>::value)
+                    : mData(std::move(n.mData)) {
+                }
+
+                // doesn't do anything
+                void destroy(M& ROBIN_HOOD_UNUSED(map) /*unused*/) noexcept {}
+                void destroyDoNotDeallocate() noexcept {}
+
+                value_type const* operator->() const noexcept {
+                    return &mData;
+                }
+                value_type* operator->() noexcept {
+                    return &mData;
+                }
+
+                const value_type& operator*() const noexcept {
+                    return mData;
+                }
+
+                value_type& operator*() noexcept {
+                    return mData;
+                }
+
+                template <typename VT = value_type>
+                ROBIN_HOOD(NODISCARD)
+                    typename std::enable_if<is_map, typename VT::first_type&>::type getFirst() noexcept {
+                    return mData.first;
+                }
+                template <typename VT = value_type>
+                ROBIN_HOOD(NODISCARD)
+                    typename std::enable_if<is_set, VT&>::type getFirst() noexcept {
+                    return mData;
+                }
+
+                template <typename VT = value_type>
+                ROBIN_HOOD(NODISCARD)
+                    typename std::enable_if<is_map, typename VT::first_type const&>::type
+                    getFirst() const noexcept {
+                    return mData.first;
+                }
+                template <typename VT = value_type>
+                ROBIN_HOOD(NODISCARD)
+                    typename std::enable_if<is_set, VT const&>::type getFirst() const noexcept {
+                    return mData;
+                }
+
+                template <typename MT = mapped_type>
+                ROBIN_HOOD(NODISCARD)
+                    typename std::enable_if<is_map, MT&>::type getSecond() noexcept {
+                    return mData.second;
+                }
+
+                template <typename MT = mapped_type>
+                ROBIN_HOOD(NODISCARD)
+                    typename std::enable_if<is_set, MT const&>::type getSecond() const noexcept {
+                    return mData.second;
+                }
+
+                void swap(DataNode<M, true>& o) noexcept(
+                    noexcept(std::declval<value_type>().swap(std::declval<value_type>()))) {
+                    mData.swap(o.mData);
+                }
+
+            private:
+                value_type mData;
+            };
+
+            // big object: allocate on heap.
+            template <typename M>
+            class DataNode<M, false> {
+            public:
+                template <typename... Args>
+                explicit DataNode(M& map, Args&&... args)
+                    : mData(map.allocate()) {
+                    ::new (static_cast<void*>(mData)) value_type(std::forward<Args>(args)...);
+                }
+
+                DataNode(M& ROBIN_HOOD_UNUSED(map) /*unused*/, DataNode<M, false>&& n) noexcept
+                    : mData(std::move(n.mData)) {
+                }
+
+                void destroy(M& map) noexcept {
+                    // don't deallocate, just put it into list of datapool.
+                    mData->~value_type();
+                    map.deallocate(mData);
+                }
+
+                void destroyDoNotDeallocate() noexcept {
+                    mData->~value_type();
+                }
+
+                value_type const* operator->() const noexcept {
+                    return mData;
+                }
+
+                value_type* operator->() noexcept {
+                    return mData;
+                }
+
+                const value_type& operator*() const {
+                    return *mData;
+                }
+
+                value_type& operator*() {
+                    return *mData;
+                }
+
+                template <typename VT = value_type>
+                ROBIN_HOOD(NODISCARD)
+                    typename std::enable_if<is_map, typename VT::first_type&>::type getFirst() noexcept {
+                    return mData->first;
+                }
+                template <typename VT = value_type>
+                ROBIN_HOOD(NODISCARD)
+                    typename std::enable_if<is_set, VT&>::type getFirst() noexcept {
+                    return *mData;
+                }
+
+                template <typename VT = value_type>
+                ROBIN_HOOD(NODISCARD)
+                    typename std::enable_if<is_map, typename VT::first_type const&>::type
+                    getFirst() const noexcept {
+                    return mData->first;
+                }
+                template <typename VT = value_type>
+                ROBIN_HOOD(NODISCARD)
+                    typename std::enable_if<is_set, VT const&>::type getFirst() const noexcept {
+                    return *mData;
+                }
+
+                template <typename MT = mapped_type>
+                ROBIN_HOOD(NODISCARD)
+                    typename std::enable_if<is_map, MT&>::type getSecond() noexcept {
+                    return mData->second;
+                }
+
+                template <typename MT = mapped_type>
+                ROBIN_HOOD(NODISCARD)
+                    typename std::enable_if<is_map, MT const&>::type getSecond() const noexcept {
+                    return mData->second;
+                }
+
+                void swap(DataNode<M, false>& o) noexcept {
+                    using std::swap;
+                    swap(mData, o.mData);
+                }
+
+            private:
+                value_type* mData;
+            };
+
+            using Node = DataNode<Self, IsFlat>;
+
+            // helpers for insertKeyPrepareEmptySpot: extract first entry (only const required)
+            ROBIN_HOOD(NODISCARD) key_type const& getFirstConst(Node const& n) const noexcept {
+                return n.getFirst();
+            }
+
+            // in case we have void mapped_type, we are not using a pair, thus we just route k through.
+            // No need to disable this because it's just not used if not applicable.
+            ROBIN_HOOD(NODISCARD) key_type const& getFirstConst(key_type const& k) const noexcept {
+                return k;
+            }
+
+            // in case we have non-void mapped_type, we have a standard robin_hood::pair
+            template <typename Q = mapped_type>
+            ROBIN_HOOD(NODISCARD)
+                typename std::enable_if<!std::is_void<Q>::value, key_type const&>::type
+                getFirstConst(value_type const& vt) const noexcept {
+                return vt.first;
+            }
+
+            // Cloner //////////////////////////////////////////////////////////
+
+            template <typename M, bool UseMemcpy>
+            struct Cloner;
+
+            // fast path: Just copy data, without allocating anything.
+            template <typename M>
+            struct Cloner<M, true> {
+                void operator()(M const& source, M& target) const {
+                    auto const* const src = reinterpret_cast<char const*>(source.mKeyVals);
+                    auto* tgt = reinterpret_cast<char*>(target.mKeyVals);
+                    auto const numElementsWithBuffer = target.calcNumElementsWithBuffer(target.mMask + 1);
+                    std::copy(src, src + target.calcNumBytesTotal(numElementsWithBuffer), tgt);
+                }
+            };
+
+            template <typename M>
+            struct Cloner<M, false> {
+                void operator()(M const& s, M& t) const {
+                    auto const numElementsWithBuffer = t.calcNumElementsWithBuffer(t.mMask + 1);
+                    std::copy(s.mInfo, s.mInfo + t.calcNumBytesInfo(numElementsWithBuffer), t.mInfo);
+
+                    for (size_t i = 0; i < numElementsWithBuffer; ++i) {
+                        if (t.mInfo[i]) {
+                            ::new (static_cast<void*>(t.mKeyVals + i)) Node(t, *s.mKeyVals[i]);
+                        }
                     }
-                    else if (current_entry->distance_from_desired < distance_from_desired)
-                    {
-                        swap(distance_from_desired, current_entry->distance_from_desired);
-                        swap(to_insert, current_entry->value);
-                        ++distance_from_desired;
+                }
+            };
+
+            // Destroyer ///////////////////////////////////////////////////////
+
+            template <typename M, bool IsFlatAndTrivial>
+            struct Destroyer {};
+
+            template <typename M>
+            struct Destroyer<M, true> {
+                void nodes(M& m) const noexcept {
+                    m.mNumElements = 0;
+                }
+
+                void nodesDoNotDeallocate(M& m) const noexcept {
+                    m.mNumElements = 0;
+                }
+            };
+
+            template <typename M>
+            struct Destroyer<M, false> {
+                void nodes(M& m) const noexcept {
+                    m.mNumElements = 0;
+                    // clear also resets mInfo to 0, that's sometimes not necessary.
+                    auto const numElementsWithBuffer = m.calcNumElementsWithBuffer(m.mMask + 1);
+
+                    for (size_t idx = 0; idx < numElementsWithBuffer; ++idx) {
+                        if (0 != m.mInfo[idx]) {
+                            Node& n = m.mKeyVals[idx];
+                            n.destroy(m);
+                            n.~Node();
+                        }
                     }
-                    else
-                    {
-                        ++distance_from_desired;
-                        if (distance_from_desired == max_lookups)
-                        {
-                            swap(to_insert, result.current->value);
-                            grow();
-                            return emplace(std::move(to_insert));
+                }
+
+                void nodesDoNotDeallocate(M& m) const noexcept {
+                    m.mNumElements = 0;
+                    // clear also resets mInfo to 0, that's sometimes not necessary.
+                    auto const numElementsWithBuffer = m.calcNumElementsWithBuffer(m.mMask + 1);
+                    for (size_t idx = 0; idx < numElementsWithBuffer; ++idx) {
+                        if (0 != m.mInfo[idx]) {
+                            Node& n = m.mKeyVals[idx];
+                            n.destroyDoNotDeallocate();
+                            n.~Node();
+                        }
+                    }
+                }
+            };
+
+            // Iter ////////////////////////////////////////////////////////////
+
+            struct fast_forward_tag {};
+
+            // generic iterator for both const_iterator and iterator.
+            template <bool IsConst>
+            // NOLINTNEXTLINE(hicpp-special-member-functions,cppcoreguidelines-special-member-functions)
+            class Iter {
+            private:
+                using NodePtr = typename std::conditional<IsConst, Node const*, Node*>::type;
+
+            public:
+                using difference_type = std::ptrdiff_t;
+                using value_type = typename Self::value_type;
+                using reference = typename std::conditional<IsConst, value_type const&, value_type&>::type;
+                using pointer = typename std::conditional<IsConst, value_type const*, value_type*>::type;
+                using iterator_category = std::forward_iterator_tag;
+
+                // default constructed iterator can be compared to itself, but WON'T return true when
+                // compared to end().
+                Iter() = default;
+
+                // Rule of zero: nothing specified. The conversion constructor is only enabled for
+                // iterator to const_iterator, so it doesn't accidentally work as a copy ctor.
+
+                // Conversion constructor from iterator to const_iterator.
+                template <bool OtherIsConst,
+                    typename = typename std::enable_if<IsConst && !OtherIsConst>::type>
+                // NOLINTNEXTLINE(hicpp-explicit-conversions)
+                Iter(Iter<OtherIsConst> const& other) noexcept
+                    : mKeyVals(other.mKeyVals)
+                    , mInfo(other.mInfo) {
+                }
+
+                Iter(NodePtr valPtr, uint8_t const* infoPtr) noexcept
+                    : mKeyVals(valPtr)
+                    , mInfo(infoPtr) {
+                }
+
+                Iter(NodePtr valPtr, uint8_t const* infoPtr,
+                    fast_forward_tag ROBIN_HOOD_UNUSED(tag) /*unused*/) noexcept
+                    : mKeyVals(valPtr)
+                    , mInfo(infoPtr) {
+                    fastForward();
+                }
+
+                template <bool OtherIsConst,
+                    typename = typename std::enable_if<IsConst && !OtherIsConst>::type>
+                Iter& operator=(Iter<OtherIsConst> const& other) noexcept {
+                    mKeyVals = other.mKeyVals;
+                    mInfo = other.mInfo;
+                    return *this;
+                }
+
+                // prefix increment. Undefined behavior if we are at end()!
+                Iter& operator++() noexcept {
+                    mInfo++;
+                    mKeyVals++;
+                    fastForward();
+                    return *this;
+                }
+
+                Iter operator++(int) noexcept {
+                    Iter tmp = *this;
+                    ++(*this);
+                    return tmp;
+                }
+
+                reference operator*() const {
+                    return **mKeyVals;
+                }
+
+                pointer operator->() const {
+                    return &**mKeyVals;
+                }
+
+                template <bool O>
+                bool operator==(Iter<O> const& o) const noexcept {
+                    return mKeyVals == o.mKeyVals;
+                }
+
+                template <bool O>
+                bool operator!=(Iter<O> const& o) const noexcept {
+                    return mKeyVals != o.mKeyVals;
+                }
+
+            private:
+                // fast forward to the next non-free info byte
+                // I've tried a few variants that don't depend on intrinsics, but unfortunately they are
+                // quite a bit slower than this one. So I've reverted that change again. See map_benchmark.
+                void fastForward() noexcept {
+                    size_t n = 0;
+                    while (0U == (n = detail::unaligned_load<size_t>(mInfo))) {
+                        mInfo += sizeof(size_t);
+                        mKeyVals += sizeof(size_t);
+                    }
+#if defined(ROBIN_HOOD_DISABLE_INTRINSICS)
+                    // we know for certain that within the next 8 bytes we'll find a non-zero one.
+                    if (ROBIN_HOOD_UNLIKELY(0U == detail::unaligned_load<uint32_t>(mInfo))) {
+                        mInfo += 4;
+                        mKeyVals += 4;
+                    }
+                    if (ROBIN_HOOD_UNLIKELY(0U == detail::unaligned_load<uint16_t>(mInfo))) {
+                        mInfo += 2;
+                        mKeyVals += 2;
+                    }
+                    if (ROBIN_HOOD_UNLIKELY(0U == *mInfo)) {
+                        mInfo += 1;
+                        mKeyVals += 1;
+                    }
+#else
+#    if ROBIN_HOOD(LITTLE_ENDIAN)
+                    auto inc = ROBIN_HOOD_COUNT_TRAILING_ZEROES(n) / 8;
+#    else
+                    auto inc = ROBIN_HOOD_COUNT_LEADING_ZEROES(n) / 8;
+#    endif
+                    mInfo += inc;
+                    mKeyVals += inc;
+#endif
+                }
+
+                friend class Table<IsFlat, MaxLoadFactor100, key_type, mapped_type, hasher, key_equal>;
+                NodePtr mKeyVals{ nullptr };
+                uint8_t const* mInfo{ nullptr };
+            };
+
+            ////////////////////////////////////////////////////////////////////
+
+            // highly performance relevant code.
+            // Lower bits are used for indexing into the array (2^n size)
+            // The upper 1-5 bits need to be a reasonable good hash, to save comparisons.
+            template <typename HashKey>
+            void keyToIdx(HashKey&& key, size_t* idx, InfoType* info) const {
+                // In addition to whatever hash is used, add another mul & shift so we get better hashing.
+                // This serves as a bad hash prevention, if the given data is
+                // badly mixed.
+                auto h = static_cast<uint64_t>(WHash::operator()(key));
+
+                h *= mHashMultiplier;
+                h ^= h >> 33U;
+
+                // the lower InitialInfoNumBits are reserved for info.
+                *info = mInfoInc + static_cast<InfoType>((h & InfoMask) >> mInfoHashShift);
+                *idx = (static_cast<size_t>(h) >> InitialInfoNumBits) & mMask;
+            }
+
+            // forwards the index by one, wrapping around at the end
+            void next(InfoType* info, size_t* idx) const noexcept {
+                *idx = *idx + 1;
+                *info += mInfoInc;
+            }
+
+            void nextWhileLess(InfoType* info, size_t* idx) const noexcept {
+                // unrolling this by hand did not bring any speedups.
+                while (*info < mInfo[*idx]) {
+                    next(info, idx);
+                }
+            }
+
+            // Shift everything up by one element. Tries to move stuff around.
+            void
+                shiftUp(size_t startIdx,
+                    size_t const insertion_idx) noexcept(std::is_nothrow_move_assignable<Node>::value) {
+                auto idx = startIdx;
+                ::new (static_cast<void*>(mKeyVals + idx)) Node(std::move(mKeyVals[idx - 1]));
+                while (--idx != insertion_idx) {
+                    mKeyVals[idx] = std::move(mKeyVals[idx - 1]);
+                }
+
+                idx = startIdx;
+                while (idx != insertion_idx) {
+                    ROBIN_HOOD_COUNT(shiftUp)
+                        mInfo[idx] = static_cast<uint8_t>(mInfo[idx - 1] + mInfoInc);
+                    if (ROBIN_HOOD_UNLIKELY(mInfo[idx] + mInfoInc > 0xFF)) {
+                        mMaxNumElementsAllowed = 0;
+                    }
+                    --idx;
+                }
+            }
+
+            void shiftDown(size_t idx) noexcept(std::is_nothrow_move_assignable<Node>::value) {
+                // until we find one that is either empty or has zero offset.
+                // TODO(martinus) we don't need to move everything, just the last one for the same
+                // bucket.
+                mKeyVals[idx].destroy(*this);
+
+                // until we find one that is either empty or has zero offset.
+                while (mInfo[idx + 1] >= 2 * mInfoInc) {
+                    ROBIN_HOOD_COUNT(shiftDown)
+                        mInfo[idx] = static_cast<uint8_t>(mInfo[idx + 1] - mInfoInc);
+                    mKeyVals[idx] = std::move(mKeyVals[idx + 1]);
+                    ++idx;
+                }
+
+                mInfo[idx] = 0;
+                // don't destroy, we've moved it
+                // mKeyVals[idx].destroy(*this);
+                mKeyVals[idx].~Node();
+            }
+
+            // copy of find(), except that it returns iterator instead of const_iterator.
+            template <typename Other>
+            ROBIN_HOOD(NODISCARD)
+                size_t findIdx(Other const& key) const {
+                size_t idx{};
+                InfoType info{};
+                keyToIdx(key, &idx, &info);
+
+                do {
+                    // unrolling this twice gives a bit of a speedup. More unrolling did not help.
+                    if (info == mInfo[idx] &&
+                        ROBIN_HOOD_LIKELY(WKeyEqual::operator()(key, mKeyVals[idx].getFirst()))) {
+                        return idx;
+                    }
+                    next(&info, &idx);
+                    if (info == mInfo[idx] &&
+                        ROBIN_HOOD_LIKELY(WKeyEqual::operator()(key, mKeyVals[idx].getFirst()))) {
+                        return idx;
+                    }
+                    next(&info, &idx);
+                } while (info <= mInfo[idx]);
+
+                // nothing found!
+                return mMask == 0 ? 0
+                    : static_cast<size_t>(std::distance(
+                        mKeyVals, reinterpret_cast_no_cast_align_warning<Node*>(mInfo)));
+            }
+
+            void cloneData(const Table& o) {
+                Cloner<Table, IsFlat&& ROBIN_HOOD_IS_TRIVIALLY_COPYABLE(Node)>()(o, *this);
+            }
+
+            // inserts a keyval that is guaranteed to be new, e.g. when the hashmap is resized.
+            // @return True on success, false if something went wrong
+            void insert_move(Node&& keyval) {
+                // we don't retry, fail if overflowing
+                // don't need to check max num elements
+                if (0 == mMaxNumElementsAllowed && !try_increase_info()) {
+                    throwOverflowError();
+                }
+
+                size_t idx{};
+                InfoType info{};
+                keyToIdx(keyval.getFirst(), &idx, &info);
+
+                // skip forward. Use <= because we are certain that the element is not there.
+                while (info <= mInfo[idx]) {
+                    idx = idx + 1;
+                    info += mInfoInc;
+                }
+
+                // key not found, so we are now exactly where we want to insert it.
+                auto const insertion_idx = idx;
+                auto const insertion_info = static_cast<uint8_t>(info);
+                if (ROBIN_HOOD_UNLIKELY(insertion_info + mInfoInc > 0xFF)) {
+                    mMaxNumElementsAllowed = 0;
+                }
+
+                // find an empty spot
+                while (0 != mInfo[idx]) {
+                    next(&info, &idx);
+                }
+
+                auto& l = mKeyVals[insertion_idx];
+                if (idx == insertion_idx) {
+                    ::new (static_cast<void*>(&l)) Node(std::move(keyval));
+                }
+                else {
+                    shiftUp(idx, insertion_idx);
+                    l = std::move(keyval);
+                }
+
+                // put at empty spot
+                mInfo[insertion_idx] = insertion_info;
+
+                ++mNumElements;
+            }
+
+        public:
+            using iterator = Iter<false>;
+            using const_iterator = Iter<true>;
+
+            Table() noexcept(noexcept(Hash()) && noexcept(KeyEqual()))
+                : WHash()
+                , WKeyEqual() {
+                ROBIN_HOOD_TRACE(this)
+            }
+
+            // Creates an empty hash map. Nothing is allocated yet, this happens at the first insert.
+            // This tremendously speeds up ctor & dtor of a map that never receives an element. The
+            // penalty is payed at the first insert, and not before. Lookup of this empty map works
+            // because everybody points to DummyInfoByte::b. parameter bucket_count is dictated by the
+            // standard, but we can ignore it.
+            explicit Table(
+                size_t ROBIN_HOOD_UNUSED(bucket_count) /*unused*/, const Hash& h = Hash{},
+                const KeyEqual& equal = KeyEqual{}) noexcept(noexcept(Hash(h)) && noexcept(KeyEqual(equal)))
+                : WHash(h)
+                , WKeyEqual(equal) {
+                ROBIN_HOOD_TRACE(this)
+            }
+
+            template <typename Iter>
+            Table(Iter first, Iter last, size_t ROBIN_HOOD_UNUSED(bucket_count) /*unused*/ = 0,
+                const Hash& h = Hash{}, const KeyEqual& equal = KeyEqual{})
+                : WHash(h)
+                , WKeyEqual(equal) {
+                ROBIN_HOOD_TRACE(this)
+                    insert(first, last);
+            }
+
+            Table(std::initializer_list<value_type> initlist,
+                size_t ROBIN_HOOD_UNUSED(bucket_count) /*unused*/ = 0, const Hash& h = Hash{},
+                const KeyEqual& equal = KeyEqual{})
+                : WHash(h)
+                , WKeyEqual(equal) {
+                ROBIN_HOOD_TRACE(this)
+                    insert(initlist.begin(), initlist.end());
+            }
+
+            Table(Table&& o) noexcept
+                : WHash(std::move(static_cast<WHash&>(o)))
+                , WKeyEqual(std::move(static_cast<WKeyEqual&>(o)))
+                , DataPool(std::move(static_cast<DataPool&>(o))) {
+                ROBIN_HOOD_TRACE(this)
+                    if (o.mMask) {
+                        mHashMultiplier = std::move(o.mHashMultiplier);
+                        mKeyVals = std::move(o.mKeyVals);
+                        mInfo = std::move(o.mInfo);
+                        mNumElements = std::move(o.mNumElements);
+                        mMask = std::move(o.mMask);
+                        mMaxNumElementsAllowed = std::move(o.mMaxNumElementsAllowed);
+                        mInfoInc = std::move(o.mInfoInc);
+                        mInfoHashShift = std::move(o.mInfoHashShift);
+                        // set other's mask to 0 so its destructor won't do anything
+                        o.init();
+                    }
+            }
+
+            Table& operator=(Table&& o) noexcept {
+                ROBIN_HOOD_TRACE(this)
+                    if (&o != this) {
+                        if (o.mMask) {
+                            // only move stuff if the other map actually has some data
+                            destroy();
+                            mHashMultiplier = std::move(o.mHashMultiplier);
+                            mKeyVals = std::move(o.mKeyVals);
+                            mInfo = std::move(o.mInfo);
+                            mNumElements = std::move(o.mNumElements);
+                            mMask = std::move(o.mMask);
+                            mMaxNumElementsAllowed = std::move(o.mMaxNumElementsAllowed);
+                            mInfoInc = std::move(o.mInfoInc);
+                            mInfoHashShift = std::move(o.mInfoHashShift);
+                            WHash::operator=(std::move(static_cast<WHash&>(o)));
+                            WKeyEqual::operator=(std::move(static_cast<WKeyEqual&>(o)));
+                            DataPool::operator=(std::move(static_cast<DataPool&>(o)));
+
+                            o.init();
+
+                        }
+                        else {
+                            // nothing in the other map => just clear us.
+                            clear();
+                        }
+                    }
+                return *this;
+            }
+
+            Table(const Table& o)
+                : WHash(static_cast<const WHash&>(o))
+                , WKeyEqual(static_cast<const WKeyEqual&>(o))
+                , DataPool(static_cast<const DataPool&>(o)) {
+                ROBIN_HOOD_TRACE(this)
+                    if (!o.empty()) {
+                        // not empty: create an exact copy. it is also possible to just iterate through all
+                        // elements and insert them, but copying is probably faster.
+
+                        auto const numElementsWithBuffer = calcNumElementsWithBuffer(o.mMask + 1);
+                        auto const numBytesTotal = calcNumBytesTotal(numElementsWithBuffer);
+
+                        ROBIN_HOOD_LOG("std::malloc " << numBytesTotal << " = calcNumBytesTotal("
+                            << numElementsWithBuffer << ")")
+                            mHashMultiplier = o.mHashMultiplier;
+                        mKeyVals = static_cast<Node*>(
+                            detail::assertNotNull<std::bad_alloc>(std::malloc(numBytesTotal)));
+                        // no need for calloc because clonData does memcpy
+                        mInfo = reinterpret_cast<uint8_t*>(mKeyVals + numElementsWithBuffer);
+                        mNumElements = o.mNumElements;
+                        mMask = o.mMask;
+                        mMaxNumElementsAllowed = o.mMaxNumElementsAllowed;
+                        mInfoInc = o.mInfoInc;
+                        mInfoHashShift = o.mInfoHashShift;
+                        cloneData(o);
+                    }
+            }
+
+            // Creates a copy of the given map. Copy constructor of each entry is used.
+            // Not sure why clang-tidy thinks this doesn't handle self assignment, it does
+            // NOLINTNEXTLINE(bugprone-unhandled-self-assignment,cert-oop54-cpp)
+            Table& operator=(Table const& o) {
+                ROBIN_HOOD_TRACE(this)
+                    if (&o == this) {
+                        // prevent assigning of itself
+                        return *this;
+                    }
+
+                // we keep using the old allocator and not assign the new one, because we want to keep
+                // the memory available. when it is the same size.
+                if (o.empty()) {
+                    if (0 == mMask) {
+                        // nothing to do, we are empty too
+                        return *this;
+                    }
+
+                    // not empty: destroy what we have there
+                    // clear also resets mInfo to 0, that's sometimes not necessary.
+                    destroy();
+                    init();
+                    WHash::operator=(static_cast<const WHash&>(o));
+                    WKeyEqual::operator=(static_cast<const WKeyEqual&>(o));
+                    DataPool::operator=(static_cast<DataPool const&>(o));
+
+                    return *this;
+                }
+
+                // clean up old stuff
+                Destroyer<Self, IsFlat&& std::is_trivially_destructible<Node>::value>{}.nodes(*this);
+
+                if (mMask != o.mMask) {
+                    // no luck: we don't have the same array size allocated, so we need to realloc.
+                    if (0 != mMask) {
+                        // only deallocate if we actually have data!
+                        ROBIN_HOOD_LOG("std::free")
+                            std::free(mKeyVals);
+                    }
+
+                    auto const numElementsWithBuffer = calcNumElementsWithBuffer(o.mMask + 1);
+                    auto const numBytesTotal = calcNumBytesTotal(numElementsWithBuffer);
+                    ROBIN_HOOD_LOG("std::malloc " << numBytesTotal << " = calcNumBytesTotal("
+                        << numElementsWithBuffer << ")")
+                        mKeyVals = static_cast<Node*>(
+                            detail::assertNotNull<std::bad_alloc>(std::malloc(numBytesTotal)));
+
+                    // no need for calloc here because cloneData performs a memcpy.
+                    mInfo = reinterpret_cast<uint8_t*>(mKeyVals + numElementsWithBuffer);
+                    // sentinel is set in cloneData
+                }
+                WHash::operator=(static_cast<const WHash&>(o));
+                WKeyEqual::operator=(static_cast<const WKeyEqual&>(o));
+                DataPool::operator=(static_cast<DataPool const&>(o));
+                mHashMultiplier = o.mHashMultiplier;
+                mNumElements = o.mNumElements;
+                mMask = o.mMask;
+                mMaxNumElementsAllowed = o.mMaxNumElementsAllowed;
+                mInfoInc = o.mInfoInc;
+                mInfoHashShift = o.mInfoHashShift;
+                cloneData(o);
+
+                return *this;
+            }
+
+            // Swaps everything between the two maps.
+            void swap(Table& o) {
+                ROBIN_HOOD_TRACE(this)
+                    using std::swap;
+                swap(o, *this);
+            }
+
+            // Clears all data, without resizing.
+            void clear() {
+                ROBIN_HOOD_TRACE(this)
+                    if (empty()) {
+                        // don't do anything! also important because we don't want to write to
+                        // DummyInfoByte::b, even though we would just write 0 to it.
+                        return;
+                    }
+
+                Destroyer<Self, IsFlat&& std::is_trivially_destructible<Node>::value>{}.nodes(*this);
+
+                auto const numElementsWithBuffer = calcNumElementsWithBuffer(mMask + 1);
+                // clear everything, then set the sentinel again
+                uint8_t const z = 0;
+                std::fill(mInfo, mInfo + calcNumBytesInfo(numElementsWithBuffer), z);
+                mInfo[numElementsWithBuffer] = 1;
+
+                mInfoInc = InitialInfoInc;
+                mInfoHashShift = InitialInfoHashShift;
+            }
+
+            // Destroys the map and all it's contents.
+            ~Table() {
+                ROBIN_HOOD_TRACE(this)
+                    destroy();
+            }
+
+            // Checks if both tables contain the same entries. Order is irrelevant.
+            bool operator==(const Table& other) const {
+                ROBIN_HOOD_TRACE(this)
+                    if (other.size() != size()) {
+                        return false;
+                    }
+                for (auto const& otherEntry : other) {
+                    if (!has(otherEntry)) {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+
+            bool operator!=(const Table& other) const {
+                ROBIN_HOOD_TRACE(this)
+                    return !operator==(other);
+            }
+
+            template <typename Q = mapped_type>
+            typename std::enable_if<!std::is_void<Q>::value, Q&>::type operator[](const key_type& key) {
+                ROBIN_HOOD_TRACE(this)
+                    auto idxAndState = insertKeyPrepareEmptySpot(key);
+                switch (idxAndState.second) {
+                case InsertionState::key_found:
+                    break;
+
+                case InsertionState::new_node:
+                    ::new (static_cast<void*>(&mKeyVals[idxAndState.first]))
+                        Node(*this, std::piecewise_construct, std::forward_as_tuple(key),
+                            std::forward_as_tuple());
+                    break;
+
+                case InsertionState::overwrite_node:
+                    mKeyVals[idxAndState.first] = Node(*this, std::piecewise_construct,
+                        std::forward_as_tuple(key), std::forward_as_tuple());
+                    break;
+
+                case InsertionState::overflow_error:
+                    throwOverflowError();
+                }
+
+                return mKeyVals[idxAndState.first].getSecond();
+            }
+
+            template <typename Q = mapped_type>
+            typename std::enable_if<!std::is_void<Q>::value, Q&>::type operator[](key_type&& key) {
+                ROBIN_HOOD_TRACE(this)
+                    auto idxAndState = insertKeyPrepareEmptySpot(key);
+                switch (idxAndState.second) {
+                case InsertionState::key_found:
+                    break;
+
+                case InsertionState::new_node:
+                    ::new (static_cast<void*>(&mKeyVals[idxAndState.first]))
+                        Node(*this, std::piecewise_construct, std::forward_as_tuple(std::move(key)),
+                            std::forward_as_tuple());
+                    break;
+
+                case InsertionState::overwrite_node:
+                    mKeyVals[idxAndState.first] =
+                        Node(*this, std::piecewise_construct, std::forward_as_tuple(std::move(key)),
+                            std::forward_as_tuple());
+                    break;
+
+                case InsertionState::overflow_error:
+                    throwOverflowError();
+                }
+
+                return mKeyVals[idxAndState.first].getSecond();
+            }
+
+            template <typename Iter>
+            void insert(Iter first, Iter last) {
+                for (; first != last; ++first) {
+                    // value_type ctor needed because this might be called with std::pair's
+                    insert(value_type(*first));
+                }
+            }
+
+            void insert(std::initializer_list<value_type> ilist) {
+                for (auto&& vt : ilist) {
+                    insert(std::move(vt));
+                }
+            }
+
+            template <typename... Args>
+            std::pair<iterator, bool> emplace(Args&&... args) {
+                ROBIN_HOOD_TRACE(this)
+                    Node n{ *this, std::forward<Args>(args)... };
+                auto idxAndState = insertKeyPrepareEmptySpot(getFirstConst(n));
+                switch (idxAndState.second) {
+                case InsertionState::key_found:
+                    n.destroy(*this);
+                    break;
+
+                case InsertionState::new_node:
+                    ::new (static_cast<void*>(&mKeyVals[idxAndState.first])) Node(*this, std::move(n));
+                    break;
+
+                case InsertionState::overwrite_node:
+                    mKeyVals[idxAndState.first] = std::move(n);
+                    break;
+
+                case InsertionState::overflow_error:
+                    n.destroy(*this);
+                    throwOverflowError();
+                    break;
+                }
+
+                return std::make_pair(iterator(mKeyVals + idxAndState.first, mInfo + idxAndState.first),
+                    InsertionState::key_found != idxAndState.second);
+            }
+
+            template <typename... Args>
+            iterator emplace_hint(const_iterator position, Args&&... args) {
+                (void)position;
+                return emplace(std::forward<Args>(args)...).first;
+            }
+
+            template <typename... Args>
+            std::pair<iterator, bool> try_emplace(const key_type& key, Args&&... args) {
+                return try_emplace_impl(key, std::forward<Args>(args)...);
+            }
+
+            template <typename... Args>
+            std::pair<iterator, bool> try_emplace(key_type&& key, Args&&... args) {
+                return try_emplace_impl(std::move(key), std::forward<Args>(args)...);
+            }
+
+            template <typename... Args>
+            iterator try_emplace(const_iterator hint, const key_type& key, Args&&... args) {
+                (void)hint;
+                return try_emplace_impl(key, std::forward<Args>(args)...).first;
+            }
+
+            template <typename... Args>
+            iterator try_emplace(const_iterator hint, key_type&& key, Args&&... args) {
+                (void)hint;
+                return try_emplace_impl(std::move(key), std::forward<Args>(args)...).first;
+            }
+
+            template <typename Mapped>
+            std::pair<iterator, bool> insert_or_assign(const key_type& key, Mapped&& obj) {
+                return insertOrAssignImpl(key, std::forward<Mapped>(obj));
+            }
+
+            template <typename Mapped>
+            std::pair<iterator, bool> insert_or_assign(key_type&& key, Mapped&& obj) {
+                return insertOrAssignImpl(std::move(key), std::forward<Mapped>(obj));
+            }
+
+            template <typename Mapped>
+            iterator insert_or_assign(const_iterator hint, const key_type& key, Mapped&& obj) {
+                (void)hint;
+                return insertOrAssignImpl(key, std::forward<Mapped>(obj)).first;
+            }
+
+            template <typename Mapped>
+            iterator insert_or_assign(const_iterator hint, key_type&& key, Mapped&& obj) {
+                (void)hint;
+                return insertOrAssignImpl(std::move(key), std::forward<Mapped>(obj)).first;
+            }
+
+            std::pair<iterator, bool> insert(const value_type& keyval) {
+                ROBIN_HOOD_TRACE(this)
+                    return emplace(keyval);
+            }
+
+            iterator insert(const_iterator hint, const value_type& keyval) {
+                (void)hint;
+                return emplace(keyval).first;
+            }
+
+            std::pair<iterator, bool> insert(value_type&& keyval) {
+                return emplace(std::move(keyval));
+            }
+
+            iterator insert(const_iterator hint, value_type&& keyval) {
+                (void)hint;
+                return emplace(std::move(keyval)).first;
+            }
+
+            // Returns 1 if key is found, 0 otherwise.
+            size_t count(const key_type& key) const { // NOLINT(modernize-use-nodiscard)
+                ROBIN_HOOD_TRACE(this)
+                    auto kv = mKeyVals + findIdx(key);
+                if (kv != reinterpret_cast_no_cast_align_warning<Node*>(mInfo)) {
+                    return 1;
+                }
+                return 0;
+            }
+
+            template <typename OtherKey, typename Self_ = Self>
+            // NOLINTNEXTLINE(modernize-use-nodiscard)
+            typename std::enable_if<Self_::is_transparent, size_t>::type count(const OtherKey& key) const {
+                ROBIN_HOOD_TRACE(this)
+                    auto kv = mKeyVals + findIdx(key);
+                if (kv != reinterpret_cast_no_cast_align_warning<Node*>(mInfo)) {
+                    return 1;
+                }
+                return 0;
+            }
+
+            bool contains(const key_type& key) const { // NOLINT(modernize-use-nodiscard)
+                return 1U == count(key);
+            }
+
+            template <typename OtherKey, typename Self_ = Self>
+            // NOLINTNEXTLINE(modernize-use-nodiscard)
+            typename std::enable_if<Self_::is_transparent, bool>::type contains(const OtherKey& key) const {
+                return 1U == count(key);
+            }
+
+            // Returns a reference to the value found for key.
+            // Throws std::out_of_range if element cannot be found
+            template <typename Q = mapped_type>
+            // NOLINTNEXTLINE(modernize-use-nodiscard)
+            typename std::enable_if<!std::is_void<Q>::value, Q&>::type at(key_type const& key) {
+                ROBIN_HOOD_TRACE(this)
+                    auto kv = mKeyVals + findIdx(key);
+                if (kv == reinterpret_cast_no_cast_align_warning<Node*>(mInfo)) {
+                    doThrow<std::out_of_range>("key not found");
+                }
+                return kv->getSecond();
+            }
+
+            // Returns a reference to the value found for key.
+            // Throws std::out_of_range if element cannot be found
+            template <typename Q = mapped_type>
+            // NOLINTNEXTLINE(modernize-use-nodiscard)
+            typename std::enable_if<!std::is_void<Q>::value, Q const&>::type at(key_type const& key) const {
+                ROBIN_HOOD_TRACE(this)
+                    auto kv = mKeyVals + findIdx(key);
+                if (kv == reinterpret_cast_no_cast_align_warning<Node*>(mInfo)) {
+                    doThrow<std::out_of_range>("key not found");
+                }
+                return kv->getSecond();
+            }
+
+            const_iterator find(const key_type& key) const { // NOLINT(modernize-use-nodiscard)
+                ROBIN_HOOD_TRACE(this)
+                    const size_t idx = findIdx(key);
+                return const_iterator{ mKeyVals + idx, mInfo + idx };
+            }
+
+            template <typename OtherKey>
+            const_iterator find(const OtherKey& key, is_transparent_tag /*unused*/) const {
+                ROBIN_HOOD_TRACE(this)
+                    const size_t idx = findIdx(key);
+                return const_iterator{ mKeyVals + idx, mInfo + idx };
+            }
+
+            template <typename OtherKey, typename Self_ = Self>
+            typename std::enable_if<Self_::is_transparent, // NOLINT(modernize-use-nodiscard)
+                const_iterator>::type  // NOLINT(modernize-use-nodiscard)
+                find(const OtherKey& key) const {              // NOLINT(modernize-use-nodiscard)
+                ROBIN_HOOD_TRACE(this)
+                    const size_t idx = findIdx(key);
+                return const_iterator{ mKeyVals + idx, mInfo + idx };
+            }
+
+            iterator find(const key_type& key) {
+                ROBIN_HOOD_TRACE(this)
+                    const size_t idx = findIdx(key);
+                return iterator{ mKeyVals + idx, mInfo + idx };
+            }
+
+            template <typename OtherKey>
+            iterator find(const OtherKey& key, is_transparent_tag /*unused*/) {
+                ROBIN_HOOD_TRACE(this)
+                    const size_t idx = findIdx(key);
+                return iterator{ mKeyVals + idx, mInfo + idx };
+            }
+
+            template <typename OtherKey, typename Self_ = Self>
+            typename std::enable_if<Self_::is_transparent, iterator>::type find(const OtherKey& key) {
+                ROBIN_HOOD_TRACE(this)
+                    const size_t idx = findIdx(key);
+                return iterator{ mKeyVals + idx, mInfo + idx };
+            }
+
+            iterator begin() {
+                ROBIN_HOOD_TRACE(this)
+                    if (empty()) {
+                        return end();
+                    }
+                return iterator(mKeyVals, mInfo, fast_forward_tag{});
+            }
+            const_iterator begin() const { // NOLINT(modernize-use-nodiscard)
+                ROBIN_HOOD_TRACE(this)
+                    return cbegin();
+            }
+            const_iterator cbegin() const { // NOLINT(modernize-use-nodiscard)
+                ROBIN_HOOD_TRACE(this)
+                    if (empty()) {
+                        return cend();
+                    }
+                return const_iterator(mKeyVals, mInfo, fast_forward_tag{});
+            }
+
+            iterator end() {
+                ROBIN_HOOD_TRACE(this)
+                    // no need to supply valid info pointer: end() must not be dereferenced, and only node
+                    // pointer is compared.
+                    return iterator{ reinterpret_cast_no_cast_align_warning<Node*>(mInfo), nullptr };
+            }
+            const_iterator end() const { // NOLINT(modernize-use-nodiscard)
+                ROBIN_HOOD_TRACE(this)
+                    return cend();
+            }
+            const_iterator cend() const { // NOLINT(modernize-use-nodiscard)
+                ROBIN_HOOD_TRACE(this)
+                    return const_iterator{ reinterpret_cast_no_cast_align_warning<Node*>(mInfo), nullptr };
+            }
+
+            iterator erase(const_iterator pos) {
+                ROBIN_HOOD_TRACE(this)
+                    // its safe to perform const cast here
+                    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-const-cast)
+                    return erase(iterator{ const_cast<Node*>(pos.mKeyVals), const_cast<uint8_t*>(pos.mInfo) });
+            }
+
+            // Erases element at pos, returns iterator to the next element.
+            iterator erase(iterator pos) {
+                ROBIN_HOOD_TRACE(this)
+                    // we assume that pos always points to a valid entry, and not end().
+                    auto const idx = static_cast<size_t>(pos.mKeyVals - mKeyVals);
+
+                shiftDown(idx);
+                --mNumElements;
+
+                if (*pos.mInfo) {
+                    // we've backward shifted, return this again
+                    return pos;
+                }
+
+                // no backward shift, return next element
+                return ++pos;
+            }
+
+            size_t erase(const key_type& key) {
+                ROBIN_HOOD_TRACE(this)
+                    size_t idx{};
+                InfoType info{};
+                keyToIdx(key, &idx, &info);
+
+                // check while info matches with the source idx
+                do {
+                    if (info == mInfo[idx] && WKeyEqual::operator()(key, mKeyVals[idx].getFirst())) {
+                        shiftDown(idx);
+                        --mNumElements;
+                        return 1;
+                    }
+                    next(&info, &idx);
+                } while (info <= mInfo[idx]);
+
+                // nothing found to delete
+                return 0;
+            }
+
+            // reserves space for the specified number of elements. Makes sure the old data fits.
+            // exactly the same as reserve(c).
+            void rehash(size_t c) {
+                // forces a reserve
+                reserve(c, true);
+            }
+
+            // reserves space for the specified number of elements. Makes sure the old data fits.
+            // Exactly the same as rehash(c). Use rehash(0) to shrink to fit.
+            void reserve(size_t c) {
+                // reserve, but don't force rehash
+                reserve(c, false);
+            }
+
+            // If possible reallocates the map to a smaller one. This frees the underlying table.
+            // Does not do anything if load_factor is too large for decreasing the table's size.
+            void compact() {
+                ROBIN_HOOD_TRACE(this)
+                    auto newSize = InitialNumElements;
+                while (calcMaxNumElementsAllowed(newSize) < mNumElements && newSize != 0) {
+                    newSize *= 2;
+                }
+                if (ROBIN_HOOD_UNLIKELY(newSize == 0)) {
+                    throwOverflowError();
+                }
+
+                ROBIN_HOOD_LOG("newSize > mMask + 1: " << newSize << " > " << mMask << " + 1")
+
+                    // only actually do anything when the new size is bigger than the old one. This prevents to
+                    // continuously allocate for each reserve() call.
+                    if (newSize < mMask + 1) {
+                        rehashPowerOfTwo(newSize, true);
+                    }
+            }
+
+            size_type size() const noexcept { // NOLINT(modernize-use-nodiscard)
+                ROBIN_HOOD_TRACE(this)
+                    return mNumElements;
+            }
+
+            size_type max_size() const noexcept { // NOLINT(modernize-use-nodiscard)
+                ROBIN_HOOD_TRACE(this)
+                    return static_cast<size_type>(-1);
+            }
+
+            ROBIN_HOOD(NODISCARD) bool empty() const noexcept {
+                ROBIN_HOOD_TRACE(this)
+                    return 0 == mNumElements;
+            }
+
+            float max_load_factor() const noexcept { // NOLINT(modernize-use-nodiscard)
+                ROBIN_HOOD_TRACE(this)
+                    return MaxLoadFactor100 / 100.0F;
+            }
+
+            // Average number of elements per bucket. Since we allow only 1 per bucket
+            float load_factor() const noexcept { // NOLINT(modernize-use-nodiscard)
+                ROBIN_HOOD_TRACE(this)
+                    return static_cast<float>(size()) / static_cast<float>(mMask + 1);
+            }
+
+            ROBIN_HOOD(NODISCARD) size_t mask() const noexcept {
+                ROBIN_HOOD_TRACE(this)
+                    return mMask;
+            }
+
+            ROBIN_HOOD(NODISCARD) size_t calcMaxNumElementsAllowed(size_t maxElements) const noexcept {
+                if (ROBIN_HOOD_LIKELY(maxElements <= (std::numeric_limits<size_t>::max)() / 100)) {
+                    return maxElements * MaxLoadFactor100 / 100;
+                }
+
+                // we might be a bit inprecise, but since maxElements is quite large that doesn't matter
+                return (maxElements / 100) * MaxLoadFactor100;
+            }
+
+            ROBIN_HOOD(NODISCARD) size_t calcNumBytesInfo(size_t numElements) const noexcept {
+                // we add a uint64_t, which houses the sentinel (first byte) and padding so we can load
+                // 64bit types.
+                return numElements + sizeof(uint64_t);
+            }
+
+            ROBIN_HOOD(NODISCARD)
+                size_t calcNumElementsWithBuffer(size_t numElements) const noexcept {
+                auto maxNumElementsAllowed = calcMaxNumElementsAllowed(numElements);
+                return numElements + (std::min)(maxNumElementsAllowed, (static_cast<size_t>(0xFF)));
+            }
+
+            // calculation only allowed for 2^n values
+            ROBIN_HOOD(NODISCARD) size_t calcNumBytesTotal(size_t numElements) const {
+#if ROBIN_HOOD(BITNESS) == 64
+                return numElements * sizeof(Node) + calcNumBytesInfo(numElements);
+#else
+                // make sure we're doing 64bit operations, so we are at least safe against 32bit overflows.
+                auto const ne = static_cast<uint64_t>(numElements);
+                auto const s = static_cast<uint64_t>(sizeof(Node));
+                auto const infos = static_cast<uint64_t>(calcNumBytesInfo(numElements));
+
+                auto const total64 = ne * s + infos;
+                auto const total = static_cast<size_t>(total64);
+
+                if (ROBIN_HOOD_UNLIKELY(static_cast<uint64_t>(total) != total64)) {
+                    throwOverflowError();
+                }
+                return total;
+#endif
+            }
+
+        private:
+            template <typename Q = mapped_type>
+            ROBIN_HOOD(NODISCARD)
+                typename std::enable_if<!std::is_void<Q>::value, bool>::type has(const value_type& e) const {
+                ROBIN_HOOD_TRACE(this)
+                    auto it = find(e.first);
+                return it != end() && it->second == e.second;
+            }
+
+            template <typename Q = mapped_type>
+            ROBIN_HOOD(NODISCARD)
+                typename std::enable_if<std::is_void<Q>::value, bool>::type has(const value_type& e) const {
+                ROBIN_HOOD_TRACE(this)
+                    return find(e) != end();
+            }
+
+            void reserve(size_t c, bool forceRehash) {
+                ROBIN_HOOD_TRACE(this)
+                    auto const minElementsAllowed = (std::max)(c, mNumElements);
+                auto newSize = InitialNumElements;
+                while (calcMaxNumElementsAllowed(newSize) < minElementsAllowed && newSize != 0) {
+                    newSize *= 2;
+                }
+                if (ROBIN_HOOD_UNLIKELY(newSize == 0)) {
+                    throwOverflowError();
+                }
+
+                ROBIN_HOOD_LOG("newSize > mMask + 1: " << newSize << " > " << mMask << " + 1")
+
+                    // only actually do anything when the new size is bigger than the old one. This prevents to
+                    // continuously allocate for each reserve() call.
+                    if (forceRehash || newSize > mMask + 1) {
+                        rehashPowerOfTwo(newSize, false);
+                    }
+            }
+
+            // reserves space for at least the specified number of elements.
+            // only works if numBuckets if power of two
+            // True on success, false otherwise
+            void rehashPowerOfTwo(size_t numBuckets, bool forceFree) {
+                ROBIN_HOOD_TRACE(this)
+
+                    Node* const oldKeyVals = mKeyVals;
+                uint8_t const* const oldInfo = mInfo;
+
+                const size_t oldMaxElementsWithBuffer = calcNumElementsWithBuffer(mMask + 1);
+
+                // resize operation: move stuff
+                initData(numBuckets);
+                if (oldMaxElementsWithBuffer > 1) {
+                    for (size_t i = 0; i < oldMaxElementsWithBuffer; ++i) {
+                        if (oldInfo[i] != 0) {
+                            // might throw an exception, which is really bad since we are in the middle of
+                            // moving stuff.
+                            insert_move(std::move(oldKeyVals[i]));
+                            // destroy the node but DON'T destroy the data.
+                            oldKeyVals[i].~Node();
+                        }
+                    }
+
+                    // this check is not necessary as it's guarded by the previous if, but it helps
+                    // silence g++'s overeager "attempt to free a non-heap object 'map'
+                    // [-Werror=free-nonheap-object]" warning.
+                    if (oldKeyVals != reinterpret_cast_no_cast_align_warning<Node*>(&mMask)) {
+                        // don't destroy old data: put it into the pool instead
+                        if (forceFree) {
+                            std::free(oldKeyVals);
+                        }
+                        else {
+                            DataPool::addOrFree(oldKeyVals, calcNumBytesTotal(oldMaxElementsWithBuffer));
                         }
                     }
                 }
             }
 
-            void grow()
-            {
-                rehash(std::max(size_t(4), 2 * bucket_count()));
+            ROBIN_HOOD(NOINLINE) void throwOverflowError() const {
+#if ROBIN_HOOD(HAS_EXCEPTIONS)
+                throw std::overflow_error("robin_hood::map overflow");
+#else
+                abort();
+#endif
             }
 
-            void deallocate_data(EntryPointer begin, size_t num_slots_minus_one, int8_t max_lookups)
-            {
-                if (begin != Entry::empty_default_table())
-                {
-                    AllocatorTraits::deallocate(*this, begin, num_slots_minus_one + max_lookups + 1);
+            template <typename OtherKey, typename... Args>
+            std::pair<iterator, bool> try_emplace_impl(OtherKey&& key, Args&&... args) {
+                ROBIN_HOOD_TRACE(this)
+                    auto idxAndState = insertKeyPrepareEmptySpot(key);
+                switch (idxAndState.second) {
+                case InsertionState::key_found:
+                    break;
+
+                case InsertionState::new_node:
+                    ::new (static_cast<void*>(&mKeyVals[idxAndState.first])) Node(
+                        *this, std::piecewise_construct, std::forward_as_tuple(std::forward<OtherKey>(key)),
+                        std::forward_as_tuple(std::forward<Args>(args)...));
+                    break;
+
+                case InsertionState::overwrite_node:
+                    mKeyVals[idxAndState.first] = Node(*this, std::piecewise_construct,
+                        std::forward_as_tuple(std::forward<OtherKey>(key)),
+                        std::forward_as_tuple(std::forward<Args>(args)...));
+                    break;
+
+                case InsertionState::overflow_error:
+                    throwOverflowError();
+                    break;
+                }
+
+                return std::make_pair(iterator(mKeyVals + idxAndState.first, mInfo + idxAndState.first),
+                    InsertionState::key_found != idxAndState.second);
+            }
+
+            template <typename OtherKey, typename Mapped>
+            std::pair<iterator, bool> insertOrAssignImpl(OtherKey&& key, Mapped&& obj) {
+                ROBIN_HOOD_TRACE(this)
+                    auto idxAndState = insertKeyPrepareEmptySpot(key);
+                switch (idxAndState.second) {
+                case InsertionState::key_found:
+                    mKeyVals[idxAndState.first].getSecond() = std::forward<Mapped>(obj);
+                    break;
+
+                case InsertionState::new_node:
+                    ::new (static_cast<void*>(&mKeyVals[idxAndState.first])) Node(
+                        *this, std::piecewise_construct, std::forward_as_tuple(std::forward<OtherKey>(key)),
+                        std::forward_as_tuple(std::forward<Mapped>(obj)));
+                    break;
+
+                case InsertionState::overwrite_node:
+                    mKeyVals[idxAndState.first] = Node(*this, std::piecewise_construct,
+                        std::forward_as_tuple(std::forward<OtherKey>(key)),
+                        std::forward_as_tuple(std::forward<Mapped>(obj)));
+                    break;
+
+                case InsertionState::overflow_error:
+                    throwOverflowError();
+                    break;
+                }
+
+                return std::make_pair(iterator(mKeyVals + idxAndState.first, mInfo + idxAndState.first),
+                    InsertionState::key_found != idxAndState.second);
+            }
+
+            void initData(size_t max_elements) {
+                mNumElements = 0;
+                mMask = max_elements - 1;
+                mMaxNumElementsAllowed = calcMaxNumElementsAllowed(max_elements);
+
+                auto const numElementsWithBuffer = calcNumElementsWithBuffer(max_elements);
+
+                // malloc & zero mInfo. Faster than calloc everything.
+                auto const numBytesTotal = calcNumBytesTotal(numElementsWithBuffer);
+                ROBIN_HOOD_LOG("std::calloc " << numBytesTotal << " = calcNumBytesTotal("
+                    << numElementsWithBuffer << ")")
+                    mKeyVals = reinterpret_cast<Node*>(
+                        detail::assertNotNull<std::bad_alloc>(std::malloc(numBytesTotal)));
+                mInfo = reinterpret_cast<uint8_t*>(mKeyVals + numElementsWithBuffer);
+                std::memset(mInfo, 0, numBytesTotal - numElementsWithBuffer * sizeof(Node));
+
+                // set sentinel
+                mInfo[numElementsWithBuffer] = 1;
+
+                mInfoInc = InitialInfoInc;
+                mInfoHashShift = InitialInfoHashShift;
+            }
+
+            enum class InsertionState { overflow_error, key_found, new_node, overwrite_node };
+
+            // Finds key, and if not already present prepares a spot where to pot the key & value.
+            // This potentially shifts nodes out of the way, updates mInfo and number of inserted
+            // elements, so the only operation left to do is create/assign a new node at that spot.
+            template <typename OtherKey>
+            std::pair<size_t, InsertionState> insertKeyPrepareEmptySpot(OtherKey&& key) {
+                for (int i = 0; i < 256; ++i) {
+                    size_t idx{};
+                    InfoType info{};
+                    keyToIdx(key, &idx, &info);
+                    nextWhileLess(&info, &idx);
+
+                    // while we potentially have a match
+                    while (info == mInfo[idx]) {
+                        if (WKeyEqual::operator()(key, mKeyVals[idx].getFirst())) {
+                            // key already exists, do NOT insert.
+                            // see http://en.cppreference.com/w/cpp/container/unordered_map/insert
+                            return std::make_pair(idx, InsertionState::key_found);
+                        }
+                        next(&info, &idx);
+                    }
+
+                    // unlikely that this evaluates to true
+                    if (ROBIN_HOOD_UNLIKELY(mNumElements >= mMaxNumElementsAllowed)) {
+                        if (!increase_size()) {
+                            return std::make_pair(size_t(0), InsertionState::overflow_error);
+                        }
+                        continue;
+                    }
+
+                    // key not found, so we are now exactly where we want to insert it.
+                    auto const insertion_idx = idx;
+                    auto const insertion_info = info;
+                    if (ROBIN_HOOD_UNLIKELY(insertion_info + mInfoInc > 0xFF)) {
+                        mMaxNumElementsAllowed = 0;
+                    }
+
+                    // find an empty spot
+                    while (0 != mInfo[idx]) {
+                        next(&info, &idx);
+                    }
+
+                    if (idx != insertion_idx) {
+                        shiftUp(idx, insertion_idx);
+                    }
+                    // put at empty spot
+                    mInfo[insertion_idx] = static_cast<uint8_t>(insertion_info);
+                    ++mNumElements;
+                    return std::make_pair(insertion_idx, idx == insertion_idx
+                        ? InsertionState::new_node
+                        : InsertionState::overwrite_node);
+                }
+
+                // enough attempts failed, so finally give up.
+                return std::make_pair(size_t(0), InsertionState::overflow_error);
+            }
+
+            bool try_increase_info() {
+                ROBIN_HOOD_LOG("mInfoInc=" << mInfoInc << ", numElements=" << mNumElements
+                    << ", maxNumElementsAllowed="
+                    << calcMaxNumElementsAllowed(mMask + 1))
+                    if (mInfoInc <= 2) {
+                        // need to be > 2 so that shift works (otherwise undefined behavior!)
+                        return false;
+                    }
+                // we got space left, try to make info smaller
+                mInfoInc = static_cast<uint8_t>(mInfoInc >> 1U);
+
+                // remove one bit of the hash, leaving more space for the distance info.
+                // This is extremely fast because we can operate on 8 bytes at once.
+                ++mInfoHashShift;
+                auto const numElementsWithBuffer = calcNumElementsWithBuffer(mMask + 1);
+
+                for (size_t i = 0; i < numElementsWithBuffer; i += 8) {
+                    auto val = unaligned_load<uint64_t>(mInfo + i);
+                    val = (val >> 1U) & UINT64_C(0x7f7f7f7f7f7f7f7f);
+                    std::memcpy(mInfo + i, &val, sizeof(val));
+                }
+                // update sentinel, which might have been cleared out!
+                mInfo[numElementsWithBuffer] = 1;
+
+                mMaxNumElementsAllowed = calcMaxNumElementsAllowed(mMask + 1);
+                return true;
+            }
+
+            // True if resize was possible, false otherwise
+            bool increase_size() {
+                // nothing allocated yet? just allocate InitialNumElements
+                if (0 == mMask) {
+                    initData(InitialNumElements);
+                    return true;
+                }
+
+                auto const maxNumElementsAllowed = calcMaxNumElementsAllowed(mMask + 1);
+                if (mNumElements < maxNumElementsAllowed && try_increase_info()) {
+                    return true;
+                }
+
+                ROBIN_HOOD_LOG("mNumElements=" << mNumElements << ", maxNumElementsAllowed="
+                    << maxNumElementsAllowed << ", load="
+                    << (static_cast<double>(mNumElements) * 100.0 /
+                        (static_cast<double>(mMask) + 1)))
+
+                    if (mNumElements * 2 < calcMaxNumElementsAllowed(mMask + 1)) {
+                        // we have to resize, even though there would still be plenty of space left!
+                        // Try to rehash instead. Delete freed memory so we don't steadyily increase mem in case
+                        // we have to rehash a few times
+                        nextHashMultiplier();
+                        rehashPowerOfTwo(mMask + 1, true);
+                    }
+                    else {
+                        // we've reached the capacity of the map, so the hash seems to work nice. Keep using it.
+                        rehashPowerOfTwo((mMask + 1) * 2, false);
+                    }
+                return true;
+            }
+
+            void nextHashMultiplier() {
+                // adding an *even* number, so that the multiplier will always stay odd. This is necessary
+                // so that the hash stays a mixing function (and thus doesn't have any information loss).
+                mHashMultiplier += UINT64_C(0xc4ceb9fe1a85ec54);
+            }
+
+            void destroy() {
+                if (0 == mMask) {
+                    // don't deallocate!
+                    return;
+                }
+
+                Destroyer<Self, IsFlat&& std::is_trivially_destructible<Node>::value>{}
+                .nodesDoNotDeallocate(*this);
+
+                // This protection against not deleting mMask shouldn't be needed as it's sufficiently
+                // protected with the 0==mMask check, but I have this anyways because g++ 7 otherwise
+                // reports a compile error: attempt to free a non-heap object 'fm'
+                // [-Werror=free-nonheap-object]
+                if (mKeyVals != reinterpret_cast_no_cast_align_warning<Node*>(&mMask)) {
+                    ROBIN_HOOD_LOG("std::free")
+                        std::free(mKeyVals);
                 }
             }
 
-            void reset_to_empty_state()
-            {
-                deallocate_data(entries, num_slots_minus_one, max_lookups);
-                entries = Entry::empty_default_table();
-                num_slots_minus_one = 0;
-                hash_policy.reset();
-                max_lookups = detailv3::min_lookups - 1;
+            void init() noexcept {
+                mKeyVals = reinterpret_cast_no_cast_align_warning<Node*>(&mMask);
+                mInfo = reinterpret_cast<uint8_t*>(&mMask);
+                mNumElements = 0;
+                mMask = 0;
+                mMaxNumElementsAllowed = 0;
+                mInfoInc = InitialInfoInc;
+                mInfoHashShift = InitialInfoHashShift;
             }
 
-            template<typename U>
-            size_t hash_object(const U& key)
-            {
-                return static_cast<Hasher&>(*this)(key);
-            }
-            template<typename U>
-            size_t hash_object(const U& key) const
-            {
-                return static_cast<const Hasher&>(*this)(key);
-            }
-            template<typename L, typename R>
-            bool compares_equal(const L& lhs, const R& rhs)
-            {
-                return static_cast<Equal&>(*this)(lhs, rhs);
-            }
-
-            struct convertible_to_iterator
-            {
-                EntryPointer it;
-
-                operator iterator()
-                {
-                    if (it->has_value())
-                        return { it };
-                    else
-                        return ++iterator{it};
-                }
-                operator const_iterator()
-                {
-                    if (it->has_value())
-                        return { it };
-                    else
-                        return ++const_iterator{it};
-                }
-            };
-
+            // members are sorted so no padding occurs
+            uint64_t mHashMultiplier = UINT64_C(0xc4ceb9fe1a85ec53);                // 8 byte  8
+            Node* mKeyVals = reinterpret_cast_no_cast_align_warning<Node*>(&mMask); // 8 byte 16
+            uint8_t* mInfo = reinterpret_cast<uint8_t*>(&mMask);                    // 8 byte 24
+            size_t mNumElements = 0;                                                // 8 byte 32
+            size_t mMask = 0;                                                       // 8 byte 40
+            size_t mMaxNumElementsAllowed = 0;                                      // 8 byte 48
+            InfoType mInfoInc = InitialInfoInc;                                     // 4 byte 52
+            InfoType mInfoHashShift = InitialInfoHashShift;                         // 4 byte 56
+            // 16 byte 56 if NodeAllocator
         };
-    }
 
-    struct prime_number_hash_policy
-    {
-        static size_t mod0(size_t) { return 0llu; }
-        static size_t mod2(size_t hash) { return hash % 2llu; }
-        static size_t mod3(size_t hash) { return hash % 3llu; }
-        static size_t mod5(size_t hash) { return hash % 5llu; }
-        static size_t mod7(size_t hash) { return hash % 7llu; }
-        static size_t mod11(size_t hash) { return hash % 11llu; }
-        static size_t mod13(size_t hash) { return hash % 13llu; }
-        static size_t mod17(size_t hash) { return hash % 17llu; }
-        static size_t mod23(size_t hash) { return hash % 23llu; }
-        static size_t mod29(size_t hash) { return hash % 29llu; }
-        static size_t mod37(size_t hash) { return hash % 37llu; }
-        static size_t mod47(size_t hash) { return hash % 47llu; }
-        static size_t mod59(size_t hash) { return hash % 59llu; }
-        static size_t mod73(size_t hash) { return hash % 73llu; }
-        static size_t mod97(size_t hash) { return hash % 97llu; }
-        static size_t mod127(size_t hash) { return hash % 127llu; }
-        static size_t mod151(size_t hash) { return hash % 151llu; }
-        static size_t mod197(size_t hash) { return hash % 197llu; }
-        static size_t mod251(size_t hash) { return hash % 251llu; }
-        static size_t mod313(size_t hash) { return hash % 313llu; }
-        static size_t mod397(size_t hash) { return hash % 397llu; }
-        static size_t mod499(size_t hash) { return hash % 499llu; }
-        static size_t mod631(size_t hash) { return hash % 631llu; }
-        static size_t mod797(size_t hash) { return hash % 797llu; }
-        static size_t mod1009(size_t hash) { return hash % 1009llu; }
-        static size_t mod1259(size_t hash) { return hash % 1259llu; }
-        static size_t mod1597(size_t hash) { return hash % 1597llu; }
-        static size_t mod2011(size_t hash) { return hash % 2011llu; }
-        static size_t mod2539(size_t hash) { return hash % 2539llu; }
-        static size_t mod3203(size_t hash) { return hash % 3203llu; }
-        static size_t mod4027(size_t hash) { return hash % 4027llu; }
-        static size_t mod5087(size_t hash) { return hash % 5087llu; }
-        static size_t mod6421(size_t hash) { return hash % 6421llu; }
-        static size_t mod8089(size_t hash) { return hash % 8089llu; }
-        static size_t mod10193(size_t hash) { return hash % 10193llu; }
-        static size_t mod12853(size_t hash) { return hash % 12853llu; }
-        static size_t mod16193(size_t hash) { return hash % 16193llu; }
-        static size_t mod20399(size_t hash) { return hash % 20399llu; }
-        static size_t mod25717(size_t hash) { return hash % 25717llu; }
-        static size_t mod32401(size_t hash) { return hash % 32401llu; }
-        static size_t mod40823(size_t hash) { return hash % 40823llu; }
-        static size_t mod51437(size_t hash) { return hash % 51437llu; }
-        static size_t mod64811(size_t hash) { return hash % 64811llu; }
-        static size_t mod81649(size_t hash) { return hash % 81649llu; }
-        static size_t mod102877(size_t hash) { return hash % 102877llu; }
-        static size_t mod129607(size_t hash) { return hash % 129607llu; }
-        static size_t mod163307(size_t hash) { return hash % 163307llu; }
-        static size_t mod205759(size_t hash) { return hash % 205759llu; }
-        static size_t mod259229(size_t hash) { return hash % 259229llu; }
-        static size_t mod326617(size_t hash) { return hash % 326617llu; }
-        static size_t mod411527(size_t hash) { return hash % 411527llu; }
-        static size_t mod518509(size_t hash) { return hash % 518509llu; }
-        static size_t mod653267(size_t hash) { return hash % 653267llu; }
-        static size_t mod823117(size_t hash) { return hash % 823117llu; }
-        static size_t mod1037059(size_t hash) { return hash % 1037059llu; }
-        static size_t mod1306601(size_t hash) { return hash % 1306601llu; }
-        static size_t mod1646237(size_t hash) { return hash % 1646237llu; }
-        static size_t mod2074129(size_t hash) { return hash % 2074129llu; }
-        static size_t mod2613229(size_t hash) { return hash % 2613229llu; }
-        static size_t mod3292489(size_t hash) { return hash % 3292489llu; }
-        static size_t mod4148279(size_t hash) { return hash % 4148279llu; }
-        static size_t mod5226491(size_t hash) { return hash % 5226491llu; }
-        static size_t mod6584983(size_t hash) { return hash % 6584983llu; }
-        static size_t mod8296553(size_t hash) { return hash % 8296553llu; }
-        static size_t mod10453007(size_t hash) { return hash % 10453007llu; }
-        static size_t mod13169977(size_t hash) { return hash % 13169977llu; }
-        static size_t mod16593127(size_t hash) { return hash % 16593127llu; }
-        static size_t mod20906033(size_t hash) { return hash % 20906033llu; }
-        static size_t mod26339969(size_t hash) { return hash % 26339969llu; }
-        static size_t mod33186281(size_t hash) { return hash % 33186281llu; }
-        static size_t mod41812097(size_t hash) { return hash % 41812097llu; }
-        static size_t mod52679969(size_t hash) { return hash % 52679969llu; }
-        static size_t mod66372617(size_t hash) { return hash % 66372617llu; }
-        static size_t mod83624237(size_t hash) { return hash % 83624237llu; }
-        static size_t mod105359939(size_t hash) { return hash % 105359939llu; }
-        static size_t mod132745199(size_t hash) { return hash % 132745199llu; }
-        static size_t mod167248483(size_t hash) { return hash % 167248483llu; }
-        static size_t mod210719881(size_t hash) { return hash % 210719881llu; }
-        static size_t mod265490441(size_t hash) { return hash % 265490441llu; }
-        static size_t mod334496971(size_t hash) { return hash % 334496971llu; }
-        static size_t mod421439783(size_t hash) { return hash % 421439783llu; }
-        static size_t mod530980861(size_t hash) { return hash % 530980861llu; }
-        static size_t mod668993977(size_t hash) { return hash % 668993977llu; }
-        static size_t mod842879579(size_t hash) { return hash % 842879579llu; }
-        static size_t mod1061961721(size_t hash) { return hash % 1061961721llu; }
-        static size_t mod1337987929(size_t hash) { return hash % 1337987929llu; }
-        static size_t mod1685759167(size_t hash) { return hash % 1685759167llu; }
-        static size_t mod2123923447(size_t hash) { return hash % 2123923447llu; }
-        static size_t mod2675975881(size_t hash) { return hash % 2675975881llu; }
-        static size_t mod3371518343(size_t hash) { return hash % 3371518343llu; }
-        static size_t mod4247846927(size_t hash) { return hash % 4247846927llu; }
-        static size_t mod5351951779(size_t hash) { return hash % 5351951779llu; }
-        static size_t mod6743036717(size_t hash) { return hash % 6743036717llu; }
-        static size_t mod8495693897(size_t hash) { return hash % 8495693897llu; }
-        static size_t mod10703903591(size_t hash) { return hash % 10703903591llu; }
-        static size_t mod13486073473(size_t hash) { return hash % 13486073473llu; }
-        static size_t mod16991387857(size_t hash) { return hash % 16991387857llu; }
-        static size_t mod21407807219(size_t hash) { return hash % 21407807219llu; }
-        static size_t mod26972146961(size_t hash) { return hash % 26972146961llu; }
-        static size_t mod33982775741(size_t hash) { return hash % 33982775741llu; }
-        static size_t mod42815614441(size_t hash) { return hash % 42815614441llu; }
-        static size_t mod53944293929(size_t hash) { return hash % 53944293929llu; }
-        static size_t mod67965551447(size_t hash) { return hash % 67965551447llu; }
-        static size_t mod85631228929(size_t hash) { return hash % 85631228929llu; }
-        static size_t mod107888587883(size_t hash) { return hash % 107888587883llu; }
-        static size_t mod135931102921(size_t hash) { return hash % 135931102921llu; }
-        static size_t mod171262457903(size_t hash) { return hash % 171262457903llu; }
-        static size_t mod215777175787(size_t hash) { return hash % 215777175787llu; }
-        static size_t mod271862205833(size_t hash) { return hash % 271862205833llu; }
-        static size_t mod342524915839(size_t hash) { return hash % 342524915839llu; }
-        static size_t mod431554351609(size_t hash) { return hash % 431554351609llu; }
-        static size_t mod543724411781(size_t hash) { return hash % 543724411781llu; }
-        static size_t mod685049831731(size_t hash) { return hash % 685049831731llu; }
-        static size_t mod863108703229(size_t hash) { return hash % 863108703229llu; }
-        static size_t mod1087448823553(size_t hash) { return hash % 1087448823553llu; }
-        static size_t mod1370099663459(size_t hash) { return hash % 1370099663459llu; }
-        static size_t mod1726217406467(size_t hash) { return hash % 1726217406467llu; }
-        static size_t mod2174897647073(size_t hash) { return hash % 2174897647073llu; }
-        static size_t mod2740199326961(size_t hash) { return hash % 2740199326961llu; }
-        static size_t mod3452434812973(size_t hash) { return hash % 3452434812973llu; }
-        static size_t mod4349795294267(size_t hash) { return hash % 4349795294267llu; }
-        static size_t mod5480398654009(size_t hash) { return hash % 5480398654009llu; }
-        static size_t mod6904869625999(size_t hash) { return hash % 6904869625999llu; }
-        static size_t mod8699590588571(size_t hash) { return hash % 8699590588571llu; }
-        static size_t mod10960797308051(size_t hash) { return hash % 10960797308051llu; }
-        static size_t mod13809739252051(size_t hash) { return hash % 13809739252051llu; }
-        static size_t mod17399181177241(size_t hash) { return hash % 17399181177241llu; }
-        static size_t mod21921594616111(size_t hash) { return hash % 21921594616111llu; }
-        static size_t mod27619478504183(size_t hash) { return hash % 27619478504183llu; }
-        static size_t mod34798362354533(size_t hash) { return hash % 34798362354533llu; }
-        static size_t mod43843189232363(size_t hash) { return hash % 43843189232363llu; }
-        static size_t mod55238957008387(size_t hash) { return hash % 55238957008387llu; }
-        static size_t mod69596724709081(size_t hash) { return hash % 69596724709081llu; }
-        static size_t mod87686378464759(size_t hash) { return hash % 87686378464759llu; }
-        static size_t mod110477914016779(size_t hash) { return hash % 110477914016779llu; }
-        static size_t mod139193449418173(size_t hash) { return hash % 139193449418173llu; }
-        static size_t mod175372756929481(size_t hash) { return hash % 175372756929481llu; }
-        static size_t mod220955828033581(size_t hash) { return hash % 220955828033581llu; }
-        static size_t mod278386898836457(size_t hash) { return hash % 278386898836457llu; }
-        static size_t mod350745513859007(size_t hash) { return hash % 350745513859007llu; }
-        static size_t mod441911656067171(size_t hash) { return hash % 441911656067171llu; }
-        static size_t mod556773797672909(size_t hash) { return hash % 556773797672909llu; }
-        static size_t mod701491027718027(size_t hash) { return hash % 701491027718027llu; }
-        static size_t mod883823312134381(size_t hash) { return hash % 883823312134381llu; }
-        static size_t mod1113547595345903(size_t hash) { return hash % 1113547595345903llu; }
-        static size_t mod1402982055436147(size_t hash) { return hash % 1402982055436147llu; }
-        static size_t mod1767646624268779(size_t hash) { return hash % 1767646624268779llu; }
-        static size_t mod2227095190691797(size_t hash) { return hash % 2227095190691797llu; }
-        static size_t mod2805964110872297(size_t hash) { return hash % 2805964110872297llu; }
-        static size_t mod3535293248537579(size_t hash) { return hash % 3535293248537579llu; }
-        static size_t mod4454190381383713(size_t hash) { return hash % 4454190381383713llu; }
-        static size_t mod5611928221744609(size_t hash) { return hash % 5611928221744609llu; }
-        static size_t mod7070586497075177(size_t hash) { return hash % 7070586497075177llu; }
-        static size_t mod8908380762767489(size_t hash) { return hash % 8908380762767489llu; }
-        static size_t mod11223856443489329(size_t hash) { return hash % 11223856443489329llu; }
-        static size_t mod14141172994150357(size_t hash) { return hash % 14141172994150357llu; }
-        static size_t mod17816761525534927(size_t hash) { return hash % 17816761525534927llu; }
-        static size_t mod22447712886978529(size_t hash) { return hash % 22447712886978529llu; }
-        static size_t mod28282345988300791(size_t hash) { return hash % 28282345988300791llu; }
-        static size_t mod35633523051069991(size_t hash) { return hash % 35633523051069991llu; }
-        static size_t mod44895425773957261(size_t hash) { return hash % 44895425773957261llu; }
-        static size_t mod56564691976601587(size_t hash) { return hash % 56564691976601587llu; }
-        static size_t mod71267046102139967(size_t hash) { return hash % 71267046102139967llu; }
-        static size_t mod89790851547914507(size_t hash) { return hash % 89790851547914507llu; }
-        static size_t mod113129383953203213(size_t hash) { return hash % 113129383953203213llu; }
-        static size_t mod142534092204280003(size_t hash) { return hash % 142534092204280003llu; }
-        static size_t mod179581703095829107(size_t hash) { return hash % 179581703095829107llu; }
-        static size_t mod226258767906406483(size_t hash) { return hash % 226258767906406483llu; }
-        static size_t mod285068184408560057(size_t hash) { return hash % 285068184408560057llu; }
-        static size_t mod359163406191658253(size_t hash) { return hash % 359163406191658253llu; }
-        static size_t mod452517535812813007(size_t hash) { return hash % 452517535812813007llu; }
-        static size_t mod570136368817120201(size_t hash) { return hash % 570136368817120201llu; }
-        static size_t mod718326812383316683(size_t hash) { return hash % 718326812383316683llu; }
-        static size_t mod905035071625626043(size_t hash) { return hash % 905035071625626043llu; }
-        static size_t mod1140272737634240411(size_t hash) { return hash % 1140272737634240411llu; }
-        static size_t mod1436653624766633509(size_t hash) { return hash % 1436653624766633509llu; }
-        static size_t mod1810070143251252131(size_t hash) { return hash % 1810070143251252131llu; }
-        static size_t mod2280545475268481167(size_t hash) { return hash % 2280545475268481167llu; }
-        static size_t mod2873307249533267101(size_t hash) { return hash % 2873307249533267101llu; }
-        static size_t mod3620140286502504283(size_t hash) { return hash % 3620140286502504283llu; }
-        static size_t mod4561090950536962147(size_t hash) { return hash % 4561090950536962147llu; }
-        static size_t mod5746614499066534157(size_t hash) { return hash % 5746614499066534157llu; }
-        static size_t mod7240280573005008577(size_t hash) { return hash % 7240280573005008577llu; }
-        static size_t mod9122181901073924329(size_t hash) { return hash % 9122181901073924329llu; }
-        static size_t mod11493228998133068689(size_t hash) { return hash % 11493228998133068689llu; }
-        static size_t mod14480561146010017169(size_t hash) { return hash % 14480561146010017169llu; }
-        static size_t mod18446744073709551557(size_t hash) { return hash % 18446744073709551557llu; }
+    } // namespace detail
 
-        using mod_function = size_t(*)(size_t);
+    // map
 
-        mod_function next_size_over(size_t& size) const
-        {
-            // prime numbers generated by the following method:
-            // 1. start with a prime p = 2
-            // 2. go to wolfram alpha and get p = NextPrime(2 * p)
-            // 3. repeat 2. until you overflow 64 bits
-            // you now have large gaps which you would hit if somebody called reserve() with an unlucky number.
-            // 4. to fill the gaps for every prime p go to wolfram alpha and get ClosestPrime(p * 2^(1/3)) and ClosestPrime(p * 2^(2/3)) and put those in the gaps
-            // 5. get PrevPrime(2^64) and put it at the end
-            static constexpr const size_t prime_list[] =
-            {
-                2llu, 3llu, 5llu, 7llu, 11llu, 13llu, 17llu, 23llu, 29llu, 37llu, 47llu,
-                59llu, 73llu, 97llu, 127llu, 151llu, 197llu, 251llu, 313llu, 397llu,
-                499llu, 631llu, 797llu, 1009llu, 1259llu, 1597llu, 2011llu, 2539llu,
-                3203llu, 4027llu, 5087llu, 6421llu, 8089llu, 10193llu, 12853llu, 16193llu,
-                20399llu, 25717llu, 32401llu, 40823llu, 51437llu, 64811llu, 81649llu,
-                102877llu, 129607llu, 163307llu, 205759llu, 259229llu, 326617llu,
-                411527llu, 518509llu, 653267llu, 823117llu, 1037059llu, 1306601llu,
-                1646237llu, 2074129llu, 2613229llu, 3292489llu, 4148279llu, 5226491llu,
-                6584983llu, 8296553llu, 10453007llu, 13169977llu, 16593127llu, 20906033llu,
-                26339969llu, 33186281llu, 41812097llu, 52679969llu, 66372617llu,
-                83624237llu, 105359939llu, 132745199llu, 167248483llu, 210719881llu,
-                265490441llu, 334496971llu, 421439783llu, 530980861llu, 668993977llu,
-                842879579llu, 1061961721llu, 1337987929llu, 1685759167llu, 2123923447llu,
-                2675975881llu, 3371518343llu, 4247846927llu, 5351951779llu, 6743036717llu,
-                8495693897llu, 10703903591llu, 13486073473llu, 16991387857llu,
-                21407807219llu, 26972146961llu, 33982775741llu, 42815614441llu,
-                53944293929llu, 67965551447llu, 85631228929llu, 107888587883llu,
-                135931102921llu, 171262457903llu, 215777175787llu, 271862205833llu,
-                342524915839llu, 431554351609llu, 543724411781llu, 685049831731llu,
-                863108703229llu, 1087448823553llu, 1370099663459llu, 1726217406467llu,
-                2174897647073llu, 2740199326961llu, 3452434812973llu, 4349795294267llu,
-                5480398654009llu, 6904869625999llu, 8699590588571llu, 10960797308051llu,
-                13809739252051llu, 17399181177241llu, 21921594616111llu, 27619478504183llu,
-                34798362354533llu, 43843189232363llu, 55238957008387llu, 69596724709081llu,
-                87686378464759llu, 110477914016779llu, 139193449418173llu,
-                175372756929481llu, 220955828033581llu, 278386898836457llu,
-                350745513859007llu, 441911656067171llu, 556773797672909llu,
-                701491027718027llu, 883823312134381llu, 1113547595345903llu,
-                1402982055436147llu, 1767646624268779llu, 2227095190691797llu,
-                2805964110872297llu, 3535293248537579llu, 4454190381383713llu,
-                5611928221744609llu, 7070586497075177llu, 8908380762767489llu,
-                11223856443489329llu, 14141172994150357llu, 17816761525534927llu,
-                22447712886978529llu, 28282345988300791llu, 35633523051069991llu,
-                44895425773957261llu, 56564691976601587llu, 71267046102139967llu,
-                89790851547914507llu, 113129383953203213llu, 142534092204280003llu,
-                179581703095829107llu, 226258767906406483llu, 285068184408560057llu,
-                359163406191658253llu, 452517535812813007llu, 570136368817120201llu,
-                718326812383316683llu, 905035071625626043llu, 1140272737634240411llu,
-                1436653624766633509llu, 1810070143251252131llu, 2280545475268481167llu,
-                2873307249533267101llu, 3620140286502504283llu, 4561090950536962147llu,
-                5746614499066534157llu, 7240280573005008577llu, 9122181901073924329llu,
-                11493228998133068689llu, 14480561146010017169llu, 18446744073709551557llu
-            };
-            static constexpr size_t(* const mod_functions[])(size_t) =
-            {
-                &mod0, &mod2, &mod3, &mod5, &mod7, &mod11, &mod13, &mod17, &mod23, &mod29, &mod37,
-                &mod47, &mod59, &mod73, &mod97, &mod127, &mod151, &mod197, &mod251, &mod313, &mod397,
-                &mod499, &mod631, &mod797, &mod1009, &mod1259, &mod1597, &mod2011, &mod2539, &mod3203,
-                &mod4027, &mod5087, &mod6421, &mod8089, &mod10193, &mod12853, &mod16193, &mod20399,
-                &mod25717, &mod32401, &mod40823, &mod51437, &mod64811, &mod81649, &mod102877,
-                &mod129607, &mod163307, &mod205759, &mod259229, &mod326617, &mod411527, &mod518509,
-                &mod653267, &mod823117, &mod1037059, &mod1306601, &mod1646237, &mod2074129,
-                &mod2613229, &mod3292489, &mod4148279, &mod5226491, &mod6584983, &mod8296553,
-                &mod10453007, &mod13169977, &mod16593127, &mod20906033, &mod26339969, &mod33186281,
-                &mod41812097, &mod52679969, &mod66372617, &mod83624237, &mod105359939, &mod132745199,
-                &mod167248483, &mod210719881, &mod265490441, &mod334496971, &mod421439783,
-                &mod530980861, &mod668993977, &mod842879579, &mod1061961721, &mod1337987929,
-                &mod1685759167, &mod2123923447, &mod2675975881, &mod3371518343, &mod4247846927,
-                &mod5351951779, &mod6743036717, &mod8495693897, &mod10703903591, &mod13486073473,
-                &mod16991387857, &mod21407807219, &mod26972146961, &mod33982775741, &mod42815614441,
-                &mod53944293929, &mod67965551447, &mod85631228929, &mod107888587883, &mod135931102921,
-                &mod171262457903, &mod215777175787, &mod271862205833, &mod342524915839,
-                &mod431554351609, &mod543724411781, &mod685049831731, &mod863108703229,
-                &mod1087448823553, &mod1370099663459, &mod1726217406467, &mod2174897647073,
-                &mod2740199326961, &mod3452434812973, &mod4349795294267, &mod5480398654009,
-                &mod6904869625999, &mod8699590588571, &mod10960797308051, &mod13809739252051,
-                &mod17399181177241, &mod21921594616111, &mod27619478504183, &mod34798362354533,
-                &mod43843189232363, &mod55238957008387, &mod69596724709081, &mod87686378464759,
-                &mod110477914016779, &mod139193449418173, &mod175372756929481, &mod220955828033581,
-                &mod278386898836457, &mod350745513859007, &mod441911656067171, &mod556773797672909,
-                &mod701491027718027, &mod883823312134381, &mod1113547595345903, &mod1402982055436147,
-                &mod1767646624268779, &mod2227095190691797, &mod2805964110872297, &mod3535293248537579,
-                &mod4454190381383713, &mod5611928221744609, &mod7070586497075177, &mod8908380762767489,
-                &mod11223856443489329, &mod14141172994150357, &mod17816761525534927,
-                &mod22447712886978529, &mod28282345988300791, &mod35633523051069991,
-                &mod44895425773957261, &mod56564691976601587, &mod71267046102139967,
-                &mod89790851547914507, &mod113129383953203213, &mod142534092204280003,
-                &mod179581703095829107, &mod226258767906406483, &mod285068184408560057,
-                &mod359163406191658253, &mod452517535812813007, &mod570136368817120201,
-                &mod718326812383316683, &mod905035071625626043, &mod1140272737634240411,
-                &mod1436653624766633509, &mod1810070143251252131, &mod2280545475268481167,
-                &mod2873307249533267101, &mod3620140286502504283, &mod4561090950536962147,
-                &mod5746614499066534157, &mod7240280573005008577, &mod9122181901073924329,
-                &mod11493228998133068689, &mod14480561146010017169, &mod18446744073709551557
-            };
-            const size_t* found = std::lower_bound(std::begin(prime_list), std::end(prime_list) - 1, size);
-            size = *found;
-            return mod_functions[1 + found - prime_list];
-        }
-        void commit(mod_function new_mod_function)
-        {
-            current_mod_function = new_mod_function;
-        }
-        void reset()
-        {
-            current_mod_function = &mod0;
-        }
+    template <typename Key, typename T, typename Hash = hash<Key>,
+        typename KeyEqual = std::equal_to<Key>, size_t MaxLoadFactor100 = 80>
+    using unordered_flat_map = detail::Table<true, MaxLoadFactor100, Key, T, Hash, KeyEqual>;
 
-        size_t index_for_hash(size_t hash, size_t /*num_slots_minus_one*/) const
-        {
-            return current_mod_function(hash);
-        }
-        size_t keep_in_range(size_t index, size_t num_slots_minus_one) const
-        {
-            return index > num_slots_minus_one ? current_mod_function(index) : index;
-        }
+    template <typename Key, typename T, typename Hash = hash<Key>,
+        typename KeyEqual = std::equal_to<Key>, size_t MaxLoadFactor100 = 80>
+    using unordered_node_map = detail::Table<false, MaxLoadFactor100, Key, T, Hash, KeyEqual>;
 
-    private:
-        mod_function current_mod_function = &mod0;
-    };
+    template <typename Key, typename T, typename Hash = hash<Key>,
+        typename KeyEqual = std::equal_to<Key>, size_t MaxLoadFactor100 = 80>
+    using unordered_map =
+        detail::Table<sizeof(robin_hood::pair<Key, T>) <= sizeof(size_t) * 6 &&
+        std::is_nothrow_move_constructible<robin_hood::pair<Key, T>>::value&&
+        std::is_nothrow_move_assignable<robin_hood::pair<Key, T>>::value,
+        MaxLoadFactor100, Key, T, Hash, KeyEqual>;
 
-    struct power_of_two_hash_policy
-    {
-        size_t index_for_hash(size_t hash, size_t num_slots_minus_one) const
-        {
-            return hash & num_slots_minus_one;
-        }
-        size_t keep_in_range(size_t index, size_t num_slots_minus_one) const
-        {
-            return index_for_hash(index, num_slots_minus_one);
-        }
-        int8_t next_size_over(size_t& size) const
-        {
-            size = detailv3::next_power_of_two(size);
-            return 0;
-        }
-        void commit(int8_t)
-        {
-        }
-        void reset()
-        {
-        }
+    // set
 
-    };
+    template <typename Key, typename Hash = hash<Key>, typename KeyEqual = std::equal_to<Key>,
+        size_t MaxLoadFactor100 = 80>
+    using unordered_flat_set = detail::Table<true, MaxLoadFactor100, Key, void, Hash, KeyEqual>;
 
-    struct fibonacci_hash_policy
-    {
-        size_t index_for_hash(size_t hash, size_t /*num_slots_minus_one*/) const
-        {
-            return (11400714819323198485ull * hash) >> shift;
-        }
-        size_t keep_in_range(size_t index, size_t num_slots_minus_one) const
-        {
-            return index & num_slots_minus_one;
-        }
+    template <typename Key, typename Hash = hash<Key>, typename KeyEqual = std::equal_to<Key>,
+        size_t MaxLoadFactor100 = 80>
+    using unordered_node_set = detail::Table<false, MaxLoadFactor100, Key, void, Hash, KeyEqual>;
 
-        int8_t next_size_over(size_t& size) const
-        {
-            size = std::max(size_t(2), detailv3::next_power_of_two(size));
-            return 64 - detailv3::log2(size);
-        }
-        void commit(int8_t shift)
-        {
-            this->shift = shift;
-        }
-        void reset()
-        {
-            shift = 63;
-        }
+    template <typename Key, typename Hash = hash<Key>, typename KeyEqual = std::equal_to<Key>,
+        size_t MaxLoadFactor100 = 80>
+    using unordered_set = detail::Table<sizeof(Key) <= sizeof(size_t) * 6 &&
+        std::is_nothrow_move_constructible<Key>::value&&
+        std::is_nothrow_move_assignable<Key>::value,
+        MaxLoadFactor100, Key, void, Hash, KeyEqual>;
 
-    private:
-        int8_t shift = 63;
-    };
+} // namespace robin_hood
 
-    template<typename K, typename V, typename H = std::hash<K>, typename E = std::equal_to<K>, typename A = std::allocator<std::pair<K, V> > >
-    class flat_hash_map
-        : public detailv3::sherwood_v3_table
-        <
-        std::pair<K, V>,
-        K,
-        H,
-        detailv3::KeyOrValueHasher<K, std::pair<K, V>, H>,
-        E,
-        detailv3::KeyOrValueEquality<K, std::pair<K, V>, E>,
-        A,
-        typename std::allocator_traits<A>::template rebind_alloc<detailv3::sherwood_v3_entry<std::pair<K, V>>>
-        >
-    {
-        using Table = detailv3::sherwood_v3_table
-            <
-            std::pair<K, V>,
-            K,
-            H,
-            detailv3::KeyOrValueHasher<K, std::pair<K, V>, H>,
-            E,
-            detailv3::KeyOrValueEquality<K, std::pair<K, V>, E>,
-            A,
-            typename std::allocator_traits<A>::template rebind_alloc<detailv3::sherwood_v3_entry<std::pair<K, V>>>
-            >;
-    public:
-
-        using key_type = K;
-        using mapped_type = V;
-
-        using Table::Table;
-        flat_hash_map()
-        {
-        }
-
-        inline V& operator[](const K& key)
-        {
-            return emplace(key, convertible_to_value()).first->second;
-        }
-        inline V& operator[](K&& key)
-        {
-            return emplace(std::move(key), convertible_to_value()).first->second;
-        }
-        V& at(const K& key)
-        {
-            auto found = this->find(key);
-            if (found == this->end())
-                throw std::out_of_range("Argument passed to at() was not in the map.");
-            return found->second;
-        }
-        const V& at(const K& key) const
-        {
-            auto found = this->find(key);
-            if (found == this->end())
-                throw std::out_of_range("Argument passed to at() was not in the map.");
-            return found->second;
-        }
-
-        using Table::emplace;
-        std::pair<typename Table::iterator, bool> emplace()
-        {
-            return emplace(key_type(), convertible_to_value());
-        }
-        template<typename M>
-        std::pair<typename Table::iterator, bool> insert_or_assign(const key_type& key, M&& m)
-        {
-            auto emplace_result = emplace(key, std::forward<M>(m));
-            if (!emplace_result.second)
-                emplace_result.first->second = std::forward<M>(m);
-            return emplace_result;
-        }
-        template<typename M>
-        std::pair<typename Table::iterator, bool> insert_or_assign(key_type&& key, M&& m)
-        {
-            auto emplace_result = emplace(std::move(key), std::forward<M>(m));
-            if (!emplace_result.second)
-                emplace_result.first->second = std::forward<M>(m);
-            return emplace_result;
-        }
-        template<typename M>
-        typename Table::iterator insert_or_assign(typename Table::const_iterator, const key_type& key, M&& m)
-        {
-            return insert_or_assign(key, std::forward<M>(m)).first;
-        }
-        template<typename M>
-        typename Table::iterator insert_or_assign(typename Table::const_iterator, key_type&& key, M&& m)
-        {
-            return insert_or_assign(std::move(key), std::forward<M>(m)).first;
-        }
-
-        friend bool operator==(const flat_hash_map& lhs, const flat_hash_map& rhs)
-        {
-            if (lhs.size() != rhs.size())
-                return false;
-            for (const typename Table::value_type& value : lhs)
-            {
-                auto found = rhs.find(value.first);
-                if (found == rhs.end())
-                    return false;
-                else if (value.second != found->second)
-                    return false;
-            }
-            return true;
-        }
-        friend bool operator!=(const flat_hash_map& lhs, const flat_hash_map& rhs)
-        {
-            return !(lhs == rhs);
-        }
-
-    private:
-        struct convertible_to_value
-        {
-            operator V() const
-            {
-                return V();
-            }
-        };
-    };
-
-    template<typename T, typename H = std::hash<T>, typename E = std::equal_to<T>, typename A = std::allocator<T> >
-    class flat_hash_set
-        : public detailv3::sherwood_v3_table
-        <
-        T,
-        T,
-        H,
-        detailv3::functor_storage<size_t, H>,
-        E,
-        detailv3::functor_storage<bool, E>,
-        A,
-        typename std::allocator_traits<A>::template rebind_alloc<detailv3::sherwood_v3_entry<T>>
-        >
-    {
-        using Table = detailv3::sherwood_v3_table
-            <
-            T,
-            T,
-            H,
-            detailv3::functor_storage<size_t, H>,
-            E,
-            detailv3::functor_storage<bool, E>,
-            A,
-            typename std::allocator_traits<A>::template rebind_alloc<detailv3::sherwood_v3_entry<T>>
-            >;
-    public:
-
-        using key_type = T;
-
-        using Table::Table;
-        flat_hash_set()
-        {
-        }
-
-        template<typename... Args>
-        std::pair<typename Table::iterator, bool> emplace(Args &&... args)
-        {
-            return Table::emplace(T(std::forward<Args>(args)...));
-        }
-        std::pair<typename Table::iterator, bool> emplace(const key_type& arg)
-        {
-            return Table::emplace(arg);
-        }
-        std::pair<typename Table::iterator, bool> emplace(key_type& arg)
-        {
-            return Table::emplace(arg);
-        }
-        std::pair<typename Table::iterator, bool> emplace(const key_type&& arg)
-        {
-            return Table::emplace(std::move(arg));
-        }
-        std::pair<typename Table::iterator, bool> emplace(key_type&& arg)
-        {
-            return Table::emplace(std::move(arg));
-        }
-
-        friend bool operator==(const flat_hash_set& lhs, const flat_hash_set& rhs)
-        {
-            if (lhs.size() != rhs.size())
-                return false;
-            for (const T& value : lhs)
-            {
-                if (rhs.find(value) == rhs.end())
-                    return false;
-            }
-            return true;
-        }
-        friend bool operator!=(const flat_hash_set& lhs, const flat_hash_set& rhs)
-        {
-            return !(lhs == rhs);
-        }
-    };
-
-
-    template<typename T>
-    struct power_of_two_std_hash : std::hash<T>
-    {
-        typedef ska::power_of_two_hash_policy hash_policy;
-    };
-
-} // end namespace ska
+#endif

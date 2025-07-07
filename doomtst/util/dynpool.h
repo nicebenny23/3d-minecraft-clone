@@ -2,7 +2,7 @@
 #include "dynamicarray.h"
 #include <stdexcept>
 
-namespace DynPool {
+namespace dynPool {
 
     struct blockInfo {
         bool free;
@@ -22,10 +22,11 @@ namespace DynPool {
 
         // For Derived
         flux(size_t ElementSize) {
+
+            BlockSize = (ElementSize + sizeof(blockInfo));
             if (BlockSize < sizeof(T)) {
                 throw std::invalid_argument("Element size must be at least sizeof(T)");
             }
-            BlockSize = (ElementSize + sizeof(blockInfo));
         }
 
         T* alloc() {

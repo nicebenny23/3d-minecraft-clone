@@ -12,7 +12,7 @@
 #include "../util/Id.h"
 #include "../util/bitset.h"
 #include "../util/type_index.h"
-#
+#include "../util/dynpool.h"
 namespace GameContext {
 
 }
@@ -39,6 +39,8 @@ namespace gameobject {
 	};
 	struct component;
 	struct OCManager;
+	struct Archtype;
+	
 	enum objstate : char
 	{
 		beinginitiated = 0,
@@ -52,43 +54,31 @@ namespace gameobject {
 		updatetick = 2,
 		updaterender = 3,
 	};
-	
-	struct Archtype {
-		bitset exists;
-		Cont::array<Ids::Id> objects;
-		OCManager* Man;
-	};
-	
-	struct ComponentHasher {
-
-		size_t operator()(const size_t c) const;
-
-	};
+	//using ArchStorage = Sparse::SparseSet < size_t>;
 	struct ComponentMapper {
 		constexpr size_t operator()(component* comp) const noexcept;
-		
-			
-		
-	};
 
-	using componentStorage = Sparse::PackedSet < component*, std::hash<size_t>, ComponentMapper >;
+
+
+	};
+	
 	struct EntityMetadata {
-		componentStorage componentlist;
-		size_t arch_id;
-		Archtype* type;
+	
+
+		Archtype* arch;
 		objstate state;
 		size_t gen_count;
+		size_t arch_ind;
 		EntityMetadata() {
-			gen_count=0;
-			type = nullptr;
-			arch_id = 0;
+			gen_count = 0;
+			arch = nullptr;
+			arch_ind = 0;
 
 		}
 		void reset() {
-			componentlist.clear();
 			gen_count++;
 		}
-		
+
 	};
 	struct obj
 	{
@@ -104,7 +94,7 @@ namespace gameobject {
 		//removes a component
 		template <class T>
 		void removecomponent();
-	
+
 		bool exists() const;
 
 		Ids::Id Id;
@@ -115,14 +105,14 @@ namespace gameobject {
 		EntityMetadata& meta();
 
 		componentStorage& componentlist();
-	
+
 		objstate& state();
 
 		constexpr obj() noexcept {
-			Id =Ids::None;
+			Id = Ids::None;
 			OC = nullptr;
 		}
-	
+
 		void immediate_destroy();
 
 		void deffered_destroy();
@@ -135,8 +125,48 @@ namespace gameobject {
 		OCManager* OC;
 
 		friend struct OCManager;
-	};	
-	static constexpr obj None  = obj();
+	};
+	static constexpr obj None = obj();
+
+	struct Archtype {
+		array<Archtype*> moves;
+		array<obj> elems;
+	
+		bitset::bitset bit_list;
+		template <typename T>
+		bool has_component();
+		bool has_component(size_t index);
+		void add(obj object) {
+			elems.push(object);
+			object.meta().arch = this;
+			object.meta().arch_ind = elems.length - 1;
+		}
+		void remove(obj object) {
+			
+			EntityMetadata& met= object.meta();
+			if (this!=met.arch)
+			{
+				throw std::logic_error("cannot remove a componet from an archtype it is not a member of");
+			}
+			size_t index = met.arch_ind;
+			size_t end_index = elems.length - 1;
+			std::swap(met.arch_ind, elems[end_index].meta().arch_ind);
+			std::swap(elems[index], elems[end_index]);
+			met.arch = nullptr;
+			elems.pop();
+		}
+		//Sparse::SparseSet<size_t> proper_inds;
+		OCManager* OC;
+		Archtype(bitset::bitset st,OCManager* Man) :bit_list(st), OC(Man) {};
+		Archtype() {
+			OC = nullptr;
+
+			bit_list = bitset::None;
+		}
+	};
+
+
+	
 	struct componentmanager
 	{
 		componentmanager();
@@ -145,7 +175,7 @@ namespace gameobject {
 		int priority;
 		size_t id;
 	
-		chainpool::chainedpool<component> pool;
+		dynPool::flux<component> pool;
 
 
 		void init(component* sample);
@@ -154,9 +184,10 @@ namespace gameobject {
 	
 
 	struct OCManager {
-		void destroy(obj* object);
-		OCManager() :ctx(nullptr){
+	
+		OCManager(){
 			const size_t max_size = static_cast<size_t>(1) << 20;
+			ctx = nullptr;
 			entitymeta = array<EntityMetadata>(max_size);
 			free_ids = array<size_t>(max_size);
 			for (size_t i = 0; i < max_size; i++)
@@ -165,7 +196,8 @@ namespace gameobject {
 				
 			}
 			managers = array<componentmanager, true>(0);
-		
+			archtypes.push(Archtype(bitset::None,this));
+			archtypes[0].bit_list.push(false);
 		}
 		void inject_context(CtxName::Context* context)
 		{
@@ -173,18 +205,72 @@ namespace gameobject {
 		}
 		array<EntityMetadata> entitymeta;
 		
-		void Delete_deffered_objs();
-
+	
 		
-		void delete_component(component* comp);
-		 void InitObj(obj* object);
-		 template <class T, typename... types>
-		  T* InitComp(types&&... initval);
-		 void updatecomponents(updatecalltype type);
+		obj CreateEntity(v3::Vector3 SpawnPos);
+		void InitObj(obj* object);
 
-		 obj CreateEntity(v3::Vector3 SpawnPos);
+		void destroy(obj* object);
+		
+		
+		  template <class T, typename... types>
+		  T* InitComp(types&&... initval);
+
+		  void updatecomponents(updatecalltype type);
+
+		 void Delete_deffered_objs();
+
+		 void delete_component(component* comp);
+
 		 Cont::stack<obj> EntityDeletionBuffer;
+		 array<Archtype> archtypes;
+		 void expandArchtype() {
+			
+				 for (auto& arch : archtypes)
+				 {
+					 arch.bit_list.push(false);
+				 }
+			 
+		 }
+
+		 void addArchtype(bitset::bitset Components) {
+			
+			 archtypes.push(Archtype(Components,this));
+			 for (auto& arch:archtypes)
+			 {
+				 bitset::bitset archxor = Components ^ arch.bit_list;
+				 if (archxor.popcount() == 1)
+				 {
+					 for (size_t j = 0; j < archxor.bits; j++)
+					 {
+						 if (archxor[j])
+						 {
+							 archtypes[archtypes.length - 1].moves[j] = &arch;
+							 arch.moves[j] = &archtypes[archtypes.length - 1];
+						 }
+					 }
+				 }
+			 }
+		 }
 		 type_id::dense_type_system comp_map;
+		 void moveflipArch(obj object, size_t index) {
+			 Archtype* current = object.meta().arch;
+			 if (current == nullptr)
+			 {
+				 throw std::logic_error("Component must be part of an archtype");
+			 }
+			 
+			 Archtype* new_type = current->moves[index];
+			 if (new_type==nullptr)
+			 {
+				 bitset::bitset new_arch = current->bit_list;
+				 new_arch.flip(index);
+				 addArchtype(new_arch);
+				 new_type = current->moves[index];
+			 }
+			 current->remove(object);
+			 new_type->add(object);
+		 }
 	private:
 	
 		CtxName::Context* ctx;
@@ -233,7 +319,6 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 
 			obj owner;
 
-			unsigned int index;
 			short priority=0;
 		
 		
@@ -255,14 +340,14 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 				active = true;
 				
 				comp_id = 0;
-				index = 0;
+				
 				ctx= nullptr;
 			};
 			void destroy(); 
 			virtual void start();
 			virtual void update();
 			virtual void onplayerclick();
-
+			
 			virtual void oncollision(obj collidedwith);
 			void SetManager(CtxName::Context* man)
 			{
@@ -300,11 +385,13 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			size_t id = OC->comp_map.get<T>();
 
 			componentStorage& complist = componentlist();
-			if (complist.containsKey(id))
+			if (complist.contains_key(id))
 			{
-				size_t found = complist.keyIndex(id);
+				OC->moveflipArch(*this,id);
+				size_t found = complist.sparse[id];
 				complist[found]->destroy();
-				complist.eraseKey(found);
+
+				complist.erase_key(found);
 			}
 			
 		}
@@ -313,15 +400,20 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		void destroy(obj* object);
 
 		template<class T>
-		 T* obj::getcomponentptr()
+		T* obj::getcomponentptr()
 		{
 			verify_component<T>();
 
 			size_t id = OC->comp_map.get<T>();
 			componentStorage& complist = componentlist();
-			return (T*)(complist.getOrDefault(id));
-		}
+			EntityMetadata& met = meta();
+			if (met.arch->has_component(id))
+			{
 
+				return (T*)(complist.getByKey(id));
+			}
+			return nullptr;
+		}
 		template <class T>
 		T& obj::getcomponent()
 		{
@@ -340,11 +432,8 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		bool obj::hascomponent()
 		{
 			verify_component<T>();
-
 			size_t id = OC->comp_map.get<T>();
-
-			componentStorage& complist = componentlist();
-			return complist.containsKey(id);
+			return meta().arch->has_component(id);
 			
 		}
 
@@ -364,19 +453,14 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			//transfer this section over to the Update Manager
 			T* comp = OC->InitComp<T>(std::forward<types>(initval)...);
 			componentlist().push(comp);
+
+			OC->moveflipArch(*this, comp->comp_id);
 			comp->owner = *this;
 			comp->start();
 			comp->active = true;
 			return comp;
 		}
 
-
-
-
-
-
-	
-	
 
 
 		template<class T, typename ...types>
@@ -391,7 +475,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			if (newmanager)
 			{
 				managers[id].create(id, sizeof(T));
-
+				expandArchtype();
 			}
 			void* mem = (managers[id].pool.alloc());
 			comp = new (mem) T(std::forward<types>(initval)...);
@@ -412,6 +496,15 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		inline bool operator == (const obj& obj1, const obj& obj2) {
 
 			return obj1.Id == obj2.Id;
+		}
+		inline bool gameobject::Archtype::has_component(size_t index)
+		{
+			return bit_list.at(index);
+		}
+		template<typename T>
+		 bool Archtype::has_component()
+		{
+		return has_component(OC->comp_map.get<T>());
 		}
 }
 

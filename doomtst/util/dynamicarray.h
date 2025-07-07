@@ -5,7 +5,8 @@
 #include <new>
 #include <cstdlib>
 #include <cstring>
-#pragma once
+#include "../debugger/debug.h"
+
 
 namespace Cont {
 
@@ -50,7 +51,7 @@ namespace Cont {
 
 		// Append a single value to the array.
 		void push(const T& value);
-
+		void push(T&& value);
 		// Append an array of elements to the current array.
 		void push(T* arr, size_t otherlen);
 
@@ -68,7 +69,7 @@ namespace Cont {
 		void swap(array& other);
 
 		// Default constructor.
-		array();
+constexpr array() noexcept;
 
 		// Constructor that initializes the array with a given size.
 		array(size_t size);
@@ -324,7 +325,17 @@ namespace Cont {
 		{
 			resize(resizelength(length));
 		}
-		list[length] = T(value);
+		list[length] = value;
+		length++;
+
+	}
+	template<class T, bool initelems>
+	void array<T, initelems>::push(T&& value) {
+		if (length >= capacity)
+		{
+			resize(resizelength(length));
+		}
+		list[length] = std::move(value);
 		length++;
 
 	}
@@ -452,7 +463,7 @@ namespace Cont {
 
 
 	template<class T, bool initelems >
-	array<T, initelems>::array() {
+	constexpr array<T, initelems>::array() noexcept{
 		length = 0;
 		capacity = 0;
 		list = nullptr;

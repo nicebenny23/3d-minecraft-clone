@@ -1,4 +1,5 @@
 #pragma once
+#define NOMINMAX
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "../util/vector2.h"#include "../util/stbiload.h"

@@ -23,6 +23,7 @@ void player::initplayer()
 	goblin.addcomponent<gameobject::StaticComponent>();
 	goblin.addcomponent<estate>(30,true);
 	goblin.transform().scale = unitv / 2;
+	
 	goblin.addcomponent<inventory>();
 	goblin.addcomponent<Collider>(zerov, unitv / 2.3f, true, false);
 	goblin.addcomponent<rigidbody>(playerfric);
