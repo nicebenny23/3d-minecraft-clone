@@ -10,7 +10,7 @@
 #include "../items/itemutil.h"
 #pragma once 
 void initbreakparticle(gameobject::obj newent);
-struct playerbreak:gameobject::component
+struct playerbreak: gameobject::component
 {
 	
 	voxtra::WorldRayCollision closest;

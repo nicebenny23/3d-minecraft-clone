@@ -16,7 +16,7 @@ enum bosstate {
     shooting=1,
     ramming=2,
 };
-struct firedaggerfinalboss :gameobject::component {
+struct firedaggerfinalboss : gameobject::component {
     float timetillshoot;
     int shotsleft = 0;
     bosstate state;

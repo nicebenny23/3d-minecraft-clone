@@ -9,7 +9,7 @@ struct entityeffects {
 
 };                 
 
-struct estate :gameobject::component
+struct estate : gameobject::component
 {
 	entityeffects effects;
 	

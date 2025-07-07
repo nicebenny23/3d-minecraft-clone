@@ -54,7 +54,7 @@ inline bool operator==(const navnode& nav1, const navnode& nav2) {
 
 array<navnode> getneighborsdefault(navnode& node);
 bool normaltestfunc(Coord  pos, int dir);
-struct navigator:gameobject::component
+struct navigator: gameobject::component
 {
     navigator(gameobject::obj parentref, array<navnode> (*testfunc)(navnode& pos));
     bool isblockvalid;

@@ -4,7 +4,7 @@
 #include "../game/collision.h"
 #include "../entities/crystaldaggers.h"
 #pragma once 
-struct playerdaggercomp :gameobject::component
+struct playerdaggercomp : gameobject::component
 {
 	void wearduribilty() {
 		item* select = owner.getcomponent<inventory>().selected;

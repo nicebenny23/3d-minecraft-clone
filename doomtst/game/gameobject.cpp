@@ -216,10 +216,6 @@ void gameobject::componentmanager::init(component* sample)
 	utype = sample->utype;
 }
 
-size_t gameobject::ComponentHasher::operator()(const size_t c) const
-{
-	return c;
-}
 
 constexpr size_t gameobject::ComponentMapper::operator()(component* comp) const noexcept
 {

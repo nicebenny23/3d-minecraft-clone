@@ -66,6 +66,6 @@ namespace aabb {
     bool aabbboxintersect(geometry::Box p1, Collider& p2);
    v3::Vector3 collideaabb(Collider p1, Collider p2);
 
-    extern Sparse::SparseSet<Collider*> Colliderlist;
+    extern Sparse::PackedSet<Collider*> Colliderlist;
 }
 

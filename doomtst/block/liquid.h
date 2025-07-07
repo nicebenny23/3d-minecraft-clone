@@ -10,7 +10,7 @@
 extern float liquidtick;
 
 void updateltick();
-struct liquidprop :gameobject::component {
+struct liquidprop : gameobject::component {
 	int maxliq;
 	int liqval;
 

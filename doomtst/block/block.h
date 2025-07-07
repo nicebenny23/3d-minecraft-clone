@@ -155,7 +155,7 @@ namespace blockname {
 		bool transparent;
 		bool solid;
 	};
-	struct  block:gameobject::component
+	struct  block: gameobject::component
 	{
 
 		blockmesh mesh;

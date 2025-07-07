@@ -5,7 +5,7 @@
 // settings
 
 namespace player {
-	struct player_tag :gameobject::component {
+	struct player_tag : gameobject::component {
 
 
 

@@ -54,7 +54,7 @@ struct inventorymen :menu
 
 	inventorymen() = default;
 };
-struct inventory :gameobject::component
+struct inventory : gameobject::component
 {
 	Container blkcont;
 	inventorymen playermenu;

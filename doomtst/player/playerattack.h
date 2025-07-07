@@ -4,7 +4,7 @@
 #include "../game/collision.h"
 #include "../game/entityutil.h"
 #pragma once 
-struct playerattackcomp:gameobject::component
+struct playerattackcomp: gameobject::component
 {
 	void wearduribilty() {
 		item* select =owner.getcomponent<inventory>().selected;

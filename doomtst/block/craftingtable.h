@@ -50,7 +50,7 @@ struct craftingmenu :menu {
 
 
 };
-struct craftingtablecomp :gameobject::component {
+struct craftingtablecomp : gameobject::component {
 	
 	craftingmenu men;
 	void onplayerclick() {

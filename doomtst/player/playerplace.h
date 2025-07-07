@@ -8,7 +8,7 @@
 #include "../items/itemutil.h"
 
 
-struct playerplace :gameobject::component
+struct playerplace : gameobject::component
 {
 	int curplaceid;
 	voxtra::WorldRayCollision Hit;

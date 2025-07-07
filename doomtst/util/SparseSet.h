@@ -3,6 +3,7 @@
 #include <iterator>
 #include <utility>
 #include <type_traits> 
+#include <limits>
 #pragma once
 namespace Sparse {
 	struct Identity {
@@ -12,14 +13,14 @@ namespace Sparse {
 		}
 	};
 	template <typename T, typename Hasher = std::hash<T>, typename KeyMap = Identity>
-	struct SparseSet
+	struct PackedSet
 	{
 
 		using KeyType = std::decay_t<decltype(std::declval<KeyMap>()(std::declval<const T&>()))>;
-		robin_hood::unordered_map<KeyType, size_t, Hasher> sparse;
+		ska::flat_hash_map<KeyType, uint32_t, Hasher> sparse;
 		Cont::array<T> dense;
 
-		SparseSet() :sparse(), dense() {
+		PackedSet() :sparse(), dense() {
 		}
 
 		// Element -> Key
@@ -46,7 +47,7 @@ namespace Sparse {
 		}
 
 		// Removes element at index
-		void erase(const size_t index) {
+		void erase(const uint32_t index) {
 			std::swap(dense[index], dense[dense.length - 1]);
 			sparse.erase(toKey(dense[dense.length - 1]));
 			// flips
@@ -103,10 +104,59 @@ namespace Sparse {
 		T getOrDefault(const KeyType& key) const {
 			auto it = sparse.find(key);
 			if (it != sparse.end()) {
-				return dense[it->second];
+				return dense.list[it->second];
 			}
 			return T(); 
 		}
-	};
+	}; 
+	static constexpr size_t ind_none= std::numeric_limits<size_t>::max();
+	template<typename T, typename KeyMap = Identity>
+	class SparseSet {
+		Cont::array<size_t> sparse;
+		Cont::array<T> dense;
 
+	public:
+	
+		void push(const T& elem) {
+			size_t key = KeyMap(elem);
+			sparse[key] = dense.length;
+			dense.push(elem);
+		}
+		void erase_key(size_t key) {
+			size_t index = sparse[key];
+			std::swap(dense[index], dense[dense.length - 1]);
+			size_t moved_key = getID(dense[index]);
+			sparse[moved_key] = index;
+			dense.pop();
+			sparse[key] = ind_none;
+		}
+		void erase(const T& elem) {
+			erase_key(getID(elem));
+		}
+		bool contains(const T& elem) const {
+			return contains_key(getID(elem));
+		}
+
+
+		bool contains_key(size_t key) const {
+			return key < sparse.length && sparse[key] != ind_none;
+		}
+
+		size_t length() const {
+			return dense.length;
+		}
+		
+		void clear() {
+			dense.destroy();
+			sparse.clear();
+		}
+		using iterator = typename Cont::array<T>::iterator;
+
+		iterator begin() { return dense.begin(); }
+		iterator end() { return dense.end(); }
+	private:
+		size_t getID(const T& elem) {
+			return KeyMap(elem);
+		}
+	};
 }

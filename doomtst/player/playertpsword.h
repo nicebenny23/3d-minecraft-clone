@@ -6,7 +6,7 @@
 #include "../game/collision.h"
 #include "../entities/crystaldaggers.h"
 
-struct playertpcomp :gameobject::component
+struct playertpcomp : gameobject::component
 {
 	float chargetime;
 

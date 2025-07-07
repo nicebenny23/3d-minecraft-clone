@@ -8,7 +8,7 @@ inline float lerpfloat(float f1, float f2, float lval) {
 
 	return f1 * (1 - lval) + f2 * lval;
 }
-struct worm:gameobject::component
+struct worm: gameobject::component
 {
 	float magoffset;
 	int length;

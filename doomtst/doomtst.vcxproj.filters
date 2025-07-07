@@ -740,6 +740,12 @@
     <ClInclude Include="renderer\gl_id.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="util\Id.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\robinHood.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag1.vs" />

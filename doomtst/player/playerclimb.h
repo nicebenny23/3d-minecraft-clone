@@ -2,7 +2,7 @@
 #include "../game/rigidbody.h"
 #include "../game/objecthelper.h"
 #pragma once 
-struct playerclimb:gameobject::component
+struct playerclimb: gameobject::component
 {
 
 	bool onrope;

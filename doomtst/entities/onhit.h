@@ -5,7 +5,7 @@
 #include "../game/entityutil.h"
 #pragma once 
 template<typename T,bool is_not_tag =false>
-struct destroyonhit :gameobject::component {
+struct destroyonhit : gameobject::component {
 
 	
 
@@ -28,7 +28,7 @@ struct destroyonhit :gameobject::component {
 };
 template<typename T>
 
-struct dmgonhit:gameobject::component
+struct dmgonhit: gameobject::component
 {
 
 	
@@ -54,7 +54,7 @@ struct dmgonhit:gameobject::component
 			{
 				return;
 			}
-			if (collidedwith.hascomponent < Transform>())
+			if (collidedwith.hascomponent < gameobject::transform_comp>())
 			{
 
 

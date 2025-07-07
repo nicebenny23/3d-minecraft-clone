@@ -11,7 +11,7 @@
 #include "../items/loottable.h"
 
 array<navnode> getneighborslime(navnode& node);
-struct slimemove :gameobject::component {
+struct slimemove : gameobject::component {
     bool ctype;
     float timesincejump;
     void jump() {

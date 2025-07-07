@@ -53,7 +53,7 @@ struct furnacemenu :menu {
 
 
 };
-struct furnacecomp :gameobject::component {
+struct furnacecomp : gameobject::component {
 
 	
 	furnacemenu men;

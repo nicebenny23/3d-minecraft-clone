@@ -7,7 +7,7 @@
 #include "../player/playerhealth.h"
 #include "../items/itemutil.h"
 #pragma once 
-struct playereat :gameobject::component
+struct playereat : gameobject::component
 {
 
 	

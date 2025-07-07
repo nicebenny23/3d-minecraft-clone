@@ -8,7 +8,7 @@
 #include "../world/voxeltraversal.h"
 #include "../game/entitystate.h"
 #include "playerclimb.h"
-struct playermovement:gameobject::component
+struct playermovement: gameobject::component
 {
     Vector3 velocitylast;
     bool prevonground;

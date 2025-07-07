@@ -1,7 +1,7 @@
 #include "../game/objecthelper.h"
 #include "../game/rigidbody.h"
 #pragma once 
-struct rotatetwordsvel:gameobject::component
+struct rotatetwordsvel: gameobject::component
 {
 	void update() {
 

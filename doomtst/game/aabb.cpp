@@ -3,10 +3,10 @@
 //simple aabb class without collision implemented 
 namespace aabb {
     
-    Sparse::SparseSet<Collider*> Colliderlist;
+    Sparse::PackedSet<Collider*> Colliderlist;
     void initCollider()
     {
-        Colliderlist = Sparse::SparseSet<Collider*>();
+        Colliderlist = Sparse::PackedSet<Collider*>();
         
     }
     v3::Vector3 collideaabb(Collider p1, Collider p2)

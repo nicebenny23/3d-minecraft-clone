@@ -6,7 +6,7 @@
 #include "../game/entitystate.h"
 #include "playerinventory.h"
 
-struct playerhealth:gameobject::component
+struct playerhealth: gameobject::component
 {
 	bool dmgimmune = false;
 	void killplayer() {

@@ -5,7 +5,7 @@
 #include "../game/entityutil.h"
 #include "../items/menu.h"
 #pragma once
-struct playercamcontrols :gameobject::component
+struct playercamcontrols : gameobject::component
 {
 	void update() {
 

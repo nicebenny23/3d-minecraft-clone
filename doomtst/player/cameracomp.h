@@ -5,7 +5,7 @@
 #include "../game/entityutil.h"
 #include "../game/entity.h"
 #pragma once
-struct CameraComp :gameobject::component
+struct CameraComp : gameobject::component
 {
 	CameraComp() {
 

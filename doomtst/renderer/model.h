@@ -10,7 +10,7 @@ enum  meshconnecttype
 	normalmeshconnect = 0,
 	wormmeshconnect = 1,
 };
-struct model:gameobject::component
+struct model: gameobject::component
 {
 	ModelMeshName::ModelMesh& operator[](int index);
 

@@ -34,7 +34,7 @@ player::goblin.getcomponent<inventory>().hotbar.fill(itemid, dropamt, false);
 	~lootelement() = default;
 	
 };
-struct  loottable :gameobject::component
+struct  loottable : gameobject::component
 {
 
 	bool playerinteract;

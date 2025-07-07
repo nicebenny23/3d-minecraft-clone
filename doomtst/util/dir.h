@@ -34,7 +34,7 @@ namespace Dir {
 			}
 			dir = static_cast<Ind3d>(direction);
 		}
-		constexpr char ind() const noexcept {
+		constexpr char ind() const  {
 			if (dir ==Ind3d::None) {
 				throw std::logic_error("Invalid dir");
 			

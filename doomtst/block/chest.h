@@ -51,7 +51,7 @@ struct chestmenu :menu {
 
 
 };
-struct chestcomp :gameobject::component {
+struct chestcomp : gameobject::component {
 
 	chestmenu men;
 	void onplayerclick() {

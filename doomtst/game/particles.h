@@ -11,7 +11,7 @@
 
 using namespace v3;
 using namespace Cont;
-struct particleemiter:gameobject::component
+struct particleemiter: gameobject::component
 {
 
 	v3::Vector3 position;
@@ -35,7 +35,7 @@ struct particleemiter:gameobject::component
 };
 void initbaseparticle(gameobject::obj* newent);
 
-struct particle:gameobject::component
+struct particle: gameobject::component
 {
 	
 	

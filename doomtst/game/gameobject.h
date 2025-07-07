@@ -71,7 +71,7 @@ namespace gameobject {
 		
 	};
 
-	using componentStorage = Sparse::SparseSet < component*, std::hash<size_t>, ComponentMapper >;
+	using componentStorage = Sparse::PackedSet < component*, std::hash<size_t>, ComponentMapper >;
 	struct EntityMetadata {
 		componentStorage componentlist;
 		size_t arch_id;
@@ -97,34 +97,43 @@ namespace gameobject {
 
 		template <class T>
 		T* getcomponentptr();
+
 		template <class T>
 		bool hascomponent();
 
-		
 		//removes a component
 		template <class T>
 		void removecomponent();
-
 	
 		bool exists() const;
+
 		Ids::Id Id;
+
 		template <class T, typename... types>
 		T* addcomponent(types&&... initval);
-		//todo -mid proiorty implement;
+
 		EntityMetadata& meta();
+
 		componentStorage& componentlist();
 	
 		objstate& state();
+
 		constexpr obj() noexcept {
 			Id =Ids::None;
 			OC = nullptr;
 		}
 	
 		void immediate_destroy();
+
 		void deffered_destroy();
+
 		Transform& transform();
+
 	private:
+
+
 		OCManager* OC;
+
 		friend struct OCManager;
 	};	
 	static constexpr obj None  = obj();
@@ -273,7 +282,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 
 
 		};
-		struct transform_comp :gameobject::component {
+		struct transform_comp : gameobject::component {
 			Transform transform;
 
 		};
@@ -286,6 +295,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		void obj::removecomponent()
 		{
 			//replace with a get components call
+			verify_component<T>();
 
 			size_t id = OC->comp_map.get<T>();
 
@@ -303,8 +313,9 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		void destroy(obj* object);
 
 		template<class T>
-		inline T* obj::getcomponentptr()
+		 T* obj::getcomponentptr()
 		{
+			verify_component<T>();
 
 			size_t id = OC->comp_map.get<T>();
 			componentStorage& complist = componentlist();
@@ -314,6 +325,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		template <class T>
 		T& obj::getcomponent()
 		{
+			verify_component<T>();
 
 			T* ptr = getcomponentptr<T>();
 			if (ptr == nullptr)
@@ -327,6 +339,8 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		template <class T>
 		bool obj::hascomponent()
 		{
+			verify_component<T>();
+
 			size_t id = OC->comp_map.get<T>();
 
 			componentStorage& complist = componentlist();
@@ -345,6 +359,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		T* obj::addcomponent(types&&... initval)
 		{
 
+			verify_component<T>();
 
 			//transfer this section over to the Update Manager
 			T* comp = OC->InitComp<T>(std::forward<types>(initval)...);
