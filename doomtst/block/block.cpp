@@ -100,7 +100,6 @@ blockname::blockmesh::blockmesh(block* parent, Vector3 blkscale)
 void blockname::block::create(v3::Coord location, int blockid, char blkattachface, char blkdirection)
 {
 
-	owner.state() = gameobject::beinginitiated;
 	emitedlight = 0;
 
 	mininglevel = 0;

@@ -3,7 +3,7 @@
 #include "../game/collision.h"
 #include "../game/rigidbody.h"
 #include "../renderer/model.h"
-#include "../game/entity.h"
+/*#include "../game/entity.h"
 #include "../game/objecthelper.h"
 #include "../player/player.h"
 #include "../items/item.h"
@@ -115,3 +115,4 @@ inline Ent::entityref createfinalboss(v3::Vector3 pos) {
 
 
  // !slime_HPP
+ */

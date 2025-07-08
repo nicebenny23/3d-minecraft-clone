@@ -20,6 +20,7 @@ namespace Cont {
 	template<class T, bool initelems = true>
 	class array {
 	public:
+		
 		// Debugging function to prsize_t the contents of the list (useful for debugging).
 		void debuglist();
 
@@ -90,10 +91,10 @@ constexpr array() noexcept;
 		// Posize_ter to the dynamically allocated array.
 		T* list;
 		// Current number of elements in the array.
-		size_t length;
+		uint32_t length;
 
 		// Total allocated capacity of the array.
-		size_t capacity;
+		uint32_t capacity;
 
 		// Iterator class for accessing elements using range-based for loops.
 		class Iterator {
@@ -104,7 +105,7 @@ constexpr array() noexcept;
 			using value_type = T;
 			using iterator = Iterator;
 			using const_iterator = const T*;
-			using size_type = std::size_t;
+			using size_type = std::uint32_t;
 			// Constructor initializes the iterator with a posize_ter.
 			Iterator(T* p) : ptr(p) {}
 

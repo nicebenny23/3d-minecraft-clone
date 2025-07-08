@@ -20,8 +20,7 @@ void gameobject::component::ondestroy()
 void gameobject::component::destroy()
 {
 	ondestroy();
-	ctx->OC->managers[comp_id].store.erase_key(owner.Id.id);
-	ctx->OC->delete_component(this);
+	owner.OC->delete_component(this);
 
 }
 
@@ -58,56 +57,43 @@ void gameobject::component::oncollision(obj collidedwith)
 
 bool gameobject::obj::exists() const
 {
-	return Id.id;
+	return Id ? true : false;
+
 }
 
 EntityMetadata& gameobject::obj::meta()
 {
 	
+	if (!Id)
+	{
+		throw std::logic_error("entity Has invalid id");
+	}
 	EntityMetadata& met = OC->entitymeta[Id.id]; 
-		if (met.gen_count==Id.gen)
-		{
+	if (met.gen_count!=Id.gen)
+	{
+		throw std::logic_error("Cannot acess entity, It has been deleted");
+	}
+	return met;
 
-			return met;
-
-		}
-		throw std::logic_error("Cannot acess deleted entity");
 }
 
 
-
-objstate& gameobject::obj::state()
-{
-	return meta().state;
-}
 
 
 //gets a gameobject from a refrence to it;
 
 void OCManager::destroy(obj* object) {
 	// 1) Mark destroying
-	object->state() = destroying;
-
-	// 2) Remove it from its archetype
-	Archtype* arch = object->meta().arch;
-	if (arch) {
-		arch->remove(*object);         // now it's no longer in elems
-		object->meta().arch = nullptr; // clear dangling pointer
-	}
-
-	// 3) Snapshot component pointers
 	array<component*> comps;
 	for (component* comp : ComponentView(*object)) {
-		comps.push(comp);
-	}
-
-	// 4) Destroy each component
-	for (component* comp : comps) {
 		comp->destroy();
 	}
-	comps.destroy();
 
-	// 5) Finally, reset entity metadata
+	comps.destroy();
+	object->meta().arch->remove(*object);
+	
+
+	
 	entitymeta[object->Id.id].reset();
 	free_ids.push(object->Id.id);
 }
@@ -116,7 +102,7 @@ void gameobject::OCManager::Delete_deffered_objs()
 	while (!EntityDeletionBuffer.empty())
 	{
 		gameobject::obj elem = EntityDeletionBuffer.pop();
-		if (!elem.hascomponent<StaticComponent>())
+		if (elem.hascomponent<StaticComponent>())
 		{
 			throw std::logic_error("cannot destroy this entity");
 		}
@@ -138,14 +124,21 @@ Transform& gameobject::obj::transform()
 }
 void gameobject::OCManager::delete_component(component* comp)
 {
-	managers[comp->comp_id].pool.free(comp);
+	if(comp->owner==None)
+	{
+		throw std::logic_error("Every Component Must be owned by a valid");
+	}
+	managers[comp->comp_id.value].store.erase_key(comp->owner.Id.id);
+
+	managers[comp->comp_id.value].pool.free(comp);
 }
-void gameobject::OCManager::InitObj(obj* object)
+void gameobject::OCManager::InitObj(obj& object)
 {
-	object->Id.id = free_ids.pop();
-	object->OC = ctx->OC;
-	object->Id.gen= entitymeta[object->Id.id].gen_count;
-	archtypes[0].add(*object);
+	object.Id.id = free_ids.pop();
+	object.OC = ctx->OC;
+	object.Id.gen= entitymeta[object.Id.id].gen_count;
+
+	arch.archtypes[0].add(object);
 
 }
 
@@ -172,7 +165,7 @@ void gameobject::OCManager::updatecomponents(updatecalltype type)
 	for (int j = 0; j < managerref.length; j++)
 	{
 		componentmanager* manager = managerref[j];
-		for (Archtype& arch : archtypes)
+		for (Archtype& arch : arch.archtypes)
 		{
 
 			if (arch.has_component(manager->id))
@@ -183,10 +176,9 @@ void gameobject::OCManager::updatecomponents(updatecalltype type)
 				{
 					component* comp = manager->store.getByKey(comps.Id.id);
 
-					if (comp->active) 
-					{
+					
 						comp->update();
-					}
+					
 
 				}
 			}
@@ -197,10 +189,10 @@ void gameobject::OCManager::updatecomponents(updatecalltype type)
 
 obj gameobject::OCManager::CreateEntity(v3::Vector3 SpawnPos)
 {
-	obj* object = new obj();
+	obj object = obj();
 	InitObj(object);
-	object->addcomponent<transform_comp>()->transform.position = SpawnPos;
-	return *object;
+	object.addcomponent<transform_comp>()->transform.position = SpawnPos;
+	return object;
 }
 
 
@@ -209,32 +201,26 @@ obj gameobject::OCManager::CreateEntity(v3::Vector3 SpawnPos)
 gameobject::componentmanager::componentmanager()
 {
 	
-	id = -1;
+	id = comp::None;
 	priority = -1;
 	utype = updatenone;
 	
 }
 
-void gameobject::componentmanager::create(int mid, int bytesize)
+void gameobject::componentmanager::create(comp::Id mid, int bytesize)
 {
-
 	id = mid;
-
-
 	pool = dynPool::flux<component>(bytesize);
 }
 
 void gameobject::componentmanager::init(component* sample)
 {
-	//one method to remove this would involve iterating through all managers during updates
-
 	priority = sample->priority;
-
 	utype = sample->utype;
 }
 
 
 constexpr size_t gameobject::ComponentMapper::operator()(component* comp) const noexcept
 {
-	return comp->comp_id;
+	return comp->owner.Id.id;
 }

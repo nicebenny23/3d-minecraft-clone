@@ -72,6 +72,7 @@ struct  loottable : gameobject::component
 			lootlist.destroy();
 			return;
 		}
+		return;
 		if (owner.hascomponent<blockname::block>())
 		{
 			if (objutil::toblk(owner).bstate.broken != true)

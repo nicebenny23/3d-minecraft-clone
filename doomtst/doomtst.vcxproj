@@ -251,6 +251,7 @@
     <ClInclude Include="entities\slime.h" />
     <ClInclude Include="entities\wisp.h" />
     <ClInclude Include="game\collutil.h" />
+    <ClInclude Include="game\compid.h" />
     <ClInclude Include="game\entityutil.h" />
     <ClInclude Include="game\game.h" />
     <ClInclude Include="game\Core.h" />

@@ -27,6 +27,19 @@ inline void Assert(const char* comment)
 	HANDLE mainThread = OpenThread(THREAD_TERMINATE, FALSE, GetCurrentThreadId());
 	TerminateThread(mainThread, 0);
 	CloseHandle(mainThread);
+}inline void Assert(bool tst,const char* comment)
+{
+	if (tst)
+	{
+		return;
+	}
+	// Launch the message box in a completely separate process
+	_beginthread(ShowAssertMessageBox, 0, (void*)comment);
+
+	// Immediately terminate the main program
+	HANDLE mainThread = OpenThread(THREAD_TERMINATE, FALSE, GetCurrentThreadId());
+	TerminateThread(mainThread, 0);
+	CloseHandle(mainThread);
 }
 void reset();
 

@@ -102,10 +102,9 @@ struct furnacecomp : gameobject::component {
 	
 	}
 	void ondestroy() {
-		if (owner.state() == gameobject::destroying)
-		{
+	
 			men.blkcont.save();
-		}
+		
 		men.blkcont.destroy();
 	}
 	void start() {

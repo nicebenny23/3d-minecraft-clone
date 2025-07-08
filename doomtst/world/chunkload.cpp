@@ -152,7 +152,7 @@ struct idmap
 		newchunk.loc = location;
 		newchunk.blockbuf = new gameobject::obj[chunksize];
 		for (int i = 0; i < chunksize; i++) {
-			Grid->ctx->OC->InitObj(&newchunk.blockbuf[i]);
+			Grid->ctx->OC->InitObj(newchunk.blockbuf[i]);
 			newchunk.blockbuf[i].addcomponent < block>();
 		
 		}

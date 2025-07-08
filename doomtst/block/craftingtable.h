@@ -54,16 +54,12 @@ struct craftingtablecomp : gameobject::component {
 	
 	craftingmenu men;
 	void onplayerclick() {
-		if (owner.state() ==gameobject::active)
-		{
+			
 			if (CtxName::ctx.Inp->mouseright().pressed)
 			{
 				men.open();
 			}
-		}
-	
 		
-		int l = 1;
 	}
 	void update() {
 
@@ -74,10 +70,9 @@ struct craftingtablecomp : gameobject::component {
 		}
 	}
 	void ondestroy(){
-		if (owner.state() == gameobject::destroying)
-		{
-			men.blkcont.save();
-		}
+		
+		men.blkcont.save();
+		
 		men.blkcont.destroy();
 	}
 	void start() {

@@ -86,7 +86,6 @@ namespace blkinitname {
 			plankinit(blk);
 		}
 
-		blk->owner.state() = gameobject::active;
 	}
 	inline void genblock(block* blk, int blkid, Coord location, byte attachface, byte direction)  {
 
@@ -99,7 +98,6 @@ namespace blkinitname {
 	}
 	inline void setair(block* blk) {
 		
-		blk->owner.state() = gameobject::destroying;
 		switch (blk->id)
 		{
 		case minecraftair:
