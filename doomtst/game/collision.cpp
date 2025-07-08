@@ -80,13 +80,13 @@ voxtra::WorldRayCollision collision::raycastentity(ray nray, HitQuery query)
 
 void propagatecollisionmessage(gameobject::obj o1, gameobject::obj o2) {
 
-	for (int i = 0; i < o1.componentlist().length(); i++)
+	for (gameobject::component* comp: gameobject::ComponentView(o1))
 	{
-		o1.componentlist()[i]->oncollision(o2);
+		comp->oncollision(o2);
 	}
-	for (int j= 0; j < o2.componentlist().length(); j++)
+	for (gameobject::component* comp : gameobject::ComponentView(o2))
 	{
-		o2.componentlist()[j]->oncollision(o1);
+		comp->oncollision(o1);
 	}
 }
 void moveobj(v3::Vector3 force,gameobject::obj object) {

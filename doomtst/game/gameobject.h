@@ -76,6 +76,8 @@ namespace gameobject {
 
 		}
 		void reset() {
+			arch = nullptr;
+			arch_ind = 0;
 			gen_count++;
 		}
 
@@ -104,7 +106,6 @@ namespace gameobject {
 
 		EntityMetadata& meta();
 
-		componentStorage& componentlist();
 
 		objstate& state();
 
@@ -119,10 +120,10 @@ namespace gameobject {
 
 		Transform& transform();
 
+		OCManager* OC;
 	private:
 
 
-		OCManager* OC;
 
 		friend struct OCManager;
 	};
@@ -131,7 +132,7 @@ namespace gameobject {
 	struct Archtype {
 		array<Archtype*> moves;
 		array<obj> elems;
-	
+		array<size_t> dense_bits;
 		bitset::bitset bit_list;
 		template <typename T>
 		bool has_component();
@@ -157,16 +158,22 @@ namespace gameobject {
 		}
 		//Sparse::SparseSet<size_t> proper_inds;
 		OCManager* OC;
-		Archtype(bitset::bitset st,OCManager* Man) :bit_list(st), OC(Man) {};
+		Archtype(bitset::bitset st,OCManager* Man) :bit_list(st), OC(Man) {
+			for (size_t ind = 0; ind < st.bits; ind++) {
+				if (bit_list[ind]) {
+					dense_bits.push(ind);
+				}
+			}
+		};
 		Archtype() {
 			OC = nullptr;
-
+			
 			bit_list = bitset::None;
 		}
 	};
 
 
-	
+	using componentStorage = Sparse::SparseSet< component*, ComponentMapper>;
 	struct componentmanager
 	{
 		componentmanager();
@@ -176,8 +183,8 @@ namespace gameobject {
 		size_t id;
 	
 		dynPool::flux<component> pool;
-
-
+		componentStorage store;
+		
 		void init(component* sample);
 	};
 	
@@ -271,10 +278,11 @@ namespace gameobject {
 			 current->remove(object);
 			 new_type->add(object);
 		 }
+
+		 array<componentmanager, true> managers;
 	private:
 	
 		CtxName::Context* ctx;
-		array<componentmanager, true> managers;
 		array<size_t> free_ids;
 	};
 
@@ -382,16 +390,16 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			//replace with a get components call
 			verify_component<T>();
 
-			size_t id = OC->comp_map.get<T>();
+			size_t comp_id = OC->comp_map.get<T>();
 
-			componentStorage& complist = componentlist();
-			if (complist.contains_key(id))
+			componentStorage& complist = OC->managers[comp_id].store;
+			if (complist.contains_key(Id.id))
 			{
-				OC->moveflipArch(*this,id);
-				size_t found = complist.sparse[id];
-				complist[found]->destroy();
-
-				complist.erase_key(found);
+				OC->moveflipArch(*this, comp_id);
+				component* comp = complist.getByKey(Id.id);
+				if (comp != nullptr) {
+					comp->destroy();
+				}
 			}
 			
 		}
@@ -404,15 +412,10 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		{
 			verify_component<T>();
 
-			size_t id = OC->comp_map.get<T>();
-			componentStorage& complist = componentlist();
-			EntityMetadata& met = meta();
-			if (met.arch->has_component(id))
-			{
-
-				return (T*)(complist.getByKey(id));
-			}
-			return nullptr;
+			size_t comp_id = OC->comp_map.get<T>();	
+			componentStorage& complist = OC->managers[comp_id].store;
+				return (T*)(complist.getByKey(Id.id	));
+		
 		}
 		template <class T>
 		T& obj::getcomponent()
@@ -452,10 +455,13 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 
 			//transfer this section over to the Update Manager
 			T* comp = OC->InitComp<T>(std::forward<types>(initval)...);
-			componentlist().push(comp);
+		
 
 			OC->moveflipArch(*this, comp->comp_id);
 			comp->owner = *this;
+
+			componentStorage& complist = OC->managers[comp->comp_id].store;
+			complist.push(comp);
 			comp->start();
 			comp->active = true;
 			return comp;
@@ -502,9 +508,60 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			return bit_list.at(index);
 		}
 		template<typename T>
-		 bool Archtype::has_component()
+		bool Archtype::has_component()
 		{
 		return has_component(OC->comp_map.get<T>());
 		}
+
+
+		struct ComponentIterator {
+			obj owner;
+			OCManager* manager;
+			const array<size_t>* dense_bits;
+			size_t pos = 0;
+
+			ComponentIterator(obj o, OCManager* m, const array<size_t>* bits, size_t p = 0)
+				: owner(o), manager(m), dense_bits(bits), pos(p) {
+			}
+
+			component* operator*() {
+				size_t comp_id = (*dense_bits)[pos];
+				auto& store = manager->managers[comp_id].store;
+				if (!store.contains_key(owner.Id.id)) {
+					// FAIL FAST with a clear error
+					throw std::logic_error(
+						"ECS invariant violated: archetype lists comp_id " +
+						std::to_string(comp_id) +
+						" for entity " + std::to_string(owner.Id.id) +
+						", but store does not contain that key."
+					);
+				}
+				return store.getByKey(owner.Id.id);
+			}
+			ComponentIterator& operator++() {
+				++pos;
+				return *this;
+			}
+
+			bool operator!=(const ComponentIterator& other) const {
+				return pos != other.pos;
+			}
+		};
+
+		struct ComponentView {
+			obj owner;
+
+			ComponentView(obj o) : owner(o) {}
+
+			ComponentIterator begin() {
+				auto* bits = &owner.meta().arch->dense_bits;
+				return ComponentIterator(owner, owner.OC, bits, 0);
+			}
+
+			ComponentIterator end() {
+				auto* bits = &owner.meta().arch->dense_bits;
+				return ComponentIterator(owner, owner.OC, bits, bits->length);
+			}
+		};
 }
 

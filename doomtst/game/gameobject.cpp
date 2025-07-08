@@ -20,6 +20,7 @@ void gameobject::component::ondestroy()
 void gameobject::component::destroy()
 {
 	ondestroy();
+	ctx->OC->managers[comp_id].store.erase_key(owner.Id.id);
 	ctx->OC->delete_component(this);
 
 }
@@ -73,11 +74,6 @@ EntityMetadata& gameobject::obj::meta()
 		throw std::logic_error("Cannot acess deleted entity");
 }
 
-componentStorage& gameobject::obj::componentlist()
-{
-	return meta().componentlist;
-}
-
 
 
 objstate& gameobject::obj::state()
@@ -88,20 +84,32 @@ objstate& gameobject::obj::state()
 
 //gets a gameobject from a refrence to it;
 
-
-void gameobject::OCManager::destroy(obj* object)
-{
-	array< component*>& complist =object->componentlist().dense;
-
+void OCManager::destroy(obj* object) {
+	// 1) Mark destroying
 	object->state() = destroying;
-	for (int i = 0; i < complist.length; i++)
-	{
-		complist[i]->destroy();
+
+	// 2) Remove it from its archetype
+	Archtype* arch = object->meta().arch;
+	if (arch) {
+		arch->remove(*object);         // now it's no longer in elems
+		object->meta().arch = nullptr; // clear dangling pointer
 	}
 
+	// 3) Snapshot component pointers
+	array<component*> comps;
+	for (component* comp : ComponentView(*object)) {
+		comps.push(comp);
+	}
+
+	// 4) Destroy each component
+	for (component* comp : comps) {
+		comp->destroy();
+	}
+	comps.destroy();
+
+	// 5) Finally, reset entity metadata
 	entitymeta[object->Id.id].reset();
 	free_ids.push(object->Id.id);
-
 }
 void gameobject::OCManager::Delete_deffered_objs()
 {
@@ -173,9 +181,9 @@ void gameobject::OCManager::updatecomponents(updatecalltype type)
 
 				for (obj comps : arch.elems)
 				{
-					component* comp = comps.componentlist().getByKey(manager->id);
+					component* comp = manager->store.getByKey(comps.Id.id);
 
-					if (comp->active)
+					if (comp->active) 
 					{
 						comp->update();
 					}
@@ -191,7 +199,6 @@ obj gameobject::OCManager::CreateEntity(v3::Vector3 SpawnPos)
 {
 	obj* object = new obj();
 	InitObj(object);
-	object->componentlist() = componentStorage{};
 	object->addcomponent<transform_comp>()->transform.position = SpawnPos;
 	return *object;
 }

@@ -43,9 +43,8 @@ struct playercamcontrols : gameobject::component
 		voxtra::WorldRayCollision closest = collision::raycastall(cameraray, collision::HitQuery());
 		if (closest)
 		{
-			for (int i = 0; i < closest.unwrap().collider->owner.componentlist().length(); i++) {
-				closest.unwrap().collider->owner.componentlist()[i]->onplayerclick();
-
+			for (component* comp:gameobject::ComponentView(closest.unwrap().collider->owner)) {
+				comp->onplayerclick();
 			}
 		}
 

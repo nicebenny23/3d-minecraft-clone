@@ -179,6 +179,10 @@ namespace Sparse {
 			sparse.destroy();
 		}
 		T& getByKey(const size_t& key) {
+			if (sparse[key]==ind_none)
+			{
+				throw std::logic_error("Element doesent exist");
+			}
 			return dense[sparse[key]];
 		}
 		using iterator = typename Cont::array<T>::iterator;

@@ -14,7 +14,9 @@ namespace type_id {
     
     struct dense_type_system {
         size_t type_index;
-
+        size_t size() {
+            return type_index - 1;
+        }
        Cont::array<size_t> sparse_map;
         dense_type_system()
         {
