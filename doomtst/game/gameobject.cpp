@@ -128,7 +128,7 @@ void gameobject::OCManager::delete_component(component* comp)
 	{
 		throw std::logic_error("Every Component Must be owned by a valid");
 	}
-	managers[comp->comp_id.value].store.erase_key(comp->owner.Id.id);
+	managers[comp->comp_id.value].store[comp->owner.Id.id]=nullptr;
 
 	managers[comp->comp_id.value].pool.free(comp);
 }
@@ -153,7 +153,7 @@ void gameobject::OCManager::updatecomponents(updatecalltype type)
 
 		if (shouldupdate( managers[i].utype,type))
 		{
-			managerref.push(&managers[i]);
+		managerref.push(&managers[i]);
 		}
 		
 
@@ -174,7 +174,7 @@ void gameobject::OCManager::updatecomponents(updatecalltype type)
 
 				for (obj comps : arch.elems)
 				{
-					component* comp = manager->store.getByKey(comps.Id.id);
+					component* comp = manager->store[comps.Id.id];
 
 					
 						comp->update();

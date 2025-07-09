@@ -127,11 +127,11 @@ namespace gameobject {
 	static constexpr obj None = obj();
 
 	struct Archtype {
-		bitset::bitset bit_list; 
-		array<obj> elems;
-		array<Archtype*> moves;
-		array<size_t> dense_bits;
-		
+		bitset::bitset bit_list;       
+		array<size_t> dense_bits;     
+		array<obj> elems;              
+		array<Archtype*> moves;       
+		OCManager* OC;
 		template <typename T>
 		bool has_component();
 		bool has_component(comp::Id ind);
@@ -164,8 +164,7 @@ namespace gameobject {
 			met.arch = nullptr;
 			elems.pop();
 		}
-		//Sparse::SparseSet<size_t> proper_inds;
-		OCManager* OC;
+	
 		Archtype(bitset::bitset st,OCManager* Man) :bit_list(st), OC(Man),elems() {
 
 			for (size_t ind = 0; ind < st.bits; ind++) {
@@ -182,17 +181,17 @@ namespace gameobject {
 	};
 
 
-	using componentStorage = Sparse::SparseSet< component*, ComponentMapper>;
+	using componentStorage = array<component*>;
 	struct componentmanager
 	{
 		componentmanager();
 		void create(comp::Id mid, int bytesize);
-		updatetype utype;
-		int priority;
-		comp::Id id;
-	
+		comp::Id id;             
 		dynPool::flux<component> pool;
-		componentStorage store;
+		componentStorage store; 
+
+		updatetype utype;     
+		int priority;         
 		
 		void init(component* sample);
 	};
@@ -212,7 +211,7 @@ namespace gameobject {
 			for (auto& arch : archtypes)
 			{
 				arch.bit_list.push(false);
-				int l = 1;
+	
 			}
 
 		}
@@ -350,11 +349,10 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		
 		struct component
 		{
+			comp::Id comp_id;        
 			obj owner;
-			short priority=0;
-			comp::Id comp_id;
-			//for component manager 
-			updatetype utype = updatedefault;
+			short priority;         
+			updatetype utype;
 			//called on destroy used for deallocation
 			
 			virtual void ondestroy();
@@ -401,9 +399,9 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			comp::Id comp_id = OC->comp_map.get<T>();
 
 			auto& complist = OC->managers[comp_id.value].store;
-			if (complist.contains_key(Id.id)) {
+			if (complist[Id.id]!=nullptr) {
 				OC->arch.moveflipArch(*this, comp_id);
-				component* comp = complist.getByKey(Id.id);
+				component* comp = complist[Id.id];
 				if (!comp) {
 					throw std::logic_error("invarient violation:component must exist if id is contained");
 				}
@@ -423,7 +421,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 
 			comp::Id comp_id = OC->comp_map.get<T>();	
 			componentStorage& complist = OC->managers[comp_id.value].store;
-			return (T*)(complist.getOrDefault(Id.id));
+			return (T*)(complist[Id.id]);
 		
 		}
 		template <class T>
@@ -465,13 +463,13 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			comp->owner = *this;
 			auto& complist = OC->managers[comp->comp_id.value].store;
 			
-			complist.push(comp);
+			complist[Id.id]=comp;
 			OC->arch.moveflipArch(*this, comp->comp_id);
 
 			
 			comp->start();
 		
-			Assert(complist.contains_key(Id.id), "Archtype does not contain needed key");
+			//Assert(complist, "Archtype does not contain needed key");
 			return comp;
 		}
 
@@ -485,21 +483,22 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			T* comp;
 			
 			comp::Id cmpid = comp_map.get<T>();
-			bool newmanager = (managers[cmpid.value].id == comp::None);
+			componentmanager& man = managers[cmpid.value];
+			bool newmanager = (man.id == comp::None);
 			if (newmanager)
 			{
 				arch.expandArchtype();
-				managers[cmpid.value].create(cmpid, sizeof(T));
+				man.create(cmpid, sizeof(T));
 			
 			}
-			void* mem = (managers[cmpid.value].pool.alloc());
+			void* mem = man.pool.alloc();
 			comp = new (mem) T(std::forward<types>(initval)...);
 			comp->comp_id = cmpid;
 		
 
 			if (newmanager)
 			{
-				managers[cmpid.value].init(comp);
+				man.init(comp);
 
 			}
 			
@@ -538,7 +537,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			component* operator*() {
 				size_t comp_id = (*dense_bits)[pos];
 				auto& store = manager->managers[comp_id].store;
-				if (!store.contains_key(owner.Id.id)) {
+				if (store[owner.Id.id]==nullptr) {
 					// FAIL FAST with a clear error
 					throw std::logic_error(
 						"ECS invariant violated: archetype lists comp_id " +
@@ -547,7 +546,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 						", but store does not contain that key."
 					);
 				}
-				return store.getByKey(owner.Id.id);
+				return store[owner.Id.id];
 			}
 			ComponentIterator& operator++() {
 				++pos;

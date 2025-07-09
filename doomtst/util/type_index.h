@@ -2,15 +2,17 @@
 #include "dynamicarray.h"
 #include <stdexcept>
 #include <atomic>
+#include <cstdint>
 
 namespace type_id {
 
-    // Use uint32_t for consistency, and define None_id outside struct
+    // Unique ID for an invalid type
     inline constexpr uint32_t None_id = UINT32_MAX;
 
-    // atomic counter of type uint32_t
+    // Global counter for assigning unique type IDs
     inline std::atomic<uint32_t> global_type_counter{ 0 };
 
+    // Retrieve a unique ID for type T
     template<typename T>
     uint32_t get_typeid() {
         static const uint32_t id = global_type_counter.fetch_add(1, std::memory_order_relaxed);
@@ -34,7 +36,6 @@ namespace type_id {
         uint32_t type_index = 0;
         Cont::array<Id> sparse_map;
 
-        // Returns the number of types registered
         uint32_t size() const {
             return type_index;
         }
@@ -43,29 +44,24 @@ namespace type_id {
         Id get() {
             uint32_t id = get_typeid<T>();
 
-          
+        
+
             Id& dense_id = sparse_map[id];
             if (!dense_id.valid()) {
-                dense_id = Id(type_index);
-                ++type_index;
+                dense_id = Id(type_index++);
             }
+
             return dense_id;
         }
 
         template<typename T>
         bool contains() const {
-            uint32_t typ_id = get_typeid<T>();
-            if (typ_id >= sparse_map.length) {
-                return false;
-            }
-            return sparse_map[typ_id].valid();
+            uint32_t id = get_typeid<T>();
+            return id < sparse_map.length && sparse_map[id].valid();
         }
 
         bool contains_id(uint32_t id) const {
-            if (id >= sparse_map.length) {
-                return false;
-            }
-            return sparse_map[id].valid();
+            return id < sparse_map.length && sparse_map[id].valid();
         }
     };
 

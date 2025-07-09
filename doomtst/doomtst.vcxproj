@@ -339,6 +339,7 @@
     <ClInclude Include="renderer\UniformManager.h" />
     <ClInclude Include="Resources\ResourceManager.h" />
     <ClInclude Include="util\bitset.h" />
+    <ClInclude Include="util\deque.h" />
     <ClInclude Include="util\Id.h" />
     <ClInclude Include="util\List.h" />
     <ClInclude Include="util\Option.h" />
