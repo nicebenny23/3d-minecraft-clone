@@ -19,7 +19,7 @@ struct destroyonhit : gameobject::component {
 		
 			if (collidedwith.hascomponent<T>()^is_not_tag)
 			{
-				owner.deffered_destroy();
+				owner.destroy();
 			}
 		
 	}

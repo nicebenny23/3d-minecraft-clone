@@ -13,6 +13,7 @@
 #include "../util/bitset.h"
 #include "../util/pair.h"
 #include "../util/type_index.h"
+#include "Commands.h"
 #include "../util/dynpool.h"
 namespace GameContext {
 
@@ -112,9 +113,8 @@ namespace gameobject {
 			OC = nullptr;
 		}
 
-		void immediate_destroy();
+		void destroy();
 
-		void deffered_destroy();
 
 		Transform& transform();
 
@@ -194,7 +194,7 @@ namespace gameobject {
 	struct componentmanager
 	{
 		componentmanager();
-		void create(comp::Id mid, int bytesize);
+		void create(comp::Id mid, size_t bytesize,size_t alignment);
 		comp::Id id;             
 		dynPool::flux<component> pool;
 		componentStorage store; 
@@ -280,11 +280,11 @@ namespace gameobject {
 
 
 	struct Ecs {
-	
+		CommandBuffer commands;
 		Ecs(){
-	
+			commands = CommandBuffer(this);
 			arch = ArchtypeManager(this);
-			const size_t max_size = static_cast<size_t>(1) << 18;
+			const size_t max_size = static_cast<size_t>(1) << 19;
 			ctx = nullptr;
 			entitymeta = array<EntityMetadata>(max_size);
 			free_ids = array<size_t>(max_size);
@@ -309,17 +309,14 @@ namespace gameobject {
 		obj CreateEntity(v3::Vector3 SpawnPos);
 		void InitObj(obj& object);
 
-		void destroy(obj* object);
+		void destroy(obj& object);
 		
 		
 		  template <class T, typename... types>
 		  T* InitComp(types&&... initval);
 
 		  void updatecomponents(updatecalltype type);
-
-		 void Delete_deffered_objs();
-
-		 void delete_component(component* comp);
+		 		 void delete_component(component* comp);
 
 		 Cont::stack<obj> EntityDeletionBuffer;
 		 
@@ -512,7 +509,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			if (is_new)
 			{
 				arch.expandArchtype();
-				man.create(cmpid, sizeof(T));
+				man.create(cmpid, sizeof(T),alignof(T));
 			
 			}
 			void* mem = man.pool.alloc();

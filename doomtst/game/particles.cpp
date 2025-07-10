@@ -37,7 +37,7 @@ void particleemiter::update()
 				if (particlearray[i].getcomponent<particle>().endtime < CtxName::ctx.Time->ElapsedTime)
 				{
 					gameobject::obj EntityDeletionBuffer = particlearray[i];
-					EntityDeletionBuffer.immediate_destroy();
+					EntityDeletionBuffer.destroy();
 				
 				
 					particlearray[i].Id =Ids::None;

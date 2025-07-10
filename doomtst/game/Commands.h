@@ -4,20 +4,34 @@
 #include "../util/dependency.h"
 #pragma once
 namespace gameobject {
-	struct ecs;
+	struct Ecs;
 }
 
 struct Command {
 	Command() {}; 
-	virtual void Apply(gameobject::ecs* World) = 0; 
-	virtual ~Command() = default;
-};
-struct CommandPool {
-	dynPool::flux<Command> store;
-	Cont::queue<Command*> Commands;
+	virtual void Apply(gameobject::Ecs* world) = 0; 
 	
+}; 
+using ApplyFn = void (*)(Command*, gameobject::Ecs*);
+/*struct CommandPool {
+	dynPool::flux<Command> store;
+	Cont::queue<Command*> queue;
+	ApplyFn CommandFunc;
+	void apply(gameobject::ecs* World) {
+		
+		while (!queue.empty())
+		{
+			Command* cmd = queue.pop();
+			CommandFunc(cmd,World);
+			cmd->~Command();
+			store.free(cmd);
+		}
+
+
+	}
 
 };
+*/
 struct CommandBuffer {
 	Cont::array<dynPool::flux<Command>> store;
 	Cont::array<Cont::queue<Command*>> buffer;
@@ -25,8 +39,13 @@ struct CommandBuffer {
 	void pop();
 	template<typename T>
 	void push(const T& value);
+	CommandBuffer(gameobject::Ecs* wrld):World(wrld){
 
-	gameobject::ecs* World;
+	}
+	CommandBuffer() {
+		World = nullptr;
+	}
+	gameobject::Ecs* World;
 	type_id::dense_type_system commandSystem;
 	Depends::DependencySystem DependencySystem;
 	bool empty() {
@@ -46,7 +65,7 @@ struct CommandBuffer {
 		{
 			Command* cmd = queue.pop();
 			cmd->Apply(World);
-			cmd->~Command();
+			
 			storage.free(cmd);
 		}
 		
@@ -60,18 +79,19 @@ void CommandBuffer::push(const T& value)
 	auto [Id, is_new] = commandSystem.insert<T>();
 	if (is_new) {
 		buffer.push(Cont::queue<Command*>());
-		store.push(dynPool::flux(sizeof(T)));
+		store.push(dynPool::flux<Command>(sizeof(T),alignof(T)));
 		DependencySystem.push<T>();
 	}
 
-	void* mem = store[Id.value].alloc();          
-	Command* cmd = new (mem) T(value);             
-	buffer[Id.value].push(cmd);                  
+	void* mem = store[Id.value].alloc();
+	T* cmd = new (mem) T(value);
+	buffer[Id.value].push(cmd);
 }
-void CommandBuffer::pop() {
-	            
+inline void CommandBuffer::pop() {
+	
 	size_t length = DependencySystem.sortedActive.length;
 	for (size_t ind = 0; ind <length; ind++) {
 		empty_num(DependencySystem.sortedActive[ind]);
 	}
+	
 }

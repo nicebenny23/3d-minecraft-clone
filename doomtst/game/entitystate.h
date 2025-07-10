@@ -86,7 +86,7 @@ struct estate : gameobject::component
 				if (!owner.hascomponent<gameobject::StaticComponent>())
 				{
 
-					owner.deffered_destroy();
+					owner.destroy();
 				}
 				
 			}

@@ -54,7 +54,7 @@ namespace bitset {
             return *this;
         }
         bitset(size_t length, bool state) {
-
+            bits = length;
             resize(length);
             size_t numwords = words_to_bits(length);
             uint64_t fill = state ? ~uint64_t(0) : 0;

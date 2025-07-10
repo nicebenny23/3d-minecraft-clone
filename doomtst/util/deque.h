@@ -1,4 +1,4 @@
-
+#include "../debugger/debug.h"
 #pragma once
 #include <stdexcept>
 #include "dynamicarray.h"
@@ -20,7 +20,21 @@ namespace Cont {
 		deque();
 
 
-
+		void assert_valid() const {
+			if ((length == 0 && (front == back || front == (back + 1) % capacity || capacity == 0)) ||
+				(length > 0 && (
+					(back >= front && length == (back - front + 1)) ||
+					(back < front && length == (capacity - front + back + 1))
+					))
+				)
+			{
+				
+			}
+			else
+			{
+				throw std::logic_error("Skill issue");
+			}
+		}
 		T pop_front();
 		T pop_back();
 		void destroy();
@@ -99,27 +113,33 @@ namespace Cont {
 	template<typename T>
 	void deque<T>::push_front(const T& val)
 	{
-		if (full())
+		assert_valid();
+		if (full()) {
 			resize();
-
-		if (!empty())
+		}
+		if (!empty()) {
 			dec_index(front);
-
+		}
+		
 		list[front] = val;
 		length++;
+		assert_valid();
 	}
 
 	template<typename T>
 	void deque<T>::push_back(const T& val)
 	{
+		assert_valid();
 		if (full())
 			resize();
 
-		if (!empty())
+		if (!empty()) {
 			inc_index(back);
-
+		}
+	
 		list[back] = val;
 		length++;
+		assert_valid();
 	}
 
 	template<typename T>
@@ -137,10 +157,11 @@ namespace Cont {
 			}
 			delete[] list;
 		}
-		front = 0;
-		back = length - 1;
+		front = 0; 
+		back = (length == 0) ? 0 : length - 1;
 		list = newlist;
 		capacity = new_size;
+		assert_valid();
 	}
 
 
@@ -149,24 +170,40 @@ namespace Cont {
 	template<typename T>
 	T deque<T>::pop_front()
 	{
+		assert_valid();
 		if (empty())
+		{
 			throw std::out_of_range("Queue is empty");
-
+		}
 		T val = list[front];
-		inc_index(front);
 		length--;
+		
+		if (!empty())
+		{
+			inc_index(front);
+		
+		}
+
+		assert_valid();
 		return val;
 	}
 
 	template<typename T>
 	T deque<T>::pop_back()
 	{
+		assert_valid();
 		if (empty())
 			throw std::out_of_range("Queue is empty");
 
 		T val = list[back];
-		dec_index(back);
 		length--;
+		
+		if (!empty())
+		{
+			dec_index(back);
+		}
+		assert_valid();
+
 		return val;
 	}
 
@@ -216,7 +253,7 @@ namespace Cont {
 		length = other.length;
 		capacity = other.capacity;
 		front = 0;
-		back = length - 1;
+		back = (length == 0) ? 0 : length - 1;
 	}
 
 	template<typename T>
@@ -254,7 +291,7 @@ namespace Cont {
 			length = other.length;
 			capacity = other.capacity;
 			front = 0;
-			back = length - 1;
+			back = (length == 0) ? 0 : length - 1;
 		}
 		return *this;
 	}

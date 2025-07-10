@@ -5,21 +5,28 @@
 #include "typelist.h"      // TypeList and for_each
 #include "bitset.h"
 namespace Depends{
-template<typename T>
-concept HasDependencies = requires { typename T::Dependencies; };
+    // Safe fallback wrapper for Dependencies<T>
+    template<typename T, typename = void>
+    struct DependenciesHelper {
+        using type = TypeList::TypeList<>;
+    };
 
-template<typename T>
-using Dependencies = std::conditional_t<
-    HasDependencies<T>,
-    typename T::Dependencies,
-    TypeList::TypeList<>
->;
+    template<typename T>
+    struct DependenciesHelper<T, std::void_t<typename T::Dependencies>> {
+        using type = typename T::Dependencies;
+    };
 
+    // Final alias you use everywhere:
+    template<typename T>
+    using Dependencies = typename DependenciesHelper<T>::type;
 struct DependencySystem {
     // After each push, this holds only the types you explicitly pushed,
     // in an order that respects Dependencies<T>.
     Cont::array<size_t> sortedActive;
+    DependencySystem() {
 
+
+    }
     template<typename T>
     void push() {
         // 1) Register T
@@ -31,7 +38,7 @@ struct DependencySystem {
 
         // 3) Prepare graph node
         ensureNode(tid.value);
-        graph.list[tid.value].pred.clear();
+        graph.list[tid.value].pred.destroy();
 
         // 4) Wire in each Dep → T
         using Deps = Dependencies<T>;

@@ -157,7 +157,7 @@ void Chunk::chunk::destroy()
 	{		write();
 	}
 	for (int i = 0; i < chunksize; i++) {	
-	blockbuf[i].immediate_destroy();
+	blockbuf[i].destroy();
 	}
 	mesh->destroy();
 	delete[] blockbuf;

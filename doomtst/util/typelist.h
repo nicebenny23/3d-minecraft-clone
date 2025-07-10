@@ -56,12 +56,14 @@ namespace TypeList {
     template<typename List>
     struct for_each;
 
+    template<typename List>
+    struct for_each;
+
     template<typename... Types>
     struct for_each<TypeList<Types...>> {
-        template<template<typename> class F, typename... Args>
+        template<typename F, typename... Args>
         static void apply(Args&&... args) {
-          
-            (F<Types>::call(std::forward<Args>(args)...), ...);
+            (F::template call<Types>(std::forward<Args>(args)...), ...);
         }
     };
 

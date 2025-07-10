@@ -57,7 +57,7 @@ void gameobject::component::oncollision(obj collidedwith)
 
 bool gameobject::obj::exists() const
 {
-	return Id ? true : false;
+	return (Id ? true : false) && OC->entitymeta[Id.id].gen_count == Id.gen;
 
 }
 
@@ -76,45 +76,43 @@ EntityMetadata& gameobject::obj::meta()
 	return met;
 
 }
+struct destroyCmd :Command {
+	destroyCmd(obj Obj) {
+		object = Obj;
+	}
+	obj object;
+	void Apply(gameobject::Ecs* world) override {
 
+		world->destroy(object);
+	}
+};
 
 
 
 //gets a gameobject from a refrence to it;
 
-void Ecs::destroy(obj* object) {
+void Ecs::destroy(obj& object) {
 
-	for (component* comp : query::ComponentView(*object)) {
+	if (!object.exists())
+	{
+		return;
+	}
+	for (component* comp : query::ComponentView(object)) {
 		comp->destroy();
 	}
 
-	object->meta().arch->remove(*object);
+	object.meta().arch->remove(object);
 	
 
 	
-	entitymeta[object->Id.id].reset();
-	free_ids.push(object->Id.id);
+	entitymeta[object.Id.id].reset();
+	free_ids.push(object.Id.id);
 }
-void gameobject::Ecs::Delete_deffered_objs()
-{
-	while (!EntityDeletionBuffer.empty())
-	{
-		gameobject::obj elem = EntityDeletionBuffer.pop();
-		if (elem.hascomponent<StaticComponent>())
-		{
-			throw std::logic_error("cannot destroy this entity");
-		}
-		elem.immediate_destroy();
-	}
 
-} 
-void obj::immediate_destroy()
+
+void gameobject::obj::destroy()
 {
-	OC->destroy(this);
-}
-void gameobject::obj::deffered_destroy()
-{
-	OC->EntityDeletionBuffer.push(*this);
+	OC->commands.push(destroyCmd(*this));
 }
 Transform& gameobject::obj::transform()
 {
@@ -184,6 +182,7 @@ void gameobject::Ecs::updatecomponents(updatecalltype type)
 		}
 	}
 	managerref.destroy();
+	
 }
 
 
@@ -208,10 +207,10 @@ gameobject::componentmanager::componentmanager()
 	
 }
 
-void gameobject::componentmanager::create(comp::Id mid, int bytesize)
+void gameobject::componentmanager::create(comp::Id mid, size_t bytesize, size_t alignment)
 {
 	id = mid;
-	pool = dynPool::flux<component>(bytesize);
+	pool = dynPool::flux<component>(bytesize,alignment);
 }
 
 void gameobject::componentmanager::init(component* sample)

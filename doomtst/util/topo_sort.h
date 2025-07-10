@@ -9,6 +9,9 @@ struct Edge {
 
 
     }
+    Edge(const Edge& oth) {
+        pred = oth.pred;
+    }
     Cont::array<size_t> pred;
     Edge(const Cont::array<size_t>& preds) :pred(preds) {}
 };
@@ -21,9 +24,17 @@ struct Dag {
     size_t length() {
         return list.length;
     }
+
+    Dag(const Dag& oth)
+        : list(oth.list)
+    {
+    }
+    Dag() {
+        
+    }
 };
 
-Cont::array<size_t> dag_sort_indices(Dag dag) {
+inline Cont::array<size_t> dag_sort_indices(Dag dag) {
     Cont::array<int> num_front;
     Cont::stack<size_t> zero_front;
     for (size_t i = 0; i < num_front.length; i++)

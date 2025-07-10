@@ -27,13 +27,13 @@
 #include "Core.h"
 #pragma once 
 void endframe() {
-    CtxName::ctx.OC->Delete_deffered_objs();
     CtxName::ctx.Inp->endupdate();
     updateltick();
     CtxName::ctx.Window->SwapBuffers();
     glfwPollEvents();
     CtxName::ctx.Ren->Clear();
 
+    CtxName::ctx.OC->commands.pop();
 }
 void startframe() {
 
@@ -64,7 +64,7 @@ void deleteolddata() {
     std::string o1 = std::string("C:/Users/bchar/source/repos/doomtst/doomtst/worldstorage");
 
     std::string o2 = std::string("C:/Users/User/source/repos/nicebenny23/3d-minecraft-clone/doomtst/worldstorage");
-    deleteFilesInFolder(o2);
+    deleteFilesInFolder(o1);
 
 }
 void init() {
@@ -115,6 +115,6 @@ void rungame()
         }
     }
     endgame();
-    return;
+    return ;
 }
 
