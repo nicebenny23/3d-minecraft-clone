@@ -41,7 +41,7 @@ namespace bitset {
         Cont::array<uint64> bitlist;
         size_t bits;
         constexpr bitset() noexcept :bits(0), bitlist() {};
-
+        
         bitset(const bitset& oth) : bitlist(oth.bitlist), bits(oth.bits) {}
 
         bitset(bitset&& oth) noexcept : bitlist(std::move(oth.bitlist)), bits(oth.bits) {}
@@ -53,7 +53,16 @@ namespace bitset {
             }
             return *this;
         }
+        bitset(size_t length, bool state) {
 
+            resize(length);
+            size_t numwords = words_to_bits(length);
+            uint64_t fill = state ? ~uint64_t(0) : 0;
+            for (size_t i = 0; i < numwords; ++i) {
+                bitlist[i] = fill;
+            }
+            mask_end();
+        }
         bitset& operator=(bitset&& oth) noexcept {
             if (this != &oth) {
                 bitlist = std::move(oth.bitlist);
@@ -66,7 +75,14 @@ namespace bitset {
             bitlist.destroy();
             bits = 0;
         }
-
+        void resize(size_t new_bits) {
+            if (bits>new_bits)
+            {
+                throw std::logic_error("Cannot shrink bitset");
+            }
+            bits = new_bits;
+            bitlist.resize(words_to_bits(bits));
+        }
         void set(size_t bit) {
             if (bit >= bits) throw std::out_of_range("Bit index out of range");
             size_t idx = calc_full_words(bit);

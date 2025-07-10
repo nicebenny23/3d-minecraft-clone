@@ -36,7 +36,7 @@ namespace CtxName {
 		window::Window* Window;
 		timename::TimeManager* Time;
 
-		gameobject::OCManager* OC;
+		gameobject::Ecs* OC;
 
 		renderer::Renderer* Ren;
 		

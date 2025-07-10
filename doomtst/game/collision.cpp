@@ -3,7 +3,7 @@
 #include "objecthelper.h"
 #include "../world/managegrid.h"
 #include "../game/rigidbody.h"
-
+#include "query.h"
 void collision::update()
 {
 	for (int iters = 0; iters < collisioniterations; iters++)
@@ -80,11 +80,11 @@ voxtra::WorldRayCollision collision::raycastentity(ray nray, HitQuery query)
 
 void propagatecollisionmessage(gameobject::obj o1, gameobject::obj o2) {
 
-	for (gameobject::component* comp: gameobject::ComponentView(o1))
+	for (gameobject::component* comp: query::ComponentView(o1))
 	{
 		comp->oncollision(o2);
 	}
-	for (gameobject::component* comp : gameobject::ComponentView(o2))
+	for (gameobject::component* comp : query::ComponentView(o2))
 	{
 		comp->oncollision(o1);
 	}

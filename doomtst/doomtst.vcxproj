@@ -251,12 +251,14 @@
     <ClInclude Include="entities\slime.h" />
     <ClInclude Include="entities\wisp.h" />
     <ClInclude Include="game\collutil.h" />
+    <ClInclude Include="game\Commands.h" />
     <ClInclude Include="game\compid.h" />
     <ClInclude Include="game\entityutil.h" />
     <ClInclude Include="game\game.h" />
     <ClInclude Include="game\Core.h" />
     <ClInclude Include="game\GameContext.h" />
     <ClInclude Include="game\navigation.h" />
+    <ClInclude Include="game\query.h" />
     <ClInclude Include="game\Settings.h" />
     <ClInclude Include="game\TagIndex.h" />
     <ClInclude Include="game\transform.h" />
@@ -339,10 +341,13 @@
     <ClInclude Include="renderer\UniformManager.h" />
     <ClInclude Include="Resources\ResourceManager.h" />
     <ClInclude Include="util\bitset.h" />
+    <ClInclude Include="util\dependency.h" />
     <ClInclude Include="util\deque.h" />
     <ClInclude Include="util\Id.h" />
+    <ClInclude Include="util\InterfaceStore.h" />
     <ClInclude Include="util\List.h" />
     <ClInclude Include="util\Option.h" />
+    <ClInclude Include="util\pair.h" />
     <ClInclude Include="util\robinHood.h" />
     <ClInclude Include="util\SparseSet.h" />
     <ClInclude Include="util\chainpool.h" />
@@ -363,6 +368,7 @@
     <ClInclude Include="renderer\Vao.h" />
     <ClInclude Include="renderer\VertexObjectManager.h" />
     <ClInclude Include="util\topo_sort.h" />
+    <ClInclude Include="util\typelist.h" />
     <ClInclude Include="util\type_index.h" />
     <ClInclude Include="util\UniquePtr.h" />
     <ClInclude Include="world\chunkload.h" />

@@ -6,7 +6,7 @@
 #include <cstdlib>
 #include <cstring>
 #include "../debugger/debug.h"
-
+#include <initializer_list>
 
 namespace Cont {
 
@@ -77,7 +77,7 @@ constexpr array() noexcept;
 
 		// Constructor that initializes the array from a raw posize_ter and size.
 		array(T* arr, size_t size);
-
+		array(std::initializer_list<T> init);
 		// Move constructor.
 		array(array&& other) noexcept;
 
@@ -176,7 +176,7 @@ constexpr array() noexcept;
 
 	//returns alias to index
 	template<class T, bool initelems >
-	T& array<T, initelems>::operator[](size_t index) {
+	inline T& array<T, initelems>::operator[](size_t index) {
 
 		if (index >= capacity)
 		{
@@ -486,9 +486,20 @@ constexpr array() noexcept;
 		}
 
 	}
+	template<class T, bool initelems>
+	inline array<T, initelems>::array(std::initializer_list<T> init)
+	{
+		length = init.size();
+		resize(init.size);
+		size_t i = 0;
+		for (const auto& val : init) {
+			list[i++] = val;
+		}
+	}
 	//just 
 	template<class T, bool initelems>
 	array<T, initelems>::array(const array& arr) : array(arr.list, arr.length) {
+
 
 	}
 	//takes an r value renrennce,

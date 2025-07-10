@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include <atomic>
 #include <cstdint>
-
+#include "pair.h"
 namespace type_id {
 
     // Unique ID for an invalid type
@@ -43,17 +43,23 @@ namespace type_id {
         template<typename T>
         Id get() {
             uint32_t id = get_typeid<T>();
-
-        
-
             Id& dense_id = sparse_map[id];
             if (!dense_id.valid()) {
                 dense_id = Id(type_index++);
             }
-
             return dense_id;
         }
-
+        template<typename T>
+        util::Pair<Id, bool> insert() {
+            uint32_t id = get_typeid<T>();
+            Id& dense_id = sparse_map[id];
+            bool is_new = false;
+            if (!dense_id.valid()) {
+                dense_id = Id(type_index++);
+                is_new = true;
+            }
+            return { dense_id, is_new };
+        }
         template<typename T>
         bool contains() const {
             uint32_t id = get_typeid<T>();
@@ -62,6 +68,10 @@ namespace type_id {
 
         bool contains_id(uint32_t id) const {
             return id < sparse_map.length && sparse_map[id].valid();
+        }
+        template <typename... Types>
+        Cont::array<Id> get_type_ids() {
+            return { get<Types>()... };
         }
     };
 

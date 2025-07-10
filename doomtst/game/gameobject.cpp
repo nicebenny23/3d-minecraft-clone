@@ -4,7 +4,7 @@
 #include "GameContext.h"
 #include <type_traits>
 #include <algorithm>
-
+#include "query.h"
 
 using namespace gameobject;
 
@@ -82,14 +82,12 @@ EntityMetadata& gameobject::obj::meta()
 
 //gets a gameobject from a refrence to it;
 
-void OCManager::destroy(obj* object) {
-	// 1) Mark destroying
-	array<component*> comps;
-	for (component* comp : ComponentView(*object)) {
+void Ecs::destroy(obj* object) {
+
+	for (component* comp : query::ComponentView(*object)) {
 		comp->destroy();
 	}
 
-	comps.destroy();
 	object->meta().arch->remove(*object);
 	
 
@@ -97,7 +95,7 @@ void OCManager::destroy(obj* object) {
 	entitymeta[object->Id.id].reset();
 	free_ids.push(object->Id.id);
 }
-void gameobject::OCManager::Delete_deffered_objs()
+void gameobject::Ecs::Delete_deffered_objs()
 {
 	while (!EntityDeletionBuffer.empty())
 	{
@@ -122,7 +120,7 @@ Transform& gameobject::obj::transform()
 {
 	return getcomponent<gameobject::transform_comp>().transform;
 }
-void gameobject::OCManager::delete_component(component* comp)
+void gameobject::Ecs::delete_component(component* comp)
 {
 	if(comp->owner==None)
 	{
@@ -132,7 +130,7 @@ void gameobject::OCManager::delete_component(component* comp)
 
 	managers[comp->comp_id.value].pool.free(comp);
 }
-void gameobject::OCManager::InitObj(obj& object)
+void gameobject::Ecs::InitObj(obj& object)
 {
 	object.Id.id = free_ids.pop();
 	object.OC = ctx->OC;
@@ -142,7 +140,7 @@ void gameobject::OCManager::InitObj(obj& object)
 
 }
 
-void gameobject::OCManager::updatecomponents(updatecalltype type)
+void gameobject::Ecs::updatecomponents(updatecalltype type)
 {
 
 	array<componentmanager*> managerref;
@@ -161,6 +159,7 @@ void gameobject::OCManager::updatecomponents(updatecalltype type)
 	std::sort(&managerref[0], &managerref[0]+managerref.length, [](componentmanager* a, componentmanager* b) {
 		return a->priority>b->priority;
 		});
+	
 	
 	for (int j = 0; j < managerref.length; j++)
 	{
@@ -187,7 +186,9 @@ void gameobject::OCManager::updatecomponents(updatecalltype type)
 	managerref.destroy();
 }
 
-obj gameobject::OCManager::CreateEntity(v3::Vector3 SpawnPos)
+
+
+obj gameobject::Ecs::CreateEntity(v3::Vector3 SpawnPos)
 {
 	obj object = obj();
 	InitObj(object);

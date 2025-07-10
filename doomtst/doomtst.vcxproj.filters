@@ -752,6 +752,24 @@
     <ClInclude Include="util\deque.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game\query.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\Commands.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\InterfaceStore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\pair.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\dependency.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\typelist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag1.vs" />

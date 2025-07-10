@@ -27,7 +27,7 @@ namespace Core {
 
         grid::Grid Grid;
 
-        gameobject::OCManager OC;
+        gameobject::Ecs OC;
     };
     extern Engine game;
     

@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include "deque.h"
 
-namespace queuename {
+namespace Cont {
 
     template<typename T>
     struct queue {
@@ -21,7 +21,7 @@ namespace queuename {
             if (empty()) throw std::out_of_range("Queue is empty");
             return data.list[data.front];
         }
-
+        
         const T& front() const {
             if (empty()) throw std::out_of_range("Queue is empty");
             return data.list[data.front];
@@ -50,4 +50,4 @@ namespace queuename {
         }
     };
 
-} // namespace queuename
+} // namespace Cont

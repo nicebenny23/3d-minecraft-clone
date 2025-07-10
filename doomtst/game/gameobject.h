@@ -11,6 +11,7 @@
 #include "../debugger/debug.h"
 #include "../util/Id.h"
 #include "../util/bitset.h"
+#include "../util/pair.h"
 #include "../util/type_index.h"
 #include "../util/dynpool.h"
 namespace GameContext {
@@ -39,7 +40,7 @@ namespace gameobject {
 
 	};
 	struct component;
-	struct OCManager;
+	struct Ecs;
 	struct Archtype;
 	
 	enum objstate : char
@@ -117,12 +118,12 @@ namespace gameobject {
 
 		Transform& transform();
 
-		OCManager* OC;
+		Ecs* OC;
 	private:
 
 
 
-		friend struct OCManager;
+		friend struct Ecs;
 	};
 	static constexpr obj None = obj();
 
@@ -131,10 +132,11 @@ namespace gameobject {
 		array<size_t> dense_bits;     
 		array<obj> elems;              
 		array<Archtype*> moves;       
-		OCManager* OC;
+		Ecs* OC;
 		template <typename T>
 		bool has_component();
 		bool has_component(comp::Id ind);
+		bool has_components(bitset::bitset set);
 		void add(obj object) {
 			EntityMetadata& met = object.meta();
 			if (met.arch!=nullptr)
@@ -165,7 +167,7 @@ namespace gameobject {
 			elems.pop();
 		}
 	
-		Archtype(bitset::bitset st,OCManager* Man) :bit_list(st), OC(Man),elems() {
+		Archtype(bitset::bitset st,Ecs* Man) :bit_list(st), OC(Man),elems() {
 
 			for (size_t ind = 0; ind < st.bits; ind++) {
 				if (bit_list[ind]) {
@@ -178,6 +180,13 @@ namespace gameobject {
 		
 			bit_list = bitset::None;
 		}
+		
+
+		using iterator = typename Cont::array<obj>::iterator;
+
+		iterator begin() { return elems.begin(); }
+		iterator end() { return elems.end(); }
+		
 	};
 
 
@@ -189,7 +198,6 @@ namespace gameobject {
 		comp::Id id;             
 		dynPool::flux<component> pool;
 		componentStorage store; 
-
 		updatetype utype;     
 		int priority;         
 		
@@ -201,10 +209,16 @@ namespace gameobject {
 		ArchtypeManager() {
 			OC = nullptr;
 		}
-		ArchtypeManager(OCManager* man) :OC(man) {
+		ArchtypeManager(Ecs* man) :OC(man) {
 			archtypes.push(Archtype(bitset::None, OC));
 		};
-
+		
+		Archtype& operator[](size_t index) {
+		return archtypes[index];
+		}
+		size_t length() {
+			return archtypes.length;
+		}
 		array<Archtype> archtypes; 
 		void expandArchtype() {
 
@@ -248,7 +262,7 @@ namespace gameobject {
 			if (new_type == nullptr)
 			{
 				bitset::bitset new_arch = current->bit_list;
-				
+
 				new_arch.flip(index.value);
 				addArchtype(new_arch);
 				new_type = current->moves[index.value];
@@ -256,14 +270,19 @@ namespace gameobject {
 			current->remove(object);
 			new_type->add(object);
 		}
+
+		using iterator = typename Cont::array<Archtype>::iterator;
+		iterator begin() { return archtypes.begin(); }
+		iterator end() { return archtypes.end(); }
 	private:
-		OCManager* OC;
+		Ecs* OC;
 	};
 
 
-	struct OCManager {
+	struct Ecs {
 	
-		OCManager(){
+		Ecs(){
+	
 			arch = ArchtypeManager(this);
 			const size_t max_size = static_cast<size_t>(1) << 18;
 			ctx = nullptr;
@@ -282,8 +301,10 @@ namespace gameobject {
 			ctx = context;
 		}
 		array<EntityMetadata> entitymeta;
-		
-	
+		template<typename Func>
+		void for_each();
+		template<typename T>
+		T* getcomponentptr(obj& object);
 		
 		obj CreateEntity(v3::Vector3 SpawnPos);
 		void InitObj(obj& object);
@@ -345,7 +366,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			break;
 		}
 	}
-	}
+}
 		
 		struct component
 		{
@@ -372,7 +393,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 
 		};
 		template<typename T>
-	constexpr void verify_component() {
+		constexpr void verify_component() {
 			static_assert(std::derived_from<T, component>, "T must derive from ObjComponent<T>");
 		}
 
@@ -413,16 +434,21 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 
 
 		void destroy(obj* object);
-
+	
 		template<class T>
-		T* obj::getcomponentptr()
+		T* Ecs::getcomponentptr(obj& object)
 		{
 			verify_component<T>();
 
-			comp::Id comp_id = OC->comp_map.get<T>();	
-			componentStorage& complist = OC->managers[comp_id.value].store;
-			return (T*)(complist[Id.id]);
-		
+			comp::Id comp_id = comp_map.get<T>();
+			componentStorage& complist = managers[comp_id.value].store;
+			return (T*)(complist[object.Id.id]);
+
+		}
+		template<class T>
+		T* obj::getcomponentptr()
+		{
+			return OC->getcomponentptr<T>(*this);
 		}
 		template <class T>
 		T& obj::getcomponent()
@@ -453,8 +479,6 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 
 
 		template <class T, typename... types>
-
-
 		T* obj::addcomponent(types&&... initval)
 		{
 
@@ -476,16 +500,16 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 
 
 		template<class T, typename ...types>
-		inline T* OCManager::InitComp(types && ...initval)
+		inline T* Ecs::InitComp(types && ...initval)
 		{
 
 			verify_component<T>();
 			T* comp;
 			
-			comp::Id cmpid = comp_map.get<T>();
+			auto [cmpid,is_new]  = comp_map.insert<T>();
 			componentmanager& man = managers[cmpid.value];
-			bool newmanager = (man.id == comp::None);
-			if (newmanager)
+		
+			if (is_new)
 			{
 				arch.expandArchtype();
 				man.create(cmpid, sizeof(T));
@@ -496,7 +520,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			comp->comp_id = cmpid;
 		
 
-			if (newmanager)
+			if (is_new)
 			{
 				man.init(comp);
 
@@ -517,6 +541,10 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			}
 			return false;
 		}
+		inline bool Archtype::has_components(bitset::bitset set)
+		{
+			return (bit_list & set) == set;
+		}
 		template<typename T>
 		bool Archtype::has_component()
 		{
@@ -524,55 +552,13 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		}
 
 		//will not care if component list has been changed during the iteration
-		struct ComponentIterator {
-			obj owner;
-			OCManager* manager;
-			const array<size_t>* dense_bits;
-			size_t pos = 0;
 
-			ComponentIterator(obj o, OCManager* m, const array<size_t>* bits, size_t p = 0)
-				: owner(o), manager(m), dense_bits(bits), pos(p) {
-			}
 
-			component* operator*() {
-				size_t comp_id = (*dense_bits)[pos];
-				auto& store = manager->managers[comp_id].store;
-				if (store[owner.Id.id]==nullptr) {
-					// FAIL FAST with a clear error
-					throw std::logic_error(
-						"ECS invariant violated: archetype lists comp_id " +
-						std::to_string(comp_id) +
-						" for entity " + std::to_string(owner.Id.id) +
-						", but store does not contain that key."
-					);
-				}
-				return store[owner.Id.id];
-			}
-			ComponentIterator& operator++() {
-				++pos;
-				return *this;
-			}
 
-			bool operator!=(const ComponentIterator& other) const {
-				return pos != other.pos;
-			}
-		};	
-		//will not care if component list has been changed during the iteration
-		struct ComponentView {
-			obj owner;
 
-			ComponentView(obj o) : owner(o) {}
+		
 
-			ComponentIterator begin() {
-				auto* bits = &owner.meta().arch->dense_bits;
-				return ComponentIterator(owner, owner.OC, bits, 0);
-			}
+		
 
-			ComponentIterator end() {
-				auto* meta = owner.meta().arch;
-				auto* bits=& (meta->dense_bits);
-				return ComponentIterator(owner, owner.OC, bits, bits->length);
-			}
-		};
 }
 

@@ -4,6 +4,7 @@
 #include "../game/collision.h"
 #include "../game/entityutil.h"
 #include "../items/menu.h"
+#include "../game/query.h"
 #pragma once
 struct playercamcontrols : gameobject::component
 {
@@ -43,7 +44,7 @@ struct playercamcontrols : gameobject::component
 		voxtra::WorldRayCollision closest = collision::raycastall(cameraray, collision::HitQuery());
 		if (closest)
 		{
-			for (component* comp:gameobject::ComponentView(closest.unwrap().collider->owner)) {
+			for (component* comp:query::ComponentView(closest.unwrap().collider->owner)) {
 				comp->onplayerclick();
 			}
 		}
