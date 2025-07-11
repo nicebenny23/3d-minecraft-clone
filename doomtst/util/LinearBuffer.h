@@ -1,6 +1,6 @@
 #pragma once
 namespace Cont {
-	struct untyped_linear_buffer{
+	struct Linear_Buffer{
 		char* data = nullptr;
 		size_t capacity = 0; 
 		size_t size = 0; 

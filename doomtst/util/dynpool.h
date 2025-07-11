@@ -62,6 +62,10 @@ namespace dynPool {
 
         void destroy() {
             for (auto pool : pools) {
+                if (pool==nullptr)
+                {
+                    throw std::logic_error("Postmortem Error:Pool was not allocated");
+                }
                 delete[] pool;
             }
             pools.destroy();
