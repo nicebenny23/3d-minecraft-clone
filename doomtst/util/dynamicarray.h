@@ -26,6 +26,7 @@ namespace Cont {
 		bool empty();
 		// Standard operator[] that returns a reference to the element at the given index.
 		T& operator[](size_t index);
+		T& reach(size_t index);
 		const T& operator[](size_t index) const;
 		// At function that checks if the index is in range before returning the element.
 		T& at(size_t index);
@@ -44,7 +45,6 @@ namespace Cont {
 
 		// Delete an element at the given index, shifting others.
 		void deleteind(size_t index);
-
 
 
 
@@ -68,11 +68,11 @@ namespace Cont {
 		void swap(array& other);
 
 		// Default constructor.
-constexpr array() noexcept;
+		constexpr array() noexcept;
 
-		// Constructor that initializes the array with a given size.
+		// Constructor that initializes the array with a given length
 		array(size_t size);
-
+		array(size_t len,const T& value);
 		// Constructor that initializes the array from a raw posize_ter and size.
 		array(T* arr, size_t size);
 		array(std::initializer_list<T> init);
@@ -86,6 +86,10 @@ constexpr array() noexcept;
 		array& operator=(array&& other) noexcept;
 		array& operator=(const array& other);
 		bool operator==(const array& other) const;
+		bool valid(size_t index) {
+
+			return index < length;
+		}
 		// Posize_ter to the dynamically allocated array.
 		T* list;
 		// Current number of elements in the array.
@@ -148,6 +152,8 @@ constexpr array() noexcept;
 		bool is_undefined(const T& value) const {
 			return value == T();  // Assuming that the default constructor of T indicates an undefined value.
 		}
+		//resize that changes length
+		void expand(size_t size);
 		void resize(size_t size = 0);
 
 	};
@@ -169,23 +175,28 @@ constexpr array() noexcept;
 	template<class T, bool initelems >
 	inline T& array<T, initelems>::operator[](size_t index) {
 
+	
+		if (index >= length) {
+			throw("[] cannot acess out of bounds; use reach");
+		}
+		return list[index];
+
+
+	}
+	template<class T, bool initelems>
+	inline T& array<T, initelems>::reach(size_t index)
+	{
 		if (index >= capacity)
 		{
 			resize(resizelength(index));
 
 		}
-		if (index >= length) {//max index is length
-			//i do not make it an error because this funciton is supposed to go out of bonds
+		if (index >= length) 
+		{
 			length = index + 1;
 
 		}
-
-
-
-
 		return list[index];
-
-
 	}
 	template<class T, bool initelems>
 	inline const T& array<T, initelems>::operator[](size_t index) const
@@ -372,6 +383,13 @@ constexpr array() noexcept;
 
 
 	template<class T, bool initelems>
+	inline void array<T, initelems>::expand(size_t size)
+	{
+		resize(resizelength(size));
+		length = size;
+	}
+
+	template<class T, bool initelems>
 	void array<T, initelems >::resize(size_t size) {
 		//returns if success
 
@@ -450,6 +468,7 @@ constexpr array() noexcept;
 		std::swap(capacity, other.capacity);
 		std::swap(list, other.list);
 	}
+	
 	template<class T, bool initelems >
 	array<T, initelems>::array(size_t size) {
 
@@ -463,6 +482,23 @@ constexpr array() noexcept;
 		}
 		
 
+	}
+
+	template<class T, bool initelems>
+	inline array<T, initelems>::array(size_t len, const T& value)
+	{
+
+		list = nullptr;
+		length = len;
+		capacity = 0;
+		if (0 < length)
+		{
+			resize(resizelength(length));
+		}
+		for (size_t i = 0; i < length; i++)
+		{
+			list[i] = value;
+		}
 	}
 
 

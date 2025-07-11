@@ -79,7 +79,7 @@ void InitRandomDirections()
 			PointOnCircle -= v3::unitv / 2;
 			PointOnCircle * 2;
 		} while (mag2(PointOnCircle) > 1);
-		seededdirections[i] = normal(PointOnCircle);
+		seededdirections.push(normal(PointOnCircle));
 	}
 }
 int Hash(int seed, int xPrimed, int yPrimed, int zPrimed)

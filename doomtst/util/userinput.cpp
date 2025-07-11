@@ -32,7 +32,7 @@ namespace userinput {
 		keylist = Cont::array<inputkey,true>(GLFW_KEY_LAST+ Extra_keys);
 		for (int i = 0; i < keylist.capacity; i++)
 		{
-			keylist[i]=inputkey();
+			keylist.push(inputkey());
 			
 		}
 	}

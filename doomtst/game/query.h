@@ -73,7 +73,7 @@ namespace query {
 			auto positions = ecs->comp_map.get_type_ids<Components...>();
 			
 			bitset::bitset bitlist;
-			bitlist.resize(ecs->comp_map.size());
+			bitlist.expand(ecs->comp_map.size());
 			for (auto id : positions) {
 				bitlist.set(id.value);
 			}

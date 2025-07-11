@@ -55,7 +55,7 @@ namespace bitset {
         }
         bitset(size_t length, bool state) {
             bits = length;
-            resize(length);
+            expand(length);
             size_t numwords = words_to_bits(length);
             uint64_t fill = state ? ~uint64_t(0) : 0;
             for (size_t i = 0; i < numwords; ++i) {
@@ -75,13 +75,13 @@ namespace bitset {
             bitlist.destroy();
             bits = 0;
         }
-        void resize(size_t new_bits) {
+        void expand(size_t new_bits) {
             if (bits>new_bits)
             {
                 throw std::logic_error("Cannot shrink bitset");
             }
             bits = new_bits;
-            bitlist.resize(words_to_bits(bits));
+            bitlist.expand(words_to_bits(bits));
         }
         void set(size_t bit) {
             if (bit >= bits) throw std::out_of_range("Bit index out of range");
@@ -116,11 +116,10 @@ namespace bitset {
             return (bitlist[word_index] >> bit_offset) & 1;
         }
 
-        bitset operator~() const {
+        bitset operator~()  {
             bitset result;
-            result.bits = bits;
-            result.bitlist.resize(bitlist.length);
-
+         
+            result.expand(bits);
             size_t full_words = calc_full_words(bits);
             size_t leftover = calc_leftover_bits(bits);
 
@@ -139,9 +138,8 @@ namespace bitset {
         bitset operator&(const bitset& oth) const {
             size_t min_size = Min(bitlist.length, oth.bitlist.length);
             bitset result;
-            result.bitlist.resize(min_size);
-            result.bits = Min(bits, oth.bits);
-            for (size_t i = 0; i < min_size; i++) {
+            result.expand(Min(bits, oth.bits));
+           for (size_t i = 0; i < min_size; i++) {
                 result.bitlist[i] = bitlist[i] & oth.bitlist[i];
             }
             return result;
@@ -149,8 +147,8 @@ namespace bitset {
 
         bitset& operator&=(const bitset& oth) {
             size_t min_size = Min(bitlist.length, oth.bitlist.length);
-            bitlist.resize(min_size);
-            bits = Min(bits, oth.bits);
+            expand( Min(bits, oth.bits));
+            
             for (size_t i = 0; i < min_size; i++) {
                 bitlist[i] &= oth.bitlist[i];
             }
@@ -160,9 +158,8 @@ namespace bitset {
         bitset operator|(const bitset& oth) const {
             size_t max_size = Max(bitlist.length, oth.bitlist.length);
             size_t min_size = Min(bitlist.length, oth.bitlist.length);
-            bitset result;
-            result.bitlist.resize(max_size);
-            result.bits = Max(bits, oth.bits);
+            bitset result;            
+            result.expand(Max(bits, oth.bits));
             for (size_t i = 0; i < min_size; i++) {
                 result.bitlist[i] = bitlist[i] | oth.bitlist[i];
             }
@@ -173,12 +170,13 @@ namespace bitset {
         }
 
         bitset& operator|=(const bitset& oth) {
+            expand(Max(bits, oth.bits));
             size_t min_size = Min(bitlist.length, oth.bitlist.length);
             for (size_t i = 0; i < min_size; i++) {
                 bitlist[i] |= oth.bitlist[i];
             }
             if (oth.bitlist.length > bitlist.length) {
-                bitlist.resize(oth.bitlist.length);
+
                 for (size_t i = min_size; i < oth.bitlist.length; i++) {
                     bitlist[i] = oth.bitlist[i];
                 }
@@ -191,24 +189,26 @@ namespace bitset {
             size_t max_size = Max(bitlist.length, oth.bitlist.length);
             size_t min_size = Min(bitlist.length, oth.bitlist.length);
             bitset result;
-            result.bitlist.resize(max_size);
+            result.expand(Max(bits,oth.bits));
             for (size_t i = 0; i < min_size; i++) {
-                result.bitlist[i] = bitlist[i] ^ oth.bitlist[i];
+                result.bitlist[i]=( bitlist[i] ^ oth.bitlist[i]);
             }
             for (size_t i = min_size; i < max_size; i++) {
                 result.bitlist[i] = (bitlist.length == max_size) ? bitlist[i] : oth.bitlist[i];
             }
-            result.bits = Max(bits, oth.bits);
+           
             return result;
         }
 
         bitset& operator^=(const bitset& oth) {
+
+            expand(Max(bits, oth.bits));
             size_t min_size = Min(bitlist.length, oth.bitlist.length);
             for (size_t i = 0; i < min_size; i++) {
                 bitlist[i] ^= oth.bitlist[i];
             }
             if (oth.bitlist.length > bitlist.length) {
-                bitlist.resize(oth.bitlist.length);
+           
                 for (size_t i = min_size; i < oth.bitlist.length; i++) {
                     bitlist[i] = oth.bitlist[i];
                 }
@@ -222,8 +222,7 @@ namespace bitset {
 
             bitset result;
             result.bits = bits + shift;
-            size_t new_words = words_to_bits(result.bits);
-            result.bitlist.resize(new_words);
+            result.expand(result.bits);
 
             size_t old_words = bitlist.length;
             size_t word_shift = calc_full_words(shift);
@@ -236,7 +235,7 @@ namespace bitset {
             if (bit_shift) {
                 uint64_t carry = 0;
 
-                for (size_t i = word_shift; i < new_words; ++i) {
+                for (size_t i = word_shift; i < result.bitlist.length; ++i) {
                     uint64_t val = result.bitlist[i];
 
                     // Shift left and add in bits carried from the previous word
@@ -257,9 +256,9 @@ namespace bitset {
             if (shift >= bits) return bitset{};
 
             bitset result;
-            result.bits = bits - shift;
-            result.bitlist.resize(bitlist.length);
-
+            result.expand(bits - shift);
+            
+           
             size_t word_shift = calc_full_words(shift);
             size_t bit_shift = calc_leftover_bits(shift);
             size_t len = bitlist.length;
@@ -288,7 +287,6 @@ namespace bitset {
 
         bitset& push(const bitset& oth) {
             *this |= oth << bits;
-            bits += oth.bits;
             return *this;
         }
 

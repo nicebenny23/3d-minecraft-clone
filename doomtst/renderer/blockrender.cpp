@@ -158,7 +158,7 @@ void recreatechunkmesh(Chunk::chunk* aschunk) {
 	aschunk->mesh->facebuf.destroy();
 	aschunk->mesh->facebuf = Cont::array<face>();
 	Cont::array<unsigned int> indbuf = Cont::array<unsigned int>();
-	Cont::array<float> datbuf= Cont::array<float>(0,false);
+	Cont::array<float> datbuf= Cont::array<float>(0);
 
 	
 	for (int ind = 0; ind < chunksize; ind++) {
@@ -276,38 +276,39 @@ void blockrender::initblockrendering()
 
 	CtxName::ctx.Ren->AddType(Base_Material("TransparentBlock", "BlockShader", RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).
 	AddUniform(renderer::setAspectRatio).AddUniform(renderer::setrenderingmatrixes).AddUniform(ApplyBlockTex));
+
 	array<const char*> texlist = array<const char*>();
-	texlist[treestonetex] = "images\\treestone.png";
-	texlist[grasstex] = "images\\grass.png";
-	texlist[stonetex] = "images\\stone.png";
-	texlist[altartex] = "images\\crystalaltarside.png";
-	texlist[glasstex] = "images\\glass.png";
-	texlist[watertex] = "images\\water.png";
-	texlist[torchtex] = "images\\torch.png";
-	texlist[torchtoptex] = "images\\torchtop.png";
-	texlist[crystaloretex] = "images\\crystalore.png";
-	texlist[craftingtabletop] = "images\\craftingtabletop.png";
-	texlist[craftingtableside] = "images\\craftingtableside.png";
-	texlist[crystaltorchtex] = "images\\crystaltorch.png";
-	texlist[crystaltorchtoptex] = "images\\crystaltorchtop.png";
-	texlist[mosstex] = "images\\moss.png";
-	texlist[ropetex] = "images\\rope.png";
-	texlist[lavatex] = "images\\lava.png";
-	texlist[obsidiantex] = "images\\obb.png";
-	texlist[chestfront] = "images\\chest.png";
+	texlist.reach(treestonetex)= "images\\treestone.png";
+	texlist.reach(grasstex) = "images\\grass.png";
+	texlist.reach(stonetex) = "images\\stone.png";
+	texlist.reach(altartex) = "images\\crystalaltarside.png";
+	texlist.reach(glasstex) = "images\\glass.png";
+	texlist.reach(watertex) = "images\\water.png";
+	texlist.reach(torchtex) = "images\\torch.png";
+	texlist.reach(torchtoptex) = "images\\torchtop.png";
+	texlist.reach(crystaloretex) = "images\\crystalore.png";
+	texlist.reach(craftingtabletop) = "images\\craftingtabletop.png";
+	texlist.reach(craftingtableside) = "images\\craftingtableside.png";
+	texlist.reach(crystaltorchtex) = "images\\crystaltorch.png";
+	texlist.reach(crystaltorchtoptex) = "images\\crystaltorchtop.png";
+	texlist.reach(mosstex) = "images\\moss.png";
+	texlist.reach(ropetex) = "images\\rope.png";
+	texlist.reach(lavatex) = "images\\lava.png";
+	texlist.reach(obsidiantex) = "images\\obb.png";
+	texlist.reach(chestfront) = "images\\chest.png";
 
-	texlist[chestside] = "images\\chestsides.png";
-	texlist[furnacefront] = "images\\furnacetop.png";
+	texlist.reach(chestside) = "images\\chestsides.png";
+	texlist.reach(furnacefront) = "images\\furnacetop.png";
 
-	texlist[furnaceside] = "images\\furnace.png";
-	texlist[ironoretex] = "images\\ironore.png";
+	texlist.reach(furnaceside) = "images\\furnace.png";
+	texlist.reach(ironoretex) = "images\\ironore.png";
 
-	texlist[furnacesideon] = "images\\furnaceon.png";
-	texlist[furnacefronton] = "images\\furnacetopon.png";
-	texlist[logtoppng] = "images\\log.png";
-	texlist[ultraaltarpngultrapng] = "images\\ultraaltar.png";
-	texlist[sandtex] = "images\\sand.png";
-	texlist[planktex] = "images\\treestoneblock.png";
+	texlist.reach(furnacesideon) = "images\\furnaceon.png";
+	texlist.reach(furnacefronton) = "images\\furnacetopon.png";
+	texlist.reach(logtoppng) = "images\\log.png";
+	texlist.reach(ultraaltarpngultrapng) = "images\\ultraaltar.png";
+	texlist.reach(sandtex) = "images\\sand.png";
+	texlist.reach(planktex) = "images\\treestoneblock.png";
 	texarray = CtxName::ctx.Ren->Textures.GetTexArray(texlist,"BlockTextures");
 	CtxName::ctx.Ren->context.Bind(*texarray);
 	enablelighting = true;

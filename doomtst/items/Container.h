@@ -146,8 +146,8 @@ struct Container
 			{
 
 
-				databuf[ind] = itemslot(i + xoff - float(sizex) / 2.0f, j + yoff - ysize / 2.0f);
-				ind++;
+				databuf.push( itemslot(i + xoff - float(sizex) / 2.0f, j + yoff - ysize / 2.0f));
+			
 
 			}
 		}

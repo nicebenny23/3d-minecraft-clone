@@ -50,7 +50,8 @@ void integertext::render()
 void inittextarray()
 {
 
-    array<const char*> texlist = array<const char*>();
+    array<const char*> texlist = array<const char*>(10);
+	texlist.expand(10);
     texlist[0] = "bitmaptext\\zeroimg.png";
     texlist[1] = "bitmaptext\\oneimg.png";
     texlist[2] = "bitmaptext\\twoimg.png";

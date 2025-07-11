@@ -187,10 +187,9 @@ namespace gameobject {
 			for (size_t ind = 0; ind < st.bits; ind++) {
 				if (bit_list[ind]) {
 					dense_bits.push(ind);
-				}   
-				for (size_t i = 0; i < st.bits; ++i) {
-					moves[i] = nullptr;
 				}
+
+				moves.push(nullptr);
 			}
 		};
 		Archtype() {
@@ -253,7 +252,7 @@ namespace gameobject {
 			for (auto& arch : archtypes)
 			{
 				arch->bit_list.push(false);
-	
+				arch->moves.expand(arch->moves.length + 1);
 			}
 
 		}
@@ -267,6 +266,7 @@ namespace gameobject {
 				}
 			}
 			archtypes.push(new Archtype(Components, OC));
+			
 			for (auto& arch : archtypes)
 			{
 				bitset::bitset archxor = Components ^ arch->bit_list;
@@ -296,34 +296,23 @@ namespace gameobject {
 				throw std::logic_error("Component must be part of an archtype");
 			}
 
-			Archtype* new_type = current->moves[index.value];
-			if (new_type == nullptr)
+			if (current->moves[index.value]==nullptr)
 			{
 				bitset::bitset new_arch = current->bit_list;
 
 				new_arch.flip(index.value);
 				addArchtype(new_arch);
-				new_type = current->moves[index.value];
-				if (new_type==nullptr)
-				{
-					throw std::logic_error("Improper archytype allocation");
-				}
 			}
+			Archtype* new_type = current->moves[index.value];
+			if (new_type == nullptr)
+			{
+				throw std::logic_error("Improper archytype allocation");
+			}
+
 			current->remove(object);
 			new_type->add(object);
 
-			check();
-			if (current->elems.length< 100)
-			{
-
-				for (auto& element : current->elems)
-				{
-
-					if (element.Id == object.Id) {
-						throw std::logic_error("skill");
-					}
-				}
-			}
+		
 		}
 
 		using iterator = typename Cont::array<Archtype*>::iterator;
@@ -353,13 +342,14 @@ namespace gameobject {
 			const size_t max_size = static_cast<size_t>(1) << 19;
 			ctx = nullptr;
 			entitymeta = array<EntityMetadata>(max_size);
-			free_ids = array<size_t>(max_size);
+			entitymeta.expand(max_size);
+			free_ids = array<size_t>();
 			for (size_t i = 0; i < max_size; i++)
 			{
 				free_ids.push(i);
 				
 			}
-			managers = array<componentmanager, true>(0);
+			managers = array<componentmanager, true>();
 				
 		}
 		void inject_context(CtxName::Context* context)
@@ -576,13 +566,13 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			T* comp;
 			
 			auto [cmpid,is_new]  = comp_map.insert<T>();
-			componentmanager& man = managers[cmpid.value];
+			componentmanager& man = managers.reach(cmpid.value);
 		
 			if (is_new)
 			{
 				arch.expandArchtype();
 				man.create(cmpid, sizeof(T),alignof(T));
-			
+				man.store.expand(entitymeta.capacity);
 			}
 			void* mem = man.pool.alloc();
 			comp = new (mem) T(std::forward<types>(initval)...);

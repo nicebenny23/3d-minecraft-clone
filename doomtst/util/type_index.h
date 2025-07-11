@@ -43,7 +43,7 @@ namespace type_id {
         template<typename T>
         Id get() {
             uint32_t id = get_typeid<T>();
-            Id& dense_id = sparse_map[id];
+            Id& dense_id = sparse_map.reach(id);
             if (!dense_id.valid()) {
                 dense_id = Id(type_index++);
             }
@@ -52,7 +52,7 @@ namespace type_id {
         template<typename T>
         util::Pair<Id, bool> insert() {
             uint32_t id = get_typeid<T>();
-            Id& dense_id = sparse_map[id];
+            Id& dense_id = sparse_map.reach(id);
             bool is_new = false;
             if (!dense_id.valid()) {
                 dense_id = Id(type_index++);
@@ -66,9 +66,6 @@ namespace type_id {
             return id < sparse_map.length && sparse_map[id].valid();
         }
 
-        bool contains_id(uint32_t id) const {
-            return id < sparse_map.length && sparse_map[id].valid();
-        }
         template <typename... Types>
         Cont::array<Id> get_type_ids() {
             return { get<Types>()... };

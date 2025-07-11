@@ -34,12 +34,9 @@ struct Dag {
 };
 
 inline Cont::array<size_t> dag_sort_indices(Dag dag) {
-    Cont::array<int> num_front;
+    Cont::array<int> num_front(dag.length(), 0);
     Cont::stack<size_t> zero_front;
-    for (size_t i = 0; i < num_front.length; i++)
-    {
-        num_front[i] = 0;
-    }
+    
     for (int i = 0; i < dag.list.length; i++)
     {
         for (size_t bk : dag[i].pred)

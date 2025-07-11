@@ -8,7 +8,7 @@ void ui::createuilist()
 	uielemlist = array<cptr<uielement>,true>(uisize);
 	for (int i = 0; i < uisize; i++)
 	{
-		uielemlist[i] = cptr<uielement> ();
+		uielemlist.push( cptr<uielement>());
 	}
 }
 

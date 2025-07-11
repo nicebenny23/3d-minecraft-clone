@@ -150,7 +150,7 @@ namespace grid {
 
 	
 
-		Cont::array<Chunk::chunk*>	newchunklist = Cont::array<Chunk::chunk*>(totalChunks);
+		Cont::array<Chunk::chunk*>	newchunklist = Cont::array<Chunk::chunk*>(totalChunks,nullptr);
 		int indexdxchange = localChunkIndex(griddt);
 
 		size_t ind = 0;
@@ -225,11 +225,8 @@ namespace grid {
 		loader.Init(ctx);
 		gridpos =Coord( camera::campos() / float(chunkaxis));
 		griddt = zeroiv;
-		chunklist = Cont::array<Chunk::chunk*>(totalChunks);
-		for (int i = 0; i < totalChunks; i++)
-		{
-			chunklist[i] = nullptr;
-		}
+		chunklist = Cont::array<Chunk::chunk*>(totalChunks,nullptr);
+	
 		load();
 	}
 	bool Grid::haschanged() {

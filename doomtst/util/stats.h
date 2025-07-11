@@ -18,7 +18,7 @@ namespace statistics {
 		}
 
 		HistogramEqualizer(Cont::array<float> data) {
-			const int DataPoints = data.length;
+			const size_t DataPoints = data.length;
 			
 			//you need specific input patams as when its used for a finite dataset their are almost always points outside the range
 
@@ -26,11 +26,8 @@ namespace statistics {
 				throw std::invalid_argument("Data cannot be empty.");
 			}
 			//nan for a Sentenal value
-			equalizedDistribution = Cont::array<float>(DataPoints);
-			for (int i = 0; i < DataPoints; i++)
-			{
-				equalizedDistribution[i] = NAN;
-			}
+			equalizedDistribution = Cont::array<float>(DataPoints,NAN);
+			
 			std::sort(data.list, data.list + DataPoints, [](float a, float b) {
 				return a < b;
 				});

@@ -128,8 +128,8 @@ struct idmap
 					Coord idpos = loc * chunkaxis + Coord(x, y, z);
 
 					int neid = generatechunkvalfromnoise(idpos, map, biomemap, feturemap, lavalayermap, map2);
-					ids[ind] = idblock(neid, idpos);
-					ind++;
+					ids.push( idblock(neid, idpos));
+
 				}
 			}
 

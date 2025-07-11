@@ -74,7 +74,7 @@ for (int i = 0; i < properties.distributionsize; i++)
     
     Vector3 randomPoint =NoiseOffset +randompointonsphere(0,i,0)/ScaleRange;
     float val = EvaluateNoiseAtPoint(randomPoint, properties);
-    distribution[i]=val;
+    distribution.push(val);
 }
 equalizer= statistics::HistogramEqualizer(array<float>(distribution));
 }

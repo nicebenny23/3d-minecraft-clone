@@ -62,7 +62,7 @@ namespace Depends {
             if (!isNew) return; // already registered
 
             activeList.push(tid.value);
-            graph.list[tid.value].pred.destroy(); // clear old deps
+            graph.list.reach(tid.value).pred.destroy(); // clear old deps
 
             using Deps = Dependencies<T>;
             using Tag = DependencyTag<T>;

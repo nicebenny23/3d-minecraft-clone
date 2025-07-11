@@ -70,7 +70,7 @@ namespace uiboxname {
 		if (state.enabled)
 		{
 			CtxName::ctx.Ren->SetType("Ui");
-			array<unsigned int> indbuf = array<unsigned int>();
+			array<unsigned int> indbuf = array<unsigned int>(6,unsigned int(0));
 			indbuf[0] = 0;
 			indbuf[1] = 1;
 			indbuf[2] = 3;
