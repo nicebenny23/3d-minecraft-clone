@@ -21,7 +21,7 @@ struct playerhealth: gameobject::component
 	void start(){
 		size_t max_health = owner.getcomponent<estate>().maxhealth;
 		priority = -224;
-		v2::Vector2 scale = v2::unitv / 1000;
+		v2::Vector2 scale = v2::unitv / 100;
 		healthboxes = array<Cptr::cptr<uibox>,true>(max_health);
 		for (int i = 0; i < max_health; i++) {
 			v2::Vector2 pos = v2::Vector2(i / 40.f-.4f, -.45);

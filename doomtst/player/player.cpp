@@ -20,8 +20,8 @@ void player::initplayer()
 
 	float playerfric = 5;
 	goblin = CtxName::ctx.OC->CreateEntity(Vector3(0,00,0));
-	goblin.addcomponent<gameobject::StaticComponent>();
-	goblin.addcomponent<estate>(30,true);
+
+	goblin.addcomponent<estate>(10,true);
 	goblin.transform().scale = unitv / 2;
 	
 	goblin.addcomponent<inventory>();
@@ -42,7 +42,7 @@ void player::initplayer()
 
 	goblin.addcomponent<playerattackcomp>();
 	goblin.addcomponent<playerdaggercomp>();
-	
+	goblin.addcomponent<gameobject::StaticComponent>();
 
 	goblin.addcomponent<CameraComp>();
 	goblin.addcomponent<playermovement>();

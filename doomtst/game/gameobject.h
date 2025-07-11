@@ -139,7 +139,7 @@ namespace gameobject {
 		bool has_component();
 		bool has_component(comp::Id ind);
 		bool has_components(bitset::bitset set);
-		void add(obj object) {
+		void add(obj& object) {
 			EntityMetadata& met = object.meta();
 			if (met.arch!=nullptr)
 			{
@@ -149,7 +149,7 @@ namespace gameobject {
 			met.arch = this;
 			met.arch_ind = elems.length - 1;
 		}
-		void remove(obj object) {
+		void remove( obj& object) {
 			EntityMetadata& met = object.meta();
 
 			if (this != met.arch) {
@@ -164,9 +164,22 @@ namespace gameobject {
 				moved.meta().arch_ind = index;
 				std::swap(elems[index], elems[end_index]);
 			}
-
+			
 			met.arch = nullptr;
 			elems.pop();
+			if (elems.length<100)
+			{
+
+				for (auto& element : elems)
+				{
+
+					if (element.Id == object.Id) {
+						throw std::logic_error("skill");
+					}
+				}
+			}
+
+
 		}
 	
 		Archtype(bitset::bitset st,Ecs* Man) :bit_list(st), OC(Man),elems() {
@@ -174,12 +187,17 @@ namespace gameobject {
 			for (size_t ind = 0; ind < st.bits; ind++) {
 				if (bit_list[ind]) {
 					dense_bits.push(ind);
+				}   
+				for (size_t i = 0; i < st.bits; ++i) {
+					moves[i] = nullptr;
 				}
 			}
 		};
 		Archtype() {
 			OC = nullptr;
-	
+			for (size_t i = 0; i < moves.length; ++i) {
+				moves[i] = nullptr;
+			}
 			bit_list = bitset::None;
 		}
 		
@@ -214,7 +232,15 @@ namespace gameobject {
 		ArchtypeManager(Ecs* man) :OC(man) {
 			archtypes.push(new Archtype(bitset::None, OC));
 		};
-		
+		bool check()  {
+			for (Archtype* arch : archtypes) {
+				if (!arch) continue;
+				if (arch->elems.length == 1 && arch->elems[0].meta().arch != arch) {
+					return true;
+				}
+			}
+			return false;
+		}
 		Archtype& operator[](size_t index) {
 		return *archtypes[index];
 		}
@@ -234,6 +260,12 @@ namespace gameobject {
 
 		void addArchtype(bitset::bitset Components) {
 
+			check();
+			for (Archtype* arch : archtypes) {
+				if (arch->bit_list == Components) {
+					throw std::logic_error("cannot have duplicate archtypes in ecs");
+				}
+			}
 			archtypes.push(new Archtype(Components, OC));
 			for (auto& arch : archtypes)
 			{
@@ -251,9 +283,13 @@ namespace gameobject {
 					}
 				}
 			}
+
+			check();
 		}
 
-		void moveflipArch(obj object, comp::Id index) {
+		void moveflipArch(obj& object, comp::Id index) {
+
+			check();
 			Archtype* current = object.meta().arch;
 			if (current == nullptr)
 			{
@@ -275,6 +311,19 @@ namespace gameobject {
 			}
 			current->remove(object);
 			new_type->add(object);
+
+			check();
+			if (current->elems.length< 100)
+			{
+
+				for (auto& element : current->elems)
+				{
+
+					if (element.Id == object.Id) {
+						throw std::logic_error("skill");
+					}
+				}
+			}
 		}
 
 		using iterator = typename Cont::array<Archtype*>::iterator;
@@ -431,6 +480,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			//replace with a get components call
 			verify_component<T>();
 
+			OC->arch.check();
 			comp::Id comp_id = OC->comp_map.get<T>();
 
 			auto& complist = OC->managers[comp_id.value].store;
@@ -454,14 +504,18 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		{
 			verify_component<T>();
 
+			arch.check();
 			comp::Id comp_id = comp_map.get<T>();
 			componentStorage& complist = managers[comp_id.value].store;
+
+			arch.check();
 			return (T*)(complist[object.Id.id]);
 
 		}
 		template<class T>
 		T* obj::getcomponentptr()
 		{
+			OC->arch.check();
 			return OC->getcomponentptr<T>(*this);
 		}
 		template <class T>
@@ -474,7 +528,6 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			{
 				throw std::invalid_argument("object does not have requested component");
 			}
-
 			return *ptr;
 
 		}
@@ -482,7 +535,8 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		bool obj::hascomponent()
 		{
 			verify_component<T>();
-			
+
+			OC->arch.check();
 			return meta().arch->has_component(OC->comp_map.get<T>());
 			
 		}
@@ -506,7 +560,8 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 
 			
 			comp->start();
-		
+
+			OC->arch.check();
 			//Assert(complist, "Archtype does not contain needed key");
 			return comp;
 		}
@@ -526,7 +581,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			if (is_new)
 			{
 				arch.expandArchtype();
-				man.create(cmpid, usizeof(T),alignof(T));
+				man.create(cmpid, sizeof(T),alignof(T));
 			
 			}
 			void* mem = man.pool.alloc();
@@ -549,7 +604,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 		}
 		inline bool gameobject::Archtype::has_component(comp::Id index)
 		{
-			if (index.value<bit_list.bits-1)
+			if (index.value<bit_list.bits)
 			{
 				return bit_list.at(index.value);
 			}

@@ -24,11 +24,17 @@ namespace query {
 
 			Iterator& operator++() {
 				entity_index++;
-				auto& arch = owner.archtypes[arch_index];
-				if (entity_index >= arch->elems.length) {
-					entity_index = 0;
+
+				// loop until we find a valid entity in a valid archetype
+				while (arch_index < owner.archtypes.length) {
+					auto& arch = owner.archtypes[arch_index];
+					if (entity_index < arch->elems.length) {
+						break;
+					}
 					arch_index++;
+					entity_index = 0;
 				}
+
 				return *this;
 			}
 
@@ -39,6 +45,10 @@ namespace query {
 				return !(*this == other);
 			}
 			auto operator*() {
+				if (
+					owner.archtypes[arch_index]->elems.length == 0) {
+					throw std::out_of_range("Invalid dereference: View is empty or index out of range.");
+				}
 				auto arch = owner.archtypes[arch_index];
 				size_t entity_id = arch->elems[entity_index].Id.id;
 				return std::tuple<Components*...>{owner.ecs->getcomponentptr<Components>(arch->elems[entity_index])... };
@@ -46,7 +56,15 @@ namespace query {
 		};
 
 		Iterator begin() {
-			return Iterator(*this, 0, 0);
+			Iterator it(*this, 0, 0);
+
+			// Skip empty archetypes at the beginning
+			while (it.arch_index < archtypes.length &&
+				archtypes[it.arch_index]->elems.length == 0) {
+				++it.arch_index;
+			}
+
+			return it;
 		}
 		Iterator end() {
 			return Iterator(*this, 0, archtypes.length);

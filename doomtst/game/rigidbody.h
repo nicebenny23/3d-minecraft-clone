@@ -79,21 +79,8 @@ struct rigidbody : gameobject::component {
 struct RigidbodySystem :System {
 
     void run(gameobject::Ecs* ecs) override {
-        int l = 6;
-        query::View<rigidbody, gameobject::transform_comp> rigids(ecs);
-        for (auto [body, pos] : rigids) {
-            body->calculateonground();
-            body->applyGravity();
-            body->integrate();
-            body->unsetpositon = pos->transform.position;
-        }
 
-    }
-
-};
-struct RigidbodySystem :System {
-
-    void run(gameobject::Ecs* ecs) override {
+ecs->arch.check();
         int l = 6;
         query::View<rigidbody, gameobject::transform_comp> rigids(ecs);
         for (auto [body, pos] : rigids) {

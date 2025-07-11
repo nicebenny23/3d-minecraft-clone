@@ -38,7 +38,7 @@ struct playerbreak: gameobject::component
 		{
 			return false;
 		}
-		debug(float( Hit.collider->owner.getcomponent<blockname::block>().id));
+	
 		if (!inrange(Hit.Dist(), interactminrange, interactmaxrange))
 		{
 			return false;

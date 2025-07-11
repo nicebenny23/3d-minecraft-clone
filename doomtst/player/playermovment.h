@@ -22,7 +22,7 @@ struct playermovement: gameobject::component
         Vector3& pos = owner.transform().position;
         float slowdown = 2;
         Vector3& velocity = owner.getcomponent<rigidbody>().velocity;
-        float speed = 160;
+        float speed = 16;
         float effectivespeed = (CtxName::ctx.Time->dt * speed) * slowdown;
         Vector3 fv =normal( Vector3(camera::GetCamFront().x, 0, camera::GetCamFront().z));
         Vector3 rv =normal( Vector3(camera::GetCamRight().x, 0, camera::GetCamRight().z));

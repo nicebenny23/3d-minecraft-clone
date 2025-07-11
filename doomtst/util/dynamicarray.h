@@ -364,6 +364,7 @@ constexpr array() noexcept;
 			throw std::logic_error("Cannot pop empty array");
 		}
 		T store = list[length - 1];
+	
 		length -= 1;
 		return store;
 

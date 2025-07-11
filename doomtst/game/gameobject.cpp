@@ -75,6 +75,7 @@ EntityMetadata& gameobject::obj::meta()
 	{
 		throw std::logic_error("Cannot acess entity, It has been deleted");
 	}
+
 	return met;
 
 }
@@ -145,6 +146,7 @@ void gameobject::Ecs::updatecomponents(updatecalltype type)
 
 	array<componentmanager*> managerref;
 
+	arch.check();
 	for (int i = 0; i < managers.length; i++)
 	{
 		
@@ -156,18 +158,6 @@ void gameobject::Ecs::updatecomponents(updatecalltype type)
 		
 
 	}
-	debug(managerref.length);
-	for (componentmanager* man : managerref)
-	{
-	
-		if (man == nullptr) {
-			throw std::logic_error("skill issue");
-		}
-		else {
-			debug(man->priority);
-		
-		}
-	}
 	if (managerref.length != 0)
 	{
 
@@ -176,25 +166,25 @@ void gameobject::Ecs::updatecomponents(updatecalltype type)
 			return a->priority > b->priority;
 			});
 	}
-	for (int j = 0; j < managerref.length; j++)
-	{
-		
-		componentmanager* manager = managerref[j];
-		for (Archtype* arch : arch.archtypes)
-		{
+	for (componentmanager* mgr : managerref) {
+		for (Archtype* archtype : arch.archtypes) {
+			
+			if (!archtype->has_component(mgr->id)) continue;
 
-			if (arch->has_component(manager->id))
-			{
-				
-				for (obj comps : arch->elems)
+			// 1) Snapshot the count _once_
+			size_t originalCount = archtype->elems.length;
+
+			// 2) Index by integer, not range-for
+			for (size_t i = 0; i < originalCount; ++i) {
+				obj   o = archtype->elems[i];           // read by value
+				auto* c = (component*)mgr->store[o.Id.id];
+				c->update();  
+				if (archtype !=o.meta().arch)
 				{
-					component* comp = manager->store[comps.Id.id];
-
-					
-						comp->update();
-					
-
+					int l = 1;
 				}
+				c->update();
+				// safe to move/ remove here
 			}
 		}
 	}
@@ -210,6 +200,8 @@ obj gameobject::Ecs::CreateEntity(v3::Vector3 SpawnPos)
 	InitObj(object);
 	object.addcomponent<transform_comp>()->transform.position = SpawnPos;
 	return object;
+
+	arch.check();
 }
 
 
