@@ -25,7 +25,14 @@
 #include "../debugger/console.h"
 #include "../items/menu.h"
 #include "Core.h"
+#include "rigidbody.h"
+#include "../game/System.h"
 #pragma once 
+struct IAmAPrinter:System {
+    void run(gameobject::Ecs* ecs) override {
+        
+    }
+};
 void endframe() {
     CtxName::ctx.Inp->endupdate();
     updateltick();
@@ -33,6 +40,7 @@ void endframe() {
     glfwPollEvents();
     CtxName::ctx.Ren->Clear();
 
+ 
     CtxName::ctx.OC->commands.pop();
 }
 void startframe() {
@@ -44,10 +52,11 @@ void startframe() {
 
 }
 
+SystemExecutor executive = SystemExecutor();
 void updateworld() {
 
     
-    
+    executive.Run();
     collision::update();
     CtxName::ctx.OC->updatecomponents(gameobject::Framecall);
 gridutil::gridupdate();
@@ -64,7 +73,7 @@ void deleteolddata() {
     std::string o1 = std::string("C:/Users/bchar/source/repos/doomtst/doomtst/worldstorage");
 
     std::string o2 = std::string("C:/Users/User/source/repos/nicebenny23/3d-minecraft-clone/doomtst/worldstorage");
-    deleteFilesInFolder(o1);
+    deleteFilesInFolder(o2);
 
 }
 void init() {
@@ -99,8 +108,10 @@ void endgame() {
 void rungame()
 {
     init();
-    
-    float lastupdate = 0;
+     executive = SystemExecutor(CtxName::ctx.OC);
+     executive.push(new IAmAPrinter());
+     executive.push(new RigidbodySystem());
+     float lastupdate = 0;
     while (!CtxName::ctx.Window->shouldClose())
     {
         

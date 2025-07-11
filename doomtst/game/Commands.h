@@ -13,17 +13,17 @@ struct Command {
 	
 }; 
 using ApplyFn = void (*)(Command*, gameobject::Ecs*);
-/*struct CommandPool {
+struct CommandPool {
 	dynPool::flux<Command> store;
 	Cont::queue<Command*> queue;
 	ApplyFn CommandFunc;
-	void apply(gameobject::ecs* World) {
+	void apply(gameobject::Ecs* World) {
 		
 		while (!queue.empty())
 		{
 			Command* cmd = queue.pop();
 			CommandFunc(cmd,World);
-			cmd->~Command();
+
 			store.free(cmd);
 		}
 
@@ -31,7 +31,6 @@ using ApplyFn = void (*)(Command*, gameobject::Ecs*);
 	}
 
 };
-*/
 struct CommandBuffer {
 	Cont::array<dynPool::flux<Command>> store;
 	Cont::array<Cont::queue<Command*>> buffer;

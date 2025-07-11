@@ -7,34 +7,25 @@ namespace query {
 
 	template<typename... Components>
 	struct ArchFilter {
-		bitset::bitset bitlist;
-		gameobject::Ecs* manager;
-		ArchFilter(gameobject::Ecs* ecs) : manager(ecs) {
-			auto positions = manager->comp_map.get_type_ids<Components...>();
-			bitlist.resize(manager->managers.length);
-			for (auto id : positions) {
-				bitlist.set(id.value);
-			}
-		}
-
 	};
 
 
 	template<typename... Components>
 	struct View {
-		Cont::array<gameobject::Archtype*> archetypes;
+		Cont::array<gameobject::Archtype*> archtypes;
 		gameobject::Ecs* ecs;
 		struct Iterator {
+			View& owner;
 			size_t entity_index;
 			size_t arch_index;
-			Iterator(array<gameobject::Archtype>& arch, size_t ent_index = 0)
-				: arch_index(arch), entity_index(ent_index) {
+			Iterator(View& vw, size_t ent_index = 0,size_t ArchIndex=0)
+				:owner(vw), arch_index(ArchIndex), entity_index(ent_index) {
 			}
 
 			Iterator& operator++() {
 				entity_index++;
-				auto& arch = ecs->arch[arch_index.arch_index];
-				if (entity_index >= arch.elems.length) {
+				auto& arch = owner.archtypes[arch_index];
+				if (entity_index >= arch->elems.length) {
 					entity_index = 0;
 					arch_index++;
 				}
@@ -48,21 +39,34 @@ namespace query {
 				return !(*this == other);
 			}
 			auto operator*() {
-				auto& arch = arch[arch_index];
-				size_t entity_id = arch.elems[entity_index].Id.id;
-				return std::tuple<Components*...>{ecs->getcomponentptr<Components>(arch.elems[entity_index])... };
+				auto arch = owner.archtypes[arch_index];
+				size_t entity_id = arch->elems[entity_index].Id.id;
+				return std::tuple<Components*...>{owner.ecs->getcomponentptr<Components>(arch->elems[entity_index])... };
 			}
 		};
 
-		Iterator begin();
-		Iterator end();
-		View(ArchFilter<Components...> filter, gameobject::Ecs* ecs) {
+		Iterator begin() {
+			return Iterator(*this, 0, 0);
+		}
+		Iterator end() {
+			return Iterator(*this, 0, archtypes.length);
+		}
+		View(gameobject::Ecs* world):ecs(world) {
+			auto positions = ecs->comp_map.get_type_ids<Components...>();
+			
+			bitset::bitset bitlist;
+			bitlist.resize(ecs->comp_map.size());
+			for (auto id : positions) {
+				bitlist.set(id.value);
+			}
 			Cont::array<gameobject::Archtype*> result;
 			for (auto& arch : ecs->arch) {
-				if (arch.has_components(filter.bitlist)) {
-					result.push(&arch);
+				if (arch->has_components(bitlist)) {
+					result.push(arch);
 				}
 			}
+			archtypes = result;
+		
 		}
 	};
 	

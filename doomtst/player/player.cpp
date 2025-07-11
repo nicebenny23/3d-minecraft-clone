@@ -37,7 +37,8 @@ void player::initplayer()
 	
 	goblin.addcomponent< playerbreak>();
 	goblin.addcomponent< playerplace>();
-	
+
+	goblin.addcomponent<player_tag>();
 
 	goblin.addcomponent<playerattackcomp>();
 	goblin.addcomponent<playerdaggercomp>();

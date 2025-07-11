@@ -1,6 +1,8 @@
 #include <iostream>
 #include "../renderer/Window.h"
-#include <process.h>  // For _beginthread
+#include <process.h>
+#include "console.h"
+#include "../util/dynamicarray.h"// For _beginthread
 #include <cstdlib>
 #include <csignal>
 #pragma once 
@@ -9,11 +11,6 @@ constexpr bool debuggeneral = true;
 constexpr bool debugrender = false;
 constexpr bool generateflat = false;
 constexpr bool debugnodeath = false;
-
-#define debug(msg) std::cout << 'w' << (msg )<< '\n';
-
-#define warn(msg) std::cout << 'y' <<( msg )<< '\n';
-#define alert(msg) std::cout << 'r' << (msg )<< '\n';
 void ShowAssertMessageBox(void* lpParam);
 
 

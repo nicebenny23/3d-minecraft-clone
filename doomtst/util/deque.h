@@ -113,7 +113,7 @@ namespace Cont {
 	template<typename T>
 	void deque<T>::push_front(const T& val)
 	{
-		assert_valid();
+	
 		if (full()) {
 			resize();
 		}
@@ -123,13 +123,12 @@ namespace Cont {
 		
 		list[front] = val;
 		length++;
-		assert_valid();
+	
 	}
 
 	template<typename T>
 	void deque<T>::push_back(const T& val)
 	{
-		assert_valid();
 		if (full())
 			resize();
 
@@ -139,7 +138,7 @@ namespace Cont {
 	
 		list[back] = val;
 		length++;
-		assert_valid();
+	
 	}
 
 	template<typename T>
@@ -161,7 +160,7 @@ namespace Cont {
 		back = (length == 0) ? 0 : length - 1;
 		list = newlist;
 		capacity = new_size;
-		assert_valid();
+
 	}
 
 
@@ -170,7 +169,7 @@ namespace Cont {
 	template<typename T>
 	T deque<T>::pop_front()
 	{
-		assert_valid();
+		
 		if (empty())
 		{
 			throw std::out_of_range("Queue is empty");
@@ -184,14 +183,14 @@ namespace Cont {
 		
 		}
 
-		assert_valid();
+		
 		return val;
 	}
 
 	template<typename T>
 	T deque<T>::pop_back()
 	{
-		assert_valid();
+	
 		if (empty())
 			throw std::out_of_range("Queue is empty");
 
@@ -202,7 +201,7 @@ namespace Cont {
 		{
 			dec_index(back);
 		}
-		assert_valid();
+		
 
 		return val;
 	}

@@ -254,12 +254,14 @@
     <ClInclude Include="game\Commands.h" />
     <ClInclude Include="game\compid.h" />
     <ClInclude Include="game\entityutil.h" />
+    <ClInclude Include="game\Event.h" />
     <ClInclude Include="game\game.h" />
     <ClInclude Include="game\Core.h" />
     <ClInclude Include="game\GameContext.h" />
     <ClInclude Include="game\navigation.h" />
     <ClInclude Include="game\query.h" />
     <ClInclude Include="game\Settings.h" />
+    <ClInclude Include="game\System.h" />
     <ClInclude Include="game\TagIndex.h" />
     <ClInclude Include="game\transform.h" />
     <ClInclude Include="game\wormobj.h" />

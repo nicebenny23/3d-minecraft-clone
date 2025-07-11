@@ -1,39 +1,60 @@
-
-#include <iostream>
-#include "../game/Settings.h"
-#include "../util/vector3.h"
-#include "../imgui/imgui.h"
-#include "../imgui/imgui_impl_glfw.h"
-#include "../imgui/imgui_impl_opengl3.h"
-
-#include <string>
-#include "../util/dynamicarray.h"
+// console.h
 #pragma once
 
+#include <array>
+#include <string>
+#include <atomic>
+#include <format>
+#include "../imgui/imgui.h"
+#include <sstream>
 namespace console {
 
-    class ImGuiStreamBuf : public std::streambuf {
-    public:
-        ImGuiStreamBuf();
+    // Log severity levels
+    enum class LogLevel { Info, Warning, Error };
 
-        Cont::array<std::string, true> log;
-        int sync() override;
-        
-    protected:
-        // Override overflow to handle direct appending of text to log
-        int overflow(int c) override;
-      
-
-    private:       
-        static const int buffer_size = 12; // Buffer size, can adjust
-           char* buffer ;
-           std::string current_line;
-       
+    // Single log entry
+    struct LogEntry {
+        LogLevel level;
+        std::string text;
     };
-    // 6. Create UI Elements
-    void renderconsole();
-    void CreateConsoleBuffer();
-    void consoleendloop();
-    extern ImGuiStreamBuf imgui_stream_buf;
-}
+
+    // Console singleton: fixed-size ring buffer
+    class Console {
+    public:
+        static constexpr int MaxEntries = 1024;
+
+        static Console& Instance();
+
+        // Log a simple message
+        void Log(LogLevel level, std::string&& message);
+
+        // Clear all entries
+        void Clear();
+
+        // Render the console UI (call each frame)
+        void Render();
+
+        // Disable copy
+        Console(const Console&) = delete;
+        Console& operator=(const Console&) = delete;
+
+    private:
+        Console() = default;
+        ~Console() = default;
+
+        std::array<LogEntry, MaxEntries> buffer_;
+        std::atomic<int> head_{ 0 };  
+        std::atomic<int> count_{ 0 };     // Number of valid entries
+        ImGuiTextFilter filter_;        // For filtering displayed lines
+    };
+
+} // namespace console
+
+// Macros for logging with file/line info and formatting
+#define debug(...) do { std::stringstream ss{}; ss << __VA_ARGS__; \
+    console::Console::Instance().Log(console::LogLevel::Info, ss.str()); } while (0)
+#define warn(...) do { std::stringstream ss{}; ss << __VA_ARGS__; \
+    console::Console::Instance().Log(console::LogLevel::Warning, ss.str()); } while (0)
+#define alert(...) do { std::stringstream ss{}; ss << __VA_ARGS__; \
+    console::Console::Instance().Log(console::LogLevel::Error, ss.str()); } while (0)
 

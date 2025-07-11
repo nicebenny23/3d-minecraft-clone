@@ -6,6 +6,7 @@
 #include "../game/objecthelper.h"
 #include "../util/geometry.h"
 #include "../world/voxeltraversal.h"
+#include "System.h"
 
 using namespace v3;
 #pragma once 
@@ -43,15 +44,6 @@ struct rigidbody : gameobject::component {
         priority = -111;
     }
 
-    // Update function called every frame
-    void update() {
-        calculateonground();
-    
-            applyGravity();
-
-        integrate();
-        unsetpositon = owner.transform().position;
-    }
 
     // Apply gravity to the rigidbody
     void applyGravity() {
@@ -83,4 +75,34 @@ struct rigidbody : gameobject::component {
     }
 
   
+};
+struct RigidbodySystem :System {
+
+    void run(gameobject::Ecs* ecs) override {
+        int l = 6;
+        query::View<rigidbody, gameobject::transform_comp> rigids(ecs);
+        for (auto [body, pos] : rigids) {
+            body->calculateonground();
+            body->applyGravity();
+            body->integrate();
+            body->unsetpositon = pos->transform.position;
+        }
+
+    }
+
+};
+struct RigidbodySystem :System {
+
+    void run(gameobject::Ecs* ecs) override {
+        int l = 6;
+        query::View<rigidbody, gameobject::transform_comp> rigids(ecs);
+        for (auto [body, pos] : rigids) {
+            body->calculateonground();
+            body->applyGravity();
+            body->integrate();
+            body->unsetpositon = pos->transform.position;
+        }
+
+    }
+
 };
