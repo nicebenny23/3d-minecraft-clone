@@ -1,6 +1,9 @@
 #include "guirender.h"
 #include "../game/Core.h"
 #include "../game/GameContext.h"
+#include "../imgui/imgui.h"
+#include "../imgui/imgui_impl_opengl3.h"
+#include "../imgui/imgui_impl_glfw.h"
 namespace guirender {
 
     void initgui()
@@ -13,7 +16,7 @@ namespace guirender {
         
         ImGui_ImplGlfw_InitForOpenGL(CtxName::ctx.Window->WinPtr, true);
         ImGui_ImplOpenGL3_Init("#version 330");
-        console::CreateConsoleBuffer();
+     
     }
     void destroygui()
     {
@@ -28,8 +31,10 @@ namespace guirender {
         ImGui::NewFrame();
 
       
+        // ... your other windows
+        console::Console::Instance().Render();
 
-        console::renderconsole();
+    
         // 7. Render UI
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

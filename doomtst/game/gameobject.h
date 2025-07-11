@@ -11,9 +11,11 @@
 #include "../debugger/debug.h"
 #include "../util/Id.h"
 #include "../util/bitset.h"
+
 #include "../util/pair.h"
 #include "../util/type_index.h"
 #include "Commands.h"
+#include "Event.h"
 #include "../util/dynpool.h"
 namespace GameContext {
 
@@ -177,7 +179,7 @@ namespace gameobject {
 		};
 		Archtype() {
 			OC = nullptr;
-		
+	
 			bit_list = bitset::None;
 		}
 		
@@ -210,21 +212,21 @@ namespace gameobject {
 			OC = nullptr;
 		}
 		ArchtypeManager(Ecs* man) :OC(man) {
-			archtypes.push(Archtype(bitset::None, OC));
+			archtypes.push(new Archtype(bitset::None, OC));
 		};
 		
 		Archtype& operator[](size_t index) {
-		return archtypes[index];
+		return *archtypes[index];
 		}
 		size_t length() {
 			return archtypes.length;
 		}
-		array<Archtype> archtypes; 
+		array<Archtype*> archtypes; 
 		void expandArchtype() {
 
 			for (auto& arch : archtypes)
 			{
-				arch.bit_list.push(false);
+				arch->bit_list.push(false);
 	
 			}
 
@@ -232,10 +234,10 @@ namespace gameobject {
 
 		void addArchtype(bitset::bitset Components) {
 
-			archtypes.push(Archtype(Components, OC));
+			archtypes.push(new Archtype(Components, OC));
 			for (auto& arch : archtypes)
 			{
-				bitset::bitset archxor = Components ^ arch.bit_list;
+				bitset::bitset archxor = Components ^ arch->bit_list;
 				if (archxor.popcount() == 1)
 				{
 					for (size_t j = 0; j < archxor.bits; j++)
@@ -243,8 +245,8 @@ namespace gameobject {
 						if (archxor[j])
 						{
 
-							archtypes[archtypes.length - 1].moves[j] = &arch;
-							arch.moves[j] = &archtypes[archtypes.length - 1];
+							archtypes[archtypes.length - 1]->moves[j] = arch;
+							arch->moves[j] = archtypes[archtypes.length - 1];
 						}
 					}
 				}
@@ -266,12 +268,16 @@ namespace gameobject {
 				new_arch.flip(index.value);
 				addArchtype(new_arch);
 				new_type = current->moves[index.value];
+				if (new_type==nullptr)
+				{
+					throw std::logic_error("Improper archytype allocation");
+				}
 			}
 			current->remove(object);
 			new_type->add(object);
 		}
 
-		using iterator = typename Cont::array<Archtype>::iterator;
+		using iterator = typename Cont::array<Archtype*>::iterator;
 		iterator begin() { return archtypes.begin(); }
 		iterator end() { return archtypes.end(); }
 	private:
@@ -281,6 +287,17 @@ namespace gameobject {
 
 	struct Ecs {
 		CommandBuffer commands;
+		event::EventBus events;
+		template<typename EventType>
+		void Call_Event(const EventType& Event){
+			events.Call<EventType>(Event);
+		}
+		template<typename EventType,typename Listener>
+		void Add_listener() {
+			events.Add_listener<EventType, Listener>();
+		}
+
+
 		Ecs(){
 			commands = CommandBuffer(this);
 			arch = ArchtypeManager(this);
@@ -301,8 +318,7 @@ namespace gameobject {
 			ctx = context;
 		}
 		array<EntityMetadata> entitymeta;
-		template<typename Func>
-		void for_each();
+	
 		template<typename T>
 		T* getcomponentptr(obj& object);
 		
@@ -379,6 +395,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 
 			virtual ~component() = default;
 			component() {
+				utype = updatedefault;
 				comp_id = comp::None;
 			};
 			void destroy(); 
@@ -509,7 +526,7 @@ inline 	bool shouldupdate(const updatetype& utype,updatecalltype calltype) {
 			if (is_new)
 			{
 				arch.expandArchtype();
-				man.create(cmpid, sizeof(T),alignof(T));
+				man.create(cmpid, usizeof(T),alignof(T));
 			
 			}
 			void* mem = man.pool.alloc();

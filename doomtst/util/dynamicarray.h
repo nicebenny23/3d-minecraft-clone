@@ -5,7 +5,6 @@
 #include <new>
 #include <cstdlib>
 #include <cstring>
-#include "../debugger/debug.h"
 #include <initializer_list>
 
 namespace Cont {
@@ -21,8 +20,7 @@ namespace Cont {
 	class array {
 	public:
 		
-		// Debugging function to prsize_t the contents of the list (useful for debugging).
-		void debuglist();
+	
 
 
 		bool empty();
@@ -157,14 +155,7 @@ constexpr array() noexcept;
 
 
 
-	template<class T, bool initelems>
-	inline void array<T, initelems >::debuglist()
-	{
-		for (size_t i = 0; i < length; i++)
-		{
-			debug(list[i]);
-		}
-	}
+
 
 	//deletes content of list(not posize_ters!!)
 
@@ -392,33 +383,48 @@ constexpr array() noexcept;
 		if (size > capacity)//so it cant be shrunk
 		{
 
-			void* newlist;
-			if (capacity != 0)
+			T* newlist;
+			if constexpr(std::is_trivially_copyable_v<T>)
 			{
-				//reealloc because it is faster.
-				newlist = realloc((void*)list, sizeof(T) * size);
-			}
-			else
-			{
+				if (capacity==0)
+				{
+					newlist = (T*)malloc(sizeof(T) * size);
+				}
+				else {
+					newlist = (T*)realloc((void*)list, sizeof(T) * size);
+				}
+				if (!newlist) {
+					throw std::bad_alloc();
+				}
 
-				newlist = malloc(sizeof(T) * size);
-			}
-
-			if (!newlist) {
-				throw std::bad_alloc();
-			}
-			list = static_cast<T*>(newlist);
-			//somtimes dont want to init elems so i make it an option to turn it off
-			if (initelems)
-			{
+				list = newlist;
 				for (size_t i = capacity; i < size; i++) {
 
 					new (list + i)T();
 				}
 			}
+			else
+			{
+				newlist = new T[size];
+				if (!newlist) {
+					throw std::bad_alloc();
+				}
+				
+				for (size_t i = 0; i < capacity; i++) {
 
-			//
+					newlist[i] = std::move(list[i]); 
+				
+				}for (size_t i = capacity; i < size; i++) {
+					new (newlist + i) T();
+				}
+				if (capacity!=0)
+				{
 
+					delete[] list;
+				}
+				list = newlist;
+			}
+		
 
 			capacity = size;
 
@@ -447,16 +453,14 @@ constexpr array() noexcept;
 	array<T, initelems>::array(size_t size) {
 
 
+		list= 0;
 		length = 0;
 		capacity = 0;
 		if (0 < size)
 		{
 			resize(size);
 		}
-		else
-		{
-			list = nullptr;
-		}
+		
 
 	}
 
@@ -473,6 +477,8 @@ constexpr array() noexcept;
 	template<class T, bool initelems >
 	inline array<T, initelems>::array(T* arr, size_t size)
 	{
+
+		list = nullptr;
 		length = size;
 		capacity = size;
 		list = new T[size];
@@ -489,8 +495,11 @@ constexpr array() noexcept;
 	template<class T, bool initelems>
 	inline array<T, initelems>::array(std::initializer_list<T> init)
 	{
+		capacity = 0;
+		list = nullptr;
 		length = init.size();
-		resize(init.size);
+		resize(init.size());
+
 		size_t i = 0;
 		for (const auto& val : init) {
 			list[i++] = val;
@@ -506,6 +515,7 @@ constexpr array() noexcept;
 	template<class T, bool initelems>
 	inline array<T, initelems>::array(array&& other) noexcept
 	{
+		
 		length = other.length;
 		capacity = other.capacity;
 		list = other.list;

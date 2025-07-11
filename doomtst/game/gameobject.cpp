@@ -5,7 +5,9 @@
 #include <type_traits>
 #include <algorithm>
 #include "query.h"
-
+#include "../util/random.h"
+#include "../debugger/console.h"
+#include "../player/playermovment.h"
 using namespace gameobject;
 
 
@@ -134,7 +136,7 @@ void gameobject::Ecs::InitObj(obj& object)
 	object.OC = ctx->OC;
 	object.Id.gen= entitymeta[object.Id.id].gen_count;
 
-	arch.archtypes[0].add(object);
+	arch.archtypes[0]->add(object);
 
 }
 
@@ -145,31 +147,46 @@ void gameobject::Ecs::updatecomponents(updatecalltype type)
 
 	for (int i = 0; i < managers.length; i++)
 	{
-
-
+		
 		if (shouldupdate( managers[i].utype,type))
 		{
+			
 		managerref.push(&managers[i]);
 		}
 		
 
 	}
-	std::sort(&managerref[0], &managerref[0]+managerref.length, [](componentmanager* a, componentmanager* b) {
-		return a->priority>b->priority;
-		});
+	debug(managerref.length);
+	for (componentmanager* man : managerref)
+	{
 	
-	
+		if (man == nullptr) {
+			throw std::logic_error("skill issue");
+		}
+		else {
+			debug(man->priority);
+		
+		}
+	}
+	if (managerref.length != 0)
+	{
+
+
+		std::sort(&managerref[0], &managerref[0] + managerref.length, [](componentmanager* a, componentmanager* b) {
+			return a->priority > b->priority;
+			});
+	}
 	for (int j = 0; j < managerref.length; j++)
 	{
+		
 		componentmanager* manager = managerref[j];
-		for (Archtype& arch : arch.archtypes)
+		for (Archtype* arch : arch.archtypes)
 		{
 
-			if (arch.has_component(manager->id))
+			if (arch->has_component(manager->id))
 			{
-
-
-				for (obj comps : arch.elems)
+				
+				for (obj comps : arch->elems)
 				{
 					component* comp = manager->store[comps.Id.id];
 
@@ -215,6 +232,7 @@ void gameobject::componentmanager::create(comp::Id mid, size_t bytesize, size_t 
 
 void gameobject::componentmanager::init(component* sample)
 {
+	
 	priority = sample->priority;
 	utype = sample->utype;
 }

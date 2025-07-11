@@ -4,27 +4,26 @@
 #include "stack.h"
 #include <unordered_map>
 
-struct Edge {
-    Edge() :pred() {
+struct node {
+    node() :pred() {
 
 
     }
-    Edge(const Edge& oth) {
+    node(const node& oth) {
         pred = oth.pred;
     }
     Cont::array<size_t> pred;
-    Edge(const Cont::array<size_t>& preds) :pred(preds) {}
+    node(const Cont::array<size_t>& preds) :pred(preds) {}
 };
 
 struct Dag {
-    Cont::array<Edge> list;
-    Edge& operator[](size_t ind) {
+    Cont::array<node> list;
+    node& operator[](size_t ind) {
         return list[ind];
     }
     size_t length() {
         return list.length;
     }
-
     Dag(const Dag& oth)
         : list(oth.list)
     {
@@ -101,7 +100,7 @@ Cont::array<T> topo_sort(Cont::array<T>& items, GetPredecessors get_predecessors
             nebs[k] = map[preds[k]];
 
         }
-        graph.list.push(Edge(nebs));
+        graph.list.push(node(nebs));
 
     }
     Cont::array<size_t> res = dag_sort_indices(graph);

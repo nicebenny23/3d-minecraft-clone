@@ -13,17 +13,16 @@ struct playermovement: gameobject::component
     Vector3 velocitylast;
     bool prevonground;
     void start() {
-
         prevonground = false;
         velocitylast = zerov;
         priority = 11;
     }float lastgroundy;
-	virtual void update() {
+	 void update() override {
        //owner.transform.position += Vector3(0, 16, 0);
         Vector3& pos = owner.transform().position;
         float slowdown = 2;
         Vector3& velocity = owner.getcomponent<rigidbody>().velocity;
-        float speed = 16;
+        float speed = 160;
         float effectivespeed = (CtxName::ctx.Time->dt * speed) * slowdown;
         Vector3 fv =normal( Vector3(camera::GetCamFront().x, 0, camera::GetCamFront().z));
         Vector3 rv =normal( Vector3(camera::GetCamRight().x, 0, camera::GetCamRight().z));

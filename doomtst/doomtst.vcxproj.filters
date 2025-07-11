@@ -770,6 +770,15 @@
     <ClInclude Include="util\typelist.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game\Event.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\System.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\LinearBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag1.vs" />
