@@ -9,7 +9,7 @@ struct inventorymen :menu
 	Container armor;
 	Container deletecont;
 	recipemanager manager;
-	inventorymen(v2::Vector2 size) {
+	inventorymen(v2::Vec2 size) {
 		menubox = ui::createuielement<uibox>("images\\menutex.png", "MenuBoxTexture", size, v2::zerov, 11);
 		
 		menubox->state.enabled = false;

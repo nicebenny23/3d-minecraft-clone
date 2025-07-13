@@ -41,7 +41,7 @@ enum blocktex {
 using namespace v3;
 #define  unitscale   unitv * 1 / 2.002f
 namespace blockname {
-	const v3::Vector3 blockscale = unitscale * blocksize;
+	const v3::Vec3 blockscale = unitscale * blocksize;
 	enum id
 	{
 		minecraftair = 0,
@@ -97,7 +97,7 @@ namespace blockname {
 			facenum =Dir::Dir3d(num);
 			mesh = owner;
 		}
-		Vector3 center();
+		Vec3 center();
 		void calccameradist();
 
 	};
@@ -115,7 +115,7 @@ namespace blockname {
 			blk = nullptr;
 		}	
 	
-		blockmesh(block* parent,  Vector3 blkscale);
+		blockmesh(block* parent,  Vec3 blkscale);
 		geometry::Box box;
 		block* blk;
 	
@@ -173,7 +173,7 @@ namespace blockname {
 	
 		char mininglevel;
 		bool minedfastwithpick;
-		Vector3 center() {
+		Vec3 center() {
 			return mesh.box.center;
 		}
 		void create(v3::Coord location, int blockid, char  blkattachface, char  blkdirection);

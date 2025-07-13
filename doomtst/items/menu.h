@@ -27,7 +27,7 @@ struct menu
 		menubox = Cptr::cptr<uibox>( nullptr);
 		closeinven = nullptr;
 	};
-	menu(v2::Vector2 size);
+	menu(v2::Vec2 size);
 	virtual void testclick();
 	virtual void custominit();
 };

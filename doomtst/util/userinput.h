@@ -36,9 +36,9 @@ namespace userinput {
 		Cont::array<inputkey, true> keylist;
 
 
-		v2::Vector2 mouseposdt;
-		v2::Vector2 mousepos;
-		v2::Vector2 normedmousepos;
+		v2::Vec2 mouseposdt;
+		v2::Vec2 mousepos;
+		v2::Vec2 normedmousepos;
 		inputkey mouseleft();
 
 		inputkey mouseright();

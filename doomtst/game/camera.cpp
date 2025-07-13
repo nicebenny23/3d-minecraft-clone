@@ -7,15 +7,15 @@
 namespace camera {
 
 	
-	v3::Vector3 GetCamFront()
+	v3::Vec3 GetCamFront()
 	{
 		return GetCam().getnormaldirection();;
 	}
-	v3::Vector3 GetCamUp()
+	v3::Vec3 GetCamUp()
 	{
 		return GetCam().getupdirection();
 	}
-	v3::Vector3 GetCamRight()
+	v3::Vec3 GetCamRight()
 	{
 		return GetCam().getrightdirection();
 	}
@@ -27,7 +27,7 @@ namespace camera {
 		}
 		return  cam->CamTransform;
 	}
-	v3::Vector3 campos() {
+	v3::Vec3 campos() {
 
 		return GetCam().position.glm();
 

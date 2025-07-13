@@ -1,6 +1,8 @@
-
+#include "../game/GameContext.h"
 #include "console.h"
-
+#include "../player/player.h"
+#include <format>
+#include "../player/cameracomp.h"
 namespace console {
 
     Console& Console::Instance() {
@@ -51,11 +53,18 @@ namespace console {
             ImGui::SetScrollHereY(1.0f);
 
         ImGui::EndChild();
-
         ImGui::BeginChild("ConsoleControls", ImVec2(0, 50), true);
+        
         if (ImGui::Button("Clear")) {
             Clear();
         }
+        ImGui::EndChild();
+        ImGui::BeginChild("Debug Info"); 
+        ImGui::Text("Debug");
+        ImGui::Text(std::format("Fps {:.3f}", CtxName::ctx.Time->smooth_fps).c_str());
+        ImGui::Text(std::format("position: {}", player::goblin.getcomponent<gameobject::transform_comp>().transform.position).c_str());
+
+        ImGui::Text(std::format("yaw:{:.3f},pitch:{:.3f}", player::goblin.getcomponent<CameraComp>().CamTransform.yaw, player::goblin.getcomponent<CameraComp>().CamTransform.pitch).c_str());
         ImGui::EndChild();
     }
 

@@ -101,7 +101,7 @@ void menu::customopen()
 
 }
 
-menu::menu(v2::Vector2 size)
+menu::menu(v2::Vec2 size)
 {
 
 	menubox = ui::createuielement<uibox>("images\\menutex.png", "MenuTexture", size,v2::zerov,11);

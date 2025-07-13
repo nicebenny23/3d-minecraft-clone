@@ -13,12 +13,12 @@ const float cubeuv[] = {
 1, 0
 
 };
-const v2::Vector2 offset[] = {
-	v2::Vector2(-1,-1),
-	v2::Vector2(1, -1),
+const v2::Vec2 offset[] = {
+	v2::Vec2(-1,-1),
+	v2::Vec2(1, -1),
 
-v2::Vector2(-1, 1),
-v2::Vector2(1, 1)
+v2::Vec2(-1, 1),
+v2::Vec2(1, 1)
 
 };
 namespace uiboxname {
@@ -39,7 +39,7 @@ namespace uiboxname {
 
 	{
 
-		v2::Vector2 normedpos = CtxName::ctx.Window->FitToAspectRatio(CtxName::ctx.Inp->mousepos);
+		v2::Vec2 normedpos = CtxName::ctx.Window->FitToAspectRatio(CtxName::ctx.Inp->mousepos);
 		normedpos -= box.center;
 		if (abs(normedpos.x) < box.scale.x)
 		{
@@ -85,7 +85,7 @@ namespace uiboxname {
 			CtxName::ctx.Ren->context.Bind(*tex);
 			for (int j = 0; j < 4; j++)
 			{
-				v2::Vector2 pos = box.center + offset[j] * (box.scale);
+				v2::Vec2 pos = box.center + offset[j] * (box.scale);
 				databuf.push(pos.x);
 				databuf.push(pos.y);
 				databuf.push(cubeuv[2 * j]);
@@ -112,7 +112,7 @@ namespace uiboxname {
 	}
 
 
-	uibox::uibox(const char* texloc, const char* TextureName, v2::Vector2 scl, v2::Vector2 position, float boxpriority)
+	uibox::uibox(const char* texloc, const char* TextureName, v2::Vec2 scl, v2::Vec2 position, float boxpriority)
 	{
 		LoadTex(texloc, TextureName);
 		priority = boxpriority;

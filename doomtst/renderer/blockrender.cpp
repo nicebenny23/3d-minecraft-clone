@@ -10,15 +10,15 @@ Cont::array<unsigned int> indicebuffer;
 using namespace grid;
 
 // Predefined vertices for a cube
-const Vector3 vert[] = {
-	Vector3(0, 0, 0), // vertex 0
-	Vector3(1, 0, 0), // vertex 1
-	Vector3(1, 1, 0), // vertex 2
-	Vector3(0, 1, 0), // vertex 3
-	Vector3(0, 0, 1), // vertex 4
-	Vector3(1, 0, 1), // vertex 5
-	Vector3(1, 1, 1), // vertex 6
-	Vector3(0, 1, 1)  // vertex 7
+const Vec3 vert[] = {
+	Vec3(0, 0, 0), // vertex 0
+	Vec3(1, 0, 0), // vertex 1
+	Vec3(1, 1, 0), // vertex 2
+	Vec3(0, 1, 0), // vertex 3
+	Vec3(0, 0, 1), // vertex 4
+	Vec3(1, 0, 1), // vertex 5
+	Vec3(1, 1, 1), // vertex 6
+	Vec3(0, 1, 1)  // vertex 7
 };
 
 // UV coordinates for cube mapping
@@ -40,7 +40,7 @@ bool chunkviewable(Chunk::chunk* chk) {
 	bool srf = false;
 	for (int i = 0; i < 8; i++)
 	{
-		Vector3 vertex = chk->center() + (vert[i] - unitv / 2.f) *float( chunklength);
+		Vec3 vertex = chk->center() + (vert[i] - unitv / 2.f) *float( chunklength);
 		if (dot(vertex - camera::campos(), camera::GetCamFront()) > 0) {
 
 			srf = true;
@@ -56,28 +56,28 @@ bool chunkviewable(Chunk::chunk* chk) {
 }
 
 // Calculate UV coordinates for a face centered at the mesh
-v2::Vector2 facecoordtouv(const face* fce, int ind) {
-	const v3::Vector3& meshscale = fce->mesh->box.scale;
+v2::Vec2 facecoordtouv(const face* fce, int ind) {
+	const v3::Vec3& meshscale = fce->mesh->box.scale;
 	int facetype = fce->facenum.ind() / 2;
-	v2::Vector2 offset;
+	v2::Vec2 offset;
 
 	switch (facetype) {
 	case 0:
-		offset = v2::Vector2(meshscale.z, meshscale.y)/blocksize;
+		offset = v2::Vec2(meshscale.z, meshscale.y)/blocksize;
 		break;
 	case 1:
-		offset = v2::Vector2(meshscale.x, meshscale.z)/blocksize;
+		offset = v2::Vec2(meshscale.x, meshscale.z)/blocksize;
 		break;
 	case 2:
-		offset = v2::Vector2(meshscale.x, meshscale.y)/blocksize;
+		offset = v2::Vec2(meshscale.x, meshscale.y)/blocksize;
 		break;
 	default:
 		Assert("invalid direction");
 		break;
 	}
 
-	v2::Vector2 uvCoord = v2::Vector2(cubeuv[2 * ind], cubeuv[2 * ind + 1]);
-	v2::Vector2 ret = v2::unitv / 2 + offset * ((uvCoord - v2::unitv / 2) * -2);
+	v2::Vec2 uvCoord = v2::Vec2(cubeuv[2 * ind], cubeuv[2 * ind + 1]);
+	v2::Vec2 ret = v2::unitv / 2 + offset * ((uvCoord - v2::unitv / 2) * -2);
 	return ret;
 }
 
@@ -101,8 +101,8 @@ void emitface(const int face, block& torender, array<float>& datbuf, array<unsig
 		if (!torender.mesh.faces[face].covered) {
 			const int baselocation = datbuf.length / 7;
 			const int* uniqueInds = &uniqueindices[4 * face];
-			const Vector3& scale = torender.mesh.box.scale;
-			const Vector3& position = torender.mesh.box.center;
+			const Vec3& scale = torender.mesh.box.scale;
+			const Vec3& position = torender.mesh.box.center;
 
 			// Precompute texture number and lighting
 			const int textureNumber = torender.mesh[face].tex;
@@ -114,11 +114,11 @@ void emitface(const int face, block& torender, array<float>& datbuf, array<unsig
 
 			for (int j = 0; j < 4; j++) {
 				int uniqueind = uniqueInds[j];
-				Vector3 offsetfromcenter = (vert[uniqueind] - unitv / 2) * scale * 2;
-				Vector3 offset = position + offsetfromcenter;
+				Vec3 offsetfromcenter = (vert[uniqueind] - unitv / 2) * scale * 2;
+				Vec3 offset = position + offsetfromcenter;
 
 				// Calculate UV coordinates
-				v2::Vector2 coords = facecoordtouv(&torender[face], j);
+				v2::Vec2 coords = facecoordtouv(&torender[face], j);
 
 				// Fill vertex data
 				int baseIndex = j * 7;
@@ -158,7 +158,7 @@ void recreatechunkmesh(Chunk::chunk* aschunk) {
 	aschunk->mesh->facebuf.destroy();
 	aschunk->mesh->facebuf = Cont::array<face>();
 	Cont::array<unsigned int> indbuf = Cont::array<unsigned int>();
-	Cont::array<float> datbuf= Cont::array<float>(0);
+	Cont::array<float> datbuf= Cont::array<float>();
 
 	
 	for (int ind = 0; ind < chunksize; ind++) {

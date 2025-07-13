@@ -5,7 +5,7 @@
 
 inline void ropeinit(blockname::block* blk) {
 	blk->mesh.setfaces(ropetex, ropetex, ropetex, ropetex, ropetex, ropetex);
-	blk->mesh.box.scale = v3::Vector3(1 / 8.f, .5f, 1 / 8.f);
+	blk->mesh.box.scale = v3::Vec3(1 / 8.f, .5f, 1 / 8.f);
 	blk->attributes.solid = true;
 	blk->attributes.transparent = true;
 	blk->emitedlight = 0;

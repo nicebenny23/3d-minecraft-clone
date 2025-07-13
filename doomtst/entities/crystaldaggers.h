@@ -10,7 +10,7 @@
 #include "../items/loottable.h"
 #include "rotatetovelocity.h"
 #pragma once 
-inline gameobject::obj spawndagger(v3::Vector3 pos,v3::Vector3 velocity,float gravscale=.4f) {
+inline gameobject::obj spawndagger(v3::Vec3 pos,v3::Vec3 velocity,float gravscale=.4f) {
 
     gameobject::obj refmodel = CtxName::ctx.OC->CreateEntity(pos);
   refmodel.addcomponent<model>()->add("objs\\crystaldagger.obj", "images\\crystaldagger.png");

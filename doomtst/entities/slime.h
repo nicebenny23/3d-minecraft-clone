@@ -25,10 +25,10 @@ struct slimemove : gameobject::component {
 
 
         timesincejump -= CtxName::ctx.Time->dt;
-        Vector3 pos = owner.transform().position;
-        v3::Vector3 headed = owner.getcomponent<navigator>().headed;
+        Vec3 pos = owner.transform().position;
+        v3::Vec3 headed = owner.getcomponent<navigator>().headed;
         
-            v3::Vector3 gotopos = headed - pos;
+            v3::Vec3 gotopos = headed - pos;
             if (gotopos!=zerov)
             {
 
@@ -58,7 +58,7 @@ struct slimemove : gameobject::component {
     }
 };
 
-inline gameobject::obj createslime(v3::Vector3 pos,bool type) {
+inline gameobject::obj createslime(v3::Vec3 pos,bool type) {
 
     gameobject::obj refmodel = CtxName::ctx.OC->CreateEntity(pos);
    

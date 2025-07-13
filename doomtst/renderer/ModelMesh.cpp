@@ -21,18 +21,18 @@ ModelMesh::ModelMesh()
 {	transform = Transform();
 }
 
-Vector3 ModelMesh::nthvertex(int i)
+Vec3 ModelMesh::nthvertex(int i)
 {
 
 	return vertices[vertexindices[i] - 1];
 }
 
-v2::Vector2 ModelMesh::nthtex(int i)
+v2::Vec2 ModelMesh::nthtex(int i)
 {
 	return texcoords[texindices[i] - 1];
 }
 
-ModelMesh* ModelMeshName::loadmesh(const char* name, Texture2D* TEX, Vector3 position)
+ModelMesh* ModelMeshName::loadmesh(const char* name, Texture2D* TEX, Vec3 position)
 {
 
 	ModelMesh* newmesh = new ModelMesh();
@@ -50,12 +50,12 @@ ModelMesh* ModelMeshName::loadmesh(const char* name, Texture2D* TEX, Vector3 pos
 			break;
 		}
 		if (strcmp(header, "v") == 0) {
-			Vector3 vertex;
+			Vec3 vertex;
 			meshfile.fscanf(3, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
 			newmesh->vertices.push(vertex);
 		}
 		if (strcmp(header, "vt") == 0) {
-			v2::Vector2 texcoord;
+			v2::Vec2 texcoord;
 			meshfile.fscanf(2,"%f %f\n", &texcoord.x, &texcoord.y);
 		
 			newmesh->texcoords.push(texcoord);
@@ -92,8 +92,8 @@ void ModelMeshName::rendermesh(ModelMesh* torender)
 
 	for (int i = 0; i < torender->vertexindices.length; i++)
 	{
-		Vector3 vertex = torender->nthvertex(i);
-		v2::Vector2 Texture2D = torender->nthtex(i);
+		Vec3 vertex = torender->nthvertex(i);
+		v2::Vec2 Texture2D = torender->nthtex(i);
 
 		databuf.push(vertex.x);
 		databuf.push(vertex.y);

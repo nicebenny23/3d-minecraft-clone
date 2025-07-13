@@ -96,7 +96,7 @@ namespace Dir {
 		front2d = 4,
 		back2d = 5,
 	};
-	inline Dir3d Align(v3::Vector3 point) {
+	inline Dir3d Align(v3::Vec3 point) {
 
 
 		float max = Max(abs(point.x), abs(point.y), abs(point.z));
@@ -115,7 +115,7 @@ namespace Dir {
 		}
 return Dir3d(static_cast<char>(ind));
 	}
-	inline int max2ddirection(v3::Vector3 point) {
+	inline int max2ddirection(v3::Vec3 point) {
 
 
 		float max = Max(abs(point.x), abs(point.z));

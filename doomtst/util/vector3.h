@@ -1,11 +1,11 @@
-
+#include <format>
 #include "mathutil.h"
 #include "vector2.h"
 #include <glm/glm.hpp>
 #pragma once
 namespace v3 {
 	
-	struct Vector3;
+	struct Vec3;
 	struct Coord
 	{
 		
@@ -32,10 +32,10 @@ namespace v3 {
 		int y;
 		int z;
 
-		Vector3 operator+(const Vector3& p1) const;
-		Vector3 operator-(const Vector3& p1) const;
+		Vec3 operator+(const Vec3& p1) const;
+		Vec3 operator-(const Vec3& p1) const;
 	
-		explicit Coord(const Vector3& p1);
+		explicit Coord(const Vec3& p1);
 		
 	};
 
@@ -146,35 +146,35 @@ namespace v3 {
 
 
 
-	struct Vector3
+	struct Vec3
 	{
 		
 		glm::vec3 glm();
-		Vector3(float X, float Y,float Z);
-		Vector3(glm::vec3 glm);
-		Vector3(Coord coord);
-		Vector3();
-		void operator=(const Vector3& p1);
-		bool operator==(const Vector3& p1);
+		Vec3(float X, float Y,float Z);
+		Vec3(glm::vec3 glm);
+		Vec3(Coord coord);
+		Vec3();
+		void operator=(const Vec3& p1);
+		bool operator==(const Vec3& p1);
 		void operator=(const Coord& p1);
 		
-		bool operator!=(const Vector3& p1);
-		Vector3& operator+=(const Vector3& p1);
-		Vector3 operator+(const Vector3& p1) const;
-		Vector3 operator+(const Coord& p1) const;
-		Vector3& operator-=(const Vector3& p1);
-		Vector3 operator-(const Vector3& p1) const;
-		Vector3 operator*(const Vector3& scale) const;
-		Vector3 operator*(float scale) const;
-		Vector3& operator*=(float scale);
+		bool operator!=(const Vec3& p1);
+		Vec3& operator+=(const Vec3& p1);
+		Vec3 operator+(const Vec3& p1) const;
+		Vec3 operator+(const Coord& p1) const;
+		Vec3& operator-=(const Vec3& p1);
+		Vec3 operator-(const Vec3& p1) const;
+		Vec3 operator*(const Vec3& scale) const;
+		Vec3 operator*(float scale) const;
+		Vec3& operator*=(float scale);
 		float& operator[](size_t index);
-		v2::Vector2 xy() const;
-		v2::Vector2 xz() const;
-		v2::Vector2 yz() const;
+		v2::Vec2 xy() const;
+		v2::Vec2 xz() const;
+		v2::Vec2 yz() const;
 	
-		Vector3 operator/(float scale) const;
+		Vec3 operator/(float scale) const;
 
-		Vector3& operator/=(float scale);
+		Vec3& operator/=(float scale);
 
 		
 
@@ -185,48 +185,48 @@ namespace v3 {
 
 	};
 
-	const  Vector3 zerov = Vector3(0, 0,0);
-	const  Vector3 unitv = Vector3(1, 1,1);
-	const Vector3 right = Vector3(1, 0, 0);
+	const  Vec3 zerov = Vec3(0, 0,0);
+	const  Vec3 unitv = Vec3(1, 1,1);
+	const Vec3 right = Vec3(1, 0, 0);
 
-	const Vector3 up = Vector3(0, 1, 0);
+	const Vec3 up = Vec3(0, 1, 0);
 
-	const Vector3 forward = Vector3(0, 0, 1);
-	inline v2::Vector2 Vector3::xy() const {
+	const Vec3 forward = Vec3(0, 0, 1);
+	inline v2::Vec2 Vec3::xy() const {
 
-		return v2::Vector2(x, y);
+		return v2::Vec2(x, y);
 	}
-	inline v2::Vector2 Vector3::xz() const{
+	inline v2::Vec2 Vec3::xz() const{
 
-		return v2::Vector2(x,z);
+		return v2::Vec2(x,z);
 	}
 
-	inline v2::Vector2 Vector3::yz() const {
+	inline v2::Vec2 Vec3::yz() const {
 		
-		return v2::Vector2(y, z);
+		return v2::Vec2(y, z);
 	}
 
 
-	inline Vector3::Vector3() {
+	inline Vec3::Vec3() {
 		x = 0;
 		y = 0;
 		z = 0;
 	}
 
-	inline Vector3::Vector3(float X, float Y, float Z) {
+	inline Vec3::Vec3(float X, float Y, float Z) {
 
 		x = X;
 		y = Y;
 		z = Z;
 	}
-	inline Vector3::Vector3(glm::vec3 glm)
+	inline Vec3::Vec3(glm::vec3 glm)
 	{
 		x = glm.x;
 		y = glm.y;
 		z = glm.z;
 
 	}
-	inline Vector3::Vector3(Coord coord)
+	inline Vec3::Vec3(Coord coord)
 	{
 		x = coord.x;
 		y = coord.y;
@@ -234,13 +234,13 @@ namespace v3 {
 	}
 
 
-	inline Vector3 vec(Coord coord) {
-		return Vector3(float(coord.x), float(coord.y),float( coord.z));
+	inline Vec3 vec(Coord coord) {
+		return Vec3(float(coord.x), float(coord.y),float( coord.z));
 
 	}
 
 
-	inline void Vector3::operator=(const Vector3& p1) {
+	inline void Vec3::operator=(const Vec3& p1) {
 
 		x = p1.x;
 		y = p1.y;
@@ -251,18 +251,18 @@ namespace v3 {
 
 
 
-	inline Vector3 Vector3::operator+(const Vector3& p1) const {
+	inline Vec3 Vec3::operator+(const Vec3& p1) const {
 
 
-		return Vector3(x + p1.x, y + p1.y,z+p1.z);
+		return Vec3(x + p1.x, y + p1.y,z+p1.z);
 
 
 	}
-	inline Vector3 Vector3::operator+(const Coord& p1) const
+	inline Vec3 Vec3::operator+(const Coord& p1) const
 	{
-		return Vector3(x + p1.x, y + p1.y, z + p1.z);
+		return Vec3(x + p1.x, y + p1.y, z + p1.z);
 	}
-	inline Vector3& Vector3::operator+=(const Vector3& p1) {
+	inline Vec3& Vec3::operator+=(const Vec3& p1) {
 
 
 		x += p1.x;
@@ -276,20 +276,20 @@ namespace v3 {
 
 
 
-	inline Vector3 Vector3::operator-(const Vector3& p1) const {
+	inline Vec3 Vec3::operator-(const Vec3& p1) const {
 
 
-		return Vector3(x - p1.x, y - p1.y,z-p1.z);
+		return Vec3(x - p1.x, y - p1.y,z-p1.z);
 
 
 	}
 	//pointwise scales by the vector
-	inline Vector3 Vector3::operator*(const Vector3& scale) const
+	inline Vec3 Vec3::operator*(const Vec3& scale) const
 	{
 		
-		return Vector3(x*scale.x,y*scale.y,z*scale.z);
+		return Vec3(x*scale.x,y*scale.y,z*scale.z);
 	}
-	inline Vector3& Vector3::operator-=(const Vector3& p1) {
+	inline Vec3& Vec3::operator-=(const Vec3& p1) {
 
 
 		x -= p1.x;
@@ -299,15 +299,15 @@ namespace v3 {
 
 	}
 
-	inline Vector3 Vector3::operator*(float scale) const {
+	inline Vec3 Vec3::operator*(float scale) const {
 
-		return Vector3(x * scale, y * scale,z*scale);
+		return Vec3(x * scale, y * scale,z*scale);
 
 
 
 	}
 
-	inline Vector3& Vector3::operator*=(float scale) {
+	inline Vec3& Vec3::operator*=(float scale) {
 
 
 		x *= scale;
@@ -316,7 +316,7 @@ namespace v3 {
 		return *this;
 
 	}
-	inline float& Vector3::operator[](size_t index) 
+	inline float& Vec3::operator[](size_t index) 
 	{
 		switch (index) {
 		case 0:
@@ -329,15 +329,15 @@ namespace v3 {
 			return z;
 			break;
 		default:
-			throw std::invalid_argument(std::string(index + " is not a valid index for a Vector3"));
+			throw std::invalid_argument(std::string(index + " is not a valid index for a Vec3"));
 		}
 	}
-	inline Vector3 Vector3::operator/(float scale) const {
+	inline Vec3 Vec3::operator/(float scale) const {
 
-		return Vector3(x / scale, y / scale,z/scale);
+		return Vec3(x / scale, y / scale,z/scale);
 	}
 
-	inline Vector3& Vector3::operator/=(float scale) {
+	inline Vec3& Vec3::operator/=(float scale) {
 
 
 		x /= scale;
@@ -352,64 +352,64 @@ namespace v3 {
 
 
 
-	inline bool Vector3::operator==(const Vector3& p1)
+	inline bool Vec3::operator==(const Vec3& p1)
 	{
 		return (p1.x == x && p1.y == y&&p1.z==z);
 
 	}
 	
-	inline bool Vector3::operator!=(const Vector3& p1)
+	inline bool Vec3::operator!=(const Vec3& p1)
 	{
 		return(x!=p1.x  || y!=p1.y ||z!=p1.z);
 
 	}
 
-	inline glm::vec3 Vector3::glm()
+	inline glm::vec3 Vec3::glm()
 	{
 		return glm::vec3(x, y, z);
 	}
 
 
 	
-	inline float dist2(const Vector3& p, const Vector3& p1) {
+	inline float dist2(const Vec3& p, const Vec3& p1) {
 
 		return((p.x - p1.x) * (p.x - p1.x) + (p.y - p1.y) * (p.y - p1.y) + (p1.z - p.z) * (p1.z - p.z));
 	}
-	inline float dist(const Vector3& p, const Vector3& p1) {
+	inline float dist(const Vec3& p, const Vec3& p1) {
 
 		return(sqrt(dist2(p, p1)));
 	}
 
-	inline float dot(const Vector3& p, const Vector3& p1) {
+	inline float dot(const Vec3& p, const Vec3& p1) {
 
 		return (p.x * p1.x + p.y * p1.y + p.z * p1.z);
 	}
 
 
-	inline float mag(const Vector3& p) {
+	inline float mag(const Vec3& p) {
 
 		return(sqrt(p.x * p.x + p.y * p.y + p.z * p.z));
 	}
-	inline float mag2(const Vector3& p) {
+	inline float mag2(const Vec3& p) {
 
 		return((p.x * p.x + p.y * p.y + p.z * p.z));
 	}
-	inline Vector3 normal(const Vector3& p) {
+	inline Vec3 normal(const Vec3& p) {
 
 		return(p / mag(p));
 	}
 
-	inline Vector3 YawPitch(float yaw, float pitch) {
+	inline Vec3 YawPitch(float yaw, float pitch) {
 
-		v3::Vector3 dir = v3::zerov;
+		v3::Vec3 dir = v3::zerov;
 		dir.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
 		dir.y = sin(glm::radians(pitch));
 		dir.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 		return normal(dir);
 	}
 
-	inline Vector3 Cross(const Vector3& p, const Vector3& p1) {
-		Vector3 crosspoint;
+	inline Vec3 Cross(const Vec3& p, const Vec3& p1) {
+		Vec3 crosspoint;
 		crosspoint.x = p.y * p1.z - p.z * p1.y;
 		crosspoint.y = p.z * p1.x - p.x * p1.z;
 		crosspoint.z = p.x * p1.y - p.y * p1.x;
@@ -417,7 +417,7 @@ namespace v3 {
 	}
 
 
-	inline Vector3 lerp(const Vector3& p, const Vector3& p1, float t) {
+	inline Vec3 lerp(const Vec3& p, const Vec3& p1, float t) {
 		return p * (1 - t) + p1 * t;
 
 
@@ -426,7 +426,7 @@ namespace v3 {
 
 
 	//this section is for stuff defined in v3 incorerating iv3;
-  inline void Vector3::operator=(const Coord& p1)
+  inline void Vec3::operator=(const Coord& p1)
 	{
 	  x = p1.x;
 	  y = p1.y;
@@ -435,14 +435,14 @@ namespace v3 {
 	}
 	//this section is for stuff defined in iv3 incorperating a vector;
 	
-   inline Coord::Coord(const Vector3& p1)
+   inline Coord::Coord(const Vec3& p1)
 	{
 	  x = p1.x;
 	  y = p1.y;
 	  z = p1.z;
 	}
  
-  inline bool apx(const  Vector3 p, const Vector3& p1)
+  inline bool apx(const  Vec3 p, const Vec3& p1)
   {
 	  bool c1 = aproxequal(p.x, p1.x);
 	  bool c2 = aproxequal(p.y, p1.y);
@@ -452,19 +452,32 @@ namespace v3 {
   }
 
 
-	inline Vector3 Coord::operator+(const Vector3& p1) const
+	inline Vec3 Coord::operator+(const Vec3& p1) const
 	{
-		return Vector3(p1.x + x, p1.y + y, p1.z + z);
+		return Vec3(p1.x + x, p1.y + y, p1.z + z);
 	}
   
-	inline Vector3 Coord::operator-(const Vector3& p1) const
+	inline Vec3 Coord::operator-(const Vec3& p1) const
 	{
-		return Vector3(x-p1.x , y-p1.y , z-p1.z );
+		return Vec3(x-p1.x , y-p1.y , z-p1.z );
 	}
 
-	inline bool operator==(const Vector3& p1, const Coord& p2)
+	inline bool operator==(const Vec3& p1, const Coord& p2)
 	{
 		return (p1.x == p2.x && p1.y == p2.y && p1.z == p2.z);
 	}
-	
+	inline Vec3 operator*(float scale,const Vec3& vec)  {
+		return vec * scale;
+	}
+
 }
+
+template <>
+struct std::formatter<v3::Vec3> : std::formatter<std::string> {
+	// Parses format specifiers (e.g., "{:.2f}")
+	template <typename FormatContext>
+	auto format(const v3::Vec3& v, FormatContext& ctx) {
+		// Format the Vec3 as (x, y, z)
+		return std::format_to(ctx.out(), "({:.3f}, {:.3f}, {:.3f})", v.x, v.y, v.z);
+	}
+};

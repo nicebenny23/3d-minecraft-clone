@@ -2,12 +2,12 @@
 #include "particles.h"
 #include "rigidbody.h"
 using namespace renderer;
-Vector3 vertexlist[]{
-Vector3(-1, -1,0),
-Vector3(1, -1,0),
+Vec3 vertexlist[]{
+Vec3(-1, -1,0),
+Vec3(1, -1,0),
 
-Vector3(-1, 1,0),
-Vector3(1, 1,0)
+Vec3(-1, 1,0),
+Vec3(1, 1,0)
 };
 const float cubeuv[] = {
 	0, 1,
@@ -87,13 +87,13 @@ void particleemiter::renderparticles()
 	for (int ind = 0; ind < 6; ind++)
 	{
 		int i = indices[ind];
-		Vector3 vertice = vertexlist[i];
+		Vec3 vertice = vertexlist[i];
 
-		v3::Vector3 center = zerov;
+		v3::Vec3 center = zerov;
 
-		Vector3 rightvertex = (camera::GetCamRight())*vertice.x;
+		Vec3 rightvertex = (camera::GetCamRight())*vertice.x;
 
-		Vector3 upvertex = (camera::GetCamUp()) * vertice.y ;
+		Vec3 upvertex = (camera::GetCamUp()) * vertice.y ;
 		vertice = upvertex + rightvertex + center;
 			databuf.push(vertice.x);
 		databuf.push(vertice.y);
@@ -119,9 +119,9 @@ void particleemiter::renderparticles()
 	//databuf.destroy();
 }
 void initbaseparticle(gameobject::obj newent) {
-	newent.transform().position += Vector3(random(), 1, random()) / 10;
+	newent.transform().position += Vec3(random(), 1, random()) / 10;
 	newent.addcomponent<aabb::Collider>(newent.transform().position, unitv / 9, true);
-	newent.addcomponent<rigidbody>(1, .1)->velocity = Vector3(random(), 1, random()) * 2;
+	newent.addcomponent<rigidbody>(1, .1)->velocity = Vec3(random(), 1, random()) * 2;
 	newent.transform().scale = blockscale / 22;
 	
 }

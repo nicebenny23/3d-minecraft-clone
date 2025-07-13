@@ -11,9 +11,9 @@
 using namespace v3;
 #pragma once 
 struct rigidbody : gameobject::component {
-    Vector3 velocity;
-    Vector3 unsetpositon;
-    Vector3 acceleration;
+    Vec3 velocity;
+    Vec3 unsetpositon;
+    Vec3 acceleration;
     float mass = 1.0f;
     aabb::Collider* boundingbox;
     bool isonground;
@@ -23,8 +23,8 @@ struct rigidbody : gameobject::component {
     void calculateonground() {
 
         inliquid = false;
-        Vector3 boxcenter = owner.transform().position - Vector3(0, boundingbox->globalbox().scale.y + .05, 0);
-        geometry::Box checkbox = geometry::Box(boxcenter, Vector3(boundingbox->globalbox().scale.x, .1, boundingbox->globalbox().scale.z) * .999);
+        Vec3 boxcenter = owner.transform().position - Vec3(0, boundingbox->globalbox().scale.y + .05, 0);
+        geometry::Box checkbox = geometry::Box(boxcenter, Vec3(boundingbox->globalbox().scale.x, .1, boundingbox->globalbox().scale.z) * .999);
         isonground = (voxtra::Boxcollwithgrid(checkbox ));
     }
     // Constructor
@@ -48,7 +48,7 @@ struct rigidbody : gameobject::component {
     // Apply gravity to the rigidbody
     void applyGravity() {
         
-        Vector3 gravity(0, -9.81f, 0);
+        Vec3 gravity(0, -9.81f, 0);
         
         acceleration += gravity*gravityscale / mass;
     }
@@ -71,7 +71,7 @@ struct rigidbody : gameobject::component {
         velocity.z *= (1 - deltaTime * friction);  // Adjust damping factor to prevent excessive damping
 
         owner.transform().position += velocity * deltaTime;
-        acceleration = Vector3(0, 0, 0);  // Reset acceleration after integration
+        acceleration = Vec3(0, 0, 0);  // Reset acceleration after integration
     }
 
   

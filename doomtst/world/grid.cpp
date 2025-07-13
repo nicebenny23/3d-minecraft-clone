@@ -14,7 +14,7 @@ namespace grid {
 
 	//normed pos is when pos is in the range [0...2*CtxName::cxt.Grid->length+1) for each direction;
 	//scales to block coords
-	Vector3 Grid::toBlockPos(Vector3 point)
+	Vec3 Grid::toBlockPos(Vec3 point)
 	{
 		return point / blocksize;
 	}
@@ -46,7 +46,7 @@ namespace grid {
 
 
 	//gets the location of the currentvoxel
-	Coord Grid::getVoxel(Vector3 pos)
+	Coord Grid::getVoxel(Vec3 pos)
 	{
 		return  Coord(std::floor(pos.x / blocksize), std::floor(pos.y / blocksize), std::floor(pos.z / blocksize));
 
@@ -113,10 +113,10 @@ namespace grid {
 		array<block*>* blockarr = new array<block*>;
 		span.center = toBlockPos(span.center);
 		span.scale = toBlockPos(span.scale);
-		v3::Vector3 lowpos = ((span.center - span.scale) - unitv);
+		v3::Vec3 lowpos = ((span.center - span.scale) - unitv);
 
 		v3::Coord lowest = v3::Coord(symmetric_floor(lowpos.x), symmetric_floor(lowpos.y), symmetric_floor(lowpos.z));
-		v3::Vector3 highpos = ((span.center + span.scale) + unitv);
+		v3::Vec3 highpos = ((span.center + span.scale) + unitv);
 
 		v3::Coord highest = v3::Coord(symmetric_ceil(highpos.x), symmetric_ceil(highpos.y), symmetric_ceil(highpos.z));
 
@@ -201,7 +201,7 @@ namespace grid {
 
 	void	Grid::updateborders()
 	{
-		Vector3 pos = camera::campos();
+		Vec3 pos = camera::campos();
 		pos /= chunklength;
 		pos.x = floor(pos.x);
 		pos.y = floor(pos.y);

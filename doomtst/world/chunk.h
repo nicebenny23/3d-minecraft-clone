@@ -39,7 +39,7 @@ namespace Chunk {
 		void write();
 		chunk();
 		
-		Vector3 center() {
+		Vec3 center() {
 			return (loc+ unitv /2.f)*chunklength;
 		}
 		block& operator[](int index);

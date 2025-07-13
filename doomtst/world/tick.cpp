@@ -10,7 +10,7 @@
 		}
 
 		tickframe = false;
-		tickdt += CtxName::ctx.Time->dt;
+		tickdt += CtxName::ctx.Time->real_dt;
 		if (tickdt >ticktime)
 		{
 			

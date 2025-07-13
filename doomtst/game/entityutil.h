@@ -1,7 +1,7 @@
 #include "rigidbody.h"
 #include "entitystate.h"
 #pragma once 
-inline void kb(Vector3 point, float force,gameobject::obj ent) {
+inline void kb(Vec3 point, float force,gameobject::obj ent) {
 	if (ent.hascomponent<estate>()&&ent.hascomponent<gameobject::transform_comp>())
 	{
 
@@ -12,7 +12,7 @@ inline void kb(Vector3 point, float force,gameobject::obj ent) {
 
 			if (ent.hascomponent<rigidbody>())
 			{
-				Vector3 forceval = point -ent.transform().position;
+				Vec3 forceval = point -ent.transform().position;
 				forceval = normal(forceval);
 				forceval *= force;
 

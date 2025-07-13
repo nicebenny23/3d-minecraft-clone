@@ -23,7 +23,7 @@ namespace grid {
 		CtxName::Context* ctx;
 
 
-		Grid():rad(0),totalChunks(0),chunklist(0){
+		Grid():rad(0),totalChunks(0),chunklist(){
 			ctx = nullptr;
 		}
 		Grid(int axis, CtxName::Context* Context);
@@ -39,9 +39,9 @@ namespace grid {
 			return chunklist[index];
 		}
 
-	Vector3 toBlockPos(Vector3 point);
+	Vec3 toBlockPos(Vec3 point);
 	Coord chunkfromblockpos(Coord pos);
-	Coord getVoxel(Vector3 pos);
+	Coord getVoxel(Vec3 pos);
 
 	bool containsChunk(Coord loc);
 	int localChunkIndex(Coord NormedChunk);

@@ -779,6 +779,12 @@
     <ClInclude Include="util\LinearBuffer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="util\type_graph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\type_tag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag1.vs" />

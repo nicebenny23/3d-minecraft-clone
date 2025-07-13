@@ -132,10 +132,12 @@ inline int symmetric_ceil(float x) {
 		return ceil(x);
 	}
 }
+
 //zero is mapped to 1
 inline int sign(float x) {
 	return (x < 0) ? -1 : 1;
 }
+
 //Zero is mapped to zero
 inline int z_sign(float x) {
 
@@ -144,3 +146,11 @@ inline int z_sign(float x) {
 
 
 int comparefloat(const void* b, const void* a);
+
+inline float wrap_to_range(float val, float low, float high)
+{
+	float range = high - low;
+	float result = std::fmod(val - low, range);
+	if (result < 0) result += range;
+	return result + low;
+}

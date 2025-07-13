@@ -16,7 +16,7 @@ struct model: gameobject::component
 
 	meshconnecttype connectiontype;
 	void draw();
-	void add(const char* meshname, const char* meshtexname,Vector3 pos=zerov);
+	void add(const char* meshname, const char* meshtexname,Vec3 pos=zerov);
 	model(meshconnecttype connectmethod = normalmeshconnect);
 	void update();
 

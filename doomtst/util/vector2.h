@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #pragma once 
 namespace v2 {
-	struct Vector2;
+	struct Vec2;
 	struct Coord2
 	{
 
@@ -21,12 +21,12 @@ namespace v2 {
 
 		Coord2 operator*(int scale) const;
 		Coord2& operator*=(int scale);
-		bool operator==(const Vector2& p1);
-		Vector2 operator+(const Vector2& p1) const;
-		Vector2 operator-(const Vector2& p1) const;
+		bool operator==(const Vec2& p1);
+		Vec2 operator+(const Vec2& p1) const;
+		Vec2 operator-(const Vec2& p1) const;
 	
 		int x;
-		int	 y;
+		int y;
 
 
 
@@ -42,10 +42,6 @@ namespace v2 {
 		y = 0;
 	}
 
-	inline float dotproduct(const Coord2& p, const Coord2& p1) {
-
-		return (p.x * p1.x + p.y + p1.y);
-	}
 
 
 	
@@ -135,72 +131,72 @@ namespace v2 {
 	}
 
 
-	struct Vector2
+	struct Vec2
 	{
 
-		Vector2(float X, float Y);
-		Vector2();
-		Vector2(glm::vec2 glm);
-		void operator=(const Vector2& p1);
-		bool operator==(const Vector2& p1);
-		bool operator!=(const Vector2& p1);
-		Vector2& operator+=(const Vector2& p1);
-		Vector2 operator+(const Vector2& p1) const;
+		Vec2(float X, float Y);
+		Vec2();
+		Vec2(glm::vec2 glm);
+		void operator=(const Vec2& p1);
+		bool operator==(const Vec2& p1);
+		bool operator!=(const Vec2& p1);
+		Vec2& operator+=(const Vec2& p1);
+		Vec2 operator+(const Vec2& p1) const;
 
-		Vector2& operator-=(const Vector2& p1);
-		Vector2 operator-(const Vector2& p1) const;
+		Vec2& operator-=(const Vec2& p1);
+		Vec2 operator-(const Vec2& p1) const;
 
-		Vector2 operator*(float scale) const;
+		Vec2 operator*(float scale) const;
 		
-		Vector2& operator*=(float scale);
+		Vec2& operator*=(float scale);
 
 
-		Vector2 operator/(float scale) const;
+		Vec2 operator/(float scale) const;
 
-		Vector2& operator/=(float scale);
+		Vec2& operator/=(float scale);
 		bool operator==(const Coord2& p1);
 		float x;
 		float y;
 		void operator= (const Coord2 & p1) ;
-		Vector2 operator*(Vector2 scale) const;
+		Vec2 operator*(Vec2 scale) const;
 
 	};
 
-	const  Vector2 zerov = Vector2(0, 0);
-	const  Vector2 unitv = Vector2(1, 1);
-	inline Vector2::Vector2() {
+	const  Vec2 zerov = Vec2(0, 0);
+	const  Vec2 unitv = Vec2(1, 1);
+	inline Vec2::Vec2() {
 
 
 
 		x = 0;
 		y = 0;
 	}
-	inline Vector2::Vector2(glm::vec2 glm) {
+	inline Vec2::Vec2(glm::vec2 glm) {
 
 
 
 		x = glm.x;
 		y = glm.y;
 	}
-	inline float distance(const Vector2& p, const Vector2& p1) {
+	inline float distance(const Vec2& p, const Vec2& p1) {
 
 		return(sqrt((p.x - p1.x) * (p.x - p1.x) + (p.y - p1.y) * (p.y - p1.y)));
 	}
 	
 	
 
-	inline bool Vector2::operator==(const Vector2& p1)
+	inline bool Vec2::operator==(const Vec2& p1)
 	{
 		return (p1.x == x && p1.y == y);
 
 	}
 
 
-	inline float magnitude(const Vector2& p) {
+	inline float magnitude(const Vec2& p) {
 
 		return(sqrt(p.x * p.x + p.y * p.y));
 	}
-	inline Vector2 normal(Vector2 p) {
+	inline Vec2 normal(Vec2 p) {
 		if (p == zerov)
 		{
 			return zerov;
@@ -208,25 +204,25 @@ namespace v2 {
 		return(p / magnitude(p));
 	}
 	
-	inline float dotproduct(const Vector2& p, const Vector2& p1) {
+	inline float dotproduct(const Vec2& p, const Vec2& p1) {
 
 		return (p.x * p1.x + p.y + p1.y);
 	}
 
 
-	inline Vector2 lerp(const Vector2& p, const Vector2& p1, float t) {
+	inline Vec2 lerp(const Vec2& p, const Vec2& p1, float t) {
 		return p * (1 - t) + p1 * t;
 
 
 	}
 
-	inline float slope(const Vector2& p, const Vector2& p1) {
+	inline float slope(const Vec2& p, const Vec2& p1) {
 		return (p1.y - p.y) / (p1.x - p.x);
 
 
 	}
 
-	inline void Vector2::operator=(const Vector2& p1) {
+	inline void Vec2::operator=(const Vec2& p1) {
 
 		x = p1.x;
 		y = p1.y;
@@ -237,14 +233,14 @@ namespace v2 {
 
 
 
-	inline Vector2 Vector2::operator+(const Vector2& p1) const {
+	inline Vec2 Vec2::operator+(const Vec2& p1) const {
 
 
-		return Vector2(x + p1.x, y + p1.y);
+		return Vec2(x + p1.x, y + p1.y);
 
 
 	}
-	inline Vector2& Vector2::operator+=(const Vector2& p1) {
+	inline Vec2& Vec2::operator+=(const Vec2& p1) {
 
 
 		x += p1.x;
@@ -257,14 +253,14 @@ namespace v2 {
 
 
 
-	inline Vector2 Vector2::operator-(const Vector2& p1) const {
+	inline Vec2 Vec2::operator-(const Vec2& p1) const {
 
 
-		return Vector2(x - p1.x, y - p1.y);
+		return Vec2(x - p1.x, y - p1.y);
 
 
 	}
-	inline Vector2& Vector2::operator-=(const Vector2& p1) {
+	inline Vec2& Vec2::operator-=(const Vec2& p1) {
 
 
 		x -= p1.x;
@@ -273,21 +269,21 @@ namespace v2 {
 
 	}
 
-	inline Vector2 Vector2::operator*(float scale) const {
+	inline Vec2 Vec2::operator*(float scale) const {
 
-		return Vector2(x * scale, y * scale);
-
-
-
-	}
-	inline Vector2 Vector2::operator*(Vector2 scale) const {
-
-		return Vector2(x * scale.x, y * scale.y);
+		return Vec2(x * scale, y * scale);
 
 
 
 	}
-	inline Vector2& Vector2::operator*=(float scale) {
+	inline Vec2 Vec2::operator*(Vec2 scale) const {
+
+		return Vec2(x * scale.x, y * scale.y);
+
+
+
+	}
+	inline Vec2& Vec2::operator*=(float scale) {
 
 
 		x *= scale;
@@ -296,13 +292,13 @@ namespace v2 {
 
 	}
 
-	inline Vector2 Vector2::operator/(float scale) const {
+	inline Vec2 Vec2::operator/(float scale) const {
 
-		return Vector2(x / scale, y / scale);
+		return Vec2(x / scale, y / scale);
 	}
 
 	
-	inline Vector2& Vector2::operator/=(float scale) {
+	inline Vec2& Vec2::operator/=(float scale) {
 
 
 		x /= scale;
@@ -313,27 +309,27 @@ namespace v2 {
 
 
 	
-	inline Vector2::Vector2(float X, float Y) {
+	inline Vec2::Vec2(float X, float Y) {
 
 		x = X;
 		y = Y;
 	}
 
-	inline bool Vector2::operator!=(const Vector2& p1)
+	inline bool Vec2::operator!=(const Vec2& p1)
 	{
 		return(p1.x != x || p1.y != y);
 
 	}
 
 	//this section is for stuff defined in v2 incorerating iv2;
-	inline void Vector2::operator=(const Coord2& p1)  
+	inline void Vec2::operator=(const Coord2& p1)  
 	{
 		x = p1.x;
 		y = p1.y;
 
 	}
 
-	inline bool Vector2::operator==(const Coord2& p1)
+	inline bool Vec2::operator==(const Coord2& p1)
 	{
 		return (p1.x == x && p1.y == y);
 	}
@@ -343,18 +339,18 @@ namespace v2 {
 
 
 	
-	inline bool Coord2::operator==(const Vector2& p1)
+	inline bool Coord2::operator==(const Vec2& p1)
 	{
 		return (p1.x == x && p1.y == y );
 	}
-	inline Vector2 Coord2::operator+(const Vector2& p1) const
+	inline Vec2 Coord2::operator+(const Vec2& p1) const
 	{
-		return Vector2(p1.x + x, p1.y + y);
+		return Vec2(p1.x + x, p1.y + y);
 	}
 
-	inline Vector2 Coord2::operator-(const Vector2& p1) const
+	inline Vec2 Coord2::operator-(const Vec2& p1) const
 	{
-		return Vector2(x - p1.x, y - p1.y);
+		return Vec2(x - p1.x, y - p1.y);
 	}
 
 }

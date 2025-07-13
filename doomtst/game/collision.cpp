@@ -89,7 +89,7 @@ void propagatecollisionmessage(gameobject::obj o1, gameobject::obj o2) {
 		comp->oncollision(o1);
 	}
 }
-void moveobj(v3::Vector3 force,gameobject::obj object) {
+void moveobj(v3::Vec3 force,gameobject::obj object) {
 	
 	if (object.hascomponent<blockname::block>())
 	{
@@ -103,7 +103,7 @@ void moveobj(v3::Vector3 force,gameobject::obj object) {
 
 	}
 }
-void distributeforce( gameobject::obj p1, gameobject::obj p2,Vector3 force) {
+void distributeforce( gameobject::obj p1, gameobject::obj p2,Vec3 force) {
 
 	float totalforcemag = 0;
 	float e1mass = 0;
@@ -164,7 +164,7 @@ void collision::handleduelentitycollisions()
 				continue;
 			}
 
-			v3::Vector3 force = aabb::collideaabb(*Collider1, *Collider2);
+			v3::Vec3 force = aabb::collideaabb(*Collider1, *Collider2);
 			if (v3::mag(force) < 0.01f)
 			{
 				continue;
@@ -204,7 +204,7 @@ voxtra::WorldRayCollision collision::raycastall(ray nray, HitQuery query, voxtra
 	}
 	return entcol;
 }
-Vector3 colideentandblock(Collider& entity, block* tocollide) {
+Vec3 colideentandblock(Collider& entity, block* tocollide) {
 	
 	if (tocollide != nullptr)
 	{
@@ -216,9 +216,9 @@ Vector3 colideentandblock(Collider& entity, block* tocollide) {
 
 
 
-			Vector3 my = entity.globalbox().center;
-			Vector3 otherpos = blockcol.globalbox().center;
-			Vector3 force = aabb::collideaabb(entity, blockcol);
+			Vec3 my = entity.globalbox().center;
+			Vec3 otherpos = blockcol.globalbox().center;
+			Vec3 force = aabb::collideaabb(entity, blockcol);
 
 
 			if (force == zerov)
@@ -249,14 +249,14 @@ void collision::handleCollisionWithGrid(Collider& entity)
 	
 		
 	
-		Vector3 minforce = zerov;
+		Vec3 minforce = zerov;
 		block* minblock=nullptr;
 		for (int ind = 0; ind < blklist.length; ind++)
 		{
 
 
 	
-			Vector3 force = colideentandblock(entity, blklist[ind]);
+			Vec3 force = colideentandblock(entity, blklist[ind]);
 
 			if (mag(force) > mag(minforce) || mag(minforce) == 0)
 			{

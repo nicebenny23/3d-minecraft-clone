@@ -22,7 +22,7 @@ struct firedaggerfinalboss : gameobject::component {
     bosstate state;
     void update(){
         Transform& currtransform = owner->getcomponent<model>()[0].transform;
-        Vector3 pos = player::goblin->transform.position;
+        Vec3 pos = player::goblin->transform.position;
         if (state == following)
         {
 
@@ -45,16 +45,16 @@ struct firedaggerfinalboss : gameobject::component {
         }
         if (state == shooting)
         {
-            currtransform.OrientDir(Vector3(0, 1, 0));
+            currtransform.OrientDir(Vec3(0, 1, 0));
             currtransform.position += currtransform.getnormaldirection()*CtxName::ctx.Time->dt * 4;
 
-            //currtransform.position += Vector3(1, 0, 0)*.002f;
+            //currtransform.position += Vec3(1, 0, 0)*.002f;
             if (timetillshoot<0&&0<shotsleft)
             {
 
-                v3::Vector3 pos = owner->getcomponent<model>()[0].transform.position + owner->getcomponent<model>()[0].transform.getnormaldirection() * 4+Vector3(random(),random(),random());
-                Vector3 ppos = player::goblin.toent()->transform.position;
-                Vector3 velocity = normal(pos-ppos) * -6+(Vector3(random(),random(),random())-unitv/2);
+                v3::Vec3 pos = owner->getcomponent<model>()[0].transform.position + owner->getcomponent<model>()[0].transform.getnormaldirection() * 4+Vec3(random(),random(),random());
+                Vec3 ppos = player::goblin.toent()->transform.position;
+                Vec3 velocity = normal(pos-ppos) * -6+(Vec3(random(),random(),random())-unitv/2);
                 spawndagger(pos, velocity, 0);
                 shotsleft--;
                 timetillshoot = .1;
@@ -83,13 +83,13 @@ struct firedaggerfinalboss : gameobject::component {
     }
     void destroy() {
 
-        player::goblin->transform.position = Vector3(0, 300, 0);
+        player::goblin->transform.position = Vec3(0, 300, 0);
 
 
     }
 
 };
-inline Ent::entityref createfinalboss(v3::Vector3 pos) {
+inline Ent::entityref createfinalboss(v3::Vec3 pos) {
     
     Ent::entityref refmodel = CtxName::ctx.EntMan->CreateEntity(zerov, "enemy");
     refmodel.toent()->addcomponent<model>();
@@ -97,7 +97,7 @@ inline Ent::entityref createfinalboss(v3::Vector3 pos) {
     //  refmodel.toent()->getcomponent<model>().add("slime2.obj", "images\\slimetex.png");
     for (int i = 0; i <160; i++)
     {
-        refmodel.toent()->getcomponent<model>().add("objs\\finalboss.obj", "images\\bosstex.png", Vector3(i, 0, 0)+cpos);
+        refmodel.toent()->getcomponent<model>().add("objs\\finalboss.obj", "images\\bosstex.png", Vec3(i, 0, 0)+cpos);
        refmodel.toent()->getcomponent<model>()[i].transform.yaw = 0;
     }
     refmodel.toent()->addcomponent<firedaggerfinalboss>();

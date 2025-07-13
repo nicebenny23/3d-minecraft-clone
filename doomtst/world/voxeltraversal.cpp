@@ -61,8 +61,8 @@ bool voxtra::Boxcollwithgrid(geometry::Box Box )
 voxtra::WorldRayCollision  voxtra::travvox(ray nray, float acc, GridTraverseMode trav)
 {
 	float RayDistance = nray.length();
-	v3::Vector3 Offset = nray.diff() / acc;
-	v3::Vector3 Position = nray.start;
+	v3::Vec3 Offset = nray.diff() / acc;
+	v3::Vec3 Position = nray.start;
 	 
 	for (int i = 0; i < RayDistance * acc; i++)
 	{
@@ -110,6 +110,6 @@ voxtra::WorldRayCollision  voxtra::travvox(ray nray, float acc, GridTraverseMode
 			return nullptr;
 		}
 		float BackMag = 2 * nray.length() / acc;
-		Vector3 BackProp= Intersection.unwrap().Intersection() - nray.dir() * BackMag;
+		Vec3 BackProp= Intersection.unwrap().Intersection() - nray.dir() * BackMag;
 	return	(CtxName::ctx.Grid->getBlock(CtxName::ctx.Grid->getVoxel( BackProp)));
 	}

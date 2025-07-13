@@ -53,10 +53,10 @@ namespace window {
         void EnableCursor();
         void DisableCursor();
         float AspectRatio();
-        v2::Vector2 Center(v2::Vector2 pos);
+        v2::Vec2 Center(v2::Vec2 pos);
 
         // Adjusts coordinates to maintain square proportions based on the current aspect ratio.
-          v2::Vector2 FitToAspectRatio(v2::Vector2 pos);
+          v2::Vec2 FitToAspectRatio(v2::Vec2 pos);
 
 
           bool shouldClose()

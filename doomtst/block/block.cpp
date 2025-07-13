@@ -4,12 +4,12 @@
 #include "../game/aabb.h"
 
 using namespace blockname;
-Vector3 face::center()
+Vec3 face::center()
 {
-	return Vector3( facenum.ToVec())* mesh->box.scale + mesh->box.center;
+	return Vec3( facenum.ToVec())* mesh->box.scale + mesh->box.center;
 }
 void face::calccameradist() {
-	cameradist = 128 * dist2((*this).center(), Vector3(camera::campos()));
+	cameradist = 128 * dist2((*this).center(), Vec3(camera::campos()));
 }
 
 void blockmesh::setfaces(int leftface, int rightface, int upface, int downface, int frontface, int backface) {
@@ -75,8 +75,8 @@ face& blockmesh::operator[](int index)
 void blockname::blockmesh::attachindirection()
 {
 
-	Vector3 maxpos = blk->center() + box.scale * (blk->mesh.attachdir.ToVec());
-	Vector3 blkpos = Vector3(blk->mesh.attachdir.ToVec())*blocksize / 2 + blk->center();
+	Vec3 maxpos = blk->center() + box.scale * (blk->mesh.attachdir.ToVec());
+	Vec3 blkpos = Vec3(blk->mesh.attachdir.ToVec())*blocksize / 2 + blk->center();
 	box.center += blkpos - maxpos;
 }
 face& blockname::block::operator[](int index)
@@ -84,14 +84,14 @@ face& blockname::block::operator[](int index)
 	return (mesh)[index];
 }
 
-blockname::blockmesh::blockmesh(block* parent, Vector3 blkscale)
+blockname::blockmesh::blockmesh(block* parent, Vec3 blkscale)
 {
 	blk = parent;
 	
 
 	box.scale = blkscale;
 
-	box.center =Vector3(blk->pos+unitv/2) * blocksize;
+	box.center =Vec3(blk->pos+unitv/2) * blocksize;
 
 
 

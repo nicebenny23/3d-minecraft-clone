@@ -49,7 +49,7 @@ int idfromnoise( float nint, float bint,  float nint3) {
 	return neid;
 
 }
-int generatechunkvalfromnoise(Vector3 pos, noisemap* map, noisemap* biomemap, noisemap* feturemap, noisemap* lavamap, noisemap* map2)
+int generatechunkvalfromnoise(Vec3 pos, noisemap* map, noisemap* biomemap, noisemap* feturemap, noisemap* lavamap, noisemap* map2)
 {
 	pos *= blocksize;
 	
@@ -59,7 +59,7 @@ int generatechunkvalfromnoise(Vector3 pos, noisemap* map, noisemap* biomemap, no
 	localpos.y = symmetric_mod(pos.y, chunkaxis);
 
 	localpos.z = symmetric_mod(pos.z, chunkaxis);
-	float nint = (*map).Eval(pos + Vector3(0, pos.y, 0));
+	float nint = (*map).Eval(pos + Vec3(0, pos.y, 0));
 	float nint3 = map->Eval(pos + Coord(0, 103, 40));
 	float nint2 = map->Eval(pos + Coord(101, 300, 33));
 
@@ -119,7 +119,7 @@ struct idmap
 		biomemap = nullptr;
 		lavalayermap = genperlin(1, .5f, .03f, 1.2, normalnoise);
 		loc = location;
-		ids = array<idblock>(chunksize);
+		ids = array<idblock>();
 		int ind = 0;
 		for (int x = 0; x < chunkaxis; x++)
 		{

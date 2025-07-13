@@ -21,10 +21,10 @@ struct playerhealth: gameobject::component
 	void start(){
 		size_t max_health = owner.getcomponent<estate>().maxhealth;
 		priority = -224;
-		v2::Vector2 scale = v2::unitv / 100;
-		healthboxes = array<Cptr::cptr<uibox>,true>(max_health);
+		v2::Vec2 scale = v2::unitv / 100;
+		healthboxes = array<Cptr::cptr<uibox>,true>();
 		for (int i = 0; i < max_health; i++) {
-			v2::Vector2 pos = v2::Vector2(i / 40.f-.4f, -.45);
+			v2::Vec2 pos = v2::Vec2(i / 40.f-.4f, -.45);
 			healthboxes.push(ui::createuielement<uibox>("images\\health.png","HealthTexture",scale,pos,55));
 		}
 	}

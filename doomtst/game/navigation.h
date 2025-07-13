@@ -58,9 +58,9 @@ struct navigator: gameobject::component
 {
     navigator(gameobject::obj parentref, array<navnode> (*testfunc)(navnode& pos));
     bool isblockvalid;
-    v3::Vector3 esize;
+    v3::Vec3 esize;
     float timetillupdate;
-    v3::Vector3 headed;
+    v3::Vec3 headed;
     array<navnode> (*testfunction)(navnode& pos);
     gameobject::obj goingtwords;
     void calcpath();

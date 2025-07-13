@@ -18,7 +18,7 @@ void spawn() {
 	if (randomnum<spawnthreshold)
 	{
 		
-	Vector3 pos= voxtra::findground(unitv);
+	Vec3 pos= voxtra::findground(unitv);
 				if (dist(player::goblin.toent()->transform.position,pos)>8)
 				{
 					int entityswitchnum = randomint(4);

@@ -2,9 +2,13 @@
 #include "vertexobject.h"
 #pragma once
 namespace VObjMan {
-	class VObjManager
+	struct VObjManager
 	{
-	public:
+		VObjManager() {
+
+
+		}
+
 		void Create(buffer_object::Ebo* NewEbo);
 		void Create(buffer_object::Vbo* NewVbo);
 		void Create(VaoName::Vao* NewVao);

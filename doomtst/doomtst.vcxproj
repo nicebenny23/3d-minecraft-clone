@@ -31,6 +31,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -258,6 +259,7 @@
     <ClInclude Include="game\game.h" />
     <ClInclude Include="game\Core.h" />
     <ClInclude Include="game\GameContext.h" />
+    <ClInclude Include="game\job.h" />
     <ClInclude Include="game\navigation.h" />
     <ClInclude Include="game\query.h" />
     <ClInclude Include="game\Settings.h" />
@@ -341,6 +343,7 @@
     <ClInclude Include="renderer\ui.h" />
     <ClInclude Include="renderer\RenderProperties.h" />
     <ClInclude Include="renderer\UniformManager.h" />
+    <ClInclude Include="Resources\Resource.h" />
     <ClInclude Include="Resources\ResourceManager.h" />
     <ClInclude Include="util\bitset.h" />
     <ClInclude Include="util\dependency.h" />
@@ -372,7 +375,9 @@
     <ClInclude Include="renderer\VertexObjectManager.h" />
     <ClInclude Include="util\topo_sort.h" />
     <ClInclude Include="util\typelist.h" />
+    <ClInclude Include="util\type_graph.h" />
     <ClInclude Include="util\type_index.h" />
+    <ClInclude Include="util\type_tag.h" />
     <ClInclude Include="util\UniquePtr.h" />
     <ClInclude Include="world\chunkload.h" />
     <ClInclude Include="world\managegrid.h" />

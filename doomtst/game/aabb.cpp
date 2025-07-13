@@ -9,7 +9,7 @@ namespace aabb {
         Colliderlist = Sparse::PackedSet<Collider*>();
         
     }
-    v3::Vector3 collideaabb(Collider p1, Collider p2)
+    v3::Vec3 collideaabb(Collider p1, Collider p2)
     {
         return geometry::collidebox(p1.globalbox(), p2.globalbox());
 
@@ -27,7 +27,7 @@ namespace aabb {
         }
     }
     
-    Collider::Collider(const v3::Vector3& objcenter, const v3::Vector3& objscale,bool appendtolist, bool iseffector)
+    Collider::Collider(const v3::Vec3& objcenter, const v3::Vec3& objscale,bool appendtolist, bool iseffector)
     {
         effector = iseffector;
         utype = gameobject::updatenone;

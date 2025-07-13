@@ -10,8 +10,8 @@ Box2d getboxfrominvloc(int xloc, int yloc) {
 
 	float xval = ((2 * xloc + 1.0f) / float(xamt));
 	float yval = ((2 * yloc + 1.0f) / float(yamt));
-	v2::Vector2 scale = v2::Vector2(1.0f / float(xamt), 1.0f / float(yamt));
-	return Box2d(v2::Vector2(xval, yval), scale);
+	v2::Vec2 scale = v2::Vec2(1.0f / float(xamt), 1.0f / float(yamt));
+	return Box2d(v2::Vec2(xval, yval), scale);
 }
 
 itemslot::itemslot(int xloc, int yloc) {

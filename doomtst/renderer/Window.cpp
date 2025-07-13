@@ -84,14 +84,14 @@ namespace window {
           return static_cast<float>(width) / static_cast<float>(height);
         
     }
-    v2::Vector2 Window::Center(v2::Vector2 pos)
+    v2::Vec2 Window::Center(v2::Vec2 pos)
     {
-            return v2::Vector2((2.0f * pos.x / width) - 1.0f,1.0f - (2.0f * pos.y / height));
+            return v2::Vec2((2.0f * pos.x / width) - 1.0f,1.0f - (2.0f * pos.y / height));
     }
     
-    v2::Vector2 Window::FitToAspectRatio(v2::Vector2 pos)
+    v2::Vec2 Window::FitToAspectRatio(v2::Vec2 pos)
     {
-            return Center(pos) * v2::Vector2(1.0f, 1.0f / AspectRatio());
+            return Center(pos) * v2::Vec2(1.0f, 1.0f / AspectRatio());
     }
  
 

@@ -9,20 +9,20 @@
 
 // Helper function for heuristic calculation (Manhattan distance)
 float appdist(const navnode& a, const navnode& b) {
-    return v3::mag(Vector3( a.pos- b.pos));
+    return v3::mag(Vec3( a.pos- b.pos));
 }
 
 array<navnode> getneighborsdefault( navnode& node) {
     
-    array<navnode> neighbors= array<navnode>(6);
+    array<navnode> neighbors= array<navnode>();
     for (auto dir: Dir::Directions3d) {
         if (dir==Dir::down3d||dir==Dir::up3d) {
             continue;
         }
         Coord point= Coord(dir.ToVec() + node.pos);
 
-        v3::Vector3 center = point + unitv / 2;
-        v3::Vector3 scale = blockscale * v3::Vector3(1.1, .9f, 1.1);
+        v3::Vec3 center = point + unitv / 2;
+        v3::Vec3 scale = blockscale * v3::Vec3(1.1, .9f, 1.1);
         geometry::Box bx = geometry::Box(center, scale);
         if (!voxtra::Boxcollwithgrid(bx))
         {
@@ -191,12 +191,12 @@ navigator::navigator(gameobject::obj parentref, array<navnode>(*testfunc)(navnod
     testfunction = testfunc;
 }
 
-Vector3 transformnormal(Vector3 pos, Vector3 scale)
+Vec3 transformnormal(Vec3 pos, Vec3 scale)
 {
     pos.y = floor(pos.y);
     pos = (pos);
-    Vector3  low = pos - scale;
-    Vector3  high = pos + scale;
+    Vec3  low = pos - scale;
+    Vec3  high = pos + scale;
 
     for (int xind = low.x; xind < high.x; xind++)
     {
@@ -205,17 +205,17 @@ Vector3 transformnormal(Vector3 pos, Vector3 scale)
         {
            
 
-                Vector3 center = Vector3(xind, pos.y - 1, zind);
+                Vec3 center = Vec3(xind, pos.y - 1, zind);
                 geometry::Box posbx = geometry::Box(center+unitv/2, blockscale);
                 if (!voxtra::Boxcollwithgrid(posbx))
                 {
                     continue;
                 }
-                center += Vector3( 0,1,0);
-                posbx.center += Vector3(0, 1, 0);
+                center += Vec3( 0,1,0);
+                posbx.center += Vec3(0, 1, 0);
                 if (voxtra::Boxcollwithgrid(posbx) == true)
                 {
-                    return Vector3(xind, pos.y, zind);
+                    return Vec3(xind, pos.y, zind);
                 }
         }
 
@@ -229,7 +229,7 @@ void navigator::calcpath()
     
     Coord currpos = CtxName::ctx.Grid->getVoxel( owner.transform().position);
 
-    Vector3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.transform().position);
+    Vec3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.transform().position);
  
     array<navnode>  finding = astarpathfinding(navnode(currpos),navnode(Coord(gotopos)), testfunction);
     if (finding.length>1)
@@ -267,9 +267,9 @@ void navigator::update()
 {
     float timetillupdatespeed = .3;
 
-    Vector3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.transform().position);
+    Vec3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.transform().position);
 
-    v3::Vector3 loc = owner.transform().position;
+    v3::Vec3 loc = owner.transform().position;
     float distance = dist(loc, gotopos);
     float addoffset = Max(0,(sigmoid(distance/ 10)-.5)*2);
     timetillupdatespeed = .3 + addoffset;

@@ -5,7 +5,7 @@
 namespace userinput {
 	//([0-width],[0,height])
 	void InputManager::endupdate(){
-		mouseposdt = v2::Vector2(0, 0);
+		mouseposdt = v2::Vec2(0, 0);
 		for (int i = 0; i < keylist.capacity; i++)
 		{
 			keylist[i].pressed = false;
@@ -27,12 +27,12 @@ namespace userinput {
 	 InputManager::InputManager()
 	{
 
-		mousepos = v2::Vector2(0, 0);
-		mouseposdt = v2::Vector2(0, 0);
+		mousepos = v2::Vec2(0, 0);
+		mouseposdt = v2::Vec2(0, 0);
 		keylist = Cont::array<inputkey,true>(GLFW_KEY_LAST+ Extra_keys);
 		for (int i = 0; i < keylist.capacity; i++)
 		{
-			keylist.push(inputkey());
+			keylist[i]= inputkey();
 			
 		}
 	}

@@ -6,6 +6,10 @@ namespace TextureManager {
 
 	class TextureManager {
 	public:
+		TextureManager() {
+
+
+		}
 		std::unordered_map<std::string, ITexture*> TextureList;
 	
 		Texture2D* Get2dTex(const char* File, const std::string& name);

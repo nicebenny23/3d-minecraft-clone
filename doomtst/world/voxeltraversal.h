@@ -27,7 +27,7 @@ namespace voxtra {
 			collider = nullptr;
 			
 		}
-		Vector3 Intersection() {
+		Vec3 Intersection() {
 
 			return Hit.intersectionpoint;
 		}
@@ -52,7 +52,7 @@ namespace voxtra {
 	WorldRayCollision travvox(ray nray, float acc, GridTraverseMode trav = countnormal);
 	block* findprevblock(ray nray, float acc, GridTraverseMode trav = countnormal);
 
-	inline v3::Vector3 findemptyspace(v3::Vector3 scale) {
+	inline v3::Vec3 findemptyspace(v3::Vec3 scale) {
 		geometry::Box loadbox;
 		int test = 0;
 		bool notinblock = false;
@@ -66,7 +66,7 @@ namespace voxtra {
 
 			float ranz = (random() - .5) * 2;
 			
-			v3::Vector3 offset = (Vector3(ranx, rany, ranz) * (2 * CtxName::ctx.Grid->rad + 1) / 2 +CtxName::ctx.Grid->gridpos) * chunkaxis;
+			v3::Vec3 offset = (Vec3(ranx, rany, ranz) * (2 * CtxName::ctx.Grid->rad + 1) / 2 +CtxName::ctx.Grid->gridpos) * chunkaxis;
 			test++;
 			if (1000 < test)
 			{
@@ -76,13 +76,13 @@ namespace voxtra {
 		} while (Boxcollwithgrid(loadbox));
 		return loadbox.center;
 	}
-	inline Vector3 findground(v3::Vector3 scale) {
-		Vector3 pos = zerov;
+	inline Vec3 findground(v3::Vec3 scale) {
+		Vec3 pos = zerov;
 		bool shouldcontinue = true;
 		do
 		{
 			pos = findemptyspace(scale);
-			geometry::Box testbox = geometry::Box(pos - Vector3(0, scale.y + .5, 0), scale);
+			geometry::Box testbox = geometry::Box(pos - Vec3(0, scale.y + .5, 0), scale);
 			shouldcontinue = !Boxcollwithgrid(testbox);
 			if (random()<.001)
 			{
@@ -90,6 +90,6 @@ namespace voxtra {
 			}
 		} while (shouldcontinue);
 	
-		return pos - Vector3(0, scale.y, 0);
+		return pos - Vec3(0, scale.y, 0);
 	}
 }

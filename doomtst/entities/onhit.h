@@ -58,8 +58,8 @@ struct dmgonhit: gameobject::component
 			{
 
 
-				v3::Vector3 center = owner.transform().position;
-				v3::Vector3 othercenter = collidedwith.transform().position;
+				v3::Vec3 center = owner.transform().position;
+				v3::Vec3 othercenter = collidedwith.transform().position;
 				if (collidedwith.hascomponent<rigidbody>()) {
 
 

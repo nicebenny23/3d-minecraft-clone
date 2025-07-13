@@ -6,7 +6,7 @@ struct craftingmenu :menu {
 
 	recipemanager blkcont;
 	
-	craftingmenu(v2::Vector2 size) {
+	craftingmenu(v2::Vec2 size) {
 		menubox = ui::createuielement<uibox>("images\\menutex.png", "MenuTexture", size, v2::zerov, 11);
 
 		menubox->state.enabled = false;
@@ -77,7 +77,7 @@ struct craftingtablecomp : gameobject::component {
 	}
 	void start() {
 
-		men = craftingmenu(v2::Vector2(3, 3));
+		men = craftingmenu(v2::Vec2(3, 3));
 	}
 };
 inline void tableinit(blockname::block* blk) {

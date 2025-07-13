@@ -5,6 +5,7 @@
 #include "GameContext.h"
 #include "entity.h"
 #include "../renderer/renderer.h"
+#include "System.h"
 #include "../util/time.h"
 #include "../renderer/guirender.h"
 //start of the application
@@ -19,7 +20,7 @@ namespace Core {
         void InitOC();
         void InitRenderer();
        CtxName::Context* ctx;
-
+       SystemExecutor SystemRunner;
         timename::TimeManager Time;
         userinput::InputManager Inp;
         window::Window Window;

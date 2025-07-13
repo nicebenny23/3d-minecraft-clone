@@ -26,6 +26,7 @@
 #include "../items/menu.h"
 #include "Core.h"
 #include "rigidbody.h"
+#include "../player/playermovment.h"
 #include "../game/System.h"
 #pragma once 
 struct IAmAPrinter:System {
@@ -52,13 +53,13 @@ void startframe() {
 
 }
 
-SystemExecutor executive = SystemExecutor();
 void updateworld() {
 
     
-    executive.Run();
     collision::update();
-    CtxName::ctx.OC->updatecomponents(gameobject::Framecall);
+    CtxName::ctx.Executor->Run();
+
+CtxName::ctx.OC->updatecomponents(gameobject::Framecall);
 gridutil::gridupdate();
 
 }
@@ -73,7 +74,7 @@ void deleteolddata() {
     std::string o1 = std::string("C:/Users/bchar/source/repos/doomtst/doomtst/worldstorage");
 
     std::string o2 = std::string("C:/Users/User/source/repos/nicebenny23/3d-minecraft-clone/doomtst/worldstorage");
-    deleteFilesInFolder(o2);
+    deleteFilesInFolder(o1);
 
 }
 void init() {
@@ -81,12 +82,11 @@ void init() {
 
     Core::game.ConnectToContext();
     deleteolddata();
-    Core::game.InitOC();
     Core::game.createWindow();
-    
+    Core::game.InitRenderer();
+    Core::game.InitOC();
     aabb::initCollider();
     ui::createuilist();
-    Core::game.InitRenderer();
     inittextarray();
     player::initplayer();
     blockrender::initblockrendering();
@@ -108,22 +108,14 @@ void endgame() {
 void rungame()
 {
     init();
-     executive = SystemExecutor(CtxName::ctx.OC);
-     executive.push(new IAmAPrinter());
-     executive.push(new RigidbodySystem());
+     CtxName::ctx.Executor->push(new IAmAPrinter());
+     CtxName::ctx.Executor->push(new RigidbodySystem());
+
+     CtxName::ctx.Executor->push(new PlayerMovementSys());
      float lastupdate = 0;
     while (!CtxName::ctx.Window->shouldClose())
     {
-        
         update();
-        lastupdate += CtxName::ctx.Time->real_dt;
-        if (lastupdate > 1)
-        {
-
-            lastupdate = 0;
-         
-         debug(CtxName::ctx.Time->fps);
-        }
     }
     endgame();
     return ;

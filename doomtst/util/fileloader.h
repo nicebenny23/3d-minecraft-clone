@@ -63,7 +63,7 @@ struct safefile {
 	long getsize();
 	void movetoend();
 	int fscanf(const char* format, ...);
-	void fscanf(int expectedargs, const char* format, ...);
+	void fscanf(size_t expectedargs, const char* format, ...);
 
 	safefile(const char* filepath, mode openmode);
 	safefile(char* filepath, mode openmode);

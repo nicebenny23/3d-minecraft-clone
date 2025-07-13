@@ -45,7 +45,7 @@ struct CommandBuffer {
 		World = nullptr;
 	}
 	gameobject::Ecs* World;
-	type_id::dense_type_system commandSystem;
+	type_id::type_indexer commandSystem;
 	Depends::DependencySystem DependencySystem;
 	bool empty() {
 		for (auto& count : buffer)

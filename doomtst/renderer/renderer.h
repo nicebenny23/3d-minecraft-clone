@@ -27,7 +27,7 @@ namespace renderer {
 			Modes.AddType(type);
 		}
 		void applyProperties();
-		Renderer() {
+		Renderer():Textures(),Binders(),Shaders() {
 
 		}
 		ITexture* CurrentTexture() {

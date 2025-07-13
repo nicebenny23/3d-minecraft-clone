@@ -9,37 +9,37 @@
 
 extern TextureArray* textarray;
 void inittextarray();
-const v2::Vector2 cubeuv[] = {
-	v2::Vector2(0, 1),
+const v2::Vec2 cubeuv[] = {
+	v2::Vec2(0, 1),
 
 
-	v2::Vector2(1, 1),
+	v2::Vec2(1, 1),
 
-	v2::Vector2(0, 0),
-	v2::Vector2(1, 0),
-
-
-
-	
-
+	v2::Vec2(0, 0),
+	v2::Vec2(1, 0),
 
 
 
 	
 
-}; const v2::Vector2 offset[] = {
-	v2::Vector2(-1,-1),
-	v2::Vector2(1, -1),
 
-v2::Vector2(-1, 1),
-v2::Vector2(1, 1)
+
+
+	
+
+}; const v2::Vec2 offset[] = {
+	v2::Vec2(-1,-1),
+	v2::Vec2(1, -1),
+
+v2::Vec2(-1, 1),
+v2::Vec2(1, 1)
 
 };
 struct integertext:ui::uielement
 {	float scale;
-	v2::Vector2 center;
+	v2::Vec2 center;
 	
-	integertext(v2::Vector2 textcenter,float textscale);
+	integertext(v2::Vec2 textcenter,float textscale);
 	void write();
 	
 	int value;

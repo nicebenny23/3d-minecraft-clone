@@ -41,8 +41,8 @@ struct playertpcomp : gameobject::component
 				{
 					if (CtxName::ctx.Inp->mouseleft().released)
 					{
-						Vector3 pos =owner.transform().position;
-						Vector3 offset =owner.transform().getnormaldirection() * chargetime * chargetime;
+						Vec3 pos =owner.transform().position;
+						Vec3 offset =owner.transform().getnormaldirection() * chargetime * chargetime;
 						ray moveray = ray(pos, pos + offset);
 					voxtra::WorldRayCollision grid=	voxtra::travvox(moveray, 100, voxtra::countall);
 					if (!grid)

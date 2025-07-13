@@ -179,12 +179,7 @@ void gameobject::Ecs::updatecomponents(updatecalltype type)
 				obj   o = archtype->elems[i];           // read by value
 				auto* c = (component*)mgr->store[o.Id.id];
 				c->update();  
-				if (archtype !=o.meta().arch)
-				{
-					int l = 1;
-				}
-				c->update();
-				// safe to move/ remove here
+				
 			}
 		}
 	}
@@ -194,7 +189,7 @@ void gameobject::Ecs::updatecomponents(updatecalltype type)
 
 
 
-obj gameobject::Ecs::CreateEntity(v3::Vector3 SpawnPos)
+obj gameobject::Ecs::CreateEntity(v3::Vec3 SpawnPos)
 {
 	obj object = obj();
 	InitObj(object);

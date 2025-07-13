@@ -9,8 +9,8 @@ namespace geometry {
 
 	
 	struct Box {
-		Vector3 center;
-		Vector3 scale;
+		Vec3 center;
+		Vec3 scale;
 		Box() {
 			center = zerov;
 			scale = zerov;
@@ -39,7 +39,7 @@ namespace geometry {
 		Box operator-(const Box& other) const {
 			return Box(center - other.center, scale + other.scale);
 		}
-		bool contains(v3::Vector3 pos)
+		bool contains(v3::Vec3 pos)
 		{
 			pos -= center;
 			if (abs(pos.x) <= scale.x)
@@ -68,7 +68,7 @@ namespace geometry {
 			}
 			return false;
 		}
-		Box(Vector3 cent, Vector3 scl)
+		Box(Vec3 cent, Vec3 scl)
 			: center(cent), scale(scl) {}
 
 		bool rayintersects(ray fray);
@@ -76,13 +76,13 @@ namespace geometry {
 
 
 	struct Box2d {
-		v2::Vector2 center;
-		v2::Vector2 scale;
+		v2::Vec2 center;
+		v2::Vec2 scale;
 		
-		Box2d(v2::Vector2 cent, v2::Vector2 scl)
+		Box2d(v2::Vec2 cent, v2::Vec2 scl)
 			: center(cent), scale(scl) {}
 
-		bool contains(v2::Vector2 point) {
+		bool contains(v2::Vec2 point) {
 
 			point -= center;
 			if (abs(point.x)<scale.x&&abs(point.y)<scale.y)
@@ -98,29 +98,29 @@ namespace geometry {
 
 
 	struct Plane {
-		Vector3 normal;
-		Vector3 point;
+		Vec3 normal;
+		Vec3 point;
 
 		Plane() = default;
-		Plane(Vector3 norm, Vector3 pnt)
+		Plane(Vec3 norm, Vec3 pnt)
 			: normal(norm), point(pnt) {}
 
-		Plane(Vector3 p1, Vector3 p2, Vector3 p3) {
-			Vector3 v1 = p2 - p1;
-			Vector3 v2 = p3 - p1;
+		Plane(Vec3 p1, Vec3 p2, Vec3 p3) {
+			Vec3 v1 = p2 - p1;
+			Vec3 v2 = p3 - p1;
 			normal = v3::normal(Cross(v1, v2));
 			point = p1;
 		}
 
 
-		float distanceToPoint(const Vector3& p) const {
+		float distanceToPoint(const Vec3& p) const {
 			return dot(normal, p - point);
 		}
 	};
 
 	struct sphere {
 		float radius;
-		Vector3 center;
+		Vec3 center;
 
 		sphere(Box bx)
 			: radius(mag(bx.scale)), center(bx.center) {}
@@ -139,9 +139,9 @@ namespace geometry {
 
 		
 
-		float distanceFromPoint(Vector3 samplePoint) {
+		float distanceFromPoint(Vec3 samplePoint) {
 			// Project the sample point onto the cone's central axis (ray)
-			Vector3 axisProjection = dirray.project(samplePoint);
+			Vec3 axisProjection = dirray.project(samplePoint);
 
 			// Compute the perpendicular distance from the sample point to the cone's axis.
 			float distanceToAxis = dist(samplePoint, axisProjection);
@@ -163,7 +163,7 @@ namespace geometry {
 		return (p1 - p2).contains_orgin();
 					
 	}
-inline 	v3::Vector3 collidebox(Box p1, Box p2)
+inline 	v3::Vec3 collidebox(Box p1, Box p2)
 	{
 		int sgnx = p1.center.x > p2.center.x ? 1 : -1;
 		int sgny = p1.center.y > p2.center.y ? 1 : -1;
@@ -174,12 +174,12 @@ inline 	v3::Vector3 collidebox(Box p1, Box p2)
 			float ydepth = sgny * (p1.scale.y + p2.scale.y) - (p1.center.y - p2.center.y);
 			float zdepth = sgnz * (p1.scale.z + p2.scale.z) - (p1.center.z - p2.center.z);
 			if (abs(xdepth) < abs(ydepth) && abs(xdepth) < abs(zdepth)) {
-				return v3::Vector3(xdepth, 0, 0);
+				return v3::Vec3(xdepth, 0, 0);
 			}
 			if (abs(ydepth) < abs(zdepth)) {
-				return v3::Vector3(0, ydepth, 0);
+				return v3::Vec3(0, ydepth, 0);
 			}
-			return v3::Vector3(0, 0, zdepth);
+			return v3::Vec3(0, 0, zdepth);
 		}
 		return v3::zerov;
 

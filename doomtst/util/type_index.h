@@ -32,7 +32,7 @@ namespace type_id {
 
     inline constexpr Id None{ None_id };
 
-    struct dense_type_system {
+    struct type_indexer {
         uint32_t type_index = 0;
         Cont::array<Id> sparse_map;
 
@@ -63,7 +63,7 @@ namespace type_id {
         template<typename T>
         bool contains() const {
             uint32_t id = get_typeid<T>();
-            return id < sparse_map.length && sparse_map[id].valid();
+            return id < sparse_map.length && sparse_map.contains(id);
         }
 
         template <typename... Types>

@@ -28,8 +28,8 @@ struct playerdaggercomp : gameobject::component
 			{
 				return;
 			}
-			Vector3 spawpos =owner.transform().position + owner.transform().getnormaldirection() * 3;
-			Vector3 velocity =owner.transform().getnormaldirection() * 10;
+			Vec3 spawpos =owner.transform().position + owner.transform().getnormaldirection() * 3;
+			Vec3 velocity =owner.transform().getnormaldirection() * 10;
 
 			spawndagger(spawpos, velocity);
 			wearduribilty();

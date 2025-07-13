@@ -3,7 +3,7 @@
 #include "textrender.h"
 #include "renderer.h"
 TextureArray* textarray;
-integertext::integertext(v2::Vector2 textcenter, float textscale)
+integertext::integertext(v2::Vec2 textcenter, float textscale)
 {
 	center = textcenter;
 	scale = textscale; 
@@ -51,7 +51,7 @@ void inittextarray()
 {
 
     array<const char*> texlist = array<const char*>(10);
-	texlist.expand(10);
+
     texlist[0] = "bitmaptext\\zeroimg.png";
     texlist[1] = "bitmaptext\\oneimg.png";
     texlist[2] = "bitmaptext\\twoimg.png";
@@ -70,14 +70,14 @@ void writeletter(geometry::Box2d location, int letter)
 	const int baselocation = datbuf.length / 5;
 	for (int j = 0; j < 4; j++) {
 		// Index of unique vertex in each face
-		v2::Vector2 pointtoappend = location.scale * offset[j] + location.center;
+		v2::Vec2 pointtoappend = location.scale * offset[j] + location.center;
 		// Actual location
 		datbuf.push(pointtoappend.x);
 
 		datbuf.push(pointtoappend.y);
 
 		// UV coordinates
-		v2::Vector2 coords = cubeuv[j];
+		v2::Vec2 coords = cubeuv[j];
 		datbuf.push(coords.x);
 		datbuf.push(coords.y);
 
@@ -97,9 +97,9 @@ void writeletter(geometry::Box2d location, int letter)
 }
 void integertext::write()
 {
-	v2::Vector2 min = center - (v2::Vector2(1.5f*word.length(), 1.f) * scale) / 2;
-	v2::Vector2 boxoffset = v2::Vector2(1.5, 1) * scale / 2.0;
-	v2::Vector2 increse=  v2::Vector2(1.5,0) * scale;
+	v2::Vec2 min = center - (v2::Vec2(1.5f*word.length(), 1.f) * scale) / 2;
+	v2::Vec2 boxoffset = v2::Vec2(1.5, 1) * scale / 2.0;
+	v2::Vec2 increse=  v2::Vec2(1.5,0) * scale;
 	geometry::Box2d charlocation = geometry::Box2d(min+boxoffset, v2::unitv * scale);
 	for (int i = 0; i < word.length(); i++)
 	{

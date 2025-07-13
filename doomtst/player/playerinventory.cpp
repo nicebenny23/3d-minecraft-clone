@@ -25,7 +25,7 @@ inventory::inventory()
 {
 
 	selectedind = -1;
-	playermenu = inventorymen(v2::Vector2(.5f, .5f));
+	playermenu = inventorymen(v2::Vec2(.5f, .5f));
 	playermenu.menutype = inventorymenu;
 	inventorylocation = &playermenu;
 		hotbar = Container(6, 1, 0, -4.5);

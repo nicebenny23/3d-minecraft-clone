@@ -19,7 +19,7 @@ void player::initplayer()
 {
 
 	float playerfric = 5;
-	goblin = CtxName::ctx.OC->CreateEntity(Vector3(0,00,0));
+	goblin = CtxName::ctx.OC->CreateEntity(Vec3(0,00,0));
 
 	goblin.addcomponent<estate>(10,true);
 	goblin.transform().scale = unitv / 2;

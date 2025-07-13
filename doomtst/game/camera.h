@@ -5,11 +5,11 @@
 #include "../renderer/renderer.h"
 namespace camera {
 	
-	v3::Vector3 GetCamFront();
-	v3::Vector3 GetCamUp();
-	v3::Vector3 GetCamRight();
+	v3::Vec3 GetCamFront();
+	v3::Vec3 GetCamUp();
+	v3::Vec3 GetCamRight();
 	Transform GetCam();
-v3::Vector3 campos();
+v3::Vec3 campos();
 
 }
 

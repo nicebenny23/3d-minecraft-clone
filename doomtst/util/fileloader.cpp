@@ -32,7 +32,7 @@ int safefile::fscanf(const char* format, ...)
     return result;
 }
 
-void safefile::fscanf(int expectedargs, const char* format, ...)
+void safefile::fscanf(size_t expectedargs, const char* format, ...)
 {
     va_list args;
     va_start(args, format);

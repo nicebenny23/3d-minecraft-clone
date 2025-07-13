@@ -8,7 +8,7 @@ inline void crystaltorchinit(blockname::block* blk) {
 	blk->attributes.transparent = true;
 	blk->emitedlight = 15;
 	blk->lightval = 15;
-	blk->mesh.box.scale = v3::Vector3(1 / 8.f, .375, 1 / 8.f);
+	blk->mesh.box.scale = v3::Vec3(1 / 8.f, .375, 1 / 8.f);
 	blk->mesh.attachindirection();
 
 	blk->createdefaultaabb(false);

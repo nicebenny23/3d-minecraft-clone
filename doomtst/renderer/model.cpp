@@ -9,7 +9,7 @@ ModelMeshName::ModelMesh& model::operator[](int index)
 void model::draw()
 {
 }
-void model::add(const char* meshname,const char * meshtexname,Vector3 pos)
+void model::add(const char* meshname,const char * meshtexname,Vec3 pos)
 {
 		Texture2D* meshtex = CtxName::ctx.Ren->Textures.Get2dTex(meshtexname,meshtexname);
 	meshlist.push(ModelMeshName::loadmesh(meshname, meshtex, zerov));

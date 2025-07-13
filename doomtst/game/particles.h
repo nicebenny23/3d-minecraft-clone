@@ -14,7 +14,7 @@ using namespace Cont;
 struct particleemiter: gameobject::component
 {
 
-	v3::Vector3 position;
+	v3::Vec3 position;
 	Texture2D* tex;
 	int maxparticles = 1000;
 	Mesh ParticleMesh;

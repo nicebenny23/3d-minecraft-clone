@@ -31,9 +31,6 @@ namespace Cont {
 		// At function that checks if the index is in range before returning the element.
 		T& at(size_t index);
 
-		// Unsafe method to directly access an element at the specified index.
-		T& UncheckedAt(const size_t index);
-
 		// Cut a range of elements from startindex to endindex.
 		void cutind(size_t startindex, size_t endindex);
 
@@ -132,7 +129,39 @@ namespace Cont {
 
 
 		};
+		using iterator = Iterator;
 
+		class ConstIterator {
+		private:
+			const T* ptr;
+
+		public:
+			using value_type = T;
+			using iterator = ConstIterator;
+			using size_type = std::uint32_t;
+
+			ConstIterator(const T* p) : ptr(p) {}
+
+			const T& operator*() const {
+				return *ptr;
+			}
+
+			ConstIterator& operator++() {
+				++ptr;
+				return *this;
+			}
+
+			bool operator!=(const ConstIterator& other) const {
+				return ptr != other.ptr;
+			}
+
+			bool operator==(const ConstIterator& other) const {
+				return ptr == other.ptr;
+			}
+		};
+
+		T& last();
+		T& first();
 		// Methods to get the beginning and end iterators for range-based for loops.
 		Iterator begin() {
 			return Iterator(list);  // Return an iterator to the first element.
@@ -141,8 +170,11 @@ namespace Cont {
 		Iterator end() {
 			return Iterator(list + length);  // Return an iterator past the last element.
 		}
-		using iterator = Iterator;
-
+		using const_iterator = ConstIterator;
+		const_iterator begin() const { return const_iterator(list); }
+		const_iterator end()   const { return const_iterator(list + length); }
+		const_iterator cbegin() const { return const_iterator(list); }
+		const_iterator cend()   const { return const_iterator(list + length); }
 		// Method to return the current capacity of the array.
 		size_t get_size() const {
 			return capacity;
@@ -155,6 +187,12 @@ namespace Cont {
 		//resize that changes length
 		void expand(size_t size);
 		void resize(size_t size = 0);
+		static constexpr size_t npos = (size_t)-1;
+		// Find the index of value, or npos if not found
+		size_t find(const T& value) const;
+
+		// Return true if value is in the array
+		bool contains(const T& value) const; 
 
 	};
 
@@ -218,14 +256,7 @@ namespace Cont {
 
 
 	}
-	//unsafe
-	template<class T, bool initelems>
-	inline T& array<T, initelems>::UncheckedAt(const size_t ind)
-	{
-
-		return list[ind];
-	}
-
+	
 	//keeps a range of indices including [start,end] ind,todo add inclusive exculsive toggle
 	template<class T, bool initelems>
 	void array<T, initelems>::slice(size_t startindex, size_t endindex) {
@@ -383,6 +414,27 @@ namespace Cont {
 
 
 	template<class T, bool initelems>
+	inline T& array<T, initelems>::last()
+	{
+
+		if (length == 0)
+		{
+			throw std::logic_error("Cannot acess the last element of an empty array");
+		}
+		return list[length-1];
+	}
+
+	template<class T, bool initelems>
+	inline T& array<T, initelems>::first()
+	{
+		if (length==0)
+		{
+			throw std::logic_error("Cannot acess the first element of an empty array");
+		}
+		return list[0];
+	}
+
+	template<class T, bool initelems>
 	inline void array<T, initelems>::expand(size_t size)
 	{
 		resize(resizelength(size));
@@ -450,6 +502,7 @@ namespace Cont {
 		}
 
 	}
+	
 
 	template<class T, bool initelems>
 	void array<T, initelems >::destroy() {
@@ -474,7 +527,7 @@ namespace Cont {
 
 
 		list= 0;
-		length = 0;
+		length = size;
 		capacity = 0;
 		if (0 < size)
 		{
@@ -602,4 +655,21 @@ namespace Cont {
 
 
 
+	template<class T, bool initelems>
+	inline size_t array<T, initelems>::find(const T & value) const
+	{
+
+		for (size_t i = 0; i < length; ++i) {
+			if (list[i] == value) {
+				return i;
+			}
+		}
+		return npos;
+	}
+
+	template<class T, bool initelems>
+	inline bool array<T, initelems>::contains(const T & value) const
+	{
+		return find(value) != npos;
+	}
 }

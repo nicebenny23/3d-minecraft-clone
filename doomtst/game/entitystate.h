@@ -19,7 +19,7 @@ struct estate : gameobject::component
 	bool prevonground;
 	int maxhealth;
 	float damagemultiplyer;
-	v3::Vector3 velocitylast;
+	v3::Vec3 velocitylast;
 	float lastongroundy;
 	float invincablilitymax;
 	float timetilldmg;

@@ -7,7 +7,7 @@ struct chestmenu :menu {
 
 	Container blkcont;
 
-	chestmenu(v2::Vector2 size) {
+	chestmenu(v2::Vec2 size) {
 		menubox = ui::createuielement<uibox>("images\\menutex.png", "MenuTexture", size, v2::zerov, 11);
 
 		menubox->state.enabled = false;
@@ -75,7 +75,7 @@ struct chestcomp : gameobject::component {
 }
 	void start() {
 
-		men = chestmenu(v2::Vector2(3, 3));
+		men = chestmenu(v2::Vec2(3, 3));
 	}
 };
 inline void chestinit(blockname::block* blk) {

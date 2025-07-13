@@ -342,7 +342,7 @@ namespace gameobject {
 			const size_t max_size = static_cast<size_t>(1) << 19;
 			ctx = nullptr;
 			entitymeta = array<EntityMetadata>(max_size);
-			entitymeta.expand(max_size);
+	
 			free_ids = array<size_t>();
 			for (size_t i = 0; i < max_size; i++)
 			{
@@ -361,7 +361,7 @@ namespace gameobject {
 		template<typename T>
 		T* getcomponentptr(obj& object);
 		
-		obj CreateEntity(v3::Vector3 SpawnPos);
+		obj CreateEntity(v3::Vec3 SpawnPos);
 		void InitObj(obj& object);
 
 		void destroy(obj& object);

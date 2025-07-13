@@ -18,18 +18,18 @@ noisemap::noisemap()
 float noisemap::Eval(Coord pos)
 {
 
-	return Eval(Vector3(pos));
+	return Eval(Vec3(pos));
 }
-float noisemap::Eval(Vector3 pos)
+float noisemap::Eval(Vec3 pos)
 {
 
 	return equalizer.apply_distribution((EvaluateNoiseAtPoint(pos+ NoiseOffset, properties)));
 }
 
 
-inline float dotGridGradient( const int& x, const int& y, const int& z, const Vector3& pos) {
+inline float dotGridGradient( const int& x, const int& y, const int& z, const Vec3& pos) {
 
-	Vector3 gradient = randompointonsphere(x,y,z);
+	Vec3 gradient = randompointonsphere(x,y,z);
 	
 	float dx = pos.x - x;
 	float dy = pos.y - y;
@@ -41,7 +41,7 @@ inline float dotGridGradient( const int& x, const int& y, const int& z, const Ve
 
 inline float dotGridGradient( int x, int y, int z, float xd, float yd, float zd)
 {
-	Vector3 pos = randompointonsphere(x, y, z);
+	Vec3 pos = randompointonsphere(x, y, z);
 	return xd * pos.x+ yd * pos.y+ zd * pos.z;
 }
 
@@ -93,7 +93,7 @@ float interpolatenoisemap(float x, float y, float z)
 	
 }
 
-float EvaluateNoiseAtPoint(Vector3 point,noiseparams params)
+float EvaluateNoiseAtPoint(Vec3 point,noiseparams params)
 {
 	float value = 0;
 	float maxintensity = 0;
@@ -102,7 +102,7 @@ float EvaluateNoiseAtPoint(Vector3 point,noiseparams params)
 	float scale = params.startscale;
 	for (int i = 0; i < params.octaves; i++)
 	{
-		Vector3 testpoint = point * scale;
+		Vec3 testpoint = point * scale;
 		float toadd = intensity * interpolatenoisemap(testpoint.x, testpoint.y, testpoint.z);
 		if (params.type==normalnoise)
 		{

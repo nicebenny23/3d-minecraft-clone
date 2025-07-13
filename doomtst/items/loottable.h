@@ -45,7 +45,7 @@ struct  loottable : gameobject::component
 	loottable() {
 
 		playerinteract = false;
-		lootlist = array<lootelement>(1);
+		lootlist = array<lootelement>();
 		utype = gameobject::updatenone;
 	}
 	void start() {

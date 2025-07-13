@@ -4,7 +4,7 @@
 namespace geointersect {
 	struct RayHit {
 		float dist;
-		v3::Vector3 intersectionpoint;
+		v3::Vec3 intersectionpoint;
 		ray Ray;
 		RayHit() : dist(0.0f), intersectionpoint(v3::zerov) {}
 		// Constructor with parameters

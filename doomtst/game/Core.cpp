@@ -35,7 +35,7 @@ namespace Core {
     // Cursor position callback: Calculates movement delta and updates normalized mouse position.
     void cursorPositionCallback(GLFWwindow* /*window*/, double xpos, double ypos)
     {
-        v2::Vector2 newPos(static_cast<float>(xpos), static_cast<float>(ypos));
+        v2::Vec2 newPos(static_cast<float>(xpos), static_cast<float>(ypos));
         game.Inp.mouseposdt = newPos - game.Inp.mousepos;
         game.Inp.mousepos = newPos;
         game.Inp.normedmousepos = CtxName::ctx.Window->Center(newPos);
@@ -83,7 +83,9 @@ namespace Core {
     void Engine::InitOC()
     {
         ctx->OC = &OC;
-        ctx->OC->inject_context(ctx);
+        ctx->OC->inject_context(ctx); 
+        new (&SystemRunner) SystemExecutor(&OC);
+        ctx->Executor = &SystemRunner;
     }
 
     void Engine::InitRenderer()

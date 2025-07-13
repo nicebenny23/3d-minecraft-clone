@@ -7,7 +7,7 @@ inline void torchinit(blockname::block* blk) {
 	blk->attributes.transparent = true;
 	blk->emitedlight =13;
 	blk->lightval = 8;
-	blk->mesh.box.scale = v3::Vector3(1 / 16.f, .375, 1 / 16.f);
+	blk->mesh.box.scale = v3::Vec3(1 / 16.f, .375, 1 / 16.f);
 	blk->mesh.attachindirection();
 
 	blk->createdefaultaabb(false);

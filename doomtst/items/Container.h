@@ -111,7 +111,7 @@ struct Container
 	}
 	int sizex;
 	int sizey;
-	v2::Vector2 offset;
+	v2::Vec2 offset;
 	void enable() {
 		for (int i = 0; i < databuf.length; i++)
 		{
@@ -137,9 +137,9 @@ struct Container
 		currentcontid++;
 		sizex = xsize;
 		sizey = ysize;
-		offset = v2::Vector2(xoff, yoff);
+		offset = v2::Vec2(xoff, yoff);
 		int ind = 0;
-		databuf = array<itemslot,true>(xsize * ysize);
+		databuf = array<itemslot,true>();
 		for (int j = 0; j < ysize; j++)
 		{
 			for (int i = 0; i < xsize; i++)

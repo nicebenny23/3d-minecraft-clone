@@ -41,8 +41,8 @@ namespace aabb {
                 {
                     int l = 1;
                 }
-                Vector3 scale = blk.mesh.box.scale;
-                Vector3 pos = blk.center();
+                Vec3 scale = blk.mesh.box.scale;
+                Vec3 pos = blk.center();
                 global.center = box.center * scale * 2 + pos;
                 global.scale = box.scale * scale * 2;
 
@@ -53,7 +53,7 @@ namespace aabb {
         short index;
       
         Collider() = default;
-        Collider(const v3::Vector3& objcenter, const v3::Vector3& objscale, bool appendtolist,bool iseffector=false);
+        Collider(const v3::Vec3& objcenter, const v3::Vec3& objscale, bool appendtolist,bool iseffector=false);
         ~Collider() = default;
 
        
@@ -64,7 +64,7 @@ namespace aabb {
 
     void initCollider();
     bool aabbboxintersect(geometry::Box p1, Collider& p2);
-   v3::Vector3 collideaabb(Collider p1, Collider p2);
+   v3::Vec3 collideaabb(Collider p1, Collider p2);
 
     extern Sparse::PackedSet<Collider*> Colliderlist;
 }

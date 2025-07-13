@@ -9,12 +9,12 @@ struct furnacemenu :menu {
 
 	recipemanager blkcont;
 	Cptr::cptr<uibox> progressbar;
-	furnacemenu(v2::Vector2 size) {
+	furnacemenu(v2::Vec2 size) {
 		menubox = ui::createuielement<uibox>("images\\menutex.png", "MenuTexture", size, v2::zerov, 1);
 	
 		menubox->state.enabled = false;
 		menutype = normalmenu;
-		progressbar = ui::createuielement<uibox>("images\\greenbar.png", "GreenBarTexture", v2::Vector2(0, .1) , v2::Vector2(0, 0), 100);
+		progressbar = ui::createuielement<uibox>("images\\greenbar.png", "GreenBarTexture", v2::Vec2(0, .1) , v2::Vec2(0, 0), 100);
 		blkcont = recipemanager("crafting\\furnace.txt", 1,1);
 		progressbar->state.enabled= false;
 		enabled = false;
@@ -68,8 +68,8 @@ struct furnacecomp : gameobject::component {
 	}
 	void update() {
 		float scale1 = (2 - men.blkcont.attributes.timetillcraft) / 10;
-		v2::Vector2 center = v2::Vector2(0, .2) + v2::Vector2(scale1/2 , .1);
-		v2::Vector2 scale = v2::Vector2(scale1, .03);
+		v2::Vec2 center = v2::Vec2(0, .2) + v2::Vec2(scale1/2 , .1);
+		v2::Vec2 scale = v2::Vec2(scale1, .03);
 		Box2d progbox = Box2d(center, scale/2);
 		men.progressbar->box = progbox;
 
@@ -109,7 +109,7 @@ struct furnacecomp : gameobject::component {
 	}
 	void start() {
 
-		men = furnacemenu(v2::Vector2(3, 3));
+		men = furnacemenu(v2::Vec2(3, 3));
 	}
 };
 inline void furnaceinit(blockname::block* blk) {

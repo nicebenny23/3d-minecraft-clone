@@ -14,14 +14,14 @@ void randomcoord(unsigned int& seed);
 
 int randomint( int max);
 
-extern Cont::array<v3::Vector3> seededdirections;
+extern Cont::array<v3::Vec3> seededdirections;
 int Hash(int seed, int xPrimed, int yPrimed, int zPrimed);
-inline v3::Vector3 randompointonsphere(int x, int y, int z) {
+inline v3::Vec3 randompointonsphere(int x, int y, int z) {
 	int seed = 3;
 	int hash = Hash(seed, x, y, z);
 	hash ^= hash >> 15;
 	hash &= MAXSHORT - 1;
-	return seededdirections.UncheckedAt(hash);
+	return seededdirections.list[hash];
 
 }
 

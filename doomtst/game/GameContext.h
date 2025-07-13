@@ -3,6 +3,7 @@
 #include "../util/userinput.h"
 #include "../util/time.h"
 #include "entity.h"
+#include "System.h"
 #pragma once
 
 
@@ -32,10 +33,11 @@ namespace CtxName {
 			OC = nullptr;
 			
 		}
+
 		userinput::InputManager* Inp;
 		window::Window* Window;
 		timename::TimeManager* Time;
-
+		SystemExecutor* Executor;
 		gameobject::Ecs* OC;
 
 		renderer::Renderer* Ren;

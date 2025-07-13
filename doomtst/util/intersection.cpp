@@ -3,7 +3,7 @@
 namespace geointersect {
 	boxRayCollision intersection(geometry::Box box, ray fray)
 	{
-		v3::Vector3 dir = fray.dir();
+		v3::Vec3 dir = fray.dir();
 
 		//not actually max
 		float xval1 = (box.center.x - box.scale.x - fray.start.x) / dir.x;

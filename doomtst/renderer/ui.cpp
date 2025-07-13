@@ -6,10 +6,7 @@ array<cptr<ui::uielement>,true> ui::uielemlist;
 void ui::createuilist()
 {
 	uielemlist = array<cptr<uielement>,true>(uisize);
-	for (int i = 0; i < uisize; i++)
-	{
-		uielemlist.push( cptr<uielement>());
-	}
+
 }
 
 int ui::compareuielem(const void* b, const void* a)

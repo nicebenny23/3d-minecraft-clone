@@ -22,7 +22,7 @@ namespace ModelMeshName {
 	{
 		float yaw;
 		float pitch;
-		v3::Vector3 pos;
+		v3::Vec3 pos;
 		void setmodeluniform();
 		
 		void setmodeluniform(glm::mat4 model);
@@ -31,8 +31,8 @@ namespace ModelMeshName {
 		ModelMesh();
 	
 		Transform transform;
-		array<Vector3> vertices;
-		array<v2::Vector2> texcoords;
+		array<Vec3> vertices;
+		array<v2::Vec2> texcoords;
 		array<unsigned int> vertexindices;
 		array<unsigned int> texindices;
 		void destroy() {
@@ -42,8 +42,8 @@ namespace ModelMeshName {
 			texindices.destroy();
 			vertices.destroy();
 		}
-		Vector3 nthvertex(int i);
-		v2::Vector2 nthtex(int i);
+		Vec3 nthvertex(int i);
+		v2::Vec2 nthtex(int i);
 		Mesh mesh;
 		void setvobjs() {
 		CtxName::ctx.Ren->Gen<false>(&mesh);
@@ -53,7 +53,7 @@ namespace ModelMeshName {
 
 		glm::mat4* modelmatrix;
 
-	};	ModelMesh* loadmesh(const char* name, Texture2D* TEX, Vector3 position);
+	};	ModelMesh* loadmesh(const char* name, Texture2D* TEX, Vec3 position);
 	void rendermesh(ModelMesh* torender);
 
 }
