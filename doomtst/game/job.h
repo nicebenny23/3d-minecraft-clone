@@ -1,12 +1,12 @@
 #pragma once
 
 struct Job {
-	size_t;
+	size_t id;
 
 };
 
 struct JobManager {
 
 
-
+	
 };

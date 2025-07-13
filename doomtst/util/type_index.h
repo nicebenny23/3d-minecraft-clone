@@ -2,6 +2,7 @@
 #include "dynamicarray.h"
 #include <stdexcept>
 #include <atomic>
+#include "Option.h"
 #include <cstdint>
 #include "pair.h"
 namespace type_id {
@@ -14,7 +15,7 @@ namespace type_id {
 
     // Retrieve a unique ID for type T
     template<typename T>
-    uint32_t get_typeid() {
+    uint32_t typeIndex() {
         static const uint32_t id = global_type_counter.fetch_add(1, std::memory_order_relaxed);
         return id;
     }
@@ -42,16 +43,26 @@ namespace type_id {
 
         template<typename T>
         Id get() {
-            uint32_t id = get_typeid<T>();
+            uint32_t id = typeIndex<T>();
             Id& dense_id = sparse_map.reach(id);
             if (!dense_id.valid()) {
-                dense_id = Id(type_index++);
+                throw std::logic_error(std::string("Id of" + std::string(typeid(T).name()) + "has not been created"));
             }
             return dense_id;
         }
+
+        template<typename T>
+        Opt::Option<Id> get_opt() {
+            uint32_t id = typeIndex<T>();
+            Id& dense_id = sparse_map.reach(id);
+            if (!dense_id.valid()) {
+                return Opt::None; 
+            }
+            return Opt::Option<Id>(dense_id);
+        }
         template<typename T>
         util::Pair<Id, bool> insert() {
-            uint32_t id = get_typeid<T>();
+            uint32_t id = typeIndex<T>();
             Id& dense_id = sparse_map.reach(id);
             bool is_new = false;
             if (!dense_id.valid()) {
@@ -62,8 +73,8 @@ namespace type_id {
         }
         template<typename T>
         bool contains() const {
-            uint32_t id = get_typeid<T>();
-            return id < sparse_map.length && sparse_map.contains(id);
+            uint32_t id = typeIndex<T>();
+            return id < sparse_map.length && sparse_map.contains<T>(id);
         }
 
         template <typename... Types>
