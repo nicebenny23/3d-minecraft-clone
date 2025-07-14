@@ -41,7 +41,7 @@ namespace Cont {
             return data.empty();
         }
 
-        size_t size() const {
+        size_t length() const {
             return data.length;
         }
 

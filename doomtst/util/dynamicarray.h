@@ -180,10 +180,6 @@ namespace Cont {
 			return capacity;
 		}
 
-		// A method that checks if a value is undefined (default-constructed).
-		bool is_undefined(const T& value) const {
-			return value == T();  // Assuming that the default constructor of T indicates an undefined value.
-		}
 		//resize that changes length
 		void expand(size_t size);
 		void resize(size_t size = 0);
@@ -673,3 +669,4 @@ namespace Cont {
 		return find(value) != npos;
 	}
 }
+//newline

@@ -41,7 +41,7 @@ struct Dag {
         if (!list.contains(toIndex)) list.push(toIndex);
     }
 
-    size_t size() const { return nodes.length; }
+    size_t length() const { return nodes.length; }
     DagNode<T>& operator[](size_t nodeIndex) { return nodes[nodeIndex]; }
     const DagNode<T>& operator[](size_t nodeIndex) const { return nodes[nodeIndex]; }
 
@@ -53,7 +53,7 @@ struct Dag {
 // Topological sort returning values in order
 template<typename T>
 inline Cont::array<T> dag_sort(const Dag<T>& graph) {
-    size_t nodeCount = graph.size();
+    size_t nodeCount = graph.length();
     Cont::array<int> inDegree(nodeCount, 0);
     Cont::stack<size_t> zeroQueue;
 

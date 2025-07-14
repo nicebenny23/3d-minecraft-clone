@@ -373,6 +373,7 @@
     <ClInclude Include="util\stbiload.h" />
     <ClInclude Include="renderer\Vao.h" />
     <ClInclude Include="renderer\VertexObjectManager.h" />
+    <ClInclude Include="util\thread_pool.h" />
     <ClInclude Include="util\topo_sort.h" />
     <ClInclude Include="util\typelist.h" />
     <ClInclude Include="util\type_graph.h" />
