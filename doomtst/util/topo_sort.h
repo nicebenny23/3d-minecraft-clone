@@ -24,7 +24,14 @@ struct DagNode {
 template<typename T>
 struct Dag {
     Cont::array<DagNode<T>> nodes;
+    void destroy() {
 
+
+        nodes.destroy();
+
+
+
+    }
     Dag() = default;
     Dag(const Dag& other) : nodes(other.nodes) {}
 
@@ -39,6 +46,42 @@ struct Dag {
     void addEdge(size_t fromIndex, size_t toIndex) {
         auto& list = nodes[fromIndex].successors;
         if (!list.contains(toIndex)) list.push(toIndex);
+    } 
+    
+    void EnsureEdge(const T& start, const T& end) {
+        auto& list = nodes[reach_find(start)].successors;
+        size_t end_ind = reach_find(end);
+        if (!list.contains(end_ind)) list.push(end_ind);
+        
+    }
+    size_t find(const T& SearchValue) const {
+        for (DagNode<T> node:nodes)
+        {
+            if (node.value == SearchValue) {
+                return node.index;
+            }
+        }
+
+    }
+    size_t find_create(const T& SearchValue){
+        for (DagNode<T> node : nodes)
+        {
+            if (node.value == SearchValue) {
+                return node.index;
+            }
+        }
+        push(SearchValue);
+
+    }
+
+    bool contains(const T& SearchValue) const {
+        for (DagNode<T> node : nodes)
+        {
+            if (node.value == SearchValue) {
+                return true;
+            }
+        }
+        return false;
     }
 
     size_t length() const { return nodes.length; }
@@ -80,7 +123,35 @@ inline Cont::array<T> dag_sort(const Dag<T>& graph) {
     if (sorted.length != nodeCount) throw std::logic_error("Cycle detected in DAG");
     return sorted;
 }
+template<typename T>
+ bool is_acyclic(const Dag<T>& graph) {
+    size_t nodeCount = graph.length();
+    Cont::array<int> inDegree(nodeCount, 0);
+    Cont::stack<size_t> zeroQueue;
 
+    // compute in-degrees
+    for (size_t i = 0; i < nodeCount; i++) {
+        for (auto succIndex : graph.nodes[i].successors) {
+            ++inDegree[succIndex];
+        }
+    }
+    // enqueue zeros
+    for (size_t i = 0; i < nodeCount; ++i) {
+        if (inDegree[i] == 0) zeroQueue.push(i);
+    }
+    // process
+    size_t proccesed=0;
+
+    while (!zeroQueue.empty()) {
+        size_t currentIndex = zeroQueue.pop();
+        proccesed++;
+        for (auto succIndex : graph.nodes[currentIndex].successors) {
+            if (--inDegree[succIndex] == 0) zeroQueue.push(succIndex);
+        }
+    }
+    return (proccesed == nodeCount);
+
+}
 // Builder with clear names
 template<typename T, typename Hash = std::hash<T>>
 struct DagBuilder {
@@ -157,52 +228,56 @@ struct DagBuilder {
 
 private:
     void rebuild() {
-        // Determine all active indices
-        std::unordered_set<size_t> activeSet;
-        for (auto& entry : valueIndex) activeSet.insert(entry.second);
-
-        // Clear previous filtered graph
-        filteredGraph.nodes.destroy();
-
-        // Build ordered list: first insertionOrder, then remaining active nodes
-        Cont::array<size_t> orderedIndices;
-        std::unordered_set<size_t> added;
-        // Add in insertion order
-        for (auto& val : pushed) {
-            size_t idx = valueIndex[val];
-            orderedIndices.push(idx);
-            added.insert(idx);
-        }
-        // Append any other active nodes
-        for (size_t idx = 0; idx < fullGraph.length(); idx++) {
-            if (activeSet.count(idx) && !added.count(idx)) {
-                orderedIndices.push(idx);
-                added.insert(idx);
-            }
-        }
-
-        // Add nodes to filtered graph; addNode sets correct index
-        for (size_t oldIdx : orderedIndices) {
-            filteredGraph.addNode(fullGraph.nodes[oldIdx].value);
-        }
-
-        // Prepare remap from old->new
-        Cont::array<size_t> remap(fullGraph.length());
-        
-        for (size_t newIdx = 0; newIdx < orderedIndices.length; newIdx++) {
-            remap[orderedIndices[newIdx]] = newIdx;
-        }
-
-        // Add edges within filtered graph
-        for (size_t newIdx = 0; newIdx < orderedIndices.length; newIdx++) {
-            size_t oldIdx = orderedIndices[newIdx];
-            for (auto succIdx : fullGraph.nodes[oldIdx].successors) {
-                if (activeSet.count(succIdx)) {
-                    filteredGraph.addEdge(newIdx, remap[succIdx]);
-                }
-            }
-        }
-
+       filteredGraph = filter(fullGraph,pushed);
         dirty = false;
     }
+   
 };
+
+template<typename T>
+Cont::array<T> filter(const Cont::array<T>& whole, const Cont::array<T>& keep) {
+    Cont::array<T> result;
+    for (const auto & elem: whole)
+    {
+        if (keep.contains(elem))
+        {
+            result.push(elem);
+        }
+    }
+    return result;
+}
+template<typename T>
+Dag<T> filter(Dag<T> full, const Cont::array<T>& keep) {
+    Dag<T> new_dag;
+    std::unordered_set<size_t> added;
+    Cont::array<size_t> remap;
+    Cont::array<size_t> filter_ind;
+    for (size_t i = 0; i < full.length(); i++)
+    {
+        if (keep.contains(full[i].value))
+        {
+            //?
+            remap.reach(i) = new_dag.length();
+            new_dag.addNode(full[i].value);
+            filter_ind.push(i);
+        
+        }
+
+    }
+    for (size_t i = 0; i < full.length(); i++)
+    {
+        if (keep.contains(full[i].value))
+        {
+           
+            DagNode<T>& new_element = new_dag[remap[i]];
+            new_element.successors = filter(full[i].successors,filter_ind);
+            for (size_t j = 0; j < new_element.successors.length; j++)
+            {
+
+                new_element.successors[j]= remap[new_element.successors[j]];
+
+            } 
+        }
+    }
+    return new_dag;
+}

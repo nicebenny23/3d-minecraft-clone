@@ -69,7 +69,13 @@ namespace Depends {
             // Update sorted list automatically
             sortedActive = dag_sort(builder.getFiltered());
         }
+        const type_id::type_indexer indexer() const {
+            return typeSystem;
+        }
+        Dag<size_t> filtered() {
 
+            return (builder.getFiltered());
+        }
     private:
         struct CollectDependees {
             template<typename Dep>
@@ -81,6 +87,7 @@ namespace Depends {
 
         DagBuilder<size_t> builder;
         type_id::type_indexer typeSystem;
+
     };
 
 } // namespace Depends

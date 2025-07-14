@@ -49,7 +49,7 @@ int idfromnoise( float nint, float bint,  float nint3) {
 	return neid;
 
 }
-int generatechunkvalfromnoise(Vec3 pos, noisemap* map, noisemap* biomemap, noisemap* feturemap, noisemap* lavamap, noisemap* map2)
+int generatechunkvalfromnoise(Vec3 pos, noisemap* map)
 {
 	pos *= blocksize;
 	
@@ -86,11 +86,7 @@ struct idmap
 {
 
 	noisemap* map;
-	noisemap* map2;
-	noisemap* feturemap;
-
-	noisemap* biomemap;
-	noisemap* lavalayermap;
+	
 	array<idblock> ids;
 	Coord loc;
 	int idatpos(Coord pos) {
@@ -113,11 +109,7 @@ struct idmap
 	idmap(Coord location) {
 
 		map = genperlin(1, .6f, .02f, 1.2, rigid);
-		map2 = nullptr;
-		feturemap = nullptr;
 
-		biomemap = nullptr;
-		lavalayermap = genperlin(1, .5f, .03f, 1.2, normalnoise);
 		loc = location;
 		ids = array<idblock>();
 		int ind = 0;
@@ -127,8 +119,8 @@ struct idmap
 				for (int z = 0; z < chunkaxis; z++) {
 					Coord idpos = loc * chunkaxis + Coord(x, y, z);
 
-					int neid = generatechunkvalfromnoise(idpos, map, biomemap, feturemap, lavalayermap, map2);
-					ids.push( idblock(neid, idpos));
+					int neid = generatechunkvalfromnoise(idpos, map);
+					ids.push(idblock(neid, idpos));
 
 				}
 			}
@@ -138,154 +130,153 @@ struct idmap
 	}
 	void destroy() {
 		ids.destroy();
-		lavalayermap->destroy();
 		map->destroy();
 
 	}
 
 };
-	Chunk::chunk* ChunkLoader::AllocChunk(Coord location)
-	{
-		Chunk::chunk& newchunk = *(new Chunk::chunk());
-		newchunk.modified = false;
-		createchunkmesh(&newchunk);
-		newchunk.loc = location;
-		newchunk.blockbuf = new gameobject::obj[chunksize];
-		for (int i = 0; i < chunksize; i++) {
-			Grid->ctx->OC->InitObj(newchunk.blockbuf[i]);
-			newchunk.blockbuf[i].addcomponent < block>();
-		
-		}
-		return &newchunk;
+Chunk::chunk* ChunkLoader::AllocChunk(Coord location)
+{
+	Chunk::chunk& newchunk = *(new Chunk::chunk());
+	newchunk.modified = false;
+	createchunkmesh(&newchunk);
+	newchunk.loc = location;
+	newchunk.blockbuf = new gameobject::obj[chunksize];
+	for (int i = 0; i < chunksize; i++) {
+		Grid->ctx->OC->InitObj(newchunk.blockbuf[i]);
+		newchunk.blockbuf[i].addcomponent < block>();
+
 	}
+	return &newchunk;
+}
 
-	Chunk::chunk* ChunkLoader::LoadFromFile(Coord location)
+Chunk::chunk* ChunkLoader::LoadFromFile(Coord location)
+{
+
+	const char* name = Chunk::getcorefilename(location);
+	safefile file = safefile(name, fileread);
+	unsigned short* bytelist = file.read<unsigned short>(chunksize);
+
+	file.go(chunksize * 2);
+	unsigned short* randomproperties = file.read<unsigned short>(chunksize);
+	Chunk::chunk& newchunk = *AllocChunk(location);
+	int i = 0;
+	for (int x = 0; x < chunkaxis; x++)
 	{
+		for (int y = 0; y < chunkaxis; y++) {
+			for (int z = 0; z < chunkaxis; z++)
+			{
+				Coord blockpos = Coord(x, y, z) + location * chunkaxis;
 
-		const char* name = Chunk::getcorefilename(location);
-		safefile file = safefile(name, fileread);
-		unsigned short* bytelist = file.read<unsigned short>(chunksize);
+				byte blockid = bytelist[i] & unsigned char(255);
+				byte dirprop = bytelist[i] >> unsigned char(8);
 
-		file.go(chunksize * 2);
-		unsigned short* randomproperties = file.read<unsigned short>(chunksize);
-		Chunk::chunk& newchunk = *AllocChunk(location);
-		int i = 0;
-		for (int x = 0; x < chunkaxis; x++)
-		{
-			for (int y = 0; y < chunkaxis; y++) {
-				for (int z = 0; z < chunkaxis; z++)
+
+				byte mesh_attachdir = dirprop >> unsigned char(3);
+				byte dir = dirprop & unsigned char(7);
+				if (dir > 5)
 				{
-					Coord blockpos = Coord(x, y, z) + location * chunkaxis;
+					throw std::logic_error("Directional corruption error");
 
-					byte blockid = bytelist[i] & unsigned char(255);
-					byte dirprop = bytelist[i] >>unsigned char( 8);
+				}if (mesh_attachdir > 5)
+				{
+					throw std::logic_error("Directional corruption error");
 
-
-					byte mesh_attachdir = dirprop >> unsigned char(3);
-					byte dir = dirprop & unsigned char(7);
-					if (dir>5)
-					{
-							throw std::logic_error("Directional corruption error");
-						
-					}if (mesh_attachdir> 5)
-					{
-						throw std::logic_error("Directional corruption error");
-
-					}
-					blkinitname::genblock(newchunk.blockbuf[i].getcomponentptr<block>(), blockid, blockpos, mesh_attachdir, dir);
-
-					if (newchunk.blockbuf[i].hascomponent<liquidprop>())
-					{
-						newchunk.blockbuf[i].getcomponent<liquidprop>().liqval = randomproperties[i];
-					}
-					if (newchunk.blockbuf[i].hascomponent<craftingtablecomp>())
-					{
-
-						newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.destroy();
-						//we created a contaner so we are going back
-						currentcontid -= 2;
-						int resourceid = randomproperties[i] & 255;
-
-						int newloc = randomproperties[i] / 256.f;
-						newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.resourcecontainer = new Container(resourceid);
-						newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.newitemlocation = new Container(newloc);
-
-					}
-					if (newchunk.blockbuf[i].hascomponent<chestcomp>())
-					{
-
-						newchunk.blockbuf[i].getcomponent<chestcomp>().men.blkcont.destroy();
-						//we created a contaner so we are going back
-						currentcontid -= 1;
-						int resourceid = randomproperties[i] & 255;
-
-
-						newchunk.blockbuf[i].getcomponent<chestcomp>().men.blkcont = Container(resourceid);
-
-					}
-					if (newchunk.blockbuf[i].hascomponent<furnacecomp>())
-					{
-
-						newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.destroy();
-						//we created a contaner so we are going back
-						currentcontid -= 2;
-						int resourceid = randomproperties[i] & 255;
-
-						int newloc = randomproperties[i] / 256.f;
-						newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.resourcecontainer = new Container(resourceid);
-						newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.newitemlocation = new Container(newloc);
-
-					}
-					//if (newchunk.blockbuf[i].hascomponent<>())
-
-					i++;
 				}
+				blkinitname::genblock(newchunk.blockbuf[i].getcomponentptr<block>(), blockid, blockpos, mesh_attachdir, dir);
+
+				if (newchunk.blockbuf[i].hascomponent<liquidprop>())
+				{
+					newchunk.blockbuf[i].getcomponent<liquidprop>().liqval = randomproperties[i];
+				}
+				if (newchunk.blockbuf[i].hascomponent<craftingtablecomp>())
+				{
+
+					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.destroy();
+					//we created a contaner so we are going back
+					currentcontid -= 2;
+					int resourceid = randomproperties[i] & 255;
+
+					int newloc = randomproperties[i] / 256.f;
+					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.resourcecontainer = new Container(resourceid);
+					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.newitemlocation = new Container(newloc);
+
+				}
+				if (newchunk.blockbuf[i].hascomponent<chestcomp>())
+				{
+
+					newchunk.blockbuf[i].getcomponent<chestcomp>().men.blkcont.destroy();
+					//we created a contaner so we are going back
+					currentcontid -= 1;
+					int resourceid = randomproperties[i] & 255;
+
+
+					newchunk.blockbuf[i].getcomponent<chestcomp>().men.blkcont = Container(resourceid);
+
+				}
+				if (newchunk.blockbuf[i].hascomponent<furnacecomp>())
+				{
+
+					newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.destroy();
+					//we created a contaner so we are going back
+					currentcontid -= 2;
+					int resourceid = randomproperties[i] & 255;
+
+					int newloc = randomproperties[i] / 256.f;
+					newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.resourcecontainer = new Container(resourceid);
+					newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.newitemlocation = new Container(newloc);
+
+				}
+				//if (newchunk.blockbuf[i].hascomponent<>())
+
+				i++;
 			}
 		}
-
-
-		delete[] bytelist;
-		file.close();
-		return &newchunk;
-
 	}
 
 
-	Chunk::chunk* ChunkLoader::LoadFromNoise(Coord location)
+	delete[] bytelist;
+	file.close();
+	return &newchunk;
+
+}
+
+
+Chunk::chunk* ChunkLoader::LoadFromNoise(Coord location)
+{
+
+	Chunk::chunk& newchunk = *AllocChunk(location);
+	idmap statemap = idmap(location);
+
+
+	int ind = 0;
+	for (int x = 0; x < chunkaxis; x++)
 	{
-
-		Chunk::chunk& newchunk = *AllocChunk(location);
-		idmap statemap = idmap(location);
-		
-
-		int ind = 0;
-		for (int x = 0; x < chunkaxis; x++)
-		{
-			for (int y = 0; y < chunkaxis; y++) {
-				for (int z = 0; z < chunkaxis; z++)
-				{
-					Coord pos = statemap.ids[ind].pos;
-					int id = statemap.ids[ind].id;
+		for (int y = 0; y < chunkaxis; y++) {
+			for (int z = 0; z < chunkaxis; z++)
+			{
+				Coord pos = statemap.ids[ind].pos;
+				int id = statemap.ids[ind].id;
 
 
-					blkinitname::genblock(newchunk.blockbuf[ind].getcomponentptr<block>(), id, pos, 0, 0);
+				blkinitname::genblock(newchunk.blockbuf[ind].getcomponentptr<block>(), id, pos, 0, 0);
 
-					ind++;
-				}
+				ind++;
 			}
 		}
-		statemap.destroy();
-		return &newchunk;
 	}
-	void ChunkLoader::Init(CtxName::Context* ctx)
+	statemap.destroy();
+	return &newchunk;
+}
+void ChunkLoader::Init(CtxName::Context* ctx)
+{
+	Grid = ctx->Grid;
+}
+Chunk::chunk* ChunkLoader::LoadChunk(Coord location)
+{
+	if (fileexists(Chunk::getcorefilename(location)))
 	{
-		Grid = ctx->Grid;
+		return LoadFromFile(location);
 	}
-	Chunk::chunk* ChunkLoader::LoadChunk(Coord location)
-	{
-		if (fileexists(Chunk::getcorefilename(location)))
-		{
-			return LoadFromFile(location);
-		}
-		return LoadFromNoise(location);
-	}
+	return LoadFromNoise(location);
+}

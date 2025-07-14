@@ -71,7 +71,7 @@ namespace bitset {
             return *this;
         }
 
-        void destroy() {
+        ~bitset() {
             bitlist.destroy();
             bits = 0;
         }
@@ -329,5 +329,5 @@ namespace bitset {
         }
 
     };
-    static constexpr bitset None{};
+    
 }

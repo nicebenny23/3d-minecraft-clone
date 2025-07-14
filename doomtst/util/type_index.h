@@ -42,9 +42,9 @@ namespace type_id {
         }
 
         template<typename T>
-        Id get() {
+        Id get() const{
             uint32_t id = typeIndex<T>();
-            Id& dense_id = sparse_map.reach(id);
+            Id dense_id = sparse_map[id];
             if (!dense_id.valid()) {
                 throw std::logic_error(std::string("Id of" + std::string(typeid(T).name()) + "has not been created"));
             }
@@ -54,7 +54,7 @@ namespace type_id {
         template<typename T>
         Opt::Option<Id> get_opt() {
             uint32_t id = typeIndex<T>();
-            Id& dense_id = sparse_map.reach(id);
+            Id dense_id = sparse_map[id];
             if (!dense_id.valid()) {
                 return Opt::None; 
             }
@@ -74,7 +74,7 @@ namespace type_id {
         template<typename T>
         bool contains() const {
             uint32_t id = typeIndex<T>();
-            return id < sparse_map.length && sparse_map.contains<T>(id);
+            return id < sparse_map.length && sparse_map.contains(id);
         }
 
         template <typename... Types>

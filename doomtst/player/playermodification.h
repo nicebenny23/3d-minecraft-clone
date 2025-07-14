@@ -8,6 +8,7 @@
 #include "../debugger/debug.h"
 #include "playerinventory.h"
 #include "../items/itemutil.h"
+#include "../game/System.h"
 #pragma once 
 void initbreakparticle(gameobject::obj newent);
 struct playerbreak: gameobject::component
@@ -140,5 +141,13 @@ struct playerbreak: gameobject::component
 	}
 };
 
-
+struct PlayerUpdateSystem : System{
+	void run(gameobject::Ecs* ecs) {
+		query::View<playerbreak> rigids(ecs);
+		for (auto [body] : rigids) {
+			body->update();
+			
+		}
+	}
+};
  // ! playerplace_H

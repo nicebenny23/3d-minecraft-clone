@@ -4,11 +4,7 @@
 
 struct System {
 
-	virtual void run(gameobject::Ecs* ecs) {
-
-
-	}
-
+	virtual void run(gameobject::Ecs* ecs) = 0;
 };
 
 

@@ -262,6 +262,7 @@
     <ClInclude Include="game\job.h" />
     <ClInclude Include="game\navigation.h" />
     <ClInclude Include="game\query.h" />
+    <ClInclude Include="game\relationship.h" />
     <ClInclude Include="game\Settings.h" />
     <ClInclude Include="game\System.h" />
     <ClInclude Include="game\TagIndex.h" />

@@ -69,7 +69,7 @@ namespace query {
 		Iterator end() {
 			return Iterator(*this, 0, archtypes.length);
 		}
-		View(gameobject::Ecs* world):ecs(world) {
+		View(gameobject::Ecs* world):ecs(world), archtypes(){
 			auto positions = ecs->comp_map.get_type_ids<Components...>();
 			
 			bitset::bitset bitlist;
@@ -77,13 +77,16 @@ namespace query {
 			for (auto id : positions) {
 				bitlist.set(id.value);
 			}
-			Cont::array<gameobject::Archtype*> result;
 			for (auto& arch : ecs->arch) {
 				if (arch->has_components(bitlist)) {
-					result.push(arch);
+					archtypes.push(arch);
 				}
 			}
-			archtypes = result;
+		
+		}
+		~View() {
+
+			archtypes.destroy();
 		}
 	};
 	

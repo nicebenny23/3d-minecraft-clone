@@ -194,7 +194,7 @@ namespace gameobject {
 			for (size_t i = 0; i < moves.length; ++i) {
 				moves[i] = nullptr;
 			}
-			bit_list = bitset::None;
+			bit_list = bitset::bitset();
 		}
 
 
@@ -226,7 +226,7 @@ namespace gameobject {
 			OC = nullptr;
 		}
 		ArchtypeManager(Ecs* man) :OC(man) {
-			archtypes.push(new Archtype(bitset::None, OC));
+			archtypes.push(new Archtype(bitset::bitset(), OC));
 		};
 		bool check() {
 			for (Archtype* arch : archtypes) {
@@ -604,6 +604,7 @@ namespace gameobject {
 	}
 	inline bool Archtype::has_components(bitset::bitset set)
 	{
+
 		return (bit_list & set) == set;
 	}
 	template<typename T>
@@ -613,10 +614,8 @@ namespace gameobject {
 		if (!comp_id)
 		{
 			return false;
-
-			return has_component(*comp_id);
 		}
-
+		return has_component(*comp_id);
 		//will not care if component list has been changed during the iteration
 
 

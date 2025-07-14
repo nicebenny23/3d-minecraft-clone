@@ -668,5 +668,4 @@ namespace Cont {
 	{
 		return find(value) != npos;
 	}
-}
-//newline
+}//newline

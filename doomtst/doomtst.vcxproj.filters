@@ -785,6 +785,18 @@
     <ClInclude Include="util\type_tag.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game\job.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\thread_pool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\relationship.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag1.vs" />
