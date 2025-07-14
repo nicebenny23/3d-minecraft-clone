@@ -1,4 +1,4 @@
-#include <thread>
+/*include <thread>
 #include "dynamicarray.h"
 #include <functional>
 #include <condition_variable>
@@ -33,3 +33,4 @@ private:
 	std::condition_variable cv;
 		Cont::array<Func> tasks;
 };
+*/

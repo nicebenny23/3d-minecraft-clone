@@ -174,7 +174,7 @@ private:
             added.insert(idx);
         }
         // Append any other active nodes
-        for (size_t idx = 0; idx < fullGraph.size(); idx++) {
+        for (size_t idx = 0; idx < fullGraph.length(); idx++) {
             if (activeSet.count(idx) && !added.count(idx)) {
                 orderedIndices.push(idx);
                 added.insert(idx);
@@ -187,7 +187,7 @@ private:
         }
 
         // Prepare remap from old->new
-        Cont::array<size_t> remap(fullGraph.size());
+        Cont::array<size_t> remap(fullGraph.length());
         
         for (size_t newIdx = 0; newIdx < orderedIndices.length; newIdx++) {
             remap[orderedIndices[newIdx]] = newIdx;

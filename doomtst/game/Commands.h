@@ -50,7 +50,7 @@ struct CommandBuffer {
 	bool empty() {
 		for (auto& count : buffer)
 		{
-			if (count.size() != 0) {
+			if (count.length () != 0) {
 				return false;
 			}
 		}

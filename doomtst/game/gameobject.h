@@ -256,7 +256,7 @@ namespace gameobject {
 
 		void addArchtype(bitset::bitset Components) {
 
-			check();
+		
 			for (Archtype* arch : archtypes) {
 				if (arch->bit_list == Components) {
 					throw std::logic_error("cannot have duplicate archtypes in ecs");
@@ -281,12 +281,12 @@ namespace gameobject {
 				}
 			}
 
-			check();
+			
 		}
 
 		void moveflipArch(obj& object, comp::Id index) {
 
-			check();
+		
 			Archtype* current = object.meta().arch;
 			if (current == nullptr)
 			{
@@ -494,7 +494,7 @@ namespace gameobject {
 	{
 		verify_component<T>();
 
-		arch.check();
+	
 		Opt::Option<comp::Id> comp_id = comp_map.get_opt<T>();
 		if (!comp_id)
 		{
