@@ -42,7 +42,7 @@ namespace Chunk {
 		Vec3 center() {
 			return (loc+ unitv /2.f)*chunklength;
 		}
-		block& operator[](int index);
+		block& operator[](size_t index);
 		gameobject::obj* blockbuf;
 		void destroy();
 		float cameradist() {

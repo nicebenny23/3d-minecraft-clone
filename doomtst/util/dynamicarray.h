@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdexcept>
-
+#include <vector>
 #include <new>
 #include <cstdlib>
 #include <cstring>
@@ -26,7 +26,7 @@ namespace Cont {
 		bool empty();
 		// Standard operator[] that returns a reference to the element at the given index.
 		T& operator[](size_t index);
-		T& reach(size_t index);
+		T& reach(const size_t& index);
 		const T& operator[](size_t index) const;
 		// At function that checks if the index is in range before returning the element.
 		T& at(size_t index);
@@ -218,16 +218,16 @@ namespace Cont {
 
 	}
 	template<class T, bool initelems>
-	inline T& array<T, initelems>::reach(size_t index)
+	inline T& array<T, initelems>::reach(const size_t& index)
 	{
+
+		if (index >= length)
+		{
+			length = index + 1;
+		}
 		if (index >= capacity)
 		{
 			resize(resizelength(index));
-
-		}
-		if (index >= length) 
-		{
-			length = index + 1;
 
 		}
 		return list[index];
@@ -401,11 +401,8 @@ namespace Cont {
 		{
 			throw std::logic_error("Cannot pop empty array");
 		}
-		T store = list[length - 1];
-	
-		length -= 1;
-		return store;
-
+		//subtracts first
+		return list[(--length)];
 	}
 
 
@@ -453,30 +450,36 @@ namespace Cont {
 			T* newlist;
 			if constexpr(std::is_trivially_copyable_v<T>)
 			{
-				if (capacity==0)
-				{
-					newlist = (T*)malloc(sizeof(T) * size);
+				if constexpr (std::is_trivially_default_constructible_v<T>) {
+					if (capacity == 0)
+					{
+						newlist = (T*)std::calloc(size,sizeof(T));
+					}
+					else {
+						newlist = (T*)realloc((void*)list, sizeof(T) * size);
+						std::memset(newlist + capacity, 0, (size - capacity) * sizeof(T));
+					}
+					
 				}
 				else {
-					newlist = (T*)realloc((void*)list, sizeof(T) * size);
-				}
-				if (!newlist) {
-					throw std::bad_alloc();
-				}
+					if (capacity == 0)
+					{
+						newlist = (T*)malloc(sizeof(T) * size);
+					}
+					else {
+						newlist = (T*)realloc((void*)list, sizeof(T) * size);
+					}
+						for (size_t i = capacity; i < size; i++) {
 
-				list = newlist;
-				for (size_t i = capacity; i < size; i++) {
-
-					new (list + i)T();
+							new (newlist + i)T();
+						}
+								
 				}
+				
 			}
 			else
 			{
-				newlist = new T[size];
-				if (!newlist) {
-					throw std::bad_alloc();
-				}
-				
+				newlist = new T[size];		
 				for (size_t i = 0; i < capacity; i++) {
 
 					newlist[i] = std::move(list[i]); 
@@ -489,10 +492,13 @@ namespace Cont {
 
 					delete[] list;
 				}
-				list = newlist;
+				
 			}
-		
-
+			
+			list = newlist;
+			if (!list) {
+				throw std::bad_alloc();
+			}
 			capacity = size;
 
 		}

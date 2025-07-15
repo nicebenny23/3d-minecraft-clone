@@ -60,7 +60,7 @@ void blockmesh::setfaces(int leftface, int rightface, int upface, int downface, 
 
 
 
-face& blockmesh::operator[](int index)
+face& blockmesh::operator[](size_t index)
 {
 	if (index<6&&0<=index)
 	{
@@ -79,7 +79,7 @@ void blockname::blockmesh::attachindirection()
 	Vec3 blkpos = Vec3(blk->mesh.attachdir.ToVec())*blocksize / 2 + blk->center();
 	box.center += blkpos - maxpos;
 }
-face& blockname::block::operator[](int index)
+face& blockname::block::operator[](size_t index)
 {
 	return (mesh)[index];
 }

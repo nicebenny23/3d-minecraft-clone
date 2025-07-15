@@ -67,24 +67,27 @@ namespace blockname {
 	};
 	
 	struct blockmesh;
+	enum class cover_state :char {
+		Covered=0,
+		Uncovered=1,
+		Uncomputed=2
+
+	};
 	struct face {
 		
 
 		blockmesh* mesh;
 
 		float cameradist;
-		
 		byte tex;
 		Dir::Dir3d facenum;
 		byte light;
 	
 
-		bool covercomputed;
-		bool covered;
+		cover_state cover;
 		face() {
-			covercomputed = false;
+			cover = cover_state::Uncomputed;
 			mesh= nullptr;
-			covered = false;
 			facenum = Dir::None3d;
 			cameradist = -1;
 			tex = 0;
@@ -92,7 +95,7 @@ namespace blockname {
 		}
 	
 		void create(byte texval,  char num, blockmesh* owner) {
-			covercomputed = false;
+			cover= cover_state::Uncomputed;
 			tex = texval;
 			facenum =Dir::Dir3d(num);
 			mesh = owner;
@@ -124,7 +127,7 @@ namespace blockname {
 		
 		
 		
-		face& operator[](int index);
+		face& operator[](size_t index);
 		void attachindirection();
 		void setfaces(int leftface, int rightface, int upface, int downface, int frontface, int backface);
 		
@@ -167,7 +170,7 @@ namespace blockname {
 
 		blockstate bstate;
 	
-		face& operator[](int index);
+		face& operator[](size_t index);
 		blockatt attributes;
 		
 	

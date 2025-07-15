@@ -98,7 +98,7 @@ const int indiceoffsetfrombaselocation[] = {
 
 // Emit the vertices and indices for a single face of a block
 void emitface(const int face, block& torender, array<float>& datbuf, array<unsigned int>& indbuf) {
-		if (!torender.mesh.faces[face].covered) {
+		if (torender.mesh.faces[face].cover==cover_state::Uncovered) {
 			const int baselocation = datbuf.length / 7;
 			const int* uniqueInds = &uniqueindices[4 * face];
 			const Vec3& scale = torender.mesh.box.scale;
@@ -176,7 +176,7 @@ void recreatechunkmesh(Chunk::chunk* aschunk) {
 
 
 		for (int x = 0; x < 6; x++) {
-					if (!(blockatpos.mesh)[x].covered) {
+					if ((blockatpos.mesh)[x].cover==cover_state::Uncovered) {
 						aschunk->mesh->facebuf.push((blockatpos.mesh)[x]);
 					}
 		}

@@ -27,13 +27,11 @@ void gridutil::computecover(face& blkface)
 	if (!apx(blkface.mesh->box.scale, blockscale))
 	{
 		
-		blkface.covercomputed = true;
-			blkface.covered = false;
+			blkface.cover= cover_state::Uncovered;
 			return;
 		
 
 	}
-	blkface.covered = true;
 
 	
 	Coord pos = blkface.mesh->blk->pos+ blkface.facenum.ToVec();
@@ -42,27 +40,41 @@ void gridutil::computecover(face& blkface)
 	{
 
 		
-		blkface.covercomputed = false;
-		blkface.covered = !blkface.mesh->blk->attributes.transparent;
+		blkface.cover= blockname::cover_state::Uncomputed;
+		//blkface.covered = !blkface.mesh->blk->attributes.transparent;
 		return;
 	}
 	if (blkface.mesh->blk->attributes.transparent)
 	{
 
-		blkface.covercomputed = true;
 	
 		if (blkface.mesh->blk->id!=minecraftair)
 		{
+			if (blk->attributes.transparent && (blk->id == blkface.mesh->blk->id))
+			{
 
-			blkface.covered = blk->attributes.transparent && (blk->id == blkface.mesh->blk->id);
+				blkface.cover = cover_state::Uncovered;
 
+			}
+			else {
+				blkface.cover = cover_state::Covered;
+
+			}
 		}
 
 	}
 	else {
-		blkface.covercomputed = true;
-		blkface.covered = !blk->attributes.transparent;
-		
+	
+		if (blk->attributes.transparent)
+		{
+
+			blkface.cover = cover_state::Uncovered;
+
+		}
+		else {
+			blkface.cover = cover_state::Covered;
+
+		}
 
 	}
 
@@ -88,7 +100,7 @@ void gridutil::computeallcover()
 			for (int faceind = 0; faceind < 6; ++faceind)
 			{
 				face& tocover = blk[faceind];
-				if (!tocover.covercomputed)
+				if (tocover.cover== cover_state::Uncomputed)
 				{
 					gridutil::computecover(tocover);
 				}
@@ -180,7 +192,7 @@ void blockchangecoverupdate(blockname::block* location) {
 	
 	for (int faceind = 0; faceind < 6; faceind++)
 	{
-		(location->mesh)[faceind].covercomputed = false;
+		(location->mesh)[faceind].cover = cover_state::Uncomputed;
 		gridutil::computecover((location->mesh)[faceind]);
 	}
 	for (int blkind = 0; blkind < 6; blkind++)
@@ -190,7 +202,7 @@ void blockchangecoverupdate(blockname::block* location) {
 			
 			if (blockatpos != nullptr)
 			{
-				(blockatpos->mesh)[faceind].covercomputed = false;
+				(blockatpos->mesh)[faceind].cover = cover_state::Uncomputed;
 
 				gridutil::computecover(((blockatpos->mesh))[faceind]);
 			}

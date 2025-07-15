@@ -797,6 +797,12 @@
     <ClInclude Include="game\relationship.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game\bundle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\arraypool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag1.vs" />

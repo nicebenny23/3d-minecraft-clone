@@ -97,14 +97,14 @@ namespace gameobject {
 		template <class T>
 		void removecomponent();
 
-		bool exists() const;
+		inline bool exists() const;
 
 		Ids::Id Id;
 
 		template <class T, typename... types>
 		T* addcomponent(types&&... initval);
 
-		EntityMetadata& meta();
+		inline EntityMetadata& meta();
 
 
 		constexpr obj() noexcept {
@@ -119,9 +119,6 @@ namespace gameobject {
 
 		Ecs* OC;
 	private:
-
-
-
 		friend struct Ecs;
 	};
 	static constexpr obj None = obj();
@@ -161,20 +158,9 @@ namespace gameobject {
 				moved.meta().arch_ind = index;
 				std::swap(elems[index], elems[end_index]);
 			}
-
 			met.arch = nullptr;
 			elems.pop();
-			if (elems.length < 100)
-			{
-
-				for (auto& element : elems)
-				{
-
-					if (element.Id == object.Id) {
-						throw std::logic_error("skill");
-					}
-				}
-			}
+		
 
 
 		}
@@ -189,11 +175,9 @@ namespace gameobject {
 				moves.push(nullptr);
 			}
 		};
-		Archtype() {
+		Archtype():moves() {
 			OC = nullptr;
-			for (size_t i = 0; i < moves.length; ++i) {
-				moves[i] = nullptr;
-			}
+			
 			bit_list = bitset::bitset();
 		}
 
@@ -216,8 +200,8 @@ namespace gameobject {
 		componentStorage store;
 		updatetype utype;
 		int priority;
-		component* operator[](const obj& entity) {
-			return store[entity.Id.id];
+		component*& operator[](const obj& entity) {
+			return store.reach(entity.Id.id);
 		}
 		void init(component* sample);
 	};
@@ -239,10 +223,10 @@ namespace gameobject {
 			}
 			return false;
 		}
-		Archtype& operator[](size_t index) {
+		inline Archtype& operator[](size_t index) {
 			return *archtypes[index];
 		}
-		size_t length() {
+		inline size_t length() {
 			return archtypes.length;
 		}
 		array<Archtype*> archtypes;
@@ -256,7 +240,7 @@ namespace gameobject {
 
 		}
 
-		void addArchtype(bitset::bitset Components) {
+		void addArchtype(const bitset::bitset& Components) {
 
 		
 			for (Archtype* arch : archtypes) {
@@ -294,22 +278,25 @@ namespace gameobject {
 			{
 				throw std::logic_error("Component must be part of an archtype");
 			}
-
-			if (current->moves[index.value] == nullptr)
+			Archtype* next = current->moves[index.value];
+			if (next== nullptr)
 			{
 				bitset::bitset new_arch = current->bit_list;
 
 				new_arch.flip(index.value);
 				addArchtype(new_arch);
-			}
-			Archtype* new_type = current->moves[index.value];
-			if (new_type == nullptr)
-			{
-				throw std::logic_error("Improper archytype allocation");
-			}
+				//since it now exists
+				next = current->moves[index.value];
+				if (next == nullptr)
+				{
+					throw std::logic_error("Improper archytype allocation");
+				}
 
+			}
+		
+		
 			current->remove(object);
-			new_type->add(object);
+			next->add(object);
 
 
 		}
@@ -348,7 +335,7 @@ namespace gameobject {
 				free_ids.push(i);
 
 			}
-			managers = array<component_table>();
+			comp_storage = array<component_table>();
 
 		}
 		void inject_context(CtxName::Context* context)
@@ -367,15 +354,15 @@ namespace gameobject {
 
 
 		template <class T, typename... types>
-		T* add_component(types&&... initval, const obj& entity);
+		T* add_component(obj& entity,types&&... initval);
 
 		void updatecomponents(updatecalltype type);
 		void delete_component(component* comp);
 
 
-		type_id::type_indexer comp_map;
+		type_id::type_indexer component_indexer;
 		ArchtypeManager arch;
-		array<component_table> managers;
+		array<component_table> comp_storage;
 	private:
 
 		CtxName::Context* ctx;
@@ -416,7 +403,11 @@ namespace gameobject {
 			}
 		}
 	}
-
+	struct CompponentMetaData {
+		bool is_tag;
+		float priority;
+		updatetype utype;
+	};
 	struct component
 	{
 		comp::Id comp_id;
@@ -442,8 +433,9 @@ namespace gameobject {
 
 
 	};
+	
 	template<typename T>
-	constexpr void verify_component() {
+	inline constexpr void verify_component() {
 		static_assert(std::derived_from<T, component>, "T must derive from ObjComponent<T>");
 	}
 
@@ -467,117 +459,112 @@ namespace gameobject {
 		//replace with a get components call
 		verify_component<T>();
 
-		Opt::Option<comp::Id> comp_id = OC->comp_map.get_opt<T>();
+		Opt::Option<comp::Id> comp_id = OC->component_indexer.get_opt<T>();
 		if (!comp_id)
 		{
 			return;
 		}
 
-		auto& complist = OC->managers[(*comp_id).value].store;
-		if (complist[Id.id] != nullptr) {
-			OC->arch.moveflipArch(*this, *comp_id);
-			component* comp = complist[Id.id];
-			if (!comp) {
-				throw std::logic_error("invarient violation:component must exist if id is contained");
-			}
-			comp->destroy();
-
+		auto& complist = OC->comp_storage[(*comp_id).value].store;
+		
+		if (!hascomponent<T>()) {
+			return;
 		}
+		OC->arch.moveflipArch(*this, *comp_id);
+			
+		
+		component* comp = complist[Id.id];
+		if (!comp) {
+			throw std::logic_error("invarient violation:component must exist if id is contained");
+		}
+
+				comp->destroy();
+
+			
+		
 
 	}
 
-
-	void destroy(obj* object);
 
 	template<class T>
 	T* Ecs::getcomponentptr(obj& object)
 	{
 		verify_component<T>();
-
 	
-		Opt::Option<comp::Id> comp_id = comp_map.get_opt<T>();
+	
+		Opt::Option<comp::Id> comp_id = component_indexer.get_opt<T>();
 		if (!comp_id)
 		{
 			return nullptr;
 		}
-		componentStorage& complist = managers[comp_id.unwrap().value].store;
+		componentStorage& complist = comp_storage[comp_id.unwrap().value].store;
 
 		return (T*)(complist[object.Id.id]);
 
 	}
 	template<class T>
-	T* obj::getcomponentptr()
+	inline T* obj::getcomponentptr()
 	{
 		return OC->getcomponentptr<T>(*this);
 	}
+
+
 	template <class T>
-	T& obj::getcomponent()
+	T& obj::getcomponent() 
 	{
-		verify_component<T>();
-
-		T* ptr = getcomponentptr<T>();
-		if (ptr == nullptr)
-		{
-			throw std::invalid_argument("object does not have requested component");
-		}
-		return *ptr;
-
+		return *getcomponentptr<T>();
 	}
 	template <class T>
-	bool obj::hascomponent()
+	inline bool obj::hascomponent()
 	{
 		verify_component<T>();
+		return meta().arch->has_component(OC->component_indexer.get<T>());
 
-
-		return meta().arch->has_component(OC->comp_map.get<T>());
-
-	}
-
-
-
-
-
-
-	template <class T, typename... types>
-	T* obj::addcomponent(types&&... initval)
-	{
-		return OC->add_component<T>(std::forward<types>(initval)...);
 	}
 
 
 
 	template<class T, typename ...types>
-	inline T* Ecs::add_component(types && ...initval,const obj& entity)
+	inline T* Ecs::add_component(obj& entity,types && ...initval)
 	{
-		auto [cmpid, is_new] = comp_map.insert<T>();
-		componentStorage& row = managers[cmpid.value];
-		if (row[entity] != nullptr)
-		{
-			return row[entity];
-		}
-		T* comp = add_component<T>(std::forward<types>(initval)...);		
-		component_table& man = managers.reach(cmpid.value);
+		auto [cmpid, is_new] = component_indexer.insert<T>();
+	
+
+		component_table& row = comp_storage.reach(cmpid.value);
+			if (row[entity] != nullptr)
+			{
+				return (T*)row[entity];
+			}
+			if (is_new)
+			{
+				row.create(cmpid, sizeof(T), alignof(T));
+				row.store.expand(entitymeta.capacity);
+			
+			}
+			T* comp = new (row.pool.alloc()) T(std::forward<types>(initval)...);
+			comp->comp_id = cmpid;
+		
+			comp->owner = entity;
+			row[entity] = (component*)(comp);
 		if (is_new)
 		{
 			arch.expandArchtype();
-			man.create(cmpid, sizeof(T), alignof(T));
-			man.store.expand(entitymeta.capacity);
+			row.init(comp);
 		}
-		comp = new (man.pool.alloc()) T(std::forward<types>(initval)...);
-		comp->comp_id = cmpid;
-		if (is_new)
-		{
-			man.init(comp);
-		}
-		comp->owner = entity;
-		row[entity] = comp;
-		OC->arch.moveflipArch(*this, cmpid);
+		arch.moveflipArch(entity, cmpid);
+
 		comp->start();
-		return comp;
+		return (T*)comp;
 
 	}
-	inline bool operator == (const obj& obj1, const obj& obj2) {
 
+	template <class T, typename... types>
+	T* obj::addcomponent(types&&... initval)
+	{
+		return OC->add_component<T>(*this,std::forward<types>(initval)...);
+	}
+
+	inline bool operator == (const obj& obj1, const obj& obj2) {
 		return obj1.Id == obj2.Id;
 	}
 	inline bool gameobject::Archtype::has_component(comp::Id index)
@@ -590,28 +577,17 @@ namespace gameobject {
 	}
 	inline bool Archtype::has_components(bitset::bitset set)
 	{
-
 		return (bit_list & set) == set;
 	}
 	template<typename T>
 	bool Archtype::has_component()
 	{
-		Opt::Option<comp::Id> comp_id = OC->comp_map.get_opt<T>();
+		Opt::Option<comp::Id> comp_id = OC->component_indexer.get_opt<T>();
 		if (!comp_id)
 		{
 			return false;
 		}
 		return has_component(*comp_id);
 		//will not care if component list has been changed during the iteration
-
-
-
-
-
-
-
-
 	}
-
-
 }

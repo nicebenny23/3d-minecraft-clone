@@ -23,7 +23,7 @@ void gameobject::component::destroy()
 {
 	destroy_hook();
 	owner.OC->delete_component(this);
-
+	
 }
 
 void gameobject::component::start()
@@ -127,9 +127,9 @@ void gameobject::Ecs::delete_component(component* comp)
 	{
 		throw std::logic_error("Every Component Must be owned by a valid");
 	}
-	managers[comp->comp_id.value].store[comp->owner.Id.id]=nullptr;
+	comp_storage[comp->comp_id.value].store[comp->owner.Id.id]=nullptr;
 
-	managers[comp->comp_id.value].pool.free(comp);
+	comp_storage[comp->comp_id.value].pool.free(comp);
 }
 void gameobject::Ecs::InitObj(obj& object)
 {
@@ -147,13 +147,13 @@ void gameobject::Ecs::updatecomponents(updatecalltype type)
 	array<component_table*> managerref;
 
 	arch.check();
-	for (int i = 0; i < managers.length; i++)
+	for (int i = 0; i < comp_storage.length; i++)
 	{
 		
-		if (shouldupdate( managers[i].utype,type))
+		if (shouldupdate( comp_storage[i].utype,type))
 		{
 			
-		managerref.push(&managers[i]);
+		managerref.push(&comp_storage[i]);
 		}
 		
 

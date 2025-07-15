@@ -25,7 +25,7 @@ namespace type_id {
 
         constexpr explicit Id(uint32_t val = None_id) : value(val) {}
 
-        constexpr bool valid() const { return value != None_id; }
+        constexpr bool inline valid() const { return value != None_id; }
         constexpr bool operator==(const Id& other) const { return value == other.value; }
         constexpr bool operator!=(const Id& other) const { return value != other.value; }
         constexpr explicit operator bool() const { return valid(); }
@@ -53,9 +53,8 @@ namespace type_id {
 
         template<typename T>
         Opt::Option<Id> get_opt() {
-            uint32_t id = typeIndex<T>();
-            Id dense_id = sparse_map[id];
-            if (!dense_id.valid()) {
+            Id dense_id = sparse_map.reach(typeIndex<T>());
+            if (!dense_id.valid()) [[unlikely]] {
                 return Opt::None; 
             }
             return Opt::Option<Id>(dense_id);

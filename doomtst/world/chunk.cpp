@@ -8,7 +8,7 @@
 #include "../block/block.h"
 #include "../util/algorthm.h"#include "../util/dynamicarray.h"
 #include "../renderer/renderer.h"
-block& Chunk::chunk::operator[](int index)
+block& Chunk::chunk::operator[](size_t index)
 {
 	return blockbuf[index].getcomponent<block>();
 }
@@ -131,11 +131,11 @@ void Chunk::chunk::write()
 		{
 			throw std::logic_error("Directional corruption error");
 		}
-		bytelist[i] = fin;
+		bytelist.push(fin);
 	}
 	for (int i = 0; i < chunksize; i++)
 	{
-		bytelist[chunksize + i] = 0;
+		bytelist.reach(chunksize + i) = 0;
 		appendspecialbytelist(bytelist, i, blockbuf[i].getcomponentptr<block>());
 	}
 	file.write<unsigned short>(bytelist.list, bytelist.length);

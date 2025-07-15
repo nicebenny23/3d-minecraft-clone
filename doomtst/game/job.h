@@ -111,7 +111,7 @@ struct JobManager {
 		for (size_t i = 0; i < filtered.length(); i++)
 		{
 			run_dag.addNode(cmd_list[i]);
-			run_dag.nodes[i].successors = filtered[i].successors;
+			run_dag.nodes[ i].successors = filtered[i].successors;
 
 		}
 		Job_run(run_dag)();

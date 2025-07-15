@@ -70,10 +70,10 @@ namespace query {
 			return Iterator(*this, 0, archtypes.length);
 		}
 		View(gameobject::Ecs* world):ecs(world), archtypes(){
-			auto positions = ecs->comp_map.get_type_ids<Components...>();
+			auto positions = ecs->component_indexer.get_type_ids<Components...>();
 			
 			bitset::bitset bitlist;
-			bitlist.expand(ecs->comp_map.size());
+			bitlist.expand(ecs->component_indexer.size());
 			for (auto id : positions) {
 				bitlist.set(id.value);
 			}
@@ -102,7 +102,7 @@ namespace query {
 
 		gameobject::component* operator*() {
 			size_t comp_id = dense_bits[ind];
-			auto& store = manager->managers[comp_id].store;
+			auto& store = manager->comp_storage[comp_id].store;
 			gameobject::component* value = store[owner.Id.id];
 			if (value == nullptr) {
 				// FAIL FAST with a clear error
