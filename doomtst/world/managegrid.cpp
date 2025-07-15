@@ -53,11 +53,12 @@ void gridutil::computecover(face& blkface)
 			if (blk->attributes.transparent && (blk->id == blkface.mesh->blk->id))
 			{
 
-				blkface.cover = cover_state::Uncovered;
+
+				blkface.cover = cover_state::Covered;
 
 			}
 			else {
-				blkface.cover = cover_state::Covered;
+				blkface.cover = cover_state::Uncovered;
 
 			}
 		}
