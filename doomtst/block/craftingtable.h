@@ -69,7 +69,7 @@ struct craftingtablecomp : gameobject::component {
 			men.close();
 		}
 	}
-	void ondestroy(){
+	void destroy_hook(){
 		
 		men.blkcont.save();
 		

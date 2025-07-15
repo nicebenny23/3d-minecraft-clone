@@ -70,7 +70,7 @@ struct chestcomp : gameobject::component {
 			men.close();
 		}
 	}
-	void ondestroy() {
+	void destroy_hook() {
 		men.blkcont.writetofile();
 }
 	void start() {

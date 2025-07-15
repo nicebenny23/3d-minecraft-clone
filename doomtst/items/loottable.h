@@ -64,7 +64,7 @@ struct  loottable : gameobject::component
 	void addelem(int itemid, float maxamt,bool israndom=false) {
 		lootlist.push(lootelement(itemid, maxamt,israndom));
 	}
-	void ondestroy() {
+	void destroy_hook() {
 		
 	
 		if (!playerinteract)

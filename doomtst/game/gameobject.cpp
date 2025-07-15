@@ -14,14 +14,14 @@ using namespace gameobject;
 
 
 
-void gameobject::component::ondestroy()
+void gameobject::component::destroy_hook()
 {
 }
 
 
 void gameobject::component::destroy()
 {
-	ondestroy();
+	destroy_hook();
 	owner.OC->delete_component(this);
 
 }
@@ -144,7 +144,7 @@ void gameobject::Ecs::InitObj(obj& object)
 void gameobject::Ecs::updatecomponents(updatecalltype type)
 {
 
-	array<componentmanager*> managerref;
+	array<component_table*> managerref;
 
 	arch.check();
 	for (int i = 0; i < managers.length; i++)
@@ -162,11 +162,11 @@ void gameobject::Ecs::updatecomponents(updatecalltype type)
 	{
 
 
-		std::sort(&managerref[0], &managerref[0] + managerref.length, [](componentmanager* a, componentmanager* b) {
+		std::sort(&managerref[0], &managerref[0] + managerref.length, [](component_table* a, component_table* b) {
 			return a->priority > b->priority;
 			});
 	}
-	for (componentmanager* mgr : managerref) {
+	for (component_table* mgr : managerref) {
 		for (Archtype* archtype : arch.archtypes) {
 			
 			if (!archtype->has_component(mgr->id)) continue;
@@ -202,7 +202,7 @@ obj gameobject::Ecs::CreateEntity(v3::Vec3 SpawnPos)
 
 
 
-gameobject::componentmanager::componentmanager()
+gameobject::component_table::component_table()
 {
 	
 	id = comp::None;
@@ -211,13 +211,13 @@ gameobject::componentmanager::componentmanager()
 	
 }
 
-void gameobject::componentmanager::create(comp::Id mid, size_t bytesize, size_t alignment)
+void gameobject::component_table::create(comp::Id mid, size_t bytesize, size_t alignment)
 {
 	id = mid;
 	pool = dynPool::flux<component>(bytesize,alignment);
 }
 
-void gameobject::componentmanager::init(component* sample)
+void gameobject::component_table::init(component* sample)
 {
 	
 	priority = sample->priority;

@@ -17,7 +17,7 @@ namespace aabb {
         
 
    
-    void Collider::ondestroy()
+    void Collider::destroy_hook()
     {
         //if index is not null which implies that ojbect is nto null
         if (index!=-1)

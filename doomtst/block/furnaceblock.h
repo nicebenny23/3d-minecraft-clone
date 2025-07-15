@@ -101,7 +101,7 @@ struct furnacecomp : gameobject::component {
 		}
 	
 	}
-	void ondestroy() {
+	void destroy_hook() {
 	
 			men.blkcont.save();
 		

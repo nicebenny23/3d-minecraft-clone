@@ -207,16 +207,18 @@ namespace gameobject {
 
 
 	using componentStorage = array<component*>;
-	struct componentmanager
+	struct component_table
 	{
-		componentmanager();
+		component_table();
 		void create(comp::Id mid, size_t bytesize, size_t alignment);
 		comp::Id id;
 		dynPool::flux<component> pool;
 		componentStorage store;
 		updatetype utype;
 		int priority;
-
+		component* operator[](const obj& entity) {
+			return store[entity.Id.id];
+		}
 		void init(component* sample);
 	};
 
@@ -346,7 +348,7 @@ namespace gameobject {
 				free_ids.push(i);
 
 			}
-			managers = array<componentmanager, true>();
+			managers = array<component_table>();
 
 		}
 		void inject_context(CtxName::Context* context)
@@ -365,17 +367,15 @@ namespace gameobject {
 
 
 		template <class T, typename... types>
-		T* InitComp(types&&... initval);
+		T* add_component(types&&... initval, const obj& entity);
 
 		void updatecomponents(updatecalltype type);
 		void delete_component(component* comp);
 
-		Cont::stack<obj> EntityDeletionBuffer;
-
 
 		type_id::type_indexer comp_map;
 		ArchtypeManager arch;
-		array<componentmanager, true> managers;
+		array<component_table> managers;
 	private:
 
 		CtxName::Context* ctx;
@@ -425,7 +425,7 @@ namespace gameobject {
 		updatetype utype;
 		//called on destroy used for deallocation
 
-		virtual void ondestroy();
+		virtual void destroy_hook();
 		//use for blockmove
 		//virtual void transfer(component& obj);
 
@@ -541,52 +541,38 @@ namespace gameobject {
 	template <class T, typename... types>
 	T* obj::addcomponent(types&&... initval)
 	{
-
-		verify_component<T>();
-		T* comp = OC->InitComp<T>(std::forward<types>(initval)...);
-		comp->owner = *this;
-		auto& complist = OC->managers[comp->comp_id.value].store;
-
-		complist[Id.id] = comp;
-		OC->arch.moveflipArch(*this, comp->comp_id);
-
-
-		comp->start();
-
-
-		//Assert(complist, "Archtype does not contain needed key");
-		return comp;
+		return OC->add_component<T>(std::forward<types>(initval)...);
 	}
 
 
 
 	template<class T, typename ...types>
-	inline T* Ecs::InitComp(types && ...initval)
+	inline T* Ecs::add_component(types && ...initval,const obj& entity)
 	{
-
-		verify_component<T>();
-		T* comp;
-
 		auto [cmpid, is_new] = comp_map.insert<T>();
-		componentmanager& man = managers.reach(cmpid.value);
-
+		componentStorage& row = managers[cmpid.value];
+		if (row[entity] != nullptr)
+		{
+			return row[entity];
+		}
+		T* comp = add_component<T>(std::forward<types>(initval)...);		
+		component_table& man = managers.reach(cmpid.value);
 		if (is_new)
 		{
 			arch.expandArchtype();
 			man.create(cmpid, sizeof(T), alignof(T));
 			man.store.expand(entitymeta.capacity);
 		}
-		void* mem = man.pool.alloc();
-		comp = new (mem) T(std::forward<types>(initval)...);
+		comp = new (man.pool.alloc()) T(std::forward<types>(initval)...);
 		comp->comp_id = cmpid;
-
-
 		if (is_new)
 		{
 			man.init(comp);
-
 		}
-
+		comp->owner = entity;
+		row[entity] = comp;
+		OC->arch.moveflipArch(*this, cmpid);
+		comp->start();
 		return comp;
 
 	}

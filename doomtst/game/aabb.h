@@ -57,7 +57,7 @@ namespace aabb {
         ~Collider() = default;
 
        
-        void ondestroy();
+        void destroy_hook();
 
         
     };
