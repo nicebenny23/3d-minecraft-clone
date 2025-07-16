@@ -82,12 +82,16 @@ struct RigidbodySystem :System {
 
 ecs->arch.check();
         int l = 6;
+         
+
         query::View< gameobject::transform_comp, rigidbody> rigids(ecs);
         for (auto [pos,body] : rigids) {
             body->calculateonground();
             body->applyGravity();
             body->integrate();
+      
             body->unsetpositon = pos->transform.position;
+         //   pos->transform.position = Coord(0, 0, 0);
         }
 
     }

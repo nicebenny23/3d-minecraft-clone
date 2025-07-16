@@ -66,10 +66,15 @@ namespace grid {
 	
 	//gets the voxel at a place in world space
 
+	bool Grid::ChunkLoaded(Coord loc)
+	{
+		return(GetChunk(loc) != nullptr);
+	}
+
 	bool Grid::containsChunk(Coord loc)
 	{
-		Coord RelPos = loc - gridpos;
-		return (abs(RelPos.x) <= rad && abs(RelPos.y) <= rad && abs(RelPos.z) <= rad);
+		loc -= gridpos;
+		return (abs(loc.x) <= rad && abs(loc.y) <= rad && abs(loc.z) <= rad);
 
 	}
 
@@ -82,8 +87,8 @@ namespace grid {
 		if (containsChunk(chnk))
 		{
 
-			int ind = chunkIndex(chnk);
-			return chunklist[ind];
+			return chunklist[chunkIndex(chnk)];
+			
 		}
 		return nullptr;
 	} 
@@ -91,16 +96,19 @@ namespace grid {
 	block* Grid::getBlock(const v3::Coord pos)
 	{
 
-		Coord chnk = chunkfromblockpos(pos);
-		
-		if (containsChunk(chnk))
+		Coord chunk_pos = chunkfromblockpos(pos);
+		if (containsChunk(chunk_pos))
 		{
 
-			const int ind = chunkIndex(chnk);
-			int blkind = Chunk::indexfrompos(pos);
-			return chunklist[ind]->blockbuf[blkind].getcomponentptr<block>();
-	
 
+			Chunk::chunk* chnk = chunklist[chunkIndex(chunk_pos)];
+			if (chnk != nullptr)
+			{
+
+				return &(*chnk)[Chunk::indexfrompos(pos)];
+
+
+			}
 		}
 		return nullptr;
 
@@ -148,10 +156,9 @@ namespace grid {
 	{
 
 	
-
-		Cont::array<Chunk::chunk*>	newchunklist = Cont::array<Chunk::chunk*>(totalChunks,nullptr);
+		Cont::array<Chunk::chunk*>	newchunklist = Cont::array<Chunk::chunk*>(totalChunks, nullptr);
 		int indexdxchange = localChunkIndex(griddt);
-
+		
 		size_t ind = 0;
 		for (int k = 0; k < dim(); k++)
 		{
@@ -175,23 +182,46 @@ namespace grid {
 							chunklist[ind]->destroy();
 
 						}
-						//the inverse ind of 0 in an array of 9 is  8 ,1 is 7 follows formula totalinds-inds-1
-						int invind = (totalChunks)-(1 + ind);
-
-						int x = (2 * rad - i) + (gridpos.x - rad);
-						int y = (2 * rad - j) + (gridpos.y - rad);
-						int z = (2 * rad - k) + (gridpos.z - rad);
-
-						newchunklist[invind] = loader.LoadChunk(Coord(x, y, z));
-
-
-
 					}
-
+					
 					ind++;
 				}
 
 
+			}
+		}
+		has_loaded_chunk = false;
+		ind = 0;
+		for (int k = 0; k < dim(); k++)
+		{
+			for (int j = 0; j < dim(); j++) {
+
+				for (int i = 0; i < dim(); i++) {
+
+					if (newchunklist[ind] != nullptr)
+					{
+
+						ind++;
+						continue;
+					}
+					//the inverse ind of 0 in an array of 9 is  8 ,1 is 7 follows formula totalinds-inds-1
+					
+					int x = (i) + (gridpos.x - rad);
+					int y = (j) + (gridpos.y - rad);
+					int z = (k) + (gridpos.z - rad);
+					if (!has_loaded_chunk)
+					{
+						
+						newchunklist[ind] = loader.LoadChunk(Coord(x, y, z));
+						
+						has_loaded_chunk = true;
+					}
+
+
+
+					ind++;
+					
+				}
 			}
 		}
 
@@ -229,6 +259,6 @@ namespace grid {
 		load();
 	}
 	bool Grid::haschanged() {
-		return(griddt != zeroiv);
+		return(griddt != zeroiv)||has_loaded_chunk;
 	}
 }

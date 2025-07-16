@@ -19,9 +19,10 @@ namespace grid {
 		const int totalChunks;
 		v3::Coord gridpos;
 		v3::Coord griddt;
+		bool has_loaded_chunk;
 		Cont::array<Chunk::chunk*> chunklist;
 		CtxName::Context* ctx;
-
+		Cont::queue<Coord> to_load;
 
 		Grid():rad(0),totalChunks(0),chunklist(){
 			ctx = nullptr;
@@ -43,6 +44,7 @@ namespace grid {
 	Coord chunkfromblockpos(Coord pos);
 	Coord getVoxel(Vec3 pos);
 
+	bool ChunkLoaded(Coord loc);
 	bool containsChunk(Coord loc);
 	int localChunkIndex(Coord NormedChunk);
 	int chunkIndex(Coord Chunk);

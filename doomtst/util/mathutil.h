@@ -1,14 +1,13 @@
-#pragma once
+﻿#pragma once
 #include <cmath>
 #include <limits.h>
 #include <stdexcept>
 #include <type_traits>
 #define NaNf std::numeric_limits<float>::max()
-inline bool aproxequal(float v1, float v2) {
-	const float eps = .0001;
-	return (abs(v1 - v2) < eps);
-
-}	
+__forceinline bool aprox_equal(float a, float b) {
+	constexpr float EPS = 1e-4f;     
+	return (fabsf(a - b) < EPS);
+}
 
 
 inline float  interoplatequintic(const float& t) {
@@ -89,23 +88,20 @@ constexpr auto Min(T1 a, T2 b, Ts... rest)-> typename std::common_type<T1, T2, T
 
 
 //mod(x,m) that behaves intutiivlly (ex mod(-1,2)!=-1)
-inline  int symmetric_mod(int x, int m) {
-	// Ensure m is positive to avoid division by zero issues
-	if (m <= 0) {
-		throw std::invalid_argument("modulus cannot be negitive ");
-	}
-	
-	// When x is negative
-	if (x < 0) {
-		// Calculate the modular value for negative x
-		int mod = (-x % m);
-		return (mod == 0) ? 0 : m - mod;
-	}
-	else {
-		// When x is non-negative
-		return x % m;
-	}
+__forceinline  int symmetric_mod(int x, int m) noexcept {
+	// Precondition: m > 0
+	int r = x % m;              // r is in (−m, +m)
+
+	// If r is negative, shift it into [0, m) by adding m;
+	// otherwise return r unchanged.
+	return (r < 0) ? (r + m) : r;
+} 
+
+__forceinline float symmetric_modf(float x, float m) noexcept {
+	float r = std::fmodf(x, m);
+	return r < 0.0f ? r + m : r;
 }
+
 inline  int FastFloor(float f) {
 	return f >= 0 ? (int)f : (int)f - 1;
 }
@@ -147,10 +143,7 @@ inline int z_sign(float x) {
 
 int comparefloat(const void* b, const void* a);
 
-inline float wrap_to_range(float val, float low, float high)
-{
-	float range = high - low;
-	float result = std::fmod(val - low, range);
-	if (result < 0) result += range;
-	return result + low;
+
+inline float wrap_to_range(float val, float low, float high) noexcept {
+	return symmetric_modf(val - low, high - low) + low;
 }

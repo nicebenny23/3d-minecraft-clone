@@ -4,7 +4,7 @@ namespace settings {
 	{
 		bool viewmode;
 		GlobalSettings() {
-			viewmode = true;
+			viewmode = false;
 		}
 	};
 	extern GlobalSettings Gamesettings;

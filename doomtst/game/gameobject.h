@@ -161,8 +161,6 @@ namespace gameobject {
 			met.arch = nullptr;
 			elems.pop();
 		}
-		template<typename ...Components>
-		std::tuple<Components*...> get_nth_tuple(size_t elem_index);
 	
 		Archtype(bitset::bitset st, Ecs* Man) :bit_list(st), OC(Man), elems() {
 
@@ -345,13 +343,15 @@ namespace gameobject {
 
 		template<typename T>
 		T* getcomponentptr(obj& object);
-
+		template<typename T>
+		T& getcomponent(obj& object);
 		obj CreateEntity(v3::Vec3 SpawnPos);
 		void InitObj(obj& object);
 
 		void destroy(obj& object);
 
-
+		template<typename... Components>
+		std::tuple<Components*...> get_tuple(obj& obj, Cont::array<comp::Id>& indices);
 		template <class T, typename... types>
 		T* add_component(obj& entity,types&&... initval);
 
@@ -507,17 +507,37 @@ namespace gameobject {
 		return OC->getcomponentptr<T>(*this);
 	}
 
+	template<class T>
+	T& Ecs::getcomponent(obj& object)
+	{
+		verify_component<T>();
 
+
+		comp::Id comp_id = component_indexer.get<T>();
+
+		component* comp= comp_storage[comp_id.value][object];
+		if (comp==nullptr)
+		{
+			throw std::logic_error("Entity does not have component" + std::string(typeid(T).name()));
+		}
+		return *(T*)comp;
+
+	}
 	template <class T>
 	T& obj::getcomponent() 
 	{
-		return *getcomponentptr<T>();
+		return OC->getcomponent<T>(*this);
 	}
 	template <class T>
 	inline bool obj::hascomponent()
 	{
 		verify_component<T>();
-		return meta().arch->has_component(OC->component_indexer.get<T>());
+		Opt::Option<comp::Id> id = OC->component_indexer.get_opt<T>();
+		if (!id)
+		{
+			return false;
+		}
+		return meta().arch->has_component(*id);
 
 	}
 
@@ -590,15 +610,14 @@ namespace gameobject {
 		//will not care if component list has been changed during the iteration
 	}
 	
-	
+	//just trust this works
 	template<typename... Components>
-	std::tuple<Components*...> Archtype::get_nth_tuple(size_t elem_index) {
-		obj& o = elems[elem_index];
-		size_t id = o.Id.id;
+	std::tuple<Components*...> Ecs::get_tuple(obj& obj,Cont::array<comp::Id>& indices) {
+		
 
 		return[&]<size_t... Is>(std::index_sequence<Is...>) {
 			return std::tuple<Components*...>{
-				(Components*)OC->comp_storage[dense_bits[Is]].store[id]...
+				(Components*)comp_storage[indices[Is].value][obj]...
 			};
 		}(std::index_sequence_for<Components...>{});
 	}

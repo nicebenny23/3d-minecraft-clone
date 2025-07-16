@@ -444,11 +444,7 @@ namespace v3 {
  
   inline bool apx(const  Vec3 p, const Vec3& p1)
   {
-	  bool c1 = aproxequal(p.x, p1.x);
-	  bool c2 = aproxequal(p.y, p1.y);
-	  bool c3 = aproxequal(p.z, p1.z);
-
-	  return c1 && c2 && c3;
+	  return aprox_equal(p.x, p1.x)&& aprox_equal(p.y, p1.y)&& aprox_equal(p.z, p1.z);
   }
 
 

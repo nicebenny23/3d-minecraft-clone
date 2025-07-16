@@ -26,7 +26,7 @@ namespace Cont {
 		bool empty();
 		// Standard operator[] that returns a reference to the element at the given index.
 		T& operator[](size_t index);
-		T& reach(const size_t& index);
+		T& reach(const size_t index);
 		const T& operator[](size_t index) const;
 		// At function that checks if the index is in range before returning the element.
 		T& at(size_t index);
@@ -218,7 +218,7 @@ namespace Cont {
 
 	}
 	template<class T, bool initelems>
-	inline T& array<T, initelems>::reach(const size_t& index)
+	inline T& array<T, initelems>::reach(const size_t index)
 	{
 
 		if (index >= length)

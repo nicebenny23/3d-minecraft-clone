@@ -14,10 +14,13 @@ namespace query {
 	struct View {
 		Cont::array<gameobject::Archtype*> archtypes;
 		gameobject::Ecs* ecs;
+		
+		array<comp::Id> positions;
 		struct Iterator {
 			View& owner;
 			size_t entity_index;
 			size_t arch_index;
+
 			Iterator(View& vw, size_t ent_index = 0,size_t ArchIndex=0)
 				:owner(vw), arch_index(ArchIndex), entity_index(ent_index) {
 			}
@@ -50,8 +53,7 @@ namespace query {
 					throw std::out_of_range("Invalid dereference: View is empty or index out of range.");
 				}
 				auto arch = owner.archtypes[arch_index];
-				size_t entity_id = arch->elems[entity_index].Id.id;
-				return std::tuple<Components*...>{owner.ecs->getcomponentptr<Components>(arch->elems[entity_index])... };
+				return owner.ecs->get_tuple<Components...>(arch->elems[entity_index],owner.positions);
 			}
 		};
 
@@ -70,8 +72,8 @@ namespace query {
 			return Iterator(*this, 0, archtypes.length);
 		}
 		View(gameobject::Ecs* world):ecs(world), archtypes(){
-			auto positions = ecs->component_indexer.get_type_ids<Components...>();
-			
+			positions = ecs->component_indexer.get_type_ids<Components...>();
+
 			bitset::bitset bitlist;
 			bitlist.expand(ecs->component_indexer.size());
 			for (auto id : positions) {

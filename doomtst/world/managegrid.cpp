@@ -10,7 +10,12 @@ void gridutil::sendrecreatemsg()
 
 	for (int i = 0; i < CtxName::ctx.Grid->totalChunks; i++)
 	{
-		CtxName::ctx.GridRef()[i]->mesh->meshrecreateneeded = true;
+		if (CtxName::ctx.GridRef()[i]!=nullptr)
+		{
+
+			CtxName::ctx.GridRef()[i]->mesh->meshrecreateneeded = true;
+
+		}	
 	}
 
 }
@@ -161,6 +166,10 @@ void gridutil::redolighting()
 
 		for (int chunkind = 0; chunkind < CtxName::ctx.Grid->totalChunks; chunkind++)
 		{
+			if (CtxName::ctx.GridRef()[chunkind]==nullptr)
+			{
+				continue;
+			}
 			for (int blockind = 0; blockind < chunksize; blockind++)
 			{
 				block* blk =&( (*(CtxName::ctx.GridRef()[chunkind]))[blockind]);

@@ -233,7 +233,10 @@ void blockrender::renderblocks(bool rendertransparent) {
 	array<Chunk::chunk> tosort = array<Chunk::chunk>();
 
 	for (int i = 0; i < CtxName::ctx.Grid->totalChunks; i++) {
-		
+		if (CtxName::ctx.GridRef()[i]==nullptr)
+		{
+			continue;
+		}
 		if (chunkviewable(CtxName::ctx.GridRef()[i])) {
 			if (CtxName::ctx.GridRef()[i]->mesh->meshrecreateneeded) {
 				recreatechunkmesh(CtxName::ctx.GridRef()[i]);

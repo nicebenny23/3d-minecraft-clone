@@ -47,16 +47,22 @@ struct playerplace : gameobject::component
 	void placeblock() {
 		ray cameraray = ray(owner.transform().position,owner.transform().position +owner.transform().getnormaldirection() * 7);
 		block* plamentblock = voxtra::findprevblock(cameraray, 1000,voxtra::countsolid);
-		//this must be kept because it can somtimers bug out do to presosion errors;
-		if (plamentblock!=nullptr)
+		if (plamentblock==nullptr)
 		{
-
+			return;
+		}
+		//this must be kept because it can somtimers bug out do to presosion errors;
+	
 			if (plamentblock->attributes.solid)
 			{
 				return;
 			}
+		
+		
+		if (!Hit)
+		{
+			return;
 		}
-
 		voxtra::RayWorldHit closest = Hit.unwrap();
 		Dir::Dir3d dir = Dir::Align(closest.collider->globalbox().center - plamentblock->center());
 	
