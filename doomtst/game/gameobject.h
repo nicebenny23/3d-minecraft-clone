@@ -160,11 +160,10 @@ namespace gameobject {
 			}
 			met.arch = nullptr;
 			elems.pop();
-		
-
-
 		}
-
+		template<typename ...Components>
+		std::tuple<Components*...> get_nth_tuple(size_t elem_index);
+	
 		Archtype(bitset::bitset st, Ecs* Man) :bit_list(st), OC(Man), elems() {
 
 			for (size_t ind = 0; ind < st.bits; ind++) {
@@ -589,5 +588,18 @@ namespace gameobject {
 		}
 		return has_component(*comp_id);
 		//will not care if component list has been changed during the iteration
+	}
+	
+	
+	template<typename... Components>
+	std::tuple<Components*...> Archtype::get_nth_tuple(size_t elem_index) {
+		obj& o = elems[elem_index];
+		size_t id = o.Id.id;
+
+		return[&]<size_t... Is>(std::index_sequence<Is...>) {
+			return std::tuple<Components*...>{
+				(Components*)OC->comp_storage[dense_bits[Is]].store[id]...
+			};
+		}(std::index_sequence_for<Components...>{});
 	}
 }

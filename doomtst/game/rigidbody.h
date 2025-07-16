@@ -82,8 +82,8 @@ struct RigidbodySystem :System {
 
 ecs->arch.check();
         int l = 6;
-        query::View<rigidbody, gameobject::transform_comp> rigids(ecs);
-        for (auto [body, pos] : rigids) {
+        query::View< gameobject::transform_comp, rigidbody> rigids(ecs);
+        for (auto [pos,body] : rigids) {
             body->calculateonground();
             body->applyGravity();
             body->integrate();

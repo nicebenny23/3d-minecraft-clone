@@ -91,24 +91,17 @@ void processChunks(int startChunk, int endChunk)
 
 void gridutil::computeallcover()
 {
-		
-	for (int gridind = 0; gridind < CtxName::ctx.Grid->totalChunks; ++gridind)
-	{
-		Chunk::chunk* chk = CtxName::ctx.GridRef()[gridind];
-		for (int blockind = 0; blockind < chunksize; ++blockind)
+	query::View<block> blk(CtxName::ctx.OC);
+	for (auto [block] : blk) {
+		for (int faceind = 0; faceind < 6; ++faceind)
 		{
-			block& blk = chk->blockbuf[blockind].getcomponent<block>();
-			for (int faceind = 0; faceind < 6; ++faceind)
+			face& tocover = (*block)[faceind];
+			if (tocover.cover == cover_state::Uncomputed)
 			{
-				face& tocover = blk[faceind];
-				if (tocover.cover== cover_state::Uncomputed)
-				{
-					gridutil::computecover(tocover);
-				}
+				gridutil::computecover(tocover);
 			}
 		}
 	}
-	// Optionally, synchronize final operations like sending messages
 	sendrecreatemsg();
 }
 void gridutil::computepartialcover()
