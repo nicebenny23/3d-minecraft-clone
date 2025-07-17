@@ -1,8 +1,10 @@
-
+#include "../util/thread_split.h"
 #include "blockrender.h"
 #include "../util/geometry.h"
 #include "../util/intersection.h"
+
 #include "../game/GameContext.h"
+#include <mutex>
 bool blockrender::enablelighting;
 Cont::array<float> databuffer;
 Cont::array<unsigned int> indicebuffer;
@@ -153,19 +155,19 @@ void emitblock(block& torender, array<float>& datbuf, array<unsigned int>& indbu
 }
 
 // Recreate the mesh for a chunk
-void recreatechunkmesh(Chunk::chunk* aschunk) {
+void recreatechunkmesh(Chunk::chunk* aschunk,std::mutex& fill_lock) {
 	
-	aschunk->mesh->facebuf.destroy();
-	aschunk->mesh->facebuf = Cont::array<face>();
-	Cont::array<unsigned int> indbuf = Cont::array<unsigned int>();
-	Cont::array<float> datbuf= Cont::array<float>();
+	aschunk->mesh->facebuf.destroy();//g
+	aschunk->mesh->facebuf = Cont::array<face>();//g
+	Cont::array<unsigned int> indbuf = Cont::array<unsigned int>();//g
+	Cont::array<float> datbuf= Cont::array<float>();//g
 
 	
 	for (int ind = 0; ind < chunksize; ind++) {
-		block& blockatpos = (aschunk->blockbuf[ind].getcomponent<block>());
+		block& blockatpos = (aschunk->blockbuf[ind].getcomponent<block>());//g
 		
 		if (!blockatpos.attributes.transparent) {
-			emitblock(blockatpos, datbuf, indbuf);
+			emitblock(blockatpos, datbuf, indbuf);//g
 			continue;
 		}
 		
@@ -181,12 +183,16 @@ void recreatechunkmesh(Chunk::chunk* aschunk) {
 					}
 		}
 		
+	}{
+		std::unique_lock lck(fill_lock);
+		
+
+		CtxName::ctx.Ren->stck.push(renderer::MeshData(&aschunk->mesh->SolidGeo, std::move(indbuf),std::move( datbuf)));
+		debug("Pls");
 	}
-	CtxName::ctx.Ren->Fill(&aschunk->mesh->SolidGeo, datbuf, indbuf);
 	aschunk->mesh->meshsize = indbuf.length;
-	datbuf.destroy();
-	indbuf.destroy();
-	
+
+	aschunk->mesh->meshrecreateneeded = false;
 }
 
 // Render a chunk mesh
@@ -230,7 +236,7 @@ void blockrender::setrendersolid()
 void blockrender::renderblocks(bool rendertransparent) {
 	CtxName::ctx.Ren->context.Bind(CtxName::ctx.Ren->Shaders["BlockShader"]);
 
-	array<Chunk::chunk> tosort = array<Chunk::chunk>();
+	array<Chunk::chunk*> tosort = array<Chunk::chunk*>();
 
 	for (int i = 0; i < CtxName::ctx.Grid->totalChunks; i++) {
 		if (CtxName::ctx.GridRef()[i]==nullptr)
@@ -238,24 +244,38 @@ void blockrender::renderblocks(bool rendertransparent) {
 			continue;
 		}
 		if (chunkviewable(CtxName::ctx.GridRef()[i])) {
-			if (CtxName::ctx.GridRef()[i]->mesh->meshrecreateneeded) {
-				recreatechunkmesh(CtxName::ctx.GridRef()[i]);
-				CtxName::ctx.GridRef()[i]->mesh->meshrecreateneeded = false;
-			}
-
-			CtxName::ctx.GridRef()[i]->mesh->sortbuf();
-
-			tosort.push(* (CtxName::ctx.GridRef()[i]));
+			tosort.push((CtxName::ctx.GridRef()[i]));
 		}
 	}
+	std::mutex fill_mutex;
 
-	oalgorithm::quicksort<Chunk::chunk>(tosort.list, tosort.length);
+	auto func = [&](auto& item) {
+		{
+			std::unique_lock lck(fill_mutex);
+		
+		}
+		if (item->mesh->meshrecreateneeded) {
+			recreatechunkmesh(item, fill_mutex);  // or just recreatechunkmesh(item);
+		}
+		item->mesh->sortbuf();
+		};
+	
+	thread_util::par_iter(tosort.begin(), tosort.end(), func, 4);
+	CtxName::ctx.Ren->Consume();
+	
+	if (tosort.length != 0)
+	{
+
+		std::stable_sort(tosort.begin(), tosort.end(), [](Chunk::chunk* a, Chunk::chunk* b) {
+			return (*a) < (*b);
+			});
+	}
 	setrendersolid();
 	int renderamt = 0;
 		for (int i = 0; i < tosort.length; i++) {
 		
 				renderamt++;
-				renderchunk(*tosort[i].mesh, false);
+				renderchunk(*tosort[i]->mesh, false);
 			
 		}
  		
@@ -264,7 +284,7 @@ void blockrender::renderblocks(bool rendertransparent) {
 		setrendertransparent();
 		for (int i = 0; i < tosort.length; i++) {
 		
-				renderchunk(*tosort[i].mesh, true);
+				renderchunk(*tosort[i]->mesh, true);
 			
 		}
 	

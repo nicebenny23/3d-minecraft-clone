@@ -20,6 +20,7 @@ namespace Chunk {
 		bool meshrecreateneeded;
 		chunk* aschunk;
 		array<face> facebuf;
+		
 		void sortbuf();
 
 
@@ -39,19 +40,19 @@ namespace Chunk {
 		void write();
 		chunk();
 		
-		Vec3 center() {
+		Vec3 center() const {
 			return (loc+ unitv /2.f)*chunklength;
 		}
 		block& operator[](size_t index);
 		gameobject::obj* blockbuf;
 		void destroy();
-		float cameradist() {
+		float cameradist() const {
 			return 	 dist(center(), camera::campos());
 		}
-		bool operator<(chunk& b) {
+		bool operator<(const chunk& b) const {
 			return b.cameradist() < cameradist();
 		}
-		bool operator>(chunk& b) {
+		bool operator>(const chunk& b) const {
 			return b.cameradist() > cameradist();
 		}
 

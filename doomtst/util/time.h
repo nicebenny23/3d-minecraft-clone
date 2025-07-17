@@ -26,7 +26,7 @@ namespace timename {
 			
 
 			float fps = 1.f / real_dt;
-			float inter_rate = .03;
+			float inter_rate = 1;
 			dt = clamp(0.f, lerp(dt, real_dt,inter_rate), 1.0f / min_frames);
 			
 			
@@ -42,6 +42,6 @@ namespace timename {
 		}
 	private:
 		float fps_counter;
-		const int min_frames = 30;
+		const int min_frames = 20;
 	};
 }

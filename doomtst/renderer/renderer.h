@@ -11,10 +11,25 @@
 #include "TextureManager.h"
 #include "Mesh.h"
 #include "RenderProperties.h"
+#include "../util/stack.h"
 #include "RenderContext.h"
 using namespace buffer_object;
 //Fix
 namespace renderer {
+	struct MeshData {
+		Mesh* msh;
+		Cont::array<float> pointlist; 
+		Cont::array<unsigned int> indicelist;
+		MeshData(Mesh* mesh, Cont::array<unsigned int>&& indicelist, Cont::array<float>&& pointlist):msh(mesh),indicelist(indicelist),pointlist(pointlist)
+		{
+
+
+		}
+		MeshData() {
+
+			msh = nullptr;
+		}
+	};
 	void setrenderingmatrixes(renderer::Renderer* renderer);
 	void setAspectRatio(renderer::Renderer* renderer);
 	struct Renderer {
@@ -53,7 +68,20 @@ namespace renderer {
 
 		void Fill(Mesh* mesh, Cont::array<float>& pointlist);
 		void Fill(Mesh* mesh, Cont::array<float>& pointlist, Cont::array<unsigned int>& indicelist);
+		void CommandFill(MeshData& data) {
+			Fill(data.msh, data.pointlist, data.indicelist);
+		}
+		Cont::stack<MeshData> stck;
+		void Consume() {
 
+			while (!stck.empty())
+			{
+				CommandFill(stck.peek());
+				stck.pop();
+			}
+		}
+
+		
 		void Render(Mesh* mesh);
 		void Render(Mesh* mesh, Cont::array<float>& pointlist);
 		void Render(Mesh* mesh, Cont::array<float>& pointlist, Cont::array<unsigned int>& indicelist);
