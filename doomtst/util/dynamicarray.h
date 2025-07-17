@@ -413,7 +413,9 @@ namespace Cont {
 			throw std::logic_error("Cannot pop empty array");
 		}
 		//subtracts first
-		return list[(--length)];
+		auto res= list[(--length)];
+		list[length].~T();
+		return res;
 	}
 
 

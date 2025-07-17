@@ -25,6 +25,11 @@ namespace renderer {
 
 
 		}
+		~MeshData() {
+			
+			indicelist.destroy();
+			pointlist.destroy();
+		}
 		MeshData() {
 
 			msh = nullptr;
