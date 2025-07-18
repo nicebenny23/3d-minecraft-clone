@@ -30,7 +30,7 @@ namespace Chunk {
 		void destroy();
 	};
 	const char* getcorefilename(Coord pos);
-	int indexfrompos(Coord pos);
+	size_t indexfrompos(Coord pos);
 	struct chunk
 	{
 		bool init;

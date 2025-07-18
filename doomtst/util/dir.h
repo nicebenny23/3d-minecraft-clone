@@ -54,17 +54,17 @@ namespace Dir {
 			switch (dir)
 			{
 			case Ind3d::Right:
-				return  v3::Coord(1, 0, 0);//left
+				return  v3::RightCoord;//right
 			case Ind3d::Left:
-				return v3::Coord(-1, 0, 0);//right
+				return v3::LeftCoord;//left
 			case Ind3d::Up:
-				return v3::Coord(0, 1, 0);//north
+				return v3::UpCoord;//north
 			case Ind3d::Down:
-				return v3::Coord(0, -1, 0);//south
+				return v3::DownCoord;//south
 			case Ind3d::Front:
-				return v3::Coord(0, 0, 1);//front
+				return v3::FrontCoord;//front
 			case Ind3d::Back:
-				return v3::Coord(0, 0, -1);//back
+				return v3::BackCoord;//back
 			case Ind3d::None:
 				throw std::invalid_argument("Attempted to access invalid direction");
 				break;

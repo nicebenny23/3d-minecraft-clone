@@ -3,7 +3,11 @@
 #include "texture.h"
 #include "shader.h"
 #include "../Resources/ResourceManager.h"
+#include "RenderProperties.h"
 #pragma once
+namespace renderer {
+	struct Renderer;
+}
 //Context For the Renderer which Controls Bindings And State
 namespace RenderContext{
 
@@ -37,8 +41,11 @@ namespace RenderContext{
 		VaoName::Vao* Get_BoundVao() {
 			return BoundVao;
 		}
-	private:
+		void bind(const Base_Material* mat, renderer::Renderer* renderer);
 
+		
+	private:
+		const Base_Material * material;
 		shader* BoundShader;
 		ITexture* BoundTexture;
 		buffer_object::Ebo* BoundEbo;

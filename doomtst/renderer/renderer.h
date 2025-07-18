@@ -44,11 +44,14 @@ namespace renderer {
 		RenderModeManager Modes;
 		void SetType(std::string Name);
 		void AddType(const Base_Material& type) {
-			Modes.AddType(type);
+			 Modes.AddType(type);
+		}
+		Base_Material Construct(const char* name, const char* shade,  RenderProperties props ) {
+			return Modes.Construct(name,shade,props);
 		}
 		void applyProperties();
 		Renderer():Textures(),Binders(),Shaders() {
-
+			
 		}
 		ITexture* CurrentTexture() {
 			return context.Get_BoundTexture();
@@ -90,7 +93,7 @@ namespace renderer {
 		void Render(Mesh* mesh);
 		void Render(Mesh* mesh, Cont::array<float>& pointlist);
 		void Render(Mesh* mesh, Cont::array<float>& pointlist, Cont::array<unsigned int>& indicelist);
-
+		
 
 		void FillVertexBuffer(Mesh* mesh, Cont::array<float>& pointlist);
 

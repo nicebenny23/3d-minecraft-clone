@@ -37,8 +37,15 @@ namespace v3 {
 	
 		explicit Coord(const Vec3& p1);
 		
-	};
 
+		
+	};
+	const Coord RightCoord = Coord(1, 0, 0);
+	const Coord LeftCoord = Coord(-1, 0, 0);
+	const Coord UpCoord = Coord(0, 1, 0);
+	const Coord DownCoord = Coord(0,-1, 0);
+	const Coord FrontCoord = Coord(0, 0, 1);
+	const Coord BackCoord = Coord(0, 0, -1);
 	const  Coord zeroiv = Coord(0, 0, 0);
 
 	inline Coord::Coord() {

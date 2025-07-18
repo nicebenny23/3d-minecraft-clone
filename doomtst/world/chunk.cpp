@@ -14,7 +14,7 @@ block& Chunk::chunk::operator[](size_t index)
 }
 
 
-int Chunk::indexfrompos(Coord pos)
+size_t Chunk::indexfrompos(Coord pos)
 {
 	int x = symmetric_mod(pos.x, chunkaxis);
 	int y = symmetric_mod(pos.y, chunkaxis);

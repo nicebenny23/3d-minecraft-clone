@@ -293,11 +293,12 @@ void blockrender::renderblocks(bool rendertransparent) {
 
 void blockrender::initblockrendering()
 {
+	auto* renderer = CtxName::ctx.Ren;
 	CtxName::ctx.Ren->Shaders.Compile( "BlockShader","shaders\\vert1.vs", "shaders\\frag1.vs");
-	CtxName::ctx.Ren->AddType(Base_Material("SolidBlock", "BlockShader", RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))
+	renderer->AddType(renderer->Construct("SolidBlock", "BlockShader", RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))
 	.AddUniform(renderer::setAspectRatio).AddUniform(renderer::setrenderingmatrixes).AddUniform(ApplyBlockTex));
 
-	CtxName::ctx.Ren->AddType(Base_Material("TransparentBlock", "BlockShader", RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).
+	renderer->AddType(renderer->Construct("TransparentBlock", "BlockShader", RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).
 	AddUniform(renderer::setAspectRatio).AddUniform(renderer::setrenderingmatrixes).AddUniform(ApplyBlockTex));
 
 	array<const char*> texlist = array<const char*>();

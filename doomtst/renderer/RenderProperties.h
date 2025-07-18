@@ -4,8 +4,9 @@
 #include <functional>
 #include <unordered_map>
 #include <stdexcept>
+#include   "shader.h"
 
-
+#include "ShaderManager.h"
 namespace renderer {
     struct  Renderer;
 }
@@ -39,18 +40,19 @@ class Base_Material {
 public:
     std::string Name;
     RenderProperties prop;
-    std::string Shader;
+
+    shader* shade = nullptr;
     Cont::array<UFunc> UniformsCalls;
     // Default constructor
-    Base_Material() : Name(""), Shader(""), UniformsCalls(Cont::array<UFunc>()){}
+    Base_Material() : Name(""), shade(), UniformsCalls(Cont::array<UFunc>()){}
 
     Base_Material& AddUniform(UFunc UniformCall) {
         UniformsCalls.push( UniformCall);
         return *this;
     }
         // Constructor to initialize RenderType with parameters
-        Base_Material(const std::string& name, const std::string& shader, const RenderProperties& props = {})
-        : Name(name), Shader(shader), prop(props)
+        Base_Material(const std::string& name, shader* shade, const RenderProperties& props = {})
+        : Name(name), shade(shade), prop(props)
     {
     }
 };
@@ -58,7 +60,7 @@ public:
 class RenderModeManager {
 private:
     std::unordered_map<std::string, Base_Material> renderTypes;
-
+    Shaders::ShaderManager* shader_man;
 public:
     // Add a new RenderType
     void AddType(const Base_Material& type) {
@@ -67,14 +69,16 @@ public:
         }
         renderTypes[type.Name] = type;
     }
-
     // Check if a RenderType with the given name exists
     bool Has(const std::string& name) const {
         return renderTypes.find(name) != renderTypes.end();
     }
-
-
+    Base_Material Construct(const std::string& name, const std::string& shade, const RenderProperties& props = {})
+    {
+        return  Base_Material(name, &(*shader_man)[shade], props);
+    }
     // Const version of Get method
+
     const Base_Material& operator[](const std::string& name) const {
 
         if (!Has(name)) {
@@ -82,7 +86,14 @@ public:
         }
         return renderTypes.at(name);
     }
+    RenderModeManager(Shaders::ShaderManager* shader_manager) :shader_man(shader_manager) {
 
+
+    }
+    RenderModeManager() {
+
+
+    }
     // Clear all stored RenderTypes
     void Clear() {
         renderTypes.clear();

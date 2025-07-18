@@ -35,7 +35,7 @@ namespace timename {
 			if (fps_change_rate <fps_counter)
 			{
 				fps_counter = 0;
-				float fps_inter_rate = .1;
+				float fps_inter_rate =1;
 				smooth_fps = lerp(smooth_fps, fps, fps_inter_rate);
 
 			}

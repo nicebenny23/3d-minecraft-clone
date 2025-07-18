@@ -39,17 +39,12 @@ struct multi_iter {
 
 	}
 	private:
-		void apply() {
-
-			if (
-				owner.archtypes[arch_index]->elems.length == 0) {
-				throw std::out_of_range("Invalid dereference: View is empty or index out of range.");
-			}
-			auto arch = owner.archtypes[arch_index];
-			function(owner.ecs->get_tuple<Components...>(arch->elems[entity_index], owner.positions));
+		inline void apply() {
+			auto& arch_elems= owner.archtypes[arch_index]->elems;
+			function(owner.ecs->get_tuple<Components...>(arch_elems[entity_index], owner.positions));
 
 		}
-		void inc() {
+		inline void inc() {
 			entity_index++;
 
 			// loop until we find a valid entity in a valid archetype
@@ -84,6 +79,34 @@ void multi_query(query::View<Components...>& view, std::function<void(std::tuple
 	{
 		size_t start= size_of_each[i];
 		size_t end= size_of_each[i+1];
+		pool.push([&view, quer, start, end]() {
+			multi_iter<Components...> iter(view, start, end, quer);
+			iter.iterate();
+			});
+	}
+
+
+}
+
+template<typename... Components>
+void multi_query(query::View<Components...>& view, std::function<void(std::tuple<Components*...>)> quer, size_t threads_wanted,size_t count) {
+	size_t total_length = 0;
+
+	for (auto arch : view.archtypes)
+	{
+		total_length += arch->elems.length;
+	}
+	if (threads_wanted > total_length) {
+		threads_wanted = total_length;
+	}
+	thread::thread_pool pool(threads_wanted);
+
+
+	Cont::array<size_t> size_of_each = thread_util::split_many(total_length, total_length/count);
+	for (size_t i = 0; i < size_of_each.length-1; i++)
+	{
+		size_t start = size_of_each[i];
+		size_t end = size_of_each[i + 1];
 		pool.push([&view, quer, start, end]() {
 			multi_iter<Components...> iter(view, start, end, quer);
 			iter.iterate();

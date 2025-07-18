@@ -91,10 +91,10 @@ void gridutil::computecover(face& blkface)
 #include <mutex>
 
 void Iter(std::tuple<blockname::block*> block) {
-	auto& [blk] = block;
-	for (int faceind = 0; faceind < 6; ++faceind)
+	
+	for (size_t faceind = 0; faceind < 6; ++faceind)
 	{
-		face& tocover = (*blk)[faceind];
+		face& tocover = (*std::get<0>(block))[faceind];
 		if (tocover.cover == cover_state::Uncomputed)
 		{
 			gridutil::computecover(tocover);
@@ -106,7 +106,7 @@ void Iter(std::tuple<blockname::block*> block) {
 void gridutil::computeallcover()
 {
 	query::View<block> blk(CtxName::ctx.OC);
-	multi_query<block>(blk, std::function(Iter), 4);
+	multi_query<block>(blk, std::function(Iter), 4,1000);
 	sendrecreatemsg();
 }
 

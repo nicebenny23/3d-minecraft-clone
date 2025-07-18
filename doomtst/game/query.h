@@ -1,15 +1,71 @@
 #pragma once
 #include "gameobject.h"
-
-
+#include "../util/filter_argument.h"
+#include "../util/Not.h"
+#include "../util/typelist.h"
 namespace query {
+	enum class query_argument_type {
+		Has,
+		Option,
+		Not,
+		
 
-
-	template<typename... Components>
-	struct ArchFilter {
+	};
+	template <typename T>
+	struct QueryArgument {
+		using type = T;
+		static constexpr query_argument_type arg_type= query_argument_type::Has;
+	};
+	template <typename T>
+	struct QueryArgument<Not<T>> {
+		using type = T;
+		static constexpr query_argument_type arg_type = query_argument_type::Not;
+	};
+	template <typename T>
+	struct QueryArgument<T*> {
+		using type = T;
+		static constexpr query_argument_type arg_type = query_argument_type::Option;
 	};
 
+	template<typename T>
+	struct neededPredicate {
+		static constexpr bool value = QueryArgument<T>::arg_type == query_argument_type::Has;
+	}; 
+	
+	template<typename T>
+	struct resultPredicate {
+		static constexpr bool value = QueryArgument<T>::arg_type != query_argument_type::Not;
+	};
+	template<typename T>
+	struct excludedPredicate {
+		static constexpr bool value = QueryArgument<T>::arg_type == query_argument_type::Not;
+	};
+	
+		template<typename... Components>
+	struct ViewBuilder {
+		Cont::array<comp::Id> exclude;
+		Cont::array<comp::Id> require;
+		Cont::array<comp::Id> output;
+		using needed = type_pipeline::Filter_t<neededPredicate, Components...>::type;
+		using excluded = type_pipeline::Filter_t<excludedPredicate, Components...>::type;
+		using result = type_pipeline::Filter_t<resultPredicate, Components...>::type;
+		View<result>* Build(gameobject::Ecs* ecs) {
+			array<comp::Id> positions;
+			output = ecs->component_indexer.get_type_ids<result...>();
+			require = ecs->component_indexer.get_type_ids<needed...>();
+			exclude = ecs->component_indexer.get_type_ids<excluded...>();
+			for (auto arch : ecs->arch.archtypes)
+			{
+				if (true)
+				{
 
+				}
+
+			}
+		}
+		
+	};
+	
 	template<typename... Components>
 	struct View {
 		Cont::array<gameobject::Archtype*> archtypes;

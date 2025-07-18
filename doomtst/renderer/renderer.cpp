@@ -107,20 +107,20 @@ namespace renderer {
 
     Renderer::Renderer(size_t tst)
     {
+        Modes = RenderModeManager(&Shaders);
         fov = 90;
         view = glm::mat4(0);
         setprojmatrix(90, .21f, 100);
         Shaders.Compile("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs");
-       Base_Material Ui= Base_Material("Ui", "UiShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).AddUniform(setAspectRatio);
-       AddType(Ui);
+AddType(Construct("Ui", "UiShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).AddUniform(setAspectRatio));
            
         Shaders.Compile("ModelShader","shaders\\modelvertex.vs", "shaders\\modelfragment.vs");
 
-        AddType(Base_Material("Model", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).AddUniform(setAspectRatio).AddUniform(setrenderingmatrixes));
+        AddType(Construct("Model", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).AddUniform(setAspectRatio).AddUniform(setrenderingmatrixes));
         Shaders.Compile("ParticleShader","shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
-        AddType(Base_Material("Particle", "ParticleShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)));
+        AddType(Construct("Particle", "ParticleShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)));
         Shaders.Compile("TextShader","shaders\\textvertex.vs", "shaders\\textfragment.vs");
-        AddType(Base_Material("Text", "TextShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).AddUniform(setAspectRatio));
+        AddType(Construct("Text", "TextShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).AddUniform(setAspectRatio));
            
     
        
@@ -145,14 +145,7 @@ namespace renderer {
     void Renderer::SetType(std::string Name)
     {
 
-        properties = Modes[Name];
-        context.Bind(Shaders[properties.Shader]);
-        for (int i = 0; i < properties.UniformsCalls.length; i++)
-        {
-            properties.UniformsCalls[i](this);
-        }
-            
-        applyProperties();
+        context.bind(&Modes[Name], this);
     }
 
     void Renderer::applyProperties()

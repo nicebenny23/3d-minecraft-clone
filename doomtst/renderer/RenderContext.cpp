@@ -69,3 +69,28 @@ void RenderContext::Context::UnbindShader()
 	glUseProgram(0);
 	BoundShader = nullptr;
 }
+
+void Apply_properties(const RenderProperties* props) {
+	glDepthMask(props->depthWriteEnabled);
+	GlUtil::SetProperty(GL_CULL_FACE, props->cullFaceEnabled);
+	GlUtil::SetProperty(GL_DEPTH_TEST, props->depthTestEnabled);
+	glBlendFunc(props->blendFuncSrc, props->blendFuncDst);
+	GlUtil::SetProperty(GL_BLEND, props->blendingEnabled);
+
+}
+
+void RenderContext::Context::bind(const Base_Material* mat, renderer::Renderer* renderer)
+{
+	if (material==mat)
+	{
+		return;
+	}
+	Bind(*mat->shade);
+
+	for (int i = 0; i < mat->UniformsCalls.length; i++)
+	{
+		mat->UniformsCalls[i](renderer);
+	}
+	Apply_properties(&mat->prop);
+	material = mat;
+}

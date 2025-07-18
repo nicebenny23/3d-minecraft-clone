@@ -425,12 +425,15 @@
     <ClInclude Include="util\bitset.h" />
     <ClInclude Include="util\dependency.h" />
     <ClInclude Include="util\deque.h" />
+    <ClInclude Include="util\filter_argument.h" />
     <ClInclude Include="util\Id.h" />
     <ClInclude Include="util\InterfaceStore.h" />
     <ClInclude Include="util\LinearBuffer.h" />
     <ClInclude Include="util\List.h" />
+    <ClInclude Include="util\Not.h" />
     <ClInclude Include="util\Option.h" />
     <ClInclude Include="util\pair.h" />
+    <ClInclude Include="util\pipeline.h" />
     <ClInclude Include="util\robinHood.h" />
     <ClInclude Include="util\Span.h" />
     <ClInclude Include="util\SparseSet.h" />
