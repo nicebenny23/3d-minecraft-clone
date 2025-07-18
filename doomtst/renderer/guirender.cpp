@@ -13,7 +13,7 @@ namespace guirender {
         ImGui::CreateContext();
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable keyboard controls
-        
+
         ImGui_ImplGlfw_InitForOpenGL(CtxName::ctx.Window->WinPtr, true);
         ImGui_ImplOpenGL3_Init("#version 330");
      

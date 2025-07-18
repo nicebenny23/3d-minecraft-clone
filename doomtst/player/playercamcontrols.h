@@ -33,6 +33,7 @@ struct playercamcontrols : gameobject::component
 			owner.transform().pitch += yoffset;
 
 			owner.transform().yaw += xoffset;
+
 			owner.transform().pitch = clamp(owner.transform().pitch, -89.99, 89.99);
 
 		}

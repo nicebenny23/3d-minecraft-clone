@@ -476,4 +476,12 @@ struct std::formatter<v3::Vec3> : std::formatter<std::string> {
 		// Format the Vec3 as (x, y, z)
 		return std::format_to(ctx.out(), "({:.3f}, {:.3f}, {:.3f})", v.x, v.y, v.z);
 	}
+}; template <>
+struct std::formatter<v3::Coord> : std::formatter<std::string> {
+	// Parses format specifiers (e.g., "{:.2f}")
+	template <typename FormatContext>
+	auto format(const v3::Coord& v, FormatContext& ctx) const {
+		// Format the Vec3 as (x, y, z)
+		return std::format_to(ctx.out(), "({}, {}, {})", v.x, v.y, v.z);
+	}
 };

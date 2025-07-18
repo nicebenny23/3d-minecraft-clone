@@ -7,7 +7,7 @@
 #include "../game/entity.h"
 #pragma once
 inline double wrap_angle(double a) {
-return std::fmod(std::fmod(a, 360.0) + 360.0, 360.0);
+return wrap_to_range(a,0,360);
 }
 struct CameraComp : gameobject::component
 {
@@ -23,10 +23,10 @@ struct CameraComp : gameobject::component
 
 	}
 	void update() {
-		CamTransform.yaw=wrap_angle(CamTransform.yaw);
+		owner.transform().yaw=wrap_angle(owner.transform().yaw);
 
-		CamTransform.pitch = wrap_angle(CamTransform.pitch);
-		CtxName::ctx.Ren->setviewmatrix(LookAt(CamTransform));
+		owner.transform().pitch = wrap_to_range(owner.transform().pitch,-90,90);
+		CtxName::ctx.Ren->setviewmatrix(LookAt(owner.transform()));
 		
 		CamTransform = owner.transform();
 
