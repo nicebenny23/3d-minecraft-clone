@@ -9,7 +9,7 @@ namespace gridutil {
 	void computecover(face& blkface);
 	void sendrecreatemsg();
 	void computeallcover();
-	void computepartialcover();
+
 	void emitlight();
 
 	void redolighting();

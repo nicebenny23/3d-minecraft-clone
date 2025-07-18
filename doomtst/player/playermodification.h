@@ -95,11 +95,18 @@ struct playerbreak: gameobject::component
 				}
 			}
 			currmining = Hit.collider->owner.getcomponentptr<block>();
+			
 			if (currmining!=nullptr)
 			{
 
 				timeuntilbreak = currmining->mininglevel/5.f;
-
+				for (size_t i = 0; i < 6; i++)
+				{
+					if ((*currmining)[i].cover == cover_state::Uncomputed)
+					{
+						debug(1);
+					}
+				}
 			}
 	}
 
@@ -113,6 +120,9 @@ struct playerbreak: gameobject::component
 			timeuntilbreak = currmining->mininglevel/5.f;
 			wearduribilty();
 			voxtra::RayWorldHit Hit = closest.unwrap();
+	
+			
+		
 			objutil::toblk(Hit.collider->owner).bstate.broken = true; 
 			gridutil::setblock(objutil::toblk(Hit.collider->owner).pos, minecraftair);
 

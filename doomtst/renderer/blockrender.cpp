@@ -187,11 +187,11 @@ void recreatechunkmesh(Chunk::chunk* aschunk,std::mutex& fill_lock) {
 		std::unique_lock lck(fill_lock);
 		
 
-		CtxName::ctx.Ren->stck.push(std::move(renderer::MeshData(&aschunk->mesh->SolidGeo, std::move(indbuf),std::move( datbuf))));
+		CtxName::ctx.Ren->stck.push(renderer::MeshData(&aschunk->mesh->SolidGeo, std::move(indbuf),std::move( datbuf)));
 		debug("Pls");
 	}
 	aschunk->mesh->meshsize = indbuf.length;
-
+	
 	aschunk->mesh->meshrecreateneeded = false;
 }
 

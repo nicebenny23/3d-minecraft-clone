@@ -54,7 +54,7 @@ namespace Cont {
     }
     template<typename T>
     void stack<T>::push( T&& val) {
-        list.push(val);
+        list.push(std::move(val));
     }
 
     template<typename T>

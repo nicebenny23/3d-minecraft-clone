@@ -84,7 +84,7 @@ void multi_query(query::View<Components...>& view, std::function<void(std::tuple
 	{
 		size_t start= size_of_each[i];
 		size_t end= size_of_each[i+1];
-		pool.push([&]() {
+		pool.push([&view, quer, start, end]() {
 			multi_iter<Components...> iter(view, start, end, quer);
 			iter.iterate();
 			});

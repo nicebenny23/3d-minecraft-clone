@@ -20,7 +20,7 @@ namespace renderer {
 		Mesh* msh;
 		Cont::array<float> pointlist; 
 		Cont::array<unsigned int> indicelist;
-		MeshData(Mesh* mesh, Cont::array<unsigned int>&& indicelist, Cont::array<float>&& pointlist):msh(mesh),indicelist(indicelist),pointlist(pointlist)
+		MeshData(Mesh* mesh, Cont::array<unsigned int>&& indicelist, Cont::array<float>&& pointlist):msh(mesh),indicelist(std::move(indicelist)),pointlist(std::move(pointlist))
 		{
 
 

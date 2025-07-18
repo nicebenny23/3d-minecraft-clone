@@ -46,8 +46,8 @@ void gridutil::computecover(face& blkface)
 	{
 
 		
-		blkface.cover= blockname::cover_state::Uncomputed;
-		//blkface.covered = !blkface.mesh->blk->attributes.transparent;
+		blkface.cover= cover_state::Uncomputed;
+	
 		return;
 	}
 	if (blkface.mesh->blk->attributes.transparent)
@@ -90,12 +90,8 @@ void gridutil::computecover(face& blkface)
 #include <vector>
 #include <mutex>
 
-void processChunks(int startChunk, int endChunk)
-{
-	
-}
 void Iter(std::tuple<blockname::block*> block) {
-	auto [blk] = block;
+	auto& [blk] = block;
 	for (int faceind = 0; faceind < 6; ++faceind)
 	{
 		face& tocover = (*blk)[faceind];
@@ -113,11 +109,7 @@ void gridutil::computeallcover()
 	multi_query<block>(blk, std::function(Iter), 4);
 	sendrecreatemsg();
 }
-void gridutil::computepartialcover()
-{
 
-
-}
 
 void gridutil::emitlight()
 {
@@ -164,34 +156,24 @@ void gridutil::redolighting()
 	
 	if (redoallighting)
 	{
-
-
-		redoallighting = false;
-
-		for (int chunkind = 0; chunkind < CtxName::ctx.Grid->totalChunks; chunkind++)
+		query::View<block> blk(CtxName::ctx.OC);
+		for(auto [block]:blk)
 		{
-			if (CtxName::ctx.GridRef()[chunkind]==nullptr)
-			{
-				continue;
-			}
-			for (int blockind = 0; blockind < chunksize; blockind++)
-			{
-				block* blk =&( (*(CtxName::ctx.GridRef()[chunkind]))[blockind]);
-				
 				
 				for (int faceind = 0; faceind < 6; faceind++)
 				{
 					
-					(blk->mesh.faces)[faceind].light = 0;
+					(block->mesh.faces)[faceind].light = 0;
 				}
-			     blk->lightval = blk->emitedlight;
-				if (0 < blk->emitedlight)
+				block->lightval = block->emitedlight;
+				if (0 < block->emitedlight)
 				{
-					lightingq.push(blk);
+					lightingq.push(block);
 				}
-			}
+			
 		}
 		emitlight();
+		redoallighting = false;
 	}
 	
 }

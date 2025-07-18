@@ -75,7 +75,7 @@ namespace Cont {
 		array(std::initializer_list<T> init);
 		// Move constructor.
 		array(array&& other) noexcept;
-
+		
 		// Copy constructor.
 		explicit array(const array& arr);
 
@@ -94,7 +94,9 @@ namespace Cont {
 
 		// Total allocated capacity of the array.
 		uint32_t capacity;
-
+		T* data() {
+			return list;
+		}
 		// Iterator class for accessing elements using range-based for loops.
 		class Iterator {
 		public:
