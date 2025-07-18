@@ -97,37 +97,44 @@ namespace Cont {
 
 		// Iterator class for accessing elements using range-based for loops.
 		class Iterator {
+		public:
+			using iterator_category = std::random_access_iterator_tag;  // or forward_iterator_tag
+			using value_type = T;
+			using difference_type = std::ptrdiff_t;
+			using pointer = T*;
+			using reference = T&;
+
 		private:
-			T* ptr;  // Posize_ter to the current element in the array.
+			T* ptr;
 
 		public:
-			using value_type = T;
-			using iterator = Iterator;
-			using const_iterator = const T*;
-			using size_type = std::uint32_t;
-			// Constructor initializes the iterator with a posize_ter.
 			Iterator(T* p) : ptr(p) {}
 
-			// Dereference operator to return the element posize_ted to by the iterator.
-			T& operator*() {
-				return *ptr;
-			}
+			reference operator*() const { return *ptr; }
+			pointer operator->() const { return ptr; }
 
-			// Pre-increment operator to move to the next element.
-			Iterator& operator++() {
-				++ptr;
-				return *this;
-			}
+			Iterator& operator++() { ++ptr; return *this; }
+			Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
 
-			// Comparison operator to check if two iterators are not equal.
-			bool operator!=(const Iterator& other) const {
-				return ptr != other.ptr;
-			}
-			bool operator==(const Iterator& other) const {
-				return ptr == other.ptr;
-			}
+			Iterator& operator--() { --ptr; return *this; }
+			Iterator operator--(int) { Iterator tmp = *this; --(*this); return tmp; }
 
+			bool operator!=(const Iterator& other) const { return ptr != other.ptr; }
+			bool operator==(const Iterator& other) const { return ptr == other.ptr; }
 
+			Iterator operator+(difference_type n) const { return Iterator(ptr + n); }
+			Iterator operator-(difference_type n) const { return Iterator(ptr - n); }
+			difference_type operator-(const Iterator& other) const { return ptr - other.ptr; }
+
+			Iterator& operator+=(difference_type n) { ptr += n; return *this; }
+			Iterator& operator-=(difference_type n) { ptr -= n; return *this; }
+
+			reference operator[](difference_type n) const { return ptr[n]; }
+
+			bool operator<(const Iterator& other) const { return ptr < other.ptr; }
+			bool operator>(const Iterator& other) const { return ptr > other.ptr; }
+			bool operator<=(const Iterator& other) const { return ptr <= other.ptr; }
+			bool operator>=(const Iterator& other) const { return ptr >= other.ptr; }
 		};
 		using iterator = Iterator;
 
@@ -148,6 +155,10 @@ namespace Cont {
 
 			ConstIterator& operator++() {
 				++ptr;
+				return *this;
+			}
+			ConstIterator& operator--() {
+				--ptr;
 				return *this;
 			}
 
@@ -402,7 +413,9 @@ namespace Cont {
 			throw std::logic_error("Cannot pop empty array");
 		}
 		//subtracts first
-		return list[(--length)];
+		auto res= list[(--length)];
+		list[length].~T();
+		return res;
 	}
 
 

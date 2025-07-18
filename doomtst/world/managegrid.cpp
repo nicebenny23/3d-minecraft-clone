@@ -1,6 +1,7 @@
 #pragma once
 #include "managegrid.h"
 #include "../block/blockinit.h"
+#include "../game/multi_query.h"
 
 
 queue<block*> lightingq;
@@ -93,20 +94,23 @@ void processChunks(int startChunk, int endChunk)
 {
 	
 }
+void Iter(std::tuple<blockname::block*> block) {
+	auto [blk] = block;
+	for (int faceind = 0; faceind < 6; ++faceind)
+	{
+		face& tocover = (*blk)[faceind];
+		if (tocover.cover == cover_state::Uncomputed)
+		{
+			gridutil::computecover(tocover);
+		}
+	}
+
+}
 
 void gridutil::computeallcover()
 {
 	query::View<block> blk(CtxName::ctx.OC);
-	for (auto [block] : blk) {
-		for (int faceind = 0; faceind < 6; ++faceind)
-		{
-			face& tocover = (*block)[faceind];
-			if (tocover.cover == cover_state::Uncomputed)
-			{
-				gridutil::computecover(tocover);
-			}
-		}
-	}
+	multi_query<block>(blk, std::function(Iter), 4);
 	sendrecreatemsg();
 }
 void gridutil::computepartialcover()

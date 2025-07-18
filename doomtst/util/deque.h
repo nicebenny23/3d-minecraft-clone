@@ -42,7 +42,9 @@ namespace Cont {
 		void push_back(const T& val);
 
 		void push_front(const T& val);
+		void push_back( T&& val);
 
+		void push_front( T&& val);
 		deque(deque&& other) noexcept;
 		deque(const deque& other);
 		deque& operator=(deque&& other) noexcept;
@@ -125,6 +127,32 @@ namespace Cont {
 		length++;
 	
 	}
+	template<typename T>
+	inline void deque<T>::push_front(T&& val)
+	{
+		if (full()) {
+			resize();
+		}
+		if (!empty()) {
+			dec_index(front);
+		}
+
+		list[front] = std::move(val);
+		length++;
+	}
+	template<typename T>
+	inline void deque<T>::push_back( T&& val)
+	{
+		if (full())
+			resize();
+
+		if (!empty()) {
+			inc_index(back);
+		}
+
+		list[back] =std::move(val);
+		length++;
+	}
 
 	template<typename T>
 	void deque<T>::push_back(const T& val)
@@ -175,6 +203,8 @@ namespace Cont {
 			throw std::out_of_range("Queue is empty");
 		}
 		T val = list[front];
+		list[front].~T();
+
 		length--;
 		
 		if (!empty())
@@ -183,7 +213,6 @@ namespace Cont {
 		
 		}
 
-		
 		return val;
 	}
 
@@ -195,6 +224,7 @@ namespace Cont {
 			throw std::out_of_range("Queue is empty");
 
 		T val = list[back];
+		list[back].~T();
 		length--;
 		
 		if (!empty())
@@ -225,6 +255,7 @@ namespace Cont {
 		length = 0;
 
 	}
+
 	template<typename T>
 	inline deque<T>::deque(deque&& other) noexcept
 	{

@@ -13,6 +13,7 @@ namespace Cont {
         T& peek();
         const T& peek() const;
         void push(const T& val);
+        void push( T&& val);
         stack();
         bool empty() const;
         void destroy();
@@ -49,6 +50,10 @@ namespace Cont {
 
     template<typename T>
     void stack<T>::push(const T& val) {
+        list.push(val);
+    }
+    template<typename T>
+    void stack<T>::push( T&& val) {
         list.push(val);
     }
 

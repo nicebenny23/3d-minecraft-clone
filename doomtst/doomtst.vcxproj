@@ -334,6 +334,7 @@
     <ClInclude Include="game\Core.h" />
     <ClInclude Include="game\GameContext.h" />
     <ClInclude Include="game\job.h" />
+    <ClInclude Include="game\multi_query.h" />
     <ClInclude Include="game\navigation.h" />
     <ClInclude Include="game\query.h" />
     <ClInclude Include="game\relationship.h" />
@@ -450,6 +451,7 @@
     <ClInclude Include="renderer\Vao.h" />
     <ClInclude Include="renderer\VertexObjectManager.h" />
     <ClInclude Include="util\thread_pool.h" />
+    <ClInclude Include="util\thread_split.h" />
     <ClInclude Include="util\topo_sort.h" />
     <ClInclude Include="util\typelist.h" />
     <ClInclude Include="util\type_graph.h" />
