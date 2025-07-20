@@ -13,7 +13,7 @@ struct DagNode {
     static constexpr size_t npos = static_cast<size_t>(-1);
     size_t index = npos;
     T value;
-    Cont::array<size_t> successors;
+    stn::array<size_t> successors;
 
     DagNode() = default;
     DagNode(size_t nodeIndex, const T& nodeValue)
@@ -23,7 +23,7 @@ struct DagNode {
 // Templated DAG storing nodes and edges
 template<typename T>
 struct Dag {
-    Cont::array<DagNode<T>> nodes;
+    stn::array<DagNode<T>> nodes;
     void destroy() {
 
 
@@ -88,17 +88,17 @@ struct Dag {
     DagNode<T>& operator[](size_t nodeIndex) { return nodes[nodeIndex]; }
     const DagNode<T>& operator[](size_t nodeIndex) const { return nodes[nodeIndex]; }
 
-    using iterator = typename Cont::array<DagNode<T>>::iterator;
+    using iterator = typename stn::array<DagNode<T>>::iterator;
     iterator begin() { return nodes.begin(); }
     iterator end() { return nodes.end(); }
 };
 
 // Topological sort returning values in order
 template<typename T>
-inline Cont::array<T> dag_sort(const Dag<T>& graph) {
+inline stn::array<T> dag_sort(const Dag<T>& graph) {
     size_t nodeCount = graph.length();
-    Cont::array<int> inDegree(nodeCount, 0);
-    Cont::stack<size_t> zeroQueue;
+    stn::array<int> inDegree(nodeCount, 0);
+    stn::stack<size_t> zeroQueue;
 
     // compute in-degrees
     for (size_t i = 0; i < nodeCount; i++) {
@@ -111,7 +111,7 @@ inline Cont::array<T> dag_sort(const Dag<T>& graph) {
         if (inDegree[i] == 0) zeroQueue.push(i);
     }
     // process
-    Cont::array<T> sorted;
+    stn::array<T> sorted;
    
     while (!zeroQueue.empty()) {
         size_t currentIndex = zeroQueue.pop();
@@ -126,8 +126,8 @@ inline Cont::array<T> dag_sort(const Dag<T>& graph) {
 template<typename T>
  bool is_acyclic(const Dag<T>& graph) {
     size_t nodeCount = graph.length();
-    Cont::array<int> inDegree(nodeCount, 0);
-    Cont::stack<size_t> zeroQueue;
+    stn::array<int> inDegree(nodeCount, 0);
+    stn::stack<size_t> zeroQueue;
 
     // compute in-degrees
     for (size_t i = 0; i < nodeCount; i++) {
@@ -159,7 +159,7 @@ struct DagBuilder {
 
     Dag<T> fullGraph;                       // complete graph
     std::unordered_map<T, size_t, Hash> valueIndex; // map value to index
-    Cont::array<T> pushed;          // values in push order
+    stn::array<T> pushed;          // values in push order
     Opt::Option<size_t> firstNode, lastNode;
     Dag<T> filteredGraph;                   // filtered graph subset
     bool dirty = false;                     // lazy rebuild flag
@@ -199,7 +199,7 @@ struct DagBuilder {
         return *this;
     }
 
-    DagBuilder& push(T nodeValue, Cont::array<T>& dependents,Cont::array<T>& dependencies){
+    DagBuilder& push(T nodeValue, stn::array<T>& dependents,stn::array<T>& dependencies){
 
         size_t idx = ensureNode(nodeValue);
         for (auto depValue : dependents) {
@@ -235,8 +235,8 @@ private:
 };
 
 template<typename T>
-Cont::array<T> filter(const Cont::array<T>& whole, const Cont::array<T>& keep) {
-    Cont::array<T> result;
+stn::array<T> filter(const stn::array<T>& whole, const stn::array<T>& keep) {
+    stn::array<T> result;
     for (const auto & elem: whole)
     {
         if (keep.contains(elem))
@@ -247,11 +247,11 @@ Cont::array<T> filter(const Cont::array<T>& whole, const Cont::array<T>& keep) {
     return result;
 }
 template<typename T>
-Dag<T> filter(Dag<T> full, const Cont::array<T>& keep) {
+Dag<T> filter(Dag<T> full, const stn::array<T>& keep) {
     Dag<T> new_dag;
     std::unordered_set<size_t> added;
-    Cont::array<size_t> remap;
-    Cont::array<size_t> filter_ind;
+    stn::array<size_t> remap;
+    stn::array<size_t> filter_ind;
     for (size_t i = 0; i < full.length(); i++)
     {
         if (keep.contains(full[i].value))

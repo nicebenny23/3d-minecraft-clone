@@ -107,8 +107,8 @@ namespace dynPool {
         size_t BlockSize;  // Total size per block (metadata + aligned payload)
         size_t DataOffset; // Offset from blockInfo to T*, aligned properly
 
-        Cont::array<blockInfo*, false> freeList;
-        Cont::array<char*> pools;
+        stn::array<blockInfo*, false> freeList;
+        stn::array<char*> pools;
     };
 
 }

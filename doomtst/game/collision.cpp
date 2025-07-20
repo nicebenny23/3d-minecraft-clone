@@ -62,8 +62,6 @@ voxtra::WorldRayCollision collision::raycastentity(ray nray, HitQuery query)
 			{
 				continue;
 			}
-
-
 			if (dist(Collider1->globalbox().center, nray.start) < nray.length())
 			{
 
@@ -171,7 +169,7 @@ void collision::handleduelentitycollisions()
 			}
 				propagatecollisionmessage(Collider1->owner, Collider2->owner);
 
-				if (Collider1->effector, Collider2->effector) {
+				if (Collider1->effector||Collider2->effector) {
 
 					continue;
 				}
@@ -206,57 +204,37 @@ voxtra::WorldRayCollision collision::raycastall(ray nray, HitQuery query, voxtra
 }
 Vec3 colideentandblock(Collider& entity, block* tocollide) {
 	
-	if (tocollide != nullptr)
+	if (tocollide == nullptr|| !tocollide->owner.hascomponent<aabb::Collider>())
 	{
-		if (tocollide->owner.hascomponent<aabb::Collider>())
-		{
 
-
-			aabb::Collider& blockcol = tocollide->owner.getcomponent<aabb::Collider>();
-
-
-
-			Vec3 my = entity.globalbox().center;
-			Vec3 otherpos = blockcol.globalbox().center;
-			Vec3 force = aabb::collideaabb(entity, blockcol);
-
-
-			if (force == zerov)
-			{
-				return zerov;
-			}
-			//bug collision was happening twice(fix,improve collision to not collide already destroyed/being destroyed obejcts)/
-			propagatecollisionmessage(entity.owner, tocollide->owner);
-			
-
-			if (!blockcol.effector && !entity.effector)
-			{
-
-				return force;
-			}
-
-
-		}
+		return zerov;
 	}
-	return zerov;
+	aabb::Collider& blockcol = tocollide->owner.getcomponent<aabb::Collider>();
+	Vec3 my = entity.globalbox().center;
+	Vec3 otherpos = blockcol.globalbox().center;
+	Vec3 force = aabb::collideaabb(entity, blockcol);
+		if (force == zerov)
+		{
+			return zerov;
+		}
+		propagatecollisionmessage(entity.owner, tocollide->owner);
+		if (!blockcol.effector && !entity.effector)
+		{
+			return force;
+		}
 }
 
 void collision::handleCollisionWithGrid(Collider& entity)
 {
 	array<block*>& blklist = CtxName::ctx.Grid->voxelinrange(entity.globalbox());
 
-	//std::swap(entity.box.center, entity.prevpos);
-	
-		
+
 	
 		Vec3 minforce = zerov;
 		block* minblock=nullptr;
 		for (int ind = 0; ind < blklist.length; ind++)
 		{
-
-
-	
-			Vec3 force = colideentandblock(entity, blklist[ind]);
+		Vec3 force = colideentandblock(entity, blklist[ind]);
 
 			if (mag(force) > mag(minforce) || mag(minforce) == 0)
 			{

@@ -10,7 +10,7 @@
 #include "../game/transform.h"
 #include "renderer.h"
 //fix
-using namespace Cont;
+using namespace stn;
 using namespace v3;
 using namespace buffer_object;
 
@@ -46,9 +46,9 @@ namespace ModelMeshName {
 		v2::Vec2 nthtex(int i);
 		Mesh mesh;
 		void setvobjs() {
-		CtxName::ctx.Ren->Gen<false>(&mesh);
+		CtxName::ctx.Ren->Gen(&mesh);
 
-			mesh.AddAttribute<float,2>().AddAttribute<float, 3>();
+			mesh.Voa.attributes.push<float,2>().push<float, 3>();
 		}
 
 		glm::mat4* modelmatrix;

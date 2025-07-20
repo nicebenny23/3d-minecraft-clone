@@ -1,6 +1,7 @@
 #include "block.h"
+#include "../items/recipe.h"
 #include "../items/menu.h"
-#include "../util//vector2.h"
+#include "../util/vector2.h"
 #pragma once 
 struct craftingmenu :menu {
 

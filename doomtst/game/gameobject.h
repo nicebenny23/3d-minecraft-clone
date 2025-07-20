@@ -21,7 +21,7 @@ namespace GameContext {
 
 }
 
-using namespace Cont;
+using namespace stn;
 
 namespace CtxName {
 	struct Context;
@@ -133,6 +133,7 @@ namespace gameobject {
 		bool has_component();
 		bool has_component(comp::Id ind);
 		bool has_components(bitset::bitset set);
+		bool has_any(bitset::bitset set);
 		void add(obj& object) {
 			EntityMetadata& met = object.meta();
 			if (met.arch != nullptr)
@@ -179,7 +180,7 @@ namespace gameobject {
 		}
 
 
-		using iterator = typename Cont::array<obj>::iterator;
+		using iterator = typename stn::array<obj>::iterator;
 
 		iterator begin() { return elems.begin(); }
 		iterator end() { return elems.end(); }
@@ -298,7 +299,7 @@ namespace gameobject {
 
 		}
 
-		using iterator = typename Cont::array<Archtype*>::iterator;
+		using iterator = typename stn::array<Archtype*>::iterator;
 		iterator begin() { return archtypes.begin(); }
 		iterator end() { return archtypes.end(); }
 	private:
@@ -317,7 +318,17 @@ namespace gameobject {
 		void Add_listener() {
 			events.Add_listener<EventType, Listener>();
 		}
-
+		template <typename... Components>
+	bitset::bitset bitset_of() {
+		array<size_t> indices = component_indexer.get_type_ids<Components>();
+		bitset::bitset res;
+		for (auto ind:indices)
+		{
+			res.expand(ind);
+			res.set(ind);
+		}
+		return res;
+		}
 
 		Ecs() {
 			commands = CommandBuffer(this);
@@ -346,12 +357,12 @@ namespace gameobject {
 		template<typename T>
 		T& getcomponent(obj& object);
 		obj CreateEntity(v3::Vec3 SpawnPos);
-		void InitObj(obj& object);
+		void InitializeEntity(obj& object);
 
 		void destroy(obj& object);
 
 		template<typename... Components>
-		std::tuple<Components*...> get_tuple(obj& obj, Cont::array<comp::Id>& indices);
+		std::tuple<Components*...> get_tuple(obj& obj, stn::array<comp::Id>& indices);
 		template <class T, typename... types>
 		T* add_component(obj& entity,types&&... initval);
 
@@ -598,6 +609,10 @@ namespace gameobject {
 	{
 		return (bit_list & set) == set;
 	}
+	inline bool Archtype::has_any(bitset::bitset set)
+	{
+		return (bit_list & set).popcount()!=0;
+	}
 	template<typename T>
 	bool Archtype::has_component()
 	{
@@ -612,7 +627,7 @@ namespace gameobject {
 	
 	//just trust this works
 	template<typename... Components>
-	std::tuple<Components*...> Ecs::get_tuple(obj& obj,Cont::array<comp::Id>& indices) {
+	std::tuple<Components*...> Ecs::get_tuple(obj& obj,stn::array<comp::Id>& indices) {
 		
 
 		return[&]<size_t... Is>(std::index_sequence<Is...>) {

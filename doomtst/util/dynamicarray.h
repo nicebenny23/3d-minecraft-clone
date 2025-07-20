@@ -7,7 +7,7 @@
 #include <cstring>
 #include <initializer_list>
 
-namespace Cont {
+namespace stn {
 
 
 	// Resizing function that doubles the size of the array when needed.

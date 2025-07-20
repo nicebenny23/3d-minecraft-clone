@@ -1,7 +1,7 @@
 #include "../util/dynamicarray.h"
 #include "Container.h"
 #include "../util/fileloader.h"
-using namespace Cont;
+using namespace stn;
 #pragma once 
 struct iteminrecipe {
 

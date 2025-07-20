@@ -40,35 +40,10 @@ namespace query {
 	struct excludedPredicate {
 		static constexpr bool value = QueryArgument<T>::arg_type == query_argument_type::Not;
 	};
-	
-		template<typename... Components>
-	struct ViewBuilder {
-		Cont::array<comp::Id> exclude;
-		Cont::array<comp::Id> require;
-		Cont::array<comp::Id> output;
-		using needed = type_pipeline::Filter_t<neededPredicate, Components...>::type;
-		using excluded = type_pipeline::Filter_t<excludedPredicate, Components...>::type;
-		using result = type_pipeline::Filter_t<resultPredicate, Components...>::type;
-		View<result>* Build(gameobject::Ecs* ecs) {
-			array<comp::Id> positions;
-			output = ecs->component_indexer.get_type_ids<result...>();
-			require = ecs->component_indexer.get_type_ids<needed...>();
-			exclude = ecs->component_indexer.get_type_ids<excluded...>();
-			for (auto arch : ecs->arch.archtypes)
-			{
-				if (true)
-				{
 
-				}
-
-			}
-		}
-		
-	};
-	
 	template<typename... Components>
 	struct View {
-		Cont::array<gameobject::Archtype*> archtypes;
+		stn::array<gameobject::Archtype*> archtypes;
 		gameobject::Ecs* ecs;
 		
 		array<comp::Id> positions;
@@ -127,7 +102,11 @@ namespace query {
 		Iterator end() {
 			return Iterator(*this, 0, archtypes.length);
 		}
-		View(gameobject::Ecs* world):ecs(world), archtypes(){
+		View(gameobject::Ecs* world):ecs(world), archtypes(),positions(){
+			if (!ecs->component_indexer.contains_all<Components...>())
+			{
+				return;
+			}
 			positions = ecs->component_indexer.get_type_ids<Components...>();
 
 			bitset::bitset bitlist;
@@ -147,7 +126,37 @@ namespace query {
 			archtypes.destroy();
 		}
 	};
-	
+
+	template<typename... Components>
+	struct ViewBuilder {
+		using needed = type_pipeline::Filter_t<neededPredicate, Components...>::type;
+		using excluded = type_pipeline::Filter_t<excludedPredicate, Components...>::type;
+		using result = type_pipeline::Filter_t<resultPredicate, Components...>::type;
+		View<result> Build(gameobject::Ecs* ecs) {
+			View<result> output_arch;
+			output_arch.ecs = ecs;
+			bitset::bitset exclude;
+			bitset::bitset require;
+			stn::array<comp::Id> output;
+
+			output = ecs->component_indexer.get_type_ids<result...>();
+			require = ecs->bitset_of<needed...>();
+			exclude = ecs->bitset_of<excluded...>();
+			for (auto arch : ecs->arch.archtypes)
+			{
+				if (arch->has_components(require) && !arch->has_any(exclude))
+				{
+					output_arch.archtypes.push(arch);
+
+				}
+
+			}
+			output_arch.positions = output;
+			return output_arch;
+		}
+		  
+	};
+
 	struct ComponentIterator {
 		gameobject::obj owner;
 		gameobject::Ecs* manager;

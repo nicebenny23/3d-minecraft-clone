@@ -6,6 +6,7 @@
 #include "chunkload.h"	
 #include "../util/geometry.h"
 #include "../game/GameContext.h"
+#include "../util/random.h"
 using namespace v3;
 
 namespace grid {
@@ -96,6 +97,16 @@ namespace grid {
 	block* Grid::getBlock(const v3::Coord pos)
 	{
 
+		gameobject::obj* blk = getObject(pos);
+		if (blk)
+		{
+			return &blk->getcomponent<block>();
+		}
+		return nullptr;
+	}
+
+	gameobject::obj* Grid::getObject(const v3::Coord pos)
+	{
 		Coord chunk_pos = chunkfromblockpos(pos);
 		if (containsChunk(chunk_pos))
 		{
@@ -156,7 +167,7 @@ namespace grid {
 	{
 
 	
-		Cont::array<Chunk::chunk*>	newchunklist = Cont::array<Chunk::chunk*>(totalChunks, nullptr);
+		stn::array<Chunk::chunk*>	newchunklist = stn::array<Chunk::chunk*>(totalChunks, nullptr);
 		int indexdxchange = localChunkIndex(griddt);
 		
 		size_t ind = 0;
@@ -191,6 +202,7 @@ namespace grid {
 			}
 		}
 		has_loaded_chunk = false;
+	 
 		ind = 0;
 		for (int k = 0; k < dim(); k++)
 		{
@@ -223,8 +235,8 @@ namespace grid {
 					
 				}
 			}
+		
 		}
-
 		chunklist = std::move(newchunklist);
 	}
 
@@ -254,7 +266,7 @@ namespace grid {
 		loader.Init(ctx);
 		gridpos =Coord( camera::campos() / float(chunkaxis));
 		griddt = zeroiv;
-		chunklist = Cont::array<Chunk::chunk*>(totalChunks,nullptr);
+		chunklist = stn::array<Chunk::chunk*>(totalChunks,nullptr);
 	
 		load();
 	}

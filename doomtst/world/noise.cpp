@@ -1,6 +1,6 @@
 #pragma once
 #include "noise.h"
-using namespace Cont;
+using namespace stn;
 #include "../util/mathutil.h"
 
 //todo move this to random

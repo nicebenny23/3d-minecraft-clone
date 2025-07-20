@@ -6,11 +6,12 @@
 #include "../util/fileloader.h"
 #include "../block/blockinit.h"
 #include "../block/block.h"
+#include <format>
 #include "../util/algorthm.h"#include "../util/dynamicarray.h"
 #include "../renderer/renderer.h"
-block& Chunk::chunk::operator[](size_t index)
+gameobject::obj& Chunk::chunk::operator[](size_t index)
 {
-	return blockbuf[index].getcomponent<block>();
+	return blockbuf[index];
 }
 
 
@@ -25,11 +26,11 @@ size_t Chunk::indexfrompos(Coord pos)
 
 void Chunk::chunkmesh::genbufs()
 {
-	CtxName::ctx.Ren->Gen<true>(&TransparentGeo);
+	CtxName::ctx.Ren->Gen(&TransparentGeo);
 
-	CtxName::ctx.Ren->Gen<true>(&SolidGeo);
-	SolidGeo.AddAttribute<float,3>().AddAttribute<float,3>().AddAttribute<float, 1>();
-	TransparentGeo.AddAttribute<float, 3>().AddAttribute<float, 3>().AddAttribute<float, 1>();
+	CtxName::ctx.Ren->Gen(&SolidGeo);
+	SolidGeo.Voa.attributes.push<float,3>().push<float,3>().push<float, 1>();
+	TransparentGeo.Voa.attributes.push<float, 3>().push<float, 3>().push<float, 1>();
 
 }
 
@@ -75,16 +76,13 @@ Chunk::chunk* Chunk::airload(Coord location)
 
 
 
-const char* Chunk::getcorefilename(Coord pos)
+std::string  Chunk::getcorefilename(Coord pos)
 {
-	std::string* strng = new std::string();
-	strng->append("worldstorage\\Chunk");
-	strng->append(std::to_string(pos.x));
-	strng->append(",");
-	strng->append(std::to_string(pos.y));
-	strng->append(",");
-	strng->append(std::to_string(pos.z));
-	return 	strng->data();
+
+	std::string m = std::format("Chunk{}", pos);
+	std::filesystem::path path = CtxName::ctx.wrld->get_path();
+	path = path / "Chunks" /m;  // assign the combined path back
+	return 	path.string();
 }
 //this whole system has to be completly redone
 void appendspecialbytelist(array<unsigned short>& bytelist, int index, block* blk) {
@@ -115,7 +113,6 @@ void appendspecialbytelist(array<unsigned short>& bytelist, int index, block* bl
 void Chunk::chunk::write()
 {
 
-	const char* name = getcorefilename(loc);
 
 	safefile file = safefile(getcorefilename(loc), filewrite);
 	array<unsigned short> bytelist = array<unsigned short >();

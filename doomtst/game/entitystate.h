@@ -70,6 +70,7 @@ struct estate : gameobject::component
 		invincablilitymax = 1;
 		takesfalldmg = falls;
 	}
+	void remove();
 	void damage(int dmg) {
 		dmg = dmg * damagemultiplyer;
 		if (dmg <= 0)
@@ -83,11 +84,10 @@ struct estate : gameobject::component
 			health -= dmg;
 			if (health <= 0)
 			{
-				if (!owner.hascomponent<gameobject::StaticComponent>())
-				{
+				remove();
 
-					owner.destroy();
-				}
+				
+				
 				
 			}
 			health = clamp(health, 0, maxhealth);

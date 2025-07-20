@@ -86,9 +86,6 @@ void gridutil::computecover(face& blkface)
 	}
 
 }
-#include <thread>
-#include <vector>
-#include <mutex>
 
 void Iter(std::tuple<blockname::block*> block) {
 	
@@ -109,7 +106,6 @@ void gridutil::computeallcover()
 	multi_query<block>(blk, std::function(Iter), 4,1000);
 	sendrecreatemsg();
 }
-
 
 void gridutil::emitlight()
 {
@@ -148,30 +144,50 @@ void gridutil::emitlight()
 		}
 	}
 }
+//removes a block from the grid whilst still keeping it in the work
+gameobject::obj gridutil::dislocate(gameobject::obj blk)
+{
 
+	auto position = blk.getcomponent<block>().pos;
+	blk.removecomponent<block>();
+	gameobject::obj& to_flip = *CtxName::ctx.Grid->getObject(position);
+	CtxName::ctx.OC->InitializeEntity(to_flip);
+	setdefault(to_flip.addcomponent<block>());
+	return blk;
+}
+void collect_if_light(std::tuple<blockname::block*> block, std::mutex& push_mutex) {
+	auto& [blk] = block;
+	for (int faceind = 0; faceind < 6; faceind++)
+	{
 
+		(blk->mesh.faces)[faceind].light = 0;
+	}
+	blk->lightval = blk->emitedlight;
+	if (0 < blk->emitedlight)
+	{
+		push_mutex.lock();
+		lightingq.push(blk);
+
+		push_mutex.unlock();
+	}
+
+}
+
+//removes an block competly
+gameobject::obj gridutil::set_air(gameobject::obj blk)
+{
+	dislocate(blk).destroy();
+}
 void gridutil::redolighting()
 {
 
 	
 	if (redoallighting)
 	{
+		std::mutex fill_mutex;
+
 		query::View<block> blk(CtxName::ctx.OC);
-		for(auto [block]:blk)
-		{
-				
-				for (int faceind = 0; faceind < 6; faceind++)
-				{
-					
-					(block->mesh.faces)[faceind].light = 0;
-				}
-				block->lightval = block->emitedlight;
-				if (0 < block->emitedlight)
-				{
-					lightingq.push(block);
-				}
-			
-		}
+		multi_query(blk, std::function([&fill_mutex](std::tuple<blockname::block*> block) { return collect_if_light(block,fill_mutex);}),4);
 		emitlight();
 		redoallighting = false;
 	}

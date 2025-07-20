@@ -35,7 +35,7 @@ namespace type_id {
 
     struct type_indexer {
         uint32_t type_index = 0;
-        Cont::array<Id> sparse_map;
+        stn::array<Id> sparse_map;
 
         uint32_t size() const {
             return type_index;
@@ -60,7 +60,7 @@ namespace type_id {
             return Opt::Option<Id>(dense_id);
         }
         template<typename T>
-        util::Pair<Id, bool> insert() {
+        util::pair<Id, bool> insert() {
             uint32_t id = typeIndex<T>();
             Id& dense_id = sparse_map.reach(id);
             bool is_new = false;
@@ -73,13 +73,19 @@ namespace type_id {
         template<typename T>
         bool contains() const {
             uint32_t id = typeIndex<T>();
-            return id < sparse_map.length && sparse_map.contains(id);
+            return id < sparse_map.length && sparse_map.contains(Id(id));
         }
 
         template <typename... Types>
-        Cont::array<Id> get_type_ids() {
+        stn::array<Id> get_type_ids() {
             return { get<Types>()... };
         }
+
+
+         template <typename... Types>
+           bool contains_all() const {
+               return (contains<Types>() && ...);
+           }
     };
 
 }

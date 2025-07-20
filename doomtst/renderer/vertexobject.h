@@ -27,7 +27,7 @@ namespace buffer_object {
 		}
 			//use when data is of one type
 		template<class T>
-		void fillbuffer(Cont::array<T>& data) {
+		void fillbuffer(stn::array<T>& data) {
 			fillbuffer(data.list, data.length*sizeof(T));
 		}
 	protected:
@@ -68,7 +68,7 @@ namespace buffer_object {
 		Ebo():Buf(GL_ELEMENT_ARRAY_BUFFER) {	
 		}
 		template<class T>
-		void fillbuffer(Cont::array<T>& data) {
+		void fillbuffer(stn::array<T>& data) {
 			Buf.fillbuffer<T>(data);
 		}
 		void fillbuffer(void* data, int size) {
@@ -99,7 +99,7 @@ namespace buffer_object {
 		Vbo() :Buf(GL_ARRAY_BUFFER) {
 		}
 		template<class T>
-		void fillbuffer(Cont::array<T>& data) {
+		void fillbuffer(stn::array<T>& data) {
 			Buf.fillbuffer<T>(data);
 		}
 		void fillbuffer(void* data, int size) {

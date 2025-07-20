@@ -38,7 +38,7 @@ namespace bitset {
     }
     struct bitset {
         using uint64 = uint64_t;
-        Cont::array<uint64> bitlist;
+        stn::array<uint64> bitlist;
         size_t bits;
         constexpr bitset() noexcept :bits(0), bitlist() {};
         

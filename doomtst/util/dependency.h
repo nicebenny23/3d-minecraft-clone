@@ -34,7 +34,7 @@ namespace Depends {
     };
 
     struct DependencySystem {
-        Cont::array<size_t> sortedActive;
+        stn::array<size_t> sortedActive;
 
         template<typename T>
         void push() {
@@ -47,8 +47,8 @@ namespace Depends {
             using Deps = typename GetDependencies<T>::type;
             using Tag = typename GetDependencyTag<T>::type;
 
-            Cont::array<size_t> dependees;     // types that T depends on
-            Cont::array<size_t> dependencies;  // unused but needed by dag_builder API
+            stn::array<size_t> dependees;     // types that T depends on
+            stn::array<size_t> dependencies;  // unused but needed by dag_builder API
 
             // Collect dependees from Deps list
             TypeList::for_each<Deps>::template apply<CollectDependees>(dependees, *this);
@@ -79,7 +79,7 @@ namespace Depends {
     private:
         struct CollectDependees {
             template<typename Dep>
-            static void call(Cont::array<size_t>& dependees, DependencySystem& sys) {
+            static void call(stn::array<size_t>& dependees, DependencySystem& sys) {
                 auto [depId, _] = sys.typeSystem.insert<Dep>();
                 dependees.push(depId.value);
             }

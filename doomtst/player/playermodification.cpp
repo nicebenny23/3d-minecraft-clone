@@ -2,6 +2,8 @@
 #include "playermodification.h"
 #include "../world/voxeltraversal.h"
 #include "../game/rigidbody.h"
+
+#include "../items/loottable.h"
 #include "../entities/onhit.h"
 #include "../game/particles.h"
 void initbreakparticle(gameobject::obj newent)
@@ -17,4 +19,12 @@ void initbreakparticle(gameobject::obj newent)
 		newent.addcomponent<destroyonhit<particle>>();
 
 	
+}
+
+void playerbreak::make_drop(voxtra::RayWorldHit Hit)
+{
+	if (Hit.collider->owner.hascomponent<loottable>())
+	{
+		Hit.collider->owner.getcomponent<loottable>().should_drop = true;
+	}
 }

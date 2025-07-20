@@ -18,7 +18,7 @@ struct Job_run {
 	
 	std::mutex lock;
 	Dag<Job_cmd> job_graph;
-	Cont::queue<size_t> finished;
+	stn::queue<size_t> finished;
 	Job_run(Dag<Job_cmd> jobGraph):job_graph(jobGraph),finished(),lock() {
 	
 		if (!is_acyclic(jobGraph))
@@ -29,9 +29,9 @@ struct Job_run {
 	void operator()() {
 
 		thread::thread_pool pool=thread::thread_pool(1);
-		Cont::array<size_t> indegree(job_graph.length());
+		stn::array<size_t> indegree(job_graph.length());
 		
-		Cont::queue<size_t> can_run;
+		stn::queue<size_t> can_run;
 		for (size_t i = 0; i < job_graph.length(); i++)
 		{
 			DagNode<Job_cmd> graph_node = job_graph[i];
@@ -93,7 +93,7 @@ struct Job_run {
 };
 
 struct JobManager {
-	Cont::array<Job_cmd> cmd_list;
+	stn::array<Job_cmd> cmd_list;
 	Depends::DependencySystem job_list;
 
 	template<typename T>

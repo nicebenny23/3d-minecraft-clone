@@ -12,7 +12,7 @@ bool randombool();
 unsigned int randomint();
 void randomcoord(unsigned int& seed);
 int randomint( int max);
-extern Cont::array<v3::Vec3> seededdirections;
+extern stn::array<v3::Vec3> seededdirections;
 int Hash(int seed, int xPrimed, int yPrimed, int zPrimed);
 inline v3::Vec3 randompointonsphere(int x, int y, int z) {
 	int seed = 3;

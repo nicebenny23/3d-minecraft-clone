@@ -43,7 +43,7 @@ int randomint(int max){
 
     return (randomint()%max);
 }
- Cont::array<v3::Vec3> seededdirections;
+ stn::array<v3::Vec3> seededdirections;
 
 void InitRandomDirections()
 {
@@ -55,7 +55,7 @@ void InitRandomDirections()
 		randomcoord(noiseval);
 	}
 
-	seededdirections = Cont::array<v3::Vec3>();
+	seededdirections = stn::array<v3::Vec3>();
 	for (int i = 0; i < USHRT_MAX; i++)
 	{
 

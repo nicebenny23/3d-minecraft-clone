@@ -1,5 +1,6 @@
 #include "../renderer/Window.h"
 #include "../world/grid.h"
+#include "../world/world.h"
 #include "../util/userinput.h"
 #include "../util/time.h"
 #include "entity.h"
@@ -31,9 +32,9 @@ namespace CtxName {
 			Grid = nullptr;
 			Time = nullptr;
 			OC = nullptr;
-			
+			wrld = nullptr;
 		}
-
+		World::world* wrld;
 		userinput::InputManager* Inp;
 		window::Window* Window;
 		timename::TimeManager* Time;

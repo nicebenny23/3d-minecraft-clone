@@ -131,7 +131,7 @@ namespace chainpool {
 
         metalist usedBlocks; // Array to track free blocks
         metalist freeBlocks; // Array to track free blocks
-        Cont::array<char*> poollist;   // Pointer to the memory pool
+        stn::array<char*> poollist;   // Pointer to the memory pool
 
         T* findFreeBlock(); // Find a free block index
 

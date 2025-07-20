@@ -78,7 +78,7 @@ safefile::safefile(const char* filepath, mode openmode)
     }
 }
 
-safefile::safefile(char* filepath, mode openmode)
+safefile::safefile(std::string filepath, mode openmode)
 {
     fp = nullptr;
     offset = 0;
@@ -86,13 +86,13 @@ safefile::safefile(char* filepath, mode openmode)
     switch (openmode)
     {
     case filewrite:
-        fp = fopen(filepath, "wb");
+        fp = fopen(filepath.c_str(), "wb");
         break;
     case fileread:
-        fp = fopen(filepath, "rb");
+        fp = fopen(filepath.c_str(), "rb");
         break;
     case fileappend:
-        fp = fopen(filepath, "ab");
+        fp = fopen(filepath.c_str(), "ab");
         break;
     default:
         std::cout << fp;
@@ -130,9 +130,10 @@ void safefile::go(unsigned int byteoffset)
     offset = byteoffset;
 }
 
-bool fileexists(const char* name)
+
+bool fileexists(std::string name)
 {
-    FILE* file = fopen(name, "r");
+    FILE* file = fopen(name.c_str(), "r");
     if (file) {
         fclose(file);
         return true;

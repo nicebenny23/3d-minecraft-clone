@@ -41,17 +41,17 @@ namespace RenderContext{
 		VaoName::Vao* Get_BoundVao() {
 			return BoundVao;
 		}
-		void bind(const Base_Material* mat, renderer::Renderer* renderer);
-
+		void bind(const Material* mat, renderer::Renderer* renderer);
+		void apply(uniforms::uniform uform);
 		
 	private:
-		const Base_Material * material;
+		const Material * material;
 		shader* BoundShader;
 		ITexture* BoundTexture;
 		buffer_object::Ebo* BoundEbo;
 		buffer_object::Vbo* BoundVbo;
 		VaoName::Vao* BoundVao;
-
+		uniforms::UniformManager* form;
 
 	};
 

@@ -17,7 +17,7 @@ void oalgorithm::quicksubptr(T* arr, int low, int high, bool(*lt)(T, T), bool(*g
 
 }
 
-float oalgorithm::invertnoisetransform(Cont::array<float>& arr, float searchval)
+float oalgorithm::invertnoisetransform(stn::array<float>& arr, float searchval)
 {
 	int high = arr.length - 1;
 	int low = 0;

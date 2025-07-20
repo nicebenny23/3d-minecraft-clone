@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <stdexcept>
 #include   "shader.h"
-
+#include "Uniform.h"
 #include "ShaderManager.h"
 namespace renderer {
     struct  Renderer;
@@ -36,63 +36,58 @@ public:
 
  
 };
-class Base_Material {
+class Material {
 public:
     std::string Name;
     RenderProperties prop;
-
+    array<type_id::Id> handles;
     shader* shade = nullptr;
-    Cont::array<UFunc> UniformsCalls;
     // Default constructor
-    Base_Material() : Name(""), shade(), UniformsCalls(Cont::array<UFunc>()){}
+    Material() : Name(""), shade(){}
 
-    Base_Material& AddUniform(UFunc UniformCall) {
-        UniformsCalls.push( UniformCall);
-        return *this;
-    }
+   
+    
         // Constructor to initialize RenderType with parameters
-        Base_Material(const std::string& name, shader* shade, const RenderProperties& props = {})
+        Material(const std::string& name, shader* shade, const RenderProperties& props = {})
         : Name(name), shade(shade), prop(props)
     {
     }
 };
 
-class RenderModeManager {
+class MaterialManager {
 private:
-    std::unordered_map<std::string, Base_Material> renderTypes;
+    std::unordered_map<std::string, Material> renderTypes;
     Shaders::ShaderManager* shader_man;
+    uniforms::UniformManager* uniform_man;
 public:
-    // Add a new RenderType
-    void AddType(const Base_Material& type) {
-        if (Has(type.Name)) {
-            throw std::runtime_error("RenderType Already Created: " + type.Name);
-        }
-        renderTypes[type.Name] = type;
-    }
+    
     // Check if a RenderType with the given name exists
     bool Has(const std::string& name) const {
         return renderTypes.find(name) != renderTypes.end();
     }
-    Base_Material Construct(const std::string& name, const std::string& shade, const RenderProperties& props = {})
+    template<typename ...uniforms>
+    void Construct(const std::string& name, const std::string& shade, const RenderProperties& props = {})
     {
-        return  Base_Material(name, &(*shader_man)[shade], props);
+        if (Has(name)) {
+            throw std::runtime_error("RenderType Already Created: " + name);
+        }
+
+        auto val=(Material(name, &(*shader_man)[shade], props));
+        val.handles= uniform_man->get_handles<uniforms...>();
+        renderTypes[type.Name] = type;
     }
     // Const version of Get method
 
-    const Base_Material& operator[](const std::string& name) const {
+    const Material& operator[](const std::string& name) const {
 
         if (!Has(name)) {
             throw std::runtime_error("RenderType not found: " + name);
         }
         return renderTypes.at(name);
     }
-    RenderModeManager(Shaders::ShaderManager* shader_manager) :shader_man(shader_manager) {
-
-
+    MaterialManager(Shaders::ShaderManager* shader_manager,uniforms::UniformManager* uniform_manager) :shader_man(shader_manager),uniform_man(uniform_manager){
     }
-    RenderModeManager() {
-
-
+    MaterialManager() {
     }
     // Clear all stored RenderTypes
     void Clear() {
@@ -100,5 +95,5 @@ public:
     }
 
     // Destructor
-    ~RenderModeManager() = default;
+    ~MaterialManager() = default;
 };

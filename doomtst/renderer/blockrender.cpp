@@ -6,8 +6,8 @@
 #include "../game/GameContext.h"
 #include <mutex>
 bool blockrender::enablelighting;
-Cont::array<float> databuffer;
-Cont::array<unsigned int> indicebuffer;
+stn::array<float> databuffer;
+stn::array<unsigned int> indicebuffer;
 
 using namespace grid;
 
@@ -158,9 +158,9 @@ void emitblock(block& torender, array<float>& datbuf, array<unsigned int>& indbu
 void recreatechunkmesh(Chunk::chunk* aschunk,std::mutex& fill_lock) {
 	
 	aschunk->mesh->facebuf.destroy();//g
-	aschunk->mesh->facebuf = Cont::array<face>();//g
-	Cont::array<unsigned int> indbuf = Cont::array<unsigned int>();//g
-	Cont::array<float> datbuf= Cont::array<float>();//g
+	aschunk->mesh->facebuf = stn::array<face>();//g
+	stn::array<unsigned int> indbuf = stn::array<unsigned int>();//g
+	stn::array<float> datbuf= stn::array<float>();//g
 
 	
 	for (int ind = 0; ind < chunksize; ind++) {
@@ -185,10 +185,7 @@ void recreatechunkmesh(Chunk::chunk* aschunk,std::mutex& fill_lock) {
 		
 	}{
 		std::unique_lock lck(fill_lock);
-		
-
 		CtxName::ctx.Ren->stck.push(renderer::MeshData(&aschunk->mesh->SolidGeo, std::move(indbuf),std::move( datbuf)));
-		debug("Pls");
 	}
 	aschunk->mesh->meshsize = indbuf.length;
 	

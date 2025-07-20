@@ -88,6 +88,12 @@ namespace Core {
         ctx->Executor = &SystemRunner;
     }
 
+    void Engine::CreateWorld()
+    {
+        new (&world) World::world(0);
+        ctx->wrld = &world;
+    }
+
     void Engine::InitRenderer()
     {
         new (&ren) renderer::Renderer(1);

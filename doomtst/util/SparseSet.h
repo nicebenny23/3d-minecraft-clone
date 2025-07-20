@@ -38,7 +38,7 @@ namespace Sparse {
 		static_assert(std::is_move_constructible_v<T>,"T must be move constructible");
 
 	robin_hood::unordered_flat_map<KeyType, size_t, Hasher> sparse;
-		Cont::array<T> dense;
+		stn::array<T> dense;
 
 		PackedSet() :sparse(), dense() {
 		}
@@ -53,7 +53,7 @@ namespace Sparse {
 			return dense.length;
 		}
 
-		using iterator = typename Cont::array<T>::iterator;
+		using iterator = typename stn::array<T>::iterator;
 
 		iterator begin() { return dense.begin(); }
 		iterator end() { return dense.end(); }
@@ -137,8 +137,8 @@ namespace Sparse {
 	template<typename T, typename KeyMap = Identity>
 	struct SparseSet {
 		static_assert(std::is_invocable_r_v<size_t, KeyMap, const T&>,"KeyMap must take const T& and return a size_t index");
-		Cont::array<size_t> sparse;
-		Cont::array<T> dense;
+		stn::array<size_t> sparse;
+		stn::array<T> dense;
 	
 
 		void push(const T& elem) {
@@ -185,7 +185,7 @@ namespace Sparse {
 			}
 			return dense[sparse[key]];
 		}
-		using iterator = typename Cont::array<T>::iterator;
+		using iterator = typename stn::array<T>::iterator;
 
 		iterator begin() { return dense.begin(); }
 		iterator end() { return dense.end(); }
@@ -206,4 +206,72 @@ namespace Sparse {
 			return KeyMap{}(elem);
 		}
 	};
+
+	template <typename T>
+	struct KeySet {
+		static constexpr size_t ind_none = std::numeric_limits<size_t>::max();
+
+		stn::array<size_t> sparse;
+		stn::array<T>      dense;
+		stn::array<size_t> index_to_key;
+
+		KeySet(size_t maxKeys = 0) {
+			if (maxKeys > 0) {
+				sparse.resize(maxKeys);
+				for (size_t i = 0; i < maxKeys; ++i) sparse[i] = ind_none;
+			}
+		}
+
+		void push(size_t key, const T& elem) {
+			size_t& slot = sparse.reach(key);
+			if (slot != ind_none) throw std::logic_error("Key already exists in KeySet");
+			size_t idx = dense.length();
+			dense.push(elem);
+			slot = idx;
+			index_to_key.push(key);
+		}
+
+		T& operator[](size_t key) {
+			if (key >= sparse.length() || sparse[key] == ind_none) throw std::out_of_range("Key does not exist in KeySet");
+			return dense[sparse[key]];
+		}
+		const T& get(size_t key) const {
+			if (key >= sparse.length() || sparse[key] == ind_none) throw std::out_of_range("Key does not exist in KeySet");
+			return dense[sparse[key]];
+		}
+
+		void erase_key(size_t key) {
+			if (key >= sparse.length()) throw std::out_of_range("Key does not exist in KeySet");
+			size_t slot = sparse[key];
+			if (slot == ind_none) throw std::out_of_range("Key does not exist in KeySet");
+			size_t last_idx = dense.length() - 1;
+			if (slot != last_idx) {
+				dense[slot] = std::move(dense[last_idx]);
+				size_t moved_key = index_to_key[last_idx];
+				sparse[moved_key] = slot;
+				index_to_key[slot] = moved_key;
+			}
+			dense.pop();
+			index_to_key.pop();
+			sparse[key] = ind_none;
+		}
+
+		size_t length() const {
+			return dense.length();
+		}
+
+		void clear() {
+			dense.destroy();
+			index_to_key.destroy();
+			sparse.destroy();
+		}
+
+		using iterator = typename stn::array<T>::iterator;
+		using const_iterator = typename stn::array<T>::const_iterator;
+		iterator begin() { return dense.begin(); }
+		iterator end() { return dense.end(); }
+		const_iterator begin() const { return dense.begin(); }
+		const_iterator end()   const { return dense.end(); }
+	};
+
 }

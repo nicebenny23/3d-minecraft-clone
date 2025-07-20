@@ -1,5 +1,5 @@
 #pragma once
-namespace Cont {
+namespace stn {
 	struct Linear_Buffer{
 		char* data = nullptr;
 		size_t capacity = 0; 

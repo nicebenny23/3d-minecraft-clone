@@ -34,7 +34,7 @@ void particleemiter::update()
 			{
 
 
-				if (particlearray[i].getcomponent<particle>().endtime < CtxName::ctx.Time->ElapsedTime)
+				if (particlearray[i].getcomponent<particle>().endtime < CtxName::ctx.Time->now().value)
 				{
 					gameobject::obj EntityDeletionBuffer = particlearray[i];
 					EntityDeletionBuffer.destroy();
@@ -56,7 +56,7 @@ void particleemiter::update()
 			 {
 				 gameobject::obj newparticle = CtxName::ctx.OC->CreateEntity(position);
 				 
-				 newparticle.addcomponent<particle>()->endtime= CtxName::ctx.Time->ElapsedTime+particlelifetime;
+				 newparticle.addcomponent<particle>()->endtime= CtxName::ctx.Time->now().value+particlelifetime;
 				 newparticle.getcomponent<particle>().ind = i;
 				 newparticle.getcomponent<particle>().emit = this;
 				 (*particleinit)(newparticle);
@@ -129,8 +129,8 @@ particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) 
 {
 	tex = newtex;
 	
-	CtxName::ctx.Ren->Gen<false>(&ParticleMesh);
-	ParticleMesh.AddAttribute<float, 3>().AddAttribute<float, 2>();
+	CtxName::ctx.Ren->Gen(&ParticleMesh);
+	ParticleMesh.Voa.attributes.push<float, 3>().push<float, 2>();
 	particlelifetime = lifetime;
 	particlespawntime = spawntime;
 	particleinit = initfunc;

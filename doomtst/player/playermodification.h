@@ -104,12 +104,12 @@ struct playerbreak: gameobject::component
 				{
 					if ((*currmining)[i].cover == cover_state::Uncomputed)
 					{
-						debug(1);
+						
 					}
 				}
 			}
 	}
-
+	void make_drop(voxtra::RayWorldHit Hit);
 
 
 	void destroylogic() {
@@ -124,6 +124,7 @@ struct playerbreak: gameobject::component
 			
 		
 			objutil::toblk(Hit.collider->owner).bstate.broken = true; 
+			make_drop(Hit);
 			gridutil::setblock(objutil::toblk(Hit.collider->owner).pos, minecraftair);
 
 		}

@@ -77,7 +77,7 @@ inline	T clamp(T val, int low, int high)
 		}
 		return val;
 	}
-float invertnoisetransform(Cont::array<float>& arr, float searchval);
+float invertnoisetransform(stn::array<float>& arr, float searchval);
 	//todo low priority redo
 	template <typename T>
 	int parttion(T* arr, int low, int high)

@@ -2,7 +2,7 @@
 #pragma once
 #include <stdexcept>
 #include "dynamicarray.h"
-namespace Cont {
+namespace stn {
 	template<typename T>
 	struct deque {
 		T* list;

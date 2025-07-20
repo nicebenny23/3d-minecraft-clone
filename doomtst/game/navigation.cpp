@@ -47,7 +47,7 @@ array<navnode> reconstructpath(navnode* node) {
     for (int i = 0; i < searchlength; i++) {
         std::swap( path[i],path[ path.length - 1 - i]);
          }
-    return Cont::array<navnode>( path);
+    return stn::array<navnode>( path);
 }
 
 bool normaltestfunc(Coord pos, int dir)

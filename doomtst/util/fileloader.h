@@ -13,28 +13,50 @@
 
 namespace fs = std::filesystem;
 
-inline void deleteFilesInFolder(const std::string& folderPath) {
-	for (const auto& entry : fs::directory_iterator(folderPath)) {
-		if (entry.is_regular_file()) {
-			fs::remove(entry.path());
-		}
+inline fs::path createUniqueNamedFolder(const fs::path& basePath, const std::string& baseName) {
+	if (!fs::exists(basePath)) {
+		fs::create_directories(basePath);
 	}
+
+	int folderNumber = 1;
+	fs::path folderPath;
+
+	do {
+		folderPath = basePath / (baseName+std::to_string(folderNumber));
+		folderNumber++;
+	} while (fs::exists(folderPath));
+
+	fs::create_directories(folderPath);
+	return folderPath;
+}
+inline void createFolder(const fs::path& basePath, const std::string& baseName) {
+	if (!fs::exists(basePath)) {
+		fs::create_directories(basePath);
+	}
+
+	fs::create_directories(basePath/baseName);
+
+}
+inline fs::path getWindowsHomeDir() {
+	const char* homeDrive = std::getenv("HOMEDRIVE");
+	const char* homePath = std::getenv("HOMEPATH");
+
+	if (homeDrive && homePath) {
+		return fs::path(std::string(homeDrive) + std::string(homePath));
+	}
+
+	// Fallback: try USERPROFILE env var (usually full home path)
+	const char* userProfile = std::getenv("USERPROFILE");
+	if (userProfile) {
+		return fs::path(userProfile);
+	}
+
+	throw std::logic_error("Could not find home directory");
+	
 }
 
-inline void createdirectory(const char* name) {
-	if (_mkdir(name) != 0) {
-		throw std::runtime_error("error creating directory");
-	}
-}
+bool fileexists(std::string name);
 
-bool fileexists(const char* name);
-
-// DONT USE UNLESS NECESSARY AND CHECKED
-inline void deletedirectory(const char* name) {
-	if (_rmdir(name) != 0) {
-		throw std::runtime_error("error deleting directory");
-	}
-}
 
 enum mode {
 	filewrite,
@@ -66,7 +88,7 @@ struct safefile {
 	void fscanf(size_t expectedargs, const char* format, ...);
 
 	safefile(const char* filepath, mode openmode);
-	safefile(char* filepath, mode openmode);
+	safefile(std::string filepath, mode openmode);
 	void close();
 
 	void go(unsigned int byteoffset);

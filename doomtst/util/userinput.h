@@ -33,7 +33,7 @@ namespace userinput {
 	};
 	struct  InputManager
 	{
-		Cont::array<inputkey, true> keylist;
+		stn::array<inputkey, true> keylist;
 
 
 		v2::Vec2 mouseposdt;

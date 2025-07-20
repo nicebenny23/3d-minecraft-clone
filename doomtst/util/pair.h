@@ -6,21 +6,41 @@
 namespace util {
 
 	template<typename T1, typename T2>
-	struct Pair {
+	struct pair {
 		T1 first;
 		T2 second;
 
-		Pair() = default;
-		Pair(const T1& a, const T2& b) : first(a), second(b) {}
+		pair() = default;
+		pair(const T1& a, const T2& b) : first(a), second(b) {}
+		template<std::size_t I>
+		constexpr decltype(auto) at() & noexcept {
+			static_assert(I < 2, "Index out of bounds");
+			if constexpr (I == 0) return (first);
+			else return (second);
+		}
+
+		template<std::size_t I>
+		constexpr decltype(auto) at() const& noexcept {
+			static_assert(I < 2, "Index out of bounds");
+			if constexpr (I == 0) return (first);
+			else return (second);
+		}
+
+		template<std::size_t I>
+		constexpr decltype(auto) at() && noexcept {
+			static_assert(I < 2, "Index out of bounds");
+			if constexpr (I == 0) return std::move(first);
+			else return std::move(second);
+		}
 	};
 
-	
-	template<typename T1, typename T2>
-	Pair(T1, T2) -> Pair<T1, T2>;
 
-	
+	template<typename T1, typename T2>
+	pair(T1, T2) -> pair<T1, T2>;
+
+
 	template<std::size_t I, typename T1, typename T2>
-	inline decltype(auto) get(Pair<T1, T2>& p) noexcept {
+	inline decltype(auto) get(pair<T1, T2>& p) noexcept {
 		if constexpr (I == 0)
 			return p.first;
 		else {
@@ -29,7 +49,7 @@ namespace util {
 	}
 
 	template<std::size_t I, typename T1, typename T2>
-	inline	decltype(auto) get(const Pair<T1, T2>& p) noexcept {
+	inline	decltype(auto) get(const pair<T1, T2>& p) noexcept {
 		if constexpr (I == 0)
 			return p.first;
 		else
@@ -37,7 +57,7 @@ namespace util {
 	}
 
 	template<std::size_t I, typename T1, typename T2>
-	inline	decltype(auto) get(Pair<T1, T2>&& p) noexcept {
+	inline	decltype(auto) get(pair<T1, T2>&& p) noexcept {
 		if constexpr (I == 0)
 			return std::move(p.first);
 		else
@@ -49,15 +69,15 @@ namespace util {
 namespace std {
 
 	template<typename T1, typename T2>
-	struct tuple_size<util::Pair<T1, T2>> : std::integral_constant<std::size_t, 2> {};
+	struct tuple_size<util::pair<T1, T2>> : std::integral_constant<std::size_t, 2> {};
 
 	template<typename T1, typename T2>
-	struct tuple_element<0, util::Pair<T1, T2>> {
+	struct tuple_element<0, util::pair<T1, T2>> {
 		using type = T1;
 	};
 
 	template<typename T1, typename T2>
-	struct tuple_element<1, util::Pair<T1, T2>> {
+	struct tuple_element<1, util::pair<T1, T2>> {
 		using type = T2;
 	};
 

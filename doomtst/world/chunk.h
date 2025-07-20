@@ -29,7 +29,7 @@ namespace Chunk {
 
 		void destroy();
 	};
-	const char* getcorefilename(Coord pos);
+	std::string getcorefilename(Coord pos);
 	size_t indexfrompos(Coord pos);
 	struct chunk
 	{
@@ -43,7 +43,7 @@ namespace Chunk {
 		Vec3 center() const {
 			return (loc+ unitv /2.f)*chunklength;
 		}
-		block& operator[](size_t index);
+		gameobject::obj& operator[](size_t index);
 		gameobject::obj* blockbuf;
 		void destroy();
 		float cameradist() const {

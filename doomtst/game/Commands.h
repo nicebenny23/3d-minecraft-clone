@@ -15,7 +15,7 @@ struct Command {
 using ApplyFn = void (*)(Command*, gameobject::Ecs*);
 struct CommandPool {
 	dynPool::flux<Command> store;
-	Cont::queue<Command*> queue;
+	stn::queue<Command*> queue;
 	ApplyFn CommandFunc;
 	void apply(gameobject::Ecs* World) {
 		
@@ -32,8 +32,8 @@ struct CommandPool {
 
 };
 struct CommandBuffer {
-	Cont::array<dynPool::flux<Command>> store;
-	Cont::array<Cont::queue<Command*>> buffer;
+	stn::array<dynPool::flux<Command>> store;
+	stn::array<stn::queue<Command*>> buffer;
 
 	void pop();
 	template<typename T>
@@ -77,7 +77,7 @@ void CommandBuffer::push(const T& value)
 	static_assert(std::is_base_of<Command, T>::value, "T must derive from Command");
 	auto [Id, is_new] = commandSystem.insert<T>();
 	if (is_new) {
-		buffer.push(Cont::queue<Command*>());
+		buffer.push(stn::queue<Command*>());
 		store.push(dynPool::flux<Command>(sizeof(T),alignof(T)));
 		DependencySystem.push<T>();
 	}

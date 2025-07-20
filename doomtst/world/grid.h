@@ -20,9 +20,9 @@ namespace grid {
 		v3::Coord gridpos;
 		v3::Coord griddt;
 		bool has_loaded_chunk;
-		Cont::array<Chunk::chunk*> chunklist;
+		stn::array<Chunk::chunk*> chunklist;
 		CtxName::Context* ctx;
-		Cont::queue<Coord> to_load;
+		stn::queue<Coord> to_load;
 
 		Grid():rad(0),totalChunks(0),chunklist(){
 			ctx = nullptr;
@@ -50,6 +50,7 @@ namespace grid {
 	int chunkIndex(Coord Chunk);
 	Chunk::chunk* GetChunk(Coord pos);
 	block* getBlock(const v3::Coord pos);
+	gameobject::obj* getObject(const v3::Coord pos);
 	array<block*>& voxelinrange(geometry::Box span);
 	
 	

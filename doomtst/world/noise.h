@@ -9,7 +9,7 @@
 #pragma once
 #define NoiseOffset Vec3(.838f, .38f, .49f)
 using namespace v3;
-using namespace Cont;
+using namespace stn;
 
 enum noisetype {
     normalnoise = 0,

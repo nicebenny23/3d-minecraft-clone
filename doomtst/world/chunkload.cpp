@@ -143,7 +143,7 @@ Chunk::chunk* ChunkLoader::AllocChunk(Coord location)
 	newchunk.loc = location;
 	newchunk.blockbuf = new gameobject::obj[chunksize];
 	for (int i = 0; i < chunksize; i++) {
-		Grid->ctx->OC->InitObj(newchunk.blockbuf[i]);
+		Grid->ctx->OC->InitializeEntity(newchunk.blockbuf[i]);
 		newchunk.blockbuf[i].addcomponent < block>();
 
 	}
@@ -153,8 +153,7 @@ Chunk::chunk* ChunkLoader::AllocChunk(Coord location)
 Chunk::chunk* ChunkLoader::LoadFromFile(Coord location)
 {
 
-	const char* name = Chunk::getcorefilename(location);
-	safefile file = safefile(name, fileread);
+	safefile file = safefile(Chunk::getcorefilename(location), fileread);
 	unsigned short* bytelist = file.read<unsigned short>(chunksize);
 
 	file.go(chunksize * 2);

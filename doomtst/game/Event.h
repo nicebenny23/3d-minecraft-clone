@@ -25,7 +25,7 @@ namespace event {
                 listeners[index](event);
             }
         }
-        Cont::array<ListenerFn> listeners;
+        stn::array<ListenerFn> listeners;
         Depends::DependencySystem dependenciesList;
     };
     struct EventBus
@@ -42,7 +42,7 @@ namespace event {
             size_t index = event_indexer.insert<EventType>().first.value;
             event_subsystem[index].Call(event);
         }
-        Cont::array<EventSubsystem> event_subsystem;
+        stn::array<EventSubsystem> event_subsystem;
         type_id::type_indexer event_indexer;
         EventBus() {
         }

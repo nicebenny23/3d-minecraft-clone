@@ -5,7 +5,7 @@
 #include "../util/dynamicarray.h"
 #include "../util/vector2.h"
 #include "../util/geometry.h"
-using namespace Cont;
+using namespace stn;
 using namespace geometry;
 using namespace Cptr;
 #pragma once

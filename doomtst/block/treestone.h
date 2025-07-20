@@ -1,7 +1,9 @@
 #pragma once
 #include "block.h"
+#include "../game/aabb.h"
 #include "../items/loottable.h"
-#
+#include "../items/item.h"
+
 
 inline void treestoneinit(blockname::block* blk) {
 

@@ -3,7 +3,7 @@
 #include "../util/dynamicarray.h"
 #include <glad/glad.h>
 #pragma once 
-using namespace Cont;
+using namespace stn;
 enum TextureType {
 	TexArray = GL_TEXTURE_2D_ARRAY,
 	Tex2d = GL_TEXTURE_2D,
@@ -32,24 +32,22 @@ private:
 struct Texture2D:ITexture
 {	Texture2D();
 	v2::Coord2 size;
-private:
+
 	void apply() override;
 	void destroy();
 	Texture2D(const char* file, const char* name);
-	friend class TextureManager::TextureManager;
-
+	
 };
 struct TextureArray:ITexture
 {
 	TextureArray();
 	int length;
 	v2::Coord2 size;
-private:
+
 	void apply() override;
 	void destroy() override;
 	TextureArray(array<const char*>& textures, const char* name);
-	friend class TextureManager::TextureManager;
-
+	
 };
 
 

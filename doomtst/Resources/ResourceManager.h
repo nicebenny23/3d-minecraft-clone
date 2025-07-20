@@ -40,6 +40,6 @@ struct ResourceManager {
     }
 
 private:
-    Cont::array<void*> resources;
+    stn::array<void*> resources;
     type_id::type_indexer resources_ids;
 };

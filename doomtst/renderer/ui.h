@@ -4,7 +4,7 @@
 #include "../debugger/debug.h"
 
 #define uisize 400
-using namespace Cont;
+using namespace stn;
 using namespace Cptr;
 namespace ui {
 	

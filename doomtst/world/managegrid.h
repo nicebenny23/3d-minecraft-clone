@@ -1,7 +1,7 @@
 #include "../world/grid.h"
 #include "../util/queue.h"
 using namespace grid;
-using namespace Cont;
+using namespace stn;
 #pragma once 
 namespace gridutil {
 	extern bool redoallighting;
@@ -11,7 +11,9 @@ namespace gridutil {
 	void computeallcover();
 
 	void emitlight();
+	gameobject::obj dislocate(gameobject::obj blk);
 
+	gameobject::obj set_air(gameobject::obj blk);
 	void redolighting();
 	
 	bool move(block* blk, Coord offset);

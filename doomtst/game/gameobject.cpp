@@ -131,7 +131,7 @@ void gameobject::Ecs::delete_component(component* comp)
 
 	comp_storage[comp->comp_id.value].pool.free(comp);
 }
-void gameobject::Ecs::InitObj(obj& object)
+void gameobject::Ecs::InitializeEntity(obj& object)
 {
 	object.Id.id = free_ids.pop();
 	object.OC = ctx->OC;
@@ -192,7 +192,7 @@ void gameobject::Ecs::updatecomponents(updatecalltype type)
 obj gameobject::Ecs::CreateEntity(v3::Vec3 SpawnPos)
 {
 	obj object = obj();
-	InitObj(object);
+	InitializeEntity(object);
 	object.addcomponent<transform_comp>()->transform.position = SpawnPos;
 	return object;
 

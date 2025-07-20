@@ -37,7 +37,7 @@ struct SystemExecutor {
 	}
 	gameobject::Ecs* ecs;
 	Depends::DependencySystem dependency_executor;
-	Cont::array<System*> sys_list;
+	stn::array<System*> sys_list;
 	type_id::type_indexer type_list;
 
 };

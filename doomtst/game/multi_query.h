@@ -74,7 +74,7 @@ void multi_query(query::View<Components...>& view, std::function<void(std::tuple
 	thread::thread_pool pool(threads_wanted);
 	
 
-	Cont::array<size_t> size_of_each = thread_util::split_many(total_length, pool.length());
+	stn::array<size_t> size_of_each = thread_util::split_many(total_length, pool.length());
 	for (size_t i = 0; i < pool.length(); i++)
 	{
 		size_t start= size_of_each[i];
@@ -102,7 +102,7 @@ void multi_query(query::View<Components...>& view, std::function<void(std::tuple
 	thread::thread_pool pool(threads_wanted);
 
 
-	Cont::array<size_t> size_of_each = thread_util::split_many(total_length, total_length/count);
+	stn::array<size_t> size_of_each = thread_util::split_many(total_length, total_length/count);
 	for (size_t i = 0; i < size_of_each.length-1; i++)
 	{
 		size_t start = size_of_each[i];

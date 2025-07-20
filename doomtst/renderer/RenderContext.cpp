@@ -79,7 +79,7 @@ void Apply_properties(const RenderProperties* props) {
 
 }
 
-void RenderContext::Context::bind(const Base_Material* mat, renderer::Renderer* renderer)
+void RenderContext::Context::bind(const Material* mat, renderer::Renderer* renderer)
 {
 	if (material==mat)
 	{
@@ -87,10 +87,56 @@ void RenderContext::Context::bind(const Base_Material* mat, renderer::Renderer* 
 	}
 	Bind(*mat->shade);
 
-	for (int i = 0; i < mat->UniformsCalls.length; i++)
+	for (int i = 0; i < mat->handles.length; i++)
 	{
-		mat->UniformsCalls[i](renderer);
+		apply(form->get(mat->handles[i]));
 	}
 	Apply_properties(&mat->prop);
 	material = mat;
+}
+
+void RenderContext::Context::apply(uniforms::uniform uform)
+{
+	const char* name = uform.name;
+	uniforms::uniform_var val = uform.value;
+	switch (val.index()) {
+		switch (val.index()) {
+		case uniforms::uform_int:
+			
+			break;
+		case uniforms::uform_float:
+			BoundShader->setf(std::get<float>(val), name);
+				break;
+		case uniforms::uform_gluint:
+			// handle GLuint
+			break;
+		case uniforms::uform_vec2:
+			BoundShader->SetVector2f(std::get<glm::vec2>(val), name);
+			break;
+		case uniforms::uform_vec3:
+
+			BoundShader->SetVector3f(std::get<glm::vec3>(val), name);
+			break;
+		case uniforms::uform_vec4:
+			BoundShader->SetVector4f(std::get<glm::vec4>(val), name);
+			break;
+		case uniforms::uform_mat3:
+		
+
+			break;
+		case uniforms::uform_mat4:
+
+			BoundShader->setMat4(std::get<glm::mat4>(val), name);
+			break;
+		case uniforms::uform_texarr:
+			std::get<TextureArray*>(val)->apply();
+			break;
+		case uniforms::uform_tex2d:
+
+			std::get<Texture2D*>(val)->apply();
+			break;
+		default:
+			
+			break;
+		}
 }

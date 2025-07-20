@@ -2,7 +2,7 @@
 
 
 using namespace uiboxname;
-using namespace Cont;
+using namespace stn;
 #pragma once 
 enum type {
 	inventorymenu=1,

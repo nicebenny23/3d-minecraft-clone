@@ -2,11 +2,11 @@
 #include <stdexcept>
 #include "deque.h"
 
-namespace Cont {
+namespace stn {
 
     template<typename T>
     struct queue {
-        Cont::deque<T> data;
+        stn::deque<T> data;
 
         void push(const T& val) {
             data.push_back(val);

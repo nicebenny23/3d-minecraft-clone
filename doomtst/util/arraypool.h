@@ -4,7 +4,7 @@ namespace dyn_allocator {
 	template <typename T>
 	struct dyn_alloc
 	{
-		Cont::array<dynPool::flux> pools;
+		stn::array<dynPool::flux> pools;
 	void tranfer() {
 	
 

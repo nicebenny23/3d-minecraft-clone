@@ -1,9 +1,9 @@
 #include "../game/gameobject.h"
 #include "../util/dynamicarray.h"
-#include "../player/playerinventory.h"
+
 #include "../util/random.h"
-#include "../player/player.h"
-using namespace Cont;
+
+using namespace stn;
 #pragma once 
 const float interacttimeneededfordrop = 1;
 struct lootelement
@@ -17,14 +17,8 @@ struct lootelement
 	}
 	unsigned char itemid;
 	unsigned char maxamt;
-	void drop() {
-		int dropamt = maxamt;
-player::goblin.getcomponent<inventory>().hotbar.fill(itemid, dropamt, false);
-		player::goblin.getcomponent<inventory>().playermenu.blkcont.fill(itemid, dropamt,false);
-		player::goblin.getcomponent<inventory>().hotbar.fill(itemid, dropamt, true);
-
-		player::goblin.getcomponent<inventory>().playermenu.blkcont.fill(itemid, dropamt, true);
-	}
+	void drop();
+	
 
 	lootelement(int itemid, float maxamt,bool happenrandom)
 		: itemid(itemid), maxamt(maxamt)
@@ -36,15 +30,11 @@ player::goblin.getcomponent<inventory>().hotbar.fill(itemid, dropamt, false);
 };
 struct  loottable : gameobject::component
 {
-
-	bool playerinteract;
-	void onplayerclick() {
-		playerinteract = true;
-		
-	}
+	
+	bool should_drop;
 	loottable() {
 
-		playerinteract = false;
+		should_drop = false;
 		lootlist = array<lootelement>();
 		utype = gameobject::updatenone;
 	}
@@ -67,27 +57,15 @@ struct  loottable : gameobject::component
 	void destroy_hook() {
 		
 	
-		if (!playerinteract)
+		if (should_drop)
 		{
-			lootlist.destroy();
-			return;
-		}
-		return;
-		if (owner.hascomponent<blockname::block>())
-		{
-			if (objutil::toblk(owner).bstate.broken != true)
+			for (int i = 0; i < lootlist.length; i++)
 			{
-				lootlist.destroy();
+				lootlist[i].drop();
 			}
 		}
-		for (int i = 0; i < lootlist.length; i++)
-		{
-			
-			lootlist[i].drop();
-		
-		}
 		lootlist.destroy();
-}
+	}
 };
 
 

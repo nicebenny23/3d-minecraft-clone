@@ -24,21 +24,21 @@ void integertext::customdestroy()
 
 }
 
-Cont::array<float> datbuf;
-Cont::array<unsigned int> indbuf;
+stn::array<float> datbuf;
+stn::array<unsigned int> indbuf;
 void integertext::render()
 {
-	indbuf = Cont::array<unsigned int>();
-	datbuf = Cont::array<float>();
+	indbuf = stn::array<unsigned int>();
+	datbuf = stn::array<float>();
 	CtxName::ctx.Ren->SetType("Text");
 	recalculateword();
 
 	write();
 	Mesh text;
-	text.AddAttribute<float,2>().AddAttribute<float,3>();
+	text.Voa.attributes.push<float,2>().push<float,3>();
 
 
-	CtxName::ctx.Ren->Gen<true>(&text);
+	CtxName::ctx.Ren->Gen(&text);
 	CtxName::ctx.Ren->context.Bind(*textarray);
 	CtxName::ctx.Ren->Render(&text, datbuf, indbuf);
 	datbuf.destroy();

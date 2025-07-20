@@ -1,12 +1,12 @@
 #pragma once
 #include "dynamicarray.h"
 
-namespace Cont {
+namespace stn {
 
     template<typename T>
     struct stack {
     private:
-        Cont::array<T> list;
+        stn::array<T> list;
 
     public:
         T pop();

@@ -4,8 +4,30 @@
 #include "mathutil.h"
 #pragma once
 namespace timename {
+	struct time {
+		float value;
+
+		explicit time(float val) : value(val) {}
+
+		float dist(const time& oth) const {
+			return std::fabs(oth.value - value);
+		}
+
+		bool operator<(const time& oth) const { return value < oth.value; }
+		bool operator==(const time& oth) const { return value == oth.value; }
+
+		time operator+(float offset) const { return time(value + offset); }
+		time operator-(float offset) const { return time(value - offset); }
+
+	};
 	struct TimeManager
 	{
+		float real_dt;
+
+		float dt;
+		float smooth_fps;
+		float ElapsedTime;
+
 		TimeManager() {
 			
 			dt = 0;
@@ -13,11 +35,9 @@ namespace timename {
 			real_dt = 1 / 60.f;
 
 		}
-		float ElapsedTime;
-		float real_dt;
-		float dt;		
+			
 		
-		float smooth_fps;
+		
 		void calcfps() {
 
 			float CurrentTime= glfwGetTime();
@@ -40,7 +60,12 @@ namespace timename {
 
 			}
 		}
+		time now() {
+			return time(ElapsedTime);
+		}
+		
 	private:
+		
 		float fps_counter;
 		const int min_frames = 20;
 	};

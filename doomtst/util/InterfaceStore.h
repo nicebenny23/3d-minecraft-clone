@@ -5,10 +5,10 @@
 template <typename T>
 struct IntStore{
 
-	Cont::queue<T*> elem;
+	stn::queue<T*> elem;
 };
 template <typename T>
 struct store{
-	Cont::array<<dynPool::flux<T>>;
+	stn::array<<dynPool::flux<T>>;
 
 };

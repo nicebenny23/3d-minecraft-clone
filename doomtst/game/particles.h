@@ -10,7 +10,7 @@
 #include "camera.h"
 
 using namespace v3;
-using namespace Cont;
+using namespace stn;
 struct particleemiter: gameobject::component
 {
 

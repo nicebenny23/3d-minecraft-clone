@@ -29,7 +29,7 @@ namespace userinput {
 
 		mousepos = v2::Vec2(0, 0);
 		mouseposdt = v2::Vec2(0, 0);
-		keylist = Cont::array<inputkey,true>(GLFW_KEY_LAST+ Extra_keys);
+		keylist = stn::array<inputkey,true>(GLFW_KEY_LAST+ Extra_keys);
 		for (int i = 0; i < keylist.capacity; i++)
 		{
 			keylist[i]=inputkey();

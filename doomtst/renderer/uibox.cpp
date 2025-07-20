@@ -79,8 +79,8 @@ namespace uiboxname {
 			indbuf[5] = 2;
 
 			Mesh BoxMesh;
-			CtxName::ctx.Ren->Gen<true>(&BoxMesh);
-			BoxMesh.AddAttribute<float, 2>().AddAttribute<float, 2>();
+			CtxName::ctx.Ren->Gen(&BoxMesh);
+			BoxMesh.Voa.attributes.push<float, 2>().push<float, 2>();
 			array<float> databuf = array<float>();
 			CtxName::ctx.Ren->context.Bind(*tex);
 			for (int j = 0; j < 4; j++)

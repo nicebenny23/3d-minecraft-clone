@@ -58,8 +58,8 @@ namespace thread {
 						continue;
 					}
 					task = std::move(tasks.pop());
-				}
 					working_threads.fetch_add(1);
+					}
 					task();
 					working_threads.fetch_sub(1);
 					{
@@ -117,9 +117,9 @@ return threads.length;
 
 		}
 	private:
-		Cont::array<std::thread> threads;
+		stn::array<std::thread> threads;
 		std::condition_variable cv;
-		Cont::array<Func> tasks;
+		stn::array<Func> tasks;
 		std::mutex mutex;
 		bool stop;
 		std::exception_ptr except_ptr;

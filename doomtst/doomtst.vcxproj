@@ -229,6 +229,7 @@
     <ClCompile Include="debugger\debug.cpp" />
     <ClCompile Include="entities\slime.cpp" />
     <ClCompile Include="game\Core.cpp" />
+    <ClCompile Include="game\entitystate.cpp" />
     <ClCompile Include="game\GameContext.cpp" />
     <ClCompile Include="game\navigation.cpp" />
     <ClCompile Include="game\Settings.cpp" />
@@ -243,6 +244,7 @@
     <ClCompile Include="items\itemslot.cpp" />
     <ClCompile Include="items\item.cpp" />
     <ClCompile Include="items\Container.cpp" />
+    <ClCompile Include="items\loottable.cpp" />
     <ClCompile Include="items\menu.cpp" />
     <ClCompile Include="items\recipe.cpp" />
     <ClCompile Include="mtest.cpp" />
@@ -405,6 +407,7 @@
     <ClInclude Include="player\playertpsword.h" />
     <ClInclude Include="renderer\grandrenderer.h" />
     <ClInclude Include="renderer\guirender.h" />
+    <ClInclude Include="renderer\meshStorage.h" />
     <ClInclude Include="renderer\ModelMesh.h" />
     <ClInclude Include="renderer\model.h" />
     <ClInclude Include="game\particles.h" />
@@ -412,13 +415,16 @@
     <ClInclude Include="player\player.h" />
     <ClInclude Include="player\playerhealth.h" />
     <ClInclude Include="player\playerinventory.h" />
+    <ClInclude Include="renderer\renderable.h" />
     <ClInclude Include="renderer\RenderContext.h" />
     <ClInclude Include="renderer\ShaderManager.h" />
     <ClInclude Include="renderer\textrender.h" />
     <ClInclude Include="renderer\TextureManager.h" />
     <ClInclude Include="renderer\ui.h" />
     <ClInclude Include="renderer\RenderProperties.h" />
+    <ClInclude Include="renderer\Uniform.h" />
     <ClInclude Include="renderer\UniformManager.h" />
+    <ClInclude Include="renderer\vertex.h" />
     <ClInclude Include="Resources\Resource.h" />
     <ClInclude Include="Resources\ResourceManager.h" />
     <ClInclude Include="util\arraypool.h" />
@@ -428,6 +434,7 @@
     <ClInclude Include="util\filter_argument.h" />
     <ClInclude Include="util\Id.h" />
     <ClInclude Include="util\InterfaceStore.h" />
+    <ClInclude Include="util\lazy.h" />
     <ClInclude Include="util\LinearBuffer.h" />
     <ClInclude Include="util\List.h" />
     <ClInclude Include="util\Not.h" />
@@ -493,6 +500,7 @@
     <ClInclude Include="world\tick.h" />
     <ClInclude Include="world\voxeltraversal.h" />
     <ClInclude Include="renderer\Window.h" />
+    <ClInclude Include="world\world.h" />
     <ClInclude Include="world\worldintersection.h" />
   </ItemGroup>
   <ItemGroup>

@@ -2,7 +2,7 @@
 #include <algorithm>
 #include "random.h"
 #include <stdexcept>
-using namespace Cont;
+using namespace stn;
 #pragma once
 //not actually a memory pool it is a randomized pool
 template<class T>

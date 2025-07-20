@@ -87,7 +87,7 @@ namespace Dir {
 	static constexpr Dir3d front3d = Dir3d(Ind3d::Front);  // (0, 0, 1)
 	static constexpr Dir3d  back3d = Dir3d(Ind3d::Back);   // (0, 0, -1)
 	static constexpr Dir3d  None3d = Dir3d(Ind3d::None);   // (0, 0, -1)
-	static constexpr  Cont::List<Dir3d, 6> Directions3d= { right3d,left3d,up3d,down3d,front3d,back3d };
+	static constexpr  stn::List<Dir3d, 6> Directions3d= { right3d,left3d,up3d,down3d,front3d,back3d };
 	enum dir2d
 	{
 		west2d = 0,

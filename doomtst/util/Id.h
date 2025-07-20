@@ -29,9 +29,6 @@ namespace Ids {
 		size_t operator()(const Id& id) const noexcept {
 			return id.id;
 		}
-
-
-
 	};
 
 	struct IdHash{

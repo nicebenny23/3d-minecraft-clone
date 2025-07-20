@@ -3,6 +3,7 @@
 #include "../game/Settings.h"
 #include "../game/GameContext.h"
 namespace renderer {
+   
     void setAspectRatio(renderer::Renderer* renderer) {
         renderer->CurrentShader()->setf(CtxName::ctx.Window->AspectRatio(), "aspectratio");
     }
@@ -14,9 +15,9 @@ namespace renderer {
     }
 
 
-    void Renderer::FillVertexBuffer(Mesh* mesh, Cont::array<float>& pointlist)
+    void Renderer::FillVertexBuffer(Mesh* mesh, stn::array<float>& pointlist)
     {
-        if (pointlist.length % mesh->Voa.ComponentsPerVertex() != 0)
+        if (pointlist.length % mesh->Voa.attributes.components() != 0)
         {
             throw std::logic_error("Vertex Data is corrupted");
         }
@@ -31,25 +32,30 @@ namespace renderer {
         context.Bind(mesh->Ibo);
     }
 
-    void Renderer::Fill(Mesh* mesh, Cont::array<float>& pointlist, Cont::array<unsigned int>& indicelist) {
-        if (!mesh->IsEboMesh)
-        {
-            throw std::invalid_argument("attempted to intiate a non Ebo mesh with an indice list");
-        }
+    void Renderer::Fill(Mesh* mesh, stn::array<float>& pointlist, stn::array<unsigned int>& indicelist) {
+      
         FillVertexBuffer(mesh, pointlist);
         context.Bind(mesh->Ibo);
         mesh->Ibo.fillbuffer<unsigned int>(indicelist);
         mesh->length = indicelist.length;
 
     }
-    void Renderer::Fill(Mesh * mesh,Cont::array<float>& pointlist) {
-        if (mesh->IsEboMesh)
-        {
-            throw std::invalid_argument("attempted to intiate an Ebo Mesh without an indice list");
-        }
-        FillVertexBuffer(mesh, pointlist);
-        mesh->length = pointlist.length/mesh->Voa.ComponentsPerVertex();
+    void Renderer::Fill(Mesh * mesh,stn::array<float>& pointlist) {
+        array<unsigned int> indicelist = trivial_buffer(mesh->Voa.attributes, pointlist);
+        Fill(mesh, pointlist, indicelist);
+        indicelist.destroy();
     }
+    void Renderer::Render(Mesh* mesh, stn::array<float>& pointlist)
+    {
+        Fill(mesh, pointlist);
+        Render(mesh);
+    }
+    void Renderer::Render(Mesh* mesh, stn::array<float>& pointlist, stn::array<unsigned int>& indicelist)
+    {
+        Fill(mesh, pointlist, indicelist);
+        Render(mesh);
+    }
+
 
     void Renderer::Destroy(Mesh* mesh)
     {
@@ -57,15 +63,13 @@ namespace renderer {
         {
             throw std::invalid_argument("Cannot Delete a mesh without Generating buffers first");
         }
-        if (mesh->IsEboMesh)
-        {
-            Binders.Destroy(&mesh->Ibo);
-        }
+       
+          
+        Binders.Destroy(&mesh->Ibo);
         Binders.Destroy(&mesh->Voa);
         Binders.Destroy(&mesh->Vbo);
         mesh->BuffersGenerated = false;
         mesh->length = -1;
-        mesh->IsEboMesh = true;
     }
 
     void Renderer::Render(Mesh* mesh) {
@@ -77,10 +81,7 @@ namespace renderer {
         context.Bind(mesh->Vbo);
       context.Bind(mesh->Voa);
         mesh->Voa.SetAllAttributes();
-        if (mesh->IsEboMesh)
-        {
-            context.Bind(mesh->Ibo);
-        }
+        context.Bind(mesh->Ibo);
         if (settings::Gamesettings.viewmode)
         {
             glDrawElements(GL_LINES, mesh->length, GL_UNSIGNED_INT, 0);
@@ -91,23 +92,14 @@ namespace renderer {
         }
     }
 
-    void Renderer::Render(Mesh* mesh, Cont::array<float>& pointlist)
-    {
-        Fill(mesh, pointlist);
-        Render(mesh);
-    }
-    void Renderer::Render(Mesh* mesh, Cont::array<float>& pointlist, Cont::array<unsigned int>& indicelist)
-    {
-        Fill(mesh, pointlist, indicelist);
-        Render(mesh);
-    }
+    
    
  
    
 
     Renderer::Renderer(size_t tst)
     {
-        Modes = RenderModeManager(&Shaders);
+        Modes = MaterialManager(&Shaders);
         fov = 90;
         view = glm::mat4(0);
         setprojmatrix(90, .21f, 100);

@@ -2,7 +2,7 @@
 #include <stdexcept>
 namespace sharedptr {
     template <typename T>
-    class shared {
+    class rc {
     private:
         T* ptr;                // Raw pointer to the managed object
         unsigned int* count;   // Reference count
@@ -60,15 +60,15 @@ namespace sharedptr {
 
 
 
-        shared(): ptr(nullptr),count(nullptr)
+        rc(): ptr(nullptr),count(nullptr)
         {
         }
-        ~shared() {
+        ~rc() {
 
             free();
         }
         // Constructor
-        explicit shared(T* pointer):ptr(pointer),count(nullptr)
+        explicit rc(T* pointer):ptr(pointer),count(nullptr)
         {
             if (ptr != nullptr)
             {
@@ -77,13 +77,13 @@ namespace sharedptr {
             }
         }
         // Copy constructor
-        shared(const shared<T>& other) : ptr(other.ptr), count(other.count)  {
+        rc(const rc<T>& other) : ptr(other.ptr), count(other.count)  {
             incrementCount();
         }
     
         // Template Assignment Operator for Derived Types
         template <typename U>
-        shared& operator=(const shared<U>& other) {
+        rc& operator=(const rc<U>& other) {
             static_assert(std::is_base_of<T, U>::value, "U must be derived from T");
             if (reinterpret_cast<void*>(this) != reinterpret_cast<const void*>(&other)) {
                 free();
@@ -95,7 +95,7 @@ namespace sharedptr {
         }
 
 
-        shared& operator=(const shared<T>& other) {
+        rc& operator=(const rc<T>& other) {
             if (this != &other) {
                 
                 free();
@@ -107,12 +107,12 @@ namespace sharedptr {
             return *this;
         }
         
-        shared(shared<T>&& other) noexcept {
+        rc(rc<T>&& other) noexcept {
             ptr = std::exchange(other.ptr, nullptr);
             count = std::exchange(other.count, nullptr);
         }
 
-        shared& operator=(shared<T>&& other) noexcept {
+        rc& operator=(rc<T>&& other) noexcept {
             if (this != &other) {
                 free();
                ptr= std::exchange(other.ptr, nullptr);
@@ -164,7 +164,7 @@ namespace Cptr {
     template <typename T>
     struct cptr {
       
-        sharedptr::shared<bool> exists;
+        sharedptr::rc<bool> exists;
     private:
         T* pntr;
         //unsafe function
@@ -190,10 +190,10 @@ namespace Cptr {
             if (pntr != nullptr)
             {
 
-                exists = sharedptr::shared< bool>(new bool(true));
+                exists = sharedptr::rc< bool>(new bool(true));
             }
             else {
-                exists = sharedptr::shared<bool>(nullptr);
+                exists = sharedptr::rc<bool>(nullptr);
             }
         }
 

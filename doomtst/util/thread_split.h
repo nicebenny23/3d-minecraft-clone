@@ -5,8 +5,8 @@
 namespace thread_util {
 
 	//creates range represnetation of a thread split it is inclusive exclusiv
-inline Cont::array<size_t> split_many(size_t length, size_t threads) {
-		Cont::array<size_t> res;
+inline stn::array<size_t> split_many(size_t length, size_t threads) {
+		stn::array<size_t> res;
 		size_t total=0;
 		for (size_t i = 0; i < threads; i++)
 		{
@@ -24,7 +24,7 @@ inline Cont::array<size_t> split_many(size_t length, size_t threads) {
 		if (threads > length) threads = length;
 		thread::thread_pool thread_pool = thread::thread_pool(threads);
 
-		Cont::array<size_t> size_of_each = thread_util::split_many(length, thread_pool.length());
+		stn::array<size_t> size_of_each = thread_util::split_many(length, thread_pool.length());
 		Iterator range_start = begin;
 		for (size_t i = 0; i < thread_pool.length(); i++)
 		{

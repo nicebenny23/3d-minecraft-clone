@@ -210,6 +210,12 @@
     <ClCompile Include="mtest.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="items\loottable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\entitystate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="util\vector3.h">
@@ -819,6 +825,24 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="util\pipeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\lazy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="world\world.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\vertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\meshStorage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Uniform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\renderable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

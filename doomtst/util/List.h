@@ -4,7 +4,7 @@
 #include <initializer_list>
 #include <stdexcept>
 #include <type_traits>
-namespace Cont {
+namespace stn {
 
     template <typename T, size_t N>
         requires std::is_default_constructible_v<T>
