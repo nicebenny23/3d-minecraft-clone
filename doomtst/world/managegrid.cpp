@@ -174,10 +174,7 @@ void collect_if_light(std::tuple<blockname::block*> block, std::mutex& push_mute
 }
 
 //removes an block competly
-gameobject::obj gridutil::set_air(gameobject::obj blk)
-{
-	dislocate(blk).destroy();
-}
+
 void gridutil::redolighting()
 {
 

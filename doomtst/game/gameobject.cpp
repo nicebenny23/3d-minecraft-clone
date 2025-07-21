@@ -59,19 +59,19 @@ void gameobject::component::oncollision(obj collidedwith)
 
 bool gameobject::obj::exists() const
 {
-	return (Id ? true : false) && OC->entitymeta[Id.id].gen_count == Id.gen;
+	return (GenId ? true : false) && OC->entitymeta[GenId.id].gen_count == GenId.gen;
 
 }
 
 EntityMetadata& gameobject::obj::meta()
 {
 	
-	if (!Id)
+	if (!GenId)
 	{
 		throw std::logic_error("entity Has invalid id");
 	}
-	EntityMetadata& met = OC->entitymeta[Id.id]; 
-	if (met.gen_count!=Id.gen)
+	EntityMetadata& met = OC->entitymeta[GenId.id]; 
+	if (met.gen_count!=GenId.gen)
 	{
 		throw std::logic_error("Cannot acess entity, It has been deleted");
 	}
@@ -108,8 +108,8 @@ void Ecs::destroy(obj& object) {
 	
 
 	
-	entitymeta[object.Id.id].reset();
-	free_ids.push(object.Id.id);
+	entitymeta[object.GenId.id].reset();
+	free_ids.push(object.GenId.id);
 }
 
 
@@ -127,15 +127,15 @@ void gameobject::Ecs::delete_component(component* comp)
 	{
 		throw std::logic_error("Every Component Must be owned by a valid");
 	}
-	comp_storage[comp->comp_id.value].store[comp->owner.Id.id]=nullptr;
+	comp_storage[comp->comp_id.value].store[comp->owner.GenId.id]=nullptr;
 
 	comp_storage[comp->comp_id.value].pool.free(comp);
 }
 void gameobject::Ecs::InitializeEntity(obj& object)
 {
-	object.Id.id = free_ids.pop();
+	object.GenId.id = free_ids.pop();
 	object.OC = ctx->OC;
-	object.Id.gen= entitymeta[object.Id.id].gen_count;
+	object.GenId.gen= entitymeta[object.GenId.id].gen_count;
 
 	arch.archtypes[0]->add(object);
 
@@ -177,7 +177,7 @@ void gameobject::Ecs::updatecomponents(updatecalltype type)
 			// 2) Index by integer, not range-for
 			for (size_t i = 0; i < originalCount; ++i) {
 				obj   o = archtype->elems[i];           // read by value
-				auto* c = (component*)mgr->store[o.Id.id];
+				auto* c = (component*)mgr->store[o.GenId.id];
 				c->update();  
 				
 			}
@@ -227,5 +227,5 @@ void gameobject::component_table::init(component* sample)
 
 constexpr size_t gameobject::ComponentMapper::operator()(component* comp) const noexcept
 {
-	return comp->owner.Id.id;
+	return comp->owner.GenId.id;
 }

@@ -96,7 +96,6 @@ namespace Core {
 
     void Engine::InitRenderer()
     {
-        new (&ren) renderer::Renderer(1);
         ctx->Ren = &ren;
     }
    

@@ -36,64 +36,71 @@ public:
 
  
 };
-class Material {
-public:
+struct Material {
+
     std::string Name;
     RenderProperties prop;
-    array<type_id::Id> handles;
+    array<uniforms::uniform_ref> handles;
     shader* shade = nullptr;
     // Default constructor
-    Material() : Name(""), shade(){}
-
-   
-    
-        // Constructor to initialize RenderType with parameters
-        Material(const std::string& name, shader* shade, const RenderProperties& props = {})
-        : Name(name), shade(shade), prop(props)
-    {
-    }
+    Material() : Name(""), shade() {}
+        Material(const std::string& name, shader* shade, const RenderProperties& props = {}): Name(name), shade(shade), prop(props){}
 };
 
 class MaterialManager {
-private:
-    std::unordered_map<std::string, Material> renderTypes;
-    Shaders::ShaderManager* shader_man;
-    uniforms::UniformManager* uniform_man;
+
 public:
-    
+    MaterialManager(Shaders::ShaderManager* shader_manager, uniforms::UniformManager* uniform_manager) :shader_man(shader_manager), uniform_man(uniform_manager) {
+    }
+    MaterialManager() {
+    }
     // Check if a RenderType with the given name exists
     bool Has(const std::string& name) const {
-        return renderTypes.find(name) != renderTypes.end();
+        return string_to_id.find(name) != string_to_id.end();
     }
-    template<typename ...uniforms>
-    void Construct(const std::string& name, const std::string& shade, const RenderProperties& props = {})
+   
+    template <typename... Args>
+    void Construct(const std::string& name, const std::string& shade, const RenderProperties& props = {}, Args&&... args)
     {
+
         if (Has(name)) {
             throw std::runtime_error("RenderType Already Created: " + name);
         }
 
-        auto val=(Material(name, &(*shader_man)[shade], props));
-        val.handles= uniform_man->get_handles<uniforms...>();
-        renderTypes[type.Name] = type;
+        auto val = Material(name, &(*shader_man)[shade], props);
+        (evaluate_uniform_paramater(val, std::forward<Args>(args)), ...);
+        string_to_id[val.Name] = string_to_id.size();
+        materials.push(val);
+        
     }
-    // Const version of Get method
 
-    const Material& operator[](const std::string& name) const {
+    void evaluate_uniform_paramater(Material& mat, util::pair<const char*,const char*> uniform_ref) {
+        mat.handles.push(uniforms::uniform_ref( uniform_man->get_handle(uniform_ref.first), uniform_ref.second));
+    }
+
+
+
+    const size_t get_id(const std::string& name) const {
 
         if (!Has(name)) {
             throw std::runtime_error("RenderType not found: " + name);
         }
-        return renderTypes.at(name);
+        return string_to_id.at(name);
     }
-    MaterialManager(Shaders::ShaderManager* shader_manager,uniforms::UniformManager* uniform_manager) :shader_man(shader_manager),uniform_man(uniform_manager){
-    }
-    MaterialManager() {
+    const Material& get_material(const size_t id) const {
+
+        return materials[id];
     }
     // Clear all stored RenderTypes
     void Clear() {
-        renderTypes.clear();
+        string_to_id.clear();
     }
 
     // Destructor
     ~MaterialManager() = default;
+private:
+    std::unordered_map<std::string,size_t> string_to_id;
+    stn::array<Material> materials;
+    Shaders::ShaderManager* shader_man;
+    uniforms::UniformManager* uniform_man;
 };

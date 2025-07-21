@@ -4,15 +4,6 @@
 #include "../game/GameContext.h"
 namespace renderer {
    
-    void setAspectRatio(renderer::Renderer* renderer) {
-        renderer->CurrentShader()->setf(CtxName::ctx.Window->AspectRatio(), "aspectratio");
-    }
-    void setrenderingmatrixes(renderer::Renderer* renderer)
-    {
-
-        renderer->CurrentShader()->setMat4(renderer->proj, "projection");
-        renderer->CurrentShader()->setMat4(renderer->view, "view");
-    }
 
 
     void Renderer::FillVertexBuffer(Mesh* mesh, stn::array<float>& pointlist)
@@ -97,24 +88,34 @@ namespace renderer {
  
    
 
-    Renderer::Renderer(size_t tst)
+    Renderer::Renderer()
     {
-        Modes = MaterialManager(&Shaders);
+        Modes = MaterialManager(&Shaders,&uniform_man);
         fov = 90;
         view = glm::mat4(0);
         setprojmatrix(90, .21f, 100);
         Shaders.Compile("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs");
-AddType(Construct("Ui", "UiShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).AddUniform(setAspectRatio));
+        Construct("Ui", "UiShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+        uniforms::uparam("aspect_ratio","aspectratio")
+        );
            
         Shaders.Compile("ModelShader","shaders\\modelvertex.vs", "shaders\\modelfragment.vs");
+        Construct("Model", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+        uniforms::uparam("aspect_ratio","aspectratio"),
+            uniforms::uparam("proj_matrix","projection"),
+        uniforms::uparam("view_matrix","view_matrix")
+        );
 
-        AddType(Construct("Model", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).AddUniform(setAspectRatio).AddUniform(setrenderingmatrixes));
         Shaders.Compile("ParticleShader","shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
-        AddType(Construct("Particle", "ParticleShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)));
+        Construct("Particle", "ParticleShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        
         Shaders.Compile("TextShader","shaders\\textvertex.vs", "shaders\\textfragment.vs");
-        AddType(Construct("Text", "TextShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).AddUniform(setAspectRatio));
-           
-    
+        Construct("Text", "TextShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+        uniforms::uparam("aspect_ratio","aspectratio")
+        );
+
+        set_uniform("aspect_ratio",CtxName::ctx.Window->AspectRatio());
+        context = RenderContext::Context(&uniform_man);
        
               
    
@@ -122,14 +123,15 @@ AddType(Construct("Ui", "UiShader", RenderProperties(false, false, false, true, 
 
     void Renderer::setviewmatrix(glm::mat4 viewmat)
     {
-            view = viewmat;
+            set_uniform("view_matrix",viewmat);
     }
 
     void Renderer::setprojmatrix(float newfov, float nearclipplane, float farclipplane)
     {
-        proj = glm::perspective(glm::radians(newfov), float(4 / 3.f), nearclipplane, farclipplane);
-        fov = newfov;
 
+        set_uniform("proj_matrix",glm::perspective(glm::radians(newfov), float(4 / 3.f), nearclipplane, farclipplane));
+        fov = newfov;
+        
     }
 
 
@@ -137,21 +139,15 @@ AddType(Construct("Ui", "UiShader", RenderProperties(false, false, false, true, 
     void Renderer::SetType(std::string Name)
     {
 
-        context.bind(&Modes[Name], this);
+        context.bind(&Modes.get_material(Modes.get_id(Name)), this);
     }
 
-    void Renderer::applyProperties()
-    {
-       
-        glDepthMask(properties.prop.depthWriteEnabled );
-        GlUtil::SetProperty(GL_CULL_FACE,properties.prop.cullFaceEnabled);
-        GlUtil::SetProperty(GL_DEPTH_TEST,properties.prop.depthTestEnabled);
-        glBlendFunc(properties.prop.blendFuncSrc, properties.prop.blendFuncDst);
-        GlUtil::SetProperty(GL_BLEND, properties.prop.blendingEnabled);
-    }
+  
 
     void Renderer::Clear()
     {
+
+        set_uniform("aspect_ratio",CtxName::ctx.Window->AspectRatio());
         glClearColor(0, 0, 0, 0.0f);
         glDepthMask(GL_TRUE);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

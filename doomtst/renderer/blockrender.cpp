@@ -218,10 +218,6 @@ void blockrender::setrendertransparent()
 	
 }
 
-void ApplyBlockTex(renderer::Renderer* rend) {
-
-rend->context.Bind(*blockrender::texarray);
-}
 void blockrender::setrendersolid()
 {
 	CtxName::ctx.Ren->SetType("SolidBlock");
@@ -287,16 +283,24 @@ void blockrender::renderblocks(bool rendertransparent) {
 	
 	tosort.destroy();
 }
-
+struct bind_block_texture {};
 void blockrender::initblockrendering()
 {
 	auto* renderer = CtxName::ctx.Ren;
 	CtxName::ctx.Ren->Shaders.Compile( "BlockShader","shaders\\vert1.vs", "shaders\\frag1.vs");
-	renderer->AddType(renderer->Construct("SolidBlock", "BlockShader", RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))
-	.AddUniform(renderer::setAspectRatio).AddUniform(renderer::setrenderingmatrixes).AddUniform(ApplyBlockTex));
-
-	renderer->AddType(renderer->Construct("TransparentBlock", "BlockShader", RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)).
-	AddUniform(renderer::setAspectRatio).AddUniform(renderer::setrenderingmatrixes).AddUniform(ApplyBlockTex));
+	renderer->Construct("SolidBlock", "BlockShader", RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+		uniforms::uparam("aspect_ratio","aspectratio"),
+		uniforms::uparam("proj_matrix","projection"),
+		uniforms::uparam("view_matrix","view"),
+		uniforms::uparam("bind_block_texture","tex")
+	);
+	
+	renderer->Construct("TransparentBlock", "BlockShader", RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+		uniforms::uparam("aspect_ratio", "aspectratio"),
+		uniforms::uparam("proj_matrix", "projection"),
+		uniforms::uparam("view_matrix", "view"),
+		uniforms::uparam("bind_block_texture", "tex")
+	);
 
 	array<const char*> texlist = array<const char*>();
 	texlist.reach(treestonetex)= "images\\treestone.png";
@@ -330,8 +334,11 @@ void blockrender::initblockrendering()
 	texlist.reach(ultraaltarpngultrapng) = "images\\ultraaltar.png";
 	texlist.reach(sandtex) = "images\\sand.png";
 	texlist.reach(planktex) = "images\\treestoneblock.png";
+	
 	texarray = CtxName::ctx.Ren->Textures.GetTexArray(texlist,"BlockTextures");
+	
 	CtxName::ctx.Ren->context.Bind(*texarray);
+	CtxName::ctx.Ren->set_uniform("bind_block_texture",texarray);
 	enablelighting = true;
 }
 

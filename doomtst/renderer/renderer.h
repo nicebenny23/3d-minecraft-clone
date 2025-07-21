@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "texture.h"
 #include "ShaderManager.h"
+#include "renderable.h"
 #include "VertexObjectManager.h"
 #include "TextureManager.h"
 #include "Mesh.h"
@@ -59,7 +60,7 @@ namespace renderer {
 		}
 	};
 	struct MeshData2 {
-		Ids::Id mesh;
+		Ids::GenId mesh;
 		vertice::vertex layout;
 		stn::array<float> pointlist;
 		stn::array<unsigned int> indicelist;
@@ -81,35 +82,29 @@ namespace renderer {
 
 		}
 	};
-
-	struct view_matrix{
-
-
-	};
-	struct view_matrix{
-
-
-	};
-
-	void setrenderingmatrixes(renderer::Renderer* renderer);
-	struct aspect_ratio {
-	};
+	struct aspect_ratio {};
 	struct Renderer {
-		Renderer(size_t tst);
+		Renderer();
+
+//		Sparse::SparseSet<renderable> renderables;
+		
 		RenderContext::Context context;
-		Material properties;
 		MaterialManager Modes;
+		Material properties;
 		void SetType(std::string Name);
-		void AddType(const Material& type) {
-			 Modes.AddType(type);
+		
+		
+		template<typename val_type>
+		void set_uniform(const char* name,const val_type& val) {
+			uniform_man.set(name,uniforms::uniform_val(val));
+
 		}
-		Material Construct(const char* name, const char* shade,  RenderProperties props ) {
-			return Modes.Construct(name,shade,props);
+
+		template <typename... Args>
+		void Construct(const char* name, const char* shade,  RenderProperties props,Args&&...args) {
+			 Modes.Construct(name,shade,props, std::forward<Args>(args)...);
 		}
-		void applyProperties();
-		Renderer():Textures(),Binders(),Shaders() {
-			
-		}
+		
 		ITexture* CurrentTexture() {
 			return context.Get_BoundTexture();
 		};
@@ -117,6 +112,7 @@ namespace renderer {
 			return context.Get_BoundShader();
 		}
 		void Clear();
+		uniforms::UniformManager uniform_man;
 		Shaders::ShaderManager Shaders;
 		VObjMan::VObjManager Binders;
 		TextureManager::TextureManager Textures;
@@ -127,6 +123,11 @@ namespace renderer {
 		void SetUniformMat4(const std::string& name, const glm::mat4& mat);
 
 		meshId gen() {
+
+
+		}
+		void gen_renderable() {
+
 
 
 		}

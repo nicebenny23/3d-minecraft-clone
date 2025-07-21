@@ -42,8 +42,9 @@ namespace RenderContext{
 			return BoundVao;
 		}
 		void bind(const Material* mat, renderer::Renderer* renderer);
-		void apply(uniforms::uniform uform);
-		
+		void apply(uniforms::uniform_ref uform,const char* name);
+		Context() {};
+		Context(uniforms::UniformManager* uniform_manager) :form_man(uniform_manager) {};
 	private:
 		const Material * material;
 		shader* BoundShader;
@@ -51,7 +52,7 @@ namespace RenderContext{
 		buffer_object::Ebo* BoundEbo;
 		buffer_object::Vbo* BoundVbo;
 		VaoName::Vao* BoundVao;
-		uniforms::UniformManager* form;
+		uniforms::UniformManager* form_man;
 
 	};
 

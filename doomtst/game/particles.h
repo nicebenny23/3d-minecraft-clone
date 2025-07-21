@@ -44,7 +44,7 @@ struct particle: gameobject::component
 	particleemiter* emit;
 	~particle() {
 
-		emit->particlearray[ind].Id=Ids::None;
+		emit->particlearray[ind].GenId=Ids::NoneG;
 	}
 	particle() = default;
 }; 

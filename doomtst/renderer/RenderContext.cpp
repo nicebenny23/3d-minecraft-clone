@@ -89,54 +89,51 @@ void RenderContext::Context::bind(const Material* mat, renderer::Renderer* rende
 
 	for (int i = 0; i < mat->handles.length; i++)
 	{
-		apply(form->get(mat->handles[i]));
+		apply(mat->handles[i],mat->handles[i].name);
 	}
 	Apply_properties(&mat->prop);
 	material = mat;
 }
 
-void RenderContext::Context::apply(uniforms::uniform uform)
+void RenderContext::Context::apply(uniforms::uniform_ref uform,const char* location_in_shader)
 {
-	const char* name = uform.name;
-	uniforms::uniform_var val = uform.value;
-	switch (val.index()) {
+	uniforms::uniform_val val = form_man->get(uform);
+	
 		switch (val.index()) {
 		case uniforms::uform_int:
-			
+
 			break;
 		case uniforms::uform_float:
-			BoundShader->setf(std::get<float>(val), name);
-				break;
+			BoundShader->setf(std::get<float>(val), location_in_shader);
+			break;
 		case uniforms::uform_gluint:
 			// handle GLuint
 			break;
 		case uniforms::uform_vec2:
-			BoundShader->SetVector2f(std::get<glm::vec2>(val), name);
+			BoundShader->SetVector2f(std::get<glm::vec2>(val), location_in_shader);
 			break;
 		case uniforms::uform_vec3:
 
-			BoundShader->SetVector3f(std::get<glm::vec3>(val), name);
+			BoundShader->SetVector3f(std::get<glm::vec3>(val), location_in_shader);
 			break;
 		case uniforms::uform_vec4:
-			BoundShader->SetVector4f(std::get<glm::vec4>(val), name);
+			BoundShader->SetVector4f(std::get<glm::vec4>(val), location_in_shader);
 			break;
 		case uniforms::uform_mat3:
-		
-
+			BoundShader->setMat3(std::get<glm::mat3>(val), location_in_shader);
 			break;
 		case uniforms::uform_mat4:
-
-			BoundShader->setMat4(std::get<glm::mat4>(val), name);
+			BoundShader->setMat4(std::get<glm::mat4>(val), location_in_shader);
 			break;
 		case uniforms::uform_texarr:
 			std::get<TextureArray*>(val)->apply();
 			break;
 		case uniforms::uform_tex2d:
-
 			std::get<Texture2D*>(val)->apply();
 			break;
 		default:
-			
+
 			break;
 		}
+	
 }

@@ -26,7 +26,7 @@ using namespace stn;
 namespace CtxName {
 	struct Context;
 }
-namespace comp = type_id;
+namespace comp = Ids;
 namespace gameobject {
 
 
@@ -99,7 +99,7 @@ namespace gameobject {
 
 		inline bool exists() const;
 
-		Ids::Id Id;
+		Ids::GenId GenId;
 
 		template <class T, typename... types>
 		T* addcomponent(types&&... initval);
@@ -108,7 +108,7 @@ namespace gameobject {
 
 
 		constexpr obj() noexcept {
-			Id = Ids::None;
+			GenId = Ids::NoneG;
 			OC = nullptr;
 		}
 
@@ -199,7 +199,7 @@ namespace gameobject {
 		updatetype utype;
 		int priority;
 		component*& operator[](const obj& entity) {
-			return store.reach(entity.Id.id);
+			return store.reach(entity.GenId.id);
 		}
 		void init(component* sample);
 	};
@@ -483,7 +483,7 @@ namespace gameobject {
 		OC->arch.moveflipArch(*this, *comp_id);
 			
 		
-		component* comp = complist[Id.id];
+		component* comp = complist[GenId.id];
 		if (!comp) {
 			throw std::logic_error("invarient violation:component must exist if id is contained");
 		}
@@ -509,7 +509,7 @@ namespace gameobject {
 		}
 		componentStorage& complist = comp_storage[comp_id.unwrap().value].store;
 
-		return (T*)(complist[object.Id.id]);
+		return (T*)(complist[object.GenId.id]);
 
 	}
 	template<class T>
@@ -524,7 +524,7 @@ namespace gameobject {
 		verify_component<T>();
 
 
-		comp::Id comp_id = component_indexer.get<T>();
+		comp::GenId comp_id = component_indexer.get<T>();
 
 		component* comp= comp_storage[comp_id.value][object];
 		if (comp==nullptr)
@@ -595,7 +595,7 @@ namespace gameobject {
 	}
 
 	inline bool operator == (const obj& obj1, const obj& obj2) {
-		return obj1.Id == obj2.Id;
+		return obj1.GenId == obj2.GenId;
 	}
 	inline bool gameobject::Archtype::has_component(comp::Id index)
 	{

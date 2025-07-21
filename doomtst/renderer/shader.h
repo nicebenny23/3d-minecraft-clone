@@ -11,16 +11,16 @@ namespace Shaders {
 struct shader
 {
 
-	int id;
+	size_t id;
 	std::string Name;
 	
 
 	shader() {
 		Name = "";
-		id = -1;
+		id = 0;
 	}
 	int uniformlocation(const char* name) {
-		if (id==-1)
+		if (id==0)
 		{
 			throw std::logic_error("invalid id");
 		}
@@ -31,6 +31,17 @@ struct shader
 	{
 	
 		glad_glUniform1f(uniformlocation(name), val);
+	}
+	void setuint(unsigned int val, const char* name)
+	{
+
+		glad_glUniform1ui(uniformlocation(name), val);
+	}
+	void setMat3(glm::mat3 val, const char* name)
+	{
+
+		glad_glUniformMatrix3fv(uniformlocation(name), 1, GL_FALSE, &val[0][0]);
+
 	}
 	void setMat4(glm::mat4 val, const char* name)
 	{

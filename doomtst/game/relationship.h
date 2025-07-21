@@ -3,6 +3,7 @@
 #include "../util/Option.h"
 #include "../util/SparseSet.h"
 #include "../util/pipeline.h"
+#include <tuple>
 namespace Hierarchy {
 
     struct Parent;

@@ -23,7 +23,7 @@ struct ResourceManager {
 
     template<typename T>
     T& get() {
-        Opt::Option<type_id::Id> comp_id = resources_ids.get_opt<T>();
+        Opt::Option<Ids::Id> comp_id = resources_ids.get_opt<T>();
 
         if (!comp_id) {
             throw std::invalid_argument(std::string(typeid(T).name()) + " has not been initialized yet");

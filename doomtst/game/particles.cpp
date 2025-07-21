@@ -26,7 +26,7 @@ void particleemiter::update()
 	timetillspawn = Min(timetillspawn-CtxName::ctx.Time->dt,particlespawntime);
 	for (int i = 0; i < particlearray.length; i++)
 	{
-		if (particlearray[i].Id !=Ids::None)
+		if (particlearray[i].GenId !=Ids::NoneG)
 		{
 
 
@@ -40,7 +40,7 @@ void particleemiter::update()
 					EntityDeletionBuffer.destroy();
 				
 				
-					particlearray[i].Id =Ids::None;
+					particlearray[i].GenId =Ids::NoneG;
 				}
 			}
 		}
@@ -52,7 +52,7 @@ void particleemiter::update()
 		
 		 for (size_t i = 0; i < maxparticles; i++)
 		 {
-			 if (particlearray[i].Id ==Ids::None)
+			 if (particlearray[i].GenId ==Ids::NoneG)
 			 {
 				 gameobject::obj newparticle = CtxName::ctx.OC->CreateEntity(position);
 				 
@@ -107,7 +107,7 @@ void particleemiter::renderparticles()
 	for (int i = 0; i < particlearray.length; i++)
 	{
 
-		if (particlearray[i].Id !=Ids::None)
+		if (particlearray[i].GenId !=Ids::None)
 		{
 			CtxName::ctx.Ren->CurrentShader()->SetVector3f(particlearray[i].transform().position.glm(), "offset");
 			CtxName::ctx.Ren->CurrentShader()->SetVector3f(particlearray[i].transform().scale.glm(), "scale");
@@ -137,7 +137,7 @@ particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) 
 	timetillspawn = spawntime;
 	for ( int i = 0; i < maxparticles; i++)
 	{
-		particlearray[i].Id = Ids::None;
+		particlearray[i].GenId = Ids::NoneG;
 	}
 }
 

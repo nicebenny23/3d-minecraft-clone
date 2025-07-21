@@ -5,10 +5,9 @@
 #include "Option.h"
 #include <cstdint>
 #include "pair.h"
+#include "Id.h"
 namespace type_id {
 
-    // Unique ID for an invalid type
-    inline constexpr uint32_t None_id = UINT32_MAX;
 
     // Global counter for assigning unique type IDs
     inline std::atomic<uint32_t> global_type_counter{ 0 };
@@ -20,31 +19,19 @@ namespace type_id {
         return id;
     }
 
-    struct Id {
-        uint32_t value;
-
-        constexpr explicit Id(uint32_t val = None_id) : value(val) {}
-
-        constexpr bool inline valid() const { return value != None_id; }
-        constexpr bool operator==(const Id& other) const { return value == other.value; }
-        constexpr bool operator!=(const Id& other) const { return value != other.value; }
-        constexpr explicit operator bool() const { return valid(); }
-    };
-
-    inline constexpr Id None{ None_id };
-
+  
     struct type_indexer {
         uint32_t type_index = 0;
-        stn::array<Id> sparse_map;
+        stn::array<Ids::Id> sparse_map;
 
         uint32_t size() const {
             return type_index;
         }
 
         template<typename T>
-        Id get() const{
+        Ids::Id get() const{
             uint32_t id = typeIndex<T>();
-            Id dense_id = sparse_map[id];
+            Ids::Id dense_id = sparse_map[id];
             if (!dense_id.valid()) {
                 throw std::logic_error(std::string("Id of" + std::string(typeid(T).name()) + "has not been created"));
             }
@@ -52,20 +39,20 @@ namespace type_id {
         }
 
         template<typename T>
-        Opt::Option<Id> get_opt() {
-            Id dense_id = sparse_map.reach(typeIndex<T>());
+        Opt::Option<Ids::Id> get_opt() {
+            Ids::Id dense_id = sparse_map.reach(typeIndex<T>());
             if (!dense_id.valid()) [[unlikely]] {
                 return Opt::None; 
             }
-            return Opt::Option<Id>(dense_id);
+            return Opt::Option<Ids::Id>(dense_id);
         }
         template<typename T>
-        util::pair<Id, bool> insert() {
+        util::pair<Ids::Id, bool> insert() {
             uint32_t id = typeIndex<T>();
-            Id& dense_id = sparse_map.reach(id);
+            Ids::Id& dense_id = sparse_map.reach(id);
             bool is_new = false;
             if (!dense_id.valid()) {
-                dense_id = Id(type_index++);
+                dense_id = Ids::Id(type_index++);
                 is_new = true;
             }
             return { dense_id, is_new };
@@ -73,11 +60,11 @@ namespace type_id {
         template<typename T>
         bool contains() const {
             uint32_t id = typeIndex<T>();
-            return id < sparse_map.length && sparse_map.contains(Id(id));
+            return id < sparse_map.length && sparse_map[id].valid();
         }
 
         template <typename... Types>
-        stn::array<Id> get_type_ids() {
+        stn::array<Ids::Id> get_type_ids() {
             return { get<Types>()... };
         }
 

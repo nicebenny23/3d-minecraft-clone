@@ -170,13 +170,13 @@ namespace query {
 		gameobject::component* operator*() {
 			size_t comp_id = dense_bits[ind];
 			auto& store = manager->comp_storage[comp_id].store;
-			gameobject::component* value = store[owner.Id.id];
+			gameobject::component* value = store[owner.GenId.id];
 			if (value == nullptr) {
 				// FAIL FAST with a clear error
 				throw std::logic_error(
 					"ECS invariant violated: archetype lists comp_id " +
 					std::to_string(comp_id) +
-					" for entity " + std::to_string(owner.Id.id) +
+					" for entity " + std::to_string(owner.GenId.id) +
 					", but store does not contain that key.");
 			}
 			return value;

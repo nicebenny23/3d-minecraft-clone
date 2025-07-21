@@ -12,6 +12,7 @@ namespace Meshes {
 		bool operator !=(const meshId oth) const {
 			return id != oth.id;
 		}
+		explicit meshId(size_t Id):id(Id) {};
 	};
 	struct MeshRegistry {
 		Renderer* ren;

@@ -13,7 +13,7 @@ namespace gridutil {
 	void emitlight();
 	gameobject::obj dislocate(gameobject::obj blk);
 
-	gameobject::obj set_air(gameobject::obj blk);
+
 	void redolighting();
 	
 	bool move(block* blk, Coord offset);

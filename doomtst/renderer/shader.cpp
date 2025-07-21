@@ -55,9 +55,9 @@ shader::shader(const char* ShaderName, const char* vertexpath, const char* fragp
 
 void shader::attach()
 {
-    if (id==-1)
+    if (id==0)
     {
-        Assert("cant attach invalid shader");
+        throw std::logic_error("Unable to attach invalid shader");
     }
     glUseProgram(id);
 }
