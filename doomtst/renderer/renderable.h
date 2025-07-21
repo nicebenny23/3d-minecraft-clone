@@ -2,26 +2,35 @@
 #include "Uniform.h"
 #pragma once
 struct renderable {
-	Meshes::meshId mesh;
-	size_t material;
+	Ids::Id mesh;
+	Ids::Id material;
 	template <typename T>
-	void set(const char* name, T& value) {
+	void set(const char* shader_alias, T& value) {
 		
 		for (auto& val:overides)
 		{
-			if (val.name==name)
+			if (val.name==shader_alias)
 			{
-				val.value = value;
+				val.id = value;
 				return;
 			}
 			
 		}
-		overides.push(uniforms::uniform(name,value));
+		overides.push(uniforms::uniform(shader_alias,value));
+
+	}
+	renderable() {
+
 
 	}
 	stn::array<uniforms::uniform> overides;
 	~renderable() {
 		overides.destroy();
 	}
-
+	void set_material(Ids::Id mat_id) {
+		material = mat_id;
+	}
+	void set_mesh(Ids::Id msh_id) {
+		mesh = msh_id;
+	}
 };

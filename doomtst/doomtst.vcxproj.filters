@@ -99,9 +99,6 @@
     <ClCompile Include="renderer\ModelMesh.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="game\particles.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="renderer\textrender.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -216,6 +213,9 @@
     <ClCompile Include="game\entitystate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game\particles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="util\vector3.h">
@@ -279,9 +279,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="world\noise.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="util\time.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="renderer\blockrender.h">
@@ -737,9 +734,6 @@
     <ClInclude Include="player\playermovment.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="util\topo_sort.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="renderer\gl_id.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -843,6 +837,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="renderer\HandleMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\topo_sort.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

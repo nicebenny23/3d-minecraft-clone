@@ -112,7 +112,7 @@ namespace query {
 			bitset::bitset bitlist;
 			bitlist.expand(ecs->component_indexer.size());
 			for (auto id : positions) {
-				bitlist.set(id.value);
+				bitlist.set(id.id);
 			}
 			for (auto& arch : ecs->arch) {
 				if (arch->has_components(bitlist)) {

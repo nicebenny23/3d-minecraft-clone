@@ -12,8 +12,8 @@ namespace comp {
         constexpr Id() : value(None_id) {}
 
         constexpr bool valid() const { return value != None_id; }
-        constexpr bool operator==(const Id& other) const { return value == other.value; }
-        constexpr bool operator!=(const Id& other) const { return value != other.value; }
+        constexpr bool operator==(const Id& other) const { return value == other.id; }
+        constexpr bool operator!=(const Id& other) const { return value != other.id; }
         constexpr explicit operator bool() const { return valid(); }
     };
 

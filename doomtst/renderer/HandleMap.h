@@ -18,11 +18,11 @@ namespace handle {
 
 		}
 		const T& get_elem(Ids::Id handle) const{
-			if (elemlist.length < handle.value)
+			if (elemlist.length < handle.id)
 			{
 				throw std::out_of_range("Requested Shader does not exist");
 			}
-			return elemlist[handle.value];
+			return elemlist[handle.id];
 
 		}
 		bool Contains(const std::string& name) const{
@@ -30,7 +30,7 @@ namespace handle {
 			return string_to_id.contains(name);
 		}
 		void set(const std::string& Name,const T& value) {
-			size_t handle = get_handle(Name).value;
+			size_t handle = get_handle(Name).id;
 			if (handle < elemlist.length)
 			{
 				throw std::logic_error("Two elements are unable to have the same name");

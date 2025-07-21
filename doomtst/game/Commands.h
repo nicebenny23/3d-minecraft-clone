@@ -82,9 +82,9 @@ void CommandBuffer::push(const T& value)
 		DependencySystem.push<T>();
 	}
 
-	void* mem = store[Id.value].alloc();
+	void* mem = store[Id.id].alloc();
 	T* cmd = new (mem) T(value);
-	buffer[Id.value].push(cmd);
+	buffer[Id.id].push(cmd);
 }
 inline void CommandBuffer::pop() {
 	

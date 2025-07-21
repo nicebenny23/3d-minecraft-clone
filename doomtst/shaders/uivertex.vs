@@ -1,23 +1,20 @@
 #version 330 core
-layout (location = 0) in vec2 aPos;
-layout (location= 1 ) in vec2 texcord;
+layout (location= 0 ) in vec2 texcord;
 
 
-  //width/height
-  uniform float aspectratio;
+uniform float scale;
+uniform vec2 center;
+uniform float aspectratio;
 out vec2 texcoord;
 
 
 
 void main()
 {
-   
-
-  vec4 pos=  vec4(aPos.x,aPos.y,1, 1.0);
-
+   //because texcoords are inverted
+vec2 vec_pos= (vec2(0.5,0.5)-texcord)*2;
+vec4 pos = vec4(vec_pos*scale+center,1, 1.0);
 pos.y=pos.y*aspectratio;
-
-    
 gl_Position=pos;
     texcoord = texcord;
 }

@@ -34,12 +34,14 @@ namespace Ids {
 
 	
 	struct Id {
-		uint32_t value;
+		uint32_t id;
+		explicit constexpr Id():id(none_id){
 
-		constexpr explicit Id(uint32_t val = none_id) : value(val) {}
-		constexpr bool inline valid() const { return value != none_id; }
-		constexpr bool operator==(const Id& other) const { return value == other.value; }
-		constexpr bool operator!=(const Id& other) const { return value != other.value; }
+		}
+		constexpr explicit Id(uint32_t val) : id(val) {}
+		constexpr bool inline valid() const { return id != none_id; }
+		constexpr bool operator==(const Id& other) const { return id == other.id; }
+		constexpr bool operator!=(const Id& other) const { return id != other.id; }
 		constexpr explicit operator bool() const { return valid(); }
 	};
 

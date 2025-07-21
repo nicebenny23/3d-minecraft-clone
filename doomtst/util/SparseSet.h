@@ -216,13 +216,19 @@ namespace Sparse {
 		stn::array<size_t> index_to_key;
 
 		KeySet(size_t maxKeys = 0) {
-			if (maxKeys > 0) {
-				sparse.resize(maxKeys);
-				for (size_t i = 0; i < maxKeys; ++i) sparse[i] = ind_none;
+		
+		}
+		void resize(size_t new_size){
+			for (size_t i = sparse.length ; i < new_size; i++)
+			{
+				sparse.reach(i)=ind_none;
 			}
 		}
-
 		void push(size_t key, const T& elem) {
+			if (sparse.length<=key)
+			{
+				resize(key+1);
+			}
 			size_t& slot = sparse.reach(key);
 			if (slot != ind_none) throw std::logic_error("Key already exists in KeySet");
 			size_t idx = dense.length;

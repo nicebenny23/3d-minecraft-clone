@@ -69,32 +69,10 @@ namespace uiboxname {
 
 		if (state.enabled)
 		{
-			CtxName::ctx.Ren->SetType("Ui");
-			array<unsigned int> indbuf = array<unsigned int>(6,unsigned int(0));
-			indbuf[0] = 0;
-			indbuf[1] = 1;
-			indbuf[2] = 3;
-			indbuf[3] = 0;
-			indbuf[4] = 3;
-			indbuf[5] = 2;
-
-			Mesh BoxMesh;
-			CtxName::ctx.Ren->Gen(&BoxMesh);
-			BoxMesh.Voa.attributes.push<float, 2>().push<float, 2>();
-			array<float> databuf = array<float>();
-			CtxName::ctx.Ren->Bind_Texture(tex_handle);
-			for (int j = 0; j < 4; j++)
-			{
-				v2::Vec2 pos = box.center + offset[j] * (box.scale);
-				databuf.push(pos.x);
-				databuf.push(pos.y);
-				databuf.push(cubeuv[2 * j]);
-				databuf.push(cubeuv[2 * j + 1]);
-			}
-			CtxName::ctx.Ren->Render(&BoxMesh, databuf, indbuf);
-			databuf.destroy();
-			indbuf.destroy();
-			CtxName::ctx.Ren->Destroy(&BoxMesh);
+			
+			tex_handle.set_uniform(uniforms::uniform(box.scale.x, "scale"));
+			tex_handle.set_uniform(uniforms::uniform(glm::vec2( box.center.x, box.center.y), "center"));
+			tex_handle.render();
 		}
 
 	}
@@ -103,12 +81,31 @@ namespace uiboxname {
 
 	void uibox::customdestroy()
 	{
+		tex_handle.remove();
 	}
 
 	void uibox::LoadTex(const char* texloc, const char* texture)
 	{
-		tex_handle = CtxName::ctx.Ren->Textures.LoadTexture(texloc, texture);
-
+		tex_handle = CtxName::ctx.Ren->gen_renderable();
+		tex_handle.set_material("Ui");
+		tex_handle.set_uniform(uniforms::uniform(CtxName::ctx.Ren->Textures.LoadTexture(texloc, texture), "tex"));
+		tex_handle.set_layout(vertice::vertex().push<float, 2>());
+		array<unsigned int> indbuf = array<unsigned int>(6, unsigned int(0));
+		indbuf[0] = 0;
+		indbuf[1] = 1;
+		indbuf[2] = 3;
+		indbuf[3] = 0;
+		indbuf[4] = 3;
+		indbuf[5] = 2;
+		array<float> databuf = array<float>();
+		for (int j = 0; j < 4; j++)
+		{
+			databuf.push_many(cubeuv[2 * j],cubeuv[2*j+1]);
+			
+		}
+	
+		tex_handle.fill(std::move(databuf), std::move(indbuf));
+		CtxName::ctx.Ren->consume();
 	}
 
 

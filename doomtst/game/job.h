@@ -82,7 +82,7 @@ struct Job_run {
 
 	}
 		void run_cmd(DagNode<Job_cmd> cmd){
-			cmd.value();
+			cmd.id();
 			lock.lock();
 			finished.push(cmd.index);
 			lock.unlock();

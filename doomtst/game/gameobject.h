@@ -276,15 +276,15 @@ namespace gameobject {
 			{
 				throw std::logic_error("Component must be part of an archtype");
 			}
-			Archtype* next = current->moves[index.value];
+			Archtype* next = current->moves[index.id];
 			if (next== nullptr)
 			{
 				bitset::bitset new_arch = current->bit_list;
 
-				new_arch.flip(index.value);
+				new_arch.flip(index.id);
 				addArchtype(new_arch);
 				//since it now exists
-				next = current->moves[index.value];
+				next = current->moves[index.id];
 				if (next == nullptr)
 				{
 					throw std::logic_error("Improper archytype allocation");
@@ -475,7 +475,7 @@ namespace gameobject {
 			return;
 		}
 
-		auto& complist = OC->comp_storage[(*comp_id).value].store;
+		auto& complist = OC->comp_storage[(*comp_id).id].store;
 		
 		if (!hascomponent<T>()) {
 			return;
@@ -507,7 +507,7 @@ namespace gameobject {
 		{
 			return nullptr;
 		}
-		componentStorage& complist = comp_storage[comp_id.unwrap().value].store;
+		componentStorage& complist = comp_storage[comp_id.unwrap().id].store;
 
 		return (T*)(complist[object.GenId.id]);
 
@@ -526,7 +526,7 @@ namespace gameobject {
 
 		comp::Id comp_id = component_indexer.get<T>();
 
-		component* comp= comp_storage[comp_id.value][object];
+		component* comp= comp_storage[comp_id.id][object];
 		if (comp==nullptr)
 		{
 			throw std::logic_error("Entity does not have component" + std::string(typeid(T).name()));
@@ -560,7 +560,7 @@ namespace gameobject {
 		auto [cmpid, is_new] = component_indexer.insert<T>();
 	
 
-		component_table& row = comp_storage.reach(cmpid.value);
+		component_table& row = comp_storage.reach(cmpid.id);
 			if (row[entity] != nullptr)
 			{
 				return (T*)row[entity];
@@ -599,9 +599,9 @@ namespace gameobject {
 	}
 	inline bool gameobject::Archtype::has_component(comp::Id index)
 	{
-		if (index.value < bit_list.bits)
+		if (index.id < bit_list.bits)
 		{
-			return bit_list.at(index.value);
+			return bit_list.at(index.id);
 		}
 		return false;
 	}
@@ -632,7 +632,7 @@ namespace gameobject {
 
 		return[&]<size_t... Is>(std::index_sequence<Is...>) {
 			return std::tuple<Components*...>{
-				(Components*)comp_storage[indices[Is].value][obj]...
+				(Components*)comp_storage[indices[Is].id][obj]...
 			};
 		}(std::index_sequence_for<Components...>{});
 	}

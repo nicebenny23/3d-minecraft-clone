@@ -56,7 +56,7 @@ void particleemiter::update()
 			 {
 				 gameobject::obj newparticle = CtxName::ctx.OC->CreateEntity(position);
 				 
-				 newparticle.addcomponent<particle>()->endtime= CtxName::ctx.Time->now().value+particlelifetime;
+				 newparticle.addcomponent<particle>()->endtime= CtxName::ctx.Time->now().value +particlelifetime;
 				 newparticle.getcomponent<particle>().ind = i;
 				 newparticle.getcomponent<particle>().emit = this;
 				 (*particleinit)(newparticle);

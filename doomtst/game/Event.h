@@ -34,12 +34,12 @@ namespace event {
         template<typename EventType,typename Listener>
             requires std::invocable<Listener, const EventType&>&&std::is_class_v<Listener>
         void Add_listener() {
-            size_t index = event_indexer.insert<EventType>().first.value;
+            size_t index = event_indexer.insert<EventType>().first.id;
             event_subsystem[index].push<EventType, Listener>();
         }
         template<typename EventType>
         void Call(const EventType& event) {
-            size_t index = event_indexer.insert<EventType>().first.value;
+            size_t index = event_indexer.insert<EventType>().first.id;
             event_subsystem[index].Call(event);
         }
         stn::array<EventSubsystem> event_subsystem;

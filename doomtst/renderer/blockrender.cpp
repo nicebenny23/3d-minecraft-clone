@@ -182,9 +182,12 @@ void recreatechunkmesh(Chunk::chunk* aschunk,std::mutex& fill_lock) {
 					}
 		}
 		
-	}{
+	}
+	
+	{
 		std::unique_lock lck(fill_lock);
-		CtxName::ctx.Ren->stck.push(renderer::MeshData(&aschunk->mesh->SolidGeo, std::move(indbuf),std::move( datbuf)));
+
+		aschunk->mesh->SolidGeo.fill(std::move(datbuf), std::move(indbuf));
 	}
 	aschunk->mesh->meshsize = indbuf.length;
 	
@@ -194,7 +197,7 @@ void recreatechunkmesh(Chunk::chunk* aschunk,std::mutex& fill_lock) {
 // Render a chunk mesh
 void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 	if (!transparent) {
-		CtxName::ctx.Ren->Render(&mesh.SolidGeo);
+		mesh.SolidGeo.render();
 	}
 	else {
 		// Enable 2D render
@@ -229,11 +232,8 @@ void blockrender::renderblocks(bool rendertransparent) {
 	}
 	std::mutex fill_mutex;
 
-	auto func = [&](auto& item) {
-		{
-			std::unique_lock lck(fill_mutex);
+	auto func = [&fill_mutex](Chunk::chunk*& item) {
 		
-		}
 		if (item->mesh->meshrecreateneeded) {
 			recreatechunkmesh(item, fill_mutex);  // or just recreatechunkmesh(item);
 		}
@@ -241,7 +241,7 @@ void blockrender::renderblocks(bool rendertransparent) {
 		};
 	
 	thread_util::par_iter(tosort.begin(), tosort.end(), func, 4);
-	CtxName::ctx.Ren->Consume();
+	CtxName::ctx.Ren->consume();
 	
 	if (tosort.length != 0)
 	{
@@ -250,7 +250,6 @@ void blockrender::renderblocks(bool rendertransparent) {
 			return (*a) < (*b);
 			});
 	}	
-		CtxName::ctx.Ren->SetType("SolidBlock");
 		int renderamt = 0;
 		for (int i = 0; i < tosort.length; i++) {
 		

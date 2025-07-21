@@ -40,7 +40,7 @@ namespace Depends {
         void push() {
            
             auto [tid, isNew] = typeSystem.insert<T>();
-            if (builder.pushed.contains(tid.value))
+            if (builder.pushed.contains(tid.id))
             {
                 return;
             }
@@ -57,13 +57,13 @@ namespace Depends {
             if constexpr (std::is_same_v<Tag, dependency_first>) {
                 if constexpr (!std::is_same_v<Deps, TypeList::TypeList<>>)
                     throw std::runtime_error("dependency_first types cannot have Dependencies");
-                builder.push(tid.value, DagBuilder<size_t>::PushType::First);
+                builder.push(tid.id, DagBuilder<size_t>::PushType::First);
             }
             else if constexpr (std::is_same_v<Tag, dependency_last>) {
-                builder.push(tid.value, DagBuilder<size_t>::PushType::Last);
+                builder.push(tid.id, DagBuilder<size_t>::PushType::Last);
             }
             else {
-                builder.push(tid.value, dependees, dependencies);
+                builder.push(tid.id, dependees, dependencies);
             }
 
             // Update sorted list automatically
@@ -81,7 +81,7 @@ namespace Depends {
             template<typename Dep>
             static void call(stn::array<size_t>& dependees, DependencySystem& sys) {
                 auto [depId, _] = sys.typeSystem.insert<Dep>();
-                dependees.push(depId.value);
+                dependees.push(depId.id);
             }
         };
 

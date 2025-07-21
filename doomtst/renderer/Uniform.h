@@ -49,7 +49,7 @@ namespace uniforms{
         stn::array<uniform_val> uniform_list;  // Dense storage of all uniforms
         robin_hood::unordered_flat_map<const char*,size_t> name_id_map;
         void set(const char* name,const uniform_val& value) {
-            uniform_list.reach(get_handle(name).value) = value;
+            uniform_list.reach(get_handle(name).id) = value;
         }
         
         
@@ -62,15 +62,15 @@ namespace uniforms{
         }
 
 
-        const uniform_val& get(uniform_ref handle) const {
-            if (handle.id.value >= uniform_list.length) {
+        const uniform_val& get(const uniform_ref& handle) const {
+            if (handle.id.id >= uniform_list.length) {
                 throw std::out_of_range("Uniform handle out of range");
             }
-            return uniform_list[handle.id.value];
+            return uniform_list[handle.id.id];
 
         }
         template< typename T>
-        T& get(uniform_ref handle) {
+        T& get(const uniform_ref handle) {
             return std::get<T>(get(handle));
         }
     }; 
@@ -82,7 +82,7 @@ namespace uniforms{
    struct uniform {
        uniform_val value;
        const char* name;
-       uniform(const char* uniform_name,const uniform_val& val):name(uniform_name),value(val) {
+       uniform(const uniform_val& val,const char* uniform_name):name(uniform_name),value(val) {
 
 
        }
@@ -91,7 +91,7 @@ namespace uniforms{
            return std::get<T>(value);
        }
        template< typename T>
-       uniform(const char* uniform_name, T& val):name(uniform_name), value(uniform_val(val)) {}
+       uniform( T& val, const char* uniform_name):name(uniform_name), value(uniform_val(val)) {}
 
        uniform() :name() {
 

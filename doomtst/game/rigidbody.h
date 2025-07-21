@@ -60,7 +60,7 @@ struct rigidbody : gameobject::component {
         velocity += acceleration * deltaTime;
         if (isonground)
         {
-            velocity.y *= 1-deltaTime*10;
+            velocity.y *= clamp(1 - deltaTime * 10, 0.0, 1.0);
         }
         if (mag(velocity)>1000)
         {
@@ -69,11 +69,11 @@ struct rigidbody : gameobject::component {
         if (gravityscale!=0)
         {
 
-            velocity.y *= 1 - deltaTime;
+            velocity.y *= clamp(1 - deltaTime,0.0,1.0);
 
-        }velocity.x *= (1-deltaTime*friction);  // Adjust damping factor to prevent excessive damping
+        }velocity.x *= clamp(1 - deltaTime*friction, 0.0, 1.0);  // Adjust damping factor to prevent excessive damping
 
-        velocity.z *= (1 - deltaTime * friction);  // Adjust damping factor to prevent excessive damping
+        velocity.z *= clamp(1 - deltaTime * friction, 0.0, 1.0);  // Adjust damping factor to prevent excessive damping
 
         owner.transform().position += velocity * deltaTime;
         acceleration = Vec3(0, 0, 0);  // Reset acceleration after integration

@@ -57,7 +57,7 @@ struct Dag {
     size_t find(const T& SearchValue) const {
         for (DagNode<T> node:nodes)
         {
-            if (node.value == SearchValue) {
+            if (node.id == SearchValue) {
                 return node.index;
             }
         }
@@ -66,7 +66,7 @@ struct Dag {
     size_t find_create(const T& SearchValue){
         for (DagNode<T> node : nodes)
         {
-            if (node.value == SearchValue) {
+            if (node.id == SearchValue) {
                 return node.index;
             }
         }

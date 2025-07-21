@@ -127,9 +127,9 @@ void gameobject::Ecs::delete_component(component* comp)
 	{
 		throw std::logic_error("Every Component Must be owned by a valid");
 	}
-	comp_storage[comp->comp_id.value].store[comp->owner.GenId.id]=nullptr;
+	comp_storage[comp->comp_id.id].store[comp->owner.GenId.id]=nullptr;
 
-	comp_storage[comp->comp_id.value].pool.free(comp);
+	comp_storage[comp->comp_id.id].pool.free(comp);
 }
 void gameobject::Ecs::InitializeEntity(obj& object)
 {

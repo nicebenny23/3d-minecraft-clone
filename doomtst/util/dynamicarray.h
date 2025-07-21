@@ -19,8 +19,8 @@ namespace stn {
 	template<class T, bool initelems = true>
 	class array {
 	public:
-		
-	
+
+
 
 
 		bool empty();
@@ -69,13 +69,19 @@ namespace stn {
 
 		// Constructor that initializes the array with a given length
 		array(size_t size);
-		array(size_t len,const T& value);
+		array(size_t len, const T& value);
 		// Constructor that initializes the array from a raw posize_ter and size.
 		array(T* arr, size_t size);
 		array(std::initializer_list<T> init);
 		// Move constructor.
 		array(array&& other) noexcept;
-		
+		void push_single(const T& value);
+	
+
+
+		template<typename... Args>
+		void push_many(const Args&... values);
+
 		// Copy constructor.
 		explicit array(const array& arr);
 
@@ -631,6 +637,7 @@ namespace stn {
 		other.capacity = 0;
 
 	}
+	
 	//takes an r value refrence  
 	template<class T, bool initelems>
 	array<T, initelems>& array<T, initelems>::operator=(array<T, initelems>&& other) noexcept {
@@ -688,5 +695,22 @@ namespace stn {
 	inline bool array<T, initelems>::contains(const T & value) const
 	{
 		return find(value) != npos;
+	}
+	template<class T, bool initelems>
+	template<typename ...Args>
+	inline void array<T, initelems>::push_many(const Args & ...values)
+	{
+		size_t total_new = sizeof...(values);
+		if (length + total_new > capacity) {
+			resize(resizelength(length + total_new));
+		}
+		(push_single(values), ...);
+
+	}
+	template<class T, bool initelems>
+	inline void array<T, initelems>::push_single(const T& value)
+	{
+		list[length++] = value;
+
 	}
 }//newline

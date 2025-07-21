@@ -105,7 +105,7 @@ namespace renderer {
         Construct("Text", "TextShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
             uniforms::uparam("aspect_ratio", "aspectratio")
         );
-
+        meshes = Meshes::MeshRegistry(&Binders);
         set_uniform("aspect_ratio", CtxName::ctx.Window->AspectRatio());
     }
  
@@ -117,7 +117,7 @@ namespace renderer {
         fov = 90;
         
         setprojmatrix(90, .21f, 100);
-           
+        meshes = Meshes::MeshRegistry();
    
     }
 
@@ -142,20 +142,20 @@ namespace renderer {
         bind_material(Modes.get_id(Name));
 
     }
-    void Renderer::bind_material(size_t material)
+    void Renderer::bind_material(Ids::Id material)
     {
         const Material& mat = Modes.get_material(material);
         context.Bind(Shaders.get_shader(mat.shader));
         for (const auto& elem : mat.handles)
         {
-            apply_uniform(elem, elem.name);
+            apply_uniform(uniform_man.get( elem), elem.name);
         }
         context.bind_properties(mat.prop);
     }
-    void Renderer::apply_uniform(uniforms::uniform_ref uform, const char* location_in_shader)
+  
+    void Renderer::apply_uniform(uniforms::uniform_val val, const char* location_in_shader)
     {
-        uniforms::uniform_val val = uniform_man.get(uform);
-
+        
         switch (val.index()) {
         case uniforms::uform_int:
             context.bound_shader().setint(std::get<int>(val), location_in_shader);
@@ -230,6 +230,36 @@ namespace renderer {
     void Renderer::SetUniformMat4(const std::string& name, const glm::mat4& mat)
     {
         CurrentShader()->setMat4(mat, name.c_str());
+    }
+
+    void RenderableHandle::set_material(const std::string& name)
+    {
+        renderer->set_material(id, name);
+    }
+
+    void RenderableHandle::set_layout(vertice::vertex layout)
+    {
+        renderer->set_layout(id, layout);
+    }
+
+    void RenderableHandle::fill(stn::array<float>&& points, stn::array<unsigned int>&& indices)
+    {
+        renderer->fill_cmd(id, std::move(points), std::move(indices));
+    }
+
+    void RenderableHandle::set_uniform(const uniforms::uniform& u)
+    {
+        renderer->set_uniform(id, u);
+    }
+
+    void RenderableHandle::render()
+    {
+        renderer->render(id);
+    }
+
+    void RenderableHandle::remove()
+    {
+        renderer->remove(id);
     }
 
 }

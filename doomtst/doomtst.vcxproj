@@ -68,7 +68,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableASAN>false</EnableASAN>
+    <EnableASAN>true</EnableASAN>
     <EnableFuzzer>false</EnableFuzzer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -168,6 +168,7 @@
       <MultiProcessorCompilation>Yes</MultiProcessorCompilation>
       <LanguageStandard>stdcpp23</LanguageStandard>
       <UseDynamicDebugging>false</UseDynamicDebugging>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -187,11 +188,12 @@
       <LanguageStandard>stdcpp20</LanguageStandard>
       <UseDynamicDebugging>false</UseDynamicDebugging>
       <Optimization>Full</Optimization>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
+      <OmitFramePointers>false</OmitFramePointers>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -232,6 +234,7 @@
     <ClCompile Include="game\entitystate.cpp" />
     <ClCompile Include="game\GameContext.cpp" />
     <ClCompile Include="game\navigation.cpp" />
+    <ClCompile Include="game\particles.cpp" />
     <ClCompile Include="game\Settings.cpp" />
     <ClCompile Include="game\transform.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
@@ -257,7 +260,6 @@
     <ClCompile Include="Resources\ResourceManager.cpp" />
     <ClCompile Include="util\algorthm.cpp" />
     <ClCompile Include="renderer\ModelMesh.cpp" />
-    <ClCompile Include="game\particles.cpp" />
     <ClCompile Include="player\player.cpp" />
     <ClCompile Include="player\playerinventory.cpp" />
     <ClCompile Include="renderer\model.cpp" />
@@ -463,6 +465,7 @@
     <ClInclude Include="renderer\VertexObjectManager.h" />
     <ClInclude Include="util\thread_pool.h" />
     <ClInclude Include="util\thread_split.h" />
+    <ClInclude Include="util\time.h" />
     <ClInclude Include="util\topo_sort.h" />
     <ClInclude Include="util\typelist.h" />
     <ClInclude Include="util\type_graph.h" />
@@ -489,7 +492,6 @@
     <ClInclude Include="util\random.h" />
     <ClInclude Include="util\ray.h" />
     <ClInclude Include="renderer\renderer.h" />
-    <ClInclude Include="util\time.h" />
     <ClInclude Include="util\userinput.h" />
     <ClInclude Include="util\vector2.h" />
     <ClInclude Include="util\vector3.h" />

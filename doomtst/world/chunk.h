@@ -12,7 +12,8 @@ namespace Chunk {
 	{
 		chunkmesh() = default;
 		
-		Mesh SolidGeo;
+
+		renderer::RenderableHandle SolidGeo;
 		Mesh TransparentGeo;
 		//voa vertexspec;
 		void genbufs();

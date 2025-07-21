@@ -38,14 +38,14 @@ struct TypeDag {
     template<typename T>
     void push() {
         auto [tid, inserted] = typeSystem.insert<T>();
-        if (tid.value >= graph.length())
-            graph.resize(tid.value + 1);
+        if (tid.id >= graph.length())
+            graph.resize(tid.id + 1);
 
         // Connect Dep -> T
-        TypeList::for_each<Dependencies<T>>::template apply<DepLinker>(tid.value, *this);
+        TypeList::for_each<Dependencies<T>>::template apply<DepLinker>(tid.id, *this);
 
         // Connect T -> Dependee
-        TypeList::for_each<Dependees<T>>::template apply<DependeeLinker>(tid.value, *this);
+        TypeList::for_each<Dependees<T>>::template apply<DependeeLinker>(tid.id, *this);
     }
 
 private:
@@ -55,7 +55,7 @@ private:
         static void call(size_t target, TypeDag& sys) {
             auto maybe = sys.typeSystem.find<Dep>();
             if (!maybe) return;
-            size_t from = maybe.value();
+            size_t from = maybe.id();
             if (from >= sys.graph.length())
                 sys.graph.resize(from + 1);
             sys.graph.list[from].succs.push(target); 
@@ -68,7 +68,7 @@ private:
         static void call(size_t source, TypeDag& sys) {
             auto maybe = sys.typeSystem.find<Dep>();
             if (!maybe) return;
-            size_t to = maybe.value();
+            size_t to = maybe.id();
             if (to >= sys.graph.length())
                 sys.graph.resize(to + 1);
             sys.graph.list[source].succs.push(to); // Use `succs`

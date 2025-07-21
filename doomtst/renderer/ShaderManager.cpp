@@ -3,7 +3,7 @@
 
 void Shaders::ShaderManager::Compile(const std::string& name, const char* vert, const char* frag)
 {
-        size_t handle = get_handle(name).value;
+        size_t handle = get_handle(name).id;
         if (handle<shaderlist.length)
         {
             throw std::logic_error("shaders are unable to have the same Name");
@@ -24,9 +24,9 @@ Ids::Id Shaders::ShaderManager::get_handle(std::string Name)
 
 shader& Shaders::ShaderManager::get_shader(Ids::Id handle)
 {
-    if (shaderlist.length<handle.value)
+    if (shaderlist.length<handle.id)
     {
         throw std::out_of_range("Requested Shader does not exist");
     }
-    return shaderlist[handle.value];
+    return shaderlist[handle.id];
 }

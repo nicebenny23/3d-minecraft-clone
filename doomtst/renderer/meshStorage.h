@@ -2,33 +2,30 @@
 #include "Mesh.h"
 #include "VertexObjectManager.h"
 #pragma once
+
 namespace Meshes {
-	extern struct Renderer;
-	struct meshId {
-		size_t id;
-		bool operator ==(const meshId oth) const{
-			return id == oth.id;
-		}
-		bool operator !=(const meshId oth) const {
-			return id != oth.id;
-		}
-		explicit meshId(size_t Id):id(Id) {};
-	};
+	
 	struct MeshRegistry {
-		Renderer* ren;
+		MeshRegistry(VObjMan::VObjManager* manager):man(manager) {
+
+		}
+		MeshRegistry() {
+
+		}
+	
 		VObjMan::VObjManager* man;
 		Sparse::KeySet<Mesh> meshes;
 		stn::array<size_t> free;
-		void remove(meshId& handle) {
+		void remove(Ids::Id& handle) {
 			auto& to_destroy = meshes[handle.id];
 			man->Destroy(&to_destroy.Vbo);
 			man->Destroy(&to_destroy.Ibo);
 			man->Destroy(&to_destroy.Voa);
 			meshes.erase_key(handle.id);
 			free.push(handle.id);
-			handle.id = -1;
+			handle= Ids::None;
 		}
-		meshId create() {
+		Ids::Id create() {
 			if (free.length==0)
 			{
 				free.push(meshes.length());
@@ -40,9 +37,9 @@ namespace Meshes {
 			man->Create(&new_mesh.Voa);
 			new_mesh.BuffersGenerated = true;
 			meshes.push(id, new_mesh);
-			return meshId{ id };
+			return Ids::Id(id);
 		}
-		Mesh& operator[] (meshId key) {
+		Mesh& operator[](Ids::Id key) {
 			return meshes[key.id];
 		}
 	};

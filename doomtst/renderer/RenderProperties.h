@@ -80,16 +80,16 @@ public:
 
 
 
-    const size_t get_id(const std::string& name) const {
+    const Ids::Id get_id(const std::string& name) const {
 
         if (!Has(name)) {
             throw std::runtime_error("RenderType not found: " + name);
         }
-        return string_to_id.at(name);
+        return Ids::Id(string_to_id.at(name));
     }
-    const Material& get_material(const size_t id) const {
+    const Material& get_material(const Ids::Id id) const {
 
-        return materials[id];
+        return materials[id.id];
     }
     // Clear all stored RenderTypes
     void Clear() {
