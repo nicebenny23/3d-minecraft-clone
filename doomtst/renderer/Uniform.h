@@ -18,8 +18,7 @@ namespace uniforms{
         uform_vec4,
         uform_mat3,
         uform_mat4,
-        uform_texarr,
-        uform_tex2d
+        uform_tex,
     };
 
     using uniform_val = std::variant<
@@ -31,8 +30,7 @@ namespace uniforms{
         glm::vec4,      // 5
         glm::mat3,      // 6
         glm::mat4,      // 7
-        TextureArray*,  // 8
-        Texture2D*      // 9
+        Ids::Id         // texture
     >;
 
     struct uniform_ref {

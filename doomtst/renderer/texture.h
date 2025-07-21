@@ -20,12 +20,12 @@ struct ITexture
 	TextureType type;
 	ITexture() {
 		type = TextureNull;
-		id = -1;
+		id = 0;
 		Name="";
 	};
 	std::string Name;
-private:
-	virtual void apply();
+
+	virtual void apply() const;
 	virtual void destroy();
 	friend class TextureManager::TextureManager;
 };
@@ -33,8 +33,8 @@ struct Texture2D:ITexture
 {	Texture2D();
 	v2::Coord2 size;
 
-	void apply() override;
-	void destroy();
+	void apply() const override;
+	void destroy() override;
 	Texture2D(const char* file, const char* name);
 	
 };
@@ -44,7 +44,7 @@ struct TextureArray:ITexture
 	int length;
 	v2::Coord2 size;
 
-	void apply() override;
+	void apply() const override;
 	void destroy() override;
 	TextureArray(array<const char*>& textures, const char* name);
 	

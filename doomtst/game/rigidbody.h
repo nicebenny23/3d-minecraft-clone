@@ -54,12 +54,17 @@ struct rigidbody : gameobject::component {
     }
 
     // Integrate the acceleration to update velocity and position
+    //should definitly clamp
     void integrate() {
         float deltaTime = CtxName::ctx.Time->dt;
         velocity += acceleration * deltaTime;
         if (isonground)
         {
             velocity.y *= 1-deltaTime*10;
+        }
+        if (mag(velocity)>1000)
+        {
+            int l = 1;
         }
         if (gravityscale!=0)
         {

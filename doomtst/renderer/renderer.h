@@ -82,12 +82,14 @@ namespace renderer {
 
 		}
 	};
-	struct aspect_ratio {};
+	
 	struct Renderer {
-		Renderer();
+		void Bind_Texture(Ids::Id Handle) {
+			context.Bind( Textures.get_texture(Handle));
 
-//		Sparse::SparseSet<renderable> renderables;
-		
+		}
+		Renderer();
+		void InitilizeBaseMaterials();	
 		RenderContext::Context context;
 		MaterialManager Modes;
 		Material properties;
@@ -96,10 +98,11 @@ namespace renderer {
 		
 		template<typename val_type>
 		void set_uniform(const char* name,const val_type& val) {
-			uniform_man.set(name,uniforms::uniform_val(val));
+		
+			uniform_man.set(name,uniforms::uniform_val{val});
 
 		}
-
+		void apply_uniform(uniforms::uniform_ref uform, const char* location_in_shader);
 		template <typename... Args>
 		void Construct(const char* name, const char* shade,  RenderProperties props,Args&&...args) {
 			 Modes.Construct(name,shade,props, std::forward<Args>(args)...);
@@ -121,7 +124,7 @@ namespace renderer {
 		void SetUniform(const std::string& name, const glm::vec3& vec);
 		void SetUniform(const std::string& name, const glm::vec4& vec);
 		void SetUniformMat4(const std::string& name, const glm::mat4& mat);
-
+		void bind_material(size_t material);
 		meshId gen() {
 
 
@@ -160,13 +163,10 @@ namespace renderer {
 		void Render(Mesh* mesh);
 		void Render(Mesh* mesh, stn::array<float>& pointlist);
 		void Render(Mesh* mesh, stn::array<float>& pointlist, stn::array<unsigned int>& indicelist);
-		
-
 		void FillVertexBuffer(Mesh* mesh, stn::array<float>& pointlist);
-
 		void setviewmatrix(glm::mat4 viewmat);
 		void setprojmatrix(float newfov, float nearclipplane, float farclipplane);
-		glm::mat4 proj, view;
+	
 
 		float fov;
 	};

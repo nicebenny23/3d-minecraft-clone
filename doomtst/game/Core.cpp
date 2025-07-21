@@ -96,6 +96,7 @@ namespace Core {
 
     void Engine::InitRenderer()
     {
+        ren.InitilizeBaseMaterials();
         ctx->Ren = &ren;
     }
    

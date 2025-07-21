@@ -238,6 +238,10 @@ void collision::handleCollisionWithGrid(Collider& entity)
 
 			if (mag(force) > mag(minforce) || mag(minforce) == 0)
 			{
+				if (mag(force)>10000)
+				{
+					int l = 1;
+				}
 				minblock = blklist[ind];
 				minforce = force;
 			}

@@ -84,7 +84,30 @@ namespace renderer {
     }
 
     
-   
+    void Renderer::InitilizeBaseMaterials()
+    {
+        Shaders.Compile("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs");
+        Construct("Ui", "UiShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+            uniforms::uparam("aspect_ratio", "aspectratio")
+        );
+
+        Shaders.Compile("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs");
+        Construct("Model", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+            uniforms::uparam("aspect_ratio", "aspectratio"),
+            uniforms::uparam("proj_matrix", "projection"),
+            uniforms::uparam("view_matrix", "view_matrix")
+        );
+
+        Shaders.Compile("ParticleShader", "shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
+        Construct("Particle", "ParticleShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+
+        Shaders.Compile("TextShader", "shaders\\textvertex.vs", "shaders\\textfragment.vs");
+        Construct("Text", "TextShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+            uniforms::uparam("aspect_ratio", "aspectratio")
+        );
+
+        set_uniform("aspect_ratio", CtxName::ctx.Window->AspectRatio());
+    }
  
    
 
@@ -92,32 +115,9 @@ namespace renderer {
     {
         Modes = MaterialManager(&Shaders,&uniform_man);
         fov = 90;
-        view = glm::mat4(0);
-        setprojmatrix(90, .21f, 100);
-        Shaders.Compile("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs");
-        Construct("Ui", "UiShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-        uniforms::uparam("aspect_ratio","aspectratio")
-        );
-           
-        Shaders.Compile("ModelShader","shaders\\modelvertex.vs", "shaders\\modelfragment.vs");
-        Construct("Model", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-        uniforms::uparam("aspect_ratio","aspectratio"),
-            uniforms::uparam("proj_matrix","projection"),
-        uniforms::uparam("view_matrix","view_matrix")
-        );
-
-        Shaders.Compile("ParticleShader","shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
-        Construct("Particle", "ParticleShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
         
-        Shaders.Compile("TextShader","shaders\\textvertex.vs", "shaders\\textfragment.vs");
-        Construct("Text", "TextShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-        uniforms::uparam("aspect_ratio","aspectratio")
-        );
-
-        set_uniform("aspect_ratio",CtxName::ctx.Window->AspectRatio());
-        context = RenderContext::Context(&uniform_man);
-       
-              
+        setprojmatrix(90, .21f, 100);
+           
    
     }
 
@@ -139,8 +139,59 @@ namespace renderer {
     void Renderer::SetType(std::string Name)
     {
 
-        context.bind(&Modes.get_material(Modes.get_id(Name)), this);
+        bind_material(Modes.get_id(Name));
+
     }
+    void Renderer::bind_material(size_t material)
+    {
+        const Material& mat = Modes.get_material(material);
+        context.Bind(Shaders.get_shader(mat.shader));
+        for (const auto& elem : mat.handles)
+        {
+            apply_uniform(elem, elem.name);
+        }
+        context.bind_properties(mat.prop);
+    }
+    void Renderer::apply_uniform(uniforms::uniform_ref uform, const char* location_in_shader)
+    {
+        uniforms::uniform_val val = uniform_man.get(uform);
+
+        switch (val.index()) {
+        case uniforms::uform_int:
+            context.bound_shader().setint(std::get<int>(val), location_in_shader);
+            break;
+        case uniforms::uform_float:
+            context.bound_shader().setf(std::get<float>(val), location_in_shader);
+            break;
+        case uniforms::uform_gluint:
+            context.bound_shader().setuint(std::get<unsigned int>(val), location_in_shader);
+            break;
+        case uniforms::uform_vec2:
+            context.bound_shader().SetVector2f(std::get<glm::vec2>(val), location_in_shader);
+            break;
+        case uniforms::uform_vec3:
+            context.bound_shader().SetVector3f(std::get<glm::vec3>(val), location_in_shader);
+            break;
+        case uniforms::uform_vec4:
+            context.bound_shader().SetVector4f(std::get<glm::vec4>(val), location_in_shader);
+            break;
+        case uniforms::uform_mat3:
+            context.bound_shader().setMat3(std::get<glm::mat3>(val), location_in_shader);
+            break;
+        case uniforms::uform_mat4:
+            context.bound_shader().setMat4(std::get<glm::mat4>(val), location_in_shader);
+            break;
+        case uniforms::uform_tex:
+            Textures.get_texture(std::get<Ids::Id>(val)).apply();
+            break;
+        default:
+            throw std::logic_error("Invalid uniform paramater");
+            break;
+        }
+    }
+
+  
+
 
   
 

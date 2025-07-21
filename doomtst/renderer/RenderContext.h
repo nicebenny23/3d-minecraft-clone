@@ -4,6 +4,7 @@
 #include "shader.h"
 #include "../Resources/ResourceManager.h"
 #include "RenderProperties.h"
+#include "ShaderManager.h"
 #pragma once
 namespace renderer {
 	struct Renderer;
@@ -41,10 +42,13 @@ namespace RenderContext{
 		VaoName::Vao* Get_BoundVao() {
 			return BoundVao;
 		}
-		void bind(const Material* mat, renderer::Renderer* renderer);
-		void apply(uniforms::uniform_ref uform,const char* name);
-		Context() {};
-		Context(uniforms::UniformManager* uniform_manager) :form_man(uniform_manager) {};
+		shader& bound_shader() {
+
+			return *BoundShader;
+		}
+		void bind_properties(const RenderProperties& props);
+		Context() {}
+	
 	private:
 		const Material * material;
 		shader* BoundShader;
@@ -52,7 +56,7 @@ namespace RenderContext{
 		buffer_object::Ebo* BoundEbo;
 		buffer_object::Vbo* BoundVbo;
 		VaoName::Vao* BoundVao;
-		uniforms::UniformManager* form_man;
+	
 
 	};
 

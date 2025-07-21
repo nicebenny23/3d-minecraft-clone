@@ -107,7 +107,7 @@ void particleemiter::renderparticles()
 	for (int i = 0; i < particlearray.length; i++)
 	{
 
-		if (particlearray[i].GenId !=Ids::None)
+		if (particlearray[i].GenId !=Ids::NoneG)
 		{
 			CtxName::ctx.Ren->CurrentShader()->SetVector3f(particlearray[i].transform().position.glm(), "offset");
 			CtxName::ctx.Ren->CurrentShader()->SetVector3f(particlearray[i].transform().scale.glm(), "scale");

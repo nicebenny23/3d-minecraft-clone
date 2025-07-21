@@ -147,13 +147,20 @@ void gridutil::emitlight()
 //removes a block from the grid whilst still keeping it in the work
 gameobject::obj gridutil::dislocate(gameobject::obj blk)
 {
-
-	auto position = blk.getcomponent<block>().pos;
-	blk.removecomponent<block>();
+	auto& blk_comp = blk.getcomponent<block>();
+	
+	auto position = blk_comp.pos;
 	gameobject::obj& to_flip = *CtxName::ctx.Grid->getObject(position);
 	CtxName::ctx.OC->InitializeEntity(to_flip);
-	setdefault(to_flip.addcomponent<block>());
+
+	to_flip.addcomponent<block>()->create(position, minecraftair, blk_comp.mesh.attachdir, blk_comp.mesh.direction);
+	setdefault(&to_flip.getcomponent<block>());
+	blk.removecomponent<block>();
 	return blk;
+}
+void gridutil::set_air(gameobject::obj blk)
+{
+	dislocate(blk).destroy();
 }
 void collect_if_light(std::tuple<blockname::block*> block, std::mutex& push_mutex) {
 	auto& [blk] = block;
@@ -265,7 +272,8 @@ void gridutil::setblock(Coord loc, int blockid)
 
 			int prevemit = CtxName::ctx.Grid->getBlock(loc)->emitedlight;
 			CtxName::ctx.Grid->GetChunk(loc)->modified = true;
-			blkinitname::setair(location);
+			set_air(location->owner);
+			location = CtxName::ctx.Grid->getBlock(loc);
 			location->id = blockid;
 			blkinitname::blockinit(location);
 			blockchangecoverupdate(location);

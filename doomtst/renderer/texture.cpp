@@ -78,19 +78,19 @@ TextureArray::TextureArray( array<const char*>& textures, const char* name)
 	settextureparams(GL_TEXTURE_2D_ARRAY);
 }
 
-void TextureArray::apply()
+void TextureArray::apply() const
 {
 	glBindTexture(GL_TEXTURE_2D_ARRAY, id);
 }
 
 void TextureArray::destroy()
 {
-	if (id == -1)
+	if (id == 0)
 	{
 		throw std::logic_error("cant delete invalid texture");
 	}
 	glDeleteTextures(1, &id);
-	id = -1;
+	id = 0;
 }
 
 Texture2D::Texture2D() {
@@ -100,9 +100,9 @@ Texture2D::Texture2D() {
 }
 
 
-void Texture2D::apply() 
+void Texture2D::apply() const
 {
-	if (id==-1)
+	if (id==0)
 	{
 		throw std::logic_error("cant apply invalid texture");
 	}
@@ -110,15 +110,15 @@ void Texture2D::apply()
 }
 void Texture2D::destroy()
 {
-	if (id == -1)
+	if (id == 0)
 	{
-		throw std::logic_error("cant Delete Invalit Texture");
+		throw std::logic_error("cant Delete Invalid Texture");
 	}
 	glDeleteTextures(1, &id);
-	id = -1;
+	id = 0;
 }
 
-void ITexture::apply() {
+void ITexture::apply() const{
 }
 
 void ITexture::destroy()

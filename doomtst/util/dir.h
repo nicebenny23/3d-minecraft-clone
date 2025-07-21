@@ -88,22 +88,14 @@ namespace Dir {
 	static constexpr Dir3d  back3d = Dir3d(Ind3d::Back);   // (0, 0, -1)
 	static constexpr Dir3d  None3d = Dir3d(Ind3d::None);   // (0, 0, -1)
 	static constexpr  stn::List<Dir3d, 6> Directions3d= { right3d,left3d,up3d,down3d,front3d,back3d };
-	enum dir2d
-	{
-		west2d = 0,
-		east2d = 1,
-
-		front2d = 4,
-		back2d = 5,
-	};
 	inline Dir3d Align(v3::Vec3 point) {
 
 
 		float max = Max(abs(point.x), abs(point.y), abs(point.z));
-		int ind=0;
+		int ind = 0;
 		if (abs(point.x) == max)
 		{
-			ind =((1 - sign(point.x)) / 2);
+			ind = ((1 - sign(point.x)) / 2);
 		}
 		if (abs(point.y) == max)
 		{
@@ -113,8 +105,9 @@ namespace Dir {
 		{
 			ind = 4 + ((1 - sign(point.z)) / 2);
 		}
-return Dir3d(static_cast<char>(ind));
+		return Dir3d(static_cast<char>(ind));
 	}
+	
 	inline int max2ddirection(v3::Vec3 point) {
 
 
@@ -126,7 +119,99 @@ return Dir3d(static_cast<char>(ind));
 
 		if (abs(point.z) == max)
 		{
-			return 4 + (1 - sign(point.z)) / 2;
+			return 2 + (1 - sign(point.z)) / 2;
 		}
+	}
+	
+	enum class Ind2d : char {
+		Right = 0,
+		Left = 1,
+		Up = 2,
+		Down = 3,
+		None = 4
+	};
+
+	struct Dir2d {
+	private:
+		Ind2d dir;
+
+	public:
+		// Default constructor (None)
+		constexpr Dir2d() : dir(Ind2d::None) {}
+
+		// Constructor from enum
+		constexpr Dir2d(Ind2d d) noexcept : dir(d) {}
+
+		// Constructor from char with validation
+		explicit Dir2d(char direction) {
+			if (direction >= static_cast<char>(Ind2d::None)) {
+				throw std::invalid_argument("Invalid Dir2d: " + ((int)direction));
+			}
+			dir = static_cast<Ind2d>(direction);
+		}
+
+		// Get underlying char index
+		constexpr char ind() const {
+			if (dir == Ind2d::None) {
+				throw std::logic_error("Invalid direction");
+			}
+			return static_cast<char>(dir);
+		}
+
+		// Inverse direction: swaps 0↔1, 2↔3
+		Dir2d Inv() const {
+			if (dir == Ind2d::None) {
+				throw std::invalid_argument("Attempted to access invalid direction");
+			}
+			return Dir2d(static_cast<Ind2d>(static_cast<char>(dir) ^ 1));
+		}
+
+		// Convert to vector (assuming v2::Coord exists similar to v3::Coord)
+		v2::Coord2 ToVec() const {
+			switch (dir) {
+			case Ind2d::Right:
+				return v2::Coord2(1,0);  // (1, 0)
+			case Ind2d::Left:
+				return v2::Coord2(-1, 0);   // (-1, 0)
+			case Ind2d::Up:
+				return v2::Coord2(0, 1);     // (0, 1)
+			case Ind2d::Down:
+				return v2::Coord2(0, -1);   // (0, -1)
+			case Ind2d::None:
+				throw std::invalid_argument("Attempted to access invalid direction");
+			}
+			// Just to suppress compiler warnings (unreachable)
+			return v2::Coord2(0, 0);
+		}
+
+		constexpr bool operator==(const Dir2d& other) const noexcept {
+			return dir == other.dir;
+		}
+
+		constexpr bool operator!=(const Dir2d& other) const noexcept {
+			return !(*this == other);
+		}
+	};
+
+	// Direction constants
+	static constexpr Dir2d right2d = Dir2d(Ind2d::Right);  // (1, 0)
+	static constexpr Dir2d left2d = Dir2d(Ind2d::Left);    // (-1, 0)
+	static constexpr Dir2d up2d = Dir2d(Ind2d::Up);        // (0, 1)
+	static constexpr Dir2d down2d = Dir2d(Ind2d::Down);    // (0, -1)
+	static constexpr Dir2d None2d = Dir2d(Ind2d::None);    // none
+
+	static constexpr stn::List<Dir2d, 4> Directions2d = { right2d, left2d, up2d, down2d };
+
+	inline Dir2d Align2d(v2::Vec2 point) {
+		float max_val = std::max(std::abs(point.x), std::abs(point.y));
+		int ind = 0;
+
+		if (std::abs(point.x) == max_val) {
+			ind = ((1 - sign(point.x)) / 2); // 0 if positive (Right), 1 if negative (Left)
+		}
+		if (std::abs(point.y) == max_val) {
+			ind = 2 + ((1 - sign(point.y)) / 2); // 2 if positive (Up), 3 if negative (Down)
+		}
+		return Dir2d(static_cast<char>(ind));
 	}
 }

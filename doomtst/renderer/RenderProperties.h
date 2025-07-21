@@ -41,10 +41,10 @@ struct Material {
     std::string Name;
     RenderProperties prop;
     array<uniforms::uniform_ref> handles;
-    shader* shade = nullptr;
+    Ids::Id shader;
     // Default constructor
-    Material() : Name(""), shade() {}
-        Material(const std::string& name, shader* shade, const RenderProperties& props = {}): Name(name), shade(shade), prop(props){}
+    Material() : Name(""), shader() {}
+        Material(const std::string& name, Ids::Id shader_handle, const RenderProperties& props = {}): Name(name), shader(shader_handle), prop(props){}
 };
 
 class MaterialManager {
@@ -67,7 +67,7 @@ public:
             throw std::runtime_error("RenderType Already Created: " + name);
         }
 
-        auto val = Material(name, &(*shader_man)[shade], props);
+        auto val = Material(name, (*shader_man).get_handle(shade), props);
         (evaluate_uniform_paramater(val, std::forward<Args>(args)), ...);
         string_to_id[val.Name] = string_to_id.size();
         materials.push(val);

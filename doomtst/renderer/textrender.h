@@ -7,7 +7,7 @@
 #pragma once
 
 
-extern TextureArray* textarray;
+extern Ids::Id textarray;
 void inittextarray();
 const v2::Vec2 cubeuv[] = {
 	v2::Vec2(0, 1),

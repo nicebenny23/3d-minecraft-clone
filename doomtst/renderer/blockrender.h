@@ -2,9 +2,6 @@
 #include "../util/algorthm.h"
 #pragma once 
 namespace blockrender {
-	void setrendertransparent();
-	extern TextureArray* texarray;
-	void setrendersolid();
 	void renderblocks(bool transparent);
 	void initblockrendering();
 	//for final boss

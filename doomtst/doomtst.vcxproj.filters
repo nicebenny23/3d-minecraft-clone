@@ -704,9 +704,6 @@
     <ClInclude Include="renderer\RenderProperties.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="renderer\UniformManager.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="util\UniquePtr.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -843,6 +840,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="renderer\renderable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\HandleMap.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

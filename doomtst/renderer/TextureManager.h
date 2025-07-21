@@ -1,5 +1,7 @@
 #include "texture.h"
+#include "../util/Id.h"
 #include <unordered_map>
+#include "HandleMap.h"
 #pragma once
 
 namespace TextureManager {
@@ -10,12 +12,15 @@ namespace TextureManager {
 
 
 		}
-		std::unordered_map<std::string, ITexture*> TextureList;
-	
-		Texture2D* Get2dTex(const char* File, const std::string& name);
-		TextureArray* GetTexArray(array<const char*>& File, const std::string& name);
-		ITexture* LoadTextureArray(array<const char*>& FileList, const std::string& name);
-		ITexture* LoadTexture(const char* File, const std::string& name);
+		handle::HandleMap<ITexture*> texture_list;
+		Ids::Id get_handle(std::string Name) {
+			return texture_list.get_handle(Name);
+		}
+		ITexture& get_texture(Ids::Id handle) {
+			return *texture_list.get_elem(handle);
+		}
+		Ids::Id LoadTextureArray(array<const char*>& FileList, const std::string& name);
+		Ids::Id LoadTexture(const char* File, const std::string& name);
 		
 		
 	};

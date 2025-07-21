@@ -2,7 +2,7 @@
 #include "../game/GameContext.h"
 #include "textrender.h"
 #include "renderer.h"
-TextureArray* textarray;
+Ids::Id textarray;
 integertext::integertext(v2::Vec2 textcenter, float textscale)
 {
 	center = textcenter;
@@ -39,7 +39,7 @@ void integertext::render()
 
 
 	CtxName::ctx.Ren->Gen(&text);
-	CtxName::ctx.Ren->context.Bind(*textarray);
+	CtxName::ctx.Ren->Bind_Texture(textarray);
 	CtxName::ctx.Ren->Render(&text, datbuf, indbuf);
 	datbuf.destroy();
 	indbuf.destroy();
@@ -62,7 +62,7 @@ void inittextarray()
     texlist[7] = "bitmaptext\\sevenimg.png";
     texlist[8] = "bitmaptext\\eightimg.png";
     texlist[9] = "bitmaptext\\nineimg.png";
-    textarray = CtxName::ctx.Ren->Textures.GetTexArray(texlist,"Letters");
+    textarray = CtxName::ctx.Ren->Textures.LoadTextureArray(texlist,"Letters");
    
 }
 void writeletter(geometry::Box2d location, int letter)

@@ -396,6 +396,7 @@
     <ClInclude Include="player\playermovment.h" />
     <ClInclude Include="renderer\GlUtil.h" />
     <ClInclude Include="renderer\gl_id.h" />
+    <ClInclude Include="renderer\HandleMap.h" />
     <ClInclude Include="renderer\Mesh.h" />
     <ClInclude Include="player\cameracomp.h" />
     <ClInclude Include="player\daggerthrow.h" />
@@ -423,7 +424,6 @@
     <ClInclude Include="renderer\ui.h" />
     <ClInclude Include="renderer\RenderProperties.h" />
     <ClInclude Include="renderer\Uniform.h" />
-    <ClInclude Include="renderer\UniformManager.h" />
     <ClInclude Include="renderer\vertex.h" />
     <ClInclude Include="Resources\Resource.h" />
     <ClInclude Include="Resources\ResourceManager.h" />

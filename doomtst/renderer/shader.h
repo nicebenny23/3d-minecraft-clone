@@ -32,6 +32,11 @@ struct shader
 	
 		glad_glUniform1f(uniformlocation(name), val);
 	}
+	void setint(int val, const char* name)
+	{
+
+		glad_glUniform1i(uniformlocation(name), val);
+	}
 	void setuint(unsigned int val, const char* name)
 	{
 

@@ -27,7 +27,7 @@ namespace ModelMeshName {
 		
 		void setmodeluniform(glm::mat4 model);
 
-		Texture2D* tex;
+		Ids::Id tex;
 		ModelMesh();
 	
 		Transform transform;
@@ -53,7 +53,7 @@ namespace ModelMeshName {
 
 		glm::mat4* modelmatrix;
 
-	};	ModelMesh* loadmesh(const char* name, Texture2D* TEX, Vec3 position);
+	};	ModelMesh* loadmesh(const char* name, Ids::Id tex_handle, Vec3 position);
 	void rendermesh(ModelMesh* torender);
 
 }

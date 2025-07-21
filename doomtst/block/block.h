@@ -109,7 +109,7 @@ namespace blockname {
 
 	struct blockmesh
 	{
-		char direction;
+		Dir::Dir2d direction;
 		Dir::Dir3d attachdir;
 		blockmesh() {
 
@@ -179,9 +179,9 @@ namespace blockname {
 		Vec3 center() {
 			return mesh.box.center;
 		}
-		void create(v3::Coord location, int blockid, char  blkattachface, char  blkdirection);
+		void create(v3::Coord location, int blockid, Dir::Dir3d blkattachface, Dir::Dir2d blkdirection);
 
-		block() {
+		block():mesh(){
 			utype = gameobject::updatenone;
 		};
 		 	 void createdefaultaabb(bool effector=false);

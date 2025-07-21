@@ -11,8 +11,8 @@ void model::draw()
 }
 void model::add(const char* meshname,const char * meshtexname,Vec3 pos)
 {
-		Texture2D* meshtex = CtxName::ctx.Ren->Textures.Get2dTex(meshtexname,meshtexname);
-	meshlist.push(ModelMeshName::loadmesh(meshname, meshtex, zerov));
+		 auto mesh_tex= CtxName::ctx.Ren->Textures.LoadTexture(meshtexname,meshtexname);
+	meshlist.push(ModelMeshName::loadmesh(meshname, mesh_tex, zerov));
 meshlist[meshlist.length - 1]->transform.position = pos;
 }
 model::model(meshconnecttype connectmethod )
@@ -50,7 +50,7 @@ void model::start()
 void model::setmodelshader()
 {
 
-	CtxName::ctx.Ren->context.Bind(CtxName::ctx.Ren->Shaders["ModelShader"]);
+	//toto readd CtxName::ctx.Ren->context.Bind(CtxName::ctx.Ren->Shaders["ModelShader"]);
 	CtxName::ctx.Ren->SetType("Model");
 	
 }

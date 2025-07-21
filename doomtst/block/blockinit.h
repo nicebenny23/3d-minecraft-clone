@@ -89,7 +89,7 @@ namespace blkinitname {
 	}
 	inline void genblock(block* blk, int blkid, Coord location, byte attachface, byte direction)  {
 
-		blk->create(location, blkid,attachface,direction);
+		blk->create(location, blkid,Dir::Dir3d(attachface),Dir::Dir2d(direction));
 
 
 		blkinitname::blockinit(blk);

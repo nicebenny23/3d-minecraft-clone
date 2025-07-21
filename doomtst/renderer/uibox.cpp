@@ -54,7 +54,7 @@ namespace uiboxname {
 	uibox::uibox(uibox& toreplace)
 	{
 		id = toreplace.id;
-		tex = toreplace.tex;
+		tex_handle = toreplace.tex_handle;
 		box = toreplace.box;
 
 		ui::uielemlist[id].set<uibox>(*new cptr<uibox>(this));
@@ -82,7 +82,7 @@ namespace uiboxname {
 			CtxName::ctx.Ren->Gen(&BoxMesh);
 			BoxMesh.Voa.attributes.push<float, 2>().push<float, 2>();
 			array<float> databuf = array<float>();
-			CtxName::ctx.Ren->context.Bind(*tex);
+			CtxName::ctx.Ren->Bind_Texture(tex_handle);
 			for (int j = 0; j < 4; j++)
 			{
 				v2::Vec2 pos = box.center + offset[j] * (box.scale);
@@ -107,7 +107,7 @@ namespace uiboxname {
 
 	void uibox::LoadTex(const char* texloc, const char* texture)
 	{
-		tex = CtxName::ctx.Ren->Textures.Get2dTex(texloc, texture);
+		tex_handle = CtxName::ctx.Ren->Textures.LoadTexture(texloc, texture);
 
 	}
 

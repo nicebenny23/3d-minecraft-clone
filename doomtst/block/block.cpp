@@ -23,27 +23,28 @@ void blockmesh::setfaces(int leftface, int rightface, int upface, int downface, 
 	faces[2].create(upface, 2, this);
 	faces[3].create(downface, 3, this);
 
-	switch (blk->mesh.direction)
+	switch (Dir::Ind2d(direction.ind()))
 	{
-	case Dir::dir2d::west2d:
+		
+	case Dir::Ind2d::Left://west
 		faces[0].create(frontface, 0, this);
 		faces[1].create(backface, 1, this);
 		faces[4].create(rightface, 4, this);
 		faces[5].create(leftface, 5, this);
 		break;
-	case Dir::dir2d::east2d:
+	case  Dir::Ind2d::Right://east
 		faces[0].create(backface, 0, this);
 		faces[1].create(frontface, 1, this);
 		faces[4].create(leftface, 4, this);
 		faces[5].create(rightface, 5, this);
 		break;
-	case Dir::dir2d::front2d:
+	case Dir::Ind2d::Up ://block faces fowards
 		faces[0].create(leftface, 0, this);
 		faces[1].create(rightface, 1, this);
 		faces[4].create(frontface, 4, this);
 		faces[5].create(backface, 5, this);
 		break;
-	case Dir::dir2d::back2d:
+		case Dir::Ind2d::Down ://block faces backwords
 		faces[0].create(rightface, 0, this);
 		faces[1].create(leftface, 1, this);
 		faces[4].create(backface, 4, this);
@@ -87,7 +88,8 @@ face& blockname::block::operator[](size_t index)
 blockname::blockmesh::blockmesh(block* parent, Vec3 blkscale)
 {
 	blk = parent;
-	
+	direction = Dir::up2d;
+	attachdir = Dir::front3d;
 
 	box.scale = blkscale;
 
@@ -97,7 +99,7 @@ blockname::blockmesh::blockmesh(block* parent, Vec3 blkscale)
 
 }
 
-void blockname::block::create(v3::Coord location, int blockid, char blkattachface, char blkdirection)
+void blockname::block::create(v3::Coord location, int blockid, Dir::Dir3d blkattachface, Dir::Dir2d blkdirection)
 {
 
 	emitedlight = 0;
@@ -112,8 +114,13 @@ void blockname::block::create(v3::Coord location, int blockid, char blkattachfac
 	attributes.solid = true;
 
 	mesh = blockname::blockmesh(this, blockscale);
-	mesh.direction = (blkdirection);
-	mesh.attachdir =Dir::Dir3d( blkattachface);
+	mesh.direction = blkdirection;
+
+	if (mesh.direction.ind())
+	{
+
+	}
+	mesh.attachdir = blkattachface;
 }
 
 void blockname::block::createdefaultaabb(bool effector)

@@ -524,7 +524,7 @@ namespace gameobject {
 		verify_component<T>();
 
 
-		comp::GenId comp_id = component_indexer.get<T>();
+		comp::Id comp_id = component_indexer.get<T>();
 
 		component* comp= comp_storage[comp_id.value][object];
 		if (comp==nullptr)

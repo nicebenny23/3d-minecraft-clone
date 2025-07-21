@@ -31,21 +31,12 @@ namespace Ids {
 		}
 	};
 
-	struct IdHash{
-		size_t operator()(const GenId& id) const noexcept {
-
-			return std::hash<size_t>{}((size_t(id.gen)<<32)+id.id);
-		}
-	};
-
-
 
 	
 	struct Id {
 		uint32_t value;
 
 		constexpr explicit Id(uint32_t val = none_id) : value(val) {}
-
 		constexpr bool inline valid() const { return value != none_id; }
 		constexpr bool operator==(const Id& other) const { return value == other.value; }
 		constexpr bool operator!=(const Id& other) const { return value != other.value; }

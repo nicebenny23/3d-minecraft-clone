@@ -17,7 +17,7 @@ namespace uiboxname {
 	struct uibox:ui::uielement
 	{
 		uibox() = default;
-		Texture2D* tex;
+		Ids::Id tex_handle;
 		geometry::Box2d box;
 		void update();
 		bool mouseonblock();

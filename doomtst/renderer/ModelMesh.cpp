@@ -32,13 +32,13 @@ v2::Vec2 ModelMesh::nthtex(int i)
 	return texcoords[texindices[i] - 1];
 }
 
-ModelMesh* ModelMeshName::loadmesh(const char* name, Texture2D* TEX, Vec3 position)
+ModelMesh* ModelMeshName::loadmesh(const char* name, Ids::Id tex_handle, Vec3 position)
 {
 
 	ModelMesh* newmesh = new ModelMesh();
 	safefile meshfile = safefile(name, fileread);
 	newmesh->pos = position;
-	newmesh->tex = TEX;
+	newmesh->tex = tex_handle;
 	newmesh->setvobjs();
 	while (true)
 	{
@@ -84,7 +84,7 @@ ModelMesh* ModelMeshName::loadmesh(const char* name, Texture2D* TEX, Vec3 positi
 
 void ModelMeshName::rendermesh(ModelMesh* torender)
 {
-	CtxName::ctx.Ren->context.Bind(*torender->tex);
+	CtxName::ctx.Ren->Bind_Texture(torender->tex);
 	
 	array<float> databuf;
 

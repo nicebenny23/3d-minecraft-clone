@@ -30,7 +30,6 @@ const float cubeuv[] = {
 	0, 1,
 	1, 1
 };
-TextureArray* blockrender::texarray;
 // Check if a chunk is viewable within the camera's frustum
 bool chunkviewable(Chunk::chunk* chk) {
 	return true;
@@ -211,23 +210,11 @@ void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 		indbuf.destroy();
 	}
 }
-void blockrender::setrendertransparent()
-{
 
-	CtxName::ctx.Ren->SetType("TransparentBlock");
-	
-}
-
-void blockrender::setrendersolid()
-{
-	CtxName::ctx.Ren->SetType("SolidBlock");
-
-	
-}
 
 // Initialize the data buffer and render chunks
 void blockrender::renderblocks(bool rendertransparent) {
-	CtxName::ctx.Ren->context.Bind(CtxName::ctx.Ren->Shaders["BlockShader"]);
+	//CtxName::ctx.Ren->context.Bind(CtxName::ctx.Ren->Shaders["BlockShader"]);
 
 	array<Chunk::chunk*> tosort = array<Chunk::chunk*>();
 
@@ -262,9 +249,9 @@ void blockrender::renderblocks(bool rendertransparent) {
 		std::stable_sort(tosort.begin(), tosort.end(), [](Chunk::chunk* a, Chunk::chunk* b) {
 			return (*a) < (*b);
 			});
-	}
-	setrendersolid();
-	int renderamt = 0;
+	}	
+		CtxName::ctx.Ren->SetType("SolidBlock");
+		int renderamt = 0;
 		for (int i = 0; i < tosort.length; i++) {
 		
 				renderamt++;
@@ -273,8 +260,7 @@ void blockrender::renderblocks(bool rendertransparent) {
 		}
  		
 	
-
-		setrendertransparent();
+		CtxName::ctx.Ren->SetType("TransparentBlock");
 		for (int i = 0; i < tosort.length; i++) {
 		
 				renderchunk(*tosort[i]->mesh, true);
@@ -335,9 +321,9 @@ void blockrender::initblockrendering()
 	texlist.reach(sandtex) = "images\\sand.png";
 	texlist.reach(planktex) = "images\\treestoneblock.png";
 	
-	texarray = CtxName::ctx.Ren->Textures.GetTexArray(texlist,"BlockTextures");
+	Ids::Id texarray = CtxName::ctx.Ren->Textures.LoadTextureArray(texlist,"BlockTextures");
 	
-	CtxName::ctx.Ren->context.Bind(*texarray);
+	CtxName::ctx.Ren->Bind_Texture(texarray);
 	CtxName::ctx.Ren->set_uniform("bind_block_texture",texarray);
 	enablelighting = true;
 }

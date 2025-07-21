@@ -119,7 +119,7 @@ void Chunk::chunk::write()
 	for (int i = 0; i < chunksize; i++)
 	{
 		size_t v1= blockbuf[i].getcomponent<block>().id;
-		size_t dir = blockbuf[i].getcomponent<block>().mesh.direction;
+		size_t dir = blockbuf[i].getcomponent<block>().mesh.direction.ind();
 		size_t attach = (blockbuf[i].getcomponent<block>().mesh.attachdir.ind());
 		
 		size_t v2 = dir | attach << 3;

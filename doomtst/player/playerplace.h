@@ -68,7 +68,7 @@ struct playerplace : gameobject::component
 	
 		int blockdirection = Dir::max2ddirection(camera::campos() - closest.Hit.intersectionpoint);
 
-		plamentblock->mesh.direction = blockdirection;
+		plamentblock->mesh.direction = Dir::Dir2d(blockdirection);
 		plamentblock->mesh.attachdir = dir;
 		Box newblockbox = Box(plamentblock->center(), blockscale);
 		bool collides = collision::boxCollidesWithEntity(newblockbox,collision::HitQuery());
