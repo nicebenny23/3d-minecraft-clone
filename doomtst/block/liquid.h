@@ -86,7 +86,7 @@ struct liquidprop : gameobject::component {
 		gridutil::setblock(pos, objutil::toblk(owner).id);
 		blk = (CtxName::ctx.GridRef().getBlock(pos));
 
-		if (blk->owner.hascomponent<liquidprop>())
+		if (!blk->owner.hascomponent<liquidprop>())
 		{
 			Assert("block must be inititated with liquid component");
 		}

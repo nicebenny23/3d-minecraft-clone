@@ -26,7 +26,7 @@ struct CameraComp : gameobject::component
 		owner.transform().yaw=wrap_angle(owner.transform().yaw);
 
 		owner.transform().pitch = wrap_to_range(owner.transform().pitch,-90,90);
-		CtxName::ctx.Ren->setviewmatrix(LookAt(owner.transform()));
+		CtxName::ctx.Ren->set_uniform("view_matrix", LookAt(owner.transform()));
 		
 		CamTransform = owner.transform();
 

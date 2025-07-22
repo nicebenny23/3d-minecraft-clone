@@ -101,10 +101,7 @@ namespace renderer {
         Shaders.Compile("ParticleShader", "shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
         Construct("Particle", "ParticleShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-        Shaders.Compile("TextShader", "shaders\\textvertex.vs", "shaders\\textfragment.vs");
-        Construct("Text", "TextShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-            uniforms::uparam("aspect_ratio", "aspectratio")
-        );
+        
         meshes = Meshes::MeshRegistry(&Binders);
         set_uniform("aspect_ratio", CtxName::ctx.Window->AspectRatio());
     }
@@ -113,24 +110,17 @@ namespace renderer {
 
     Renderer::Renderer()
     {
-        Modes = MaterialManager(&Shaders,&uniform_man);
+        Modes = MaterialManager(&Shaders,&uniform_manager);
         fov = 90;
-        
         setprojmatrix(90, .21f, 100);
         meshes = Meshes::MeshRegistry();
-   
-    }
-
-    void Renderer::setviewmatrix(glm::mat4 viewmat)
-    {
-            set_uniform("view_matrix",viewmat);
     }
 
     void Renderer::setprojmatrix(float newfov, float nearclipplane, float farclipplane)
     {
 
         set_uniform("proj_matrix",glm::perspective(glm::radians(newfov), float(4 / 3.f), nearclipplane, farclipplane));
-        fov = newfov;
+       
         
     }
 
@@ -148,7 +138,7 @@ namespace renderer {
         context.Bind(Shaders.get_shader(mat.shader));
         for (const auto& elem : mat.handles)
         {
-            apply_uniform(uniform_man.get( elem), elem.name);
+            apply_uniform(uniform_manager.get( elem), elem.name);
         }
         context.bind_properties(mat.prop);
     }
@@ -242,9 +232,9 @@ namespace renderer {
         renderer->set_layout(id, layout);
     }
 
-    void RenderableHandle::fill(stn::array<float>&& points, stn::array<unsigned int>&& indices)
+    void RenderableHandle::fill(MeshData&& new_mesh)
     {
-        renderer->fill_cmd(id, std::move(points), std::move(indices));
+        renderer->fill_cmd(id,new_mesh);
     }
 
     void RenderableHandle::set_uniform(const uniforms::uniform& u)
@@ -257,7 +247,7 @@ namespace renderer {
         renderer->render(id);
     }
 
-    void RenderableHandle::remove()
+    void RenderableHandle::destroy()
     {
         renderer->remove(id);
     }

@@ -2,7 +2,17 @@
 #include "../game/GameContext.h"
 #include "textrender.h"
 #include "renderer.h"
-Ids::Id textarray;
+
+void integertext::set_handle()
+{
+	if (handle())
+	{
+		handle.destroy();
+	}
+	handle = CtxName::ctx.Ren->gen_renderable();
+	handle.set_material("Text");
+	handle.set_layout(vertice::vertex().push<float, 2>().push<float, 3>());
+}
 integertext::integertext(v2::Vec2 textcenter, float textscale)
 {
 	center = textcenter;
@@ -21,29 +31,18 @@ void integertext::customdestroy()
 {
 	word.clear();
 	
-
+	handle.destroy();
 }
 
-stn::array<float> datbuf;
-stn::array<unsigned int> indbuf;
 void integertext::render()
 {
-	indbuf = stn::array<unsigned int>();
-	datbuf = stn::array<float>();
-	CtxName::ctx.Ren->SetType("Text");
+	set_handle();
 	recalculateword();
 
 	write();
-	Mesh text;
-	text.Voa.attributes.push<float,2>().push<float,3>();
-
-
-	CtxName::ctx.Ren->Gen(&text);
-	CtxName::ctx.Ren->Bind_Texture(textarray);
-	CtxName::ctx.Ren->Render(&text, datbuf, indbuf);
-	datbuf.destroy();
-	indbuf.destroy();
-	CtxName::ctx.Ren->Destroy(&text);
+		
+	
+	handle.render();
 }
 
 
@@ -51,47 +50,46 @@ void inittextarray()
 {
 
     array<const char*> texlist = array<const char*>(10);
+	texlist[0] = "bitmaptext\\zeroimg.png";
+	texlist[1] = "bitmaptext\\oneimg.png";
+	texlist[2] = "bitmaptext\\twoimg.png";
+	texlist[3] = "bitmaptext\\threeimg.png";
+	texlist[4] = "bitmaptext\\fourimg.png";
+	texlist[5] = "bitmaptext\\fiveimg.png";
+	texlist[6] = "bitmaptext\\siximg.png";
+	texlist[7] = "bitmaptext\\sevenimg.png";
+	texlist[8] = "bitmaptext\\eightimg.png";
+	texlist[9] = "bitmaptext\\nineimg.png";
+	Ids::Id textarray = CtxName::ctx.Ren->Textures.LoadTextureArray(texlist, "Letters");
+	CtxName::ctx.Ren->set_uniform("letters", textarray);
+;	CtxName::ctx.Ren->Shaders.Compile("TextShader", "shaders\\textvertex.vs", "shaders\\textfragment.vs");
+	CtxName::ctx.Ren->Construct("Text", "TextShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+		uniforms::uparam("aspect_ratio", "aspectratio"),
+		uniforms::uparam("letters", "tex")
 
-    texlist[0] = "bitmaptext\\zeroimg.png";
-    texlist[1] = "bitmaptext\\oneimg.png";
-    texlist[2] = "bitmaptext\\twoimg.png";
-    texlist[3] = "bitmaptext\\threeimg.png";
-    texlist[4] = "bitmaptext\\fourimg.png";
-    texlist[5] = "bitmaptext\\fiveimg.png";
-    texlist[6] = "bitmaptext\\siximg.png";
-    texlist[7] = "bitmaptext\\sevenimg.png";
-    texlist[8] = "bitmaptext\\eightimg.png";
-    texlist[9] = "bitmaptext\\nineimg.png";
-    textarray = CtxName::ctx.Ren->Textures.LoadTextureArray(texlist,"Letters");
+	);
+ 
    
 }
-void writeletter(geometry::Box2d location, int letter)
+void writeletter(renderer::MeshData& mesh_data,geometry::Box2d location, int letter)
 {
-	const int baselocation = datbuf.length / 5;
+
+	const int baselocation = mesh_data.pointlist.length / 5;
 	for (int j = 0; j < 4; j++) {
 		// Index of unique vertex in each face
 		v2::Vec2 pointtoappend = location.scale * offset[j] + location.center;
 		// Actual location
-		datbuf.push(pointtoappend.x);
+		mesh_data.add_point(pointtoappend,cubeuv[j],letter);
 
-		datbuf.push(pointtoappend.y);
-
-		// UV coordinates
-		v2::Vec2 coords = cubeuv[j];
-		datbuf.push(coords.x);
-		datbuf.push(coords.y);
-
-		datbuf.push(letter);
 
 		
 	}	
-
-	indbuf.push( 0+baselocation);
-	indbuf.push(1+ baselocation);
-	indbuf.push(3 + baselocation);
-	indbuf.push(0 + baselocation);
-		indbuf.push(3 + baselocation);
-	indbuf.push(2 + baselocation);
+	mesh_data.add_index( 0+baselocation);
+	mesh_data.add_index(1+ baselocation);
+	mesh_data.add_index(3 + baselocation);
+	mesh_data.add_index(0 + baselocation);
+	mesh_data.add_index(3 + baselocation);
+	mesh_data.add_index(2 + baselocation);
 
 
 }
@@ -101,10 +99,13 @@ void integertext::write()
 	v2::Vec2 boxoffset = v2::Vec2(1.5, 1) * scale / 2.0;
 	v2::Vec2 increse=  v2::Vec2(1.5,0) * scale;
 	geometry::Box2d charlocation = geometry::Box2d(min+boxoffset, v2::unitv * scale);
+	renderer::MeshData mesh_data;
 	for (int i = 0; i < word.length(); i++)
 	{
-		writeletter(charlocation, int(word[i]-'0'));
+		writeletter(mesh_data,charlocation, int(word[i]-'0'));
 		charlocation.center += increse;
 	}
+	handle.fill(std::move(mesh_data));
+	CtxName::ctx.Ren->consume();
 
 }

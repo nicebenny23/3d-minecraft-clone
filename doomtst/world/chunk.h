@@ -14,10 +14,10 @@ namespace Chunk {
 		
 
 		renderer::RenderableHandle SolidGeo;
-		Mesh TransparentGeo;
+		renderer::RenderableHandle TransparentGeo;
 		//voa vertexspec;
 		void genbufs();
-		int meshsize;
+	
 		bool meshrecreateneeded;
 		chunk* aschunk;
 		array<face> facebuf;

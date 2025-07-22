@@ -50,7 +50,7 @@ struct Material {
 class MaterialManager {
 
 public:
-    MaterialManager(Shaders::ShaderManager* shader_manager, uniforms::UniformManager* uniform_manager) :shader_man(shader_manager), uniform_man(uniform_manager) {
+    MaterialManager(Shaders::ShaderManager* shader_manager, uniforms::UniformManager* uniform_manager) :shader_man(shader_manager), uniform_manager(uniform_manager) {
     }
     MaterialManager() {
     }
@@ -75,7 +75,7 @@ public:
     }
 
     void evaluate_uniform_paramater(Material& mat, util::pair<const char*,const char*> uniform_ref) {
-        mat.handles.push(uniforms::uniform_ref( uniform_man->get_handle(uniform_ref.first), uniform_ref.second));
+        mat.handles.push(uniforms::uniform_ref( uniform_manager->get_handle(uniform_ref.first), uniform_ref.second));
     }
 
 
@@ -102,5 +102,5 @@ private:
     std::unordered_map<std::string,size_t> string_to_id;
     stn::array<Material> materials;
     Shaders::ShaderManager* shader_man;
-    uniforms::UniformManager* uniform_man;
+    uniforms::UniformManager* uniform_manager;
 };

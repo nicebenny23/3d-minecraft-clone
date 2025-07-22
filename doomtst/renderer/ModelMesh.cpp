@@ -10,15 +10,17 @@ void ModelMesh::setmodeluniform()
 	glm::mat4 trans2 = (transform.ToMatrix());
 	
 	trans *= trans2;
-	CtxName::ctx.Ren->CurrentShader()->setMat4(trans, "model");
+	handle.set_uniform(uniforms::uniform(trans, "model"));
 }
-void ModelMesh::setmodeluniform(glm::mat4 model)
-{
 
-	CtxName::ctx.Ren->CurrentShader()->setMat4(model, "model");
-}
 ModelMesh::ModelMesh()
 {	transform = Transform();
+}
+
+void ModelMeshName::ModelMesh::create_handle()
+{
+handle=CtxName::ctx.Ren->gen_renderable(); 
+handle.set_layout(vertice::vertex().push<float, 3>().push<float, 3>());
 }
 
 Vec3 ModelMesh::nthvertex(int i)
@@ -84,9 +86,9 @@ ModelMesh* ModelMeshName::loadmesh(const char* name, Ids::Id tex_handle, Vec3 po
 
 void ModelMeshName::rendermesh(ModelMesh* torender)
 {
-	CtxName::ctx.Ren->Bind_Texture(torender->tex);
+//	CtxName::ctx.Ren->Bind_Texture(torender->tex);
 	
-	array<float> databuf;
+	renderer::MeshData data();
 
 	torender->setmodeluniform();
 
@@ -94,18 +96,19 @@ void ModelMeshName::rendermesh(ModelMesh* torender)
 	{
 		Vec3 vertex = torender->nthvertex(i);
 		v2::Vec2 Texture2D = torender->nthtex(i);
-
-		databuf.push(vertex.x);
-		databuf.push(vertex.y);
-		databuf.push(vertex.z);
-		databuf.push(Texture2D.x);
-		databuf.push(1-Texture2D.y);
+		Texture2D.y= 1 - Texture2D.y;
+		data.add_point(vertex, Texture2D);
+	
 
 	}
-	CtxName::ctx.Ren->Render(&torender->mesh, databuf);
+	if (!torender)
+	{
 
+		torender->create_handle();
 
-	//enable position
+	}
+
+torender->handle.fill(	//enable position
 
 	glDrawArrays(GL_TRIANGLES, 0, databuf.length / 5);
 	databuf.destroy();

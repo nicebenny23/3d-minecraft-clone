@@ -46,8 +46,7 @@ namespace stn {
 
 
 		// Append a single value to the array.
-		void push(const T& value);
-		void push(T&& value);
+	
 		// Append an array of elements to the current array.
 		void push(T* arr, size_t otherlen);
 
@@ -75,12 +74,11 @@ namespace stn {
 		array(std::initializer_list<T> init);
 		// Move constructor.
 		array(array&& other) noexcept;
-		void push_single(const T& value);
-	
+		
 
 
 		template<typename... Args>
-		void push_many(const Args&... values);
+		void push(Args&&... values);
 
 		// Copy constructor.
 		explicit array(const array& arr);
@@ -368,26 +366,7 @@ namespace stn {
 	}
 
 	//copies and appends an element to the list(!!!issues with posize_ters!!!)
-	template<class T, bool initelems>
-	void array<T, initelems>::push(const T& value) {
-		if (length >= capacity)
-		{
-			resize(resizelength(length));
-		}
-		list[length] = value;
-		length++;
-
-	}
-	template<class T, bool initelems>
-	void array<T, initelems>::push(T&& value) {
-		if (length >= capacity)
-		{
-			resize(resizelength(length));
-		}
-		list[length] = std::move(value);
-		length++;
-
-	}
+	
 	//append
 	template<class T, bool initelems >
 	inline void array<T, initelems>::push(T* arr, size_t otherlen)
@@ -697,20 +676,17 @@ namespace stn {
 		return find(value) != npos;
 	}
 	template<class T, bool initelems>
-	template<typename ...Args>
-	inline void array<T, initelems>::push_many(const Args & ...values)
-	{
-		size_t total_new = sizeof...(values);
+	template<typename... Args>
+	inline void array<T, initelems>::push(Args&&... values) {
+		constexpr size_t total_new = sizeof...(values);
 		if (length + total_new > capacity) {
 			resize(resizelength(length + total_new));
 		}
-		(push_single(values), ...);
 
-	}
-	template<class T, bool initelems>
-	inline void array<T, initelems>::push_single(const T& value)
-	{
-		list[length++] = value;
+		T* dst = list + length;
+		((*(dst++) = std::forward<Args>(values)), ...);
 
+		length += total_new;
 	}
+	
 }//newline

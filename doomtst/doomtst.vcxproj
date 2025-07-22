@@ -431,6 +431,7 @@
     <ClInclude Include="Resources\ResourceManager.h" />
     <ClInclude Include="util\arraypool.h" />
     <ClInclude Include="util\bitset.h" />
+    <ClInclude Include="util\cached.h" />
     <ClInclude Include="util\dependency.h" />
     <ClInclude Include="util\deque.h" />
     <ClInclude Include="util\filter_argument.h" />

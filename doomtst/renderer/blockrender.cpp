@@ -98,9 +98,9 @@ const int indiceoffsetfrombaselocation[] = {
 };
 
 // Emit the vertices and indices for a single face of a block
-void emitface(const int face, block& torender, array<float>& datbuf, array<unsigned int>& indbuf) {
+void emitface(const int face, block& torender, renderer::MeshData& mesh) {
 		if (torender.mesh.faces[face].cover==cover_state::Uncovered) {
-			const int baselocation = datbuf.length / 7;
+			const int baselocation = mesh.pointlist.length / 7;
 			const int* uniqueInds = &uniqueindices[4 * face];
 			const Vec3& scale = torender.mesh.box.scale;
 			const Vec3& position = torender.mesh.box.center;
@@ -110,9 +110,7 @@ void emitface(const int face, block& torender, array<float>& datbuf, array<unsig
 			const float lightValue = blockrender::enablelighting ?
 				(torender.attributes.transparent ? torender.lightval : torender.mesh[face].light) : 15;
 
-			float vertexData[28]{}; // 4 vertices * 7 floats per vertex (x, y, z, u, v, tex, light)
-			unsigned int indices[6]; // 6 indices per face
-
+		
 			for (int j = 0; j < 4; j++) {
 				int uniqueind = uniqueInds[j];
 				Vec3 offsetfromcenter = (vert[uniqueind] - unitv / 2) * scale * 2;
@@ -122,33 +120,24 @@ void emitface(const int face, block& torender, array<float>& datbuf, array<unsig
 				v2::Vec2 coords = facecoordtouv(&torender[face], j);
 
 				// Fill vertex data
-				int baseIndex = j * 7;
-				vertexData[baseIndex] = offset.x;
-				vertexData[baseIndex + 1] = offset.y;
-				vertexData[baseIndex + 2] = offset.z;
-				vertexData[baseIndex + 3] = coords.x;
-				vertexData[baseIndex + 4] = coords.y;
-				vertexData[baseIndex + 5] = textureNumber;
-				vertexData[baseIndex + 6] = lightValue;
+				mesh.add_point(offset,coords,textureNumber,lightValue);
+			
 			}
 
-			// Append vertex data in bulk
-			datbuf.push(vertexData, 28);
-
+			
 			// Generate and append indices
 			for (int j = 0; j < 6; j++) {
-				indices[j] = baselocation + indiceoffsetfrombaselocation[j];
+				mesh.add_index(baselocation + indiceoffsetfrombaselocation[j]);
 			}
-			indbuf.push(indices, 6);
 		}
 	
 }
 
 // Emit the faces for a block
-void emitblock(block& torender, array<float>& datbuf, array<unsigned int>& indbuf) {
+void emitblock(block& torender, renderer::MeshData& mesh) {
 	if (torender.id != minecraftair) {
 		for (int i = 0; i < 6; i++) {
-			emitface(i, torender, datbuf, indbuf);
+			emitface(i, torender, mesh);
 		}
 	}
 }
@@ -158,15 +147,13 @@ void recreatechunkmesh(Chunk::chunk* aschunk,std::mutex& fill_lock) {
 	
 	aschunk->mesh->facebuf.destroy();//g
 	aschunk->mesh->facebuf = stn::array<face>();//g
-	stn::array<unsigned int> indbuf = stn::array<unsigned int>();//g
-	stn::array<float> datbuf= stn::array<float>();//g
-
+	renderer::MeshData mesh;
 	
 	for (int ind = 0; ind < chunksize; ind++) {
 		block& blockatpos = (aschunk->blockbuf[ind].getcomponent<block>());//g
 		
 		if (!blockatpos.attributes.transparent) {
-			emitblock(blockatpos, datbuf, indbuf);//g
+			emitblock(blockatpos, mesh);//g
 			continue;
 		}
 		
@@ -187,10 +174,9 @@ void recreatechunkmesh(Chunk::chunk* aschunk,std::mutex& fill_lock) {
 	{
 		std::unique_lock lck(fill_lock);
 
-		aschunk->mesh->SolidGeo.fill(std::move(datbuf), std::move(indbuf));
+		aschunk->mesh->SolidGeo.fill(std::move(mesh));
 	}
-	aschunk->mesh->meshsize = indbuf.length;
-	
+
 	aschunk->mesh->meshrecreateneeded = false;
 }
 
@@ -201,16 +187,15 @@ void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 	}
 	else {
 		// Enable 2D render
-		array<float> datbuf = array<float>();
-		array<unsigned int> indbuf = array<unsigned int>();
-
+		renderer::MeshData mesh_data;
 		for (int i = 0; i < mesh.facebuf.length; i++) {
-			emitface(mesh.facebuf[i].facenum.ind(), *(mesh.facebuf[i].mesh->blk), datbuf, indbuf);
+			emitface(mesh.facebuf[i].facenum.ind(), *(mesh.facebuf[i].mesh->blk), mesh_data);
 		}
 
-		CtxName::ctx.Ren->Render(&mesh.TransparentGeo, datbuf, indbuf);
-		datbuf.destroy();
-		indbuf.destroy();
+		mesh.TransparentGeo.fill(std::move(mesh_data));
+		CtxName::ctx.Ren->consume();
+		mesh.TransparentGeo.render();
+	
 	}
 }
 
@@ -259,7 +244,7 @@ void blockrender::renderblocks(bool rendertransparent) {
 		}
  		
 	
-		CtxName::ctx.Ren->SetType("TransparentBlock");
+	
 		for (int i = 0; i < tosort.length; i++) {
 		
 				renderchunk(*tosort[i]->mesh, true);

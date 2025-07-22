@@ -38,10 +38,10 @@ v2::Vec2(1, 1)
 struct integertext:ui::uielement
 {	float scale;
 	v2::Vec2 center;
-	
+	void set_handle();
 	integertext(v2::Vec2 textcenter,float textscale);
 	void write();
-	
+	renderer::RenderableHandle handle;
 	int value;
 	std::string word;
 		void recalculateword();

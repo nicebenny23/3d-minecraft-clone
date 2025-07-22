@@ -81,7 +81,7 @@ namespace uiboxname {
 
 	void uibox::customdestroy()
 	{
-		tex_handle.remove();
+		tex_handle.destroy();
 	}
 
 	void uibox::LoadTex(const char* texloc, const char* texture)
@@ -90,21 +90,21 @@ namespace uiboxname {
 		tex_handle.set_material("Ui");
 		tex_handle.set_uniform(uniforms::uniform(CtxName::ctx.Ren->Textures.LoadTexture(texloc, texture), "tex"));
 		tex_handle.set_layout(vertice::vertex().push<float, 2>());
-		array<unsigned int> indbuf = array<unsigned int>(6, unsigned int(0));
-		indbuf[0] = 0;
-		indbuf[1] = 1;
-		indbuf[2] = 3;
-		indbuf[3] = 0;
-		indbuf[4] = 3;
-		indbuf[5] = 2;
+		renderer::MeshData mesh;
+		mesh.add_index(0);
+		mesh.add_index(1);
+		mesh.add_index(3);
+		mesh.add_index(0);
+		mesh.add_index(3);
+		mesh.add_index(2);
 		array<float> databuf = array<float>();
 		for (int j = 0; j < 4; j++)
 		{
-			databuf.push_many(cubeuv[2 * j],cubeuv[2*j+1]);
+			mesh.add_point(cubeuv[2 * j],cubeuv[2*j+1]);
 			
 		}
 	
-		tex_handle.fill(std::move(databuf), std::move(indbuf));
+		tex_handle.fill(std::move(mesh));
 		CtxName::ctx.Ren->consume();
 	}
 

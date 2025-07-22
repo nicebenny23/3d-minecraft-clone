@@ -22,11 +22,7 @@ using namespace buffer_object;
 
 namespace renderer {
 	struct Renderer;
-	struct meshId {
-		size_t id;
-		Renderer* ren;
-
-	};
+	
 	inline array<unsigned int> trivial_buffer(vertice::vertex& layout, stn::array<float>& points) {
 		array<unsigned int> trivial;
 		size_t vertices = points.length / layout.stride();
@@ -39,21 +35,65 @@ namespace renderer {
 
 	struct MeshData {
 		Ids::Id mesh;
-		stn::array<float> pointlist;
-		stn::array<unsigned int> indicelist;
-		MeshData(Ids::Id msh,stn::array<float>&& pointlist,stn::array<unsigned int>&& indicelist ) :mesh(msh), indicelist(std::move(indicelist)), pointlist(std::move(pointlist))
+		vertice::vertex layout;
+
+		bool generate_trivial;
+		size_t length() {
+			return pointlist.length / layout.stride();
+
+		}
+		MeshData(Ids::Id msh, vertice::vertex vertex_layout,bool indices) :generate_trivial(indices),layout(vertex_layout), pointlist(std::move(pointlist))
 		{
 
 
 		}
+
 		~MeshData() {
 
 			indicelist.destroy();
 			pointlist.destroy();
 		}
-		MeshData() {
-
+		template<typename ...Args>
+		inline void add_point(const Args& ...values)
+		{
+			if (generate_trivial)
+			{
+				indicelist.push(indicelist.length);
+			}
+			(push_single(values), ...);
 		}
+		template<typename T>
+		inline void push_single(const T& value)
+		{
+			if constexpr (std::is_same_v<T, v3::Vec3>)
+			{
+				pointlist.push(value.x, value.y, value.z);
+				return;
+			}
+			else if constexpr (std::is_same_v<T, v2::Vec2>)
+			{
+				pointlist.push(value.x, value.y);
+				return;
+
+			}
+			else if constexpr (std::is_constructible<float, T>::value)
+			{
+				pointlist.push(float(value));
+				return;
+			}
+			else
+			{
+				static_assert(true, "invalid paramater for type");
+			}
+		}
+		void add_index(size_t index) {
+			indicelist.push(index);
+		}
+	private:
+		explicit MeshData() {}
+		friend Renderer;
+		stn::array<float> pointlist;
+		stn::array<unsigned int> indicelist;
 	};
 	struct RenderableHandle {
 		Ids::Id id;
@@ -65,25 +105,39 @@ namespace renderer {
 		RenderableHandle(Ids::Id id, Renderer* renderer)
 			: id(id), renderer(renderer) {
 		}
-
+		
 		void set_material(const std::string& name);
 		
 		void set_layout(vertice::vertex layout);
 		
-		void fill(stn::array<float>&& points, stn::array<unsigned int>&& indices);
+		void fill(MeshData&& new_mesh);
 		
 		void set_uniform(const uniforms::uniform& u);
 		
 		void render();
 		
-		void remove();
+		void destroy();
 		
-		bool valid() const {
+		bool operator()( ) const {
 			return static_cast<bool>(id);
 		}
 	};
 	struct Renderer {
+
 		
+		Shaders::ShaderManager Shaders;
+		VObjMan::VObjManager Binders;
+		TextureManager::TextureManager Textures;
+
+		MaterialManager Modes;
+		template <typename... Args>
+		void Construct(const char* name, const char* shade, RenderProperties props, Args&&...args) {
+			Modes.Construct(name, shade, props, std::forward<Args>(args)...);
+		}
+		void bind_material(Ids::Id material);
+		void SetType(std::string Name);
+
+
 		void Bind_Texture(Ids::Id Handle) {
 			context.Bind( Textures.get_texture(Handle));
 
@@ -91,61 +145,38 @@ namespace renderer {
 		Renderer();
 		void InitilizeBaseMaterials();	
 		RenderContext::Context context;
-		MaterialManager Modes;
-		Material properties;
-		void SetType(std::string Name);
+	
 		
-		
+		uniforms::UniformManager uniform_manager;
 		template<typename val_type>
-		void set_uniform(const char* name,const val_type& val) {
-		
-			uniform_man.set(name,uniforms::uniform_val{val});
+		void set_uniform(const char* name, const val_type& val) {
+
+			uniform_manager.set(name, uniforms::uniform_val{ val });
 
 		}
 		void apply_uniform(uniforms::uniform_val val, const char* location_in_shader);
-		template <typename... Args>
-		void Construct(const char* name, const char* shade,  RenderProperties props,Args&&...args) {
-			 Modes.Construct(name,shade,props, std::forward<Args>(args)...);
-		}
-		
-		ITexture* CurrentTexture() {
-			return context.Get_BoundTexture();
-		};
-		shader* CurrentShader() {
-			return context.Get_BoundShader();
-		}
-		void Clear();
-		uniforms::UniformManager uniform_man;
-		Shaders::ShaderManager Shaders;
-		VObjMan::VObjManager Binders;
-		TextureManager::TextureManager Textures;
 		void SetUniform(const std::string& name, float value);
 		void SetUniform(const std::string& name, const glm::vec2& vec);
 		void SetUniform(const std::string& name, const glm::vec3& vec);
 		void SetUniform(const std::string& name, const glm::vec4& vec);
 		void SetUniformMat4(const std::string& name, const glm::mat4& mat);
-		void bind_material(Ids::Id material);
-		meshId gen() {
 
-
-		}
-	
-		void destroy(meshId mesh) {
-
-		}
 		
+		shader* CurrentShader() {
+			return context.Get_BoundShader();
+		}
+		void Clear();
+
 		void Gen(Mesh* mesh);
 		void Destroy(Mesh* mesh);
 
+		void FillVertexBuffer(Mesh* mesh, stn::array<float>& pointlist);
 		void Fill(Mesh* mesh, stn::array<float>& pointlist);
 		void Fill(Mesh* mesh, stn::array<float>& pointlist, stn::array<unsigned int>& indicelist);
-	
-		
 		void Render(Mesh* mesh);
 		void Render(Mesh* mesh, stn::array<float>& pointlist);
 		void Render(Mesh* mesh, stn::array<float>& pointlist, stn::array<unsigned int>& indicelist);
-		void FillVertexBuffer(Mesh* mesh, stn::array<float>& pointlist);
-		void setviewmatrix(glm::mat4 viewmat);
+		
 		void setprojmatrix(float newfov, float nearclipplane, float farclipplane);
 	
 		RenderableHandle gen_renderable() {
@@ -179,6 +210,13 @@ namespace renderer {
 			}
 			renderables[renderable_id.id].overides.push(value);
 		}
+		
+		
+	
+		void set_layout(Ids::Id renderable_id, vertice::vertex layout) {
+			Ids::Id mesh_id = ensure_mesh(renderable_id);
+			meshes[mesh_id].Voa.attributes = layout;
+		}
 		void render(Ids::Id renderable_id) {
 
 			renderable& value = renderables[renderable_id.id];
@@ -189,25 +227,11 @@ namespace renderer {
 			}
 			Ids::Id mesh_id = value.mesh;
 			bind_material(mat_id);
-			for (auto& uniform :value.overides)
+			for (auto& uniform : value.overides)
 			{
-				apply_uniform(uniform.value,uniform.name);
+				apply_uniform(uniform.value, uniform.name);
 			}
 			Render(&meshes[mesh_id]);
-		}
-		
-		void fill_cmd(Ids::Id renderable_id, stn::array<float>&& pointlist, stn::array<unsigned int>&& indicelist) {
-			Ids::Id mesh_id = ensure_mesh(renderable_id);
-			to_fill.push(MeshData(mesh_id,  std::move(pointlist), std::move(indicelist)));
-		}
-		void fill_mesh(MeshData& data) {
-			//must exist as a precurus as it is created through fillcmd;
-			Ids::Id mesh_id = data.mesh;
-			Fill(&meshes[mesh_id], data.pointlist, data.indicelist);
-		}
-		void set_layout(Ids::Id renderable_id, vertice::vertex layout) {
-			Ids::Id mesh_id = ensure_mesh(renderable_id);
-			meshes[mesh_id].Voa.attributes = layout;
 		}
 		void remove(Ids::Id renderable_id) {
 			renderable* value = &renderables[renderable_id.id];
@@ -222,12 +246,26 @@ namespace renderer {
 			renderables.erase_key(renderable_id.id);
 			free_ids.push(renderable_id);
 		}
+		void fill_cmd(Ids::Id renderable_id, MeshData& mesh) {
+			Ids::Id mesh_id = ensure_mesh(renderable_id);
+			to_fill.push(MeshData(mesh));
+		}
+		void fill_mesh(MeshData& data) {
+			//must exist as a precurus as it is created through fillcmd;
+			Ids::Id mesh_id = data.mesh;
+			Fill(&meshes[mesh_id], data.pointlist, data.indicelist);
+		}
 		void consume() {
 			while (!to_fill.empty())
 			{
 				fill_mesh(to_fill.peek());
 				to_fill.pop();
 			}
+		}
+		template<bool is_trivial>
+		MeshData create(Ids::Id renderable_id) {
+			auto& renderable = renderables[renderable_id.id];
+			return MeshData(renderable.mesh, meshes[renderable.mesh].Voa.attributes, is_trivial);
 		}
 		float fov;
 		private:
@@ -246,10 +284,10 @@ namespace renderer {
 		Meshes::MeshRegistry meshes;
 		Sparse::KeySet<renderable> renderables;
 		stn::array<Ids::Id> free_ids;
-	};
+		
 
+		};
 
-	
 		inline void Renderer::Gen(Mesh* mesh)
 		{
 			Binders.Create(&mesh->Ibo);
@@ -257,6 +295,7 @@ namespace renderer {
 			Binders.Create(&mesh->Vbo);
 			mesh->BuffersGenerated = true;
 		}
-
+	
+		
 }
 

@@ -26,13 +26,15 @@ size_t Chunk::indexfrompos(Coord pos)
 
 void Chunk::chunkmesh::genbufs()
 {
-	CtxName::ctx.Ren->Gen(&TransparentGeo);
+
 	
 	SolidGeo= CtxName::ctx.Ren->gen_renderable();
 	SolidGeo.set_material("SolidBlock");
 	SolidGeo.set_layout(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
-	TransparentGeo.Voa.attributes.push<float, 3>().push<float, 3>().push<float, 1>();
-
+	TransparentGeo = CtxName::ctx.Ren->gen_renderable();
+	TransparentGeo.set_material("SolidBlock");
+	TransparentGeo.set_layout(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
+	
 }
 
 
@@ -53,9 +55,8 @@ void Chunk::chunkmesh::sortbuf()
 
 void Chunk::chunkmesh::destroy()
 {			 
-	SolidGeo.remove();
-	CtxName::ctx.Ren->Destroy(&TransparentGeo);
-
+	SolidGeo.destroy();
+	TransparentGeo.destroy();
 	
 	facebuf.destroy();
 }

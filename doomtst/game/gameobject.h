@@ -599,8 +599,10 @@ namespace gameobject {
 	}
 	inline bool gameobject::Archtype::has_component(comp::Id index)
 	{
+		
 		if (index.id < bit_list.bits)
 		{
+			
 			return bit_list.at(index.id);
 		}
 		return false;

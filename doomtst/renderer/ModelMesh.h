@@ -24,19 +24,16 @@ namespace ModelMeshName {
 		float pitch;
 		v3::Vec3 pos;
 		void setmodeluniform();
-		
-		void setmodeluniform(glm::mat4 model);
-
 		Ids::Id tex;
 		ModelMesh();
-	
+		void create_handle();
 		Transform transform;
 		array<Vec3> vertices;
-		array<v2::Vec2> texcoords;
 		array<unsigned int> vertexindices;
+		array<v2::Vec2> texcoords;
 		array<unsigned int> texindices;
 		void destroy() {
-			CtxName::ctx.Ren->Destroy(&mesh);
+			handle.destroy();
 			vertexindices.destroy();
 			texcoords.destroy();
 			texindices.destroy();
@@ -44,11 +41,10 @@ namespace ModelMeshName {
 		}
 		Vec3 nthvertex(int i);
 		v2::Vec2 nthtex(int i);
-		Mesh mesh;
+		renderer::RenderableHandle handle;
 		void setvobjs() {
-		CtxName::ctx.Ren->Gen(&mesh);
-
-			mesh.Voa.attributes.push<float,2>().push<float, 3>();
+			handle = CtxName::ctx.Ren->gen_renderable();
+			handle.set_layout(vertice::vertex().push<float,2>().push<float, 3>());
 		}
 
 		glm::mat4* modelmatrix;
