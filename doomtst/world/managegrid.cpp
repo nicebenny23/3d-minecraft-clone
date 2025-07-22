@@ -269,7 +269,7 @@ void gridutil::setblock(Coord loc, int blockid)
 		
 		if (location != nullptr)
 		{
-
+			//i made no progress
 			int prevemit = CtxName::ctx.Grid->getBlock(loc)->emitedlight;
 			CtxName::ctx.Grid->GetChunk(loc)->modified = true;
 			set_air(location->owner);
