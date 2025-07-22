@@ -10,11 +10,11 @@ struct Mesh
 	}
 	bool HasBeenFilled() {
 
-		return (length != -1);
+		return (length != 0);
 	}
 
 	bool BuffersGenerated;
-	int length;
+	size_t length;
 	
 	VaoName::Vao Voa;
 	buffer_object::Ebo Ibo;
@@ -22,3 +22,5 @@ struct Mesh
 		
 };
 
+
+	torender->create_handle();
