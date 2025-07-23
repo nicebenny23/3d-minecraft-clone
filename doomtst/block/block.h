@@ -39,7 +39,7 @@ enum blocktex {
 	planktex=27,
 };
 using namespace v3;
-#define  unitscale   unitv * 1 / 2.002f
+#define  unitscale   unitv * 1 / 2.0002f
 namespace blockname {
 	const v3::Vec3 blockscale = unitscale * blocksize;
 	enum id

@@ -12,14 +12,18 @@ struct multi_iter {
 	size_t arch_index;
 	size_t end_index;
 	size_t index;
+
+	size_t begin;
 	query_func<Components...> function;
 
 	multi_iter(query::View<Components...>& vw,size_t start,size_t end,const query_func<Components...> func):owner(vw),index(start),end_index(end),function(func) {
 		size_t counter=0;
+		begin = index;
 		for (size_t i = 0; i < owner.archtypes.length; i++)
 		{
 			size_t to_add = owner.archtypes[i]->elems.length;
-			if (start <= counter + to_add)
+			size_t archtype_end_index = counter + to_add;
+			if (start < archtype_end_index)
 			{
 				arch_index = i;
 				entity_index = start - counter;
@@ -96,13 +100,11 @@ void multi_query(query::View<Components...>& view, std::function<void(std::tuple
 	{
 		total_length += arch->elems.length;
 	}
-	if (threads_wanted > total_length) {
-		threads_wanted = total_length;
-	}
+	//ensures tasks is greater than one 
+	size_t tasks = Min(count, total_length/count);
+	threads_wanted = Min(tasks, total_length);
 	thread::thread_pool pool(threads_wanted);
-
-
-	stn::array<size_t> size_of_each = thread_util::split_many(total_length, total_length/count);
+	stn::array<size_t> size_of_each = thread_util::split_many(total_length, tasks);
 	for (size_t i = 0; i < size_of_each.length-1; i++)
 	{
 		size_t start = size_of_each[i];

@@ -9,13 +9,13 @@
 #include "../renderer/textrender.h"
 #include "../renderer/model.h"
 #include "guirender.h"
-
+#include "../renderer/decal.h"
 
 void rendergame() {
 
     CtxName::ctx.OC->updatecomponents(gameobject::Rendercall);
     blockrender::renderblocks(false);
-
+    render_decals();
     //apply postprossising
     ui::updateui();
     guirender::rendergui();

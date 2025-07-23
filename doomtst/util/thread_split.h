@@ -42,6 +42,7 @@ inline stn::array<size_t> split_many(size_t length, size_t threads) {
 				int z = 2;
 			}
 		}
+		size_of_each.destroy();
 	}
 
 }

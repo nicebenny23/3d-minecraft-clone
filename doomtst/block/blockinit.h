@@ -84,6 +84,7 @@ namespace blkinitname {
 			break;
 		case minecraftplank:
 			plankinit(blk);
+			break;
 		}
 
 	}
@@ -95,84 +96,6 @@ namespace blkinitname {
 		blkinitname::blockinit(blk);
 
 
-	}
-	inline void setair(block* blk) {
-		
-		switch (blk->id)
-		{
-		case minecraftair:
-
-			break;
-		case minecraftmoss:
-			mossdelete(blk);
-			break;
-		case minecrafttreestone:
-			treestonedelete(blk);
-			break;
-		case minecraftstone:
-
-
-			stonedelete(blk);
-			break;
-
-		case minecraftglass:
-
-
-			glassdelete(blk);
-			break;
-		case minecraftcrystal:
-
-
-			crystaldelete(blk);
-			break;
-		case minecrafttorch:
-
-
-			torchdelete(blk);
-			break;
-		case minecraftsand:
-
-		sanddelete(blk);
-			break;
-		case minecraftwater:
-
-
-			waterdelete(blk);
-			break;
-		case minecraftcraftingtable:
-			tabledelete(blk);
-			break;
-		case minecraftcrystaltorch:
-			crystaltorchdelete(blk);
-			break;
-		case minecraftrope:
-			ropedelete(blk);
-			break;
-		case minecraftlava:
-			lavadelete(blk);
-			break;
-		case minecraftobsidian:
-			obsidiandelete(blk);
-			break;
-		case minecraftchest:
-			chestdelete(blk);
-			break;
-		case minecraftfurnace:
-			furnacedelete(blk);
-			break;
-		case minecraftironore:
-			irondelete(blk);
-			break;
-		case minecraftaltar:
-		altardelete(blk);
-			break;
-		case minecraftplank:
-			plankdelete(blk);
-			break;
-		default:
-			throw std::invalid_argument("need valid id in set blk");
-		}
-		setdefault(blk);
 	}
 	
 }

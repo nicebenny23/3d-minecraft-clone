@@ -62,14 +62,14 @@ struct rigidbody : gameobject::component {
         {
             velocity.y *= clamp(1 - deltaTime * 10, 0.0, 1.0);
         }
-        if (mag(velocity)>1000)
+        if ((velocity.y)>10000)
         {
             int l = 1;
         }
         if (gravityscale!=0)
         {
 
-            velocity.y *= clamp(1 - deltaTime,0.0,1.0);
+            velocity.y *= clamp(1 - deltaTime*.1f,0.0,1.0);
 
         }velocity.x *= clamp(1 - deltaTime*friction, 0.0, 1.0);  // Adjust damping factor to prevent excessive damping
 

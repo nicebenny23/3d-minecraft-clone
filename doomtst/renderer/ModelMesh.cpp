@@ -88,7 +88,7 @@ void ModelMeshName::rendermesh(ModelMesh* torender)
 {
 //	CtxName::ctx.Ren->Bind_Texture(torender->tex);
 	
-	renderer::MeshData data();
+	renderer::MeshData data=torender->handle.create_mesh();
 
 	torender->setmodeluniform();
 
@@ -108,8 +108,7 @@ void ModelMeshName::rendermesh(ModelMesh* torender)
 
 	}
 
-torender->handle.fill(	//enable position
+	torender->handle.fill(std::move(data));	//enable position
+		CtxName::ctx.Ren->consume();
 
-	glDrawArrays(GL_TRIANGLES, 0, databuf.length / 5);
-	databuf.destroy();
 }

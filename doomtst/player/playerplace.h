@@ -71,6 +71,7 @@ struct playerplace : gameobject::component
 		plamentblock->mesh.direction = Dir::Dir2d(blockdirection);
 		plamentblock->mesh.attachdir = dir;
 		Box newblockbox = Box(plamentblock->center(), blockscale);
+		newblockbox.scale *= .95;
 		bool collides = collision::boxCollidesWithEntity(newblockbox,collision::HitQuery());
 		if (!collides)
 		{

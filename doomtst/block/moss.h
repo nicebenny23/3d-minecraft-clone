@@ -9,7 +9,7 @@ inline void mossinit(blockname::block* blk) {
 	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
 	blk->minedfastwithpick = 1;
-	blk->mininglevel = .3f;
+	blk->mininglevel = 1.f;
 	blk->mesh.box.scale = blockname::blockscale;
 	blk->createdefaultaabb();
 	blk->owner.addcomponent<loottable>()->addelem(mossitem, 1,true);

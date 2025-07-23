@@ -351,6 +351,13 @@ namespace gameobject {
 			ctx = context;
 		}
 		array<EntityMetadata> entitymeta;
+		obj create_entity()
+		{
+			obj object = obj();
+			InitializeEntity(object);
+			return object;
+
+		}
 
 		template<typename T>
 		T* getcomponentptr(obj& object);

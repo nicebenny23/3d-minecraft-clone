@@ -17,6 +17,7 @@ void ShowAssertMessageBox(void* lpParam);
 // Assert function that terminates the main program but keeps the message box open
 inline void Assert(const char* comment)
 {
+	throw std::logic_error(comment);
 	// Launch the message box in a completely separate process
 	_beginthread(ShowAssertMessageBox, 0, (void*)comment);
 	
@@ -30,6 +31,8 @@ inline void Assert(const char* comment)
 	{
 		return;
 	}
+
+	throw std::logic_error(comment);
 	// Launch the message box in a completely separate process
 	_beginthread(ShowAssertMessageBox, 0, (void*)comment);
 

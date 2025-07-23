@@ -7,6 +7,7 @@
 #include "../renderer/Window.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+
 #include "../util/userinput.h"
 #include "../world/chunk.h"
 #include "../game/objecthelper.h"
@@ -81,13 +82,16 @@ void init() {
     ui::createuilist();
     inittextarray();
     player::initplayer();
+    create_decal_material();
+    
     blockrender::initblockrendering();
+    
     ui::createuielement<uibox>("images\\crosshair.png", "CrosshairTexture", v2::unitv / 32, v2::zerov, -3);
     Core::game.CreateGrid();
     gridutil::computeallcover();
     gridutil::redolighting();
     CtxName::ctx.Inp->endupdate();
-
+    
     glfwSwapInterval(0);
 }
 
@@ -107,6 +111,7 @@ void rungame()
      float lastupdate = 0;
     while (!CtxName::ctx.Window->shouldClose())
     {
+       
         update();
     }
     endgame();

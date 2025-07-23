@@ -32,65 +32,71 @@ namespace renderer {
 		}
 		return trivial;
 	}
-
+	template<typename T> struct dependent_false : std::false_type {};
 	struct MeshData {
 		Ids::Id mesh;
-		vertice::vertex layout;
+		
 
 		bool generate_trivial;
 		size_t length() {
-			return pointlist.length / layout.stride();
+			
+			return pointlist.length * sizeof(float) / stride;
 
 		}
-		MeshData(Ids::Id msh, vertice::vertex vertex_layout,bool indices) :generate_trivial(indices),layout(vertex_layout), pointlist(std::move(pointlist))
+		MeshData(Ids::Id msh,const vertice::vertex& vertex_layout,bool indices) :mesh(msh),generate_trivial(indices),layout(vertex_layout), pointlist()
 		{
-
+			stride = layout.stride();
 
 		}
 
 		~MeshData() {
 
+			layout.Clear();
 			indicelist.destroy();
 			pointlist.destroy();
 		}
 		template<typename ...Args>
 		inline void add_point(const Args& ...values)
 		{
-			if (generate_trivial)
-			{
-				indicelist.push(indicelist.length);
-			}
-			(push_single(values), ...);
+				size_t pushed_floats = (push_single(values) + ...);
+				if (stride != pushed_floats * sizeof(float)) {
+					throw std::logic_error("Point size mismatch: does not match stride");
+				}
+
+				if (generate_trivial) {
+					indicelist.push(indicelist.length);
+				}
+			
+
 		}
 		template<typename T>
-		inline void push_single(const T& value)
+		inline size_t push_single(const T& value)
 		{
-			if constexpr (std::is_same_v<T, v3::Vec3>)
-			{
-				pointlist.push(value.x, value.y, value.z);
-				return;
-			}
-			else if constexpr (std::is_same_v<T, v2::Vec2>)
-			{
-				pointlist.push(value.x, value.y);
-				return;
-
-			}
-			else if constexpr (std::is_constructible<float, T>::value)
-			{
-				pointlist.push(float(value));
-				return;
-			}
-			else
-			{
-				static_assert(true, "invalid paramater for type");
-			}
+			
+				if constexpr (std::is_same_v<T, v3::Vec3>) {
+					pointlist.push(value.x, value.y, value.z);
+					return 3;
+				}
+				else if constexpr (std::is_same_v<T, v2::Vec2>) {
+					pointlist.push(value.x, value.y);
+					return 2;
+				}
+				else if constexpr (std::is_convertible_v<T, float>) {
+					pointlist.push(static_cast<float>(value));
+					return 1;
+				}
+				else {
+					static_assert(dependent_false<T>::value, "Invalid type passed to add_point");
+				}
+			
 		}
 		void add_index(size_t index) {
 			indicelist.push(index);
 		}
-	private:
 		explicit MeshData() {}
+	private:
+		size_t stride;
+		vertice::vertex layout;
 		friend Renderer;
 		stn::array<float> pointlist;
 		stn::array<unsigned int> indicelist;
@@ -117,8 +123,8 @@ namespace renderer {
 		void render();
 		
 		void destroy();
-		
-		bool operator()( ) const {
+		MeshData create_mesh(bool auto_inds = false);
+		bool operator()() const {
 			return static_cast<bool>(id);
 		}
 	};
@@ -246,9 +252,9 @@ namespace renderer {
 			renderables.erase_key(renderable_id.id);
 			free_ids.push(renderable_id);
 		}
-		void fill_cmd(Ids::Id renderable_id, MeshData& mesh) {
+		void fill_cmd(Ids::Id renderable_id, MeshData&& mesh) {
 			Ids::Id mesh_id = ensure_mesh(renderable_id);
-			to_fill.push(MeshData(mesh));
+			to_fill.push(std::move(mesh));
 		}
 		void fill_mesh(MeshData& data) {
 			//must exist as a precurus as it is created through fillcmd;
@@ -262,10 +268,9 @@ namespace renderer {
 				to_fill.pop();
 			}
 		}
-		template<bool is_trivial>
-		MeshData create(Ids::Id renderable_id) {
+		MeshData create(Ids::Id renderable_id, bool is_trivial) {
 			auto& renderable = renderables[renderable_id.id];
-			return MeshData(renderable.mesh, meshes[renderable.mesh].Voa.attributes, is_trivial);
+			return MeshData(renderable.mesh,meshes[renderable.mesh].Voa.attributes, is_trivial);
 		}
 		float fov;
 		private:

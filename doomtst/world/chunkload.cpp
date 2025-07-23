@@ -3,6 +3,7 @@
 #include "noise.h"
 #include "../renderer/chunkrender.h"
 #include <string>
+#include "../util/interval.h"
 #include "../util/fileloader.h"
 #include "../block/blockinit.h"
 
@@ -45,6 +46,17 @@ int idfromnoise( float nint, float bint,  float nint3) {
 				neid = minecraftstone;
 			}
 		}
+		else {
+			neid = minecraftair;
+			if (inter::range(0, offset2).contains(bint))
+			{
+				neid = minecrafttreestone;
+			}
+			if (inter::range(-offset2,0).contains(bint))
+			{
+				neid = minecraftmoss;
+			}
+		}
 	}
 	return neid;
 
@@ -60,6 +72,8 @@ int generatechunkvalfromnoise(Vec3 pos, noisemap* map)
 
 	localpos.z = symmetric_mod(pos.z, chunkaxis);
 	float nint = (*map).Eval(pos + Vec3(0, pos.y, 0));
+
+	float biome= map->Eval(pos + Coord(33893, 103, 40));
 	float nint3 = map->Eval(pos + Coord(0, 103, 40));
 	float nint2 = map->Eval(pos + Coord(101, 300, 33));
 

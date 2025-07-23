@@ -93,6 +93,8 @@ namespace thread {
 		}
 		~thread_pool() {
 			wait();
+			tasks.destroy();
+			threads.destroy();
 		}
 
 		thread_pool(size_t n):tasks(){

@@ -74,7 +74,7 @@ void inittextarray()
 void writeletter(renderer::MeshData& mesh_data,geometry::Box2d location, int letter)
 {
 
-	const int baselocation = mesh_data.pointlist.length / 5;
+	const int baselocation = mesh_data.length();
 	for (int j = 0; j < 4; j++) {
 		// Index of unique vertex in each face
 		v2::Vec2 pointtoappend = location.scale * offset[j] + location.center;
@@ -99,7 +99,7 @@ void integertext::write()
 	v2::Vec2 boxoffset = v2::Vec2(1.5, 1) * scale / 2.0;
 	v2::Vec2 increse=  v2::Vec2(1.5,0) * scale;
 	geometry::Box2d charlocation = geometry::Box2d(min+boxoffset, v2::unitv * scale);
-	renderer::MeshData mesh_data;
+	renderer::MeshData mesh_data=handle.create_mesh();
 	for (int i = 0; i < word.length(); i++)
 	{
 		writeletter(mesh_data,charlocation, int(word[i]-'0'));

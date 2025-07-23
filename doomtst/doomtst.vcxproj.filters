@@ -204,9 +204,6 @@
     <ClCompile Include="Resources\ResourceManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="mtest.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="items\loottable.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -214,6 +211,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="game\particles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\decal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -710,9 +710,6 @@
     <ClInclude Include="Resources\ResourceManager.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Csn.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="util\SparseSet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -843,6 +840,22 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="util\topo_sort.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\decal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\overlay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\decal_frag.vs" />
+    <ClInclude Include="util\cached.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\spawn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\interval.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

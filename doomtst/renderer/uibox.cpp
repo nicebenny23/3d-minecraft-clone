@@ -90,7 +90,7 @@ namespace uiboxname {
 		tex_handle.set_material("Ui");
 		tex_handle.set_uniform(uniforms::uniform(CtxName::ctx.Ren->Textures.LoadTexture(texloc, texture), "tex"));
 		tex_handle.set_layout(vertice::vertex().push<float, 2>());
-		renderer::MeshData mesh;
+		renderer::MeshData mesh=tex_handle.create_mesh();
 		mesh.add_index(0);
 		mesh.add_index(1);
 		mesh.add_index(3);

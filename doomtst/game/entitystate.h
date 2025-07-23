@@ -46,7 +46,7 @@ struct estate : gameobject::component
 				if (owner.getcomponent<rigidbody>().velocity.y<-5)
 				{
 
-					damage((falldmg/100));
+					damage((falldmg/3));
 
 				}
 

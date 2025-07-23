@@ -2,6 +2,7 @@
 #include "../game/Core.h"
 #include "../game/Settings.h"
 #include "../game/GameContext.h"
+#include "decal.h"
 namespace renderer {
    
 
@@ -67,7 +68,8 @@ namespace renderer {
 
         if (!mesh->HasBeenFilled())
         {
-            throw std::logic_error("Cannott render a UnbindedMesh Mesh");
+            return;
+            //throw std::logic_error("Cannott render a UnbindedMesh Mesh");
         }
         context.Bind(mesh->Vbo);
       context.Bind(mesh->Voa);
@@ -234,7 +236,7 @@ namespace renderer {
 
     void RenderableHandle::fill(MeshData&& new_mesh)
     {
-        renderer->fill_cmd(id,new_mesh);
+        renderer->fill_cmd(id,std::move(new_mesh));
     }
 
     void RenderableHandle::set_uniform(const uniforms::uniform& u)
@@ -249,7 +251,16 @@ namespace renderer {
 
     void RenderableHandle::destroy()
     {
+
         renderer->remove(id);
+        renderer = nullptr;
+        id = Ids::None;
     }
 
+    MeshData RenderableHandle::create_mesh(bool auto_inds)
+    {
+        return renderer->create(id,auto_inds);
+    }
+
+  
 }

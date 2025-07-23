@@ -8,7 +8,10 @@ namespace timename {
 		float value;
 
 		explicit time(float val) : value(val) {}
-
+		time() 
+			{
+				value = 0;
+			}
 		float dist(const time& oth) const {
 			return std::fabs(oth.value - value);
 		}
@@ -18,6 +21,8 @@ namespace timename {
 
 		time operator+(float offset) const { return time(value + offset); }
 		time operator-(float offset) const { return time(value - offset); }
+
+		float operator-(time offset) const { return (value - offset.value); }
 
 	};
 	struct TimeManager

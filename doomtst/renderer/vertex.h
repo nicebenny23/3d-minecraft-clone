@@ -55,7 +55,9 @@ namespace vertice {
 			attributes.push(VertexAttribute(Type, Components));
 			return *this;
 		}
-
+		~vertex() {
+			attributes.destroy();
+		}
 		void Clear() {
 			attributes.destroy();
 		}

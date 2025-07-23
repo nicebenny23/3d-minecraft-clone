@@ -196,7 +196,6 @@ obj gameobject::Ecs::CreateEntity(v3::Vec3 SpawnPos)
 	object.addcomponent<transform_comp>()->transform.position = SpawnPos;
 	return object;
 
-	arch.check();
 }
 
 

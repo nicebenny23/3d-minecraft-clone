@@ -100,7 +100,7 @@ const int indiceoffsetfrombaselocation[] = {
 // Emit the vertices and indices for a single face of a block
 void emitface(const int face, block& torender, renderer::MeshData& mesh) {
 		if (torender.mesh.faces[face].cover==cover_state::Uncovered) {
-			const int baselocation = mesh.pointlist.length / 7;
+			const int baselocation = mesh.length();
 			const int* uniqueInds = &uniqueindices[4 * face];
 			const Vec3& scale = torender.mesh.box.scale;
 			const Vec3& position = torender.mesh.box.center;
@@ -147,7 +147,7 @@ void recreatechunkmesh(Chunk::chunk* aschunk,std::mutex& fill_lock) {
 	
 	aschunk->mesh->facebuf.destroy();//g
 	aschunk->mesh->facebuf = stn::array<face>();//g
-	renderer::MeshData mesh;
+	renderer::MeshData mesh= aschunk->mesh->SolidGeo.create_mesh();
 	
 	for (int ind = 0; ind < chunksize; ind++) {
 		block& blockatpos = (aschunk->blockbuf[ind].getcomponent<block>());//g
@@ -187,7 +187,7 @@ void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 	}
 	else {
 		// Enable 2D render
-		renderer::MeshData mesh_data;
+		renderer::MeshData mesh_data=mesh.TransparentGeo.create_mesh();
 		for (int i = 0; i < mesh.facebuf.length; i++) {
 			emitface(mesh.facebuf[i].facenum.ind(), *(mesh.facebuf[i].mesh->blk), mesh_data);
 		}

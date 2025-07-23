@@ -250,7 +250,7 @@
     <ClCompile Include="items\loottable.cpp" />
     <ClCompile Include="items\menu.cpp" />
     <ClCompile Include="items\recipe.cpp" />
-    <ClCompile Include="mtest.cpp" />
+    <ClCompile Include="renderer\decal.cpp" />
     <ClCompile Include="renderer\Mesh.cpp" />
     <ClCompile Include="player\playermodification.cpp" />
     <ClCompile Include="renderer\guirender.cpp" />
@@ -317,7 +317,6 @@
     <ClInclude Include="block\torch.h" />
     <ClInclude Include="block\water.h" />
     <ClInclude Include="block\wood.h" />
-    <ClInclude Include="Csn.h" />
     <ClInclude Include="debugger\console.h" />
     <ClInclude Include="debugger\debug.h" />
     <ClInclude Include="entities\antifreezeboss.h" />
@@ -343,6 +342,7 @@
     <ClInclude Include="game\query.h" />
     <ClInclude Include="game\relationship.h" />
     <ClInclude Include="game\Settings.h" />
+    <ClInclude Include="game\spawn.h" />
     <ClInclude Include="game\System.h" />
     <ClInclude Include="game\TagIndex.h" />
     <ClInclude Include="game\transform.h" />
@@ -396,6 +396,7 @@
     <ClInclude Include="items\sworditem.h" />
     <ClInclude Include="items\torchitem.h" />
     <ClInclude Include="player\playermovment.h" />
+    <ClInclude Include="renderer\decal.h" />
     <ClInclude Include="renderer\GlUtil.h" />
     <ClInclude Include="renderer\gl_id.h" />
     <ClInclude Include="renderer\HandleMap.h" />
@@ -418,6 +419,7 @@
     <ClInclude Include="player\player.h" />
     <ClInclude Include="player\playerhealth.h" />
     <ClInclude Include="player\playerinventory.h" />
+    <ClInclude Include="renderer\overlay.h" />
     <ClInclude Include="renderer\renderable.h" />
     <ClInclude Include="renderer\RenderContext.h" />
     <ClInclude Include="renderer\ShaderManager.h" />
@@ -429,6 +431,7 @@
     <ClInclude Include="renderer\vertex.h" />
     <ClInclude Include="Resources\Resource.h" />
     <ClInclude Include="Resources\ResourceManager.h" />
+    <ClInclude Include="shaders\decal_frag.vs" />
     <ClInclude Include="util\arraypool.h" />
     <ClInclude Include="util\bitset.h" />
     <ClInclude Include="util\cached.h" />
@@ -437,6 +440,7 @@
     <ClInclude Include="util\filter_argument.h" />
     <ClInclude Include="util\Id.h" />
     <ClInclude Include="util\InterfaceStore.h" />
+    <ClInclude Include="util\interval.h" />
     <ClInclude Include="util\lazy.h" />
     <ClInclude Include="util\LinearBuffer.h" />
     <ClInclude Include="util\List.h" />
