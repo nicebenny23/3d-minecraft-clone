@@ -72,11 +72,14 @@ void update() {
     endframe();
 }
 void init() {
-    initrandom();
+  
     Core::game.ConnectToContext();
-    Core::game.CreateWorld();
+  
     Core::game.createWindow();
+
     Core::game.InitRenderer();
+    initrandom();
+    Core::game.CreateWorld();
     Core::game.InitOC();
     aabb::initCollider();
     ui::createuilist();

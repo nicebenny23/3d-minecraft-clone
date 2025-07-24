@@ -16,7 +16,6 @@ struct Container
 			databuf[i].destroyitem();
 			databuf[i].framedecal->destroy();
 
-			databuf[i].framedecal->destroy();
 		}
 		databuf.destroy();
 	}

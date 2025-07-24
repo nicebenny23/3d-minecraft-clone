@@ -684,7 +684,11 @@ namespace stn {
 		}
 
 		T* dst = list + length;
-		((*(dst++) = std::forward<Args>(values)), ...);
+		size_t i = 0;
+		// Use initializer list to ensure left-to-right evaluation
+		(void)std::initializer_list<int>{
+			((*dst++ = std::forward<Args>(values)), 0)...
+		};
 
 		length += total_new;
 	}

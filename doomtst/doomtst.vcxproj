@@ -68,8 +68,9 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableASAN>true</EnableASAN>
+    <EnableASAN>false</EnableASAN>
     <EnableFuzzer>false</EnableFuzzer>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -107,14 +108,17 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\opengl\lib;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)x64</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\opengl\lib;C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\lib\x64;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)x64</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|x64'">
     <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\opengl\lib;C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\lib\x64;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)x64</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -169,6 +173,7 @@
       <LanguageStandard>stdcpp23</LanguageStandard>
       <UseDynamicDebugging>false</UseDynamicDebugging>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -187,13 +192,15 @@
       <MultiProcessorCompilation>Yes</MultiProcessorCompilation>
       <LanguageStandard>stdcpp20</LanguageStandard>
       <UseDynamicDebugging>false</UseDynamicDebugging>
-      <Optimization>Full</Optimization>
+      <Optimization>Disabled</Optimization>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <OmitFramePointers>false</OmitFramePointers>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -476,6 +483,7 @@
     <ClInclude Include="util\type_graph.h" />
     <ClInclude Include="util\type_index.h" />
     <ClInclude Include="util\type_tag.h" />
+    <ClInclude Include="util\ultraAsnc.h" />
     <ClInclude Include="util\UniquePtr.h" />
     <ClInclude Include="world\chunkload.h" />
     <ClInclude Include="world\managegrid.h" />

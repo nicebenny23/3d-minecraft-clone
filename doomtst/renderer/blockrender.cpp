@@ -121,7 +121,8 @@ void emitface(const int face, block& torender, renderer::MeshData& mesh) {
 
 				// Fill vertex data
 				mesh.add_point(offset,coords,textureNumber,lightValue);
-			
+				//mesh.pointlist.push(offset.x, offset.y, offset.z, coords.x, coords.y, textureNumber, lightValue);
+
 			}
 
 			

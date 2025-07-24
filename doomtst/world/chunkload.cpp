@@ -6,8 +6,8 @@
 #include "../util/interval.h"
 #include "../util/fileloader.h"
 #include "../block/blockinit.h"
-
-
+#include <mutex>
+#include "../util/thread_split.h"
 using namespace blockname;
 
 enum biometype {
@@ -100,7 +100,7 @@ struct idmap
 {
 
 	noisemap* map;
-	
+
 	array<idblock> ids;
 	Coord loc;
 	int idatpos(Coord pos) {
@@ -120,26 +120,36 @@ struct idmap
 		return minecraftair;
 
 	}
-	idmap(Coord location) {
-
-		map = genperlin(1, .6f, .02f, 1.2, rigid);
-
-		loc = location;
-		ids = array<idblock>();
-		int ind = 0;
-		for (int x = 0; x < chunkaxis; x++)
-		{
+	void iterate(size_t x, std::mutex& mtx)
+	{
+		int ind = chunkaxis * chunkaxis * x;
 			for (int y = 0; y < chunkaxis; y++) {
 				for (int z = 0; z < chunkaxis; z++) {
 					Coord idpos = loc * chunkaxis + Coord(x, y, z);
 
 					int neid = generatechunkvalfromnoise(idpos, map);
-					ids.push(idblock(neid, idpos));
-
+					mtx.lock();
+					ids.reach(ind) = idblock(neid, idpos);
+					mtx.unlock();
+					ind++;
 				}
 			}
 
+	}
+	idmap(Coord location) {
+
+		map = genperlin(1, .6f, .02f, 1.2, rigid);
+		array<size_t> x_pos;
+		for (auto i = 0; i < chunkaxis; i++)
+		{
+			x_pos.push(i);
 		}
+		loc = location;
+		ids = array<idblock>();
+		std::mutex lck; 
+		auto func = [&lck, this](size_t x) {iterate(x, lck); };
+		thread_util::par_iter(x_pos.begin(), x_pos.end(), func, 4);
+		x_pos.destroy();
 
 	}
 	void destroy() {

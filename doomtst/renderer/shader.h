@@ -34,7 +34,8 @@ struct shader
 	}
 	void setint(int val, const char* name)
 	{
-
+		int l = uniformlocation(name);
+		
 		glad_glUniform1i(uniformlocation(name), val);
 	}
 	void setuint(unsigned int val, const char* name)
@@ -74,9 +75,9 @@ struct shader
 		glad_glUniform2f(uniformlocation(name), val.x, val.y);
 	}
 
-private:
 	void attach();
-	shader(const char* ShaderName, const char* vertexpath, const char* fragpath);
+	shader(const std::string& name, const char* vertexpath, const char* fragpath);
+private:
 	friend class Shaders::ShaderManager;
 };
 

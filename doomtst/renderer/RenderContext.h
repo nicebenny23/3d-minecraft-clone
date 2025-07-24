@@ -47,7 +47,7 @@ namespace RenderContext{
 			return *BoundShader;
 		}
 		void bind_properties(const RenderProperties& props);
-		Context() {}
+		Context():material(),BoundShader(),BoundTexture(),BoundEbo(),BoundVbo(),BoundVao(){}
 	
 	private:
 		const Material * material;

@@ -33,8 +33,7 @@ namespace RenderContext {
 		if (Shader.id == 0)
 		{
 			throw std::logic_error("cant attach invalid shader");
-		}
-		glUseProgram(Shader.id);
+		}Shader.attach();
 		BoundShader = &Shader;
 	}
 

@@ -2,7 +2,7 @@
 #include <type_traits>
 namespace Unique {
 	template<typename T>
-	struct boxed {
+	struct Box {
 	private:
 		T* ptr;
 		void Delete() {
@@ -23,16 +23,16 @@ namespace Unique {
 		T& operator->() const {
 			return *ptr;
 		}
-		boxed(boxed&& other) {
+		Box(Box&& other) {
 			ptr = other.ptr;
 			other.ptr = nullptr;
 		}
 
-		boxed(const boxed& other) = delete;
-		void operator=(const boxed& other) = delete;
+		Box(const Box& other) = delete;
+		void operator=(const Box& other) = delete;
 
 
-		void operator=(boxed&& other) noexcept {
+		void operator=(Box&& other) noexcept {
 			if (this == &other)
 			{
 				return;
@@ -44,7 +44,7 @@ namespace Unique {
 
 
 		}
-		~boxed() {
+		~Box() {
 			Delete();
 		}
 		T* Get() const {
@@ -55,7 +55,7 @@ namespace Unique {
 			Delete();
 			ptr = p;
 		}
-		explicit boxed(T* Ptr = nullptr) noexcept :ptr(Ptr) {};
+		explicit Box(T* Ptr = nullptr) noexcept :ptr(Ptr) {};
 
 		template<typename U = T>
 		//Template I found online

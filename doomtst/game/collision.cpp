@@ -13,8 +13,15 @@ void collision::update()
 
 		for (Collider* Coll : Colliderlist)
 		{
-				handleCollisionWithGrid(*Coll);
+			if (true)
+			{
 
+			}
+				handleCollisionWithGrid(*Coll);
+				
+					
+
+			
 
 			
 		}
@@ -217,7 +224,9 @@ Vec3 colideentandblock(Collider& entity, block* tocollide) {
 		{
 			return zerov;
 		}
-		propagatecollisionmessage(entity.owner, tocollide->owner);
+
+			propagatecollisionmessage(entity.owner, tocollide->owner);
+
 		if (!blockcol.effector && !entity.effector)
 		{
 			return force;
@@ -226,27 +235,26 @@ Vec3 colideentandblock(Collider& entity, block* tocollide) {
 
 void collision::handleCollisionWithGrid(Collider& entity)
 {
-	array<block*>& blklist = CtxName::ctx.Grid->voxelinrange(entity.globalbox());
-
-
 	
+
+		array<block*>& blklist = CtxName::ctx.Grid->voxelinrange(entity.globalbox());
+
+
+
 		Vec3 minforce = zerov;
-		block* minblock=nullptr;
+		block* minblock = nullptr;
 		for (int ind = 0; ind < blklist.length; ind++)
 		{
-		Vec3 force = colideentandblock(entity, blklist[ind]);
+			Vec3 force = colideentandblock(entity, blklist[ind]);
 
 			if (mag(force) > mag(minforce) || mag(minforce) == 0)
 			{
-				if (mag(force)>10000)
-				{
-					int l = 1;
-				}
+
 				minblock = blklist[ind];
 				minforce = force;
 			}
 		}
-		if (minblock!=nullptr)
+		if (minblock != nullptr)
 		{
 			if (!entity.effector)
 			{
@@ -255,11 +263,11 @@ void collision::handleCollisionWithGrid(Collider& entity)
 
 			}
 		}
-	
-	blklist.destroy();
 
-	delete& blklist;
-		
+		blklist.destroy();
+
+		delete& blklist;
+	
 }
 
 

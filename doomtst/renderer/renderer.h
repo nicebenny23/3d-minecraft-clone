@@ -58,15 +58,18 @@ namespace renderer {
 		template<typename ...Args>
 		inline void add_point(const Args& ...values)
 		{
-				size_t pushed_floats = (push_single(values) + ...);
-				if (stride != pushed_floats * sizeof(float)) {
-					throw std::logic_error("Point size mismatch: does not match stride");
-				}
+			size_t pushed_floats = 0;
+			(void)std::initializer_list<int>{
+				(pushed_floats += push_single(values), 0)...
+			};
 
-				if (generate_trivial) {
-					indicelist.push(indicelist.length);
-				}
-			
+			if (stride != pushed_floats * sizeof(float)) {
+				throw std::logic_error("Point size mismatch: does not match stride");
+			}
+
+			if (generate_trivial) {
+				indicelist.push(indicelist.length);
+			}
 
 		}
 		template<typename T>
@@ -93,8 +96,8 @@ namespace renderer {
 		void add_index(size_t index) {
 			indicelist.push(index);
 		}
-		explicit MeshData() {}
-	private:
+		explicit MeshData() :generate_trivial(false), pointlist(), indicelist(), layout(),stride() {}
+
 		size_t stride;
 		vertice::vertex layout;
 		friend Renderer;
@@ -104,7 +107,7 @@ namespace renderer {
 	struct RenderableHandle {
 		Ids::Id id;
 		Renderer* renderer;
-		RenderableHandle() {
+		RenderableHandle():id(),renderer() {
 
 
 		}
@@ -157,10 +160,10 @@ namespace renderer {
 		template<typename val_type>
 		void set_uniform(const char* name, const val_type& val) {
 
-			uniform_manager.set(name, uniforms::uniform_val{ val });
+			uniform_manager.set(name, uniforms::uniform_val{ std::in_place_type<val_type>, val });
 
 		}
-		void apply_uniform(uniforms::uniform_val val, const char* location_in_shader);
+		void apply_uniform(const uniforms::uniform_val& val, const char* location_in_shader);
 		void SetUniform(const std::string& name, float value);
 		void SetUniform(const std::string& name, const glm::vec2& vec);
 		void SetUniform(const std::string& name, const glm::vec3& vec);

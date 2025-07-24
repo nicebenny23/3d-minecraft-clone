@@ -6,25 +6,12 @@
 #include "../items/loottable.h"
 #include "../entities/onhit.h"
 #include "../game/particles.h"
-void initbreakparticle(gameobject::obj newent)
+
+
+void playerbreak::make_drop(gameobject::obj Hit)
 {
-	newent.transform().position = newent.transform().position;
-
-		newent.transform().position += Vec3(random() - .5, 1, random() - .5) / 5;
-
-		
-		newent.addcomponent<aabb::Collider>(newent.transform().position, blockscale / 22, true, true);
-		newent.addcomponent<rigidbody>(1, .1)->velocity = Vec3(random()-.5, random()-.2, random()-.5) * 2;
-		newent.transform().scale = blockscale / 22;
-		newent.addcomponent<destroyonhit<particle>>();
-
-	
-}
-
-void playerbreak::make_drop(voxtra::RayWorldHit Hit)
-{
-	if (Hit.collider->owner.hascomponent<loottable>())
+	if (Hit.hascomponent<loottable>())
 	{
-		Hit.collider->owner.getcomponent<loottable>().should_drop = true;
+		Hit.getcomponent<loottable>().should_drop = true;
 	}
 }

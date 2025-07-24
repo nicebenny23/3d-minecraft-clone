@@ -86,6 +86,7 @@ namespace renderer {
     }
 
     
+    
     void Renderer::InitilizeBaseMaterials()
     {
         Shaders.Compile("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs");
@@ -103,19 +104,20 @@ namespace renderer {
         Shaders.Compile("ParticleShader", "shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
         Construct("Particle", "ParticleShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
-        
-        meshes = Meshes::MeshRegistry(&Binders);
+
         set_uniform("aspect_ratio", CtxName::ctx.Window->AspectRatio());
     }
  
    
 
-    Renderer::Renderer()
+    Renderer::Renderer():Shaders(),Textures(),uniform_manager(),Binders()
     {
-        Modes = MaterialManager(&Shaders,&uniform_manager);
+
+        Modes = MaterialManager(&Shaders, &uniform_manager);
         fov = 90;
         setprojmatrix(90, .21f, 100);
-        meshes = Meshes::MeshRegistry();
+
+        meshes = Meshes::MeshRegistry(&Binders);
     }
 
     void Renderer::setprojmatrix(float newfov, float nearclipplane, float farclipplane)
@@ -140,14 +142,15 @@ namespace renderer {
         context.Bind(Shaders.get_shader(mat.shader));
         for (const auto& elem : mat.handles)
         {
+            
             apply_uniform(uniform_manager.get( elem), elem.name);
         }
         context.bind_properties(mat.prop);
     }
   
-    void Renderer::apply_uniform(uniforms::uniform_val val, const char* location_in_shader)
+    void Renderer::apply_uniform(const uniforms::uniform_val& val, const char* location_in_shader)
     {
-        
+        size_t ind = val.index();
         switch (val.index()) {
         case uniforms::uform_int:
             context.bound_shader().setint(std::get<int>(val), location_in_shader);

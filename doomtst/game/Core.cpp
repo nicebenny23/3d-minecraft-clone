@@ -1,6 +1,9 @@
 #pragma once
 #include "Core.h"
 namespace Core {
+#include <glad/glad.h>
+#include <iostream>
+
    
     Engine game; 
     // Error callback: Logs GLFW errors.
@@ -96,6 +99,9 @@ namespace Core {
 
     void Engine::InitRenderer()
     {
+        const char* versionStr = (const char*)glGetString(GL_VERSION);
+        std::cout << "OpenGL Version: " << versionStr << std::endl;
+       
         ren.InitilizeBaseMaterials();
         ctx->Ren = &ren;
     }

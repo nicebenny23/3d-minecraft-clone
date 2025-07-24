@@ -65,7 +65,7 @@ namespace range {
             return Pipe<decltype(new_view)>(std::move(new_view));
         }
 
-        decltype(auto) Enum() {
+        decltype(auto) enumerate() {
             static_assert(Range<RangeType>, "RangeType must satisfy Range");
             auto new_view = EnumView<RangeType>(range);
             return Pipe<decltype(new_view)>(std::move(new_view));

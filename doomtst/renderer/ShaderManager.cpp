@@ -8,11 +8,11 @@ void Shaders::ShaderManager::Compile(const std::string& name, const char* vert, 
         {
             throw std::logic_error("shaders are unable to have the same Name");
         }
-        shaderlist.push(shader(name.c_str(), vert, frag));
+        shaderlist.push(shader(name, vert, frag));
 
     }
 
-Ids::Id Shaders::ShaderManager::get_handle(std::string Name)
+Ids::Id Shaders::ShaderManager::get_handle(const std::string& Name)
 {
   
     if (!string_to_id.contains(Name))

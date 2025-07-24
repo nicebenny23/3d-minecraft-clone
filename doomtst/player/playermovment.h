@@ -105,6 +105,7 @@ struct PlayerMovementSys : System
                 else if (sinceGround < coyoteDuration
                     && sinceBuffer < bufferDuration)
                 {
+
                     body->velocity.y = jumpStrength;
                     movement->jumpBufferTime = now - (bufferDuration + 1.0f); // expire buffer
                 }

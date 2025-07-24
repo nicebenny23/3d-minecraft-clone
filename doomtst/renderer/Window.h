@@ -31,6 +31,7 @@ namespace window {
             MonPtr = nullptr;
             width = 0;
             height = 0;
+            ctx = nullptr;
         }
       
         

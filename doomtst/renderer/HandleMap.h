@@ -37,6 +37,10 @@ namespace handle {
 			}
 			elemlist.push(value);
 		}
+		void ovveride(const std::string& Name, const T& value) {
+			size_t handle = get_handle(Name).id;
+			elemlist.reach(handle) = (value);
+		}
 	};
 
 }

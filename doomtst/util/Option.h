@@ -96,8 +96,17 @@ namespace Opt {
             }
         }
        
-      
-
+      template<typename Func>
+        auto fold_or(Func f, decltype(f(std::declval<T>())) def) const -> decltype(f(std::declval<T>())) {
+            using U = decltype(f(std::declval<T>()));
+            if (has_value) {
+                return (f(value));
+            }
+            else {
+                return def;  // empty Option<U>
+            }
+        }
+        
         // Get value (throws if None)
         T& unwrap() {
             expect("Called unwrap on None");

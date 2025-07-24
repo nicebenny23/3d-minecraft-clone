@@ -5,7 +5,7 @@
 #include "../util/type_index.h"
 #include "texture.h"
 #include "../util/Id.h"
-
+#include "HandleMap.h"
 #include <glm/glm.hpp>  // for vec/mat types if you use glm
 #include <GLFW/glfw3.h>
 namespace uniforms{
@@ -46,27 +46,23 @@ namespace uniforms{
    };
     struct UniformManager {
         
-        stn::array<uniform_val> uniform_list;  // Dense storage of all uniforms
-        robin_hood::unordered_flat_map<const char*,size_t> name_id_map;
+        handle::HandleMap< uniform_val> name_uniform_map;
         void set(const char* name,const uniform_val& value) {
-            uniform_list.reach(get_handle(name).id) = value;
+            name_uniform_map.ovveride(name, value);
+           
+            int l1 = 1;
         }
         
         
         Ids::Id get_handle(const char* name) {
-            if (!name_id_map.contains(name))
-            {
-                name_id_map[name] = name_id_map.size();
-            }
-            return Ids::Id(name_id_map.at(name));
+            
+                return name_uniform_map.get_handle(name);
+            
+
         }
-
-
         const uniform_val& get(const uniform_ref& handle) const {
-            if (handle.id.id >= uniform_list.length) {
-                throw std::out_of_range("Uniform handle out of range");
-            }
-            return uniform_list[handle.id.id];
+           
+            return name_uniform_map.get_elem(handle.id);
 
         }
         template< typename T>
@@ -82,16 +78,15 @@ namespace uniforms{
    struct uniform {
        uniform_val value;
        const char* name;
-       uniform(const uniform_val& val,const char* uniform_name):name(uniform_name),value(val) {
-
-
-       }
+       
        template< typename T>
        T& get() {
            return std::get<T>(value);
        }
-       template< typename T>
-       uniform( T& val, const char* uniform_name):name(uniform_name), value(uniform_val(val)) {}
+       template<typename T>
+           uniform(const T& val, const char* uniform_name)
+           : name(uniform_name), value(std::in_place_type<T>, val) {
+       }
 
        uniform() :name() {
 

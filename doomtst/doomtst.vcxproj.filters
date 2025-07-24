@@ -858,6 +858,9 @@
     <ClInclude Include="util\interval.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="util\ultraAsnc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag1.vs" />
