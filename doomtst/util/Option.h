@@ -106,7 +106,6 @@ namespace Opt {
                 return def;  // empty Option<U>
             }
         }
-        
         // Get value (throws if None)
         T& unwrap() {
             expect("Called unwrap on None");

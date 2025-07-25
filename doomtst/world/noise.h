@@ -7,7 +7,9 @@
 #include "../util/algorthm.h"
 #include "../util/stats.h"
 #pragma once
-#define NoiseOffset Vec3(.838f, .38f, .49f)
+constexpr v3::Vec3 NoiseOffset = v3::Vec3(.838f, .38f, .49f);
+constexpr float test_scale = 2.71818281828f;
+
 using namespace v3;
 using namespace stn;
 
@@ -21,7 +23,7 @@ struct noiseparams
 {
     int distributionsize;
     noiseparams() {
-        distributionsize = 1000;
+        distributionsize = 400;
         octaves = 0;
         scalefactor = 0;
         startscale = 0;
@@ -34,7 +36,7 @@ struct noiseparams
     int octaves;            // Number of octaves used in the noise generation
     float amplificationfactor;// Controls how amplitude 
     noiseparams(float startingscale, float scalemultiplyer, unsigned int noiseoctaves, float ampfactor,noisetype ntype) {
-        distributionsize = 1000;
+        distributionsize = 400;
         startscale = startingscale;
         scalefactor = scalemultiplyer;
         octaves = noiseoctaves;
@@ -67,7 +69,7 @@ inline void noisemap::createdist() {
     
     array<float> distribution = array<float>();
     
-    float ScaleRange =properties.startscale * pow(properties.scalefactor, properties.octaves)/100;
+    float ScaleRange =properties.startscale * pow(properties.scalefactor, properties.octaves)* test_scale;
 
 for (int i = 0; i < properties.distributionsize; i++)
 {
@@ -79,7 +81,7 @@ for (int i = 0; i < properties.distributionsize; i++)
 equalizer= statistics::HistogramEqualizer(array<float>(distribution));
 }
 
-
+//higher scale means higher frequency or more chaotic
 inline noisemap* genperlin(int octaves,  float scalemul, float startscale, float ampmul,noisetype type) {
     noisemap* map = new noisemap();
     map->properties = noiseparams(startscale, scalemul, octaves, ampmul,type);

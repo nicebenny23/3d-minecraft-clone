@@ -4,6 +4,7 @@
 #include "../renderer/textrender.h"
 #include "../game/Core.h"
 #include "../game/GameContext.h"
+
 #pragma once 
 inline cptr<uiboxname::uibox> createitembox(const char* boxname,const char* TextureName) {
 
@@ -56,7 +57,7 @@ enum itemprop
 	wear=0,
 	count=1
 };
-//
+
 struct item
 {
 	int state;
@@ -77,6 +78,8 @@ struct item
 		properties.foodval = 0;
 		itemui.textvalue = ui::createuielement<integertext>(v2::zerov, 1 / 70.f);
 	}
+	
+
 
 	struct itemproperties {
 		float pickaxepower;
@@ -126,8 +129,8 @@ struct item
 	}
 	bool canadd(int amtto);
 	void destroy();
-	bool use(int useamt);
-	bool canuse(int useamt);
+	bool use(size_t useamt);
+	bool canuse(size_t useamt);
 	void give(int& givenamt);
 	void maxoutthis(item* itm);
 };

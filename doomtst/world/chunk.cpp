@@ -32,7 +32,7 @@ void Chunk::chunkmesh::genbufs()
 	SolidGeo.set_material("SolidBlock");
 	SolidGeo.set_layout(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
 	TransparentGeo = CtxName::ctx.Ren->gen_renderable();
-	TransparentGeo.set_material("SolidBlock");
+	TransparentGeo.set_material("TransparentBlock");
 	TransparentGeo.set_layout(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
 	
 }

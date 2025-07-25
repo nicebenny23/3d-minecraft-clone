@@ -11,7 +11,7 @@ inline void crystalinit(blockname::block* blk) {
 	blk->mesh.box.scale = blockname::blockscale;
 
 	blk->createdefaultaabb(false);
-	blk->mininglevel = 4;
+	blk->mininglevel = 3;
 	blk->minedfastwithpick = true;
 	blk->owner.addcomponent<loottable>()->addelem(crystalitem, 2,true);
 }

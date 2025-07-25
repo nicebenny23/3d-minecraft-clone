@@ -256,6 +256,7 @@
     <ClCompile Include="items\Container.cpp" />
     <ClCompile Include="items\loottable.cpp" />
     <ClCompile Include="items\menu.cpp" />
+    <ClCompile Include="items\new_item.cpp" />
     <ClCompile Include="items\recipe.cpp" />
     <ClCompile Include="renderer\decal.cpp" />
     <ClCompile Include="renderer\Mesh.cpp" />
@@ -382,6 +383,10 @@
     <ClInclude Include="items\ironpick.h" />
     <ClInclude Include="items\ironsword.h" />
     <ClInclude Include="items\irontopitem.h" />
+    <ClInclude Include="items\ItemCont.h" />
+    <ClInclude Include="items\item_ui.h" />
+    <ClInclude Include="items\new_item.h" />
+    <ClInclude Include="items\new_slot.h" />
     <ClInclude Include="items\obsidianitem.h" />
     <ClInclude Include="items\plank.h" />
     <ClInclude Include="items\sand.h" />

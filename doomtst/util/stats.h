@@ -3,8 +3,65 @@
 #include <algorithm>
 #include <stdexcept>
 #include "dynamicarray.h"
-
+#include "pair.h"
 namespace statistics {
+
+	inline void interpolate(stn::array<float>& to_interpolate, float min, float max) {
+
+		if (to_interpolate.length==0)
+		{
+			return;
+		}
+		stn::array<util::pair<size_t, float> > filled;
+		if (std::isnan(to_interpolate.first()))
+		{
+
+			filled.push(util::pair(size_t(0), min));
+		}
+		for (size_t i = 0; i < to_interpolate.length; i++) {
+			if (!std::isnan(to_interpolate[i])) {
+				filled.push(util::pair(i, to_interpolate[i]));
+			}
+		}
+		if (std::isnan(to_interpolate.last()))
+		{
+			if (std::isnan(to_interpolate.first())&&to_interpolate.length==1)
+			{
+				filled.first().second = (min + max)/ 2;
+			}
+			else {
+				filled.push(util::pair(size_t(to_interpolate.length - 1), max));
+			}
+			}
+	util::pair<size_t, float> min_val = filled.first();
+	util::pair<size_t, float> max_val = filled.first();
+	size_t inc = 0;
+	for (int i = 0; i < to_interpolate.length; i++) {
+
+		if (max_val.first == i) {
+			inc++;
+			min_val = max_val;
+			if (inc!= filled.length)
+			{
+
+				max_val = filled[inc];
+			}
+
+		}
+		int diff = (max_val.first - min_val.first);
+		if (diff != 0)
+		{
+			to_interpolate[i] = lerp(min_val.second, max_val.second, (i - static_cast<float>(min_val.first)) / diff);
+		}
+		else
+		{
+			to_interpolate[i] = min_val.second;
+		}
+
+	}
+	filled.destroy();
+
+	}	
 	//transforms a data set into the uniform distribution ranging from [-1,1]
 	struct HistogramEqualizer {
 		HistogramEqualizer() {
@@ -46,18 +103,10 @@ namespace statistics {
 				//the function 2x-1 transforms the interval [0,1] to [-1,1]
 				equalizedDistribution[bucket] = 2.0f * float(i) / float(DataPoints) - 1.0f;
 			}
-
-			// Fill gaps in distribution as 2 elements could be mapped to the same bucket
-			//starts at the smallest values and replaces every unfilled element with the largest value found sofar 
-			float lastValue = -1.0f;
-			for (int i = 0; i < DataPoints; i++) {
-				if (!std::isnan(equalizedDistribution[i])) {
-					lastValue = equalizedDistribution[i];
-				}
-				else {
-					equalizedDistribution[i] = lastValue;
-				}
-			}
+			
+			
+			interpolate(equalizedDistribution,-1,1);
+	
 			data.destroy();
 		}
 		bool generated() {

@@ -9,59 +9,95 @@
 #include <mutex>
 #include "../util/thread_split.h"
 using namespace blockname;
-
 enum biometype {
 	mossybiome=0,
 	normalbiome=1,
-	lavabiome=2,
-
+	open_stone=2,
+	
 };
-int idfromnoise( float nint, float bint,  float nint3) {
-	const float offset = .5f;
-	const float offset2 = .85;
-	int neid = minecraftstone;
+biometype get_biome(float biome) {
 
-	if (.4 < nint3)
+	if (inter::range(-.5,1).contains(biome))
 	{
-
-
-		if (inrange(nint, -offset, offset))
-		{
-			if (inrange(bint, -offset, offset))
-			{
-
-				neid = minecraftair;
-			}
-		}
+		return normalbiome;
 	}
-	else
+	if (inter::range(-.8, -.5).contains(biome))
 	{
-		if (0 < nint3)
-		{
-
-
-			neid = minecraftair;
-			if (inrange(bint, -offset2, offset2))
-			{
-				neid = minecraftstone;
-			}
-		}
-		else {
-			neid = minecraftair;
-			if (inter::range(0, offset2).contains(bint))
-			{
-				neid = minecrafttreestone;
-			}
-			if (inter::range(-offset2,0).contains(bint))
-			{
-				neid = minecraftmoss;
-			}
-		}
+		return normalbiome;
 	}
+	return mossybiome;
+
+}
+int get_default_block(biometype biome) {
+
+	if (normalbiome)
+	{
+		return minecraftstone;
+	}
+	if (mossybiome)
+	{
+		return minecrafttreestone;
+	}
+		return minecrafttreestone;
+	
+	
+}
+int get_secondary_block(biometype biome) {
+
+	if (normalbiome)
+	{
+		return minecraftstone;
+	}
+	if (mossybiome)
+	{
+		return minecraftmoss;
+	}
+	return minecrafttreestone;
+}
+int chaotic_overide(float chaotic, biometype biome) {
+	if (inter::range(0, .01f).contains(chaotic))
+	{
+		return minecraftcrystal;
+	}
+	if (inter::range(0,.01f).contains(chaotic))
+	{
+		return get_secondary_block(biome);
+	}
+	return -1;
+}
+int idfromnoise( float biome,float chaotic,float cave_carve,float cave_carve2,float should_cave ) {
+	const float offset = .3f;
+	biometype biome_type = get_biome(biome);
+	int main_block = get_default_block(biome_type);
+	
+	int overload = chaotic_overide(chaotic,biome_type);
+	if (overload!=-1)
+	{
+		main_block=overload;
+	}
+
+
+	int neid = main_block;
+
+		if (inrange(cave_carve, -offset, offset))
+		{
+			if (inrange(cave_carve2, -offset, offset))
+			{
+				if (0<should_cave)
+				{
+
+					neid = minecraftair;
+				}
+			}
+			
+			
+		}
+
+	
 	return neid;
 
 }
-int generatechunkvalfromnoise(Vec3 pos, noisemap* map)
+int generatechunkvalfromnoise(Vec3 pos, noisemap* map, noisemap* crazy, noisemap* slow)
 {
 	pos *= blocksize;
 	
@@ -71,13 +107,13 @@ int generatechunkvalfromnoise(Vec3 pos, noisemap* map)
 	localpos.y = symmetric_mod(pos.y, chunkaxis);
 
 	localpos.z = symmetric_mod(pos.z, chunkaxis);
-	float nint = (*map).Eval(pos + Vec3(0, pos.y, 0));
+	float carve1 = (*map).Eval(pos + Vec3(0, pos.y, 0));
+	float carve2= map->Eval(pos + Coord(0, 103, 40));
+	float biome= slow->Eval(pos + Coord(893, 103, 40));
+	float cave_region = slow->Eval(pos + Coord(893, 103, 40));
+	float random_n = crazy->Eval(pos + Coord(101, 300, 33));
 
-	float biome= map->Eval(pos + Coord(33893, 103, 40));
-	float nint3 = map->Eval(pos + Coord(0, 103, 40));
-	float nint2 = map->Eval(pos + Coord(101, 300, 33));
-
-		return idfromnoise( nint, nint2,nint3);
+		return idfromnoise(biome, random_n, carve1, carve2, cave_region);
 	
 
 
@@ -98,9 +134,9 @@ struct idblock {
 
 struct idmap
 {
-
+	noisemap* slow;
 	noisemap* map;
-
+	noisemap* crazy;
 	array<idblock> ids;
 	Coord loc;
 	int idatpos(Coord pos) {
@@ -127,7 +163,7 @@ struct idmap
 				for (int z = 0; z < chunkaxis; z++) {
 					Coord idpos = loc * chunkaxis + Coord(x, y, z);
 
-					int neid = generatechunkvalfromnoise(idpos, map);
+					int neid = generatechunkvalfromnoise(idpos, map,crazy,slow);
 					mtx.lock();
 					ids.reach(ind) = idblock(neid, idpos);
 					mtx.unlock();
@@ -137,8 +173,9 @@ struct idmap
 
 	}
 	idmap(Coord location) {
-
+		slow= genperlin(1, .005f, .02f, 1.2, rigid);
 		map = genperlin(1, .6f, .02f, 1.2, rigid);
+		crazy= genperlin(2, 1.f, .02f, 1.2, rigid);
 		array<size_t> x_pos;
 		for (auto i = 0; i < chunkaxis; i++)
 		{
@@ -155,7 +192,8 @@ struct idmap
 	void destroy() {
 		ids.destroy();
 		map->destroy();
-
+		crazy->destroy();
+		slow->destroy();
 	}
 
 };

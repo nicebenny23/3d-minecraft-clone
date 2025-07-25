@@ -55,10 +55,12 @@ struct Container
 		{
 			if (databuf[i].helditem!=nullptr)
 			{
-				if(databuf[i].helditem->amt<=0){
-				
+				if (databuf[i].helditem->amt==0)
+				{
 					databuf[i].destroyitem();
 				}
+
+				
 			}
 		}
 	}

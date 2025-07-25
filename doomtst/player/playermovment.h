@@ -14,9 +14,10 @@ struct playermovement : gameobject::component
     timename::time lastGroundedTime;
     timename::time jumpBufferTime;
     bool slamUsed;                  // track whether slam was already done this airtime
-
+    bool has_jumped = false;
     void start()
     {
+        has_jumped = false;
         priority = 11;
         lastGroundedTime = CtxName::ctx.Time->now();
         jumpBufferTime = CtxName::ctx.Time->now() - 1.0f;
@@ -32,7 +33,7 @@ struct PlayerMovementSys : System
     const float bufferDuration = 0.10f;
     const float jumpStrength = 150.0f * 16.0f / 200.0f;
     const float slamStrength = -30.0f;    // tweak for slam speed
-
+    
     virtual void run(gameobject::Ecs* ecs)
     {
         auto view = query::View<rigidbody, playermovement, playerclimb>(ecs);
@@ -60,6 +61,7 @@ struct PlayerMovementSys : System
             {
                 movement->slamUsed = false;
                 movement->lastGroundedTime = now;
+                movement->has_jumped = false;
             }
 
             // — stamp jumpBufferTime on press —
@@ -103,10 +105,11 @@ struct PlayerMovementSys : System
                 }
                 // buffered coyote jump
                 else if (sinceGround < coyoteDuration
-                    && sinceBuffer < bufferDuration)
+                    && sinceBuffer < bufferDuration&&!movement->has_jumped)
                 {
-
+                    movement->has_jumped=true;
                     body->velocity.y = jumpStrength;
+                    alert("Hershel vs super luigi");
                     movement->jumpBufferTime = now - (bufferDuration + 1.0f); // expire buffer
                 }
                 // sneak-down on ground

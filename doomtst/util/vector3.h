@@ -157,7 +157,7 @@ namespace v3 {
 	{
 		
 		glm::vec3 glm();
-		Vec3(float X, float Y,float Z);
+		constexpr Vec3(float X, float Y,float Z) noexcept;
 		Vec3(glm::vec3 glm);
 		Vec3(Coord coord);
 		Vec3();
@@ -220,7 +220,7 @@ namespace v3 {
 		z = 0;
 	}
 
-	inline Vec3::Vec3(float X, float Y, float Z) {
+	inline constexpr Vec3::Vec3(float X, float Y, float Z) noexcept {
 
 		x = X;
 		y = Y;

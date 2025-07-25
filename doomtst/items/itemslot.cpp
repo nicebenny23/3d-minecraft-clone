@@ -24,17 +24,14 @@ itemslot::itemslot(int xloc, int yloc) {
 }
 
 
-bool itemslot::givefreeamt(int amt)
+bool itemslot::givefreeamt(size_t amt)
 {
 
 	
-	if (amt<=0)
-	{
-		return false;
-	}
+	
 	if (helditem==nullptr)
 	{
-		Assert("cant give item to other from nullptr");
+		throw("cant give item to other from nullptr");
 
 		return false;
 	}
@@ -91,6 +88,16 @@ void itemslot::transferitem(item* otherholder) {
 
 		helditem->itemui.itemsprite->box.center = framedecal->box.center;
 
+	}
+
+}
+
+void itemslot::transfer(itemslot& other)
+{
+	
+	if (other.has())
+	{
+		throw std::logic_error("Unable to give item to a full item slot");
 	}
 
 }

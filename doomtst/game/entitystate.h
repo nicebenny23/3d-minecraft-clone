@@ -39,14 +39,15 @@ struct estate : gameobject::component
 		{
 
 
+
 			if (owner.getcomponent<rigidbody>().isonground && !prevonground)
 			{
 				float ypos = owner.transform().position.y;
-				float falldmg = Max(3.f, lastongroundy - ypos) - 3.f;
-				if (owner.getcomponent<rigidbody>().velocity.y<-5)
+
+				if (owner.getcomponent<rigidbody>().velocity.y < -5)
 				{
 
-					damage((falldmg/3));
+					damage(-(owner.getcomponent<rigidbody>().velocity.y / 12));
 
 				}
 

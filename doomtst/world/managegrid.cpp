@@ -75,6 +75,10 @@ void gridutil::computecover(face& blkface)
 		if (blk->attributes.transparent)
 		{
 
+			if (blk->id==minecraftwater)
+			{
+				int l = 1;
+			}
 			blkface.cover = cover_state::Uncovered;
 
 		}

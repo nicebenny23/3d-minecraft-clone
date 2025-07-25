@@ -23,7 +23,7 @@ struct itemslot
 
 	}
 	item* helditem;
-
+	
 	//(0...9),(0...14)
 	Coord location;
 	
@@ -31,13 +31,19 @@ struct itemslot
 	decaltype dtype;
 	
 	itemslot(int xloc, int yloc);
-	bool empty() {
-
-		return (helditem == nullptr);
-	}
-	bool givefreeamt(int amt);
+	
+	bool givefreeamt(size_t amt);
 	void giveitem(int id,int amt);
 	void transferitem(item* otherholder);
+	bool has() const {
+		return helditem != nullptr;
+
+	}
+	bool empty() const {
+		return helditem == nullptr;
+
+	}
+	void transfer(itemslot& other);
 	void destroyitem();
 	void enable();
 	void setdecal(decaltype toset);

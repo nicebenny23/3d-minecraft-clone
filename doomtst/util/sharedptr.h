@@ -205,7 +205,12 @@ namespace Cptr {
             pntr = other.ptr();
         }
         //safe
+        bool valid() {
+            updatestate();
+            return (pntr != nullptr);
+          
 
+        }
 
 
 

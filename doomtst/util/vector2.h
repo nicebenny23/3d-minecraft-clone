@@ -8,7 +8,7 @@ namespace v2 {
 	struct Coord2
 	{
 
-		Coord2(int X, int Y);
+		constexpr  Coord2(int X, int Y) noexcept;
 		Coord2();
 		void operator=(const Coord2& p1);
 		bool operator==(const Coord2& p1);
@@ -118,7 +118,7 @@ namespace v2 {
 	
 
 
-	inline Coord2::Coord2(int X, int Y) {
+	inline constexpr Coord2::Coord2(int X, int Y)  noexcept {
 
 		x = X;
 		y = Y;

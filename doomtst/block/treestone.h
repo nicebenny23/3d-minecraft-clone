@@ -15,7 +15,7 @@ inline void treestoneinit(blockname::block* blk) {
 
 	blk->createdefaultaabb(false);
 	blk->owner.addcomponent<loottable>()->addelem(treestoneitem,1);
-	blk->mininglevel = 1.5;
+	blk->mininglevel = 3;
 	blk->minedfastwithpick = false;
 }
 inline void treestonedelete(blockname::block* blk) {

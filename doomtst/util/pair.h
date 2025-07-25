@@ -11,6 +11,8 @@ namespace util {
 		T2 second;
 
 		pair() = default;
+
+		pair( T1&& a,  T2&& b) : first(std::move(a)), second(std::move(b)) {}
 		pair(const T1& a, const T2& b) : first(a), second(b) {}
 		template<std::size_t I>
 		constexpr decltype(auto) at() & noexcept {

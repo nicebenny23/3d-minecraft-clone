@@ -86,7 +86,8 @@ namespace gameobject {
 	{
 		template <class T>
 		T& getcomponent();
-
+		template <class T>
+		void ensure_component();
 		template <class T>
 		T* getcomponentptr();
 
@@ -546,6 +547,7 @@ namespace gameobject {
 	{
 		return OC->getcomponent<T>(*this);
 	}
+	
 	template <class T>
 	inline bool obj::hascomponent()
 	{
@@ -558,7 +560,14 @@ namespace gameobject {
 		return meta().arch->has_component(*id);
 
 	}
-
+	template<class T>
+	inline void obj::ensure_component()
+	{
+		if (!hascomponent<T>())
+		{
+			throw std::logic_error("Entity does not have component" + std::string(typeid(T).name()));
+		}
+	}
 
 
 	template<class T, typename ...types>

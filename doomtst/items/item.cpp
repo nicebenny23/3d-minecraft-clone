@@ -30,7 +30,7 @@ void item::destroy()
 	itemui.textvalue->destroy();
 	itemui.itemsprite->destroy();
 }
-bool item::use(int useamt)
+bool item::use(size_t useamt)
 {
 	amt -= useamt;
 
@@ -41,7 +41,7 @@ bool item::use(int useamt)
 	}
 	return true;
 }
-bool item::canuse(int useamt)
+bool item::canuse(size_t useamt)
 {
 	if (amt-useamt < 0) {
 

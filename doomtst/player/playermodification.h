@@ -74,7 +74,7 @@ struct playerbreak : gameobject::component {
 
     playerbreak() {};
     float block_power(block* blk) {
-        return blk->mininglevel / static_cast<float>(5);
+        return blk->mininglevel;
 
     }
     float curr_mining_power() {
@@ -82,7 +82,7 @@ struct playerbreak : gameobject::component {
         {
             return 1;
         }
-        return pickaxe()->properties.pickaxepower / 2;
+        return pickaxe()->properties.pickaxepower;
 
     }
     void engage_block(block* blk) {
@@ -133,14 +133,15 @@ struct playerbreak : gameobject::component {
                 }
                
             }
-            if (currmining()->minedfastwithpick && curr_mining_power() < currmining()->mininglevel)
-            {
-                return false;
-            }
             if (!CtxName::ctx.Inp->mouseleft().held) {
 
                 return false;
             }
+            if (currmining()->minedfastwithpick && curr_mining_power() < currmining()->mininglevel)
+            {
+                return false;
+            }
+           
             return true;
     }
 
@@ -149,7 +150,7 @@ struct playerbreak : gameobject::component {
         if (ensure_engage())
         {
             
-            timeuntilbreak -= curr_mining_power() * CtxName::ctx.Time->dt/2;
+            timeuntilbreak -= curr_mining_power() * CtxName::ctx.Time->dt;
             // Show progress decal
             float prog = (break_start_time - timeuntilbreak) / break_start_time;
             size_t phase = clamp(size_t(prog * 7.f), 0, 6);

@@ -216,6 +216,9 @@
     <ClCompile Include="renderer\decal.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="items\new_item.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="util\vector3.h">
@@ -859,6 +862,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="util\ultraAsnc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\new_item.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\ItemCont.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\new_slot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\item_ui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
