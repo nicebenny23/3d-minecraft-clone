@@ -29,9 +29,12 @@ integertext::integertext(v2::Vec2 textcenter, float textscale)
 }
 void integertext::customdestroy()
 {
+
 	word.clear();
-	
-	handle.destroy();
+	if (handle())
+	{
+		handle.destroy();
+	}
 }
 
 void integertext::render()

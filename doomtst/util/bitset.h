@@ -70,7 +70,16 @@ namespace bitset {
             }
             return *this;
         }
-
+        stn::array<size_t> indices() {
+            stn::array<size_t> inds;
+            for (size_t i = 0; i < bits; i++)
+            {
+                if (at(i)) {
+                    inds.push(i);
+                }
+            }
+            return inds;
+        }
         ~bitset() {
             bitlist.destroy();
             bits = 0;

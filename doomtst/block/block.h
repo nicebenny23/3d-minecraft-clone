@@ -180,7 +180,7 @@ namespace blockname {
 			return mesh.box.center;
 		}
 		void create(v3::Coord location, int blockid, Dir::Dir3d blkattachface, Dir::Dir2d blkdirection);
-
+		
 		block():mesh(){
 			utype = gameobject::updatenone;
 		};

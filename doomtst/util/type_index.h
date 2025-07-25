@@ -55,7 +55,7 @@ namespace type_id {
                 dense_id = Ids::Id(type_index++);
                 is_new = true;
             }
-            return { dense_id, is_new };
+            return  util::pair(Ids::Id(dense_id), is_new );
         }
         template<typename T>
         bool contains() const {

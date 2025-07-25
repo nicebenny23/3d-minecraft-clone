@@ -354,6 +354,7 @@
     <ClInclude Include="game\System.h" />
     <ClInclude Include="game\TagIndex.h" />
     <ClInclude Include="game\transform.h" />
+    <ClInclude Include="game\world_commands.h" />
     <ClInclude Include="game\wormobj.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
@@ -385,12 +386,14 @@
     <ClInclude Include="items\irontopitem.h" />
     <ClInclude Include="items\ItemCont.h" />
     <ClInclude Include="items\item_ui.h" />
+    <ClInclude Include="items\new_cont.h" />
     <ClInclude Include="items\new_item.h" />
     <ClInclude Include="items\new_slot.h" />
     <ClInclude Include="items\obsidianitem.h" />
     <ClInclude Include="items\plank.h" />
     <ClInclude Include="items\sand.h" />
     <ClInclude Include="items\tpsword.h" />
+    <ClInclude Include="items\transmute.h" />
     <ClInclude Include="items\treestoneitem.h" />
     <ClInclude Include="items\itemslot.h" />
     <ClInclude Include="items\item.h" />

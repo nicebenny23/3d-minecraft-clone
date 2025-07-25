@@ -118,7 +118,8 @@ namespace statistics {
 			if (!generated()) {
 				throw std::logic_error("Distribution has not been generated");
 			}
-
+			float l=equalizedDistribution[1];
+			int d = 3;
 			return equalizedDistribution[get_bucket(value)];
 			
 		}

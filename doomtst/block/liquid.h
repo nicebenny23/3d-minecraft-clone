@@ -22,6 +22,10 @@ struct liquidprop : gameobject::component {
 	}
 	float diffusetime;
 	void start() {
+		if (!owner.hascomponent<block>())
+		{
+			throw std::logic_error("all liquids must be blocks");
+		}
 		diffusetime = 0;
 		utype = gameobject::updatetick;
 
@@ -35,15 +39,19 @@ struct liquidprop : gameobject::component {
 	}
 	void updateinface(Dir::Dir3d face) {
 
-
-
+		if (liqval <= 1)
+		{
+			return;
+		}
 		Coord newpos =face.ToVec() + objutil::toblk(owner).pos;
-
 		blockname::block* blk = CtxName::ctx.Grid->getBlock(newpos);
 		if (blk == nullptr)
 		{
 			return;
 		}
+		
+		//instert for what dor==3 was
+		
 		if (blk->id != minecraftair)
 		{
 			if (blk->id == objutil::toblk(owner).id)
@@ -64,24 +72,15 @@ struct liquidprop : gameobject::component {
 
 			if (blk->id == minecrafttorch)
 			{
-
 				gridutil::setblock(newpos, minecraftair);
 			}
 
 
 			return;
 
+
 		}
 
-		//instert for what dor==3 was
-		if (liqval <= 1)
-		{
-			return;
-		}
-		if (liqval < 1)
-		{
-			return;
-		}
 		Coord pos = blk->pos;
 		gridutil::setblock(pos, objutil::toblk(owner).id);
 		blk = (CtxName::ctx.GridRef().getBlock(pos));
@@ -126,5 +125,3 @@ struct liquidprop : gameobject::component {
 
 
 };
-#define liquid_HPP
- // ! water_Hpp

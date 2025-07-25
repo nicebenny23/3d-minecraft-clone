@@ -193,18 +193,19 @@ namespace query {
 	//will not care if component list has been changed during the iteration
 	struct ComponentView {
 		gameobject::obj owner;
-
-		ComponentView(gameobject::obj o) : owner(o) {}
-
-		ComponentIterator begin() {
-			auto& bits = owner.meta().arch->dense_bits;
-			return ComponentIterator(owner, owner.OC, bits, 0);
+		array<size_t> dense_bits;
+		ComponentView(gameobject::obj o) : owner(o) {
+			dense_bits = owner.meta().arch->bit_list.indices();
 		}
 
+		ComponentIterator begin() {
+			return ComponentIterator(owner, owner.OC, dense_bits, 0);
+		}
+		~ComponentView() {
+			dense_bits.destroy();
+		}
 		ComponentIterator end() {
-			auto* meta = owner.meta().arch;
-			auto& bits = owner.meta().arch->dense_bits;
-			return ComponentIterator(owner, owner.OC, bits, bits.length);
+			return ComponentIterator(owner, owner.OC, dense_bits, dense_bits.length);
 		}
 	};
 }

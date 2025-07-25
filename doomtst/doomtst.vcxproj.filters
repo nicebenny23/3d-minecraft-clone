@@ -876,6 +876,15 @@
     <ClInclude Include="items\item_ui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="game\world_commands.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\new_cont.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\transmute.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag1.vs" />

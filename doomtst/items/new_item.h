@@ -15,10 +15,9 @@ namespace item_name {
 		size_t get_count();
 		size_t get_max();
 	};
-	
+	//bidirectional
 	bool can_interact(const item& itm1, const item& itm2 ) {
 		return itm1.id == itm2.id && itm1.type == itm2.type;
-
 	}
 	void make_item(gameobject::obj& object,size_t id) {
 
@@ -41,7 +40,7 @@ namespace item_name {
 		return *itm;
 	}
 	
-	void ensure_type(item& itm1, item& itm2) {
+	void ensure_interactable(item& itm1, item& itm2) {
 		if (itm1.id != itm2.id)
 		{
 			std::string msg =
@@ -79,6 +78,13 @@ namespace item_name {
 		bool can_give(size_t count) const {
 			return count<=amt;
 		}
+		size_t max_fit(item_stack& oth) {
+			if (!can_interact(get_item(owner), get_item(oth)))
+			{
+				return 0;
+			}
+			return rem_capacity();
+		}
 		void add(size_t count) {
 			if (!can_fit(count)) {
 				std::string message =
@@ -102,7 +108,7 @@ namespace item_name {
 				throw std::logic_error(msg);
 			}
 		
-			ensure_type(get_item(owner), get_item(other_item));
+			ensure_interactable(get_item(owner), get_item(other_item));
 			if (other_item.rem_capacity()<count)
 			{
 				throw std::logic_error("Unable to transfer more items overflow its capacity");
@@ -136,6 +142,7 @@ namespace item_name {
 	size_t durability() const { return remaining; }
 
 	bool is_broken() const { return remaining == 0; }
+	bool can_use() const { return remaining != 0; }
 	bool is_full() const { return remaining == max_durability; }
 
 	// How much durability has been lost (damage taken)

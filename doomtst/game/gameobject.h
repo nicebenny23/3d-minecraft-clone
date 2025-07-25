@@ -117,7 +117,7 @@ namespace gameobject {
 
 
 		Transform& transform();
-
+		
 		Ecs* OC;
 	private:
 		friend struct Ecs;
@@ -126,7 +126,6 @@ namespace gameobject {
 
 	struct Archtype {
 		bitset::bitset bit_list;
-		array<size_t> dense_bits;
 		array<obj> elems;
 		array<Archtype*> moves;
 		Ecs* OC;
@@ -151,6 +150,10 @@ namespace gameobject {
 			if (this != met.arch) {
 				throw std::logic_error("Cannot remove a component from an archetype it is not a member of");
 			}
+			if (elems.length==0) {
+				throw std::logic_error("Cannot remove a component from an empty archetype it");
+			}
+
 
 			size_t index = met.arch_ind;
 			size_t end_index = elems.length - 1;
@@ -167,10 +170,6 @@ namespace gameobject {
 		Archtype(bitset::bitset st, Ecs* Man) :bit_list(st), OC(Man), elems() {
 
 			for (size_t ind = 0; ind < st.bits; ind++) {
-				if (bit_list[ind]) {
-					dense_bits.push(ind);
-				}
-
 				moves.push(nullptr);
 			}
 		};
@@ -194,11 +193,12 @@ namespace gameobject {
 	{
 		component_table();
 		void create(comp::Id mid, size_t bytesize, size_t alignment);
-		comp::Id id;
+		
 		dynPool::flux<component> pool;
 		componentStorage store;
+		comp::Id id;
 		updatetype utype;
-		int priority;
+		short priority;
 		component*& operator[](const obj& entity) {
 			return store.reach(entity.GenId.id);
 		}
@@ -376,8 +376,9 @@ namespace gameobject {
 
 		void updatecomponents(updatecalltype type);
 		void delete_component(component* comp);
-
-
+		template <class T, typename... types>
+		component* create_component(obj& entity, types&&... initval);
+		void BindComponent(component* comp,obj& entity);
 		type_id::type_indexer component_indexer;
 		ArchtypeManager arch;
 		array<component_table> comp_storage;
@@ -428,8 +429,9 @@ namespace gameobject {
 	};
 	struct component
 	{
-		comp::Id comp_id;
+		
 		obj owner;
+		comp::Id comp_id;
 		short priority;
 		updatetype utype;
 		//called on destroy used for deallocation
@@ -440,6 +442,8 @@ namespace gameobject {
 
 		virtual ~component() = default;
 		component() {
+			owner = None;
+			priority = 0;
 			utype = updatedefault;
 			comp_id = comp::None;
 		};
@@ -568,6 +572,14 @@ namespace gameobject {
 			throw std::logic_error("Entity does not have component" + std::string(typeid(T).name()));
 		}
 	}
+	inline void gameobject::Ecs::BindComponent(component* comp, obj& entity)
+	{
+		component_table& row = comp_storage.reach(comp->comp_id.id);
+		comp->owner = entity;
+		row[entity] = (component*)(comp);
+		arch.moveflipArch(entity, comp->comp_id);
+		comp->start();
+	}
 
 
 	template<class T, typename ...types>
@@ -590,20 +602,44 @@ namespace gameobject {
 			T* comp = new (row.pool.alloc()) T(std::forward<types>(initval)...);
 			comp->comp_id = cmpid;
 		
-			comp->owner = entity;
-			row[entity] = (component*)(comp);
+			
 		if (is_new)
 		{
 			arch.expandArchtype();
 			row.init(comp);
 		}
-		arch.moveflipArch(entity, cmpid);
-
-		comp->start();
+		BindComponent(comp, entity);
 		return (T*)comp;
 
 	}
+	template<class T, typename ...types>
+	inline component* Ecs::create_component(obj& entity, types && ...initval)
+	{
+		auto [cmpid, is_new] = component_indexer.insert<T>();
 
+
+		component_table& row = comp_storage.reach(cmpid.id);
+		if (row[entity] != nullptr)
+		{
+			return (T*)row[entity];
+		}
+		if (is_new)
+		{
+			row.create(cmpid, sizeof(T), alignof(T));
+			row.store.expand(entitymeta.capacity);
+
+		}
+		T* comp = new (row.pool.alloc()) T(std::forward<types>(initval)...);
+		comp->comp_id = cmpid;
+
+
+		if (is_new)
+		{
+			arch.expandArchtype();
+			row.init(comp);
+		}
+		return comp;
+	}
 	template <class T, typename... types>
 	T* obj::addcomponent(types&&... initval)
 	{

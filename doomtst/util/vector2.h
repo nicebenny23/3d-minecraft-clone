@@ -134,9 +134,10 @@ namespace v2 {
 	struct Vec2
 	{
 
-		Vec2(float X, float Y);
+		constexpr Vec2(float X, float Y) noexcept;
 		Vec2();
 		Vec2(glm::vec2 glm);
+		explicit Vec2(Coord2 crd);
 		void operator=(const Vec2& p1);
 		bool operator==(const Vec2& p1);
 		bool operator!=(const Vec2& p1);
@@ -177,6 +178,11 @@ namespace v2 {
 
 		x = glm.x;
 		y = glm.y;
+	}
+	inline Vec2::Vec2(Coord2 crd)
+	{
+		x = crd.x;
+		y = crd.y;
 	}
 	inline float distance(const Vec2& p, const Vec2& p1) {
 
@@ -309,7 +315,7 @@ namespace v2 {
 
 
 	
-	inline Vec2::Vec2(float X, float Y) {
+	inline constexpr Vec2::Vec2(float X, float Y) noexcept{
 
 		x = X;
 		y = Y;

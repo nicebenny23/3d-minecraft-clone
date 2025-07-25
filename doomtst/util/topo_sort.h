@@ -158,9 +158,9 @@ struct DagBuilder {
     enum class PushType { Normal, First, Last };
 
     Dag<T> fullGraph;                       // complete graph
-    std::unordered_map<T, size_t, Hash> valueIndex; // map value to index
+    std::unordered_map<T, uint32_t, Hash> valueIndex; // map value to index
     stn::array<T> pushed;          // values in push order
-    Opt::Option<size_t> firstNode, lastNode;
+    Opt::Option<uint32_t> firstNode, lastNode;
     Dag<T> filteredGraph;                   // filtered graph subset
     bool dirty = false;                     // lazy rebuild flag
 

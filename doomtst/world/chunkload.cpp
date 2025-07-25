@@ -17,11 +17,11 @@ enum biometype {
 };
 biometype get_biome(float biome) {
 
-	if (inter::range(-.5,1).contains(biome))
+	if (inter::range(0,1).contains(biome))
 	{
 		return normalbiome;
 	}
-	if (inter::range(-.8, -.5).contains(biome))
+	if (inter::range(-1, -.5).contains(biome))
 	{
 		return normalbiome;
 	}
@@ -30,38 +30,40 @@ biometype get_biome(float biome) {
 }
 int get_default_block(biometype biome) {
 
-	if (normalbiome)
+	if (biome==normalbiome)
 	{
 		return minecraftstone;
 	}
-	if (mossybiome)
+	if (biome == mossybiome)
 	{
 		return minecrafttreestone;
 	}
-		return minecrafttreestone;
-	
 	
 }
 int get_secondary_block(biometype biome) {
 
-	if (normalbiome)
+	if (biome == normalbiome)
 	{
 		return minecraftstone;
 	}
-	if (mossybiome)
+	if (biome == mossybiome)
 	{
 		return minecraftmoss;
 	}
 	return minecrafttreestone;
 }
 int chaotic_overide(float chaotic, biometype biome) {
-	if (inter::range(0, .01f).contains(chaotic))
+	if (inter::range(0, .01f).contains(chaotic)&&biome==normalbiome)
 	{
 		return minecraftcrystal;
 	}
-	if (inter::range(0,.01f).contains(chaotic))
+	if (inter::range(.01,.03f).contains(chaotic))
 	{
 		return get_secondary_block(biome);
+	}
+	if (inter::range(.39, .4f).contains(chaotic)&&biome==normalbiome)
+	{
+		return minecraftironore;
 	}
 	return -1;
 }
@@ -75,8 +77,14 @@ int idfromnoise( float biome,float chaotic,float cave_carve,float cave_carve2,fl
 	{
 		main_block=overload;
 	}
-
-
+	if (.5<chaotic)
+	{
+		int l = 1;
+	}
+	if (chaotic<.5 &&0< chaotic)
+	{
+		int l = 1;
+	}
 	int neid = main_block;
 
 		if (inrange(cave_carve, -offset, offset))
@@ -92,7 +100,11 @@ int idfromnoise( float biome,float chaotic,float cave_carve,float cave_carve2,fl
 			
 			
 		}
+		if (.99<should_cave)
+		{
 
+			neid = minecraftair;
+		}
 	
 	return neid;
 
@@ -173,7 +185,7 @@ struct idmap
 
 	}
 	idmap(Coord location) {
-		slow= genperlin(1, .005f, .02f, 1.2, rigid);
+		slow= genperlin(1,1, .005f, 1.2, rigid);
 		map = genperlin(1, .6f, .02f, 1.2, rigid);
 		crazy= genperlin(2, 1.f, .02f, 1.2, rigid);
 		array<size_t> x_pos;

@@ -86,7 +86,7 @@ namespace Opt {
 
 
         template<typename Func>
-        auto map(Func f) const -> Option<decltype(f(std::declval<T>()))> {
+        auto and_then(Func f) const -> Option<decltype(f(std::declval<T>()))> {
             using U = decltype(f(std::declval<T>()));
             if (has_value) {
                 return Option<U>(f(value));
@@ -95,7 +95,16 @@ namespace Opt {
                 return Option<U>(None);  // empty Option<U>
             }
         }
+        template<typename Func>
+        auto filter(Func pred) const -> Option<T> {
        
+            if (has_value&&filter(value)) {
+                return Option<T>(value);
+            }
+            else {
+                return Option<T>(None);  // empty Option<U>
+            }
+        }
       template<typename Func>
         auto fold_or(Func f, decltype(f(std::declval<T>())) def) const -> decltype(f(std::declval<T>())) {
             using U = decltype(f(std::declval<T>()));

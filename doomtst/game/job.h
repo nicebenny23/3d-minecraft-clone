@@ -82,7 +82,6 @@ struct Job_run {
 
 	}
 		void run_cmd(DagNode<Job_cmd> cmd){
-			cmd.id();
 			lock.lock();
 			finished.push(cmd.index);
 			lock.unlock();
@@ -107,7 +106,7 @@ struct JobManager {
 	}
 	void run() {
 		Dag<Job_cmd> run_dag;
-		Dag<size_t> filtered = job_list.filtered();
+		Dag<uint32_t> filtered = job_list.filtered();
 		for (size_t i = 0; i < filtered.length(); i++)
 		{
 			run_dag.addNode(cmd_list[i]);

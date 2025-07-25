@@ -110,6 +110,7 @@ void Ecs::destroy(obj& object) {
 	
 	entitymeta[object.GenId.id].reset();
 	free_ids.push(object.GenId.id);
+	int k = 3;
 }
 
 
@@ -131,6 +132,7 @@ void gameobject::Ecs::delete_component(component* comp)
 
 	comp_storage[comp->comp_id.id].pool.free(comp);
 }
+
 void gameobject::Ecs::InitializeEntity(obj& object)
 {
 	object.GenId.id = free_ids.pop();
