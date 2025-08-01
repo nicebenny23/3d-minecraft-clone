@@ -125,6 +125,6 @@ void blockname::block::create(v3::Coord location, int blockid, Dir::Dir3d blkatt
 
 void blockname::block::createdefaultaabb(bool effector)
 {
-	owner.addcomponent<aabb::Collider>(zerov, unitscale, false,effector);
+	owner.addcomponent<aabb::Collider>(zerov, unitv/2.f, false,effector);
 
 }

@@ -5,7 +5,7 @@
 #include "../util/Option.h"
 using namespace aabb;
 #pragma once 
-constexpr auto collisioniterations = 3;
+constexpr auto collisioniterations = 6;
 #define interactmaxrange 6
 #define interactminrange 0
 namespace collision {
@@ -29,5 +29,5 @@ namespace collision {
 
 	voxtra::WorldRayCollision raycastentity(ray nray,HitQuery query);
 	void handleduelentitycollisions();
-	void handleCollisionWithGrid(Collider& entity);
+	void handleCollisionWithGrid(Collider& entity,bool is_trigger);
 }

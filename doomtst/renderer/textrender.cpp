@@ -5,7 +5,7 @@
 
 void integertext::set_handle()
 {
-	if (handle())
+	if (handle)
 	{
 		handle.destroy();
 	}
@@ -31,7 +31,7 @@ void integertext::customdestroy()
 {
 
 	word.clear();
-	if (handle())
+	if (handle)
 	{
 		handle.destroy();
 	}

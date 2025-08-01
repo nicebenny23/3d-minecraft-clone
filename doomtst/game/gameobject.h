@@ -585,6 +585,8 @@ namespace gameobject {
 	template<class T, typename ...types>
 	inline T* Ecs::add_component(obj& entity,types && ...initval)
 	{
+
+		static_assert(std::is_constructible_v<T, types...>, "no constructer takes these parameters");
 		auto [cmpid, is_new] = component_indexer.insert<T>();
 	
 

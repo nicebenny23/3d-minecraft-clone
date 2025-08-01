@@ -12,11 +12,13 @@ inline void kb(Vec3 point, float force,gameobject::obj ent) {
 
 			if (ent.hascomponent<rigidbody>())
 			{
-				Vec3 forceval = point -ent.transform().position;
+				Vec3 forceval = ent.transform().position- point;
+				forceval = Vec3(forceval.x, .25, forceval.z);
 				forceval = normal(forceval);
+				
 				forceval *= force;
 
-				ent.getcomponent<rigidbody>().velocity -= forceval;
+				ent.getcomponent<rigidbody>().add_force( rigid_force(forceval*3,.333333333, "kb_force"));
 			}
 		}
 	}

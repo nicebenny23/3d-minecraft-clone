@@ -104,17 +104,7 @@ float EvaluateNoiseAtPoint(Vec3 point,noiseparams params)
 	{
 		Vec3 testpoint = point * scale;
 		float toadd = intensity * interpolatenoisemap(testpoint.x, testpoint.y, testpoint.z);
-		if (params.type==normalnoise)
-		{
-
-			value += toadd;
-
-		}
-		if (params.type == rigid)
-		{
-
-			value += abs(toadd);
-		}
+		value += toadd;
 		maxintensity += intensity;
 
 		scale *= params.scalefactor;

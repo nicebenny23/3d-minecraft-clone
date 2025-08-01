@@ -36,11 +36,7 @@ inline stn::array<size_t> split_many(size_t length, size_t threads) {
 				}
 				});
 			range_start = range_next;
-			if (std::distance(range_start, end) >= size_of_each[i + 1] - size_of_each[i])
-			{
-				int l = size_of_each[1];
-				int z = 2;
-			}
+			
 		}
 		size_of_each.destroy();
 	}

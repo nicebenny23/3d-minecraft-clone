@@ -20,29 +20,6 @@ void safefile::movetoend()
     offset = size;
 }
 
-int safefile::fscanf(const char* format, ...)
-{
-    if (fp == nullptr) {
-        throw std::runtime_error("file is not defined yet, can't use fscanf");
-    }
-    va_list args;
-    va_start(args, format);
-    int result = vfscanf(fp, format, args);
-    va_end(args);
-    return result;
-}
-
-void safefile::fscanf(size_t expectedargs, const char* format, ...)
-{
-    va_list args;
-    va_start(args, format);
-    int result = vfscanf(fp, format, args);
-    va_end(args);
-
-    if (expectedargs != result) {
-        throw std::runtime_error("Unexpected number of matched arguments in fscanf");
-    }
-}
 
 safefile::safefile(const char* filepath, mode openmode)
 {

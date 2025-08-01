@@ -219,6 +219,15 @@
     <ClCompile Include="items\new_item.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="game\relationship.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\time.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="util\vector3.h">
@@ -883,6 +892,18 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="items\transmute.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\counter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\tag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\slime_wand.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -122,7 +122,7 @@ namespace query {
 		
 		}
 		~View() {
-
+			positions.destroy();
 			archtypes.destroy();
 		}
 	};

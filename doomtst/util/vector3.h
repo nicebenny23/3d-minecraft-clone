@@ -25,8 +25,8 @@ namespace v3 {
 	
 		Coord operator*(int scale) const;
 		Coord& operator*=(int scale);
-
-		
+		Coord(int value, size_t index);
+		int& operator[](size_t index);
 		
 		int x;
 		int y;
@@ -137,6 +137,12 @@ namespace v3 {
 
 	}
 
+	inline Coord::Coord(int value, size_t index)
+	{
+		*this = zeroiv;
+		(*this)[index] = value;
+	}
+
 	
 	
 	inline bool Coord::operator==(const Coord& p1)
@@ -150,17 +156,41 @@ namespace v3 {
 
 	}
 
+	inline int& Coord::operator[](size_t index)
+	{
+		switch (index) {
+		case 0:
+			return x;
+			break;
+		case 1:
+			return y;
+			break;
+		case 2:
+			return z;
+			break;
+		default:
+			throw std::invalid_argument(std::string(index + " is not a valid index for a Vec3"));
+		}
+	}
 
-
-
+	
 	struct Vec3
 	{
 		
 		glm::vec3 glm();
-		constexpr Vec3(float X, float Y,float Z) noexcept;
+		constexpr Vec3(double X, double Y, double Z) noexcept;
 		Vec3(glm::vec3 glm);
 		Vec3(Coord coord);
 		Vec3();
+		bool is_nan() const {
+			return isnan(x) || isnan(y) || isnan(z);
+		}
+		bool throw_if_nan() {
+			if (is_nan())
+			{
+				throw std::logic_error("Vec3 Must not be NaN");
+			}
+		}
 		void operator=(const Vec3& p1);
 		bool operator==(const Vec3& p1);
 		void operator=(const Coord& p1);
@@ -172,26 +202,33 @@ namespace v3 {
 		Vec3& operator-=(const Vec3& p1);
 		Vec3 operator-(const Vec3& p1) const;
 		Vec3 operator*(const Vec3& scale) const;
-		Vec3 operator*(float scale) const;
-		Vec3& operator*=(float scale);
-		float& operator[](size_t index);
+		Vec3 operator/(const Vec3& inv_scale) const;
+		Vec3 operator*(double scale) const;
+		Vec3& operator*=(double scale);
+		double& operator[](size_t index);
+		Vec3(double value, size_t index);
 		v2::Vec2 xy() const;
 		v2::Vec2 xz() const;
 		v2::Vec2 yz() const;
 	
-		Vec3 operator/(float scale) const;
+		Vec3 operator/(double scale) const;
 
-		Vec3& operator/=(float scale);
+		Vec3& operator/=(double scale);
 
 		
 
-		float x;
-		float y;
-		float z;
+		double x;
+		double y;
+		double z;
 
 
 	};
-
+	inline bool is_nan(v3::Vec3 vec) {
+		return vec.is_nan();
+	}
+	inline bool throw_if_nan(v3::Vec3 vec) {
+		vec.throw_if_nan();
+	}
 	const  Vec3 zerov = Vec3(0, 0,0);
 	const  Vec3 unitv = Vec3(1, 1,1);
 	const Vec3 right = Vec3(1, 0, 0);
@@ -220,7 +257,7 @@ namespace v3 {
 		z = 0;
 	}
 
-	inline constexpr Vec3::Vec3(float X, float Y, float Z) noexcept {
+	inline constexpr Vec3::Vec3(double X, double Y, double Z) noexcept {
 
 		x = X;
 		y = Y;
@@ -242,7 +279,7 @@ namespace v3 {
 
 
 	inline Vec3 vec(Coord coord) {
-		return Vec3(float(coord.x), float(coord.y),float( coord.z));
+		return Vec3(double(coord.x), double(coord.y), double( coord.z));
 
 	}
 
@@ -296,6 +333,10 @@ namespace v3 {
 		
 		return Vec3(x*scale.x,y*scale.y,z*scale.z);
 	}
+	inline Vec3 Vec3::operator/(const Vec3& inv_scale) const
+	{
+		return Vec3(x / inv_scale.x, y / inv_scale.y, z / inv_scale.z);
+	}
 	inline Vec3& Vec3::operator-=(const Vec3& p1) {
 
 
@@ -306,7 +347,7 @@ namespace v3 {
 
 	}
 
-	inline Vec3 Vec3::operator*(float scale) const {
+	inline Vec3 Vec3::operator*(double scale) const {
 
 		return Vec3(x * scale, y * scale,z*scale);
 
@@ -314,7 +355,7 @@ namespace v3 {
 
 	}
 
-	inline Vec3& Vec3::operator*=(float scale) {
+	inline Vec3& Vec3::operator*=(double scale) {
 
 
 		x *= scale;
@@ -323,7 +364,7 @@ namespace v3 {
 		return *this;
 
 	}
-	inline float& Vec3::operator[](size_t index) 
+	inline double& Vec3::operator[](size_t index)
 	{
 		switch (index) {
 		case 0:
@@ -339,13 +380,24 @@ namespace v3 {
 			throw std::invalid_argument(std::string(index + " is not a valid index for a Vec3"));
 		}
 	}
-	inline Vec3 Vec3::operator/(float scale) const {
-
+	inline Vec3::Vec3(double value, size_t index)
+	{
+		*this = zerov;
+		(*this)[index] = value;
+	}
+	inline Vec3 Vec3::operator/(double scale) const {
+		if (scale == 0)
+		{
+			throw std::logic_error("Unable to divide a Vec3 by zero");
+		}
 		return Vec3(x / scale, y / scale,z/scale);
 	}
 
-	inline Vec3& Vec3::operator/=(float scale) {
-
+	inline Vec3& Vec3::operator/=(double scale) {
+		if (scale==0)
+		{
+			throw std::logic_error("Unable to divide a Vec3 by zero");
+		}
 
 		x /= scale;
 		y /= scale;
@@ -378,34 +430,45 @@ namespace v3 {
 
 
 	
-	inline float dist2(const Vec3& p, const Vec3& p1) {
+	inline double dist2(const Vec3& p, const Vec3& p1) {
 
 		return((p.x - p1.x) * (p.x - p1.x) + (p.y - p1.y) * (p.y - p1.y) + (p1.z - p.z) * (p1.z - p.z));
 	}
-	inline float dist(const Vec3& p, const Vec3& p1) {
+	inline double dist(const Vec3& p, const Vec3& p1) {
 
 		return(sqrt(dist2(p, p1)));
 	}
 
-	inline float dot(const Vec3& p, const Vec3& p1) {
+	inline double dot(const Vec3& p, const Vec3& p1) {
 
 		return (p.x * p1.x + p.y * p1.y + p.z * p1.z);
 	}
 
 
-	inline float mag(const Vec3& p) {
+	inline double mag(const Vec3& p) {
 
 		return(sqrt(p.x * p.x + p.y * p.y + p.z * p.z));
 	}
-	inline float mag2(const Vec3& p) {
+	inline double mag2(const Vec3& p) {
 
 		return((p.x * p.x + p.y * p.y + p.z * p.z));
 	}
 	inline Vec3 normal(const Vec3& p) {
-
-		return(p / mag(p));
+		float mt = mag(p);
+		if (mt==0)
+		{
+			throw std::logic_error("Cannot Normalize the zero vector");
+		}
+		return(p / mt);
 	}
-
+	inline Vec3 zf_normal(const Vec3& p) {
+		float mt = mag(p);
+		if (mt == 0)
+		{
+			return zerov;
+		}
+		return(p / mt);
+	}
 	inline Vec3 YawPitch(float yaw, float pitch) {
 
 		v3::Vec3 dir = v3::zerov;
@@ -451,7 +514,7 @@ namespace v3 {
  
   inline bool apx(const  Vec3 p, const Vec3& p1)
   {
-	  return aprox_equal(p.x, p1.x)&& aprox_equal(p.y, p1.y)&& aprox_equal(p.z, p1.z);
+	  return apxf(p.x, p1.x)&& apxf(p.y, p1.y)&& apxf(p.z, p1.z);
   }
 
 

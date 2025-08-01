@@ -14,7 +14,7 @@ const v2::Vec2 cubeuv[] = {
 };
 void decal::create_handle(const char* texloc, const char* texture)
 {
-    if (!handle())
+    if (!handle)
     {
 
         handle = CtxName::ctx.Ren->gen_renderable();
@@ -26,7 +26,7 @@ void decal::create_handle(const char* texloc, const char* texture)
     
 }
 void decal::create_mesh(){
-    renderer::MeshData mesh = handle.create_mesh(false);
+    renderer::MeshData mesh = handle.create_mesh();
 
 for (int  i = 0; i < 4; i++)
 {

@@ -5,7 +5,7 @@
 #include "../util/vector3.h"
 #include "texture.h"
 #include "vertexobject.h"
-#include "../game/GameContext.h"
+ #include "../game/GameContext.h"
 #include "Vao.h"
 #include "../game/transform.h"
 #include "renderer.h"
@@ -20,13 +20,15 @@ namespace ModelMeshName {
 	
 	struct ModelMesh
 	{
+
 		float yaw;
 		float pitch;
 		v3::Vec3 pos;
 		void setmodeluniform();
 		Ids::Id tex;
+		Vec3 color;
 		ModelMesh();
-		void create_handle();
+		void create_handle(const char* location, const char* name);
 		Transform transform;
 		array<Vec3> vertices;
 		array<unsigned int> vertexindices;
@@ -37,19 +39,18 @@ namespace ModelMeshName {
 			vertexindices.destroy();
 			texcoords.destroy();
 			texindices.destroy();
+
 			vertices.destroy();
 		}
-		Vec3 nthvertex(int i);
-		v2::Vec2 nthtex(int i);
+		Vec3 nthvertex(size_t i);
+		v2::Vec2 nthtex(size_t i);
 		renderer::RenderableHandle handle;
-		void setvobjs() {
-			handle = CtxName::ctx.Ren->gen_renderable();
-			handle.set_layout(vertice::vertex().push<float,2>().push<float, 3>());
-		}
+		
 
 		glm::mat4* modelmatrix;
 
-	};	ModelMesh* loadmesh(const char* name, Ids::Id tex_handle, Vec3 position);
-	void rendermesh(ModelMesh* torender);
+
+	};	ModelMesh loadmesh(const char* location, const char* name, Vec3 position);
+	void rendermesh(ModelMesh& torender);
 
 }

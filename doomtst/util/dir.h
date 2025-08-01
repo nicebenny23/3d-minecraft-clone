@@ -91,7 +91,7 @@ namespace Dir {
 	inline Dir3d Align(v3::Vec3 point) {
 
 
-		float max = Max(abs(point.x), abs(point.y), abs(point.z));
+		double max = Max(abs(point.x), abs(point.y), abs(point.z));
 		int ind = 0;
 		if (abs(point.x) == max)
 		{
@@ -111,7 +111,7 @@ namespace Dir {
 	inline int max2ddirection(v3::Vec3 point) {
 
 
-		float max = Max(abs(point.x), abs(point.z));
+		double max = Max(abs(point.x), abs(point.z));
 		if (abs(point.x) == max)
 		{
 			return (1 - sign(point.x)) / 2;
@@ -121,6 +121,7 @@ namespace Dir {
 		{
 			return 2 + (1 - sign(point.z)) / 2;
 		}
+		throw std::logic_error("work");
 	}
 	
 	enum class Ind2d : char {
@@ -203,13 +204,13 @@ namespace Dir {
 	static constexpr stn::List<Dir2d, 4> Directions2d = { right2d, left2d, up2d, down2d };
 
 	inline Dir2d Align2d(v2::Vec2 point) {
-		float max_val = std::max(std::abs(point.x), std::abs(point.y));
+		double max_val = Max(abs(point.x), abs(point.y));
 		int ind = 0;
 
-		if (std::abs(point.x) == max_val) {
+		if (abs(point.x) == max_val) {
 			ind = ((1 - sign(point.x)) / 2); // 0 if positive (Right), 1 if negative (Left)
 		}
-		if (std::abs(point.y) == max_val) {
+		if (abs(point.y) == max_val) {
 			ind = 2 + ((1 - sign(point.y)) / 2); // 2 if positive (Up), 3 if negative (Down)
 		}
 		return Dir2d(static_cast<char>(ind));

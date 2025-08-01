@@ -4,6 +4,7 @@
 #include "../util/SparseSet.h"
 #include "../util/pipeline.h"
 #include <tuple>
+#include "../util/counter.h"
 namespace Hierarchy {
 
     struct Parent;
@@ -155,4 +156,4 @@ namespace Hierarchy {
     array<gameobject::obj> children(gameobject::obj& entity) {
         return view(entity).children_obj();
     }
-}
+} 

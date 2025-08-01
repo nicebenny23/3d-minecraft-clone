@@ -34,6 +34,13 @@ namespace util {
 			if constexpr (I == 0) return std::move(first);
 			else return std::move(second);
 		}
+		friend constexpr bool operator==(const pair& lhs, const pair& rhs) {
+			return lhs.first == rhs.first && lhs.second == rhs.second;
+		}
+
+		friend constexpr bool operator!=(const pair& lhs, const pair& rhs) {
+			return !(lhs == rhs);
+		}
 	};
 
 

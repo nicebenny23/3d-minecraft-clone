@@ -53,7 +53,7 @@ int get_secondary_block(biometype biome) {
 	return minecrafttreestone;
 }
 int chaotic_overide(float chaotic, biometype biome) {
-	if (inter::range(0, .01f).contains(chaotic)&&biome==normalbiome)
+	if (inter::range(0.009, .01f).contains(chaotic)&&biome==normalbiome)
 	{
 		return minecraftcrystal;
 	}
@@ -61,13 +61,14 @@ int chaotic_overide(float chaotic, biometype biome) {
 	{
 		return get_secondary_block(biome);
 	}
-	if (inter::range(.39, .4f).contains(chaotic)&&biome==normalbiome)
+	if (inter::range(.398, .4f).contains(chaotic)&&biome==normalbiome)
 	{
 		return minecraftironore;
 	}
 	return -1;
 }
 int idfromnoise( float biome,float chaotic,float cave_carve,float cave_carve2,float should_cave ) {
+	
 	const float offset = .3f;
 	biometype biome_type = get_biome(biome);
 	int main_block = get_default_block(biome_type);
@@ -111,6 +112,14 @@ int idfromnoise( float biome,float chaotic,float cave_carve,float cave_carve2,fl
 }
 int generatechunkvalfromnoise(Vec3 pos, noisemap* map, noisemap* crazy, noisemap* slow)
 {
+	if (generateflat)
+	{
+		if (0<pos.y)
+		{
+			return minecraftair;
+		}
+		return minecraftstone;
+	}
 	pos *= blocksize;
 	
 	Coord localpos;
@@ -148,6 +157,7 @@ struct idmap
 {
 	noisemap* slow;
 	noisemap* map;
+	noisemap* middle_map;
 	noisemap* crazy;
 	array<idblock> ids;
 	Coord loc;
@@ -185,9 +195,10 @@ struct idmap
 
 	}
 	idmap(Coord location) {
-		slow= genperlin(1,1, .005f, 1.2, rigid);
-		map = genperlin(1, .6f, .02f, 1.2, rigid);
-		crazy= genperlin(2, 1.f, .02f, 1.2, rigid);
+		slow= genperlin(1,1, .005f, 1.2);
+		map = genperlin(3, .6f, .02f, 1.2);
+		crazy= genperlin(4, 1.f, .005f, 1.2);
+		middle_map = genperlin(2, 1, .005, 1.2);
 		array<size_t> x_pos;
 		for (auto i = 0; i < chunkaxis; i++)
 		{
@@ -206,6 +217,7 @@ struct idmap
 		map->destroy();
 		crazy->destroy();
 		slow->destroy();
+		middle_map->destroy();
 	}
 
 };
@@ -331,7 +343,7 @@ Chunk::chunk* ChunkLoader::LoadFromNoise(Coord location)
 				Coord pos = statemap.ids[ind].pos;
 				int id = statemap.ids[ind].id;
 
-
+				
 				blkinitname::genblock(newchunk.blockbuf[ind].getcomponentptr<block>(), id, pos, 0, 0);
 
 				ind++;

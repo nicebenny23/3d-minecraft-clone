@@ -184,7 +184,7 @@ namespace v2 {
 		x = crd.x;
 		y = crd.y;
 	}
-	inline float distance(const Vec2& p, const Vec2& p1) {
+	inline float dist(const Vec2& p, const Vec2& p1) {
 
 		return(sqrt((p.x - p1.x) * (p.x - p1.x) + (p.y - p1.y) * (p.y - p1.y)));
 	}
@@ -198,7 +198,7 @@ namespace v2 {
 	}
 
 
-	inline float magnitude(const Vec2& p) {
+	inline float mag(const Vec2& p) {
 
 		return(sqrt(p.x * p.x + p.y * p.y));
 	}
@@ -207,10 +207,10 @@ namespace v2 {
 		{
 			return zerov;
  		}
-		return(p / magnitude(p));
+		return(p / mag(p));
 	}
 	
-	inline float dotproduct(const Vec2& p, const Vec2& p1) {
+	inline float dot(const Vec2& p, const Vec2& p1) {
 
 		return (p.x * p1.x + p.y + p1.y);
 	}

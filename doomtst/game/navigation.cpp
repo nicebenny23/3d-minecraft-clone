@@ -74,8 +74,8 @@ return        array<navnode>();
     while (openlist.length > 0) {
         iter += 1;
         // Find the node with the lowest f cost
-        int shortestind = -1;
-        float shortestcost = 1000;
+        Opt::Option<size_t> shortestind=Opt::None;
+        float shortestcost = std::numeric_limits<float>().infinity();
         for (int i = 0; i < openlist.length; ++i) {
             float nodecost = openlist[i].calcfcost();
             if (nodecost < shortestcost) {
@@ -83,19 +83,17 @@ return        array<navnode>();
                 shortestind = i;
             }
         }
-        if (shortestind == -1)
-        {
-            openlist.destroy();
-            closedlist.destroy();
+        if (shortestind == Opt::None)
+        { 
             break;
         }
 
-        navnode current = openlist[shortestind];
+        navnode current = openlist[shortestind()];
         navnode* newnode = new navnode(current);
         todeallocatelist.push(newnode);
 
-        openlist.deleteind(shortestind);
-
+        openlist.deleteind(shortestind());
+        
         //removes it 
         if (iter == maxiter)
         {
@@ -124,7 +122,7 @@ return        array<navnode>();
             closedlist.destroy();
            todeallocatelist.destroy();
             openlist.destroy();
-            return array<navnode>(toret);
+            return toret;
         }
 
         closedlist.push(current);
@@ -179,16 +177,28 @@ return        array<navnode>();
         delete todeallocatelist[i];
     }
     todeallocatelist.destroy();
-    
+    openlist.destroy();
+    closedlist.destroy();
     return array<navnode>(); // No path found
 }
 
 navigator::navigator(gameobject::obj parentref, array<navnode>(*testfunc)(navnode& pos))
 {
+    headed_index = 0;
     priority = 4411;
-    timetillupdate = 0;
+    path_creation_dur=CtxName::ctx.Time->create_dur();
     goingtwords = parentref;
     testfunction = testfunc;
+}
+
+v3::Vec3 navigator::headed()
+{
+    if (headed_list.length<=headed_index)
+    {
+        return owner.transform().position;
+    }
+
+    return headed_list[headed_index];
 }
 
 Vec3 transformnormal(Vec3 pos, Vec3 scale)
@@ -230,15 +240,19 @@ void navigator::calcpath()
     Coord currpos = CtxName::ctx.Grid->getVoxel( owner.transform().position);
 
     Vec3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.transform().position);
- 
     array<navnode>  finding = astarpathfinding(navnode(currpos),navnode(Coord(gotopos)), testfunction);
-    if (finding.length>1)
+    headed_list.destroy();
+    headed_index = 0;
+    for (navnode& node:finding)
     {
-        headed = finding[1].pos+unitv/2;
+        if (node.pos!=currpos)
+        {
+            headed_list.push(node.pos + unitv / 2);
+        }
     }
-    else {
-
-        headed = currpos;
+    if (headed_list.empty())
+    {
+        headed_list.push(gotopos);
     }
     finding.destroy();
 }
@@ -265,22 +279,33 @@ bool navigator::noblockinrange(Coord pos)
 
 void navigator::update()
 {
-    float timetillupdatespeed = .3;
+    float timetillupdatespeed = .5;
 
-    Vec3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.transform().position);
+    Vec3 gotopos = goingtwords.transform().position;
 
     v3::Vec3 loc = owner.transform().position;
-    float distance = dist(loc, gotopos);
-    float addoffset = Max(0,(sigmoid(distance/ 10)-.5)*2);
-    timetillupdatespeed = .3 + addoffset;
-    timetillupdate -= CtxName::ctx.Time->dt;
- 
-    if (timetillupdate<=0||dist2(loc,headed)<.04)
+   
+    if (dist(loc,headed())<.1f)
+    {
+        
+            path_creation_dur.disable();
+
+       
+    }
+    if (path_creation_dur.state()!=timename::duration_state::active)
     {
         calcpath();
-
-      //  calcpath();
-        timetillupdate =timetillupdatespeed;
+        path_creation_dur.set(timetillupdatespeed);
     }
   
+}
+
+bool navigator::should_update_path()
+{
+    Vec3 headed_pos= goingtwords.transform().position;
+    if (true)
+    {
+
+    }
+    return false;
 }

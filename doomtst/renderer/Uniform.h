@@ -25,8 +25,8 @@ namespace uniforms{
         int,            // 0
         float,          // 1
         GLuint,         // 2  
-        glm::vec2,      // 3
-        glm::vec3,      // 4
+        v2::Vec2,      // 3
+        v3::Vec3,      // 4
         glm::vec4,      // 5
         glm::mat3,      // 6
         glm::mat4,      // 7

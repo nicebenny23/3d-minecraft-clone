@@ -84,9 +84,14 @@ struct safefile {
 
 	long getsize();
 	void movetoend();
-	int fscanf(const char* format, ...);
-	void fscanf(size_t expectedargs, const char* format, ...);
-
+	template<typename... Args>
+	void fscanf(size_t expectedargs, const char* format, Args&&... args) {
+			int result = std::fscanf(fp, format, std::forward<Args>(args)...);
+			if (result != static_cast<int>(expectedargs)) {
+				throw std::runtime_error("Unexpected number of matched arguments in fscanf");
+			}
+		
+	}
 	safefile(const char* filepath, mode openmode);
 	safefile(std::string filepath, mode openmode);
 	void close();

@@ -29,7 +29,7 @@ namespace gameobject {
 			Ecs* ecs;
 			stn::array<std::function<void(obj)>> pending;
 		};
-
+	
 
 	}
 

@@ -49,6 +49,7 @@ namespace grid {
 	//gets the location of the currentvoxel
 	Coord Grid::getVoxel(Vec3 pos)
 	{
+		
 		return  Coord(std::floor(pos.x / blocksize), std::floor(pos.y / blocksize), std::floor(pos.z / blocksize));
 
 	}
@@ -57,10 +58,13 @@ namespace grid {
 	int Grid::localChunkIndex(Coord NormedChunk)
 	{
 
-		return NormedChunk.x + NormedChunk.y* (dim()) + NormedChunk.z* dim()*dim();
+		int val= NormedChunk.x + NormedChunk.y* (dim()) + NormedChunk.z* dim()*dim();
+		return val;
+
 	}
 	int Grid::chunkIndex(Coord Chunk)
 	{
+		
 		Chunk+= Coord(rad, rad, rad) - gridpos;
 		return localChunkIndex(Chunk);
 	}
@@ -126,36 +130,35 @@ namespace grid {
 	}
 
 
-	array<block*>& Grid::voxelinrange(geometry::Box span)
+	array<block*> Grid::voxelinrange(geometry::Box span)
 	{
-		array<block*>* blockarr = new array<block*>;
-		span.center = toBlockPos(span.center);
-		span.scale = toBlockPos(span.scale);
-		v3::Vec3 lowpos = ((span.center - span.scale) - unitv);
+		array<block*> blockarr = array<block*>();
+		
+		v3::Vec3 lowpos = ((span.center - span.scale));
 
-		v3::Coord lowest = v3::Coord(symmetric_floor(lowpos.x), symmetric_floor(lowpos.y), symmetric_floor(lowpos.z));
-		v3::Vec3 highpos = ((span.center + span.scale) + unitv);
+		v3::Coord lowest = getVoxel(lowpos);
+		v3::Vec3 highpos = ((span.center + span.scale));
 
-		v3::Coord highest = v3::Coord(symmetric_ceil(highpos.x), symmetric_ceil(highpos.y), symmetric_ceil(highpos.z));
+		v3::Coord highest = getVoxel(highpos);
 
-		for (int x = lowest.x; x < highest.x; x++)
+		for (int x = lowest.x; x <= highest.x; x++)
 		{
-			for (int y = lowest.y; y < highest.y; y++)
+			for (int y = lowest.y; y <= highest.y; y++)
 			{
-				for (int z = lowest.z; z < highest.z; z++)
+				for (int z = lowest.z; z <= highest.z; z++)
 				{
 					block* blk = getBlock(Coord(x, y, z));
 					if (blk != nullptr)
 					{
 
-						blockarr->push(blk);
+						blockarr.push(blk);
 					}
 				}
 
 			}
 
 		}
-		return *blockarr;
+		return blockarr;
 	}
 
 	//order of storage for chunks & location-2loadamnt+1 is width and height
@@ -248,6 +251,7 @@ namespace grid {
 		pos.y = floor(pos.y);
 		pos.z = floor(pos.z);
 		griddt = Coord(pos) - gridpos;
+		
 		gridpos = Coord(pos);
 	}
 	void Grid::destroy()
@@ -264,7 +268,7 @@ namespace grid {
 		ctx = Context;
 		Context->Grid = this;
 		loader.Init(ctx);
-		gridpos =Coord( camera::campos() / float(chunkaxis));
+		gridpos =zeroiv;
 		griddt = zeroiv;
 		chunklist = stn::array<Chunk::chunk*>(totalChunks,nullptr);
 	

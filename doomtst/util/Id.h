@@ -39,7 +39,7 @@ namespace Ids {
 
 		}
 		constexpr explicit Id(uint32_t val) : id(val) {}
-		constexpr bool inline valid() const { return id != none_id; }
+		constexpr bool inline valid() const noexcept{ return id != none_id; }
 		constexpr bool operator==(const Id& other) const { return id == other.id; }
 		constexpr bool operator!=(const Id& other) const { return id != other.id; }
 		constexpr explicit operator bool() const { return valid(); }

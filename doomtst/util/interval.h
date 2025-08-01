@@ -52,6 +52,9 @@ namespace inter {
 		bool contains(float val) {
 			return inrange(val,min, max);
 		}
+		bool apx_contains(float val) {
+			return inrange_apx(val, min, max);
+		}
 		bool contains(const range& other) {
 			return contains(other.max)&&contains(other.min);
 		}

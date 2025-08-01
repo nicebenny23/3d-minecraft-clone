@@ -71,7 +71,7 @@ namespace uiboxname {
 		{
 			
 			tex_handle.set_uniform(uniforms::uniform(box.scale.x, "scale"));
-			tex_handle.set_uniform(uniforms::uniform(glm::vec2( box.center.x, box.center.y), "center"));
+			tex_handle.set_uniform(uniforms::uniform(box.center, "center"));
 			tex_handle.render();
 		}
 

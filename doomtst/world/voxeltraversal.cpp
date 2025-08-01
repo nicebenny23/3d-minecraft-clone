@@ -13,8 +13,8 @@ bool counttablevoxel(block* blk, GridTraverseMode trav) {
 	}
 
 
-	
-	if (blk->owner.getcomponent<aabb::Collider>().effector )
+
+	if (blk->owner.getcomponent<aabb::Collider>().effector)
 	{
 		return trav != countnormal;
 
@@ -22,33 +22,33 @@ bool counttablevoxel(block* blk, GridTraverseMode trav) {
 	return true;
 }
 
-bool voxtra::Boxcollwithgrid(geometry::Box Box )
+bool voxtra::Boxcollwithgrid(geometry::Box Box)
 {
 
-		array<block*>& BlocksInRange= CtxName::ctx.Grid->voxelinrange(Box);
+	array<block*> BlocksInRange = CtxName::ctx.Grid->voxelinrange(Box);
 
 	for (block* PotentialCollision : BlocksInRange)
 	{
-		
-				if (PotentialCollision == nullptr)
-				{
-					continue;
-				}
 
-				aabb::Collider* Collider = PotentialCollision->owner.getcomponentptr<aabb::Collider>();
+		if (PotentialCollision == nullptr)
+		{
+			continue;
+		}
 
-			
-				if (Collider!=nullptr&&PotentialCollision->attributes.solid&&!Collider->effector)
-				{
-					if (aabb::aabbboxintersect(Box, *Collider))
-					{
-						BlocksInRange.destroy();
-						return true;
-					}
-				}
+		aabb::Collider* Collider = PotentialCollision->owner.getcomponentptr<aabb::Collider>();
 
 
-	
+		if (Collider != nullptr && PotentialCollision->attributes.solid && !Collider->effector)
+		{
+			if (aabb::aabbboxintersect(Box, *Collider))
+			{
+				BlocksInRange.destroy();
+				return true;
+			}
+		}
+
+
+
 	}
 	BlocksInRange.destroy();
 	return false;
@@ -58,58 +58,116 @@ bool voxtra::Boxcollwithgrid(geometry::Box Box )
 
 }
 
-voxtra::WorldRayCollision  voxtra::travvox(ray nray, float acc, GridTraverseMode trav)
+voxtra::WorldRayCollision  voxtra::travvox(ray nray, GridTraverseMode trav)
 {
-	float RayDistance = nray.length();
-	v3::Vec3 Offset = nray.diff() / acc;
-	v3::Vec3 Position = nray.start;
-	 
-	for (int i = 0; i < RayDistance * acc; i++)
+	if (nray.length() == 0)
 	{
-
-		Coord prevpos = CtxName::ctx.Grid->getVoxel(Position);
-		Position += Offset;
-		Coord curvox = CtxName::ctx.Grid->getVoxel(Position);
-		if (curvox != prevpos)
+		return Opt::None;
+	}
+	float ray_length = nray.length();
+	float travel_dist = 0;
+	Vec3 norm_ray = nray.dir();
+	Vec3 conv_each;
+	v3::Coord sgns;
+	for (size_t i = 0; i < 3; i++)
+	{
+		//if its empty we set the direction to none
+		if (norm_ray[i] == 0)
 		{
-
-			block* blk = CtxName::ctx.Grid->getBlock(curvox);
-			if (blk == nullptr)
-			{
-				continue;
-			}
-			aabb::Collider* BlockCollider = blk->owner.getcomponentptr<aabb::Collider>();
-			if (BlockCollider == nullptr)
-			{
-				continue;
-			}
-
-					if (counttablevoxel(blk, trav))
-					{
-						geointersect::boxRayCollision Collision= geointersect::intersection(BlockCollider->globalbox(), nray);
-						if (Collision)
-						{
-							return Opt::Construct<RayWorldHit>(Collision.unwrap(), &blk->owner.getcomponent<aabb::Collider>());
-						}
-					}
+			conv_each[i] = 0;
+			sgns[i] = 0;
+		}
+		else {
+			conv_each[i] = abs(1 / norm_ray[i]);
+			sgns[i] = sign(norm_ray[i]);
 		}
 
+	}
+	v3::Vec3 pos = nray.start-(1e-6*norm_ray);
 
+	Coord curvox = CtxName::ctx.Grid->getVoxel(pos);
+	Coord Boundry;
+	for (size_t i = 0; i < 3; i++)
+	{
+		Boundry[i] = next_boundary(pos[i], sgns[i] == 1);
+	}
+	while (travel_dist <= ray_length)
+	{
+		
+
+
+		WorldRayCollision Collision = Opt::None;
+		for (int x = extended_range(pos.x).first; x <= extended_range(pos.x).second; ++x) {
+			for (int y = extended_range(pos.y).first; y <= extended_range(pos.y).second; ++y) {
+				for (int z = extended_range(pos.z).first; z <= extended_range(pos.z).second; ++z) {
+					block* blk = CtxName::ctx.Grid->getBlock(Coord(x, y, z));
+					if (blk == nullptr)
+					{
+						continue;
+					}
+					aabb::Collider* BlockCollider = blk->owner.getcomponentptr<aabb::Collider>();
+					if (BlockCollider == nullptr)
+					{
+						continue;
+					}
+					if (!counttablevoxel(blk, trav))
+					{
+						continue;
+					}
+					geointersect::boxRayCollision PotentialCollision = geointersect::intersection(BlockCollider->globalbox(), nray);
+					if (PotentialCollision&&PotentialCollision().dist<ray_length && (!Collision || PotentialCollision().dist<Collision().dist()))
+					{ 
+					Collision = Opt::Construct<RayWorldHit>(PotentialCollision
+						.unwrap(), &blk->owner.getcomponent<aabb::Collider>());
+					}
+				 	
+					
+				}
+			}
+		}
+		if (Collision)
+		{
+			return Collision;
+
+		}
+		float min_dist = std::numeric_limits<float>::infinity();
+		size_t min_ind = 0;
+		for (size_t i = 0; i < 3; i++)
+		{
+			if (sgns[i] == 0)
+			{
+				continue;
+			}
+			float new_val = abs(Boundry[i] - pos[i]) * conv_each[i];
+			if (new_val < min_dist)
+			{
+				min_dist = new_val;
+				min_ind = i;
+
+			}
+		}
+
+		pos += norm_ray * min_dist;
+		travel_dist += min_dist;
+		curvox += Coord(sgns[min_ind], min_ind);
+		Boundry += Coord(sgns[min_ind], min_ind);
 
 	}
+
+
+
 	return Opt::None;
 }
-
 //todo remove this will not be needed as we will do a better function
 //essentially goes to the next block and then goes backwords
-	block* voxtra::findprevblock(ray nray, float acc,GridTraverseMode trav)
+block* voxtra::findprevblock(ray nray, GridTraverseMode trav)
+{
+	WorldRayCollision Intersection = travvox(nray, trav);
+	if (!Intersection)
 	{
-		WorldRayCollision Intersection=travvox(nray, acc, trav);
-		if (!Intersection)
-		{
-			return nullptr;
-		}
-		float BackMag = 2 * nray.length() / acc;
-		Vec3 BackProp= Intersection.unwrap().Intersection() - nray.dir() * BackMag;
-	return	(CtxName::ctx.Grid->getBlock(CtxName::ctx.Grid->getVoxel( BackProp)));
+		return nullptr;
 	}
+	float BackMag = 1 / 1000.f;
+	Vec3 BackProp = Intersection.unwrap().intersection() - nray.dir() * BackMag;
+	return	(CtxName::ctx.Grid->getBlock(CtxName::ctx.Grid->getVoxel(BackProp)));
+}

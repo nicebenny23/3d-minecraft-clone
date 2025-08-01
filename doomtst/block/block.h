@@ -7,7 +7,7 @@
 
 #include "../util/geometry.h"
 #pragma once 
-constexpr auto blocksize = 1.f;
+constexpr double blocksize = 1.f;
 enum blocktex {
 	treestonetex = 0,
 	grasstex = 1,
@@ -39,7 +39,7 @@ enum blocktex {
 	planktex=27,
 };
 using namespace v3;
-#define  unitscale   unitv * 1 / 2.0002f
+#define  unitscale   unitv * 1 / 2.00005f
 namespace blockname {
 	const v3::Vec3 blockscale = unitscale * blocksize;
 	enum id

@@ -18,6 +18,7 @@ struct Transform
 	void Orient(v3::Vec3 to);
 	void OrientDir(v3::Vec3 base);
 	glm::mat4 ToMatrix();
+
 	
 };
 glm::mat4 LookAt(Transform& transform);

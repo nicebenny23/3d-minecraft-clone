@@ -31,7 +31,7 @@ struct PlayerMovementSys : System
 
     const float coyoteDuration = 0.15f;
     const float bufferDuration = 0.10f;
-    const float jumpStrength = 150.0f * 16.0f / 200.0f;
+    const float jumpStrength = 150.0f * 12.0f / 200.0f;
     const float slamStrength = -30.0f;    // tweak for slam speed
     
     virtual void run(gameobject::Ecs* ecs)
@@ -40,6 +40,11 @@ struct PlayerMovementSys : System
 
         for (auto [body, movement, climb] : view)
         {
+
+            if (isnan(body->owner.getcomponent<rigidbody>().velocity.x))
+            {
+                int l = 2;
+            }
             float dt = CtxName::ctx.Time->dt;
             timename::time now = CtxName::ctx.Time->now();
 
@@ -118,6 +123,8 @@ struct PlayerMovementSys : System
                 {
                     body->velocity.y -= effSpeed;
                 }
+
+                
             }
         }
     }

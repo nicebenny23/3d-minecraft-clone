@@ -4,31 +4,30 @@
 
 ModelMeshName::ModelMesh& model::operator[](int index)
 {
-	return *meshlist[index];
+	return meshlist[index];
 }
 void model::draw()
 {
 }
 void model::add(const char* meshname,const char * meshtexname,Vec3 pos)
 {
-		 auto mesh_tex= CtxName::ctx.Ren->Textures.LoadTexture(meshtexname,meshtexname);
-	meshlist.push(ModelMeshName::loadmesh(meshname, mesh_tex, zerov));
-meshlist[meshlist.length - 1]->transform.position = pos;
+	meshlist.push(ModelMeshName::loadmesh(meshtexname,meshname, zerov));
+meshlist.last().transform.position = pos;
 }
 model::model(meshconnecttype connectmethod )
 {
 	utype = gameobject::updaterender;
 	connectiontype = connectmethod;
-	meshlist = array<ModelMeshName::ModelMesh*>();
+	meshlist = array<ModelMeshName::ModelMesh>();
 }
 
 void model::update()
 {
-	CtxName::ctx.Ren->SetType("Model");
+	v3::Vec3 how = owner.transform().position;
 	glm::mat4* model =new glm::mat4((owner.transform().ToMatrix()));
 	for (int i = 0; i < meshlist.length; i++)
 	{
-		meshlist[i]->modelmatrix =model;
+		meshlist[i].modelmatrix =model;
 		ModelMeshName::rendermesh(meshlist[i]);
 	}
 	delete model;
@@ -38,7 +37,7 @@ void model::destroy()
 {
 	for (int i = 0; i < meshlist.length; i++)
 	{
-		meshlist[i]->destroy();
+		meshlist[i].destroy();
 	}
 }
 

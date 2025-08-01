@@ -32,18 +32,22 @@ namespace renderer {
 		}
 		return trivial;
 	}
+	enum class indice_mode {
+		generate_indices = 0,
+		manual_generate = 1,
+	};
 	template<typename T> struct dependent_false : std::false_type {};
 	struct MeshData {
 		Ids::Id mesh;
 		
 
-		bool generate_trivial;
+		indice_mode generate_trivial;
 		size_t length() {
 			
 			return pointlist.length * sizeof(float) / stride;
 
 		}
-		MeshData(Ids::Id msh,const vertice::vertex& vertex_layout,bool indices) :mesh(msh),generate_trivial(indices),layout(vertex_layout), pointlist()
+		MeshData(Ids::Id msh,const vertice::vertex& vertex_layout, indice_mode indices) :mesh(msh),generate_trivial(indices),layout(vertex_layout), pointlist()
 		{
 			stride = layout.stride();
 
@@ -67,7 +71,7 @@ namespace renderer {
 				throw std::logic_error("Point size mismatch: does not match stride");
 			}
 
-			if (generate_trivial) {
+			if (generate_trivial==indice_mode::generate_indices) {
 				indicelist.push(indicelist.length);
 			}
 
@@ -96,7 +100,7 @@ namespace renderer {
 		void add_index(size_t index) {
 			indicelist.push(index);
 		}
-		explicit MeshData() :generate_trivial(false), pointlist(), indicelist(), layout(),stride() {}
+		explicit MeshData() :generate_trivial(indice_mode::generate_indices), pointlist(), indicelist(), layout(),stride() {}
 
 		size_t stride;
 		vertice::vertex layout;
@@ -126,9 +130,9 @@ namespace renderer {
 		void render();
 		
 		void destroy();
-		MeshData create_mesh(bool auto_inds = false);
-		bool operator()() const {
-			return static_cast<bool>(id);
+		MeshData create_mesh(indice_mode auto_ind = indice_mode::manual_generate);
+		explicit operator bool() const noexcept {
+			return id.valid();
 		}
 	};
 	struct Renderer {
@@ -271,7 +275,8 @@ namespace renderer {
 				to_fill.pop();
 			}
 		}
-		MeshData create(Ids::Id renderable_id, bool is_trivial) {
+		
+		MeshData create(Ids::Id renderable_id, indice_mode is_trivial= indice_mode::manual_generate) {
 			auto& renderable = renderables[renderable_id.id];
 			return MeshData(renderable.mesh,meshes[renderable.mesh].Voa.attributes, is_trivial);
 		}

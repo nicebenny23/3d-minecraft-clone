@@ -13,11 +13,8 @@ void collision::update()
 
 		for (Collider* Coll : Colliderlist)
 		{
-			if (true)
-			{
-
-			}
-				handleCollisionWithGrid(*Coll);
+			handleCollisionWithGrid(*Coll, (iters == 0));
+			
 				
 					
 
@@ -25,8 +22,10 @@ void collision::update()
 
 			
 		}
-		handleduelentitycollisions();
+	
 	}
+
+	handleduelentitycollisions();
 }
 
 
@@ -73,7 +72,7 @@ voxtra::WorldRayCollision collision::raycastentity(ray nray, HitQuery query)
 			{
 
 				geointersect::boxRayCollision blkinter = geointersect::intersection(Collider1->globalbox(), nray);
-				if (blkinter&&(closest==Opt::None|| blkinter.unwrap().dist < closest.unwrap().Dist()))
+				if (blkinter&&(closest==Opt::None|| blkinter.unwrap().dist < closest.unwrap().dist()))
 				{
 					closest = voxtra::RayWorldHit(blkinter.unwrap(), Collider1);
 				}
@@ -170,7 +169,7 @@ void collision::handleduelentitycollisions()
 			}
 
 			v3::Vec3 force = aabb::collideaabb(*Collider1, *Collider2);
-			if (v3::mag(force) < 0.01f)
+			if (v3::mag(force) < 0.001f)
 			{
 				continue;
 			}
@@ -194,7 +193,7 @@ bool collision::aabbCollidesWithEntity(Collider* blk, HitQuery query) {
 
 voxtra::WorldRayCollision collision::raycastall(ray nray, HitQuery query, voxtra::GridTraverseMode travmode)
 {
-	voxtra::WorldRayCollision gridcol = voxtra::travvox(nray, 200, travmode);
+	voxtra::WorldRayCollision gridcol = voxtra::travvox(nray, travmode);
 	voxtra::WorldRayCollision entcol = raycastentity(nray,query);
 	if (gridcol == Opt::None) {
 		return entcol;
@@ -203,13 +202,13 @@ voxtra::WorldRayCollision collision::raycastall(ray nray, HitQuery query, voxtra
 	{
 		return gridcol;
 	}
-	if (gridcol.unwrap().Dist()<entcol.unwrap().Dist())
+	if (gridcol.unwrap().dist()<entcol.unwrap().dist())
 	{
 		return gridcol;
 	}
 	return entcol;
 }
-Vec3 colideentandblock(Collider& entity, block* tocollide) {
+Vec3 colideentandblock(Collider& entity, block* tocollide, bool is_trigger) {
 	
 	if (tocollide == nullptr|| !tocollide->owner.hascomponent<aabb::Collider>())
 	{
@@ -224,28 +223,31 @@ Vec3 colideentandblock(Collider& entity, block* tocollide) {
 		{
 			return zerov;
 		}
-
+		if (is_trigger)
+		{
 			propagatecollisionmessage(entity.owner, tocollide->owner);
 
+		}
+			
 		if (!blockcol.effector && !entity.effector)
 		{
 			return force;
 		}
 }
 
-void collision::handleCollisionWithGrid(Collider& entity)
+void collision::handleCollisionWithGrid(Collider& entity,bool is_trigger)
 {
 	
 
-		array<block*>& blklist = CtxName::ctx.Grid->voxelinrange(entity.globalbox());
+		array<block*> blklist = CtxName::ctx.Grid->voxelinrange(entity.globalbox());
 
-
-
+		
 		Vec3 minforce = zerov;
 		block* minblock = nullptr;
+		
 		for (int ind = 0; ind < blklist.length; ind++)
 		{
-			Vec3 force = colideentandblock(entity, blklist[ind]);
+			Vec3 force = colideentandblock(entity, blklist[ind],is_trigger);
 
 			if (mag(force) > mag(minforce) || mag(minforce) == 0)
 			{
@@ -266,7 +268,7 @@ void collision::handleCollisionWithGrid(Collider& entity)
 
 		blklist.destroy();
 
-		delete& blklist;
+		
 	
 }
 

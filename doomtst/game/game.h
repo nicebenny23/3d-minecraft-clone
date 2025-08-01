@@ -29,6 +29,8 @@
 #include "rigidbody.h"
 #include "../player/playermovment.h"
 #include "../game/System.h"
+#include "../game/entity.h"
+#include "../entities/entityspawner.h"
 #pragma once 
 struct IAmAPrinter:System {
     void run(gameobject::Ecs* ecs) override {
@@ -55,14 +57,30 @@ void startframe() {
 }
 
 void updateworld() {
-
-    
+    if (isnan(player::goblin.getcomponent<rigidbody>().velocity.x))
+    {
+        int l = 2;
+    }
     collision::update();
+    if (isnan(player::goblin.getcomponent<rigidbody>().velocity.x))
+    {
+        int l = 2;
+    }
     CtxName::ctx.Executor->Run();
-
+    if (isnan(player::goblin.getcomponent<rigidbody>().velocity.x))
+    {
+        int l = 2;
+    }
 CtxName::ctx.OC->updatecomponents(gameobject::Framecall);
+if (isnan(player::goblin.getcomponent<rigidbody>().velocity.x))
+{
+    int l = 2;
+}
 gridutil::gridupdate();
-
+if (isnan(player::goblin.getcomponent<rigidbody>().velocity.x))
+{
+    int l = 2;
+}
 }
 void update() {
 
@@ -84,13 +102,15 @@ void init() {
     aabb::initCollider();
     ui::createuilist();
     inittextarray();
-    player::initplayer();
+  
     create_decal_material();
     
     blockrender::initblockrendering();
-    
+
     ui::createuielement<uibox>("images\\crosshair.png", "CrosshairTexture", v2::unitv / 32, v2::zerov, -3);
+  
     Core::game.CreateGrid();
+    player::initplayer();   
     gridutil::computeallcover();
     gridutil::redolighting();
     CtxName::ctx.Inp->endupdate();
@@ -107,11 +127,17 @@ void endgame() {
 void rungame()
 {
     init();
+    
      CtxName::ctx.Executor->push(new IAmAPrinter());
      CtxName::ctx.Executor->push(new RigidbodySystem());
-
+     CtxName::ctx.Executor->push(new spawn_mobs());
      CtxName::ctx.Executor->push(new PlayerMovementSys());
+     createslime(zerov+Vec3(0,10,0), false);
      float lastupdate = 0;
+     {
+       auto a= gameobject::Observe::entity_slot(player::goblin);
+
+     }
     while (!CtxName::ctx.Window->shouldClose())
     {
        

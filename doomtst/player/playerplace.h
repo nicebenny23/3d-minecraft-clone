@@ -46,7 +46,7 @@ struct playerplace : gameobject::component
 	}
 	void placeblock() {
 		ray cameraray = ray(owner.transform().position,owner.transform().position +owner.transform().getnormaldirection() * 7);
-		block* plamentblock = voxtra::findprevblock(cameraray, 1000,voxtra::countsolid);
+		block* plamentblock = voxtra::findprevblock(cameraray,voxtra::countsolid);
 		if (plamentblock==nullptr)
 		{
 			return;

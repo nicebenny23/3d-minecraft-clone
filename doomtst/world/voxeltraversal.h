@@ -4,38 +4,40 @@
 #include "../util/intersection.h"
 #include "../util/geometry.h"
 #include "../game/GameContext.h"
+#include "../util/Option.h"
+#include "../util/UniquePtr.h"
 #pragma once 
 namespace voxtra {
 
 	struct RayWorldHit
 	{
 		aabb::Collider* collider;
-		
+
 		geointersect::RayHit Hit;
-	
+
 		bool intersected() {
 
 			return (collider != nullptr);
 		}
 		RayWorldHit(geointersect::RayHit rayHit, aabb::Collider* WorldCollider) {
-			
+
 			collider = WorldCollider;
 			Hit = rayHit;
 		}
-		
+
 		RayWorldHit() {
 			collider = nullptr;
-			
+
 		}
-		Vec3 Intersection() {
+		Vec3 intersection() {
 
 			return Hit.intersectionpoint;
 		}
-		
-	float Dist(){
-		return Hit.dist;
-	}
-		ray Ray() {
+
+		float dist() {
+			return Hit.dist;
+		}
+		ray ray() {
 			return Hit.Ray;
 		}
 	};
@@ -49,47 +51,46 @@ namespace voxtra {
 
 
 	bool Boxcollwithgrid(geometry::Box Box);
-	WorldRayCollision travvox(ray nray, float acc, GridTraverseMode trav = countnormal);
-	block* findprevblock(ray nray, float acc, GridTraverseMode trav = countnormal);
+	WorldRayCollision travvox(ray nray, GridTraverseMode trav = countnormal);
+	block* findprevblock(ray nray, GridTraverseMode trav = countnormal);
 
-	inline v3::Vec3 findemptyspace(v3::Vec3 scale) {
-		geometry::Box loadbox;
-		int test = 0;
-		bool notinblock = false;
-		do
+	inline Opt::Option<geometry::Box> findemptyspace(v3::Vec3 scale) {
+		size_t max_tst = 40;
+		for (size_t tst = 0; tst < max_tst; tst++)
 		{
-
-
 			float ranx = (random() - .5) * 2;
-
 			float rany = (random() - .5) * 2;
-
 			float ranz = (random() - .5) * 2;
-			
-			v3::Vec3 offset = (Vec3(ranx, rany, ranz) * (2 * CtxName::ctx.Grid->rad + 1) / 2 +CtxName::ctx.Grid->gridpos) * chunkaxis;
-			test++;
-			if (1000 < test)
+			v3::Vec3 test_pos = (Vec3(ranx, rany, ranz) * (2 * CtxName::ctx.Grid->rad + 1) / 2 + CtxName::ctx.Grid->gridpos) * chunkaxis;
+			geometry::Box test_box = geometry::Box(test_pos,scale);
+			if (!Boxcollwithgrid(test_box))
 			{
-				return offset;
+				return Opt::Option<geometry::Box>(test_box);
 			}
-			loadbox = geometry::Box(offset, scale);
-		} while (Boxcollwithgrid(loadbox));
-		return loadbox.center;
+		}
+
+		return Opt::None;
 	}
-	inline Vec3 findground(v3::Vec3 scale) {
-		Vec3 pos = zerov;
-		bool shouldcontinue = true;
-		do
+	inline Opt::Option<geometry::Box> findground(v3::Vec3 scale) {
+		size_t max_checks = 100;
+		for (size_t checks = 0; checks < max_checks; checks++)
 		{
-			pos = findemptyspace(scale);
-			geometry::Box testbox = geometry::Box(pos - Vec3(0, scale.y + .5, 0), scale);
-			shouldcontinue = !Boxcollwithgrid(testbox);
-			if (random()<.001)
+
+
+			Opt::Option<geometry::Box> test_box = findemptyspace(scale);
+			if (!test_box)
 			{
-				shouldcontinue = false;
+				continue;
 			}
-		} while (shouldcontinue);
-	
-		return pos - Vec3(0, scale.y, 0);
+			geometry::Box ground_tst_box = geometry::Box(test_box().center - Vec3(0, scale.y, 0), v3::Vec3(scale.x, .1f, scale.z));;
+		
+			if (Boxcollwithgrid(ground_tst_box))
+			{
+				return test_box;
+			}
+		
+		
+		}
+		return Opt::None;
 	}
 }

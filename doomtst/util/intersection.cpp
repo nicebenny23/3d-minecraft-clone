@@ -1,35 +1,44 @@
 #pragma once
 #include "intersection.h"
+#include "interval.h"
 namespace geointersect {
 	boxRayCollision intersection(geometry::Box box, ray fray)
 	{
 		v3::Vec3 dir = fray.dir();
 
 		//not actually max
-		float xval1 = (box.center.x - box.scale.x - fray.start.x) / dir.x;
-		float xval2 = (box.center.x + box.scale.x - fray.start.x) / dir.x;
-		float maxxval = Max(xval1, xval2);
-		float minxval = Min(xval1, xval2);
-		float yval1 = (box.center.y - box.scale.y - fray.start.y) / dir.y;
-		float yval2 = (box.center.y + box.scale.y - fray.start.y) / dir.y;
-		float maxyval = Max(yval1, yval2);
-		float minyval = Min(yval1, yval2);
-		float zval1 = (box.center.z - box.scale.z - fray.start.z) / dir.z;
-		float zval2 = (box.center.z + box.scale.z - fray.start.z) / dir.z;
-		float maxzval = Max(zval1, zval2);
-		float minzval = Min(zval1, zval2);
-		float MaxMinValue = Max(minxval, minyval, minzval);
-		float MinMaxValue = Min(maxxval, maxyval, maxzval);
-	
+
+		double min_max= std::numeric_limits<double>::infinity();
+		double max_min= -std::numeric_limits<double>::infinity();
+		for (int i = 0; i < 3; i++)
+		{
+			//potential closest hits on axis
+			double tst_val_1= box.center[i] - box.scale[i] - fray.start[i];
+
+			double tst_val_2 = box.center[i] + box.scale[i] - fray.start[i];
+			if (apxf(dir[i], 0))
+			{
+				if (inter::range(tst_val_1,tst_val_2).apx_contains(0))
+				{
+					continue;
+				}
+			}
+			{
+				tst_val_1 /= dir[i];
+				tst_val_2 /= dir[i];
+			}
+			min_max= Min(min_max, Max(tst_val_1, tst_val_2));
+			max_min =Max(max_min, Min(tst_val_1, tst_val_2));
+		}
+		
 
 
-		if (MaxMinValue < MinMaxValue)
+		if (max_min< min_max||apxf(max_min,min_max))
 		{
 			
-			if (0 < MaxMinValue)
+			if (0 < max_min||apxf(max_min, 0))
 			{
-				float distancealongaxis = MaxMinValue;
-				return Opt::Construct<RayHit>(fray,distancealongaxis);
+				return Opt::Construct<RayHit>(fray, max_min);
 			}
 
 		}

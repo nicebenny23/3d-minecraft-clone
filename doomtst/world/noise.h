@@ -13,11 +13,6 @@ constexpr float test_scale = 2.71818281828f;
 using namespace v3;
 using namespace stn;
 
-enum noisetype {
-    normalnoise = 0,
-    rigid = 1,
-    billowed = 2,
-};
 
 struct noiseparams
 {
@@ -28,20 +23,18 @@ struct noiseparams
         scalefactor = 0;
         startscale = 0;
         amplificationfactor = 0;
-        type = normalnoise;
+     
     }
-    noisetype type;
     float scalefactor;    // Controls how scale is multiplied across octaves
     float startscale;       // Initial scale value for the noise
     int octaves;            // Number of octaves used in the noise generation
     float amplificationfactor;// Controls how amplitude 
-    noiseparams(float startingscale, float scalemultiplyer, unsigned int noiseoctaves, float ampfactor,noisetype ntype) {
+    noiseparams(float startingscale, float scalemultiplyer, unsigned int noiseoctaves, float ampfactor) {
         distributionsize = 400;
         startscale = startingscale;
         scalefactor = scalemultiplyer;
         octaves = noiseoctaves;
         amplificationfactor = ampfactor;
-        type = ntype;
     }
 };
 
@@ -80,11 +73,10 @@ for (int i = 0; i < properties.distributionsize; i++)
 }
 equalizer= statistics::HistogramEqualizer(array<float>(distribution));
 }
-
 //higher scale means higher frequency or more chaotic
-inline noisemap* genperlin(int octaves,  float scalemul, float startscale, float ampmul,noisetype type) {
+inline noisemap* genperlin(size_t octaves,  float frequencymul, float startfrequency, float ampmul) {
     noisemap* map = new noisemap();
-    map->properties = noiseparams(startscale, scalemul, octaves, ampmul,type);
+    map->properties = noiseparams(startfrequency, frequencymul, octaves, ampmul);
 
     map->create();
 

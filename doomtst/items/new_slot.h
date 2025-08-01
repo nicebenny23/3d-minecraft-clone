@@ -1,8 +1,9 @@
 #include "new_item.h"
 #include "item_ui.h"
 #include "../renderer/uibox.h"
-
-namespace slot {
+#include <stdexcept>
+#include "../game/entity.h"
+namespace items{
 	constexpr v2::Coord2 grid_size = v2::Coord2(1, 3);
 	constexpr v2::Vec2 grid_pixel_scale = v2::Vec2(2 / grid_size.x, 2 / grid_size.y);
 	v2::Vec2 slot_center(v2::Coord2 coord) {
@@ -23,7 +24,7 @@ namespace slot {
 		}
 		void swap(ItemSlot& oth) {
 
-			std::swap(oth.held, held);
+			oth.held.swap( held);
 		}
 		void transfer_item(ItemSlot& oth) {
 			if (oth.held) {
@@ -50,7 +51,7 @@ namespace slot {
 			}
 		}
 		private:
-			Opt::Option<gameobject::obj> held;
+			gameobject::Observe::entity_slot held;
 		
 
 	};

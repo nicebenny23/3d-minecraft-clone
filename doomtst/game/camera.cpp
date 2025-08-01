@@ -25,10 +25,15 @@ namespace camera {
 		if (cam == nullptr) {
 			throw std::logic_error("Attempted to access Camera before it was created");
 		}
+		if (isnan(cam->CamTransform.position.x))
+		{
+			int l = 2;
+		}
 		return  cam->CamTransform;
 	}
 	v3::Vec3 campos() {
 
+		
 		return GetCam().position.glm();
 
 	}

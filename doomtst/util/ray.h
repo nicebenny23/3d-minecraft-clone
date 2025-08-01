@@ -11,7 +11,7 @@ struct ray
 	v3::Vec3 diff() const {
 		return end - start;
 	}
-	float length() const {
+	double length() const {
 		return dist(start, end);
 	}
 	//slower due to repitition but this code is not preformance critical
@@ -36,7 +36,7 @@ struct ray
 	Vec3 pointAt(float t) const {
 		return start + dir() * t;
 	}
-	float distance(v3::Vec3 vector) const {
+	double distance(v3::Vec3 vector) const {
 		return dist(vector, project(vector));
 	}
 	ray(const v3::Vec3& startray, const v3::Vec3& endray)

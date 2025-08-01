@@ -25,6 +25,7 @@ namespace timename {
 		float operator-(time offset) const { return (value - offset.value); }
 
 	};
+	struct duration;
 	struct TimeManager
 	{
 		float real_dt;
@@ -52,7 +53,7 @@ namespace timename {
 
 			float fps = 1.f / real_dt;
 			float inter_rate = 1;
-			dt = clamp(0.f, lerp(dt, real_dt,inter_rate), 1.0f / min_frames);
+			dt = clamp(real_dt,0.f, 1.0f / min_frames);
 			
 			
 			float fps_change_rate = .2;
@@ -65,13 +66,90 @@ namespace timename {
 
 			}
 		}
+		duration create_dur();
+
 		time now() {
 			return time(ElapsedTime);
 		}
 		
 	private:
-		
 		float fps_counter;
 		const int min_frames = 20;
+	};
+
+
+	enum class duration_state {
+		active=0,
+		ending=1,
+		inactive=2
+	};
+	struct duration {
+		duration() :tm(nullptr), active(false) {
+
+		}
+		duration(float wait, TimeManager* tman):tm(tman),active(true) {
+			set(wait);
+		}
+		duration(TimeManager* tman) :tm(tman), active(false) {
+			
+		}
+		float remaining() {
+			if (!active)
+			{
+				throw std::logic_error("cannot compute the remaining time of a duration");
+			}
+			if (!tm)
+			{
+				throw std::logic_error("cant use unitilized duration");
+			}
+			return Max(0, end-tm->now());
+		}
+		void disable() {
+			active = false;
+		}
+		void set(float dur) {
+			if (dur<=0)
+			{
+				throw std::logic_error("duration must wasit for a positive number of time");
+			}
+
+			if (!tm)
+			{
+				throw std::logic_error("cant use unitilized duration");
+			}
+			end = tm->now() + dur;
+			active = true;
+			
+		}
+		bool is_active() const{
+
+			if (!tm)
+			{
+				throw std::logic_error("cant use unitilized duration");
+			}
+			return active;
+		}
+		duration_state state() {
+
+		if (!tm)
+		{
+			throw std::logic_error("cant use unitilized duration");
+		}
+		if (!active)
+		{
+		return duration_state::inactive;
+		}
+		if (tm->now()< end )
+		{
+		return duration_state::active;
+		}
+		active = false;
+		return duration_state::ending;
+
+	}
+	private:
+		time end;
+		TimeManager* tm;
+		bool active;
 	};
 }

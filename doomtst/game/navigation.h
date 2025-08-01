@@ -2,7 +2,6 @@
 #include "../util/mathutil.h"
 #include "../world/grid.h"
 #include "../util/dir.h"
-
 #include "entity.h"
 
 
@@ -11,7 +10,9 @@ struct navnode {
 
     //distance to objective
     float gcost;
-
+    v3::Vec3 center() {
+        return pos + unitv / 2;
+    }
     //distance to start
         float hcost;
     navnode* parent;
@@ -59,13 +60,16 @@ struct navigator: gameobject::component
     navigator(gameobject::obj parentref, array<navnode> (*testfunc)(navnode& pos));
     bool isblockvalid;
     v3::Vec3 esize;
-    float timetillupdate;
-    v3::Vec3 headed;
+    timename::duration path_creation_dur;
+    v3::Vec3 headed();
+    size_t headed_index;
+    array<v3::Vec3> headed_list;
     array<navnode> (*testfunction)(navnode& pos);
     gameobject::obj goingtwords;
     void calcpath();
     bool noblockinrange(Coord pos);
     void update();
+    bool should_update_path();
 };
 
 array<navnode> astarpathfinding(navnode start, navnode goal, array<navnode> (*getconnected)(navnode& pos));

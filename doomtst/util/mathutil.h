@@ -3,9 +3,10 @@
 #include <limits.h>
 #include <stdexcept>
 #include <type_traits>
+#include "pair.h"
 #define NaNf std::numeric_limits<float>::max()
-__forceinline bool aprox_equal(float a, float b) {
-	constexpr float EPS = 1e-4f;     
+__forceinline bool apxf(double a, double b) {
+	constexpr double EPS = 1e-4f;
 	return (fabsf(a - b) < EPS);
 }
 
@@ -54,6 +55,10 @@ inline bool inrange(float val, float low, float high)
 {
 	return val >= low && val <= high;
 }
+inline bool inrange_apx(float val, float low, float high)
+{
+	return val >= low && val <= high||apxf(val,low)||apxf(val,high);
+}
 
 inline  float sigmoid(float v1) {
 
@@ -86,7 +91,38 @@ constexpr auto Min(T1 a, T2 b, Ts... rest)-> typename std::common_type<T1, T2, T
 	}
 }
 
+inline int next_boundary(float x, bool positiveDirection) {
+	int i = static_cast<int>(std::floor(x));
 
+	if (positiveDirection) {
+		// Next boundary is always i + 1
+return i + 1;
+	}
+	else {
+		if (x==i)
+		{
+			return i-1;
+		}
+		return i;
+	}
+}
+//
+inline util::pair<int,int> extended_range(double x) {
+	int low = static_cast<int>(std::floorl(x));
+	int high = low;
+	int rnd = std::lround(x);
+	if (apxf(rnd,x))
+	{
+		if (rnd==low)
+		{
+		low--;
+		}
+		else {
+		high++;
+		}
+	}
+	return util::pair(low,high);
+}
 //mod(x,m) that behaves intutiivlly (ex mod(-1,2)!=-1)
 __forceinline  int symmetric_mod(int x, int m) noexcept {
 	// Precondition: m > 0

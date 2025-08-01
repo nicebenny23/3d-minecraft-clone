@@ -4,6 +4,8 @@
 #include <stdexcept>
 #include <glad/glad.h>
 #include <glm/mat4x4.hpp>
+#include "../util/vector2.h"
+#include "../util/vector3.h"
 namespace Shaders {
 	class ShaderManager;  // Forward declaration of TextureManager
 
@@ -24,7 +26,12 @@ struct shader
 		{
 			throw std::logic_error("invalid id");
 		}
-	return	glGetUniformLocation(id, name);
+		GLint location = glGetUniformLocation(id, name);
+		if (location == -1) {
+			std::string msg = "Uniform '" + std::string(name) + "' not found or not active in shader '" + Name + "'";
+			throw std::logic_error(msg);
+		}
+		return location;
 
 	}
 	void setf(float val, const char* name)
@@ -62,14 +69,14 @@ struct shader
 
 		
 	}
-	void SetVector3f(glm::vec3 val, const char* name)
+	void SetVector3f(v3::Vec3 val, const char* name)
 	{
 	
 		glad_glUniform3f(uniformlocation(name), val.x, val.y, val.z);
 
 		
 	}
-	void SetVector2f(glm::vec2 val, const char* name)
+	void SetVector2f(v2::Vec2 val, const char* name)
 	{
 	
 		glad_glUniform2f(uniformlocation(name), val.x, val.y);

@@ -41,7 +41,7 @@ namespace aabb {
                 {
                     int l = 1;
                 }
-                Vec3 scale = blk.mesh.box.scale;
+                Vec3 scale = blk.mesh.box.scale/2/blockname::blockscale;
                 Vec3 pos = blk.center();
                 global.center = box.center * scale * 2 + pos;
                 global.scale = box.scale * scale * 2;
@@ -50,14 +50,14 @@ namespace aabb {
             return global;
         }
         
-        short index;
+        bool in_list;
       
         Collider() = default;
         Collider(const v3::Vec3& objcenter, const v3::Vec3& objscale, bool appendtolist,bool iseffector=false);
         ~Collider() = default;
 
        
-        void destroy_hook();
+        void destroy_hook() override;
 
         
     };

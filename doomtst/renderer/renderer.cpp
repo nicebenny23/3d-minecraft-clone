@@ -98,7 +98,8 @@ namespace renderer {
         Construct("Model", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
             uniforms::uparam("aspect_ratio", "aspectratio"),
             uniforms::uparam("proj_matrix", "projection"),
-            uniforms::uparam("view_matrix", "view_matrix")
+            uniforms::uparam("view_matrix", "view")
+            
         );
 
         Shaders.Compile("ParticleShader", "shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
@@ -162,10 +163,10 @@ namespace renderer {
             context.bound_shader().setuint(std::get<unsigned int>(val), location_in_shader);
             break;
         case uniforms::uform_vec2:
-            context.bound_shader().SetVector2f(std::get<glm::vec2>(val), location_in_shader);
+            context.bound_shader().SetVector2f(std::get<v2::Vec2>(val), location_in_shader);
             break;
         case uniforms::uform_vec3:
-            context.bound_shader().SetVector3f(std::get<glm::vec3>(val), location_in_shader);
+            context.bound_shader().SetVector3f(std::get<v3::Vec3>(val), location_in_shader);
             break;
         case uniforms::uform_vec4:
             context.bound_shader().SetVector4f(std::get<glm::vec4>(val), location_in_shader);
@@ -260,9 +261,9 @@ namespace renderer {
         id = Ids::None;
     }
 
-    MeshData RenderableHandle::create_mesh(bool auto_inds)
+    MeshData RenderableHandle::create_mesh(indice_mode auto_ind)
     {
-        return renderer->create(id,auto_inds);
+        return renderer->create(id, auto_ind);
     }
 
   

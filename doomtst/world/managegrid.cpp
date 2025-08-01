@@ -107,7 +107,7 @@ void Iter(std::tuple<blockname::block*> block) {
 void gridutil::computeallcover()
 {
 	query::View<block> blk(CtxName::ctx.OC);
-	multi_query<block>(blk, std::function(Iter), 4,500);
+	multi_query<block>(blk, std::function(Iter), 5,400);
 	sendrecreatemsg();
 }
 

@@ -36,7 +36,7 @@ v3::Vec3 Transform::getnormaldirection()
 
 v3::Vec3 Transform::getrightdirection()
 {
-    return normal(Cross(getnormaldirection(),v3::up));
+    return zf_normal(Cross(getnormaldirection(),v3::up));
 }
 
 v3::Vec3 Transform::getupdirection()
@@ -47,7 +47,8 @@ v3::Vec3 Transform::getupdirection()
 
 void Transform::OrientDir(v3::Vec3 Direction)
 {
-    Direction = normal(Direction);
+    
+    Direction = zf_normal(Direction);
 
     pitch = (glm::degrees(std::asin(Direction.y)));
     yaw = (glm::degrees(std::atan2(Direction.z, Direction.x)));

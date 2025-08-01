@@ -1,9 +1,11 @@
+#pragma once 
 #include "../game/entity.h"
 #include "../game/entitystate.h"
 #include "../world/voxeltraversal.h"
 #include "../game/collision.h"
 #include "../game/entityutil.h"
-#pragma once 
+#include "../debugger/console.h"
+
 struct playerattackcomp: gameobject::component
 {
 	void wearduribilty() {
@@ -43,11 +45,12 @@ struct playerattackcomp: gameobject::component
 		{
 			return;
 		}
+		debug("sees"+std::to_string(CtxName::ctx.Time->dt));
 		if (closest.collider->owner.hascomponent<estate>()&&CtxName::ctx.Inp->mouseleft().pressed)
 		{
 			if (closest.collider->owner.hascomponent<rigidbody>())
 			{
-				kb(closest.Hit.intersectionpoint, 7, (closest.collider->owner));
+				kb(owner.transform().position, 7, (closest.collider->owner));
 				
 			}
 			int dmgdone = computeattackdmg();

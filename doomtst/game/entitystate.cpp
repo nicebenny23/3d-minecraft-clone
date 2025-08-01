@@ -11,7 +11,10 @@ void estate::remove()
 
 	if (!owner.hascomponent<gameobject::StaticComponent>())
 	{
-
+		if (owner.hascomponent<gameobject::transform_comp>())
+		{
+			int l = 1;
+		}
 		owner.destroy();
 	}
 }

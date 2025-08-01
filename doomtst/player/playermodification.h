@@ -52,7 +52,7 @@ struct playerbreak : gameobject::component {
 
     void spawn_decal(size_t phase) {
         if (phase == 0) return;
-        if (break_decal.handle()) break_decal.destroy();
+        if (break_decal.handle) break_decal.destroy();
         static const char* tex[] = { "",
             "images\\block_break_1.png","images\\block_break_2.png",
             "images\\block_break_3.png","images\\block_break_4.png",
@@ -121,7 +121,7 @@ struct playerbreak : gameobject::component {
         if (!hit.collider->owner.hascomponent<blockname::block>()) { 
             return false;
         }
-        if (!inrange(hit.Dist(), interactminrange, interactmaxrange)) {
+        if (!inrange(hit.dist(), interactminrange, interactmaxrange)) {
             return false;
         }
         engage_block(hit.collider->owner.getcomponentptr<block>());

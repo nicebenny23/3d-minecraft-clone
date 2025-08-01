@@ -17,10 +17,10 @@ namespace aabb {
         
 
    
-    void Collider::destroy_hook()
+    void Collider::destroy_hook() 
     {
         //if index is not null which implies that ojbect is nto null
-        if (index!=-1)
+        if (in_list)
         {
             Colliderlist.erase(this);
             
@@ -34,7 +34,7 @@ namespace aabb {
         box.center = objcenter;
         box.scale = objscale;
         
-        index = -1;
+        in_list = appendtolist;
         if (appendtolist) {
             Colliderlist.push(this);
         

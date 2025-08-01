@@ -14,24 +14,30 @@ array<navnode> getneighborslime(navnode& node)
             {
                 Coord offset = Coord(xind, yind, zind);
 
-                if (yind == 0)
-                {
+                
 
 
-                    if (xind != 0 && zind != 0) {
-
-                        continue;
-                    }
-                }
-
-
-
-
+                
+                //new l0cation
                 v3::Coord place= offset + node.pos;
+                if (offset.x!=0 && offset.z!=0)
+                {
+                    continue;  
+                }
+                //if same
+                if (place==node.pos)
+                {
+                    continue;
+                }
+                //center of block
                 v3::Vec3 center = place + unitv / 2;
-                v3::Vec3 scale = blockscale * v3::Vec3(.99f, .99f, .99f) / 2;
-                geometry::Box bx = geometry::Box(node.pos + unitv / 2, scale);
+
+                v3::Vec3 scale = blockscale * v3::Vec3(.99f, .99f, .99f);
+                //where we are now
+                geometry::Box bx = geometry::Box(node.center(), scale);
+                
                 bool cango = true;
+                //if close enigh 
                 if (node.gcost > 1.2 && node.hcost >1.2)
                 {
 
@@ -40,34 +46,22 @@ array<navnode> getneighborslime(navnode& node)
                     {
 
 
-                        Coord testblock = Coord(offset.x, offset.y - 1, offset.z);
-                        //if (CtxName::cxt.Grid->getobjatgrid(testblock + node.pos, false) == nullptr)
+                        Coord testblock = place-Coord(0,1,0);
+                        if (CtxName::ctx.Grid->getBlock(testblock + node.pos) == nullptr)
                         {
                             continue;
                         }
                     }
                 }
 
-                if (!(node.gcost <= 1.f))
+                if (1.f< node.gcost)
                 {
 
                     for (int i = 0; i < 3; i++)
                     {
-                        switch (i)
-                        {
-                        case 0:
+                        bx.center += Vec3(offset[i], i);
 
-                                bx.center += v3::Vec3(0, offset.y, 0);
-                                break;
-                        case 1:
 
-                            bx.center += v3::Vec3(offset.x, 0, 0);
-                            break;
-                        case 2:
-
-                            bx.center += v3::Vec3(0, 0, offset.z);
-                            break;
-                        }
                         if (voxtra::Boxcollwithgrid(bx))
                         {
                             cango = false;
@@ -77,7 +71,7 @@ array<navnode> getneighborslime(navnode& node)
 
                 if (cango)
                 {
-                    neighbors.push(navnode((place)));
+                    neighbors.push(navnode(place));
                 }
             }
 
@@ -87,5 +81,5 @@ array<navnode> getneighborslime(navnode& node)
 
 
     
-    return array<navnode>( neighbors);
+    return neighbors;
 }

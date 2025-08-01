@@ -46,6 +46,7 @@ enum itemid {
 	glassbottleitem=31,
 	lavabottleitem=32,
 	playertpsword=33,
+	slimewanditem=34,
 };
 enum itemstate {
 	beingheld = 0,

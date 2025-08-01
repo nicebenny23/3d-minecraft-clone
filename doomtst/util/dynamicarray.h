@@ -76,7 +76,8 @@ namespace stn {
 		array(array&& other) noexcept;
 		
 
-
+		template<class InputIt>
+		array(InputIt first, InputIt last);
 		template<typename... Args>
 		void push(Args&&... values);
 
@@ -115,7 +116,7 @@ namespace stn {
 
 		public:
 			Iterator(T* p) : ptr(p) {}
-
+			Iterator() : ptr(nullptr) {}
 			reference operator*() const { return *ptr; }
 			pointer operator->() const { return ptr; }
 
@@ -200,7 +201,7 @@ namespace stn {
 		//resize that changes length
 		void expand(size_t size);
 		void resize(size_t size = 0);
-		static constexpr size_t npos = (size_t)-1;
+		static constexpr size_t npos = (uint32_t)-1;
 		// Find the index of value, or npos if not found
 		size_t find(const T& value) const;
 
@@ -674,6 +675,21 @@ namespace stn {
 	inline bool array<T, initelems>::contains(const T & value) const
 	{
 		return find(value) != npos;
+	}
+	template<class T, bool initelems>
+	template<class InputIt>
+	inline array<T, initelems>::array(InputIt first, InputIt last)
+	{
+		length = 0;
+		capacity = 0;
+		list = nullptr;
+		auto dist = std::distance(first, last);
+		if (dist > 0) {
+			expand(dist);
+			for (size_t i = 0; first != last; ++first, ++i) {
+				list[i] = *first;
+			}
+		}
 	}
 	template<class T, bool initelems>
 	template<typename... Args>

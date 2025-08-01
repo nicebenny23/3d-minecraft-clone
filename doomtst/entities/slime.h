@@ -26,7 +26,7 @@ struct slimemove : gameobject::component {
 
         timesincejump -= CtxName::ctx.Time->dt;
         Vec3 pos = owner.transform().position;
-        v3::Vec3 headed = owner.getcomponent<navigator>().headed;
+        v3::Vec3 headed = owner.getcomponent<navigator>().headed();
         
             v3::Vec3 gotopos = headed - pos;
             if (gotopos!=zerov)
@@ -41,18 +41,12 @@ struct slimemove : gameobject::component {
                     jump();
                 }
             }
-          
-           if (ctype)
-           {
+       
 
-               owner.transform().position += normal(gotopos) * CtxName::ctx.Time->dt*2;
-
-           }
-           else {
-
-               owner.transform().position += normal(gotopos) * CtxName::ctx.Time->dt * 2;
-
-               }
+           owner.getcomponent<rigidbody>().velocity += v3::Vec3(normal(gotopos).x, 0, normal(gotopos).z) * CtxName::ctx.Time->dt;
+               owner.transform().OrientDir(v3::Vec3(gotopos.x,0, gotopos.z));
+              owner.transform().yaw = 90 * round(owner.transform().yaw/90);
+               
            }
 
     }
@@ -62,25 +56,13 @@ inline gameobject::obj createslime(v3::Vec3 pos,bool type) {
 
     gameobject::obj refmodel = CtxName::ctx.OC->CreateEntity(pos);
    
-  //  refmodel.getcomponent<model>().add("slime2.obj", "images\\slimetex.png");
-    if (type)
-    {
-
-        refmodel.addcomponent<model>()->add("slime2.obj", "images\\slimetexred.png");
-
-    }
-    else {
-        refmodel.addcomponent<model>()->add("slime2.obj", "images\\slimetex.png");
-
-    }
+  
+        refmodel.addcomponent<model>()->add("cubetest.obj", "images\\slimetex.png");
+    
     refmodel.addcomponent<loottable>()->addelem(slimeballitem, 1, false);
-    float hp= 9;
-    if (type == true) {
-        hp = 15;
-
-    }
-    refmodel.addcomponent<estate>(hp, true);
-    refmodel.addcomponent<aabb::Collider>(zerov, blockscale/2, true);
+ 
+    refmodel.addcomponent<estate>(10, true);
+    refmodel.addcomponent<aabb::Collider>(zerov, blockscale, true);
     float dmg = 3;
     if (type == true) {
         dmg = 5;

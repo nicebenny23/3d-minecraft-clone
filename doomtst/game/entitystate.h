@@ -3,6 +3,7 @@
 #include "entity.h"
 #include "rigidbody.h"
 #include "objecthelper.h"
+#include "../renderer/model.h"
 #pragma once
 struct entityeffects {
 	float timetilllavaover;
@@ -11,8 +12,9 @@ struct entityeffects {
 
 struct estate : gameobject::component
 {
-	entityeffects effects;
 	
+	entityeffects effects;
+	timename::duration model_red_dur;
 	bool inliquid;
 	bool takesfalldmg;
 	int health;
@@ -24,11 +26,19 @@ struct estate : gameobject::component
 	float invincablilitymax;
 	float timetilldmg;
 	void update() {
-
+		if (model_red_dur.state()==timename::duration_state::ending)
+		{
+			if (owner.hascomponent<model>())
+			{
+				for (ModelMeshName::ModelMesh& msh : owner.getcomponent<model>())
+				{
+					msh.color = Vec3(1, 1, 1);
+				}
+			}
+		}
 		timetilldmg -= CtxName::ctx.Time->dt;
 		if (owner.hascomponent<rigidbody>())
 		{
-			velocitylast = owner.getcomponent<rigidbody>().velocity * .03f + velocitylast * .97f;
 			testfalldamage();
 			prevonground = owner.getcomponent<rigidbody>().isonground;
 		}
@@ -47,7 +57,7 @@ struct estate : gameobject::component
 				if (owner.getcomponent<rigidbody>().velocity.y < -5)
 				{
 
-					damage(-(owner.getcomponent<rigidbody>().velocity.y / 12));
+					damage(-(owner.getcomponent<rigidbody>().oldvelocity.y / 44444));
 
 				}
 
@@ -60,11 +70,12 @@ struct estate : gameobject::component
 		}
 	}
 	void start() {
+		model_red_dur=CtxName::ctx.Time->create_dur();
 		priority = 11;
 		health = maxhealth;
 		lastongroundy = owner.transform().position.y;
 	}
-	estate(int maxhp, bool falls) {
+	estate(int maxhp, bool falls){
 		maxhealth = maxhp;
 		health = maxhp;
 		damagemultiplyer = 1;
@@ -81,6 +92,16 @@ struct estate : gameobject::component
 		if (timetilldmg < 0)
 		{
 
+			model_red_dur.set(.3f);
+			if (owner.hascomponent<model>())
+			{
+
+				
+				for (ModelMeshName::ModelMesh& msh:owner.getcomponent<model>())
+				{
+					msh.color = Vec3(1.0f, .3f, .3f);
+				}
+			}
 			timetilldmg = invincablilitymax;
 			health -= dmg;
 			if (health <= 0)
