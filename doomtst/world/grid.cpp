@@ -260,7 +260,6 @@ namespace grid {
 		for (int i = 0; i<totalChunks; i++) {
 			chunklist[i]->destroy();
 		}
-		chunklist.destroy();
 		
 	}
 	Grid::Grid(int axis,CtxName::Context* Context):rad(axis), totalChunks(dim()*dim()*dim())

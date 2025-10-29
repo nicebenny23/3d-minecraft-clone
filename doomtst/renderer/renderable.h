@@ -25,7 +25,6 @@ struct renderable {
 	}
 	stn::array<uniforms::uniform> overides;
 	~renderable() {
-		overides.destroy();
 	}
 	void set_material(Ids::Id mat_id) {
 		material = mat_id;

@@ -209,11 +209,10 @@ struct idmap
 		std::mutex lck; 
 		auto func = [&lck, this](size_t x) {iterate(x, lck); };
 		thread_util::par_iter(x_pos.begin(), x_pos.end(), func, 4);
-		x_pos.destroy();
+		
 
 	}
 	void destroy() {
-		ids.destroy();
 		map->destroy();
 		crazy->destroy();
 		slow->destroy();
@@ -229,7 +228,7 @@ Chunk::chunk* ChunkLoader::AllocChunk(Coord location)
 	newchunk.loc = location;
 	newchunk.blockbuf = new gameobject::obj[chunksize];
 	for (int i = 0; i < chunksize; i++) {
-		Grid->ctx->OC->InitializeEntity(newchunk.blockbuf[i]);
+		newchunk.blockbuf[i]= Grid->ctx->OC->spawn_empty();
 		newchunk.blockbuf[i].addcomponent < block>();
 
 	}

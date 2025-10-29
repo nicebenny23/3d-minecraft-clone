@@ -54,7 +54,7 @@ struct slimemove : gameobject::component {
 
 inline gameobject::obj createslime(v3::Vec3 pos,bool type) {
 
-    gameobject::obj refmodel = CtxName::ctx.OC->CreateEntity(pos);
+    gameobject::obj refmodel = CtxName::ctx.OC->spawn_with_transform(pos);
    
   
         refmodel.addcomponent<model>()->add("cubetest.obj", "images\\slimetex.png");

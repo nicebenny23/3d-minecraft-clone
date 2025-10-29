@@ -24,7 +24,7 @@ namespace vertice {
 	};
 	struct vertex {
 			size_t length() {
-			return attributes.length;
+			return attributes.length();
 			}
 		size_t components() const {
 			size_t sum=0;
@@ -56,10 +56,9 @@ namespace vertice {
 			return *this;
 		}
 		~vertex() {
-			attributes.destroy();
 		}
 		void Clear() {
-			attributes.destroy();
+			attributes.clear();
 		}
 	private:
 		stn::array<VertexAttribute> attributes;

@@ -74,7 +74,7 @@ public:
         
     }
 
-    void evaluate_uniform_paramater(Material& mat, util::pair<const char*,const char*> uniform_ref) {
+    void evaluate_uniform_paramater(Material& mat, stn::pair<const char*,const char*> uniform_ref) {
         mat.handles.push(uniforms::uniform_ref( uniform_manager->get_handle(uniform_ref.first), uniform_ref.second));
     }
 

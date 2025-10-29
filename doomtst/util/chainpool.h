@@ -92,7 +92,7 @@ namespace chainpool {
         }
 
         size_t get_size() const {
-            return usedBlocks.length;
+            return usedBlocks.length();
         }
 
 
@@ -194,7 +194,7 @@ namespace  chainpool {
     template < typename T>
     void chainedpool<T>::CreatePool() {
 
-        int poolnum = poollist.length;
+        int poolnum = poollist.length();
         size_t poolSize = 1 << poolnum;
         char* newPool = new char[BlockSize * poolSize];
         poollist.push(newPool);
@@ -221,7 +221,7 @@ namespace  chainpool {
     void chainedpool<T>::destroy()
     {
 
-        for (int i = 0; i < poollist.length; i++)
+        for (int i = 0; i < poollist.length(); i++)
         {
             delete[]  poollist[i];
         }

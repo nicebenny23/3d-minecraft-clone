@@ -42,7 +42,6 @@ bool voxtra::Boxcollwithgrid(geometry::Box Box)
 		{
 			if (aabb::aabbboxintersect(Box, *Collider))
 			{
-				BlocksInRange.destroy();
 				return true;
 			}
 		}
@@ -50,7 +49,6 @@ bool voxtra::Boxcollwithgrid(geometry::Box Box)
 
 
 	}
-	BlocksInRange.destroy();
 	return false;
 
 
@@ -62,7 +60,7 @@ voxtra::WorldRayCollision  voxtra::travvox(ray nray, GridTraverseMode trav)
 {
 	if (nray.length() == 0)
 	{
-		return Opt::None;
+		return stn::None;
 	}
 	float ray_length = nray.length();
 	float travel_dist = 0;
@@ -96,7 +94,7 @@ voxtra::WorldRayCollision  voxtra::travvox(ray nray, GridTraverseMode trav)
 		
 
 
-		WorldRayCollision Collision = Opt::None;
+		WorldRayCollision Collision = stn::None;
 		for (int x = extended_range(pos.x).first; x <= extended_range(pos.x).second; ++x) {
 			for (int y = extended_range(pos.y).first; y <= extended_range(pos.y).second; ++y) {
 				for (int z = extended_range(pos.z).first; z <= extended_range(pos.z).second; ++z) {
@@ -117,8 +115,8 @@ voxtra::WorldRayCollision  voxtra::travvox(ray nray, GridTraverseMode trav)
 					geointersect::boxRayCollision PotentialCollision = geointersect::intersection(BlockCollider->globalbox(), nray);
 					if (PotentialCollision&&PotentialCollision().dist<ray_length && (!Collision || PotentialCollision().dist<Collision().dist()))
 					{ 
-					Collision = Opt::Construct<RayWorldHit>(PotentialCollision
-						.unwrap(), &blk->owner.getcomponent<aabb::Collider>());
+					Collision = stn::Construct<RayWorldHit>(PotentialCollision(), 
+						&blk->owner.getcomponent<aabb::Collider>());
 					}
 				 	
 					
@@ -156,7 +154,7 @@ voxtra::WorldRayCollision  voxtra::travvox(ray nray, GridTraverseMode trav)
 
 
 
-	return Opt::None;
+	return stn::None;
 }
 //todo remove this will not be needed as we will do a better function
 //essentially goes to the next block and then goes backwords
@@ -168,6 +166,6 @@ block* voxtra::findprevblock(ray nray, GridTraverseMode trav)
 		return nullptr;
 	}
 	float BackMag = 1 / 1000.f;
-	Vec3 BackProp = Intersection.unwrap().intersection() - nray.dir() * BackMag;
+	Vec3 BackProp = Intersection().intersection() - nray.dir() * BackMag;
 	return	(CtxName::ctx.Grid->getBlock(CtxName::ctx.Grid->getVoxel(BackProp)));
 }

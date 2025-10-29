@@ -16,13 +16,13 @@ using namespace v3;
 struct rigid_force {
     Vec3 force;
     tag::Tag tag;
-    Opt::Option<timename::time> end_time;
+    stn::Option<timename::time> end_time;
     bool has_ended() {
         if (!end_time)
         {
             return true;
         }
-        bool val= CtxName::ctx.Time->now()<end_time.unwrap();
+        bool val= CtxName::ctx.Time->now()<end_time();
         return val;
     }
     rigid_force(Vec3 frc, float duration,const tag::Tag& tg):force(frc), end_time(CtxName::ctx.Time->now()+duration), tag(tg) {
@@ -31,13 +31,13 @@ struct rigid_force {
     rigid_force(Vec3 frc, float duration, const std::string& tg) :force(frc), end_time(CtxName::ctx.Time->now() + duration), tag(tg) {
 
     }
-    rigid_force(Vec3 frc, const tag::Tag& tg) :force(frc), end_time(Opt::None),tag(tg){
+    rigid_force(Vec3 frc, const tag::Tag& tg) :force(frc), end_time(stn::None),tag(tg){
 
     }
-    rigid_force(Vec3 frc, const std::string& tg) :force(frc), end_time(Opt::None), tag(tg) {
+    rigid_force(Vec3 frc, const std::string& tg) :force(frc), end_time(stn::None), tag(tg) {
 
     }
-    rigid_force():end_time(Opt::None),force(zerov) {
+    rigid_force():end_time(stn::None),force(zerov) {
 
 
     }
@@ -94,7 +94,7 @@ struct rigidbody : gameobject::component {
     void add_force(const rigid_force& frc) {
         forces.push(frc);
     }
-    Opt::Option<rigid_force&> get_force(const tag::Tag& name) {
+    stn::Option<rigid_force&> get_force(const tag::Tag& name) {
         for (rigid_force& frc : forces)
         {
             if (frc.tag == name)
@@ -102,12 +102,12 @@ struct rigidbody : gameobject::component {
                 return frc;
             }
         }
-        return Opt::None;
+        return stn::None;
     }
 
     void apply_forces() {
-
-        forces = range::filter(forces,[](rigid_force val) {return val.has_ended(); }).into();
+        
+       forces = forces.filter([](rigid_force val) {return val.has_ended(); }).into<stn::array>();
         for (rigid_force& frc : forces)
         {
             
@@ -185,7 +185,6 @@ struct RigidbodySystem :System {
 
     void run(gameobject::Ecs* ecs) override {
 
-ecs->arch.check();
         int l = 6;
          
 

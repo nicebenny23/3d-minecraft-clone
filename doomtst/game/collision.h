@@ -13,8 +13,8 @@ namespace collision {
 	void update();
 	struct HitQuery
 	{
-		Opt::Option<gameobject::obj> orgin;
-		explicit HitQuery():orgin(Opt::None) {
+		stn::Option<gameobject::obj> orgin;
+		explicit HitQuery():orgin(stn::None) {
 		}
 		explicit HitQuery(const gameobject::obj& orgin_obj): orgin(orgin_obj){
 

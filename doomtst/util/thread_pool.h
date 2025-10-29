@@ -26,7 +26,7 @@ namespace thread {
 		void wait() {
 			std::unique_lock lck(mutex);
 			
-			cv.wait(lck, [this] { return tasks.length == 0 && working_threads.load() == 0; });
+			cv.wait(lck, [this] { return tasks.length() == 0 && working_threads.load() == 0; });
 
 			
 			stop = true;
@@ -89,12 +89,10 @@ namespace thread {
 		}
 		bool has_work() {
 
-			return tasks.length != 0||working_threads!=0;
+			return tasks.length() != 0||working_threads!=0;
 		}
 		~thread_pool() {
 			wait();
-			tasks.destroy();
-			threads.destroy();
 		}
 
 		thread_pool(size_t n):tasks(){
@@ -115,7 +113,7 @@ namespace thread {
 			cv.notify_one();
 		}
 		size_t length() {
-return threads.length;
+return threads.length();
 
 		}
 	private:

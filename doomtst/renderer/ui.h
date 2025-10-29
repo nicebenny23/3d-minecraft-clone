@@ -55,7 +55,7 @@ namespace ui {
 		};
 		virtual void render() {};
 	};
-	extern array<cptr< uielement>,true> uielemlist;
+	extern array<cptr< uielement>>uielemlist;
 	void createuilist();
 	void updateui();
 	template <class T, typename... types>
@@ -91,12 +91,11 @@ inline	void updateui() {
 
 			}
 		}
-		qsort(indexerlist.list,indexerlist.length, sizeof(int), compareuielem);
-		for (int i = 0; i < indexerlist.length; i++)
+		qsort(indexerlist.data(), indexerlist.length(), sizeof(int), compareuielem);
+		for (int i = 0; i < indexerlist.length(); i++)
 		{
 			uielemlist[indexerlist[i]]->totalupdate();
 		}
-		indexerlist.destroy();
 	}
 }
 

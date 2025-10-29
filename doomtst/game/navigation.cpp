@@ -43,9 +43,9 @@ array<navnode> reconstructpath(navnode* node) {
             node = node->parent;
     }
     // Reverse the path array
-    int searchlength = path.length / 2;
+    int searchlength = path.length() / 2;
     for (int i = 0; i < searchlength; i++) {
-        std::swap( path[i],path[ path.length - 1 - i]);
+        std::swap( path[i],path[ path.length() - 1 - i]);
          }
     return stn::array<navnode>( path);
 }
@@ -71,19 +71,19 @@ return        array<navnode>();
     
     const int maxiter = 200;
     int iter = 0;
-    while (openlist.length > 0) {
+    while (openlist.length() > 0) {
         iter += 1;
         // Find the node with the lowest f cost
-        Opt::Option<size_t> shortestind=Opt::None;
+        stn::Option<size_t> shortestind=stn::None;
         float shortestcost = std::numeric_limits<float>().infinity();
-        for (int i = 0; i < openlist.length; ++i) {
+        for (int i = 0; i < openlist.length(); ++i) {
             float nodecost = openlist[i].calcfcost();
             if (nodecost < shortestcost) {
                 shortestcost = nodecost;
                 shortestind = i;
             }
         }
-        if (shortestind == Opt::None)
+        if (shortestind == stn::None)
         { 
             break;
         }
@@ -92,20 +92,17 @@ return        array<navnode>();
         navnode* newnode = new navnode(current);
         todeallocatelist.push(newnode);
 
-        openlist.deleteind(shortestind());
+        openlist.delete_at(shortestind());
         
         //removes it 
         if (iter == maxiter)
         {
             
             array<navnode> toret = reconstructpath(&current);
-            for (int i = 0; i < todeallocatelist.length; i++)
+            for (int i = 0; i < todeallocatelist.length(); i++)
             {
                 delete todeallocatelist[i];
             }
-            closedlist.destroy();
-            todeallocatelist.destroy();
-            openlist.destroy();
             return array<navnode>( toret);
         }
     
@@ -115,26 +112,23 @@ return        array<navnode>();
          
          
             array<navnode> toret=reconstructpath(&current);
-            for (int i = 0; i < todeallocatelist.length; i++)
+            for (int i = 0; i < todeallocatelist.length(); i++)
             {
                 delete todeallocatelist[i];
             }
-            closedlist.destroy();
-           todeallocatelist.destroy();
-            openlist.destroy();
             return toret;
         }
 
         closedlist.push(current);
 
         array<navnode> neighbors = getconnected(current);
-        for (int i = 0; i < neighbors.length; i++) {
+        for (int i = 0; i < neighbors.length(); i++) {
             navnode& neighbor = neighbors[i];
 
             // Check if neighbor is in closed list
             bool inclosedlist = false;
-            for (int j = 0; j < closedlist.length; j++) {
-                if (closedlist.at(j) == neighbor) {
+            for (int j = 0; j < closedlist.length(); j++) {
+                if (closedlist[j] == neighbor) {
                     inclosedlist = true;
                     break;
                 }
@@ -148,14 +142,14 @@ return        array<navnode>();
 
             // Check if neighbor is in open list
             bool inopenlist = false;
-            for (int j = 0; j < openlist.length; j++) {
-                if (neighbor==openlist.at(j) ) {
+            for (int j = 0; j < openlist.length(); j++) {
+                if (neighbor==openlist[j] ) {
 
                     inopenlist = true;
                     //updates gcost to be shorter
-                    if (potentialg < openlist.at(j).gcost) {
-                        openlist.at(j).gcost = potentialg;
-                        openlist.at(j).parent = newnode;
+                    if (potentialg < openlist[j].gcost) {
+                        openlist[j].gcost = potentialg;
+                        openlist[j].parent = newnode;
                     }
                     break;
                 }
@@ -170,15 +164,11 @@ return        array<navnode>();
                 openlist.push(neighbor);
             
         }
-        neighbors.destroy();
     }
-    for (int i = 0; i < todeallocatelist.length; i++)
+    for (int i = 0; i < todeallocatelist.length(); i++)
     {
         delete todeallocatelist[i];
     }
-    todeallocatelist.destroy();
-    openlist.destroy();
-    closedlist.destroy();
     return array<navnode>(); // No path found
 }
 
@@ -193,7 +183,7 @@ navigator::navigator(gameobject::obj parentref, array<navnode>(*testfunc)(navnod
 
 v3::Vec3 navigator::headed()
 {
-    if (headed_list.length<=headed_index)
+    if (headed_list.length()<=headed_index)
     {
         return owner.transform().position;
     }
@@ -241,7 +231,7 @@ void navigator::calcpath()
 
     Vec3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.transform().position);
     array<navnode>  finding = astarpathfinding(navnode(currpos),navnode(Coord(gotopos)), testfunction);
-    headed_list.destroy();
+    headed_list.clear();
     headed_index = 0;
     for (navnode& node:finding)
     {
@@ -254,7 +244,6 @@ void navigator::calcpath()
     {
         headed_list.push(gotopos);
     }
-    finding.destroy();
 }
 
 bool navigator::noblockinrange(Coord pos)

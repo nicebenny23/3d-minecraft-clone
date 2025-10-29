@@ -46,5 +46,21 @@ namespace Ids {
 	};
 
 	inline constexpr Id None{ none_id };
+	template<typename T>
+	struct typed_id {
+		uint32_t id;
+		constexpr explicit typed_id(uint32_t val) : id(val) {}
+		constexpr bool operator==(const typed_id& other) const { return id == other.id; }
+		constexpr bool operator!=(const typed_id& other) const { return id != other.id; }
+		typed_id() = delete;
+
+	};
 
 }
+#include <functional>
+template<typename T>
+struct std::hash<Ids::typed_id<T>> {
+	size_t operator()(Ids::typed_id<T> t) const noexcept {
+		return std::hash<uint32_t>{}(t.id);
+	}
+};

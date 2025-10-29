@@ -105,7 +105,7 @@ namespace uiboxname {
 		}
 	
 		tex_handle.fill(std::move(mesh));
-		CtxName::ctx.Ren->consume();
+		CtxName::ctx.Ren->pop();
 	}
 
 

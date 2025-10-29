@@ -25,7 +25,7 @@ void model::update()
 {
 	v3::Vec3 how = owner.transform().position;
 	glm::mat4* model =new glm::mat4((owner.transform().ToMatrix()));
-	for (int i = 0; i < meshlist.length; i++)
+	for (int i = 0; i < meshlist.length(); i++)
 	{
 		meshlist[i].modelmatrix =model;
 		ModelMeshName::rendermesh(meshlist[i]);
@@ -35,7 +35,7 @@ void model::update()
 
 void model::destroy()
 {
-	for (int i = 0; i < meshlist.length; i++)
+	for (int i = 0; i < meshlist.length(); i++)
 	{
 		meshlist[i].destroy();
 	}

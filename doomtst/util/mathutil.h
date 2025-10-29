@@ -107,7 +107,7 @@ return i + 1;
 	}
 }
 //
-inline util::pair<int,int> extended_range(double x) {
+inline stn::pair<int,int> extended_range(double x) {
 	int low = static_cast<int>(std::floorl(x));
 	int high = low;
 	int rnd = std::lround(x);
@@ -121,7 +121,7 @@ inline util::pair<int,int> extended_range(double x) {
 		high++;
 		}
 	}
-	return util::pair(low,high);
+	return stn::pair(low,high);
 }
 //mod(x,m) that behaves intutiivlly (ex mod(-1,2)!=-1)
 __forceinline  int symmetric_mod(int x, int m) noexcept {

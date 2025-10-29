@@ -13,10 +13,10 @@ namespace geointersect {
 			Ray = IntRay;
 		}
 	};
-	using boxRayCollision = Opt::Option<RayHit>;
+	using boxRayCollision = stn::Option<RayHit>;
 
 
 	boxRayCollision intersection(geometry::Box box, ray fray);
-	bool intersects(geometry::cone cone, geometry::sphere sph);
+	bool intersects(geometry::cone cone, geometry::Sphere sph);
 }
  // !intersection_HPP

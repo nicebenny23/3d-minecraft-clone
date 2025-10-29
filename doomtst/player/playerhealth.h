@@ -20,13 +20,13 @@ struct playerhealth: gameobject::component
 	
 	
 	}
-	array<Cptr::cptr<uibox>,true> healthboxes;
+	array<Cptr::cptr<uibox>>healthboxes;
 	void start(){
 		damage_decal_duration=CtxName::ctx.Time->create_dur();
 		size_t max_health = owner.getcomponent<estate>().maxhealth;
 		priority = -224;
 		v2::Vec2 scale = v2::unitv / 100;
-		healthboxes = array<Cptr::cptr<uibox>,true>();
+		healthboxes = array<Cptr::cptr<uibox>>();
 		for (int i = 0; i < max_health; i++) {
 			v2::Vec2 pos = v2::Vec2(i / 40.f-.4f, -.45);
 

@@ -11,19 +11,19 @@ struct Container
 	Container() {};
 	void destroy() {
 
-		for (int i = 0; i < databuf.length; i++)
+		for (int i = 0; i < databuf.length(); i++)
 		{
 			databuf[i].destroyitem();
 			databuf[i].framedecal->destroy();
 
 		}
-		databuf.destroy();
+		databuf.clear();
 	}
 	Container(int newid);
 	void writetofile();
 	bool enabled;
 	
-	array<itemslot,true> databuf;
+	array<itemslot> databuf;
 	itemslot& getlocalat(int xpos,int ypos) {
 		return databuf[xpos + ypos * sizex];
 	}
@@ -39,7 +39,7 @@ struct Container
 		{
 			return false;
 		}
-		for (int i = 0; i < databuf.length; i++)
+		for (int i = 0; i < databuf.length(); i++)
 		{
 			itemslot* slt = &databuf[i];
 			if (slt->framedecal->mouseonblock()) {
@@ -51,7 +51,7 @@ struct Container
 	void deletebelowzero() {
 
 
-		for (int i = 0; i < databuf.length; i++)
+		for (int i = 0; i < databuf.length(); i++)
 		{
 			if (databuf[i].helditem!=nullptr)
 			{
@@ -67,7 +67,7 @@ struct Container
 	bool fill(int elemid, int& amt,bool createnew) {
 
 
-		for (int i = 0; i < databuf.length; i++)
+		for (int i = 0; i < databuf.length(); i++)
 		{
 			if (amt<=0)
 			{
@@ -114,7 +114,7 @@ struct Container
 	int sizey;
 	v2::Vec2 offset;
 	void enable() {
-		for (int i = 0; i < databuf.length; i++)
+		for (int i = 0; i < databuf.length(); i++)
 		{
 			databuf[i].enable();
 		}
@@ -124,7 +124,7 @@ struct Container
 	}
 	void disable() {
 
-		for (int i = 0; i < databuf.length; i++)
+		for (int i = 0; i < databuf.length(); i++)
 		{
 			databuf[i].disable();
 		}
@@ -140,7 +140,7 @@ struct Container
 		sizey = ysize;
 		offset = v2::Vec2(xoff, yoff);
 		int ind = 0;
-		databuf = array<itemslot,true>();
+		databuf = array<itemslot>();
 		for (int j = 0; j < ysize; j++)
 		{
 			for (int i = 0; i < xsize; i++)
@@ -161,7 +161,7 @@ struct Container
 
 
 
-			for (int i = 0; i < databuf.length; i++)
+			for (int i = 0; i < databuf.length(); i++)
 			{
 
 

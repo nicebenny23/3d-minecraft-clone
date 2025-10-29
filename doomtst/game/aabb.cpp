@@ -9,9 +9,9 @@ namespace aabb {
         Colliderlist = Sparse::PackedSet<Collider*>();
         
     }
-    v3::Vec3 collideaabb(Collider p1, Collider p2)
+    Option<v3::Vec3> collideaabb(Collider& p1,Collider& p2)
     {
-        return geometry::collidebox(p1.globalbox(), p2.globalbox());
+        return geometry::collide_box(p1.globalbox(), p2.globalbox());
 
      }
         
@@ -47,7 +47,7 @@ namespace aabb {
 
     bool  aabbboxintersect(geometry::Box p1, Collider& p2)
     {
-        return geometry::boxboxintersect(p1, p2.globalbox());
+        return geometry::boxes_intersect(p1, p2.globalbox());
     }
 
 }

@@ -38,6 +38,7 @@ struct CommandBuffer {
 	void pop();
 	template<typename T>
 	void push(const T& value);
+
 	CommandBuffer(gameobject::Ecs* wrld):World(wrld){
 
 	}
@@ -47,16 +48,16 @@ struct CommandBuffer {
 	gameobject::Ecs* World;
 	type_id::type_indexer commandSystem;
 	Depends::DependencySystem DependencySystem;
-	bool empty() {
+	bool is_empty() const{
 		for (auto& count : buffer)
 		{
-			if (count.length () != 0) {
+			if (!count.empty()) {
 				return false;
 			}
 		}
 		return true;
 	}
-	void empty_num(size_t index) {
+	void consume_at(size_t index) {
 		auto& queue = buffer[index];
 		auto& storage = store[index];
 
@@ -70,6 +71,19 @@ struct CommandBuffer {
 		
 
 	}
+	size_t total_commands() const{
+		size_t count=0;
+		for (int i = 0; i < buffer.length(); i++)
+		{
+			count += buffer[i].length();
+		}
+		return count;
+	}
+	size_t total_buffers() const {
+		return buffer.length();
+
+	}
+	
 }; 
 template<typename T>
 void CommandBuffer::push(const T& value)
@@ -78,7 +92,7 @@ void CommandBuffer::push(const T& value)
 	auto [Id, is_new] = commandSystem.insert<T>();
 	if (is_new) {
 		buffer.push(stn::queue<Command*>());
-		store.push(dynPool::flux<Command>(sizeof(T),alignof(T)));
+		store.push(dynPool::flux<Command>(stn::memory::layout_of<T>));
 		DependencySystem.push<T>();
 	}
 
@@ -88,9 +102,8 @@ void CommandBuffer::push(const T& value)
 }
 inline void CommandBuffer::pop() {
 	
-	size_t length = DependencySystem.sortedActive.length;
-	for (size_t ind = 0; ind <length; ind++) {
-		empty_num(DependencySystem.sortedActive[ind]);
+	for (size_t ind = 0; ind < total_buffers(); ind++) {
+		consume_at(DependencySystem.sortedActive[ind]);
 	}
 	
 }

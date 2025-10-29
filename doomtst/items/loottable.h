@@ -45,10 +45,7 @@ struct  loottable : gameobject::component
 	~loottable()
 	{
 
-		if (lootlist.list!=nullptr)
-		{
-			Assert("lootlist not nullptr");
-		}
+
 	};
 	array<lootelement> lootlist;
 	void addelem(int itemid, float maxamt,bool israndom=false) {
@@ -59,12 +56,11 @@ struct  loottable : gameobject::component
 	
 		if (should_drop)
 		{
-			for (int i = 0; i < lootlist.length; i++)
+			for (int i = 0; i < lootlist.length(); i++)
 			{
 				lootlist[i].drop();
 			}
 		}
-		lootlist.destroy();
 	}
 };
 

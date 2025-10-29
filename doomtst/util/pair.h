@@ -1,9 +1,34 @@
 #pragma once
+#pragma once
 #include <cstddef>
 #include <type_traits>
 #include <utility>
 
-namespace util {
+//contains pair types
+namespace stn {
+	//pair for indexes
+	template<typename T>
+	struct indexed {
+		std::size_t index;
+		T value;
+
+		indexed() = default;
+
+		constexpr indexed(std::size_t i, const T& v)
+			: index(i), value(v) {
+		}
+
+		constexpr indexed(std::size_t i, T&& v) noexcept(std::is_nothrow_move_constructible_v<T>)
+			: index(i), value(std::move(v)) {
+		}
+	};
+	template<typename T>
+	indexed(size_t, const T&) -> indexed<T>;
+
+	// For rvalues
+	template<typename T>
+	indexed(size_t, T&&) -> indexed<T>;
+
 
 	template<typename T1, typename T2>
 	struct pair {
@@ -12,7 +37,7 @@ namespace util {
 
 		pair() = default;
 
-		pair( T1&& a,  T2&& b) : first(std::move(a)), second(std::move(b)) {}
+		pair(T1&& a, T2&& b) : first(std::move(a)), second(std::move(b)) {}
 		pair(const T1& a, const T2& b) : first(a), second(b) {}
 		template<std::size_t I>
 		constexpr decltype(auto) at() & noexcept {
@@ -76,17 +101,25 @@ namespace util {
 }
 
 namespace std {
+	template<typename T>
+	struct tuple_size<stn::indexed<T>> : std::integral_constant<std::size_t, 2> {};
+
+	template<typename T>
+	struct tuple_element<0, stn::indexed<T>> { using type = std::size_t; };
+
+	template<typename T>
+	struct tuple_element<1, stn::indexed<T>> { using type = T; };
 
 	template<typename T1, typename T2>
-	struct tuple_size<util::pair<T1, T2>> : std::integral_constant<std::size_t, 2> {};
+	struct tuple_size<stn::pair<T1, T2>> : std::integral_constant<std::size_t, 2> {};
 
 	template<typename T1, typename T2>
-	struct tuple_element<0, util::pair<T1, T2>> {
+	struct tuple_element<0, stn::pair<T1, T2>> {
 		using type = T1;
 	};
 
 	template<typename T1, typename T2>
-	struct tuple_element<1, util::pair<T1, T2>> {
+	struct tuple_element<1, stn::pair<T1, T2>> {
 		using type = T2;
 	};
 

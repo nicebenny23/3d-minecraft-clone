@@ -19,7 +19,7 @@ inline v3::Vec3 randompointonsphere(int x, int y, int z) {
 	int hash = Hash(seed, x, y, z);
 	hash ^= hash >> 15;
 	hash &= MAXSHORT - 1;
-	return seededdirections.list[hash];
+	return seededdirections.unchecked_at(hash);
 
 }
 

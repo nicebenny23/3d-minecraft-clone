@@ -25,7 +25,7 @@ namespace renderer {
 	
 	inline array<unsigned int> trivial_buffer(vertice::vertex& layout, stn::array<float>& points) {
 		array<unsigned int> trivial;
-		size_t vertices = points.length / layout.stride();
+		size_t vertices = points.length() / layout.stride();
 		for (size_t i = 0; i < vertices; i++)
 		{
 			trivial.push(i);
@@ -44,7 +44,7 @@ namespace renderer {
 		indice_mode generate_trivial;
 		size_t length() {
 			
-			return pointlist.length * sizeof(float) / stride;
+			return pointlist.length() * sizeof(float) / stride;
 
 		}
 		MeshData(Ids::Id msh,const vertice::vertex& vertex_layout, indice_mode indices) :mesh(msh),generate_trivial(indices),layout(vertex_layout), pointlist()
@@ -55,9 +55,6 @@ namespace renderer {
 
 		~MeshData() {
 
-			layout.Clear();
-			indicelist.destroy();
-			pointlist.destroy();
 		}
 		template<typename ...Args>
 		inline void add_point(const Args& ...values)
@@ -72,7 +69,7 @@ namespace renderer {
 			}
 
 			if (generate_trivial==indice_mode::generate_indices) {
-				indicelist.push(indicelist.length);
+				indicelist.push(indicelist.length());
 			}
 
 		}
@@ -81,11 +78,11 @@ namespace renderer {
 		{
 			
 				if constexpr (std::is_same_v<T, v3::Vec3>) {
-					pointlist.push(value.x, value.y, value.z);
+					pointlist.push({ value.x, value.y, value.z });
 					return 3;
 				}
 				else if constexpr (std::is_same_v<T, v2::Vec2>) {
-					pointlist.push(value.x, value.y);
+					pointlist.push({value.x, value.y});
 					return 2;
 				}
 				else if constexpr (std::is_convertible_v<T, float>) {
@@ -210,7 +207,7 @@ namespace renderer {
 		}
 		void set_uniform(Ids::Id renderable_id, const uniforms::uniform& value) {
 			auto& rend = renderables[renderable_id.id];
-			for (auto i = 0; i < rend.overides.length; i++)
+			for (auto i = 0; i < rend.overides.length(); i++)
 			{
 				if (rend.overides[i].name==value.name)
 				{
@@ -268,7 +265,7 @@ namespace renderer {
 			Ids::Id mesh_id = data.mesh;
 			Fill(&meshes[mesh_id], data.pointlist, data.indicelist);
 		}
-		void consume() {
+		void pop() {
 			while (!to_fill.empty())
 			{
 				fill_mesh(to_fill.peek());

@@ -1,11 +1,11 @@
 #pragma once
 #include "ui.h"
 #include "../util/mathutil.h"
-array<cptr<ui::uielement>,true> ui::uielemlist;
+array<cptr<ui::uielement>>ui::uielemlist;
 
 void ui::createuilist()
 {
-	uielemlist = array<cptr<uielement>,true>(uisize);
+	uielemlist = array<cptr<uielement>>(uisize);
 
 }
 

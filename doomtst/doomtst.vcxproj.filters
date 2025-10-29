@@ -30,9 +30,6 @@
     <ClCompile Include="renderer\Window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="util\userinput.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="renderer\renderer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -226,6 +223,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="util\time.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\userinput.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -906,6 +906,42 @@
     <ClInclude Include="items\slime_wand.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="util\Invoke.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\erased.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\variant.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\array_storage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\layout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\table.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ecs\archtype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\composite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\index.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="world\bicube_array.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\member_hash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ecs\entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\frag1.vs" />
@@ -925,5 +961,6 @@
     <None Include="items\metalrod.h">
       <Filter>Header Files</Filter>
     </None>
+    <None Include="cpp.hint" />
   </ItemGroup>
 </Project>

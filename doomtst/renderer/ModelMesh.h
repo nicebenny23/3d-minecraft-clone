@@ -36,11 +36,6 @@ namespace ModelMeshName {
 		array<unsigned int> texindices;
 		void destroy() {
 			handle.destroy();
-			vertexindices.destroy();
-			texcoords.destroy();
-			texindices.destroy();
-
-			vertices.destroy();
 		}
 		Vec3 nthvertex(size_t i);
 		v2::Vec2 nthtex(size_t i);

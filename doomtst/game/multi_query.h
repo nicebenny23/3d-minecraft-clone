@@ -19,9 +19,10 @@ struct multi_iter {
 	multi_iter(query::View<Components...>& vw,size_t start,size_t end,const query_func<Components...> func):owner(vw),index(start),end_index(end),function(func) {
 		size_t counter=0;
 		begin = index;
-		for (size_t i = 0; i < owner.archtypes.length; i++)
+		for (size_t i = 0; i < owner.archtypes.length(); i++)
 		{
-			size_t to_add = owner.archtypes[i]->elems.length;
+
+			size_t to_add = owner[i].count();
 			size_t archtype_end_index = counter + to_add;
 			if (start < archtype_end_index)
 			{
@@ -44,7 +45,7 @@ struct multi_iter {
 	}
 	private:
 		inline void apply() {
-			auto& arch_elems= owner.archtypes[arch_index]->elems;
+			auto& arch_elems= owner[arch_index].elems;
 			function(owner.ecs->get_tuple<Components...>(arch_elems[entity_index], owner.positions));
 
 		}
@@ -52,9 +53,9 @@ struct multi_iter {
 			entity_index++;
 
 			// loop until we find a valid entity in a valid archetype
-			while (arch_index < owner.archtypes.length) {
-				auto& arch = owner.archtypes[arch_index];
-				if (entity_index < arch->elems.length) {
+			while (arch_index < owner.archtypes.length()) {
+				auto& arch = owner[arch_index];
+				if (entity_index < arch.count()) {
 					break;
 				}
 				arch_index++;
@@ -64,48 +65,22 @@ struct multi_iter {
 
 		}
 }; 
-template<typename... Components>
-void multi_query(query::View<Components...>& view, std::function<void(std::tuple<Components*...>)> quer,size_t threads_wanted) {
-	size_t total_length = 0;
 
-	for (auto arch : view.archtypes)
-	{
-		total_length += arch->elems.length;
-	}
-	if (threads_wanted > total_length) {
-		threads_wanted = total_length;
-	}
-	thread::thread_pool pool(threads_wanted);
-	
-
-	stn::array<size_t> size_of_each = thread_util::split_many(total_length, pool.length());
-	for (size_t i = 0; i < pool.length(); i++)
-	{
-		size_t start= size_of_each[i];
-		size_t end= size_of_each[i+1];
-		pool.push([&view, quer, start, end]() {
-			multi_iter<Components...> iter(view, start, end, quer);
-			iter.iterate();
-			});
-	}
-
-
-}
 
 template<typename... Components>
 void multi_query(query::View<Components...>& view, std::function<void(std::tuple<Components*...>)> quer, size_t threads_wanted,size_t count) {
 	size_t total_length = 0;
 
-	for (auto arch : view.archtypes)
+	for (auto& arch : view.archtypes)
 	{
-		total_length += arch->elems.length;
+		total_length += (*view.ecs)[arch].count();
 	}
 	//ensures tasks is greater than one 
 	size_t tasks = Min(count, total_length/count);
 	threads_wanted = Min(tasks, total_length);
 	thread::thread_pool pool(threads_wanted);
 	stn::array<size_t> size_of_each = thread_util::split_many(total_length, tasks);
-	for (size_t i = 0; i < size_of_each.length-1; i++)
+	for (size_t i = 0; i < size_of_each.length()-1; i++)
 	{
 		size_t start = size_of_each[i];
 		size_t end = size_of_each[i + 1];
@@ -115,5 +90,16 @@ void multi_query(query::View<Components...>& view, std::function<void(std::tuple
 			});
 	}
 
+
+}
+template<typename... Components>
+void multi_query(query::View<Components...>& view, std::function<void(std::tuple<Components*...>)> quer, size_t threads_wanted) {
+	size_t total_length = 0;
+
+	for (auto& arch : view.archtypes)
+	{
+		total_length += (*view.ecs)[arch].count();
+	}
+	multi_query(view, quer, threads_wanted, total_length / threads_wanted);
 
 }

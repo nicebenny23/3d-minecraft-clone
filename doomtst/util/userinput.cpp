@@ -6,7 +6,7 @@ namespace userinput {
 	//([0-width],[0,height])
 	void InputManager::endupdate(){
 		mouseposdt = v2::Vec2(0, 0);
-		for (int i = 0; i < keylist.capacity; i++)
+		for (int i = 0; i < keylist.length(); i++)
 		{
 			keylist[i].pressed = false;
 			keylist[i].released = false;
@@ -29,16 +29,13 @@ namespace userinput {
 
 		mousepos = v2::Vec2(0, 0);
 		mouseposdt = v2::Vec2(0, 0);
-		keylist = stn::array<inputkey,true>(GLFW_KEY_LAST+ Extra_keys);
-		for (int i = 0; i < keylist.capacity; i++)
-		{
-			keylist[i]=inputkey();
-			
-		}
+
+		keylist = stn::array<inputkey>(GLFW_KEY_LAST+ Extra_keys);
+		keylist.reach(GLFW_KEY_LAST + Extra_keys);
 	}
 	void InputManager::updatekey(int code, int action) {
 
-		if (code< keylist.length)
+		if (code< keylist.length())
 		{
 			keylist[code].update(action);
 
@@ -63,7 +60,7 @@ namespace userinput {
 
 	}
 
-	inputkey InputManager::getKey(const int key) {
+	inputkey InputManager::getKey(const size_t key) {
 		return keylist[convertchartoglfwkey(key)];
 	}
 

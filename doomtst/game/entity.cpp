@@ -36,7 +36,7 @@ namespace gameobject {
         entity_slot::entity_slot(entity_slot&& oth) {
             (*oth).addcomponent<SlotTracker>()->swapSlots(&oth, this);
             held = std::move(oth.held);
-            oth.held = Opt::None;
+            oth.held = stn::None;
         }
 
 
@@ -48,7 +48,7 @@ namespace gameobject {
             reset();
             (*oth).addcomponent<SlotTracker>()->swapSlots(&oth, this);
             held = std::move(oth.held);
-            oth.held = Opt::None;
+            oth.held = stn::None;
             return *this;
         }
 
@@ -61,7 +61,7 @@ namespace gameobject {
         void entity_slot::reset() {
             if (held) {
                 get().addcomponent<SlotTracker>()->unregisterSlot(this);
-                held = Opt::None;
+                held = stn::None;
             }
         }
 

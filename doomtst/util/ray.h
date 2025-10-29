@@ -5,19 +5,27 @@ struct ray
 {
 	v3::Vec3 start;
 	v3::Vec3 end;
+	ray(const v3::Vec3& startray, const v3::Vec3& endray)
+	{
+		start = startray;
+		end = endray;
+	}
+
 	bool degenerate() const {
 		return  dist2(start, end) == 0;
 	}
 	v3::Vec3 diff() const {
 		return end - start;
 	}
-	double length() const {
-		return dist(start, end);
-	}
-	//slower due to repitition but this code is not preformance critical
 	v3::Vec3 dir() const {
 		return diff() / length();
 	}
+
+	double length() const {
+		return dist(start, end);
+	}
+
+	
 
 	Vec3 project(v3::Vec3 vector) const {
 
@@ -32,22 +40,27 @@ struct ray
 		Vec3 position = start + normed * t;
 		return position;
 	}
+	double distance(v3::Vec3 vector) const {
+		return dist(vector, project(vector));
+	}
 
 	Vec3 pointAt(float t) const {
 		return start + dir() * t;
 	}
-	double distance(v3::Vec3 vector) const {
-		return dist(vector, project(vector));
-	}
-	ray(const v3::Vec3& startray, const v3::Vec3& endray)
-	{
-
-		start = startray;
-		end = endray;
-
+	Vec3 lerp(float t) const {
+		return start + diff() * t;
 	}
 
-
+	ray translate(Vec3 translation_vector) const {
+		return ray(start + translation_vector, end + translation_vector);
+	}
+	ray normalize() const{
+		return ray(start ,start+ dir());
+	}
+	
+	ray dialate_from_start(float scale) const {
+		return ray(start, start +diff()*scale);
+	}
 
 	ray() = default;
 };

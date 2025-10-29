@@ -284,6 +284,7 @@
     <ClCompile Include="util\mathutil.cpp" />
     <ClCompile Include="renderer\VertexObjectManager.cpp" />
     <ClCompile Include="util\time.cpp" />
+    <ClCompile Include="util\userinput.cpp" />
     <ClCompile Include="world\chunkload.cpp" />
     <ClCompile Include="world\managegrid.cpp" />
     <ClCompile Include="renderer\blockrender.cpp" />
@@ -299,7 +300,6 @@
     <ClCompile Include="renderer\shader.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="renderer\texture.cpp" />
-    <ClCompile Include="util\userinput.cpp" />
     <ClCompile Include="world\noise.cpp" />
     <ClCompile Include="world\tick.cpp" />
     <ClCompile Include="world\voxeltraversal.cpp" />
@@ -342,6 +342,8 @@
     <ClInclude Include="game\collutil.h" />
     <ClInclude Include="game\Commands.h" />
     <ClInclude Include="game\compid.h" />
+    <ClInclude Include="game\ecs\archtype.h" />
+    <ClInclude Include="game\ecs\entity.h" />
     <ClInclude Include="game\entity.h" />
     <ClInclude Include="game\entityutil.h" />
     <ClInclude Include="game\Event.h" />
@@ -356,6 +358,7 @@
     <ClInclude Include="game\Settings.h" />
     <ClInclude Include="game\spawn.h" />
     <ClInclude Include="game\System.h" />
+    <ClInclude Include="game\table.h" />
     <ClInclude Include="game\TagIndex.h" />
     <ClInclude Include="game\transform.h" />
     <ClInclude Include="game\world_commands.h" />
@@ -453,17 +456,24 @@
     <ClInclude Include="Resources\ResourceManager.h" />
     <ClInclude Include="shaders\decal_frag.vs" />
     <ClInclude Include="util\arraypool.h" />
+    <ClInclude Include="util\array_storage.h" />
     <ClInclude Include="util\bitset.h" />
     <ClInclude Include="util\cached.h" />
+    <ClInclude Include="util\composite.h" />
     <ClInclude Include="util\dependency.h" />
     <ClInclude Include="util\deque.h" />
+    <ClInclude Include="util\erased.h" />
     <ClInclude Include="util\filter_argument.h" />
     <ClInclude Include="util\Id.h" />
+    <ClInclude Include="util\index.h" />
     <ClInclude Include="util\InterfaceStore.h" />
     <ClInclude Include="util\interval.h" />
+    <ClInclude Include="util\Invoke.h" />
+    <ClInclude Include="util\layout.h" />
     <ClInclude Include="util\lazy.h" />
     <ClInclude Include="util\LinearBuffer.h" />
     <ClInclude Include="util\List.h" />
+    <ClInclude Include="util\member_hash.h" />
     <ClInclude Include="util\Not.h" />
     <ClInclude Include="util\Option.h" />
     <ClInclude Include="util\pair.h" />
@@ -500,6 +510,8 @@
     <ClInclude Include="util\type_tag.h" />
     <ClInclude Include="util\ultraAsnc.h" />
     <ClInclude Include="util\UniquePtr.h" />
+    <ClInclude Include="util\variant.h" />
+    <ClInclude Include="world\bicube_array.h" />
     <ClInclude Include="world\chunkload.h" />
     <ClInclude Include="world\managegrid.h" />
     <ClInclude Include="util\queue.h" />
@@ -534,6 +546,7 @@
     <ClInclude Include="world\worldintersection.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="cpp.hint" />
     <None Include="items\metalrod.h" />
     <None Include="shaders\frag1.vs" />
     <None Include="shaders\modelfragment.vs" />

@@ -29,10 +29,10 @@ struct Job_run {
 	void operator()() {
 
 		thread::thread_pool pool=thread::thread_pool(1);
-		stn::array<size_t> indegree(job_graph.length());
+		stn::array<size_t> indegree(job_graph.length()());
 		
 		stn::queue<size_t> can_run;
-		for (size_t i = 0; i < job_graph.length(); i++)
+		for (size_t i = 0; i < job_graph.length()(); i++)
 		{
 			DagNode<Job_cmd> graph_node = job_graph[i];
 			for (size_t indice : graph_node.successors)
@@ -40,7 +40,7 @@ struct Job_run {
 				indegree[indice]++;
 			}
 		}
-		for (size_t i = 0; i < job_graph.length(); i++)
+		for (size_t i = 0; i < job_graph.length()(); i++)
 		{
 			if (indegree[i] == 0)
 			{
@@ -107,7 +107,7 @@ struct JobManager {
 	void run() {
 		Dag<Job_cmd> run_dag;
 		Dag<uint32_t> filtered = job_list.filtered();
-		for (size_t i = 0; i < filtered.length(); i++)
+		for (size_t i = 0; i < filtered.length()(); i++)
 		{
 			run_dag.addNode(cmd_list[i]);
 			run_dag.nodes[ i].successors = filtered[i].successors;

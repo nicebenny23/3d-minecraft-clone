@@ -9,7 +9,7 @@ namespace renderer {
 
     void Renderer::FillVertexBuffer(Mesh* mesh, stn::array<float>& pointlist)
     {
-        if (pointlist.length % mesh->Voa.attributes.components() != 0)
+        if (pointlist.length() % mesh->Voa.attributes.components() != 0)
         {
             throw std::logic_error("Vertex Data is corrupted");
         }
@@ -29,13 +29,13 @@ namespace renderer {
         FillVertexBuffer(mesh, pointlist);
         context.Bind(mesh->Ibo);
         mesh->Ibo.fillbuffer<unsigned int>(indicelist);
-        mesh->length = indicelist.length;
+        mesh->length = indicelist.length();
 
     }
     void Renderer::Fill(Mesh * mesh,stn::array<float>& pointlist) {
         array<unsigned int> indicelist = trivial_buffer(mesh->Voa.attributes, pointlist);
         Fill(mesh, pointlist, indicelist);
-        indicelist.destroy();
+    
     }
     void Renderer::Render(Mesh* mesh, stn::array<float>& pointlist)
     {

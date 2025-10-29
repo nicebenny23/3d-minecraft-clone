@@ -172,7 +172,7 @@ namespace stn {
 	template<typename T>
 	void deque<T>::resize()
 	{
-		size_t new_size = resizelength(length);
+		size_t new_size = resize_length(length);
 		T* newlist = new T[new_size];
 
 		if (list != nullptr)
@@ -276,7 +276,7 @@ namespace stn {
 	inline deque<T>::deque(const deque& other)
 	{
 		list = new T[other.capacity];
-		for (size_t i = 0; i < other.length; ++i) {
+		for (size_t i = 0; i < other.length(); ++i) {
 			size_t idx = (other.front + i) % other.capacity;
 			list[i] = other.list[idx];
 		}
@@ -314,7 +314,7 @@ namespace stn {
 		if (this != &other) {
 			destroy();
 			list = new T[other.capacity];
-			for (size_t i = 0; i < other.length; ++i) {
+			for (size_t i = 0; i < other.length(); ++i) {
 				size_t idx = (other.front + i) % other.capacity;
 				list[i] = other.list[idx];
 			}

@@ -2,7 +2,7 @@
 #include "topo_sort.h"    // dag_sort_indices
 #include "type_index.h"   // dense_type_system
 #include "typelist.h"     // TypeList::for_each
-#include "Option.h"       // Opt::Option
+#include "Option.h"       // stn::Option
 #include "type_tag.h"     // has_tag
 #include <stdexcept>
 #include <type_traits>

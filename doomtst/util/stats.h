@@ -8,47 +8,47 @@ namespace statistics {
 
 	inline void interpolate(stn::array<float>& to_interpolate, float min, float max) {
 
-		if (to_interpolate.length==0)
+		if (to_interpolate.length()==0)
 		{
 			return;
 		}
-		stn::array<util::pair<size_t, float> > filled;
+		stn::array<stn::pair<size_t, float> > filled;
 		if (std::isnan(to_interpolate.first()))
 		{
 
-			filled.push(util::pair(size_t(0), min));
+			filled.push(stn::pair(size_t(0), min));
 		}
-		for (size_t i = 0; i < to_interpolate.length; i++) {
+		for (size_t i = 0; i < to_interpolate.length(); i++) {
 			if (!std::isnan(to_interpolate[i])) {
-				filled.push(util::pair(i, to_interpolate[i]));
+				filled.push(stn::pair(i, to_interpolate[i]));
 			}
 		}
 		if (std::isnan(to_interpolate.last()))
 		{
-			if (std::isnan(to_interpolate.first())&&to_interpolate.length==1)
+			if (std::isnan(to_interpolate.first())&&to_interpolate.length()==1)
 			{
 				filled.first().second = (min + max)/ 2;
 			}
 			else {
-				filled.push(util::pair(size_t(to_interpolate.length - 1), max));
+				filled.push(stn::pair(size_t(to_interpolate.length() - 1), max));
 			}
 			}
-	util::pair<size_t, float> min_val = filled.first();
-	util::pair<size_t, float> max_val = filled.first();
+	stn::pair<size_t, float> min_val = filled.first();
+	stn::pair<size_t, float> max_val = filled.first();
 	size_t inc = 0;
-	for (int i = 0; i < to_interpolate.length; i++) {
+	for (size_t i = 0; i < to_interpolate.length(); i++) {
 
 		if (max_val.first == i) {
 			inc++;
 			min_val = max_val;
-			if (inc!= filled.length)
+			if (inc!= filled.length())
 			{
 
 				max_val = filled[inc];
 			}
 
 		}
-		int diff = (max_val.first - min_val.first);
+		size_t  diff= (max_val.first - min_val.first);
 		if (diff != 0)
 		{
 			to_interpolate[i] = lerp(min_val.second, max_val.second, (i - static_cast<float>(min_val.first)) / diff);
@@ -59,8 +59,6 @@ namespace statistics {
 		}
 
 	}
-	filled.destroy();
-
 	}	
 	//transforms a data set into the uniform distribution ranging from [-1,1]
 	struct HistogramEqualizer {
@@ -71,11 +69,11 @@ namespace statistics {
 		void destroy() {
 
 			
-			equalizedDistribution.destroy();
+			equalizedDistribution.clear();
 		}
 
 		HistogramEqualizer(stn::array<float> data) {
-			const size_t DataPoints = data.length;
+			const size_t DataPoints = data.length();
 			
 			//you need specific input patams as when its used for a finite dataset their are almost always points outside the range
 
@@ -85,11 +83,11 @@ namespace statistics {
 			//nan for a Sentenal value
 			equalizedDistribution = stn::array<float>(DataPoints,NAN);
 			
-			std::sort(data.list, data.list + DataPoints, [](float a, float b) {
+			std::sort(data.data(), data.data() + DataPoints, [](float a, float b) {
 				return a < b;
 				});
 			minvalue = data[0];
-			maxvalue = data[data.length-1];
+			maxvalue = data[data.length()-1];
 
 			// Prevent division by zero
 			if (minvalue == maxvalue) {
@@ -107,11 +105,10 @@ namespace statistics {
 			
 			interpolate(equalizedDistribution,-1,1);
 	
-			data.destroy();
 		}
 		bool generated() {
 
-			return equalizedDistribution.length > 0;
+			return equalizedDistribution.length() > 0;
 }
 		// Applies the equalized distribution to a value
 		float apply_distribution(float value) {
@@ -133,8 +130,8 @@ namespace statistics {
 		inline int get_bucket(float value) const {
 			float normalized = (value - minvalue) / (maxvalue - minvalue);
 			normalized = clamp(normalized, 0.0f, 1.0f);
-			int index = int(normalized * (equalizedDistribution.length-1));
-			return clamp(index, 0, equalizedDistribution.length- 1);
+			int index = int(normalized * (equalizedDistribution.length()-1));
+			return clamp(index, 0, equalizedDistribution.length()- 1);
 		}
 
 		// Float comparison function for qsort

@@ -18,7 +18,7 @@ namespace handle {
 
 		}
 		const T& get_elem(Ids::Id handle) const{
-			if (elemlist.length < handle.id)
+			if (elemlist.length() < handle.id)
 			{
 				throw std::out_of_range("Requested Shader does not exist");
 			}
@@ -31,7 +31,7 @@ namespace handle {
 		}
 		void set(const std::string& Name,const T& value) {
 			size_t handle = get_handle(Name).id;
-			if (handle < elemlist.length)
+			if (handle < elemlist.length())
 			{
 				throw std::logic_error("Two elements are unable to have the same name");
 			}

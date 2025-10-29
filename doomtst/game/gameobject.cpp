@@ -59,19 +59,20 @@ void gameobject::component::oncollision(obj collidedwith)
 
 bool gameobject::obj::exists() const
 {
-	return (GenId ? true : false) && OC->entitymeta[GenId.id].gen_count == GenId.gen;
+	return Genid&& OC->entitymeta[id()].gen_count == generation();
 
 }
+
 
 EntityMetadata& gameobject::obj::meta()
 {
 	
-	if (!GenId)
+	if (!Genid)
 	{
-		throw std::logic_error("entity Has invalid id");
+		throw std::logic_error("entity does not have a valid id");
 	}
-	EntityMetadata& met = OC->entitymeta[GenId.id]; 
-	if (met.gen_count!=GenId.gen)
+	EntityMetadata& met = OC->entitymeta[id()];
+	if (met.gen_count!=generation())
 	{
 		throw std::logic_error("Cannot acess entity, It has been deleted");
 	}
@@ -91,26 +92,21 @@ struct destroyCmd :Command {
 };
 
 
-
 //gets a gameobject from a refrence to it;
 
 void Ecs::destroy(obj& object) {
 
 	if (!object.exists())
 	{
+	//to prevent double deletes
 		return;
 	}
 	for (component* comp : query::ComponentView(object)) {
 		comp->destroy();
 	}
-
-	object.meta().arch->remove(object);
-	
-
-	
-	entitymeta[object.GenId.id].reset();
-	free_ids.push(object.GenId.id);
-	int k = 3;
+	arch[object.meta().arch].remove(object);
+	entitymeta[object.id()].reset();
+	free_ids.push(object.id());
 }
 
 
@@ -126,20 +122,21 @@ void gameobject::Ecs::delete_component(component* comp)
 {
 	if(comp->owner==None)
 	{
-		throw std::logic_error("Every Component Must be owned by a valid");
+		throw std::logic_error("Every Component Must be owned by a entity");
 	}
-	comp_storage[comp->comp_id.id].store[comp->owner.GenId.id]=nullptr;
+	component_table_with_id(comp->comp_id)[comp->owner]=nullptr;
 
-	comp_storage[comp->comp_id.id].pool.free(comp);
+	component_table_with_id(comp->comp_id).pool.free(comp);
 }
 
-void gameobject::Ecs::InitializeEntity(obj& object)
+obj gameobject::Ecs::spawn_empty()
 {
-	object.GenId.id = free_ids.pop();
-	object.OC = ctx->OC;
-	object.GenId.gen= entitymeta[object.GenId.id].gen_count;
+	obj new_spawn;
+	new_spawn.Genid.id= free_ids.pop();
+	new_spawn.Genid.gen = entitymeta[new_spawn.id()].gen_count;
+	new_spawn.OC = ctx->OC;
 
-	arch.archtypes[0]->add(object);
+	arch.empty_archtype().add(new_spawn);
 
 }
 
@@ -148,53 +145,51 @@ void gameobject::Ecs::updatecomponents(updatecalltype type)
 
 	array<component_table*> managerref;
 
-	arch.check();
-	for (int i = 0; i < comp_storage.length; i++)
+	for (int i = 0; i < comp_storage.length(); i++)
 	{
 		
-		if (shouldupdate( comp_storage[i].utype,type))
+		if (shouldupdate( comp_storage[i].description.update_type,type))
 		{
 			
+			//managerref.filer.
 		managerref.push(&comp_storage[i]);
 		}
 		
 
 	}
-	if (managerref.length != 0)
+	if (!managerref.empty())
 	{
 
 
-		std::sort(&managerref[0], &managerref[0] + managerref.length, [](component_table* a, component_table* b) {
-			return a->priority > b->priority;
+		std::sort(&managerref[0], &managerref[0] + managerref.length(), [](component_table* a, component_table* b) {
+			return a->description.priority > b->description.priority;
 			});
 	}
 	for (component_table* mgr : managerref) {
-		for (Archtype* archtype : arch.archtypes) {
+		for (Archtype* archtype : arch) {
 			
 			if (!archtype->has_component(mgr->id)) continue;
 
 			// 1) Snapshot the count _once_
-			size_t originalCount = archtype->elems.length;
+			size_t originalCount = archtype->count();
 
 			// 2) Index by integer, not range-for
 			for (size_t i = 0; i < originalCount; ++i) {
-				obj   o = archtype->elems[i];           // read by value
-				auto* c = (component*)mgr->store[o.GenId.id];
+				obj   o = (*archtype)[i];           // read by value
+				auto* c = (component*)mgr->store[o.id()];
 				c->update();  
 				
 			}
 		}
 	}
-	managerref.destroy();
 	
 }
 
 
 
-obj gameobject::Ecs::CreateEntity(v3::Vec3 SpawnPos)
+obj gameobject::Ecs::spawn_with_transform(v3::Vec3 SpawnPos)
 {
-	obj object = obj();
-	InitializeEntity(object);
+	obj object = spawn_empty();
 	object.addcomponent<transform_comp>()->transform.position = SpawnPos;
 	return object;
 
@@ -202,31 +197,15 @@ obj gameobject::Ecs::CreateEntity(v3::Vec3 SpawnPos)
 
 
 
-
-gameobject::component_table::component_table()
+gameobject::component_table::component_table(comp::Id mid, stn::memory::layout layout):component_layout(layout)
 {
-	
-	id = comp::None;
-	priority = -1;
-	utype = updatenone;
-	
-}
-
-void gameobject::component_table::create(comp::Id mid, size_t bytesize, size_t alignment)
-{
+	store = array<component*>();
 	id = mid;
-	pool = dynPool::flux<component>(bytesize,alignment);
+	pool = dynPool::flux<component>(component_layout);
+
 }
 
 void gameobject::component_table::init(component* sample)
 {
-	
-	priority = sample->priority;
-	utype = sample->utype;
-}
-
-
-constexpr size_t gameobject::ComponentMapper::operator()(component* comp) const noexcept
-{
-	return comp->owner.GenId.id;
+	description = component_description(sample->priority, sample->utype);
 }

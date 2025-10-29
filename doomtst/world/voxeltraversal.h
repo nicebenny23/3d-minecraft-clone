@@ -41,7 +41,7 @@ namespace voxtra {
 			return Hit.Ray;
 		}
 	};
-	using WorldRayCollision = Opt::Option<RayWorldHit>;
+	using WorldRayCollision = stn::Option<RayWorldHit>;
 	enum GridTraverseMode {
 		countnormal = 0,
 		countall = 1,
@@ -54,7 +54,7 @@ namespace voxtra {
 	WorldRayCollision travvox(ray nray, GridTraverseMode trav = countnormal);
 	block* findprevblock(ray nray, GridTraverseMode trav = countnormal);
 
-	inline Opt::Option<geometry::Box> findemptyspace(v3::Vec3 scale) {
+	inline stn::Option<geometry::Box> findemptyspace(v3::Vec3 scale) {
 		size_t max_tst = 40;
 		for (size_t tst = 0; tst < max_tst; tst++)
 		{
@@ -65,19 +65,19 @@ namespace voxtra {
 			geometry::Box test_box = geometry::Box(test_pos,scale);
 			if (!Boxcollwithgrid(test_box))
 			{
-				return Opt::Option<geometry::Box>(test_box);
+				return stn::Option<geometry::Box>(test_box);
 			}
 		}
 
-		return Opt::None;
+		return stn::None;
 	}
-	inline Opt::Option<geometry::Box> findground(v3::Vec3 scale) {
+	inline stn::Option<geometry::Box> findground(v3::Vec3 scale) {
 		size_t max_checks = 100;
 		for (size_t checks = 0; checks < max_checks; checks++)
 		{
 
 
-			Opt::Option<geometry::Box> test_box = findemptyspace(scale);
+			stn::Option<geometry::Box> test_box = findemptyspace(scale);
 			if (!test_box)
 			{
 				continue;
@@ -91,6 +91,6 @@ namespace voxtra {
 		
 		
 		}
-		return Opt::None;
+		return stn::None;
 	}
 }

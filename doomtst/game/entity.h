@@ -42,7 +42,7 @@ namespace gameobject {
         private:
             friend struct SlotTracker;
 
-            Opt::Option<gameobject::obj> held;
+            stn::Option<gameobject::obj> held;
 
         };
 
@@ -53,7 +53,7 @@ namespace gameobject {
 
             void destroy_hook() {
                 for (auto& obj : refs) {
-                    obj->held = Opt::None;
+                    obj->held = stn::None;
                 }
             }
             void swapSlots(entity_slot* old, entity_slot* location) {
@@ -69,12 +69,12 @@ namespace gameobject {
                 refs.push(old);
             };
             void unregisterSlot(entity_slot* old) {
-                size_t  loc = refs.find(old);
-                if (loc == refs.npos)
+                stn::Option<uint32_t>  loc = refs.find(old);
+                if (!loc)
                 {
                     throw std::logic_error("Unable to remove a watcher from a gameobject it is not viewing");
                 }
-                refs.deleteind(refs.find(old));
+                refs.delete_at(loc());
             };
 
         private:

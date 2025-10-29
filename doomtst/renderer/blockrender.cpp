@@ -52,7 +52,7 @@ bool chunkviewable(Chunk::chunk* chk) {
 	{
 		return false;
 	}
-	return geointersect::intersects(ncone, geometry::sphere(chkb));
+	return geointersect::intersects(ncone, geometry::Sphere(chkb));
 
 }
 
@@ -146,7 +146,7 @@ void emitblock(block& torender, renderer::MeshData& mesh) {
 // Recreate the mesh for a chunk
 void recreatechunkmesh(Chunk::chunk* aschunk,std::mutex& fill_lock) {
 	
-	aschunk->mesh->facebuf.destroy();//g
+	aschunk->mesh->facebuf.clear();//g
 	aschunk->mesh->facebuf = stn::array<face>();//g
 	renderer::MeshData mesh= aschunk->mesh->SolidGeo.create_mesh();
 	
@@ -189,12 +189,12 @@ void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 	else {
 		// Enable 2D render
 		renderer::MeshData mesh_data=mesh.TransparentGeo.create_mesh();
-		for (int i = 0; i < mesh.facebuf.length; i++) {
+		for (int i = 0; i < mesh.facebuf.length(); i++) {
 			emitface(mesh.facebuf[i].facenum.ind(), *(mesh.facebuf[i].mesh->blk), mesh_data);
 		}
 
 		mesh.TransparentGeo.fill(std::move(mesh_data));
-		CtxName::ctx.Ren->consume();
+		CtxName::ctx.Ren->pop();
 		mesh.TransparentGeo.render();
 	
 	}
@@ -227,9 +227,9 @@ void blockrender::renderblocks(bool rendertransparent) {
 		};
 	
 	thread_util::par_iter(tosort.begin(), tosort.end(), func, 4);
-	CtxName::ctx.Ren->consume();
+	CtxName::ctx.Ren->pop();
 	
-	if (tosort.length != 0)
+	if (tosort.length() != 0)
 	{
 
 		std::stable_sort(tosort.begin(), tosort.end(), [](Chunk::chunk* a, Chunk::chunk* b) {
@@ -237,7 +237,7 @@ void blockrender::renderblocks(bool rendertransparent) {
 			});
 	}	
 		int renderamt = 0;
-		for (int i = 0; i < tosort.length; i++) {
+		for (int i = 0; i < tosort.length(); i++) {
 		
 				renderamt++;
 				renderchunk(*tosort[i]->mesh, false);
@@ -246,13 +246,12 @@ void blockrender::renderblocks(bool rendertransparent) {
  		
 	
 	
-		for (int i = 0; i < tosort.length; i++) {
+		for (int i = 0; i < tosort.length(); i++) {
 		
 				renderchunk(*tosort[i]->mesh, true);
 			
 		}
 	
-	tosort.destroy();
 }
 struct bind_block_texture {};
 void blockrender::initblockrendering()

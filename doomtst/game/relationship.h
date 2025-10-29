@@ -41,7 +41,7 @@ namespace Hierarchy {
             return children_list.contains(obj);
         }
         size_t child_count() const {
-            return children_list.length;
+            return children_list.length();
         }
 
         explicit Parent(gameobject::obj& child) {
@@ -72,9 +72,9 @@ namespace Hierarchy {
 
         friend struct Child;
         void remove_child(const gameobject::obj& child) {
-            for (size_t i = 0; i < children_list.length; ++i) {
+            for (size_t i = 0; i < children_list.length(); ++i) {
                 if (children_list[i] == child) {
-                    children_list.deleteind(i);
+                    children_list.delete_at(i);
                     break;
                 }
             }
@@ -114,13 +114,13 @@ namespace Hierarchy {
         bool has_parent() {
             return entity.hascomponent<Child>();
         }
-        Opt::Option<HierarchyView> parent() {
+        stn::Option<HierarchyView> parent() {
             Child* res = entity.getcomponentptr<Child>();
             if (res)
             {
                 return HierarchyView(res->owner);
             }
-            return Opt::None;
+            return stn::None;
         }
         array<HierarchyView> children() {
             if (!entity.hascomponent<Parent>()) return {};
@@ -150,7 +150,7 @@ namespace Hierarchy {
     bool has_parent(gameobject::obj& entity) {
         return view(entity).has_parent();
     }
-    Opt::Option<gameobject::obj> parent(gameobject::obj entity) {
+    stn::Option<gameobject::obj> parent(gameobject::obj entity) {
         return view(entity).parent().map(std::function([](HierarchyView view) {return view.entity; }));
     }
     array<gameobject::obj> children(gameobject::obj& entity) {

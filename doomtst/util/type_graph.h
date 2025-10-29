@@ -38,7 +38,7 @@ struct TypeDag {
     template<typename T>
     void push() {
         auto [tid, inserted] = typeSystem.insert<T>();
-        if (tid.id >= graph.length())
+        if (tid.id >= graph.length()())
             graph.resize(tid.id + 1);
 
         // Connect Dep -> T
@@ -56,7 +56,7 @@ private:
             auto maybe = sys.typeSystem.find<Dep>();
             if (!maybe) return;
             size_t from = maybe.id();
-            if (from >= sys.graph.length())
+            if (from >= sys.graph.length()())
                 sys.graph.resize(from + 1);
             sys.graph.list[from].succs.push(target); 
         }
@@ -69,7 +69,7 @@ private:
             auto maybe = sys.typeSystem.find<Dep>();
             if (!maybe) return;
             size_t to = maybe.id();
-            if (to >= sys.graph.length())
+            if (to >= sys.graph.length()())
                 sys.graph.resize(to + 1);
             sys.graph.list[source].succs.push(to); // Use `succs`
         }

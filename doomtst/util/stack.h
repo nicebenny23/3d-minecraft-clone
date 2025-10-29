@@ -27,7 +27,7 @@ namespace stn {
     template<typename T>
     T& stack<T>::peek() {
         if (!empty()) {
-            return list[list.length - 1];
+            return list[list.length() - 1];
         }
         throw std::out_of_range("Error: Attempted to peek an empty stack.");
     }
@@ -35,7 +35,7 @@ namespace stn {
     template<typename T>
     const T& stack<T>::peek() const {
         if (!empty()) {
-            return list[list.length - 1];
+            return list[list.length() - 1];
         }
         throw std::out_of_range("Error: Attempted to peek an empty stack.");
     }
@@ -59,7 +59,7 @@ namespace stn {
 
     template<typename T>
     bool stack<T>::empty() const {
-        return list.length == 0;
+        return list.length() == 0;
     }
 
     template<typename T>

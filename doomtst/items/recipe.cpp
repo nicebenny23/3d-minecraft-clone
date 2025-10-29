@@ -16,11 +16,11 @@ void recipemanager::createcontainers() {
 void recipemanager::addrecipe(irecipe recipe)
     {
     
-    for (int i = 0; i < recipelist.length; i++) {
-        if (recipelist.at(i).xsize != resourcecontainer->sizex) {
+    for (int i = 0; i < recipelist.length(); i++) {
+        if (recipelist[i].xsize != resourcecontainer->sizex) {
             Assert("xsize not correct for recipe manager");
         }
-        if (recipelist.at(i).ysize != resourcecontainer->sizey) {
+        if (recipelist[i].ysize != resourcecontainer->sizey) {
             Assert("ysize not correct for recipe manager");
         }
     }
@@ -109,14 +109,14 @@ irecipe* recipemanager::searchrecipe() {
     int maxamt = 0;
  
 
-    for (int i = 0; i < recipelist.length; i++) {
-        if (!recipelist.at(i).cancraft(resourcecontainer)) {
+    for (int i = 0; i < recipelist.length(); i++) {
+        if (!recipelist[i].cancraft(resourcecontainer)) {
             continue;
         }
 
 
           
-            return  &recipelist.at(i);
+            return  &recipelist[i];
         
     }
 
@@ -268,9 +268,9 @@ currecipe = nullptr;
              if (linenumber == maxlinesize)
              {
 
-                 irecipe newrecipe = irecipe(recipearr.list, recipearr[recipearr.length - 1], xsize, ysize);
+                 irecipe newrecipe = irecipe(recipearr, recipearr[recipearr.length() - 1], xsize, ysize);
                  recipelist.push(newrecipe);
-                 recipearr.destroy();
+                 recipearr.clear();
                  linenumber = 0;
                  continue;
              }
@@ -320,7 +320,7 @@ bool irecipe::cancraft(Container* resourcecont,bool exact) {
     if (ysize != resourcecont->sizey) {
         Assert("size != recipesize");
     }
-    for (int i = 0; i < resourcecont->databuf.length; i++) {
+    for (int i = 0; i < resourcecont->databuf.length(); i++) {
         item* itematpos = resourcecont->at(i).helditem;
 
      
@@ -356,9 +356,9 @@ bool irecipe::cancraft(Container* resourcecont,bool exact) {
 }
 
 
-irecipe::irecipe(iteminrecipe* itemarray, iteminrecipe created, int sizex, int sizey)
+irecipe::irecipe(const array<iteminrecipe>& itemarray, iteminrecipe created, int sizex, int sizey)
 {
-    recipe =array< iteminrecipe>(itemarray,sizex*sizey);
+    recipe = itemarray;
     itemcreated = created;
     xsize = sizex;
     ysize = sizey;
@@ -369,7 +369,7 @@ irecipe::irecipe(iteminrecipe* itemarray, iteminrecipe created, int sizex, int s
 void recipemanager::craft() {
   
     
-    for (int i = 0; i < resourcecontainer->databuf.length; i++) {
+    for (int i = 0; i < resourcecontainer->databuf.length(); i++) {
         if (currecipe->recipe[i].id == 0) {
             continue;
         }
@@ -415,7 +415,7 @@ bool recipemanager::isitempreview()
 int recipemanager::timecancraft()
 {
     int times=10100;
-    for (int i = 0; i < resourcecontainer->databuf.length; i++) {
+    for (int i = 0; i < resourcecontainer->databuf.length(); i++) {
         
         if (currecipe->recipe[i].id == 0) {
             continue;

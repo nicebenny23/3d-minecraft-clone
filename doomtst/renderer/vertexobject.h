@@ -28,7 +28,7 @@ namespace buffer_object {
 			//use when data is of one type
 		template<class T>
 		void fillbuffer(stn::array<T>& data) {
-			fillbuffer(data.list, data.length*sizeof(T));
+			fillbuffer(data.data(), data.length() * sizeof(T));
 		}
 	protected:
 		void generate() {

@@ -24,7 +24,7 @@ inline Dir::Dir3d closest_face(v3::Vec3 pos, block* blk) {
 }
 
 // Returns two orthogonal axes on the block face plane
-inline util::pair<v3::Vec3, v3::Vec3> get_flat_frame(Dir::Dir3d dir) {
+inline stn::pair<v3::Vec3, v3::Vec3> get_flat_frame(Dir::Dir3d dir) {
     switch (dir.ind() / 2) {
     case 0: return { {0,0,1}, {0,1,0} };
     case 1: return { {1,0,0}, {0,0,1} };
@@ -60,7 +60,7 @@ struct playerbreak : gameobject::component {
         std::string name = tex[phase];
         std::string handle = "block_break_" + std::to_string(phase);
         break_decal.create_handle(name.c_str(), handle.c_str());
-        auto hit = closest.unwrap().Hit.intersectionpoint;
+        auto hit = closest().Hit.intersectionpoint;
         Dir::Dir3d fd = closest_face(hit, currmining());
         auto& f = currmining()->mesh[fd.ind()];
         break_decal.center = f.center();

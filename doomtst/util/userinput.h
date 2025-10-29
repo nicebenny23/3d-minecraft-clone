@@ -33,7 +33,7 @@ namespace userinput {
 	};
 	struct  InputManager
 	{
-		stn::array<inputkey, true> keylist;
+		stn::array<inputkey> keylist;
 
 
 		v2::Vec2 mouseposdt;
@@ -50,7 +50,7 @@ namespace userinput {
 
 		int convertchartoglfwkey(const int key);
 
-		inputkey getKey(const int key);
+		inputkey getKey(const size_t key);
 
 	};
 

@@ -26,7 +26,7 @@ namespace Meshes {
 			handle= Ids::None;
 		}
 		Ids::Id create() {
-			if (free.length==0)
+			if (free.length()==0)
 			{
 				free.push(meshes.length());
 			}

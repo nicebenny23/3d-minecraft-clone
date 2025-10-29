@@ -35,16 +35,16 @@ struct spawn_mobs :System {
 		return 	(average < 8);
 		}
 
-	Opt::Option<geometry::Box> find_spawn_location(v3::Vec3 Scl) {
+	stn::Option<geometry::Box> find_spawn_location(v3::Vec3 Scl) {
 		size_t max_checks = 40;
 		for (size_t chks = 0; chks < max_checks; chks++)
 		{
 
 
-			Opt::Option<Box> spawn_loc = voxtra::findground(unitv);
+			stn::Option<Box> spawn_loc = voxtra::findground(unitv);
 			if (!spawn_loc)
 			{
-				return Opt::None;
+				return stn::None;
 			}
 			v3::Vec3 pos = spawn_loc().center;
 			if (!ensure_light_level(pos))
@@ -57,7 +57,7 @@ struct spawn_mobs :System {
 			}
 			return spawn_loc;
 		}
-		return Opt::None;
+		return stn::None;
 	}
 	void run(gameobject::Ecs* ecs) {
 
@@ -95,7 +95,7 @@ struct spawn_mobs :System {
 				if (randomnum < spawnthreshold)
 				{
 
-					Opt::Option<Box> spawn_loc = find_spawn_location(unitv);
+					stn::Option<Box> spawn_loc = find_spawn_location(unitv);
 					if (!spawn_loc)
 					{
 						continue;

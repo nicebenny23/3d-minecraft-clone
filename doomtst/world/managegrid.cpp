@@ -155,7 +155,7 @@ gameobject::obj gridutil::dislocate(gameobject::obj blk)
 	
 	auto position = blk_comp.pos;
 	gameobject::obj& to_flip = *CtxName::ctx.Grid->getObject(position);
-	CtxName::ctx.OC->InitializeEntity(to_flip);
+	to_flip=CtxName::ctx.OC->spawn_empty();
 
 	to_flip.addcomponent<block>()->create(position, minecraftair, blk_comp.mesh.attachdir, blk_comp.mesh.direction);
 	setdefault(&to_flip.getcomponent<block>());

@@ -41,11 +41,11 @@ TextureArray::TextureArray( array<const char*>& textures, const char* name)
 {
 	Name = name;
 	type = TexArray;
-	length = textures.length;
+	length = textures.length();
 	id = 0;
 	glGenTextures(1, &id);
 	apply();
-	if (textures.length!=0)
+	if (textures.length()!=0)
 	{
 		size = texdata::GetImgSize(textures[0]);
 	}
@@ -55,13 +55,13 @@ TextureArray::TextureArray( array<const char*>& textures, const char* name)
 		GL_TEXTURE_2D_ARRAY //type
 		, 0                 //minmap level
 		, GL_RGBA8            //color format
-		, size.x, size.y, textures.length //size
+		, size.x, size.y, textures.length() //size
 		, 0,
 		GL_RGBA,//color format
 		GL_UNSIGNED_BYTE, nullptr);//arr
 	array<unsigned char*> data = array<unsigned char*>();
 
-	for (int i = 0; i < textures.length; i++)
+	for (int i = 0; i < textures.length(); i++)
 	{
 	//colchannel not used but it hastto be given
 		v2::Coord2 ImgSize;

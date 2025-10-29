@@ -38,17 +38,17 @@ namespace geointersect {
 			
 			if (0 < max_min||apxf(max_min, 0))
 			{
-				return Opt::Construct<RayHit>(fray, max_min);
+				return stn::Construct<RayHit>(fray, max_min);
 			}
 
 		}
 
 
-		return Opt::None;
+		return stn::None;
 
 
 	}
-	bool intersects(geometry::cone cone, geometry::sphere sph)
+	bool intersects(geometry::cone cone, geometry::Sphere sph)
 	{
 		return cone.distanceFromPoint(sph.center) <= sph.radius;
 

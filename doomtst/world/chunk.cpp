@@ -44,11 +44,11 @@ int compare(const void* b, const void* a) {
 }
 void Chunk::chunkmesh::sortbuf()
 {
-	for (int i = 0; i < facebuf.length; i++)
+	for (int i = 0; i < facebuf.length(); i++)
 	{
 		facebuf[i].calccameradist();
 	}
-	std::qsort(facebuf.list, facebuf.length, sizeof(face), compare);
+	std::qsort(facebuf.data(), facebuf.length(), sizeof(face), compare);
 
 }
 
@@ -58,7 +58,7 @@ void Chunk::chunkmesh::destroy()
 	SolidGeo.destroy();
 	TransparentGeo.destroy();
 	
-	facebuf.destroy();
+	facebuf.clear();
 }
 
 void Chunk::createchunkmesh(Chunk::chunk* aschunk)
@@ -136,8 +136,8 @@ void Chunk::chunk::write()
 		bytelist.reach(chunksize + i) = 0;
 		appendspecialbytelist(bytelist, i, blockbuf[i].getcomponentptr<block>());
 	}
-	file.write<unsigned short>(bytelist.list, bytelist.length);
-	bytelist.destroy();
+	file.write<unsigned short>(bytelist.data(), bytelist.length());
+	
 	file.close();
 }
 

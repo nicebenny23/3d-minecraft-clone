@@ -39,15 +39,15 @@ namespace type_id {
         }
 
         template<typename T>
-        Opt::Option<Ids::Id> get_opt() {
+        stn::Option<Ids::Id> get_opt() {
             Ids::Id dense_id = sparse_map.reach(typeIndex<T>());
             if (!dense_id.valid()) [[unlikely]] {
-                return Opt::None; 
+                return stn::None; 
             }
-            return Opt::Option<Ids::Id>(dense_id);
+            return stn::Option<Ids::Id>(dense_id);
         }
         template<typename T>
-        util::pair<Ids::Id, bool> insert() {
+        stn::pair<Ids::Id, bool> insert() {
             uint32_t id = typeIndex<T>();
             Ids::Id& dense_id = sparse_map.reach(id);
             bool is_new = false;
@@ -55,17 +55,17 @@ namespace type_id {
                 dense_id = Ids::Id(type_index++);
                 is_new = true;
             }
-            return  util::pair(Ids::Id(dense_id), is_new );
+            return  stn::pair(Ids::Id(dense_id), is_new );
         }
         template<typename T>
         bool contains() const {
             uint32_t id = typeIndex<T>();
-            return id < sparse_map.length && sparse_map[id].valid();
+            return id < sparse_map.length() && sparse_map[id].valid();
         }
 
         template <typename... Types>
         stn::array<Ids::Id> get_type_ids() {
-            return { get<Types>()... };
+            return stn::array({ get<Types>()... });
         }
 
 

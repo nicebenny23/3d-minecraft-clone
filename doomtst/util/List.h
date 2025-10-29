@@ -37,6 +37,12 @@ namespace stn {
                 throw std::out_of_range("List index out of bounds");
             return elements[index];
         }
+        constexpr T& unchecked_at(size_t index) {
+            return elements[index];
+        }
+        constexpr const T& unchecked_at(size_t index) const{
+            return elements[index];
+        }
         constexpr size_t length() const {
             return N;
         }

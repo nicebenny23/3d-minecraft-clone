@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include "dynamicarray.h"  // Assume Cont::array<T>
 #include "stack.h"         // Assume Cont::stack<T>
-#include "Option.h"        // Assume Opt::Option<T>
+#include "Option.h"        // Assume stn::Option<T>
 
 // Templated DAG node with static npos for "none"
 template<typename T>
@@ -37,7 +37,7 @@ struct Dag {
 
     // Add a node returning its index
     size_t addNode(const T& nodeValue) {
-        size_t newIndex = nodes.length;
+        size_t newIndex = nodes.length();
         nodes.push(DagNode<T>(newIndex, nodeValue));
         return newIndex;
     }
@@ -84,7 +84,7 @@ struct Dag {
         return false;
     }
 
-    size_t length() const { return nodes.length; }
+    size_t length() const { return nodes.length(); }
     DagNode<T>& operator[](size_t nodeIndex) { return nodes[nodeIndex]; }
     const DagNode<T>& operator[](size_t nodeIndex) const { return nodes[nodeIndex]; }
 
@@ -120,12 +120,12 @@ inline stn::array<T> dag_sort(const Dag<T>& graph) {
             if (--inDegree[succIndex] == 0) zeroQueue.push(succIndex);
         }
     }
-    if (sorted.length != nodeCount) throw std::logic_error("Cycle detected in DAG");
+    if (sorted.length() != nodeCount) throw std::logic_error("Cycle detected in DAG");
     return sorted;
 }
 template<typename T>
  bool is_acyclic(const Dag<T>& graph) {
-    size_t nodeCount = graph.length();
+    size_t nodeCount = graph.length()();
     stn::array<int> inDegree(nodeCount, 0);
     stn::stack<size_t> zeroQueue;
 
@@ -160,7 +160,7 @@ struct DagBuilder {
     Dag<T> fullGraph;                       // complete graph
     std::unordered_map<T, uint32_t, Hash> valueIndex; // map value to index
     stn::array<T> pushed;          // values in push order
-    Opt::Option<uint32_t> firstNode, lastNode;
+    stn::Option<uint32_t> firstNode, lastNode;
     Dag<T> filteredGraph;                   // filtered graph subset
     bool dirty = false;                     // lazy rebuild flag
 
@@ -204,13 +204,13 @@ struct DagBuilder {
         size_t idx = ensureNode(nodeValue);
         for (auto depValue : dependents) {
             size_t depIndex = ensureNode(depValue);
-            if (lastNode && depIndex == lastNode.unwrap())
+            if (lastNode && depIndex == lastNode())
                 throw std::logic_error("Cannot depend on last node");
             fullGraph.addEdge(depIndex, idx);
         }
         for (auto depValue : dependencies) {
             size_t depIndex = ensureNode(depValue);
-            if (lastNode && depIndex == lastNode.unwrap())
+            if (lastNode && depIndex == lastNode())
                 throw std::logic_error("Cannot depend on last node");
             fullGraph.addEdge(idx, depIndex);
         }
@@ -271,7 +271,7 @@ Dag<T> filter(Dag<T> full, const stn::array<T>& keep) {
            
             DagNode<T>& new_element = new_dag[remap[i]];
             new_element.successors = filter(full[i].successors,filter_ind);
-            for (size_t j = 0; j < new_element.successors.length; j++)
+            for (size_t j = 0; j < new_element.successors.length(); j++)
             {
 
                 new_element.successors[j]= remap[new_element.successors[j]];

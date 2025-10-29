@@ -100,7 +100,7 @@ void ModelMeshName::rendermesh(ModelMesh& torender)
 	
 	torender.setmodeluniform();
 	torender.handle.set_uniform(uniforms::uniform(torender.color,"col"));
-	for (int i = 0; i < torender.vertexindices.length; i++)
+	for (int i = 0; i < torender.vertexindices.length(); i++)
 	{
 		Vec3 vertex = torender.nthvertex(i);
 		v2::Vec2 Texture2D = torender.nthtex(i);
@@ -112,6 +112,6 @@ void ModelMeshName::rendermesh(ModelMesh& torender)
 	
 
 	torender.handle.fill(std::move(data));	//enable position
-		CtxName::ctx.Ren->consume();
+		CtxName::ctx.Ren->pop();
 		torender.handle.render();
 }

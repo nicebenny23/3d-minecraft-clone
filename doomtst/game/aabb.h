@@ -64,7 +64,8 @@ namespace aabb {
 
     void initCollider();
     bool aabbboxintersect(geometry::Box p1, Collider& p2);
-   v3::Vec3 collideaabb(Collider p1, Collider p2);
+    //cannot consify until global box is const
+    Option<v3::Vec3> collideaabb( Collider& p1, Collider& p2);
 
     extern Sparse::PackedSet<Collider*> Colliderlist;
 }

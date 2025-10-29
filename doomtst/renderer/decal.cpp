@@ -41,7 +41,7 @@ mesh.add_index(0);
 mesh.add_index(3);
 mesh.add_index(2);
 handle.fill(std::move( mesh));
-handle.renderer->consume();
+handle.renderer->pop();
 
 }
 void decal::render() {
@@ -55,5 +55,4 @@ void render_decals()
     {
         dec.render();
     }
-    decals.decals.destroy();
 }

@@ -1,292 +1,644 @@
 #pragma once
-#include <utility>   // for std::move, std::forward
+#include <utility>
 #include <iterator>
 #include <concepts>
-#include "dynamicarray.h"
 #include <type_traits>
+#include <vector>
+#include <functional>
 #include "pair.h"
-#include <format>
-#include <ranges>
 #include <stdexcept>
+#include "Option.h"
 
-namespace range {
+namespace stn {
 
+    // --- minimal Range concept ---
     template<typename RangeType>
     concept Range = requires(RangeType & r) {
         { std::begin(r) } -> std::forward_iterator;
         { std::end(r) }   -> std::sentinel_for<decltype(std::begin(r))>;
     };
+    template<Range R, typename Adaptor>
+        requires requires(Adaptor&& a, R&& r) {
+            { std::forward<Adaptor>(a)(std::forward<R>(r)) };
+    }
+    constexpr auto operator|(R&& r, Adaptor&& a)
+        -> decltype(std::forward<Adaptor>(a)(std::forward<R>(r))) {
+        return std::forward<Adaptor>(a)(std::forward<R>(r));
+    }
 
-    template<Range Source>
-    struct StoreRange {
-        using type = std::conditional_t<
-            std::is_lvalue_reference_v<Source>,
-            std::remove_reference_t<Source>&,
-            std::remove_reference_t<Source>
-        >;
-    };
+    // keep/reference for lvalues, makes it owning for other values
 
+    template<Range Source, typename Func>
+        requires requires(Func f, std::iter_value_t<std::ranges::iterator_t<Source&>> const& elem) {
+            { f(elem) } -> std::same_as<void>; // func must accept const ref and return void
+    }struct InspectView;
     template<Range Source, typename Func> struct MapView;
     template<Range Source, typename Pred> struct FilterView;
+    template<Range Source> struct EnumView;
+    template<Range A, Range B> struct ZipView;
+
+    //T->T owning
+    //T&->T& refrence
+    //exactly what we want
+    template<typename T>
+    using stored_range_t = std::conditional_t<std::is_lvalue_reference_v<T>, T, std::decay_t<T>>;
 
     template<Range RangeType>
-    struct Pipe {
-        typename StoreRange<RangeType>::type range;
-        using iterator = decltype(std::begin(std::declval<RangeType&>()));
-        using const_iterator = decltype(std::begin(std::declval<const RangeType&>()));
+    struct range {
 
-        constexpr iterator begin() { return std::begin(range); }
-        constexpr iterator end() { return std::end(range); }
-        constexpr const_iterator begin() const { return std::begin(range); }
-        constexpr const_iterator end() const { return std::end(range); }
+        using stored_type = stored_range_t<RangeType>;
+        stored_type stored_range;
 
-        constexpr bool empty() { return begin() == end(); }
-        constexpr size_t length() { return std::distance(begin(), end()); }
+        using iterator = std::ranges::iterator_t<stored_type>;
+        using const_iterator = std::ranges::iterator_t<const stored_type>;
+        iterator begin() { return std::begin(stored_range); }
+        iterator end() { return std::end(stored_range); }
+        const_iterator begin() const { return std::begin(stored_range); }
+        const_iterator end()   const { return std::end(stored_range); }
+
+        using value_type = std::iter_value_t<iterator>;
+
+
+        template<typename R>
+            requires std::constructible_from<stored_type, R&&>
+        explicit range(R&& r) : stored_range(std::forward<R>(r)) {}
+        //R&& is either R or L value 
+        //Pass the value along by forwarding so it doesent decay
+
+        constexpr bool empty() const { return begin() == end(); }
+
+        constexpr size_t length() const {
+            return static_cast<size_t>(std::distance(begin(), end()));
+        }
 
         template<typename T, typename F>
-        auto fold(T init, F func) {
-            for (auto&& val : *this) {
-                init = func(init, val);
-            }
+        constexpr auto fold(T init, F&& func) {
+            for (auto&& v : stored_range) init = func(init, v);
             return init;
         }
 
-        template<typename Pred>
-        decltype(auto) filter(Pred p) {
-            static_assert(Range<RangeType>, "RangeType must satisfy Range");
-            auto new_view = FilterView<RangeType, Pred>(range, std::move(p));
-            return Pipe<decltype(new_view)>(std::move(new_view));
-        }
-
+        //you cannot make it just a const version because they can only deduce arguments when it is an extenral fyntction
         template<typename Func>
-        decltype(auto) map(Func f) {
-            static_assert(Range<RangeType>, "RangeType must satisfy Range");
-            auto new_view = MapView<RangeType, Func>(range, std::move(f));
-            return Pipe<decltype(new_view)>(std::move(new_view));
+        auto map(Func&& f)&& {
+            using View = MapView<stored_type, std::decay_t<Func>>;
+            return range<View>{
+                View{ std::forward<RangeType>(stored_range), std::forward<Func>(f) }
+            };
         }
 
-        decltype(auto) enumerate() {
-            static_assert(Range<RangeType>, "RangeType must satisfy Range");
-            auto new_view = EnumView<RangeType>(range);
-            return Pipe<decltype(new_view)>(std::move(new_view));
+        // Lvalue map: preserves the original range
+        template<typename Func>
+        auto map(Func&& f) const& {
+            using View = MapView<const stored_type, std::decay_t<Func>>;
+            return range<View>{
+                View{ std::forward<RangeType>(stored_range), std::forward<Func>(f) }
+            };
+        }
+        template<typename Func>
+        auto inspect(Func&& f)&& {
+            using View = InspectView<stored_type, std::decay_t<Func>>;
+            return range<View>{
+                View{ std::forward<RangeType>(stored_range), std::forward<Func>(f) }
+            };
         }
 
-        template<Range OtherRange>
-        decltype(auto) zip(OtherRange&& Oth) {
-            static_assert(Range<RangeType>, "RangeType must satisfy Range");
-            auto new_view = ZipView<RangeType, OtherRange>(range, std::forward<OtherRange>(Oth));
-            return Pipe<decltype(new_view)>(std::move(new_view));
+        // Lvalue map: preserves the original range
+        template<typename Func>
+        auto inspect(Func&& f) const& {
+            using View = InspectView<const stored_type, std::decay_t<Func>>;
+            return range<View>{
+                View{ std::forward<RangeType>(stored_range), std::forward<Func>(f) }
+            };
+        }
+        template<typename Pred>
+        auto filter(Pred&& p)&& {
+            using view = FilterView<stored_type, std::decay_t<Pred>>;
+            return range<view>{
+                view{ std::forward<RangeType>(stored_range), std::forward<Pred>(p) }
+            };
         }
 
-        template<typename Container = stn::array<std::decay_t<decltype(*std::begin(range))>>>
-            requires std::constructible_from<Container, decltype(std::begin(range)), decltype(std::end(range))>
-        Container into() {
-            return Container(begin(), end());
+        template<typename Pred>
+        auto filter(Pred&& p) const& {
+            using view = FilterView<const stored_type, std::decay_t<Pred>>;
+            return range<view>{
+                view{ std::forward<RangeType>(stored_range), std::forward<Pred>(p) }
+            };
+        }
+
+        auto enumerate()&& {
+            using view = EnumView<stored_type>;
+            return range<view>{
+                view{ std::forward<RangeType>(stored_range) }
+            };
+        }
+
+
+        auto enumerate() const& {
+            using view = EnumView<const stored_type>;
+            return range<view>{
+                view{ std::forward<RangeType>(stored_range) }
+            };
+        }
+
+        template<Range Other>
+        auto zip(Other&& o)&& {
+            return range{ ZipView<RangeType, Other>{std::forward<RangeType>(stored_range), std::forward<Other>(o) } };
+        }
+        template<Range Other>
+        auto zip(Other&& o) const& {
+            return range{ ZipView<const RangeType, const Other>{ std::forward<RangeType>(stored_range), std::forward<const Other>(o) } };
+        }
+
+        template<template<typename...> class Container>
+            requires std::constructible_from<Container<value_type>, iterator, iterator>
+        auto into() const {
+            return Container<value_type>{ begin(), end()};
         }
 
         template<typename Func>
         void for_each(Func&& f) {
-            for (auto&& elem : *this) {
-                f(elem);
+            for (auto&& element : stored_range) {
+                f(element);
+            };
+        }
+
+
+        template<typename Pred>
+        bool any(Pred&& pred) const {
+            for (auto&& element : stored_range)
+            {
+                if (pred(element))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        template<typename Pred>
+        bool all(Pred&& pred) const {
+            for (auto&& element : stored_range)
+            {
+                if (!pred(element))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        template<typename T>
+        bool contains(const T& val) const {
+            for (auto&& e : stored_range) if (e == val) return true;
+            return false;
+        }
+        template<typename Pred>
+        size_t count(Pred&& pred) const {
+            size_t cnt = 0;
+            for (auto&& element : stored_range) {
+                if (pred(element)) {
+                    cnt++;
+                };
+            }
+            return cnt;
+        }
+
+        void Debug() const {
+            for (auto&& e : stored_range) {
             }
         }
 
-        template<typename RangeType2>
-            requires std::constructible_from<RangeType, RangeType2&&>
-        Pipe(RangeType2&& r) : range(std::forward<RangeType2>(r)) {}
-    };
+        template<typename Pred>
+        Option<value_type> find(Pred&& pred) const {
+            for (auto&& element : stored_range)
+                if (pred(element))
+                {
+                    return element;
+                }
+            return None;
+        }
+        bool operator==(const range& other) const {
+            auto it1 = begin();
+            auto it2 = other.begin();
+            auto end1 = end();
+            auto end2 = other.end();
 
-    template<Range T>
-    auto pipe(T&& t) {
-        return Pipe<T>{ std::forward<T>(t) };
-    }
-    template<Range T, typename Pred>
-    auto filter(T&& t, Pred pred) {
-        return Pipe<T>{ std::forward<T>(t)}.filter(pred);
-    }
-    template<Range T, typename Map>
-    auto map(T&& t, Map mapping) {
-        return Pipe<T>{ std::forward<T>(t)}.map(mapping);
-    }
-    // --- MapView ---
+            for (; it1 != end1 && it2 != end2; ++it1, ++it2) {
+                if (*it1 != *it2)
+                    return false;
+            }
 
-    template<Range Source, typename Func>
-    struct MapView {
-        typename StoreRange<Source>::type source;  // stores underlying range (ref or value)
-        Func func;      // the mapping function
-
-        struct Iterator {
-            decltype(std::begin(std::declval<Source&>())) it;
-            using value_type = std::decay_t<decltype(*it)>;
-            using reference = decltype(*it);
-            using pointer = value_type*;
-            using difference_type = std::ptrdiff_t;
-            using iterator_concept = std::forward_iterator_tag;
-            using iterator_category = std::forward_iterator_tag;
-            Func* func;
-
-            Iterator() = default; // required for default-constructibility
-            Iterator(const Iterator&) = default; // required for copy-constructibility
-            inline constexpr Iterator(decltype(it) iter, Func* fn) : it(iter), func(fn) {}
-            inline constexpr Iterator& operator++() { ++it; return *this; }
-            inline constexpr Iterator operator++(int) { Iterator temp = *this; ++(*this); return temp; }
-            inline constexpr decltype(auto) operator*() const { return (*func)(*it); }
-            inline bool operator==(const Iterator& oth) const { return it == oth.it; }
-            inline constexpr bool operator!=(const Iterator& oth) const { return it != oth.it; }
-        };
-
-        using iterator = Iterator;
-        using const_iterator = Iterator;
-
-        constexpr iterator begin() { return Iterator(std::begin(source), &func); }
-        constexpr iterator end() { return Iterator(std::end(source), &func); }
-        constexpr const_iterator begin() const { return Iterator(std::begin(source), &func); }
-        constexpr const_iterator end() const { return Iterator(std::end(source), &func); }
-
-        inline MapView(Source s, Func fnc)
-            : source(s), func(std::move(fnc)) {
+            return it1 == end1 && it2 == end2;
+        }
+        bool operator!=(const range& other) const {
+            return *this != other;
         }
     };
+    //R&&->R
+    //R&->R&
+    //thus R&& is owning,and R& is a refrence exactly what we want
+    template<Range R>
+    range(R&&) -> range<R>;
 
-    // --- EnumView ---
+    // ---------------- MapView ----------------
+    template<Range Source, typename Func>
+    struct MapView {
+        using stored_t = stored_range_t<Source>;
+        stored_t source;
+        Func func;
+        //same functoinality as above,takes ownership of R values and refrences L values
+        template<typename S>
+        MapView(S&& s, Func f)
+            : source(std::forward<S>(s)), func(std::move(f)) {
+        }
+        // Iterator template: Iter = underlying iterator type, FuncPtr = Func* or const Func*
+        template<typename iter_t, typename FuncPtr>
+        struct Iterator {
+            iter_t iter;
+            FuncPtr func_ptr;
+            using base_category = typename std::iterator_traits<iter_t>::iterator_category;
+
+            // Determine value_type and reference type
+            using value_type = std::invoke_result_t<Func&, decltype(*iter)>;
+            using reference = value_type;
+            using pointer = void;
+            using difference_type = std::iter_difference_t<iter_t>;
+
+            using iterator_category = std::conditional_t<
+                std::derived_from<base_category, std::contiguous_iterator_tag>,
+                std::random_access_iterator_tag,
+                base_category
+            >;
+
+            static constexpr bool is_bidirectional = std::derived_from<iterator_category, std::bidirectional_iterator_tag>;
+            static constexpr bool is_random_access = std::derived_from<iterator_category, std::random_access_iterator_tag>;
+
+
+            reference operator*() const {
+                return std::invoke(*func_ptr, *iter);
+            }
+            Iterator& operator++() { ++iter; return *this; }
+            Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+
+            template<typename OtherIter, typename OtherFuncPtr>
+            bool operator==(Iterator<OtherIter, OtherFuncPtr> const& o) const { return iter == o.iter; }
+            template<typename OtherIter, typename OtherFuncPtr>
+            bool operator!=(Iterator<OtherIter, OtherFuncPtr> const& o) const { return iter != o.iter; }
+            //bidirectional
+
+            Iterator& operator--() requires is_bidirectional { --iter; return *this; }
+            Iterator operator--(int) requires is_bidirectional { Iterator tmp = *this; --(*this); return tmp; }
+
+            //random access
+            reference operator[](difference_type n) const requires is_random_access { return std::invoke(*func_ptr, iter[n]); }
+            Iterator& operator+=(difference_type n) requires is_random_access { iter += n; return *this; }
+            Iterator& operator-=(difference_type n) requires is_random_access { iter -= n; return *this; }
+            Iterator operator+(difference_type n) const requires is_random_access { return Iterator{ iter + n, func_ptr }; }
+            Iterator operator-(difference_type n) const requires is_random_access { return Iterator{ iter - n, func_ptr }; }
+            difference_type operator-(const Iterator& other) const requires is_random_access { return iter - other.iter; }
+
+            Iterator() = default;
+            Iterator(iter_t iter_start, FuncPtr function_ptr) : iter(iter_start), func_ptr(function_ptr) {}
+
+        };
+
+        using iter_t = std::ranges::iterator_t<stored_t&>;
+        using const_iter_t = std::ranges::iterator_t<const stored_t&>;
+        //you cannot take &* so we need to remove the refrence
+        using pointed_t = std::remove_reference_t<Func>;
+        using iterator = Iterator<iter_t, pointed_t*>;
+        using const_iterator = Iterator<const_iter_t, const pointed_t*>;
+
+        iterator begin() { return iterator{ std::begin(source), &func }; }
+        iterator end() { return iterator{ std::end(source), &func }; }
+        const_iterator begin() const { return const_iterator{ std::begin(source), &func }; }
+        const_iterator end()   const { return const_iterator{ std::end(source), &func }; }
+    };
+
+    template<Range Source, typename Func>
+        requires requires(Func f, std::iter_value_t<std::ranges::iterator_t<Source&>> const& elem) {
+            { f(elem) } -> std::same_as<void>; // func must accept const ref and return void
+    }
+    struct InspectView {
+        using stored_t = stored_range_t<Source>;
+        stored_t source;
+        Func func;
+        //same functoinality as above,takes ownership of R values and refrences L values
+        template<typename S>
+        InspectView(S&& s, Func f)
+            : source(std::forward<S>(s)), func(std::move(f)) {
+        }
+        // Iterator template: Iter = underlying iterator type, FuncPtr = Func* or const Func*
+        template<typename iter_t, typename FuncPtr>
+        struct Iterator {
+            iter_t iter;
+            FuncPtr func_ptr;
+            using base_category = typename std::iterator_traits<iter_t>::iterator_category;
+
+            // Determine value_type and reference type
+            using value_type = std::iter_value_t<iter_t>;
+            using reference = value_type&;
+            using pointer = void;
+            using difference_type = std::iter_difference_t<iter_t>;
+
+            using iterator_category = std::conditional_t<
+                std::derived_from<base_category, std::contiguous_iterator_tag>,
+                std::random_access_iterator_tag,
+                base_category
+            >;
+
+            static constexpr bool is_bidirectional = std::derived_from<iterator_category, std::bidirectional_iterator_tag>;
+            static constexpr bool is_random_access = std::derived_from<iterator_category, std::random_access_iterator_tag>;
+
+
+            decltype(auto)  operator*() const {
+                std::invoke(*func_ptr, *iter);
+                return *iter;
+            }
+            Iterator& operator++() { ++iter; return *this; }
+            Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+
+            template<typename OtherIter, typename OtherFuncPtr>
+            bool operator==(Iterator<OtherIter, OtherFuncPtr> const& o) const { return iter == o.iter; }
+            template<typename OtherIter, typename OtherFuncPtr>
+            bool operator!=(Iterator<OtherIter, OtherFuncPtr> const& o) const { return iter != o.iter; }
+            //bidirectional
+
+            Iterator& operator--() requires is_bidirectional { --iter; return *this; }
+            Iterator operator--(int) requires is_bidirectional { Iterator tmp = *this; --(*this); return tmp; }
+
+            //random access
+            reference operator[](difference_type n) const requires is_random_access { std::invoke(*func_ptr, iter[n]); return iter[n]; }
+            Iterator& operator+=(difference_type n) requires is_random_access { iter += n; return *this; }
+            Iterator& operator-=(difference_type n) requires is_random_access { iter -= n; return *this; }
+            Iterator operator+(difference_type n) const requires is_random_access { return Iterator{ iter + n, func_ptr }; }
+            Iterator operator-(difference_type n) const requires is_random_access { return Iterator{ iter - n, func_ptr }; }
+            difference_type operator-(const Iterator& other) const requires is_random_access { return iter - other.iter; }
+
+            Iterator() = default;
+            Iterator(iter_t iter_start, FuncPtr function_ptr) : iter(iter_start), func_ptr(function_ptr) {}
+
+        };
+
+        using iter_t = std::ranges::iterator_t<stored_t&>;
+        using const_iter_t = std::ranges::iterator_t<const stored_t&>;
+        //you cannot take &* so we need to remove the refrence
+        using pointed_t = std::remove_reference_t<Func>;
+        using iterator = Iterator<iter_t, pointed_t*>;
+        using const_iterator = Iterator<const_iter_t, const pointed_t*>;
+
+        iterator begin() { return iterator{ std::begin(source), &func }; }
+        iterator end() { return iterator{ std::end(source), &func }; }
+        const_iterator begin() const { return const_iterator{ std::begin(source), &func }; }
+        const_iterator end()   const { return const_iterator{ std::end(source), &func }; }
+    };
+    // ---------------- FilterView ----------------
+    template<Range Source, typename Pred>
+    struct FilterView {
+        using stored_t = stored_range_t<Source>;
+        stored_t source;
+        Pred pred;
+
+        template<typename S>
+        FilterView(S&& s, Pred p)
+            : source(std::forward<S>(s)), pred(std::move(p)) {
+        }
+        //while it is techniccly  bidiectional making it bidirectioal would slow it down
+        template<typename iter_t, typename PredType>
+        struct Iterator {
+            iter_t curr;
+            iter_t end;
+            PredType pred_ptr;
+
+            using value_type = std::iter_value_t<iter_t>;
+            using reference = std::iter_reference_t<iter_t>;
+            using pointer = value_type*;
+            using difference_type = std::iter_difference_t<iter_t>;
+            using iterator_category = std::forward_iterator_tag;
+            Iterator() = default;
+            Iterator(iter_t current, iter_t init_end, PredType pred) : curr(current), end(init_end), pred_ptr(pred) {
+                while (curr != end && !std::invoke(*pred_ptr, *curr)) ++curr;
+            }
+
+            decltype(auto) operator*() const { return *curr; }
+
+            Iterator& operator++() {
+                do { ++curr; } while (curr != end && !std::invoke(*pred_ptr, *curr));
+                return *this;
+            }
+            Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+
+            template<typename OIter, typename OPredType>
+            bool operator==(Iterator<OIter, OPredType> const& other) const { return curr == other.curr; }
+            template<typename OIter, typename OPredType>
+            bool operator!=(Iterator<OIter, OPredType> const& other) const { return curr != other.curr; }
+        };
+
+        using iter_t = std::ranges::iterator_t<stored_t&>;
+        using const_iter_t = std::ranges::iterator_t<const stored_t&>;
+
+        //you cannot take &* so we need to remove the refrence
+        using pointed_t = std::remove_reference_t<Pred>;
+        using iterator = Iterator<iter_t, pointed_t*>;
+        using const_iterator = Iterator<const_iter_t, const pointed_t*>;
+
+        iterator begin() { return iterator{ std::begin(source), std::end(source), &pred }; }
+        iterator end() { return iterator{ std::end(source), std::end(source), &pred }; }
+        const_iterator begin() const { return const_iterator{ std::begin(source), std::end(source), &pred }; }
+        const_iterator end()   const { return const_iterator{ std::end(source), std::end(source), &pred }; }
+    };
+
+    // ---------------- EnumView ----------------
 
     template<Range Source>
     struct EnumView {
-        typename StoreRange<Source>::type source;  // stores underlying range (ref or value)
+        using stored_t = stored_range_t<Source>;
+        stored_t source;
 
+        template<typename S>
+        EnumView(S&& s) : source(std::forward<S>(s)) {}
+        using iter_t = std::ranges::iterator_t<stored_t&>;
+        using const_iter_t = std::ranges::iterator_t<const stored_t&>;
+        template<typename iter_t>
         struct Iterator {
-            size_t index;
-            decltype(std::begin(std::declval<Source&>())) it;
-            using value_type = util::pair<size_t, std::decay_t<decltype(*it)>>;
-            using reference = util::pair<size_t, decltype(*it)>;
+            iter_t iter;
+            size_t index = 0;
+            using value_type = stn::indexed<std::iter_value_t<iter_t>>;
             using pointer = void;
-            using difference_type = std::ptrdiff_t;
-            using iterator_concept = std::forward_iterator_tag;
-            using iterator_category = std::forward_iterator_tag;
+            using reference = stn::indexed<std::iter_reference_t<iter_t>>;
+            using difference_type = std::iter_difference_t<iter_t>;
 
-            Iterator() = default; // required for default-constructibility
-            Iterator(const Iterator&) = default; // required for copy-constructibility
-            reference operator*() const { return { index, *it }; }
-            Iterator(decltype(it) iter, size_t idx) : index(idx), it(iter) {}
-            inline constexpr Iterator(decltype(it) iter) : it(iter), index(0) {}
-            inline constexpr Iterator& operator++() { ++it; index++; return *this; }
-            inline constexpr Iterator operator++(int) { Iterator temp = *this; ++(*this); return temp; }
-            inline bool operator==(const Iterator& oth) const { return it == oth.it; }
-            inline constexpr bool operator!=(const Iterator& oth) const { return it != oth.it; }
+
+            using base_category = typename std::iterator_traits<iter_t>::iterator_category;
+            using iterator_category = std::conditional_t<
+                std::derived_from<base_category, std::contiguous_iterator_tag>,
+                std::random_access_iterator_tag,
+                base_category
+            >;
+            static constexpr bool is_bidirectional = std::derived_from<iterator_category, std::bidirectional_iterator_tag>;
+            static constexpr bool is_random_access = std::derived_from<iterator_category, std::random_access_iterator_tag>;
+
+            auto operator*() const {
+                return reference{ index, *iter };
+
+            }
+            Iterator() = default;
+            Iterator(iter_t i) : iter(i), index(0) {}
+
+            Iterator& operator++() { ++iter; ++index; return *this; }
+            Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+
+            template<typename OtherIter>
+            bool operator==(Iterator<OtherIter> const& o) const { return iter == o.iter; }
+            template<typename OtherIter>
+            bool operator!=(Iterator<OtherIter> const& o) const { return iter != o.iter; }
+
+            Iterator& operator--() requires is_bidirectional { --iter; --index; return *this; }
+            Iterator operator--(int) requires is_bidirectional { Iterator tmp = *this; --(*this); return tmp; }
+
+            reference operator[](difference_type n) const requires is_random_access { return reference{ index, *iter }; }
+            Iterator& operator+=(difference_type n) requires is_random_access { iter += n; index += n; return *this; }
+            Iterator& operator-=(difference_type n) requires is_random_access { iter -= n; index -= n; return *this; }
+            Iterator operator+(difference_type n) const requires is_random_access { return Iterator{ iter + n, index + n }; }
+            Iterator operator-(difference_type n) const requires is_random_access { return Iterator{ iter - n, index - n }; }
+            difference_type operator-(const Iterator& other) const requires is_random_access { return Iterator{ iter - other.iter, index - other.index }; }
+
         };
+        using iterator = Iterator<iter_t>;
+        using const_iterator = Iterator<const_iter_t>;
 
-        using iterator = Iterator;
-        using const_iterator = Iterator;
-
-        constexpr iterator begin() { return Iterator(std::begin(source), 0); }
-        constexpr iterator end() { return Iterator(std::end(source), std::distance(std::begin(source), std::end(source))); }
-        constexpr const_iterator begin() const { return Iterator(std::begin(source), 0); }
-        constexpr const_iterator end() const { return Iterator(std::distance(std::begin(source), std::end(source))); }
-
-        inline EnumView(Source s)
-            : source(s) {
-        }
+        iterator begin() { return iterator{ std::begin(source) }; }
+        iterator end() { return iterator{ std::end(source) }; }
+        const_iterator begin() const { return const_iterator{ std::begin(source) }; }
+        const_iterator end()   const { return const_iterator{ std::end(source) }; }
     };
 
-    // --- FilterView ---
-
-    template<Range Source, typename Pred>
-    struct FilterView {
-        typename StoreRange<Source>::type source;  // stores underlying range (ref or value)
-        Pred pred;      // the mapping function
-
-        struct Iterator {
-            decltype(std::end(std::declval<Source&>())) end;
-            decltype(std::begin(std::declval<Source&>())) curr;
-            using value_type = std::decay_t<decltype(*curr)>;
-            using reference = decltype(*curr);
-            using pointer = value_type*;
-            using difference_type = std::ptrdiff_t;
-            using iterator_concept = std::forward_iterator_tag;
-            using iterator_category = std::forward_iterator_tag;
-            Pred* pred;
-
-            Iterator() = default; // required for default-constructibility
-            Iterator(const Iterator&) = default; // required for copy-constructibility
-            inline constexpr Iterator(decltype(curr) curr_iter, decltype(end) end_iter, Pred* fn)
-                : curr(curr_iter), end(end_iter), pred(fn) {
-                while (curr != end && !(*pred)(*curr)) {
-                    curr++;
-                }
-            }
-            inline constexpr Iterator& operator++() {
-                do { curr++; } while (curr != end && !(*pred)(*curr));
-                return *this;
-            }
-            inline constexpr Iterator operator++(int) { Iterator temp = *this; ++(*this); return temp; }
-            inline constexpr auto operator*() const { return (*curr); }
-            bool operator==(const Iterator& oth) const { return curr == oth.curr; }
-            bool operator!=(const Iterator& oth) const { return curr != oth.curr; }
-        };
-
-        using iterator = Iterator;
-        using const_iterator = Iterator;
-
-        inline constexpr iterator begin() { return Iterator(std::begin(source), std::end(source), &pred); }
-        inline constexpr iterator end() { return Iterator(std::end(source), std::end(source), &pred); }
-        inline constexpr const_iterator begin() const { return Iterator(std::begin(source), std::end(source), &pred); }
-        inline constexpr const_iterator end() const { return Iterator(std::end(source), std::end(source), &pred); }
-
-        FilterView(Source s, Pred p)
-            : source(s), pred(std::move(p)) {
-        }
-    };
-
-    // --- ZipView ---
-
-    template<Range FirstRange, Range SecondRange>
+    // ---------------- ZipView (stops at shortest) ----------------
+    template<Range A, Range B>
     struct ZipView {
-        typename StoreRange<FirstRange>::type z1;  // stores underlying range (ref or value)
-        typename StoreRange<SecondRange>::type z2;  // stores underlying range (ref or value)
+        using stored_a = stored_range_t<A>;
+        using stored_b = stored_range_t<B>;
+        stored_a a;
+        stored_b b;
+        ZipView(A&& a_iter, B&& b_iter) : a(std::forward<A>(a_iter)), b(std::forward<B>(b_iter)) {}
 
+        template<typename IterA, typename IterB>
         struct Iterator {
-            decltype(std::begin(std::declval<FirstRange&>())) it1;
-            decltype(std::begin(std::declval<SecondRange&>())) it2;
-            using value_type = util::pair<std::decay_t<decltype(*it1)>, std::decay_t<decltype(*it2)>>;
-            using reference = util::pair<decltype(*it1), decltype(*it2)>;
-            using pointer = void;
-            using difference_type = std::ptrdiff_t;
-            using iterator_category = std::forward_iterator_tag;
-            using iterator_concept = std::forward_iterator_tag;
 
-            Iterator() = default; // required for default-constructibility
-            Iterator(const Iterator&) = default; // required for copy-constructibility
-            inline Iterator(decltype(it1) z1_iter, decltype(it2) z2_iter) : it1(z1_iter), it2(z2_iter) {}
-            inline Iterator& operator++() { ++it1; ++it2; return *this; }
-            inline constexpr Iterator operator++(int) { Iterator temp = *this; ++(*this); return temp; }
-            reference operator*() const noexcept { return reference{ *it1, *it2 }; }
-            inline bool operator==(const Iterator& oth) const {
-                bool first_equal = (it1 == oth.it1);
-                bool second_equal = (it2 == oth.it2);
-                if (first_equal != second_equal) {
-                    if (!first_equal) {
-                        auto dist = std::distance(it1, oth.it1);
-                        throw std::logic_error(std::format("Mismatch on second iterator: remaining distance = {}", dist));
-                    }
-                    else {
-                        auto dist = std::distance(it2, oth.it2);
-                        throw std::logic_error(std::format("Mismatch on second iterator: remaining distance = {}", dist));
-                    }
-                }
-                return first_equal && second_equal;
+
+
+            IterA it1;
+            IterB it2;
+            using value_type = stn::pair<
+                std::iter_value_t<IterA>,
+                std::iter_value_t<IterB>>;
+
+            using reference = stn::pair<std::iter_reference_t<IterA>, std::iter_reference_t<IterB>>;
+
+            using pointer = void;
+            using difference_type = std::iter_difference_t<IterA>;
+
+            Iterator() = default;
+            Iterator(IterA i1, IterB i2) : it1(i1), it2(i2) {}
+
+            auto operator*() const {
+                return reference{ *it1, *it2 };
             }
-            inline bool operator!=(const Iterator& oth) const { return !(*this == oth); }
+
+            Iterator& operator++() { ++it1; ++it2; return *this; }
+            Iterator operator++(int) { Iterator tmp = *this; ++(*this); return tmp; }
+
+            template<typename OtherA, typename OtherB>
+            bool operator==(Iterator<OtherA, OtherB> const& o) const { return it1 == o.it1 || it2 == o.it2; }
+
+            template<typename OtherA, typename OtherB>
+            bool operator!=(Iterator<OtherA, OtherB> const& other) const { return !(*this == other); }
         };
 
-        using iterator = Iterator;
-        using const_iterator = Iterator;
+        using iter_a = std::ranges::iterator_t<stored_a&>;
+        using const_iter_a = std::ranges::iterator_t<const stored_a&>;
+        using iter_b = std::ranges::iterator_t<stored_b&>;
+        using const_iter_b = std::ranges::iterator_t<const stored_b&>;
+        using iterator = Iterator<iter_a, iter_b>;
+        using const_iterator = Iterator<const_iter_a, const_iter_b>;
 
-        constexpr inline iterator begin() { return Iterator(std::begin(z1), std::begin(z2)); }
-        constexpr inline iterator end() { return Iterator(std::end(z1), std::end(z2)); }
-        constexpr inline const_iterator begin() const { return Iterator(std::begin(z1), std::begin(z2)); }
-        constexpr inline const_iterator end() const { return Iterator(std::end(z1), std::end(z2)); }
-
-        ZipView(FirstRange r1, SecondRange r2) : z1(std::forward<FirstRange>(r1)), z2(std::forward<SecondRange>(r2)) {}
+        iterator begin() { return iterator{ std::begin(a), std::begin(b) }; }
+        iterator end() { return iterator{ std::end(a), std::end(b) }; }
+        const_iterator begin() const { return const_iterator{ std::begin(a), std::begin(b) }; }
+        const_iterator end()   const { return const_iterator{ std::end(a), std::end(b) }; }
+    };
+    template<typename R>
+    concept ClearableRange =
+        Range<R> &&
+        requires(R & r) {
+            { r.clear() } -> std::same_as<void>;
     };
 
+    template<ClearableRange C>
+    struct DrainAction {
+        C&& src;
+
+        using iterator = decltype(std::begin(src));
+        using value_type = std::ranges::range_value_t<C>;
+
+        explicit DrainAction(C&& c) noexcept : src(std::move(c)) {}
+
+        iterator begin() noexcept { return std::begin(src); }
+        iterator end() noexcept { return std::end(src); }
+
+        // Default move/copy
+        DrainAction(DrainAction&&) noexcept = default;
+        DrainAction& operator=(DrainAction&&) noexcept = default;
+
+        ~DrainAction() {
+            src.clear();
+        }
+    };
+
+    struct DrainAdaptor {
+        template<ClearableRange C>
+        auto operator()(C&& c) const noexcept
+            requires std::is_rvalue_reference_v<C&&>
+        {
+            return DrainAction<C&&>(static_cast<C&&>(c));
+        }
+    };
+
+    inline constexpr DrainAdaptor drain{};
+    template<typename R>
+    concept RandomRange =
+        std::ranges::range<R> &&
+        std::random_access_iterator<std::ranges::iterator_t<R>> &&
+        std::sized_sentinel_for<std::ranges::sentinel_t<R>, std::ranges::iterator_t<R>>;
+    template<RandomRange R, typename Compare = std::less<>>
+    struct SortAction {
+        R& src; // always a reference; we sort in-place
+        Compare comp;
+
+        explicit SortAction(R& r, Compare c = {}) : src(r), comp(c) {
+            //  std::sort(std::begin(src), std::end(src), comp); // in-place sort
+        }
+
+        auto begin() { return std::begin(src); }
+        auto end() { return std::end(src); }
+    };
+
+    // Adaptor
+    struct SortAdaptor {
+        constexpr auto operator()() const {
+            return [](auto&& r) {
+                return SortAction<decltype(r)&&, std::less<>>{ std::forward<decltype(r)>(r) };
+                };
+        }
+
+        // Custom comparator
+        template<typename Compare>
+        constexpr auto operator()(Compare comp) const {
+            return [comp](auto&& r) {
+                return SortAction<decltype(r)&&, Compare>{ std::forward<decltype(r)>(r), comp };
+                };
+        }
+    };
+
+    inline constexpr SortAdaptor sort{};
 }

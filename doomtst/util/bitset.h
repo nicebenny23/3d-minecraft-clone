@@ -40,6 +40,9 @@ namespace bitset {
         using uint64 = uint64_t;
         stn::array<uint64> bitlist;
         size_t bits;
+        bool contains_index(size_t index) const {
+            return index < bits;
+        }
         constexpr bitset() noexcept :bits(0), bitlist() {};
         
         bitset(const bitset& oth) : bitlist(oth.bitlist), bits(oth.bits) {}
@@ -70,7 +73,7 @@ namespace bitset {
             }
             return *this;
         }
-        stn::array<size_t> indices() {
+        stn::array<size_t> indices() const {
             stn::array<size_t> inds;
             for (size_t i = 0; i < bits; i++)
             {
@@ -81,7 +84,6 @@ namespace bitset {
             return inds;
         }
         ~bitset() {
-            bitlist.destroy();
             bits = 0;
         }
         void expand(size_t new_bits) {
@@ -93,26 +95,34 @@ namespace bitset {
             bitlist.expand(words_to_bits(bits));
         }
         void set(size_t bit) {
-            if (bit >= bits) throw std::out_of_range("Bit index out of range");
+            if (bit >= bits) {
+                throw stn::make_range_exception("set failed: index {} out of bounds (length {})", bit, bits);
+            }
             size_t idx = calc_full_words(bit);
             size_t off = calc_leftover_bits(bit);
             bitlist[idx] |= (bit_at(off));
         }
         void flip(size_t bit) {
-            if (bit >= bits) throw std::out_of_range("Bit index out of range");
+            if (bit >= bits) {
+                throw stn::make_range_exception("flip failed: index {} out of bounds (length {})", bit, bits);
+            }
             size_t idx = calc_full_words(bit);
             size_t off = calc_leftover_bits(bit);
             bitlist[idx] ^= (bit_at(off));
         }
         void reset(size_t bit) {
-            if (bit >= bits) throw std::out_of_range("Bit index out of range");
+            if (bit >= bits) {
+                throw stn::make_range_exception("reset failed: index {} out of bounds (length {})", bit, bits);
+            }
             size_t idx = calc_full_words(bit);
             size_t off = calc_leftover_bits(bit);
             bitlist[idx] &= ~(bit_at(off));
         }
 
         bool operator[](size_t bit) {
-            if (bit >= bits) throw std::out_of_range("Bit index out of range");
+            if (bit >= bits) {
+                throw stn::make_range_exception("operator[] failed: index {} out of bounds (length {})", bit, bits);
+            }
             size_t word_index = calc_full_words(bit);
             size_t bit_offset = calc_leftover_bits(bit);
             return (bitlist[word_index] >> bit_offset) & 1;
@@ -136,7 +146,7 @@ namespace bitset {
                 result.bitlist[i] = ~bitlist[i];
             }
 
-            if (full_words < bitlist.length) {
+            if (full_words < bitlist.length()) {
                 uint64_t mask = make_mask(leftover);
                 result.bitlist[full_words] = bitlist[full_words] ^ mask;
             }
@@ -145,7 +155,7 @@ namespace bitset {
         }
 
         bitset operator&(const bitset& oth) const {
-            size_t min_size = Min(bitlist.length, oth.bitlist.length);
+            size_t min_size = Min(bitlist.length(), oth.bitlist.length());
             bitset result;
             result.expand(Min(bits, oth.bits));
            for (size_t i = 0; i < min_size; i++) {
@@ -155,7 +165,7 @@ namespace bitset {
         }
 
         bitset& operator&=(const bitset& oth) {
-            size_t min_size = Min(bitlist.length, oth.bitlist.length);
+            size_t min_size = Min(bitlist.length(), oth.bitlist.length());
             expand( Min(bits, oth.bits));
             
             for (size_t i = 0; i < min_size; i++) {
@@ -165,28 +175,28 @@ namespace bitset {
         }
 
         bitset operator|(const bitset& oth) const {
-            size_t max_size = Max(bitlist.length, oth.bitlist.length);
-            size_t min_size = Min(bitlist.length, oth.bitlist.length);
+            size_t max_size = Max(bitlist.length(), oth.bitlist.length());
+            size_t min_size = Min(bitlist.length(), oth.bitlist.length());
             bitset result;            
             result.expand(Max(bits, oth.bits));
             for (size_t i = 0; i < min_size; i++) {
                 result.bitlist[i] = bitlist[i] | oth.bitlist[i];
             }
             for (size_t i = min_size; i < max_size; i++) {
-                result.bitlist[i] = (bitlist.length == max_size) ? bitlist[i] : oth.bitlist[i];
+                result.bitlist[i] = (bitlist.length() == max_size) ? bitlist[i] : oth.bitlist[i];
             }
             return result;
         }
 
         bitset& operator|=(const bitset& oth) {
             expand(Max(bits, oth.bits));
-            size_t min_size = Min(bitlist.length, oth.bitlist.length);
+            size_t min_size = Min(bitlist.length(), oth.bitlist.length());
             for (size_t i = 0; i < min_size; i++) {
                 bitlist[i] |= oth.bitlist[i];
             }
-            if (oth.bitlist.length > bitlist.length) {
+            if (oth.bitlist.length() > bitlist.length()) {
 
-                for (size_t i = min_size; i < oth.bitlist.length; i++) {
+                for (size_t i = min_size; i < oth.bitlist.length(); i++) {
                     bitlist[i] = oth.bitlist[i];
                 }
             }
@@ -195,15 +205,15 @@ namespace bitset {
         }
 
         bitset operator^(const bitset& oth) const {
-            size_t max_size = Max(bitlist.length, oth.bitlist.length);
-            size_t min_size = Min(bitlist.length, oth.bitlist.length);
+            size_t max_size = Max(bitlist.length(), oth.bitlist.length());
+            size_t min_size = Min(bitlist.length(), oth.bitlist.length());
             bitset result;
             result.expand(Max(bits,oth.bits));
             for (size_t i = 0; i < min_size; i++) {
                 result.bitlist[i]=( bitlist[i] ^ oth.bitlist[i]);
             }
             for (size_t i = min_size; i < max_size; i++) {
-                result.bitlist[i] = (bitlist.length == max_size) ? bitlist[i] : oth.bitlist[i];
+                result.bitlist[i] = (bitlist.length() == max_size) ? bitlist[i] : oth.bitlist[i];
             }
            
             return result;
@@ -212,13 +222,13 @@ namespace bitset {
         bitset& operator^=(const bitset& oth) {
 
             expand(Max(bits, oth.bits));
-            size_t min_size = Min(bitlist.length, oth.bitlist.length);
+            size_t min_size = Min(bitlist.length(), oth.bitlist.length());
             for (size_t i = 0; i < min_size; i++) {
                 bitlist[i] ^= oth.bitlist[i];
             }
-            if (oth.bitlist.length > bitlist.length) {
+            if (oth.bitlist.length() > bitlist.length()) {
            
-                for (size_t i = min_size; i < oth.bitlist.length; i++) {
+                for (size_t i = min_size; i < oth.bitlist.length(); i++) {
                     bitlist[i] = oth.bitlist[i];
                 }
             }
@@ -233,7 +243,7 @@ namespace bitset {
             result.bits = bits + shift;
             result.expand(result.bits);
 
-            size_t old_words = bitlist.length;
+            size_t old_words = bitlist.length();
             size_t word_shift = calc_full_words(shift);
             size_t bit_shift = calc_leftover_bits(shift);
 
@@ -244,7 +254,7 @@ namespace bitset {
             if (bit_shift) {
                 uint64_t carry = 0;
 
-                for (size_t i = word_shift; i < result.bitlist.length; ++i) {
+                for (size_t i = word_shift; i < result.bitlist.length(); ++i) {
                     uint64_t val = result.bitlist[i];
 
                     // Shift left and add in bits carried from the previous word
@@ -270,7 +280,7 @@ namespace bitset {
            
             size_t word_shift = calc_full_words(shift);
             size_t bit_shift = calc_leftover_bits(shift);
-            size_t len = bitlist.length;
+            size_t len = bitlist.length();
 
             for (size_t i = 0; i < len; i++) {
                 uint64_t value = 0;
@@ -303,7 +313,7 @@ namespace bitset {
             size_t idx = calc_full_words(bits);
             size_t off = calc_leftover_bits(bits);
 
-            if (idx >= bitlist.length) {
+            if (idx >= bitlist.length()) {
                 bitlist.push(0);
             }
             if (oth) {
@@ -322,18 +332,25 @@ namespace bitset {
         size_t popcount() {
             mask_end();
             size_t cnt = 0;
-            for (int i = 0; i < bitlist.length; i++)
+            for (int i = 0; i < bitlist.length(); i++)
             {
                 cnt += std::popcount(bitlist[i]);
             }
             return cnt;
         }
+        size_t matches(const bitset& oth) const{
+            return (*this & oth).popcount();
+        }
+        bool matches_any(const bitset& oth) const {
+            this->matches(oth)!=0;
+        }
+        
     private:
         //trims the unused bits
         void mask_end() {
             size_t leftover = calc_leftover_bits(bits);
-            if (leftover != 0 && bitlist.length > 0) {
-                bitlist[bitlist.length - 1] &= make_mask(leftover);
+            if (leftover != 0 && bitlist.length() > 0) {
+                bitlist[bitlist.length() - 1] &= make_mask(leftover);
             }
         }
 

@@ -71,8 +71,8 @@ namespace uniforms{
         }
     }; 
     
-   inline util::pair<const char*,const char*> uparam(const char* uniform_name, const char* shader_alias) {
-        return util::pair(uniform_name, shader_alias);
+   inline stn::pair<const char*,const char*> uparam(const char* uniform_name, const char* shader_alias) {
+        return stn::pair(uniform_name, shader_alias);
     };
    //self contained uniform
    struct uniform {

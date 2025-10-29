@@ -109,6 +109,6 @@ void integertext::write()
 		charlocation.center += increse;
 	}
 	handle.fill(std::move(mesh_data));
-	CtxName::ctx.Ren->consume();
+	CtxName::ctx.Ren->pop();
 
 }
