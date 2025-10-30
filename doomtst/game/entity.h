@@ -74,7 +74,7 @@ namespace gameobject {
                 {
                     throw std::logic_error("Unable to remove a watcher from a gameobject it is not viewing");
                 }
-                refs.delete_at(loc());
+                refs.remove_at(loc());
             };
 
         private:

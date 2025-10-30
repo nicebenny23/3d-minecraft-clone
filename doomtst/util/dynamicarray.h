@@ -233,11 +233,10 @@ namespace stn {
 					for (size_t i = len - 1; i > index; --i) {
 						list[i] = std::move(list[i - 1]);
 					}
-					list[index] = T(std::forward<Args>(args)...);
+					list.destruct_at(index);
+				
 				}
-				else {
-					list.construct_at(len, std::forward<Args>(args)...);
-				}
+				list.construct_at(index, std::forward<Args>(args)...);
 			}
 
 			++len;
@@ -247,7 +246,7 @@ namespace stn {
 		void insert_at(size_t index, U&& value) requires std::convertible_to<U&&, T> {
 			emplace_at(index, std::forward<U>(value));
 		}
-		//removes and returns the last element
+		//removes and returns the last element(make nothrow move asignable
 		[[nodiscard]] T pop() {
 			if (empty())
 			{
@@ -281,7 +280,7 @@ namespace stn {
 			len--;
 		}
 		// Delete an element at the given index, shifting others.
-		void delete_at(uint32_t index) {
+		void remove_at(uint32_t index) {
 			if (!contains_index(index))
 			{
 				throw make_range_exception("Deletion failed: index {} out of bounds (length {})", index, len);
@@ -425,7 +424,7 @@ namespace stn {
 		void clear()
 		{
 			if (!empty()) {
-				if constexpr (!is_default)
+				if constexpr (!std::is_trivially_destructible_v<T>)
 				{
 					for (size_t i = 0; i < len; i++)
 					{

@@ -82,72 +82,72 @@ namespace stn {
         auto map(Func&& f)&& {
             using View = MapView<stored_type, std::decay_t<Func>>;
             return range<View>{
-                View{ std::forward<RangeType>(stored_range), std::forward<Func>(f) }
+                View{ std::move(stored_range), std::forward<Func>(f) }
             };
         }
 
         // Lvalue map: preserves the original range
         template<typename Func>
         auto map(Func&& f) const& {
-            using View = MapView<const stored_type, std::decay_t<Func>>;
+            using View = MapView<const stored_type&, std::decay_t<Func>>;
             return range<View>{
-                View{ std::forward<RangeType>(stored_range), std::forward<Func>(f) }
+                View{ stored_range, std::forward<Func>(f) }
             };
         }
         template<typename Func>
         auto inspect(Func&& f)&& {
             using View = InspectView<stored_type, std::decay_t<Func>>;
             return range<View>{
-                View{ std::forward<RangeType>(stored_range), std::forward<Func>(f) }
+                View{ std::move(stored_range), std::forward<Func>(f) }
             };
         }
 
         // Lvalue map: preserves the original range
         template<typename Func>
         auto inspect(Func&& f) const& {
-            using View = InspectView<const stored_type, std::decay_t<Func>>;
+            using View = InspectView<const stored_type&, std::decay_t<Func>>;
             return range<View>{
-                View{ std::forward<RangeType>(stored_range), std::forward<Func>(f) }
+                View{ stored_range, std::forward<Func>(f) }
             };
         }
         template<typename Pred>
         auto filter(Pred&& p)&& {
             using view = FilterView<stored_type, std::decay_t<Pred>>;
             return range<view>{
-                view{ std::forward<RangeType>(stored_range), std::forward<Pred>(p) }
+                view{ std::move(stored_range), std::forward<Pred>(p) }
             };
         }
 
         template<typename Pred>
         auto filter(Pred&& p) const& {
-            using view = FilterView<const stored_type, std::decay_t<Pred>>;
+            using view = FilterView<const stored_type&, std::decay_t<Pred>>;
             return range<view>{
-                view{ std::forward<RangeType>(stored_range), std::forward<Pred>(p) }
+                view{ stored_range, std::forward<Pred>(p) }
             };
         }
 
         auto enumerate()&& {
             using view = EnumView<stored_type>;
             return range<view>{
-                view{ std::forward<RangeType>(stored_range) }
+                view{ std::move(stored_range) }
             };
         }
 
 
         auto enumerate() const& {
-            using view = EnumView<const stored_type>;
+            using view = EnumView<const stored_type&>;
             return range<view>{
-                view{ std::forward<RangeType>(stored_range) }
+                view{ stored_range}
             };
         }
 
         template<Range Other>
         auto zip(Other&& o)&& {
-            return range{ ZipView<RangeType, Other>{std::forward<RangeType>(stored_range), std::forward<Other>(o) } };
+            return range{ ZipView<RangeType, Other>{std::move(stored_range),std::move(o) }};
         }
         template<Range Other>
         auto zip(Other&& o) const& {
-            return range{ ZipView<const RangeType, const Other>{ std::forward<RangeType>(stored_range), std::forward<const Other>(o) } };
+            return range{ ZipView<const RangeType&, const Other&>{ (stored_range), o } };
         }
 
         template<template<typename...> class Container>
@@ -231,7 +231,7 @@ namespace stn {
             return it1 == end1 && it2 == end2;
         }
         bool operator!=(const range& other) const {
-            return *this != other;
+            return !(*this == other);
         }
     };
     //R&&->R

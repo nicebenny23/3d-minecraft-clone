@@ -3,6 +3,7 @@
 #include <format>
 #include <algorithm>
 #include "pipeline.h"
+#include <ranges>
 #include <initializer_list>
 namespace stn {
     template<typename... Args>
@@ -46,14 +47,14 @@ namespace stn {
         constexpr span(T(&arr)[N]) noexcept
             : ptr(arr), len(N) {
         }
-        template <typename Iter>
+        template <std::contiguous_iterator Iter>
         span(Iter first, Iter last)
             : ptr(&(*first)), len(static_cast<size_t>(std::distance(first, last))) {
             static_assert(std::is_pointer_v<Iter> ||
                 std::is_same_v<typename std::iterator_traits<Iter>::iterator_category,
                 std::random_access_iterator_tag>, "span requires random access iterators or pointers");
         }
-        template <typename Container>
+        template <std::ranges::contiguous_range Container>
         span(Container& c) : span(std::begin(c), std::end(c)) {}
 
 
@@ -77,10 +78,11 @@ namespace stn {
             return Container<T>(begin(), end());
         }
         span from(size_t start, size_t count) const {
-            if (!contains_index(start)) {
+            //in the second important case len>start so it wont overflow
+            if (len<start  || len-start<count) {
                 throw make_range_exception("span::from requested range [{}:{}) out of bounds (valid: [0:{})", start, start + count, len);
             }
-            return span<T>(ptr + start, std::min<size_t>(count, len - start));
+            return span<T>(ptr + start, count);
         }
         //Returns a new span that represents the range [start, end)
         span slice(size_t start, size_t end) const {
@@ -92,62 +94,38 @@ namespace stn {
             }
             return span(ptr + start, end - start);
         }
-        // Returns a new span representing the range [start, end]
-        span slice_incl(size_t start, size_t end) const {
-            if (start > end || end >= len) {
-                throw make_range_exception(
-                    "span::slice_incl requested [{}:{}] out of range (valid [0:{}])",
-                    start, end, len - 1
-                );
-            }
-            return span(ptr + start, end - start + 1);
-        }
-
+        
 
         //Returns a new span that represents the range [0, index)
-        span before(size_t index) const {
-            if (len < index) {
+        span first(size_t elements) const {
+            if (len < elements) {
                 throw make_range_exception(
-                    "span::before requested [0:{}) out of range (valid [0:{}))",
-                    index, len
+                    "span::first requested [0:{}) out of range (valid [0:{}))",
+                    elements, len
                 );
             }
-            return span(ptr, index);
+            return span(ptr, elements);
         }
-
-        //Returns a new span that represents the range [0, index]
-        span before_incl(size_t index) const {
-            if (len <= index) {
+        span last(size_t elements) const {
+            if (elements > len) {
                 throw make_range_exception(
-                    "span::before_incl requested [0:{}] out of range (valid [0:{}])",
-                    index, len - 1
+                    "span::last requested last {} elements out of range (valid [0:{}))",
+                    elements, len
                 );
             }
-            return span(ptr, index + 1);
-        }
 
-        //Returns a new span that represents the range (index, length]
-        span after(size_t index) const {
-            if (index >= len) {
+            return span(ptr + (len - elements), elements);
+        }
+        constexpr span skip(size_t n) const {
+            if (n > len) {
                 throw make_range_exception(
-                    "span::after requested range ({}:{}) out of bounds (valid: [0:{})",
-                    index, len, len
+                    "span::skip requested {} elements, but length is {}",
+                    n, len
                 );
             }
-            return span(ptr + index + 1, len - (index + 1));
+            return span(ptr + n, len - n);
         }
-
-        //Returns a new span that represents the range [index, length)
-        span after_incl(size_t index) const {
-            if (index > len) {
-                throw make_range_exception(
-                    "span::after_incl requested range [{}:{}) out of bounds (valid: [0:{}))",
-                    index, len, len
-                );
-            }
-            return span(ptr + index, len - index);
-        }
-
+        
         auto pipe()& { return stn::range(*this); }
 
         auto pipe()&& { return stn::range(std::move(*this)); }

@@ -632,15 +632,11 @@ namespace gameobject {
 		auto [cmpid, is_new] = component_indexer.insert<T>();
 
 
-		if (row[entity] != nullptr)
-		{
-			return (T*)row[entity];
-		}
+		
 		if (is_new)
 		{
-			component_table& row = comp_storage.emplace(component;
+			component_table& row = comp_storage.emplace(cmpid, stn::memory::layout_of<T>);
 
-			row.create(cmpid, stn::memory::layout_of<T>);
 			row.store.expand(entitymeta.cap());
 			T* comp = new (row.pool.alloc()) T(std::forward<Args>(args)...);
 			comp->comp_id = cmpid;
@@ -651,6 +647,10 @@ namespace gameobject {
 		else
 		{
 			component_table& row = component_table_with_id(cmpid);
+			if (row[entity] != nullptr)
+			{
+				return (T*)row[entity];
+			}
 			T* comp = new (row.pool.alloc()) T(std::forward<Args>(args)...);
 			comp->comp_id = cmpid;
 		}

@@ -74,7 +74,7 @@ namespace Hierarchy {
         void remove_child(const gameobject::obj& child) {
             for (size_t i = 0; i < children_list.length(); ++i) {
                 if (children_list[i] == child) {
-                    children_list.delete_at(i);
+                    children_list.remove_at(i);
                     break;
                 }
             }

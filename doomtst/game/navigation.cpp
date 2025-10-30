@@ -92,7 +92,7 @@ return        array<navnode>();
         navnode* newnode = new navnode(current);
         todeallocatelist.push(newnode);
 
-        openlist.delete_at(shortestind());
+        openlist.remove_at(shortestind());
         
         //removes it 
         if (iter == maxiter)
