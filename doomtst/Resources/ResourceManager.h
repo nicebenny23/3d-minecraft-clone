@@ -7,8 +7,8 @@
 struct ResourceManager {
     template<typename T>
     void push(T& representative) {
-        auto [id, inserted] = resources_ids.insert<T>();
-        if (inserted) {
+        auto [id, is_new] = resources_ids.insert<T>();
+        if (is_new) {
             // New type inserted: store pointer at dense id index
             if (id.id >= resources.length()) {
                 // resize array to fit new index
@@ -23,7 +23,7 @@ struct ResourceManager {
 
     template<typename T>
     T& get() {
-        stn::Option<Ids::Id> comp_id = resources_ids.get_opt<T>();
+        stn::Option<stn::Id> comp_id = resources_ids.get_opt<T>();
 
         if (!comp_id) {
             throw std::invalid_argument(std::string(typeid(T).name()) + " has not been initialized yet");
@@ -41,5 +41,5 @@ struct ResourceManager {
 
 private:
     stn::array<void*> resources;
-    type_id::type_indexer resources_ids;
+    type_map::type_indexer<> resources_ids;
 };

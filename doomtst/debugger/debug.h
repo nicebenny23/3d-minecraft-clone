@@ -1,3 +1,5 @@
+#pragma once 
+
 #include <iostream>
 #include "../renderer/Window.h"
 #include <process.h>
@@ -5,17 +7,19 @@
 #include "../util/dynamicarray.h"// For _beginthread
 #include <cstdlib>
 #include <csignal>
-#pragma once 
 //good
 constexpr bool debuggeneral = true;
 constexpr bool debugrender = false;
-constexpr bool generateflat = false;
+constexpr bool generateflat = true;
 constexpr bool debugnodeath = false;
+
+constexpr bool debug_slow = false;
+
 void ShowAssertMessageBox(void* lpParam);
 
 
 // Assert function that terminates the main program but keeps the message box open
-inline void Assert(const char* comment)
+[[noreturn]] inline void Assert(const char* comment)
 {
 	throw std::logic_error(comment);
 	// Launch the message box in a completely separate process
@@ -41,7 +45,7 @@ inline void Assert(const char* comment)
 	TerminateThread(mainThread, 0);
 	CloseHandle(mainThread);
 }
-void reset();
+void clear();
 
 
 void writetodebug(std::string string);

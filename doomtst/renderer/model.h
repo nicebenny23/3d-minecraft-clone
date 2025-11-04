@@ -2,7 +2,6 @@
 #include "../game/objecthelper.h"
 #include "ModelMesh.h"
 #include "../game/gameobject.h"
-#include "texture.h"
 #include "../game/transform.h"
 
 enum  meshconnecttype

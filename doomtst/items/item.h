@@ -1,14 +1,14 @@
-#include "../renderer/uibox.h"
-#include "../renderer/texture.h"
+
 #include "../block/block.h"
 #include "../renderer/textrender.h"
 #include "../game/Core.h"
 #include "../game/GameContext.h"
+#include "../renderer/uibox.h"
 
 #pragma once 
 inline cptr<uiboxname::uibox> createitembox(const char* boxname,const char* TextureName) {
 
-	return ui::createuielement<uiboxname::uibox>(boxname, TextureName , v2::unitv / 40.f, v2::zerov, 100);
+	return ui::createuielement<uiboxname::uibox>(boxname, TextureName , v2::unitv / 40.f, v2::zerov, 100.f);
 }
 enum itemid {
 
@@ -119,7 +119,8 @@ struct item
 			//adjust for apwect ratio 
 			itemui.itemsprite->box.center = CtxName::ctx.Window->FitToAspectRatio( CtxName::ctx.Inp->mousepos);
 		}
-		itemui.textvalue->center = itemui.itemsprite->box.center-itemui.itemsprite->box.scale;
+		double text_offset_ideal = .8f;
+		itemui.textvalue->center = itemui.itemsprite->box.center-itemui.itemsprite->box.scale* text_offset_ideal;
 		itemui.textvalue->value= amt;
 		if (itemtype==wear)
 		{

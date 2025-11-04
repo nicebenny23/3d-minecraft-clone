@@ -1,5 +1,5 @@
 #pragma once
-namespace util {
+namespace stn {
 	template <typename T>
 	struct change {
 		change() :value(), cached() {}
@@ -10,7 +10,7 @@ namespace util {
 		T& operator()() noexcept { return value; }
 		const T& operator()() const noexcept { return value; }
 		//sets both values
-		void reset(const T& val) {
+		void clear(const T& val) {
 			value = val;
 			cached = val;
 		}

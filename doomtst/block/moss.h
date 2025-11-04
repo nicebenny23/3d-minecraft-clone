@@ -9,16 +9,10 @@ inline void mossinit(blockname::block* blk) {
 	blk->attributes.transparent = false;
 	blk->emitedlight = 0;
 	blk->minedfastwithpick = 1;
-	blk->mininglevel = 1.f;
+	blk->mininglevel = 1;
 	blk->mesh.box.scale = blockname::blockscale;
 	blk->createdefaultaabb();
-	blk->owner.addcomponent<loottable>()->addelem(mossitem, 1,true);
+	blk->owner.addcomponent<loottable>().addelem(mossitem, 1,true);
 
 	blk->minedfastwithpick = false;
 }
-inline void mossdelete(blockname::block* blk) {
-	blk->owner.removecomponent<aabb::Collider>();
-	blk->owner.removecomponent<loottable>();
-
-}
- // !wood_HPP

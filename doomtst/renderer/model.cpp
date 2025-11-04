@@ -45,11 +45,3 @@ void model::start()
 {
 	
 }
-
-void model::setmodelshader()
-{
-
-	//toto readd CtxName::ctx.Ren->context.Bind(CtxName::ctx.Ren->Shaders["ModelShader"]);
-	CtxName::ctx.Ren->SetType("Model");
-	
-}

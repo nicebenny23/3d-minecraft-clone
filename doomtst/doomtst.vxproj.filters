@@ -1,0 +1,967 @@
+
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Source.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="external\glad.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Window.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\renderer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\camera.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="world\chunk.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="block\block.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="world\grid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\aabb.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\random.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\collision.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\gameobject.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\blockrender.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\chunkrender.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="world\voxeltraversal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="world\managegrid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\uibox.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="world\noise.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\fileloader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="player\player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="items\menu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="player\playerinventory.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="items\item.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="items\recipe.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\ModelMesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\textrender.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\transform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="items\Container.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\navigation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="items\itemslot.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="entities\slime.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="world\chunkload.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="player\playermodification.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="block\liquid.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="world\tick.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\ui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\algorthm.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\intersection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_draw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_demo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_impl_glfw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_impl_opengl3.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_tables.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="imgui\imgui_widgets.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\guirender.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debugger\debug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="debugger\console.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\chainpool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\Settings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\mathutil.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\Core.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\GameContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\TextureManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\ShaderManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\Mesh.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\VertexObjectManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\RenderContext.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Resources\ResourceManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="items\loottable.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\entitystate.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\particles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="renderer\decal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="items\new_item.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\relationship.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game\entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\time.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="util\userinput.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="util\vector3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="external\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Window.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\userinput.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\dynamicarray.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\camera.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\renderer.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\block.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="world\chunk.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\vector2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="world\grid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\aabb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\random.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\collision.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\gameobject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\objecthelper.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\ray.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\vertexobject.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="world\noise.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\blockrender.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\algorthm.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\mathutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\chunkrender.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="world\voxeltraversal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\dir.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="world\managegrid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\queue.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\uibox.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\fileloader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\entitystate.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\air.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\blockinit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\crystalore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\treestone.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\glass.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\moss.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\stone.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\torch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\water.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\wood.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playerhealth.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\geometry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\liquid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\item.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\menu.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playerinventory.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\Container.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\airitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\treestoneitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\itemutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\lavapickitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\stoneitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\sworditem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\torchitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playermodification.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\loottable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\recipe.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\collutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\ModelMesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\model.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\particles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\textrender.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\rigidbody.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\transform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playerattack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\craftingtable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playerplace.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\navigation.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\craftingtableitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\crystalitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\crystalpickinit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\itemslot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\rockitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\slime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\entityinit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\entityspawner.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\slimeitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\crystaltorch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\crystaltorchitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playereat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\mossitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\rope.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\ropeblock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playerclimb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\lava.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="world\chunkload.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\obisidian.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\chest.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\grandrenderer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\furnaceblock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\ironblock.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\crystaldaggers.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\onhit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\rotatetovelocity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\entityutil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\chestitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\crystaldagger.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\furnaceitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\ironitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\ironoreitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\ironpick.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\ironsword.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\daggerthrow.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\antifreezeboss.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\wormobj.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\irontopitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\ironbottomitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\crystaltop.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\crystalbottom.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\plank.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\glassbottle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\sand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\sand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\altar.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\altaritem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="entities\wisp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\glassitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\obsidianitem.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\tpsword.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playertpsword.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="block\plank.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="world\tick.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\sharedptr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\memorypool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\dynpool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\intersection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="world\worldintersection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\cameracomp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imconfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_glfw.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_opengl3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_internal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imgui_impl_opengl3_loader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_textedit.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_rectpack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="imgui\imstb_truetype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\guirender.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\stbiload.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debugger\debug.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="debugger\console.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\stack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\chainpool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\Settings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playercamcontrols.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\stats.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\Core.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\GameContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\SlMove.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\ShaderManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\TextureManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Mesh.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Vao.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\GlUtil.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\VertexObjectManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\RenderProperties.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\UniquePtr.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\RenderContext.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\ResourceManager.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\SparseSet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\Option.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\List.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\bitset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\TagIndex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\type_index.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player\playermovment.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\gl_id.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\Id.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\robinHood.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\compid.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\deque.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\query.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\Commands.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\InterfaceStore.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\pair.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\dependency.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\typelist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\Event.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\System.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\LinearBuffer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\type_graph.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\type_tag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\job.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources\Resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\thread_pool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\relationship.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\bundle.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\arraypool.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\thread_split.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\multi_query.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\Span.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\Not.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\filter_argument.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\pipeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\lazy.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="world\world.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\vertex.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\meshStorage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\Uniform.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\renderable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\HandleMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\topo_sort.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\decal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="renderer\overlay.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="shaders\decal_frag.vs" />
+    <ClInclude Include="util\cached.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\spawn.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\interval.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\ultraAsnc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\new_item.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\ItemCont.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\new_slot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\item_ui.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\world_commands.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\new_cont.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\transmute.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\counter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\tag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="items\slime_wand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\Invoke.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\erased.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\variant.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\array_storage.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\layout.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\table.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ecs\archtype.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\composite.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\index.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="world\bicube_array.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="util\member_hash.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\ecs\entity.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\frag1.vs" />
+    <None Include="shaders\modelfragment.vs" />
+    <None Include="shaders\modelvertex.vs" />
+    <None Include="shaders\particlefragment.vs" />
+    <None Include="shaders\particlevertex.vs" />
+    <None Include="shaders\uifragment.vs" />
+    <None Include="shaders\uivertex.vs" />
+    <None Include="shaders\vert1.vs" />
+    <None Include="shaders\spritefragment.vs" />
+    <None Include="shaders\spritevert.vs">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="shaders\textfragment.vs" />
+    <None Include="shaders\textvertex.vs" />
+    <None Include="items\metalrod.h">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="cpp.hint" />
+  </ItemGroup>
+</Project>

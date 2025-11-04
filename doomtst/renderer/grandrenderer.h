@@ -12,11 +12,10 @@
 #include "../renderer/decal.h"
 
 void rendergame() {
-
     CtxName::ctx.OC->updatecomponents(gameobject::Rendercall);
     blockrender::renderblocks(false);
     render_decals();
-    //apply postprossising
+    
     ui::updateui();
     guirender::rendergui();
 

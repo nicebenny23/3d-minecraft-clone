@@ -133,14 +133,5 @@ inline void furnaceinit(blockname::block* blk) {
 
 	blk->owner.getcomponent<furnacecomp>().men.blkcont.attributes.timetocraft = 1;
 	blk->owner.getcomponent<furnacecomp>().men.blkcont.attributes.isauto = true;
-	blk->owner.addcomponent<loottable>()->addelem(furnaceitem, 1, false);
+	blk->owner.addcomponent<loottable>().addelem(furnaceitem, 1, false);
 }
-inline void furnacedelete(blockname::block* blk) {
-	blk->owner.removecomponent<aabb::Collider>();
-
-	blk->owner.removecomponent<furnacecomp>();
-
-	blk->owner.removecomponent<loottable>();
-}
- // !wood_HPP
-

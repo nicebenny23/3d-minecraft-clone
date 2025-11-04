@@ -59,7 +59,7 @@ void gameobject::component::oncollision(obj collidedwith)
 
 bool gameobject::obj::exists() const
 {
-	return Genid&& OC->entitymeta[id()].gen_count == generation();
+	return entity&& OC->entitymeta[id()].gen_count == generation();
 
 }
 
@@ -67,7 +67,7 @@ bool gameobject::obj::exists() const
 EntityMetadata& gameobject::obj::meta()
 {
 	
-	if (!Genid)
+	if (!entity)
 	{
 		throw std::logic_error("entity does not have a valid id");
 	}
@@ -105,7 +105,7 @@ void Ecs::destroy(obj& object) {
 		comp->destroy();
 	}
 	arch[object.meta().arch].remove(object);
-	entitymeta[object.id()].reset();
+	entitymeta[object.id()].clear();
 	free_ids.push(object.id());
 }
 
@@ -124,20 +124,19 @@ void gameobject::Ecs::delete_component(component* comp)
 	{
 		throw std::logic_error("Every Component Must be owned by a entity");
 	}
-	component_table_with_id(comp->comp_id)[comp->owner]=nullptr;
+	component_table_with_id(comp->comp_id).remove_at(comp->owner);
 
-	component_table_with_id(comp->comp_id).pool.free(comp);
 }
 
 obj gameobject::Ecs::spawn_empty()
 {
 	obj new_spawn;
-	new_spawn.Genid.id= free_ids.pop();
-	new_spawn.Genid.gen = entitymeta[new_spawn.id()].gen_count;
-	new_spawn.OC = ctx->OC;
+	size_t new_id = free_ids.pop();
+	new_spawn.entity =ecs::space_id(new_id, entitymeta[new_id].gen_count);
+	new_spawn.OC = this;
 
-	arch.empty_archtype().add(new_spawn);
-
+	arch.empty_archetype().add(new_spawn);
+	return new_spawn;
 }
 
 void gameobject::Ecs::updatecomponents(updatecalltype type)
@@ -166,17 +165,17 @@ void gameobject::Ecs::updatecomponents(updatecalltype type)
 			});
 	}
 	for (component_table* mgr : managerref) {
-		for (Archtype* archtype : arch) {
+		for (Archetype* archetype : arch) {
 			
-			if (!archtype->has_component(mgr->id)) continue;
+			if (!archetype->has_component(mgr->id)) continue;
 
 			// 1) Snapshot the count _once_
-			size_t originalCount = archtype->count();
+			size_t originalCount = archetype->count();
 
 			// 2) Index by integer, not range-for
 			for (size_t i = 0; i < originalCount; ++i) {
-				obj   o = (*archtype)[i];           // read by value
-				auto* c = (component*)mgr->store[o.id()];
+				obj   o = (*archetype)[i];           // read by value
+				auto* c = (*mgr)[o];
 				c->update();  
 				
 			}
@@ -190,20 +189,14 @@ void gameobject::Ecs::updatecomponents(updatecalltype type)
 obj gameobject::Ecs::spawn_with_transform(v3::Vec3 SpawnPos)
 {
 	obj object = spawn_empty();
-	object.addcomponent<transform_comp>()->transform.position = SpawnPos;
+	object.addcomponent<transform_comp>().transform.position = SpawnPos;
 	return object;
 
 }
 
 
 
-gameobject::component_table::component_table(comp::Id mid, stn::memory::layout layout):component_layout(layout)
-{
-	store = array<component*>();
-	id = mid;
-	pool = dynPool::flux<component>(component_layout);
 
-}
 
 void gameobject::component_table::init(component* sample)
 {

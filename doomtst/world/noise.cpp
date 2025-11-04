@@ -58,9 +58,9 @@ float interpolatenoisemap(float x, float y, float z)
 	float yd1 = yd0 - 1;
 	float zd1 = zd0 - 1;
 
-	float xs = interoplatequintic(xd0);
-	float ys = interoplatequintic(yd0);
-	float zs = interoplatequintic(zd0);
+	float xs = interoplate_quintic(xd0);
+	float ys = interoplate_quintic(yd0);
+	float zs = interoplate_quintic(zd0);
 
 	x0 *= PrimeX;
 	y0 *= PrimeY;

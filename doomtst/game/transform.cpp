@@ -31,12 +31,12 @@ void Transform::rotate(float ptch, float yw)
 
 v3::Vec3 Transform::getnormaldirection()
 {
-    return YawPitch(yaw, pitch);
+    return yaw_pitch(yaw, pitch);
 }
 
 v3::Vec3 Transform::getrightdirection()
 {
-    return zf_normal(Cross(getnormaldirection(),v3::up));
+    return zero_fixed_normal(Cross(getnormaldirection(),v3::up));
 }
 
 v3::Vec3 Transform::getupdirection()
@@ -48,7 +48,7 @@ v3::Vec3 Transform::getupdirection()
 void Transform::OrientDir(v3::Vec3 Direction)
 {
     
-    Direction = zf_normal(Direction);
+    Direction = zero_fixed_normal(Direction);
 
     pitch = (glm::degrees(std::asin(Direction.y)));
     yaw = (glm::degrees(std::atan2(Direction.z, Direction.x)));
@@ -64,7 +64,7 @@ glm::mat4 lookRotationMatrix(Vec3 vec) {
 
     // Define a default up vector
     Vec3 WorldUp = up;
-    if (apx(Cross(forward, WorldUp), zerov)) {
+    if (Cross(forward, WorldUp)== zerov){
         // If forward vector is collinear with up vector, use a different up vector
         WorldUp= Vec3(1.0f, 0.0f, 0.0f);
     }

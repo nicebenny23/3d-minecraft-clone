@@ -15,7 +15,7 @@ namespace stn {
                 return TypeList::length_v<type_list>;
             }
             template<typename T>
-            static constexpr bool is_member = TypeList::contains_v<type_list, T>;
+            static constexpr bool is_member =TypeList::contains_v<type_list,T>;
 
             
             template<typename T>
@@ -23,9 +23,10 @@ namespace stn {
            inline T& get() {
                 return *get_ptr<T>();
             }
+            
             template<typename T>
                 requires(is_member<T>)
-            inline const T& get()  const {
+            inline const std::remove_reference_t<T>& get()  const {
                 return *get_ptr<T>();
             }
             template<typename T>
@@ -48,29 +49,34 @@ namespace stn {
 
             // Specialization for reference types
             template<typename T>
-                requires (is_member<T>&& std::is_reference_v<T>)
-            inline void construct(T ref) {
+                requires(is_member<T>&& std::is_reference_v<T>)
+            inline void construct(std::remove_reference_t<T>& ref) {
+                //set underlying ptr to ref;
                 using raw_T = std::remove_reference_t<T>;
-                auto ptr = reinterpret_cast<raw_T**>(&storage);
-                *ptr = &ref; // Store the address of the referent
+                *reinterpret_cast<raw_T**>(&storage)= &ref;
+            
             }
 
             template<typename T>
-                requires(is_member<T>)
-           inline void reset() {
-                if constexpr (!std::is_trivially_destructible_v<T> && !std::is_reference_v<T>) {
+                requires(is_member<T>&& !std::is_reference_v<T>)
+            inline void clear() {
+                if constexpr (!std::is_trivially_destructible_v<T>) {
                     get_ptr<T>()->~T();
                 }
-                if constexpr (std::is_reference_v<T>)
-                {
-                    get_ptr<T>() = nullptr;
-                }
+            }
+
+            template<typename T> 
+                requires(is_member<T> && std::is_reference_v<T>)
+            inline void clear() {
+                    //set underlying ptr to nullptr;
+                    using raw_T = std::remove_reference_t<T>;
+                    *reinterpret_cast<raw_T**>(&storage) = nullptr;
             }
 
         private:
             alignas(layout.alignment) unsigned char storage[layout.size];
             template<typename T>
-           inline std::remove_reference_t<T>* get_ptr() {
+           std::remove_reference_t<T>* get_ptr() {
                 if constexpr (std::is_reference_v<T>)
                 {
                     using raw_T = std::remove_reference_t<T>;

@@ -1,6 +1,5 @@
 #include "../util/sharedptr.h"
 #include "ui.h"
-#include "texture.h"
 #include "renderer.h"
 #include "../util/dynamicarray.h"
 #include "../util/vector2.h"

@@ -70,7 +70,7 @@ namespace uiboxname {
 		if (state.enabled)
 		{
 			
-			tex_handle.set_uniform(uniforms::uniform(box.scale.x, "scale"));
+			tex_handle.set_uniform(uniforms::uniform(float(box.scale.x), "scale"));
 			tex_handle.set_uniform(uniforms::uniform(box.center, "center"));
 			tex_handle.render();
 		}
@@ -86,26 +86,30 @@ namespace uiboxname {
 
 	void uibox::LoadTex(const char* texloc, const char* texture)
 	{
-		tex_handle = CtxName::ctx.Ren->gen_renderable();
-		tex_handle.set_material("Ui");
-		tex_handle.set_uniform(uniforms::uniform(CtxName::ctx.Ren->Textures.LoadTexture(texloc, texture), "tex"));
-		tex_handle.set_layout(vertice::vertex().push<float, 2>());
-		renderer::MeshData mesh=tex_handle.create_mesh();
-		mesh.add_index(0);
-		mesh.add_index(1);
-		mesh.add_index(3);
-		mesh.add_index(0);
-		mesh.add_index(3);
-		mesh.add_index(2);
-		array<float> databuf = array<float>();
-		for (int j = 0; j < 4; j++)
+		if (!tex_handle)
 		{
-			mesh.add_point(cubeuv[2 * j],cubeuv[2*j+1]);
-			
+			tex_handle = CtxName::ctx.Ren->gen_renderable();
+			tex_handle.set_material("Ui");
+			tex_handle.set_layout(vertice::vertex().push<float, 2>());
+			renderer::MeshData mesh = tex_handle.create_mesh();
+			mesh.add_index(0);
+			mesh.add_index(1);
+			mesh.add_index(3);
+			mesh.add_index(0);
+			mesh.add_index(3);
+			mesh.add_index(2);
+			array<float> databuf = array<float>();
+			for (int j = 0; j < 4; j++)
+			{
+				mesh.add_point(cubeuv[2 * j], cubeuv[2 * j + 1]);
+
+			}
+
+			tex_handle.fill(std::move(mesh));
+			CtxName::ctx.Ren->pop();
 		}
-	
-		tex_handle.fill(std::move(mesh));
-		CtxName::ctx.Ren->pop();
+		tex_handle.set_uniform(uniforms::uniform(CtxName::ctx.Ren->Textures.LoadTexture(texloc, texture), "tex"));
+		
 	}
 
 

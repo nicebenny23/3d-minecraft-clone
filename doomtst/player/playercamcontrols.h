@@ -15,8 +15,8 @@ struct playercamcontrols : gameobject::component
 		{
 			CtxName::ctx.Window->DisableCursor();
 
-			float xoffset = CtxName::ctx.Inp->mouseposdt.x;
-			float yoffset = -CtxName::ctx.Inp->mouseposdt.y;
+			double xoffset = CtxName::ctx.Inp->mouseposdt.x;
+			double yoffset = -CtxName::ctx.Inp->mouseposdt.y;
 
 			float sensitivity = 0.3;
 
@@ -45,7 +45,7 @@ struct playercamcontrols : gameobject::component
 		voxtra::WorldRayCollision closest = collision::raycastall(cameraray, collision::HitQuery());
 		if (closest)
 		{
-			for (component* comp:query::ComponentView(closest.unwrap().collider->owner)) {
+			for (component* comp:query::ComponentView(closest.unwrap().gameobject())) {
 				comp->onplayerclick();
 			}
 		}

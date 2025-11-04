@@ -1,6 +1,5 @@
 #include "../game/camera.h"
 #include "../renderer/ModelMesh.h"
-#include "../renderer/shader.h"
 #include <iostream>
 #include <cmath>
 #include "../renderer/renderer.h"
@@ -57,20 +56,9 @@ void startframe() {
 }
 
 void updateworld() {
-    if (isnan(player::goblin.getcomponent<rigidbody>().velocity.x))
-    {
-        int l = 2;
-    }
     collision::update();
-    if (isnan(player::goblin.getcomponent<rigidbody>().velocity.x))
-    {
-        int l = 2;
-    }
     CtxName::ctx.Executor->Run();
-    if (isnan(player::goblin.getcomponent<rigidbody>().velocity.x))
-    {
-        int l = 2;
-    }
+   
 CtxName::ctx.OC->updatecomponents(gameobject::Framecall);
 if (isnan(player::goblin.getcomponent<rigidbody>().velocity.x))
 {
@@ -85,6 +73,7 @@ if (isnan(player::goblin.getcomponent<rigidbody>().velocity.x))
 void update() {
 
     startframe();
+    
     updateworld();
     rendergame();
     endframe();
@@ -132,7 +121,7 @@ void rungame()
      CtxName::ctx.Executor->push(new RigidbodySystem());
      CtxName::ctx.Executor->push(new spawn_mobs());
      CtxName::ctx.Executor->push(new PlayerMovementSys());
-     createslime(zerov+Vec3(0,10,0), false);
+    // createslime(zerov+Vec3(0,10,0), false);
      float lastupdate = 0;
      {
        auto a= gameobject::Observe::entity_slot(player::goblin);

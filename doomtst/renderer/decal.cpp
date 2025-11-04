@@ -12,17 +12,17 @@ const v2::Vec2 cubeuv[] = {
     v2::Vec2(0, 0),
     v2::Vec2(1, 0)
 };
-void decal::create_handle(const char* texloc, const char* texture)
+void decal::set_handle(const char* texloc, const char* texture)
 {
     if (!handle)
     {
 
         handle = CtxName::ctx.Ren->gen_renderable();
-        int l = 2;
+        handle.set_material("decal_mat");
+        handle.set_layout(vertice::vertex().push<float, 3>().push<float, 2>());
 
-    }handle.set_material("decal_mat");
+    }
     handle.set_uniform(uniforms::uniform(handle.renderer->Textures.LoadTexture(texloc, texture), "tex"));
-    handle.set_layout(vertice::vertex().push<float, 3>().push<float,2>());
     
 }
 void decal::create_mesh(){
@@ -44,9 +44,26 @@ handle.fill(std::move( mesh));
 handle.renderer->pop();
 
 }
+void decal::remove() {
+
+    if (handle)
+    {
+        Option<size_t> index = decals.decals.find(handle);
+        if (index)
+        {
+            decals.decals.swap_drop(index.unwrap());
+        }
+    }
+}
+
 void decal::render() {
+    
     create_mesh();
-    decals.decals.push(handle);
+    if (!decals.decals.contains(handle))
+    {
+        decals.decals.push(handle);
+
+    }
 }
 
 void render_decals()

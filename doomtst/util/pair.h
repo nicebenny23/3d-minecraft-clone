@@ -28,6 +28,59 @@ namespace stn {
 	// For rvalues
 	template<typename T>
 	indexed(size_t, T&&) -> indexed<T>;
+	
+	
+	template<typename T>
+	struct insertion {
+		T value;
+		bool is_new;
+		
+		insertion() = default;
+
+		constexpr insertion(const T& val, bool newly_inserted)
+			: value(val), is_new(newly_inserted) {
+		}
+
+		constexpr insertion(T&& val, bool newly_inserted)
+			: value(std::move(val)), is_new(newly_inserted) {
+		}
+		constexpr explicit operator bool() const noexcept {
+			return is_new;
+		}
+	};
+	template<typename T>
+	insertion(T&&,bool) -> insertion<T>;
+
+	template<typename T>
+	insertion(T&, bool) -> insertion<T>;
+
+	template<typename T>
+	insertion( const T&,bool) -> insertion<T>;
+
+	template<std::size_t I, typename T>
+	constexpr decltype(auto) get(insertion<T>& x) noexcept {
+		static_assert(I < 2, "insertion<T>: index out of bounds");
+		if constexpr (I == 0) return (x.value);
+		else return (x.is_new);
+	}
+
+	template<std::size_t I, typename T>
+	constexpr decltype(auto) get(const insertion<T>& x) noexcept {
+		static_assert(I < 2, "insertion<T>: index out of bounds");
+		if constexpr (I == 0) {
+			return (x.value);
+		}
+		else {
+			return (x.is_new);
+		}
+	}
+
+	template<std::size_t I, typename T>
+	constexpr decltype(auto) get(insertion<T>&& x) noexcept {
+		static_assert(I < 2, "insertion<T>: index out of bounds");
+		if constexpr (I == 0) return std::move(x.value);
+		else return std::move(x.is_new);
+	}
 
 
 	template<typename T1, typename T2>
@@ -110,6 +163,18 @@ namespace std {
 	template<typename T>
 	struct tuple_element<1, stn::indexed<T>> { using type = T; };
 
+	template<typename T>
+	struct tuple_size<stn::insertion<T>> : std::integral_constant<std::size_t, 2> {};
+
+	template<typename T>
+	struct tuple_element<0, stn::insertion<T>> {
+		using type = T;
+	};
+
+	template<typename T>
+	struct tuple_element<1, stn::insertion<T>> {
+		using type = bool;
+	};
 	template<typename T1, typename T2>
 	struct tuple_size<stn::pair<T1, T2>> : std::integral_constant<std::size_t, 2> {};
 

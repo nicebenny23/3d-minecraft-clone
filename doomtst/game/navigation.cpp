@@ -9,7 +9,7 @@
 
 // Helper function for heuristic calculation (Manhattan distance)
 float appdist(const navnode& a, const navnode& b) {
-    return v3::mag(Vec3( a.pos- b.pos));
+    return float(Vec3( a.pos- b.pos).length());
 }
 
 array<navnode> getneighborsdefault( navnode& node) {
@@ -88,11 +88,11 @@ return        array<navnode>();
             break;
         }
 
-        navnode current = openlist[shortestind()];
+        navnode current = openlist[shortestind.unwrap()];
         navnode* newnode = new navnode(current);
         todeallocatelist.push(newnode);
 
-        openlist.remove_at(shortestind());
+        openlist.remove_at(shortestind.unwrap());
         
         //removes it 
         if (iter == maxiter)

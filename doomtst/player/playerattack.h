@@ -41,20 +41,20 @@ struct playerattackcomp: gameobject::component
 			return;
 		}
 		voxtra::RayWorldHit closest = Hit.unwrap();
-		if (!closest.collider->owner.hascomponent<estate>())
+		if (!closest.collider.owner.hascomponent<estate>())
 		{
 			return;
 		}
 		debug("sees"+std::to_string(CtxName::ctx.Time->dt));
-		if (closest.collider->owner.hascomponent<estate>()&&CtxName::ctx.Inp->mouseleft().pressed)
+		if (closest.collider.owner.hascomponent<estate>()&&CtxName::ctx.Inp->mouseleft().pressed)
 		{
-			if (closest.collider->owner.hascomponent<rigidbody>())
+			if (closest.gameobject().hascomponent<rigidbody>())
 			{
-				kb(owner.transform().position, 7, (closest.collider->owner));
+				kb(owner.transform().position, 7, (closest.gameobject()));
 				
 			}
 			int dmgdone = computeattackdmg();
-			closest.collider->owner.getcomponent<estate>().damage(dmgdone);
+			closest.gameobject().getcomponent<estate>().damage(dmgdone);
 			wearduribilty();
 		
 		}

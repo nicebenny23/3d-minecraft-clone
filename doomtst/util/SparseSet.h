@@ -60,8 +60,8 @@ namespace Sparse {
 
 		// Adds an element
 			void push(const T& elem) {
-			auto [Loc, inserted] = sparse.insert({ toKey(elem), dense.length() });
-			if (inserted) {
+			auto [Loc, is_new] = sparse.insert({ toKey(elem), dense.length() });
+			if (is_new) {
 				dense.push(std::move(elem));
 			}
 			}
@@ -70,7 +70,7 @@ namespace Sparse {
 		void erase(const size_t index) {
 			if (dense.length()<=index)
 			{
-				throw stn::make_range_exception("cannot erase at index {} in a sparse_set of size {}", index,size());
+				stn::throw_range_exception("cannot erase at index {} in a sparse_set of size {}", index,size());
 			}
 			size_t oth_index = dense.length()-1;
 			std::swap(dense[index], dense[oth_index]);
@@ -181,7 +181,7 @@ namespace Sparse {
 		T& getByKey(const size_t key) {
 			if (sparse[key]==ind_none)
 			{
-				throw stn::make_range_exception("Element  at key {} does not exist",key);
+				stn::throw_range_exception("Element  at key {} does not exist",key);
 			}
 			return dense[sparse[key]];
 		}
@@ -237,23 +237,24 @@ namespace Sparse {
 			index_to_key.push(key);
 		}
 
+		bool contains_key(size_t key) const {
+			return sparse.contains_index(key) && sparse[key] != ind_none;
+		}
 		T& operator[](size_t key) {
-			if (key >= sparse.length() || sparse[key] == ind_none) throw std::out_of_range("Key does not exist in KeySet");
+			if (!contains_key(key)) throw std::out_of_range("Key does not exist in KeySet");
 			return dense[sparse[key]];
 		}
-		const T& get(size_t key) const {
-			if (key >= sparse.length() || sparse[key] == ind_none) throw std::out_of_range("Key does not exist in KeySet");
+
+		const T& operator[](size_t key) const {
+			if (!contains_key(key)) throw std::out_of_range("Key does not exist in KeySet");
 			return dense[sparse[key]];
 		}
 
 		void erase_key(size_t key) {
-			if (key >= sparse.length()) {
-				throw stn::make_range_exception("Element  at key {} does not exist", key);
+			if (!contains_key(key)) {
+				stn::throw_range_exception("Element  at key {} does not exist", key);
 			}
 			size_t slot = sparse[key];
-			if (slot == ind_none) {
-				throw stn::make_range_exception("Element  at key {} does not exist", key);
-			}
 			size_t last_idx = dense.length() - 1;
 			if (slot != last_idx) {
 				dense[slot] = std::move(dense[last_idx]);
@@ -271,9 +272,9 @@ namespace Sparse {
 		}
 
 		void clear() {
-			dense.destroy();
-			index_to_key.destroy();
-			sparse.destroy();
+			dense.clear();
+			index_to_key.clear();
+			sparse.clear();
 		}
 
 		using iterator = typename stn::array<T>::iterator;

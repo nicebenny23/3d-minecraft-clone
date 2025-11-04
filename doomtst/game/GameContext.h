@@ -38,7 +38,7 @@ namespace CtxName {
 		userinput::InputManager* Inp;
 		window::Window* Window;
 		timename::TimeManager* Time;
-		SystemExecutor* Executor;
+		Systems* Executor;
 		gameobject::Ecs* OC;
 
 		renderer::Renderer* Ren;

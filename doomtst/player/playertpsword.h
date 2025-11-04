@@ -53,7 +53,7 @@ struct playertpcomp : gameobject::component
 					}
 					else
 					{
-						owner.transform().position = grid().intersection();
+						owner.transform().position = grid.unwrap().intersection();
 					}
 					owner.getcomponent<rigidbody>().velocity.y = 0;
 						wearduribilty();

@@ -11,99 +11,75 @@ struct Command {
 	Command() {}; 
 	virtual void Apply(gameobject::Ecs* world) = 0; 
 	
-}; 
-using ApplyFn = void (*)(Command*, gameobject::Ecs*);
+}
+; template<typename T>
+concept CommandType =
+std::is_base_of_v<Command, T>&&
+	requires(T a, gameobject::Ecs* world) {
+		{ a.Apply(world) } -> std::same_as<void>;
+};
+
 struct CommandPool {
-	dynPool::flux<Command> store;
-	stn::queue<Command*> queue;
-	ApplyFn CommandFunc;
+	stn::flux store;
+	stn::array<stn::flux_token<Command>> queue;
 	void apply(gameobject::Ecs* World) {
-		
 		while (!queue.empty())
 		{
-			Command* cmd = queue.pop();
-			CommandFunc(cmd,World);
-
-			store.free(cmd);
+			stn::flux_token<Command> cmd = queue.pop();
+			cmd.get_ptr()->Apply(World);
 		}
-
+		
+	}
+	template<CommandType T,typename...Args>
+	void emplace(Args&& ...args) {
+		stn::flux_token<T> command = store.emplace_unchecked<T>(std::forward<Args>(args)...);
+		queue.push(command.abstract<Command>());
 
 	}
-
+	template<CommandType T>
+	CommandPool(std::type_identity<T> ): store(std::type_identity<T>()){}
+	size_t commands() const{
+		return queue.length();
+	}
+	size_t empty() const {
+		return queue.empty();
+	}
 };
 struct CommandBuffer {
-	stn::array<dynPool::flux<Command>> store;
-	stn::array<stn::queue<Command*>> buffer;
+	stn::array< CommandPool> pools;
+	inline void pop() {
+		
+	stn::array<std::uint32_t> indices=DependencySystem.sortedActive;
+		for (auto& index:indices)
+		{
+			pools[index].apply(World);
+		}
 
-	void pop();
-	template<typename T>
-	void push(const T& value);
+	}
+	template<CommandType T>
+	size_t insert_id() {
+		auto [Id, is_new] = commandSystem.insert<T>();
+		if (is_new) {
+			DependencySystem.push<T>();
+			pools.emplace(std::type_identity<T>());
+			}
+		return Id.id;
+	}
+	template<CommandType T>
+	void push(const T& value)
+	{
 
-	CommandBuffer(gameobject::Ecs* wrld):World(wrld){
+		pools[insert_id<T>()].emplace<T>(value);
+	}
 
+	CommandBuffer(gameobject::Ecs* world):World(world){
 	}
 	CommandBuffer() {
 		World = nullptr;
 	}
+	
 	gameobject::Ecs* World;
-	type_id::type_indexer commandSystem;
+	type_map::type_indexer<> commandSystem;
 	Depends::DependencySystem DependencySystem;
-	bool is_empty() const{
-		for (auto& count : buffer)
-		{
-			if (!count.empty()) {
-				return false;
-			}
-		}
-		return true;
-	}
-	void consume_at(size_t index) {
-		auto& queue = buffer[index];
-		auto& storage = store[index];
-
-		while (!queue.empty())
-		{
-			Command* cmd = queue.pop();
-			cmd->Apply(World);
-			
-			storage.free(cmd);
-		}
-		
-
-	}
-	size_t total_commands() const{
-		size_t count=0;
-		for (int i = 0; i < buffer.length(); i++)
-		{
-			count += buffer[i].length();
-		}
-		return count;
-	}
-	size_t total_buffers() const {
-		return buffer.length();
-
-	}
 	
 }; 
-template<typename T>
-void CommandBuffer::push(const T& value)
-{
-	static_assert(std::is_base_of<Command, T>::value, "T must derive from Command");
-	auto [Id, is_new] = commandSystem.insert<T>();
-	if (is_new) {
-		buffer.push(stn::queue<Command*>());
-		store.push(dynPool::flux<Command>(stn::memory::layout_of<T>));
-		DependencySystem.push<T>();
-	}
-
-	void* mem = store[Id.id].alloc();
-	T* cmd = new (mem) T(value);
-	buffer[Id.id].push(cmd);
-}
-inline void CommandBuffer::pop() {
-	
-	for (size_t ind = 0; ind < total_buffers(); ind++) {
-		consume_at(DependencySystem.sortedActive[ind]);
-	}
-	
-}

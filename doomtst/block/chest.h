@@ -94,14 +94,5 @@ inline void chestinit(blockname::block* blk) {
 		blk->owner.addcomponent<chestcomp>();
 
 	}
-blk->owner.addcomponent < loottable > ()->addelem(chestitem, 1, false);
+blk->owner.addcomponent < loottable > ().addelem(chestitem, 1, false);
 }
-inline void chestdelete(blockname::block* blk) {
-	blk->owner.removecomponent<aabb::Collider>();
-
-	blk->owner.removecomponent<chestcomp>();
-
-	blk->owner.removecomponent<loottable>();
-}
- // !wood_HPP
-

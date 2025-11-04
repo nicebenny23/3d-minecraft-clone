@@ -36,7 +36,7 @@ struct ray
 			return start;
 		}
 		Vec3 normed = dir();
-		float t = dot(aoffset, normed);
+		double t = dot(aoffset, normed);
 		Vec3 position = start + normed * t;
 		return position;
 	}

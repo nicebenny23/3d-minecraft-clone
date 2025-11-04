@@ -11,7 +11,7 @@ struct Container
 	Container() {};
 	void destroy() {
 
-		for (int i = 0; i < databuf.length(); i++)
+		for (size_t i = 0; i < databuf.length(); i++)
 		{
 			databuf[i].destroyitem();
 			databuf[i].framedecal->destroy();
@@ -39,7 +39,7 @@ struct Container
 		{
 			return false;
 		}
-		for (int i = 0; i < databuf.length(); i++)
+		for (size_t i = 0; i < databuf.length(); i++)
 		{
 			itemslot* slt = &databuf[i];
 			if (slt->framedecal->mouseonblock()) {
@@ -124,9 +124,9 @@ struct Container
 	}
 	void disable() {
 
-		for (int i = 0; i < databuf.length(); i++)
+		for (auto& elem:databuf)
 		{
-			databuf[i].disable();
+			elem.disable();
 		}
 		enabled=false;
 

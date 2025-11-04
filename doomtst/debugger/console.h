@@ -51,10 +51,23 @@ namespace console {
 } // namespace console
 
 // Macros for logging with file/line info and formatting
-#define debug(...) do { std::stringstream ss{}; ss << __VA_ARGS__; \
-    console::Console::Instance().Log(console::LogLevel::Info, ss.str()); } while (0)
-#define warn(...) do { std::stringstream ss{}; ss << __VA_ARGS__; \
-    console::Console::Instance().Log(console::LogLevel::Warning, ss.str()); } while (0)
-#define alert(...) do { std::stringstream ss{}; ss << __VA_ARGS__; \
-    console::Console::Instance().Log(console::LogLevel::Error, ss.str()); } while (0)
+template<typename... Args>
+inline void debug(Args&&... args) {
+    std::stringstream ss;
+    (ss << ... << std::forward<Args>(args)); // fold expression
+    console::Console::Instance().Log(console::LogLevel::Info, ss.str());
+}
 
+template<typename... Args>
+inline void warn(Args&&... args) {
+    std::stringstream ss;
+    (ss << ... << std::forward<Args>(args));
+    console::Console::Instance().Log(console::LogLevel::Warning, ss.str());
+}
+
+template<typename... Args>
+inline void alert(Args&&... args) {
+    std::stringstream ss;
+    (ss << ... << std::forward<Args>(args));
+    console::Console::Instance().Log(console::LogLevel::Error, ss.str());
+}

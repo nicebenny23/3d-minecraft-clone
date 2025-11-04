@@ -29,16 +29,16 @@ namespace gameobject {
             }
 
             gameobject::obj& get() {
-                return (*held);
+                return (held.unwrap());
             }
 
             gameobject::obj& operator*() {
-                return (*held);
+                return (held.unwrap());
             }
             void swap(entity_slot& other);
         
             
-            void reset();
+            void clear();
         private:
             friend struct SlotTracker;
 
@@ -69,12 +69,12 @@ namespace gameobject {
                 refs.push(old);
             };
             void unregisterSlot(entity_slot* old) {
-                stn::Option<uint32_t>  loc = refs.find(old);
+                stn::Option<size_t>  loc = refs.find(old);
                 if (!loc)
                 {
                     throw std::logic_error("Unable to remove a watcher from a gameobject it is not viewing");
                 }
-                refs.remove_at(loc());
+                refs.remove_at(loc.unwrap());
             };
 
         private:

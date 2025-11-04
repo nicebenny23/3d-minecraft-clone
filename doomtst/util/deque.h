@@ -1,336 +1,319 @@
-#include "../debugger/debug.h"
 #pragma once
+#include "../debugger/debug.h"
 #include <stdexcept>
 #include "dynamicarray.h"
 namespace stn {
 	template<typename T>
 	struct deque {
-		T* list;
-		size_t capacity;
-		size_t front;
-		size_t back;
-		size_t length;
-		bool empty() const {
-			return length == 0;
+		constexpr bool empty() const {
+			return len == 0;
 		}
 		bool full() const
 		{
-			return length == capacity;
+			return len == capacity;
 		}
-		deque();
-
-
-		void assert_valid() const {
-			if ((length == 0 && (front == back || front == (back + 1) % capacity || capacity == 0)) ||
-				(length > 0 && (
-					(back >= front && length == (back - front + 1)) ||
-					(back < front && length == (capacity - front + back + 1))
-					))
-				)
-			{
-				
-			}
-			else
-			{
-				throw std::logic_error("Skill issue");
-			}
-		}
-		T pop_front();
-		T pop_back();
-		void destroy();
-		void resize();
-		void push_back(const T& val);
-
-		void push_front(const T& val);
-		void push_back( T&& val);
-
-		void push_front( T&& val);
-		deque(deque&& other) noexcept;
-		deque(const deque& other);
-		deque& operator=(deque&& other) noexcept;
-		deque& operator=(const deque& other);
-
-		~deque() {
-			destroy();
-		}
-
-		using iterator_category = std::bidirectional_iterator_tag;
-		using value_type = T;
-		using difference_type = std::ptrdiff_t;
-		using pointer = T*;
-		using reference = T&;
-		struct iterator {
-			deque* arr;
-			size_t index;
-
-			iterator(deque* a, size_t idx) : arr(a), index(idx) {}
-
-			bool operator==(const iterator& other) const {
-				return arr == other.arr && index == other.index;
-			}
-			bool operator!=(const iterator& other) const {
-				return !(*this == other);
-			}
-
-			T& operator*() const {
-				return arr->list[index];
-			}
-			T* operator->() const {
-				return &arr->list[index];
-			}
-
-			iterator& operator++() {
-				arr->inc_index(index);
-				return *this;
-			}
-
-			iterator operator++(int) {
-				iterator temp = *this;
-				++(*this);
-				return temp;
-			}
-		};
-
-		iterator begin() {
-			return iterator(this, front);
-		}
-		iterator end() {
-			size_t end_pos = back;
-			inc_index(end_pos);
-			return iterator(this, end_pos);
-		}
-
-
-
-	private:
-		void inc_index(size_t& index) {
-			index = (index == capacity - 1) ? 0 : index + 1;
-		}
-
-		void dec_index(size_t& index) {
-			index = (index == 0) ? capacity - 1 : index - 1;
-		}
-
-	};
-	template<typename T>
-	void deque<T>::push_front(const T& val)
-	{
-	
-		if (full()) {
-			resize();
-		}
-		if (!empty()) {
-			dec_index(front);
-		}
-		
-		list[front] = val;
-		length++;
-	
-	}
-	template<typename T>
-	inline void deque<T>::push_front(T&& val)
-	{
-		if (full()) {
-			resize();
-		}
-		if (!empty()) {
-			dec_index(front);
-		}
-
-		list[front] = std::move(val);
-		length++;
-	}
-	template<typename T>
-	inline void deque<T>::push_back( T&& val)
-	{
-		if (full())
-			resize();
-
-		if (!empty()) {
-			inc_index(back);
-		}
-
-		list[back] =std::move(val);
-		length++;
-	}
-
-	template<typename T>
-	void deque<T>::push_back(const T& val)
-	{
-		if (full())
-			resize();
-
-		if (!empty()) {
-			inc_index(back);
+		size_t length() const{
+			return len;
 		}
 	
-		list[back] = val;
-		length++;
-	
-	}
-
-	template<typename T>
-	void deque<T>::resize()
-	{
-		size_t new_size = resize_length(length);
-		T* newlist = new T[new_size];
-
-		if (list != nullptr)
+		deque()
 		{
-			size_t ind = front;
-			for (size_t i = 0; i < length; i++) {
-				newlist[i] = std::move(list[ind]);
-				inc_index(ind);
-			}
-			delete[] list;
+			list = nullptr;
+			capacity = 0;
+			front = 0;
+			back = 0;
+			len = 0;
 		}
-		front = 0; 
-		back = (length == 0) ? 0 : length - 1;
-		list = newlist;
-		capacity = new_size;
-
-	}
-
-
-
-
-	template<typename T>
-	T deque<T>::pop_front()
-	{
-		
-		if (empty())
+		deque(deque&& other) noexcept
 		{
-			throw std::out_of_range("Queue is empty");
-		}
-		T val = list[front];
-		list[front].~T();
-
-		length--;
-		
-		if (!empty())
-		{
-			inc_index(front);
-		
-		}
-
-		return val;
-	}
-
-	template<typename T>
-	T deque<T>::pop_back()
-	{
-	
-		if (empty())
-			throw std::out_of_range("Queue is empty");
-
-		T val = list[back];
-		list[back].~T();
-		length--;
-		
-		if (!empty())
-		{
-			dec_index(back);
-		}
-		
-
-		return val;
-	}
-
-	template<typename T>
-	void deque<T>::destroy() {
-		delete[] list;
-		list = nullptr;
-		capacity = 0;
-		length = 0;
-		front = 0;
-		back = 0;
-	}
-	template<typename T>
-	inline deque<T>::deque()
-	{
-		list = nullptr;
-		capacity = 0;
-		front = 0;
-		back = 0;
-		length = 0;
-
-	}
-
-	template<typename T>
-	inline deque<T>::deque(deque&& other) noexcept
-	{
-		list = other.list;
-		capacity = other.capacity;
-		length = other.length;
-		front = other.front;
-		back = other.back;
-		other.list = nullptr;
-		other.capacity = 0;
-		other.length = 0;
-		other.front = 0;
-		other.back = 0;
-
-	}
-
-	template<typename T>
-	inline deque<T>::deque(const deque& other)
-	{
-		list = new T[other.capacity];
-		for (size_t i = 0; i < other.length(); ++i) {
-			size_t idx = (other.front + i) % other.capacity;
-			list[i] = other.list[idx];
-		}
-		length = other.length;
-		capacity = other.capacity;
-		front = 0;
-		back = (length == 0) ? 0 : length - 1;
-	}
-
-	template<typename T>
-	deque<T>& deque<T>::operator=(deque<T>&& other) noexcept
-	{
-		if (this != &other) {
-			destroy();
 			list = other.list;
 			capacity = other.capacity;
-			length = other.length;
+			len = other.len;
 			front = other.front;
 			back = other.back;
-
-			// Reset the moved-from object
 			other.list = nullptr;
 			other.capacity = 0;
-			other.length = 0;
+			other.len = 0;
 			other.front = 0;
 			other.back = 0;
 
 		}
-		return *this;
-	}
+		deque& operator=(deque&& other) noexcept
+		{
+			if (this != &other) {
+				clear();
+				list = other.list;
+				capacity = other.capacity;
+				len = other.len;
+				front = other.front;
+				back = other.back;
+				other.list = nullptr;
+				other.capacity = 0;
+				other.len = 0;
+				other.front = 0;
+				other.back = 0;
 
-	template<typename T>
-	deque<T>& deque<T>::operator=(const deque<T>& other)
-	{
-		if (this != &other) {
-			destroy();
-			list = new T[other.capacity];
-			for (size_t i = 0; i < other.length(); ++i) {
-				size_t idx = (other.front + i) % other.capacity;
-				list[i] = other.list[idx];
 			}
-			length = other.length;
+			return *this;
+		}
+		deque(const deque& other) requires std::is_copy_constructible_v<T> :deque()
+		{
+			reserve(other.capacity);
+			for (size_t i = 0; i < other.len; ++i) {
+				size_t idx = (other.front + i) % other.capacity;
+				construct_at(i,other.list[idx]);
+			}
+			len = other.len;
 			capacity = other.capacity;
 			front = 0;
-			back = (length == 0) ? 0 : length - 1;
+			back = (len == 0) ? 0 : len - 1;
 		}
-		return *this;
-	}
+		deque& operator=(const deque& other) requires std::is_copy_constructible_v<T>
+		{
+			if (this != &other) {
+				clear();
+				reserve(other.capacity);
+				for (size_t i = 0; i < other.len; ++i) {
+					size_t idx = (other.front + i) % other.capacity;
+					construct_at(i, other.list[idx]);
+				}
+				len = other.len;
+				capacity = other.capacity;
+				front = 0;
+				back = (len == 0) ? 0 : len - 1;
+			}
+			return *this;
+		}
+		template<typename U> requires std::constructible_from<T, U&&>
+		void push_front(U&& val)
+		{
+			if (full()) {
+				reserve(resize_length(capacity));
+			}
+			if (!empty()) {
+				dec_index(front);
+			}
+			construct_at(front, std::forward<U>(val));
+			len++;
+
+		}
+		template<typename U> requires std::constructible_from<T, U&&>
+		void push_back(U&& val)
+		{
+			if (full()) {
+				reserve(resize_length(capacity));
+			}
+			if (!empty()) {
+				inc_index(back);
+			}
+			construct_at(back,std::forward<U>(val));
+			len++;
+		}
+		void drop_front()
+		{
+			if (empty())
+			{
+				stn::throw_out_of_range("cannot drop_front from an empty deque");
+			}
+			destruct_at(front);
+			len--;
+			if (!empty())
+			{
+				inc_index(front);
+			}
+		}
+
+		void drop_back()
+		{
+			if (empty())
+			{
+				stn::throw_out_of_range("cannot drop_back from an empty deque");
+			}
+			destruct_at(back);
+			len--;
+			if (!empty())
+			{
+				dec_index(back);
+			}
+		}
+
+		T pop_front()
+		{
+			if (empty())
+			{
+				stn::throw_out_of_range("cannot pop_front from an empty deque");
+			}
+			T val = std::move(list[front]);
+			drop_front();
+			return val;
+		}
+
+		T pop_back()
+		{
+			if (empty())
+			{
+				stn::throw_out_of_range("cannot pop_back from an empty deque");
+			}
+			T val = std::move(list[back]);
+			drop_back();
+			return val;
+		}
+		void drop_front_many(size_t count)
+		{
+			if (len<count)
+			{
+				stn::throw_out_of_range("drop_front_many: cannot drop {} elements when the deque only has {} ",count,len);
+			}
+			for (size_t i = 0; i < count; ++i) {
+				destruct_at(front);
+				inc_index(front);
+			}
+			len -= count;
+			//resets if empty
+			if (len == 0) {
+				front = back = 0; 
+			}
+		}
+
+		void drop_back_many(size_t count)
+		{
+			if (len < count)
+			{
+				stn::throw_out_of_range("drop_back_many: cannot drop {} elements when the deque only has {} ", count, len);
+			}	
+			for (size_t i = 0; i < count; ++i) {
+				destruct_at(back);
+				dec_index(back);
+			}
+			len -= count;
+			//resets if empty
+			if (len == 0) {
+				front = back = 0;
+			}
+		}
+		void clear() {
+			if (list==nullptr)
+			{
+				return;
+			}
+			size_t ind = front;
+			for (size_t i = 0; i < len; i++) {
+				destruct_at(ind);
+				inc_index(ind);
+			}
+			::operator delete(list);
+			list = nullptr;
+			capacity = 0;
+			len = 0;
+			front = 0;
+			back = 0;
+		}
+
+		~deque() {
+			clear();
+		}
+
+		template<typename U>
+		struct iterator_base {
+			using deque_store_type = std::conditional_t<std::is_const_v<U>, const deque*, deque*>;
+			using iterator_category = std::bidirectional_iterator_tag;
+			using value_type = U;
+			using difference_type = std::ptrdiff_t;
+			using pointer = U*;
+			using reference = U&;
+			iterator_base(deque_store_type store, size_t idx) : deque_store(store), logical_pos(idx) {}
+
+			bool operator==(const iterator_base& other) const {
+				return deque_store == other.deque_store && logical_pos == other.logical_pos;
+			}
+			bool operator!=(const iterator_base& other) const {
+				return !(*this == other);
+			}
+			reference operator*() const {
+				size_t physical_index = (deque_store->front + logical_pos) % deque_store->capacity;
+				return deque_store->list[physical_index];
+			}
+			pointer operator->() const {
+				size_t physical_index = (deque_store->front + logical_pos) % deque_store->capacity;
+				return &deque_store->list[physical_index];
+			}
+			iterator_base& operator++() {
+				++logical_pos;
+				return *this;
+			}
+
+			iterator_base operator++(int) {
+				iterator_base temp = *this;
+				++(*this);
+				return temp;
+			}
+			iterator_base& operator--() {
+				--logical_pos;
+				return *this;
+			}
+
+			iterator_base operator--(int) {
+				iterator_base temp = *this;
+				--(*this);
+				return temp;
+			}
+		private:
+			deque_store_type deque_store;
+			size_t logical_pos;
+		};
+		using iterator = iterator_base<T>;
+		iterator begin() { return iterator(this, 0); }
+		iterator end() { return iterator(this, len); }
+
+		using const_iterator = iterator_base<const T>;
+		const_iterator begin() const { return const_iterator(this, 0); }
+		const_iterator end()   const { return const_iterator(this, len); }
 
 
+		void reserve(size_t new_capacity)
+		{
+			if (capacity < new_capacity)
+			{
+				T* old_list = list;
+				list= (T*)(operator new(sizeof(T) * new_capacity));
 
+				if (old_list!= nullptr)
+				{
+					size_t ind = front;
+					for (size_t i = 0; i < len; i++) {
+						construct_at(i, std::move(old_list[ind]));
+						old_list[ind].~T();
+						inc_index(ind);
+					}
+					::operator delete(old_list);
+				}
+				front = 0;
+				back = (len == 0) ? 0 : len - 1;
+				capacity = new_capacity;
+			}
+		}
+	private:
+		void inc_index(size_t& index) const {
+			index = (index == capacity - 1) ? 0 : index + 1;
+		}
+		void dec_index(size_t& index) const {
+			index = (index == 0) ? capacity - 1 : index - 1;
+		}
+		template<typename ...Args>
+		void construct_at(size_t index, Args&&... args) {
+			new (list + index) T(std::forward<Args>(args)...);
+		}
+		void destruct_at(size_t index) {
+			(list + index)->~T();
+		}
+		T* list;
+		size_t capacity;
+		size_t front;
+		size_t back;
+		size_t len;
 
-
-
+	};
 
 
 }
+

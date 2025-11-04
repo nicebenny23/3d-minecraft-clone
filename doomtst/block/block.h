@@ -181,7 +181,7 @@ namespace blockname {
 		}
 		void create(v3::Coord location, int blockid, Dir::Dir3d blkattachface, Dir::Dir2d blkdirection);
 		
-		block():mesh(){
+		block():mesh(), pos(),emitedlight(),lightval(),id(),bstate(){
 			utype = gameobject::updatenone;
 		};
 		 	 void createdefaultaabb(bool effector=false);

@@ -165,12 +165,12 @@ struct DagBuilder {
     bool dirty = false;                     // lazy rebuild flag
 
     void init() {
-        fullGraph.nodes.destroy();
+        fullGraph.nodes.clear();
         valueIndex.clear();
-        pushed.destroy();
+        pushed.clear();
         firstNode = {};
         lastNode = {};
-        filteredGraph.nodes.destroy();
+        filteredGraph.nodes.clear();
         dirty = false;
     }
 
@@ -199,18 +199,18 @@ struct DagBuilder {
         return *this;
     }
 
-    DagBuilder& push(T nodeValue, stn::array<T>& dependents,stn::array<T>& dependencies){
+    DagBuilder& push(T nodeValue, const stn::array<T>& dependents,const stn::array<T>& dependencies){
 
         size_t idx = ensureNode(nodeValue);
         for (auto depValue : dependents) {
             size_t depIndex = ensureNode(depValue);
-            if (lastNode && depIndex == lastNode())
+            if (depIndex == lastNode)
                 throw std::logic_error("Cannot depend on last node");
             fullGraph.addEdge(depIndex, idx);
         }
         for (auto depValue : dependencies) {
             size_t depIndex = ensureNode(depValue);
-            if (lastNode && depIndex == lastNode())
+            if (depIndex == lastNode)
                 throw std::logic_error("Cannot depend on last node");
             fullGraph.addEdge(idx, depIndex);
         }
@@ -271,7 +271,7 @@ Dag<T> filter(Dag<T> full, const stn::array<T>& keep) {
            
             DagNode<T>& new_element = new_dag[remap[i]];
             new_element.successors = filter(full[i].successors,filter_ind);
-            for (size_t j = 0; j < new_element.successors.length(); j++)
+            for (std::uint32_t j = 0; j < new_element.successors.length(); j++)
             {
 
                 new_element.successors[j]= remap[new_element.successors[j]];

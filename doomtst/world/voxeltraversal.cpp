@@ -113,10 +113,9 @@ voxtra::WorldRayCollision  voxtra::travvox(ray nray, GridTraverseMode trav)
 						continue;
 					}
 					geointersect::boxRayCollision PotentialCollision = geointersect::intersection(BlockCollider->globalbox(), nray);
-					if (PotentialCollision&&PotentialCollision().dist<ray_length && (!Collision || PotentialCollision().dist<Collision().dist()))
+					if (PotentialCollision && PotentialCollision.unwrap().dist<ray_length && (!Collision || PotentialCollision.unwrap().dist<Collision.unwrap().dist()))
 					{ 
-					Collision = stn::Construct<RayWorldHit>(PotentialCollision(), 
-						&blk->owner.getcomponent<aabb::Collider>());
+						Collision = PotentialCollision.map([&](geointersect::RayHit hit){return RayWorldHit(hit,blk->owner.getcomponent<aabb::Collider>());});
 					}
 				 	
 					
@@ -166,6 +165,6 @@ block* voxtra::findprevblock(ray nray, GridTraverseMode trav)
 		return nullptr;
 	}
 	float BackMag = 1 / 1000.f;
-	Vec3 BackProp = Intersection().intersection() - nray.dir() * BackMag;
+	Vec3 BackProp = Intersection.unwrap().intersection() - nray.dir() * BackMag;
 	return	(CtxName::ctx.Grid->getBlock(CtxName::ctx.Grid->getVoxel(BackProp)));
 }

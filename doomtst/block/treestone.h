@@ -14,15 +14,7 @@ inline void treestoneinit(blockname::block* blk) {
 	blk->mesh.box.scale = blockname::blockscale;
 
 	blk->createdefaultaabb(false);
-	blk->owner.addcomponent<loottable>()->addelem(treestoneitem,1);
+	blk->owner.addcomponent<loottable>().addelem(treestoneitem,1);
 	blk->mininglevel = 3;
 	blk->minedfastwithpick = false;
 }
-inline void treestonedelete(blockname::block* blk) {
-	blk->owner.removecomponent<aabb::Collider>();
-
-	blk->owner.removecomponent<loottable>();
-
-
-}
- // !wood_HPP

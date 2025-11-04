@@ -22,7 +22,7 @@ struct rigid_force {
         {
             return true;
         }
-        bool val= CtxName::ctx.Time->now()<end_time();
+        bool val= CtxName::ctx.Time->now()<end_time.unwrap();
         return val;
     }
     rigid_force(Vec3 frc, float duration,const tag::Tag& tg):force(frc), end_time(CtxName::ctx.Time->now()+duration), tag(tg) {
@@ -99,7 +99,7 @@ struct rigidbody : gameobject::component {
         {
             if (frc.tag == name)
             {
-                return frc;
+                return stn::Option<rigid_force&>(frc);
             }
         }
         return stn::None;
@@ -119,19 +119,14 @@ struct rigidbody : gameobject::component {
     // Integrate the acceleration to update velocity and position
     //should definitly clamp
     void integrate() {
-        
-        float deltaTime = CtxName::ctx.Time->dt;
-
+      
+        double deltaTime = CtxName::ctx.Time->dt;
         velocity += acceleration * deltaTime;
-        
+       
         if (isonground||isonceil)
         {
-            float zero_set_speed = 7;
+            double zero_set_speed = 7;
             velocity.y *= clamp(1 - deltaTime * zero_set_speed, 0.0, 1.0);
-        }
-        if ((velocity.y)>10000)
-        {
-            int l = 1;
         }
         if (gravityscale!=0)
         {
@@ -150,8 +145,9 @@ struct rigidbody : gameobject::component {
             {
                 v3::Vec3 curr_pos = owner.transform().position;
                 v3::Vec3 new_pos = curr_pos + v3::Vec3(velocity[i]/mini_steps, i) * deltaTime;
+                int sgn = sign(velocity[i]);
                 double scale_in_dir = owner.getcomponent<Collider>().globalbox().scale[i];
-                v3::Vec3 max_dir_rel = Vec3(sign(velocity[i]) * scale_in_dir, i);
+                v3::Vec3 max_dir_rel = Vec3(sgn * scale_in_dir, i);
                 ray dir_ray(owner.transform().position + max_dir_rel, max_dir_rel + new_pos);
 
                 if (1.435<curr_pos.y)
@@ -163,13 +159,13 @@ struct rigidbody : gameobject::component {
                   voxtra::WorldRayCollision coll = collision::raycastall(dir_ray, collision::HitQuery(owner));
                 if (!coll)
                 {
+                    //we can move completly
                     owner.transform().position[i] = new_pos[i];
                 }
                 else
                 {
-
-                   v3::Vec3 new_posdiff= (*coll).Hit.intersectionpoint - max_dir_rel-v3::Vec3(1e-4f*sign(velocity[i]), i);
-                
+                   v3::Vec3 new_posdiff= coll.unwrap().Hit.intersectionpoint - max_dir_rel-v3::Vec3(1e-4* sgn, i);
+                   Coord pos = coll.unwrap().gameobject().getcomponent<block>().pos;
                    owner.transform().position = new_posdiff;
 
                 }

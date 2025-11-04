@@ -1,4 +1,7 @@
 #include "iostream"
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <Windows.h>
 #include "dynamicarray.h"
 #include "vector2.h"

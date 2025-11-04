@@ -22,7 +22,6 @@ namespace gameobject {
 				{
 					entity_function(new_obj);
 				}
-				pending.destroy();
 				return new_obj;
 			}
 		private:

@@ -12,13 +12,7 @@ inline void ropeinit(blockname::block* blk) {
 	blk->minedfastwithpick = 1;
 	blk->mininglevel = .3f;
 	blk->createdefaultaabb(true);
-	blk->owner.addcomponent<loottable>()->addelem(ropeitem, 1, false);
+	blk->owner.addcomponent<loottable>().addelem(ropeitem, 1, false);
 
 	blk->minedfastwithpick = false;
 }
-inline void ropedelete(blockname::block* blk) {
-	blk->owner.removecomponent<aabb::Collider>();
-	blk->owner.removecomponent<loottable>();
-
-}
- // !wood_HPP

@@ -6,75 +6,16 @@
 namespace renderer {
    
 
-
-    void Renderer::FillVertexBuffer(Mesh* mesh, stn::array<float>& pointlist)
-    {
-        if (pointlist.length() % mesh->Voa.attributes.components() != 0)
-        {
-            throw std::logic_error("Vertex Data is corrupted");
-        }
-        if (!mesh->BuffersGenerated)
-        {
-            throw std::invalid_argument("Cannot Fill a mesh without Generating buffers first");
-        }
-        context.Bind(mesh->Vbo);
-        mesh->Vbo.fillbuffer<float>(pointlist);
-        context.Bind(mesh->Voa);
-        mesh->Voa.SetAllAttributes();
-        context.Bind(mesh->Ibo);
-    }
-
-    void Renderer::Fill(Mesh* mesh, stn::array<float>& pointlist, stn::array<unsigned int>& indicelist) {
-      
-        FillVertexBuffer(mesh, pointlist);
-        context.Bind(mesh->Ibo);
-        mesh->Ibo.fillbuffer<unsigned int>(indicelist);
-        mesh->length = indicelist.length();
-
-    }
-    void Renderer::Fill(Mesh * mesh,stn::array<float>& pointlist) {
-        array<unsigned int> indicelist = trivial_buffer(mesh->Voa.attributes, pointlist);
-        Fill(mesh, pointlist, indicelist);
-    
-    }
-    void Renderer::Render(Mesh* mesh, stn::array<float>& pointlist)
-    {
-        Fill(mesh, pointlist);
-        Render(mesh);
-    }
-    void Renderer::Render(Mesh* mesh, stn::array<float>& pointlist, stn::array<unsigned int>& indicelist)
-    {
-        Fill(mesh, pointlist, indicelist);
-        Render(mesh);
-    }
-
-
-    void Renderer::Destroy(Mesh* mesh)
-    {
-        if (!mesh->BuffersGenerated)
-        {
-            throw std::invalid_argument("Cannot Delete a mesh without Generating buffers first");
-        }
-       
-          
-        Binders.Destroy(&mesh->Ibo);
-        Binders.Destroy(&mesh->Voa);
-        Binders.Destroy(&mesh->Vbo);
-        mesh->BuffersGenerated = false;
-        mesh->length = -1;
-    }
-
     void Renderer::Render(Mesh* mesh) {
-
-        if (!mesh->HasBeenFilled())
+     
+        if (!mesh->filled())
         {
             return;
-            //throw std::logic_error("Cannott render a UnbindedMesh Mesh");
         }
-        context.Bind(mesh->Vbo);
-      context.Bind(mesh->Voa);
-        mesh->Voa.SetAllAttributes();
-        context.Bind(mesh->Ibo);
+        
+        context.bind(*mesh);
+        
+      mesh->Voa.SetAllAttributes();
         if (settings::Gamesettings.viewmode)
         {
             glDrawElements(GL_LINES, mesh->length, GL_UNSIGNED_INT, 0);
@@ -90,12 +31,12 @@ namespace renderer {
     void Renderer::InitilizeBaseMaterials()
     {
         Shaders.Compile("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs");
-        Construct("Ui", "UiShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+        construct_material("Ui", "UiShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
             uniforms::uparam("aspect_ratio", "aspectratio")
         );
 
         Shaders.Compile("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs");
-        Construct("Model", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+        construct_material("Model", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
             uniforms::uparam("aspect_ratio", "aspectratio"),
             uniforms::uparam("proj_matrix", "projection"),
             uniforms::uparam("view_matrix", "view")
@@ -103,7 +44,7 @@ namespace renderer {
         );
 
         Shaders.Compile("ParticleShader", "shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
-        Construct("Particle", "ParticleShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        construct_material("Particle", "ParticleShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
 
         set_uniform("aspect_ratio", CtxName::ctx.Window->AspectRatio());
@@ -111,39 +52,27 @@ namespace renderer {
  
    
 
-    Renderer::Renderer():Shaders(),Textures(),uniform_manager(),Binders()
+    Renderer::Renderer():Shaders(),Textures(),uniform_manager()
     {
 
         Modes = MaterialManager(&Shaders, &uniform_manager);
         fov = 90;
         setprojmatrix(90, .21f, 100);
 
-        meshes = Meshes::MeshRegistry(&Binders);
+        meshes = MeshRegistry(&context);
     }
 
     void Renderer::setprojmatrix(float newfov, float nearclipplane, float farclipplane)
     {
-
-        set_uniform("proj_matrix",glm::perspective(glm::radians(newfov), float(4 / 3.f), nearclipplane, farclipplane));
-       
-        
+        set_uniform("proj_matrix",glm::perspective(glm::radians(newfov), float(4 / 3.f), nearclipplane, farclipplane));        
     }
 
-
-
-    void Renderer::SetType(std::string Name)
+    void Renderer::bind_material(material_id material)
     {
-
-        bind_material(Modes.get_id(Name));
-
-    }
-    void Renderer::bind_material(Ids::Id material)
-    {
-        const Material& mat = Modes.get_material(material);
-        context.Bind(Shaders.get_shader(mat.shader));
+        const Material& mat = Modes[material];
+        context.bind(Shaders.shader_of(mat.shader));
         for (const auto& elem : mat.handles)
         {
-            
             apply_uniform(uniform_manager.get( elem), elem.name);
         }
         context.bind_properties(mat.prop);
@@ -154,7 +83,7 @@ namespace renderer {
         size_t ind = val.index();
         switch (val.index()) {
         case uniforms::uform_int:
-            context.bound_shader().setint(std::get<int>(val), location_in_shader);
+            context.bound_shader().seti(std::get<int>(val), location_in_shader);
             break;
         case uniforms::uform_float:
             context.bound_shader().setf(std::get<float>(val), location_in_shader);
@@ -178,7 +107,7 @@ namespace renderer {
             context.bound_shader().setMat4(std::get<glm::mat4>(val), location_in_shader);
             break;
         case uniforms::uform_tex:
-            Textures.get_texture(std::get<Ids::Id>(val)).apply();
+            Textures.get_texture(std::get<texture_id>(val)).apply();
             break;
         default:
             throw std::logic_error("Invalid uniform paramater");
@@ -203,67 +132,76 @@ namespace renderer {
 
     void Renderer::SetUniform(const std::string& name, float value)
     {
-        CurrentShader()->setf(value, name.c_str());
+        CurrentShader().setf(value, name.c_str());
 
     }
     void Renderer::SetUniform(const std::string& name,const glm::vec2 &vec)
     {
-        CurrentShader()->SetVector2f(vec, name.c_str());
+        CurrentShader().SetVector2f(vec, name.c_str());
     }
 
     void Renderer::SetUniform(const std::string& name, const glm::vec3& vec)
     {
-        CurrentShader()->SetVector3f(vec, name.c_str());
+        CurrentShader().SetVector3f(vec, name.c_str());
 
     }
 
     void Renderer::SetUniform(const std::string& name,const glm::vec4& vec)
     {
 
-        CurrentShader()->SetVector4f(vec, name.c_str());
+        CurrentShader().SetVector4f(vec, name.c_str());
     }
     
     void Renderer::SetUniformMat4(const std::string& name, const glm::mat4& mat)
     {
-        CurrentShader()->setMat4(mat, name.c_str());
+        CurrentShader().setMat4(mat, name.c_str());
     }
 
     void RenderableHandle::set_material(const std::string& name)
     {
-        renderer->set_material(id, name);
+        renderer->set_material(id.unwrap(), name);
     }
 
     void RenderableHandle::set_layout(vertice::vertex layout)
     {
-        renderer->set_layout(id, layout);
+        renderer->set_layout(id.unwrap(), layout);
     }
 
     void RenderableHandle::fill(MeshData&& new_mesh)
     {
-        renderer->fill_cmd(id,std::move(new_mesh));
+        renderer->fill_cmd(std::move(new_mesh));
     }
 
+    void RenderableHandle::disable()
+    {
+        renderer->set_enabled(id.unwrap(), false);
+    }
+    
+    void RenderableHandle::enable() {
+
+        renderer->set_enabled(id.unwrap(), true);
+    }
     void RenderableHandle::set_uniform(const uniforms::uniform& u)
     {
-        renderer->set_uniform(id, u);
+        renderer->set_uniform(id.unwrap(), u);
     }
 
     void RenderableHandle::render()
     {
-        renderer->render(id);
+        renderer->render(id.unwrap());
     }
 
     void RenderableHandle::destroy()
     {
 
-        renderer->remove(id);
+        renderer->remove(id.unwrap());
         renderer = nullptr;
-        id = Ids::None;
+        id = None;
     }
 
     MeshData RenderableHandle::create_mesh(indice_mode auto_ind)
     {
-        return renderer->create(id, auto_ind);
+        return renderer->create(id.unwrap(), auto_ind);
     }
 
   

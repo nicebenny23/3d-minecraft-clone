@@ -1,3 +1,5 @@
+
+#pragma once
 #include "entity.h"
 namespace gameobject {
     namespace Observe {
@@ -6,21 +8,20 @@ namespace gameobject {
             using std::swap;
             // Unregister both watchers first to avoid dangling references
             if (held) {
-                get().addcomponent<SlotTracker>()->unregisterSlot(this);
+                get().addcomponent<SlotTracker>().unregisterSlot(this);
             }
             if (other.held) {
-                other.get().addcomponent<SlotTracker>()->unregisterSlot(&other);
+                other.get().addcomponent<SlotTracker>().unregisterSlot(&other);
             }
 
-            // Swap the held gameobject::obj (your Option wrapper)
             swap(held, other.held);
 
             // Register watchers again if not empty
             if (held) {
-                get().addcomponent<SlotTracker>()->registerSlot(this);
+                get().addcomponent<SlotTracker>().registerSlot(this);
             }
             if (other.held) {
-                other.get().addcomponent<SlotTracker>()->registerSlot(&other);
+                other.get().addcomponent<SlotTracker>().registerSlot(&other);
             }
         }
         entity_slot::entity_slot() = default;
@@ -29,12 +30,12 @@ namespace gameobject {
         entity_slot::entity_slot(gameobject::obj& object)
             : held({ object })
         {
-            object.addcomponent<SlotTracker>()->registerSlot(this);
+            object.addcomponent<SlotTracker>().registerSlot(this);
         }
 
 
         entity_slot::entity_slot(entity_slot&& oth) {
-            (*oth).addcomponent<SlotTracker>()->swapSlots(&oth, this);
+            (*oth).addcomponent<SlotTracker>().swapSlots(&oth, this);
             held = std::move(oth.held);
             oth.held = stn::None;
         }
@@ -45,8 +46,8 @@ namespace gameobject {
                 return *this;
             }
 
-            reset();
-            (*oth).addcomponent<SlotTracker>()->swapSlots(&oth, this);
+            clear();
+            (*oth).addcomponent<SlotTracker>().swapSlots(&oth, this);
             held = std::move(oth.held);
             oth.held = stn::None;
             return *this;
@@ -54,13 +55,13 @@ namespace gameobject {
 
 
         entity_slot::~entity_slot() {
-            reset();
+            clear();
         }
 
 
-        void entity_slot::reset() {
+        void entity_slot::clear() {
             if (held) {
-                get().addcomponent<SlotTracker>()->unregisterSlot(this);
+                get().addcomponent<SlotTracker>().unregisterSlot(this);
                 held = stn::None;
             }
         }

@@ -87,7 +87,7 @@ namespace Core {
     {
         ctx->OC = &OC;
         ctx->OC->inject_context(ctx); 
-        new (&SystemRunner) SystemExecutor(&OC);
+        new (&SystemRunner) Systems(&OC);
         ctx->Executor = &SystemRunner;
     }
 

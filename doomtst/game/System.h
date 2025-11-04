@@ -8,19 +8,19 @@ struct System {
 };
 
 
-struct SystemExecutor {
-	SystemExecutor(gameobject::Ecs* Ecs):ecs(Ecs) {
+struct Systems {
+	Systems(gameobject::Ecs* Ecs):ecs(Ecs) {
 
 
 	}
-	SystemExecutor() {
+	Systems() {
 
 
 	}
 	template<typename T>
 	void push(T* sys) {
 		static_assert(std::is_base_of<System, T>::value, "T must be a system");
-		if (!type_list.insert<T>().second)
+		if (!type_list.insert<T>().is_new)
 		{
 			throw std::logic_error("Systems Must be singleton");
 		}
@@ -38,6 +38,6 @@ struct SystemExecutor {
 	gameobject::Ecs* ecs;
 	Depends::DependencySystem dependency_executor;
 	stn::array<System*> sys_list;
-	type_id::type_indexer type_list;
+	type_map::type_indexer<> type_list;
 
 };

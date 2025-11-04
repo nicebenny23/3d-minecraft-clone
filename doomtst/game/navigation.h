@@ -18,7 +18,7 @@ struct navnode {
     navnode* parent;
     int pathlen;
     navnode() {
-        pos = zeroiv;
+        pos = ZeroCoord;
         gcost = 0;
         hcost = 0;
         parent = nullptr;

@@ -43,16 +43,16 @@ namespace inter {
 
 			return max - min;
 		}
-		float lower() {
+		float lower() const {
 			return min;
 		}
-		float upper() {
+		float upper() const {
 			return max;
 		}
-		bool contains(float val) {
+		bool contains(float val) const {
 			return inrange(val,min, max);
 		}
-		bool apx_contains(float val) {
+		bool apx_contains(float val) const {
 			return inrange_apx(val, min, max);
 		}
 		bool contains(const range& other) {

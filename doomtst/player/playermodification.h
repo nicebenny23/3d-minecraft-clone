@@ -37,30 +37,31 @@ void initbreakparticle(gameobject::obj newent);
 
 struct playerbreak : gameobject::component {
     voxtra::WorldRayCollision closest;
-    util::change <item*> pickaxe;
+    stn::change <item*> pickaxe;
 
     decal break_decal;
     float break_start_time = 0.f;
     float timeuntilbreak = 0.f;
-    util::change<block*> currmining;
+    stn::change<block*> currmining;
 
     void start() override {
         currmining();
-        currmining.reset(nullptr);
+        currmining.clear(nullptr);
         CtxName::ctx.Ren->Textures.LoadTexture("images\\menutex.png", "MenuTexture");
     }
 
     void spawn_decal(size_t phase) {
         if (phase == 0) return;
-        if (break_decal.handle) break_decal.destroy();
+       
         static const char* tex[] = { "",
             "images\\block_break_1.png","images\\block_break_2.png",
             "images\\block_break_3.png","images\\block_break_4.png",
             "images\\block_break_5.png","images\\block_break_6.png" };
         std::string name = tex[phase];
         std::string handle = "block_break_" + std::to_string(phase);
-        break_decal.create_handle(name.c_str(), handle.c_str());
-        auto hit = closest().Hit.intersectionpoint;
+        break_decal.set_handle(name.c_str(), handle.c_str());
+        break_decal.handle.enable();
+        auto hit = closest.unwrap().Hit.intersectionpoint;
         Dir::Dir3d fd = closest_face(hit, currmining());
         auto& f = currmining()->mesh[fd.ind()];
         break_decal.center = f.center();
@@ -88,11 +89,15 @@ struct playerbreak : gameobject::component {
     void engage_block(block* blk) {
         if (!engaged())
         {
-
-            pickaxe.reset(owner.getcomponent<inventory>().selected);
-            currmining.reset( blk);
+            if (break_decal.handle)
+            {
+                break_decal.handle.disable();
+            }
+            pickaxe.clear(owner.getcomponent<inventory>().selected);
+            currmining.clear( blk);
             break_start_time = block_power(blk);
             timeuntilbreak = break_start_time;
+
         }
         else
         {
@@ -101,8 +106,12 @@ struct playerbreak : gameobject::component {
         }
     }
     void disengage_block() {
-        currmining.reset(nullptr);
-        pickaxe.reset(nullptr);
+        currmining.clear(nullptr);
+        pickaxe.clear(nullptr);
+        if (break_decal.handle)
+        {
+            break_decal.handle.disable();
+        }
         timeuntilbreak = -1;
 
     }
@@ -112,36 +121,30 @@ struct playerbreak : gameobject::component {
     //returns current speed
     bool ensure_engage()  {
         ray r(owner.transform().position,
-            owner.transform().position + owner.transform().getnormaldirection() * 7.f);
+        owner.transform().position + owner.transform().getnormaldirection() * 7.f);
         closest = collision::raycastall(r, collision::HitQuery(owner), voxtra::countsolid);
         if (!closest) {
             return false;
         }
-        auto hit = *closest;
-        if (!hit.collider->owner.hascomponent<blockname::block>()) { 
+        auto hit = closest.unwrap();
+        if (!hit.gameobject().hascomponent<blockname::block>()) { 
             return false;
         }
         if (!inrange(hit.dist(), interactminrange, interactmaxrange)) {
             return false;
         }
-        engage_block(hit.collider->owner.getcomponentptr<block>());
-        
+        if (!   CtxName::ctx.Inp->mouseleft().held)
+        {
+            return false;
+        }
+        engage_block(hit.gameobject().getcomponentptr<block>());
             if (engaged())
             {
                 if (currmining.changed()|| pickaxe.changed()) {
                     return false;
-                }
-               
+                }       
             }
-            if (!CtxName::ctx.Inp->mouseleft().held) {
-
-                return false;
-            }
-            if (currmining()->minedfastwithpick && curr_mining_power() < currmining()->mininglevel)
-            {
-                return false;
-            }
-           
+            
             return true;
     }
 
@@ -154,7 +157,7 @@ struct playerbreak : gameobject::component {
             // Show progress decal
             float prog = (break_start_time - timeuntilbreak) / break_start_time;
             size_t phase = clamp(size_t(prog * 7.f), 0, 6);
-            if (apx(currmining()->mesh.box.scale, blockscale)) {
+            if (currmining()->mesh.box.scale== blockscale) {
                 spawn_decal(phase);
             }
             if (timeuntilbreak <= 0.f) {
@@ -176,10 +179,13 @@ struct playerbreak : gameobject::component {
             {
                 pickaxe()->use(1);
             }
-
-            make_drop(broken->owner);
+            if (!currmining()->minedfastwithpick || currmining()->mininglevel <= curr_mining_power())
+            {
+                make_drop(broken->owner);
+            }
             gridutil::setblock(broken->pos, minecraftair);
             disengage_block();
+            
         }
     }
     void update() {

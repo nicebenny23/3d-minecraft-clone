@@ -3,18 +3,18 @@
 #include "../util/fileloader.h"
 #include "../util/vector2.h"
 #include "../util/vector3.h"
-#include "texture.h"
-#include "vertexobject.h"
+
  #include "../game/GameContext.h"
-#include "Vao.h"
 #include "../game/transform.h"
 #include "renderer.h"
 //fix
 using namespace stn;
 using namespace v3;
 using namespace buffer_object;
-
+#ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
+#endif // !_CRT_SECURE_NO_WARNINGS
+
 #define _CRT_SECURE_NO_DEPRECATE
 namespace ModelMeshName {
 	
@@ -25,7 +25,7 @@ namespace ModelMeshName {
 		float pitch;
 		v3::Vec3 pos;
 		void setmodeluniform();
-		Ids::Id tex;
+		stn::Id tex;
 		Vec3 color;
 		ModelMesh();
 		void create_handle(const char* location, const char* name);

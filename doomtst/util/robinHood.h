@@ -383,7 +383,7 @@ namespace robin_hood {
             }
 
             BulkPoolAllocator& operator=(BulkPoolAllocator&& o) noexcept {
-                reset();
+                clear();
                 mHead = o.mHead;
                 mListForFree = o.mListForFree;
                 o.mListForFree = nullptr;
@@ -399,11 +399,11 @@ namespace robin_hood {
             }
 
             ~BulkPoolAllocator() noexcept {
-                reset();
+                clear();
             }
 
             // Deallocates all allocated memory.
-            void reset() noexcept {
+            void clear() noexcept {
                 while (mListForFree) {
                     T* tmp = *mListForFree;
                     ROBIN_HOOD_LOG("std::free")

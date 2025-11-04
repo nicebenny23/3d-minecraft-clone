@@ -23,7 +23,7 @@ namespace Core {
         void CreateWorld();
         void InitRenderer();
        CtxName::Context* ctx;
-       SystemExecutor SystemRunner;
+       Systems SystemRunner;
         timename::TimeManager Time;
         userinput::InputManager Inp;
         window::Window Window;

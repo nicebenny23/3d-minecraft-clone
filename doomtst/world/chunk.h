@@ -2,7 +2,7 @@
 #include "../renderer/chunkrender.h"
 #pragma once 
 constexpr int chunklength = 16;
-constexpr int chunkaxis =chunklength/blocksize;
+constexpr int chunkaxis =int(chunklength/blocksize);
 constexpr int chunksize = chunkaxis*chunkaxis*chunkaxis;
 using namespace blockname;
 namespace Chunk {
@@ -23,11 +23,6 @@ namespace Chunk {
 		array<face> facebuf;
 		
 		void sortbuf();
-
-
-		//todo  get basic mesh and        reupdsted working
-
-
 		void destroy();
 	};
 	std::string getcorefilename(Coord pos);
@@ -45,9 +40,9 @@ namespace Chunk {
 			return (loc+ unitv /2.f)*chunklength;
 		}
 		gameobject::obj& operator[](size_t index);
-		gameobject::obj* blockbuf;
+		stn::array<gameobject::obj> blockbuf;
 		void destroy();
-		float cameradist() const {
+		double cameradist() const {
 			return 	 dist(center(), camera::campos());
 		}
 		bool operator<(const chunk& b) const {
@@ -58,7 +53,6 @@ namespace Chunk {
 		}
 
 	};
-	chunk* airload(Coord location);
 
 	void createchunkmesh(chunk* aschunk);
 }

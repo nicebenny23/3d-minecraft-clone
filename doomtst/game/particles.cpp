@@ -40,7 +40,7 @@ void particleemiter::update()
 					EntityDeletionBuffer.destroy();
 				
 				
-					//particlearray[i].GenId =Ids::NoneG;
+					//particlearray[i].GenId =stn::NoneG;
 				}
 			}
 		}
@@ -56,7 +56,7 @@ void particleemiter::update()
 			 {
 				 gameobject::obj newparticle = CtxName::ctx.OC->spawn_with_transform(position);
 				 
-				 newparticle.addcomponent<particle>()->endtime= CtxName::ctx.Time->now().value +particlelifetime;
+				 newparticle.addcomponent<particle>().endtime= CtxName::ctx.Time->now().value +particlelifetime;
 				 newparticle.getcomponent<particle>().ind = i;
 				 newparticle.getcomponent<particle>().emit = this;
 				 (*particleinit)(newparticle);
@@ -78,11 +78,11 @@ void particleemiter::start()
 
 void particleemiter::renderparticles()
 {
-	CtxName::ctx.Ren->context.Bind(*tex);
+	CtxName::ctx.Ren->context.bind(*tex);
 	
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE); 
-	CtxName::ctx.Ren->SetType("Particle");
+//	CtxName::ctx.Ren->SetType("Particle");
 	array<float> databuf;
 	for (int ind = 0; ind < 6; ind++)
 	{
@@ -102,15 +102,15 @@ void particleemiter::renderparticles()
 
 		databuf.push(cubeuv[2 * i+1]);
 	}
-	CtxName::ctx.Ren->Fill(&ParticleMesh, databuf);
+	//CtxName::ctx.Ren->Fill(&ParticleMesh, databuf);
 	
 	for (int i = 0; i < particlearray.length(); i++)
 	{
 
 		if (particlearray[i].exists())
 		{
-			CtxName::ctx.Ren->CurrentShader()->SetVector3f(particlearray[i].transform().position.glm(), "offset");
-			CtxName::ctx.Ren->CurrentShader()->SetVector3f(particlearray[i].transform().scale.glm(), "scale");
+			CtxName::ctx.Ren->CurrentShader().SetVector3f(particlearray[i].transform().position.glm(), "offset");
+			CtxName::ctx.Ren->CurrentShader().SetVector3f(particlearray[i].transform().scale.glm(), "scale");
 			CtxName::ctx.Ren->Render(&ParticleMesh);
 		}
 	}
@@ -121,7 +121,7 @@ void particleemiter::renderparticles()
 void initbaseparticle(gameobject::obj newent) {
 	newent.transform().position += Vec3(random(), 1, random()) / 10;
 	newent.addcomponent<aabb::Collider>(newent.transform().position, unitv / 9, true);
-	newent.addcomponent<rigidbody>(1, .1)->velocity = Vec3(random(), 1, random()) * 2;
+	newent.addcomponent<rigidbody>(1, .1).velocity = Vec3(random(), 1, random()) * 2;
 	newent.transform().scale = blockscale / 22;
 	
 }
@@ -129,7 +129,7 @@ particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) 
 {
 	tex = newtex;
 	
-	CtxName::ctx.Ren->Gen(&ParticleMesh);
+//	ParticleMesh=CtxName::ctx.Ren->Gen();
 	ParticleMesh.Voa.attributes.push<float, 3>().push<float, 2>();
 	particlelifetime = lifetime;
 	particlespawntime = spawntime;
@@ -137,7 +137,7 @@ particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) 
 	timetillspawn = spawntime;
 	for ( int i = 0; i < maxparticles; i++)
 	{
-		//particlearray[i].GenId = Ids::NoneG;
+		//particlearray[i].GenId = stn::NoneG;
 	}
 }
 

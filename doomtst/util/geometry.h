@@ -134,20 +134,20 @@ namespace geometry {
 		}
 
 
-		float distance_to_point(const Vec3& p) const {
+		double distance_to_point(const Vec3& p) const {
 			return dot(normal, p - point);
 		}
 	};
 
 	struct Sphere {
-		float radius;
+		double radius;
 		Vec3 center;
 		bool contains(Vec3 point) const{
 			return dist(center, point) <= radius;
 		}
 		
 		Sphere(Box bx)
-			: radius(mag(bx.scale)), center(bx.center) {}
+			: radius(bx.scale.length()), center(bx.center) {}
 		
 		Vec3 project(Vec3 point) const{
 			return center + normal(point - center) * radius;
@@ -167,9 +167,9 @@ namespace geometry {
 
 	struct cone {
 		ray direction_ray;
-		float slope;
+		double slope;
 
-		cone(const ray newray, float cone_slope)
+		cone(const ray newray, double cone_slope)
 			: direction_ray(newray), slope(cone_slope) {}
 
 		//returns the normized direction
@@ -180,15 +180,15 @@ namespace geometry {
 			return direction_ray.start;
 		}
 
-		float distanceFromPoint(Vec3 samplePoint) const{
+		double distanceFromPoint(Vec3 samplePoint) const{
 			// Project the sample point onto the cone's central axis (ray)
 			Vec3 axisProjection = direction_ray.project(samplePoint);
 
 			// Compute the perpendicular distance from the sample point to the cone's axis.
-			float distanceToAxis = dist(samplePoint, axisProjection);
+			double distanceToAxis = dist(samplePoint, axisProjection);
 
 			// Determine how far along the axis (from the vertex) the projection lies.
-			float distanceAlongAxis = dist(direction_ray.start, axisProjection);
+			double distanceAlongAxis = dist(direction_ray.start, axisProjection);
 
 			// At a distance 'distanceAlongAxis' along the axis, the cone's expected radius is:
 			//     expectedRadius = slope * distanceAlongAxis.
@@ -211,15 +211,15 @@ namespace geometry {
 
 		}
 		Vec3 min_vector = zerov;
-		float min_depth=std::numeric_limits<float>().infinity();
+		double min_depth=std::numeric_limits<double>().infinity();
 		for (int i = 0; i < 3; i++)
 		{
 			int sgn = p1.center[i] > p2.center[i] ? 1 : -1;
-			float depth = sgn * (p1.scale[i] + p2.scale[i]) - (p1.center[i] - p2.center[i]);
+			double depth = sgn * (p1.scale[i] + p2.scale[i]) - (p1.center[i] - p2.center[i]);
 			if (abs(depth)<=min_depth )
 			{
 				min_depth = abs(depth);
-				min_vector = Vec3(min_depth, i);
+				min_vector = Vec3(depth, i);
 			}
 		}
 		return min_vector;

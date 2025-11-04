@@ -6,34 +6,53 @@ namespace stn {
 
     template<typename T>
     struct queue {
-        stn::deque<T> data;
 
         void push(const T& val) {
             data.push_back(val);
         }
-
+        void drop_many(size_t count) {
+            data.drop_back_many(count);
+        }
+        void drop() {
+            return data.drop_back();
+        }
         T pop() {
-            if (empty()) throw std::out_of_range("Queue is empty");
-           return data.pop_front();
+            if (empty())
+            {
+                stn::throw_out_of_range("cannot pop from from an empty queue");
+            }
+            return data.pop_front();
         }
 
         T& front() {
-            if (empty()) throw std::out_of_range("Queue is empty");
+            if (empty())
+            {
+                stn::throw_out_of_range("cannot get the front element of an empty queue");
+            }
             return data.list[data.front];
         }
-        
+
         const T& front() const {
-            if (empty()) throw std::out_of_range("Queue is empty");
+            if (empty())
+            {
+                stn::throw_out_of_range("cannot get the front element of an empty queue");
+            }
             return data.list[data.front];
         }
 
         T& back() {
-            if (empty()) throw std::out_of_range("Queue is empty");
+            if (empty())
+            {
+                stn::throw_out_of_range("cannot get the back element of an empty queue");
+            }
             return data.list[data.back];
         }
 
         const T& back() const {
-            if (empty()) throw std::out_of_range("Queue is empty");
+            if (empty())
+            {
+                stn::throw_out_of_range("cannot get the back element of an empty queue");
+            }
             return data.list[data.back];
         }
 
@@ -42,12 +61,14 @@ namespace stn {
         }
 
         size_t length() const {
-            return data.length;
+            return data.length();
         }
 
         void clear() {
-            data.destroy();
+            data.clear();
         }
+    private:
+        stn::deque<T> data;
     };
 
 } // namespace Cont

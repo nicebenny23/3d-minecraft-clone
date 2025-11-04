@@ -16,7 +16,7 @@ namespace grid {
 	//how many chunks it spans from the center chunk 
 
 		const int rad;
-		const int totalChunks;
+		 int totalChunks;
 		v3::Coord gridpos;
 		v3::Coord griddt;
 		bool has_loaded_chunk;
@@ -45,11 +45,12 @@ namespace grid {
 	Coord getVoxel(Vec3 pos);
 
 	bool ChunkLoaded(Coord loc);
-	bool containsChunk(Coord loc);
+	bool containsChunk(Coord loc) const;
 	int localChunkIndex(Coord NormedChunk);
 	int chunkIndex(Coord Chunk);
 	Chunk::chunk* GetChunk(Coord pos);
 	block* getBlock(const v3::Coord pos);
+	bool containsChunkIndex(int index) const;
 	gameobject::obj* getObject(const v3::Coord pos);
 	array<block*> voxelinrange(geometry::Box span);
 	

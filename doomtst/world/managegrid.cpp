@@ -30,7 +30,7 @@ void gridutil::computecover(face& blkface)
 
 {
 
-	if (!apx(blkface.mesh->box.scale, blockscale))
+	if (blkface.mesh->box.scale!= blockscale)
 	{
 		
 			blkface.cover= cover_state::Uncovered;
@@ -157,7 +157,7 @@ gameobject::obj gridutil::dislocate(gameobject::obj blk)
 	gameobject::obj& to_flip = *CtxName::ctx.Grid->getObject(position);
 	to_flip=CtxName::ctx.OC->spawn_empty();
 
-	to_flip.addcomponent<block>()->create(position, minecraftair, blk_comp.mesh.attachdir, blk_comp.mesh.direction);
+	to_flip.addcomponent<block>().create(position, minecraftair, blk_comp.mesh.attachdir, blk_comp.mesh.direction);
 	setdefault(&to_flip.getcomponent<block>());
 	blk.removecomponent<block>();
 	return blk;

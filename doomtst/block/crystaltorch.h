@@ -17,9 +17,3 @@ inline void crystaltorchinit(blockname::block* blk) {
 	blk->owner.addcomponent<loottable>();
 	blk->owner.getcomponent<loottable>().addelem(crystaltorchitem, 1);
 }
-
-inline void crystaltorchdelete(blockname::block* blk) {
-	blk->owner.removecomponent<aabb::Collider>();
-	blk->owner.removecomponent<loottable>();
-
-}

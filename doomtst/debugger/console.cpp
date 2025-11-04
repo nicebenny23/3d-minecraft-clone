@@ -3,6 +3,8 @@
 #include "../player/player.h"
 #include <format>
 #include "../player/cameracomp.h"
+#include "../player/playermodification.h"
+#include "../player/playerplace.h"
 namespace console {
 
     Console& Console::Instance() {
@@ -30,16 +32,22 @@ namespace console {
        
         if (ImGui::BeginTabBar("DebugTabs")) {
             if (ImGui::BeginTabItem("Console")) {
-              
+
                 ImGui::BeginChild("Debug Info", ImVec2(0, 150), true);
                 ImGui::Text("Debug:");
                 ImGui::Text(std::format("Fps: {:.3f}", CtxName::ctx.Time->smooth_fps).c_str());
-              
+
                 Vec3 pos = player::goblin.getcomponent<gameobject::transform_comp>().transform.position;
                 ImGui::Text(std::format("position: {}", pos).c_str());
 
                 ImGui::Text(std::format("yaw:{:.3f},pitch:{:.3f}", player::goblin.getcomponent<CameraComp>().CamTransform.yaw, player::goblin.getcomponent<CameraComp>().CamTransform.pitch).c_str());
                 ImGui::Text(std::format("Chunk: {}", CtxName::ctx.Grid->chunkfromblockpos(Coord(pos))).c_str());
+                std::string text_for_look = player::goblin.getcomponent<playerplace>().Hit
+                    .filter([&](const voxtra::RayWorldHit& blk) {return blk.gameobject().exists() && blk.gameobject().hascomponent<block>(); })
+                    .map([&](const voxtra::RayWorldHit& blk) {return std::format("looking at {}", blk.gameobject().getcomponent<block>().pos); })
+                    .unwrap_or("not looking at a block");
+                
+                ImGui::Text(text_for_look.c_str());
                 ImGui::EndChild();
 
                 ImGui::EndTabItem();  // <-- Add this!

@@ -10,10 +10,6 @@ inline void plankinit(blockname::block* blk) {
 	blk->mesh.box.scale = blockname::blockscale;
 	blk->createdefaultaabb();
 	blk->mininglevel = 1.5f;
-	blk->owner.addcomponent<loottable>()->addelem(plankitem, 1, false);
+	blk->owner.addcomponent<loottable>().addelem(plankitem, 1, false);
 	blk->createdefaultaabb(false);
-}
-inline void plankdelete(blockname::block* blk) {
-	blk->owner.removecomponent<aabb::Collider>();
-
 }

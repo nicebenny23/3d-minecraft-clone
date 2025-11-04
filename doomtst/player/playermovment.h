@@ -40,7 +40,7 @@ struct PlayerMovementSys : System
 
         for (auto [body, movement, climb] : view)
         {
-
+            
             if (isnan(body->owner.getcomponent<rigidbody>().velocity.x))
             {
                 int l = 2;
@@ -97,7 +97,7 @@ struct PlayerMovementSys : System
             // — jumping, slam, and sneak-down —
             if (normalState)
             {
-                float sinceGround = (now - movement->lastGroundedTime);
+                double sinceGround = (now - movement->lastGroundedTime);
                 float sinceBuffer = (now - movement->jumpBufferTime);
 
                 // slam: one-time hard downward thrust in mid-air
@@ -123,7 +123,7 @@ struct PlayerMovementSys : System
                 {
                     body->velocity.y -= effSpeed;
                 }
-
+          //    body->owner.transform().position += Vec3(16, 0, 0); 
                 
             }
         }

@@ -1,8 +1,12 @@
 #pragma once
+#ifndef NOMINMAX
 #define NOMINMAX
+#endif
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "../util/vector2.h"#include "../util/stbiload.h"
+#include "../util/vector2.h"
+#include "../util/stbiload.h"
 
 namespace CtxName {
     struct Context;

@@ -33,8 +33,8 @@ struct playerplace : gameobject::component
 		{
 			return false;
 		}
-		voxtra::RayWorldHit closest = Hit();
-		if (!closest.collider->owner.hascomponent<blockname::block>())
+		voxtra::RayWorldHit closest = Hit.unwrap();
+		if (!closest.gameobject().hascomponent<blockname::block>())
 		{
 			return false;
 		}
@@ -64,7 +64,7 @@ struct playerplace : gameobject::component
 			return;
 		}
 		voxtra::RayWorldHit closest = Hit.unwrap();
-		Dir::Dir3d dir = Dir::Align(closest.collider->globalbox().center - plamentblock->center());
+		Dir::Dir3d dir = Dir::Align(closest.collider.globalbox().center - plamentblock->center());
 	
 		int blockdirection = Dir::max2ddirection(camera::campos() - closest.Hit.intersectionpoint);
 

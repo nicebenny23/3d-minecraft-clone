@@ -1,11 +1,11 @@
 #pragma once
 #include <unordered_map>
 #include <typeindex>
-struct Archtype{
+struct Archetype{
 
 
 };
-struct ArchtypeSystem {
+struct ArchetypeSystem {
 	size_t max_id;
 	std::unordered_map<std::type_index, size_t> CompHasher;
 	size_t GetCompIdAdd(std::type_index type) {

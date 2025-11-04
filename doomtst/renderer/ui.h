@@ -66,6 +66,7 @@ namespace ui {
 		for (int i = 0; i < uisize; i++)
 		{
 			if (uielemlist[i] == nullptr) {
+
 				uielemlist[i].set<T>(obj);
 				obj->id = i;
 				obj->state.parent =cptr<uielement>( nullptr);
@@ -74,7 +75,7 @@ namespace ui {
 			}
 		}
 		Assert("not enoght room to init a new ui element");
-			}
+	}
 
 	int compareuielem(const void* b, const void* a);
 	

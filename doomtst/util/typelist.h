@@ -20,6 +20,8 @@ namespace TypeList {
 
 
     };
+    using None = TypeList<>;
+
     // Helper: is_type_list trait
     template<typename T>
     struct is_type_list : std::false_type {};
@@ -33,7 +35,7 @@ namespace TypeList {
     template<typename List>
     struct length
     {
-        static_assert(is_type_list_v<List>, "length<T>: T must be a TypeList");
+        static_assert(is_type_list_v<List>, "len<T>: T must be a TypeList");
     };
 
     template<typename... Types>
@@ -265,5 +267,43 @@ namespace TypeList {
 
     template<typename List>
     inline constexpr bool is_unique_v = is_unique<List>::value;
+    template<typename List, typename T>
+    struct append_unique {
+        using type = std::conditional_t<
+            contains_v<List, T>,
+            List,
+            typename append<List, T>::type
+        >;
+    };
+    template<typename List, typename T>
+    using append_unique_v = typename append_unique<List,T>::type;
 
-} // namespace TypeList
+    template<typename... Lists>
+    struct concat_all;
+
+    // zero lists -> empty list
+    template<>
+    struct concat_all<> {
+        using type = TypeList<>;
+    };
+
+    // single list -> itself
+    template<typename List>
+    struct concat_all<List> {
+        using type = List;
+    };
+
+    // recursive: fold the remaining lists into Head using append
+    template<typename Head, typename... Tail>
+    struct concat_all<Head, Tail...> {
+        using type = typename fold<
+            TypeList<Tail...>, // the list of lists to iterate
+            Head,              // accumulator starts as Head
+            append             // append<Acc, T>::type produces Acc with T appended
+        >::type;
+    };
+
+    template<typename... Lists>
+    using concat_all_t = typename concat_all<Lists...>::type;
+
+}

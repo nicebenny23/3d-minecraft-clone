@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdexcept>
-#include <vector>
+
 #include <new>
 #include <cstdlib>
 #include <cstring>
@@ -9,12 +9,44 @@
 #include "Option.h"
 #include "array_storage.h"
 #include "pipeline.h"
+#include <chrono>
+#include <algorithm>
+#include "index.h"
+#include "../debugger/console.h"
 namespace stn {
-	//make a std::out_of_range formatted exepction
+	struct Timer {
+		size_t poll_number;
+		using clock = std::chrono::high_resolution_clock;
+		std::chrono::time_point<clock> start;
+		std::string name;
 
+		// Start the timer with an optional name
+		Timer(const std::string& n = "") : name(n), poll_number(0){
+			start = clock::now();
+		}
+
+		// Call this to stop and print the elapsed time
+		void poll() {
+			auto end = clock::now();
+			auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
+			if (100000<duration)
+			{
+
+				debug(std::format(" on poll {} [Timer] {} took {} µs\n",
+					poll_number,
+					name.empty() ? "Block" : name,
+					duration));
+			}	
+			start = clock::now();
+			poll_number++;
+		}
+		~Timer() {
+			poll();
+		}
+	};
 	// Resizing function that doubles the size of the array when needed.
 	// If the length is 0, it initializes to a default size of 2.
-	inline constexpr size_t resize_length(size_t len) {
+	inline constexpr std::size_t resize_length(std::size_t len) {
 		return (len == 0) ? 2 : 2 * len;  // Double the capacity for efficient reallocation
 	}
 	template<class T>
@@ -22,25 +54,39 @@ namespace stn {
 	public:
 
 		static constexpr bool is_default = std::is_default_constructible_v<T>;
+		static constexpr bool is_trivial_default = std::is_default_constructible_v<T>;
 		static constexpr bool is_trivially_copyable = std::is_trivially_copyable_v<T>;
 		static constexpr bool is_copyable = std::is_copy_assignable_v<T>;
 		inline constexpr bool empty() const
 		{
 			return len == 0;
 		}
-		inline constexpr std::uint32_t cap() const
+		inline constexpr bool nonempty() const
+		{
+			return len != 0;
+		}
+		inline constexpr std::size_t cap() const
 		{
 			return capacity;
 		}
-		inline constexpr std::uint32_t length() const
+		inline constexpr std::size_t last_index() const
+		{
+			if (empty())
+			{
+				throw std::logic_error("Cannot access the last index of an empty array");
+			}
+			return len-1;
+		}
+	
+		inline constexpr size_t length() const
 		{
 			return len;
 		}
-		inline constexpr std::uint32_t size() const {
+		inline constexpr std::size_t size() const {
 			return len;
 		}
 
-		constexpr bool contains_index(uint32_t index) const {
+		inline constexpr bool contains_index(size_t index) const {
 
 			return index < len;
 		}
@@ -70,29 +116,43 @@ namespace stn {
 		decltype(auto) pipe()&& {
 			return stn::range(std::move(*this));
 		}
-		[[nodiscard]] T& unchecked_at(uint32_t index) {
+		[[nodiscard]] T& unchecked_at(size_t index) {
 			return list[index];
 		}
-		[[nodiscard]] const T& unchecked_at(uint32_t index) const {
+		[[nodiscard]] const T& unchecked_at(size_t index) const {
 			return list[index];
 		}
-		[[nodiscard]] T& operator[](uint32_t index) {
+		[[nodiscard]] T& operator[](size_t index) {
 			if (!contains_index(index)) {
-				throw make_range_exception("Index {} is out of bounds: cannot access element in array of length {}", index, length());
+				throw_range_exception("Index {} is out of bounds: cannot access element in array of len {}", index, length());
 			}
 			return list[index];
 		}
-		[[nodiscard]] const T& operator[](uint32_t index) const {
+		[[nodiscard]] const T& operator[](size_t index) const {
 			if (!contains_index(index)) {
-				throw make_range_exception("Index {} is out of bounds: cannot access element in array of length {}", index, length());
+				throw_range_exception("Index {} is out of bounds: cannot access element in array of len {}", index, length());
 			}
 			return list[index];
 		}
-		[[nodiscard]] T& reach(uint32_t index) requires(is_default)
+		[[nodiscard]] T& operator[](typed_index<T> index) {
+			return (*this)[index.index];
+		}
+		[[nodiscard]] const T& operator[](typed_index<T> index) const {
+			return (*this)[index.index];
+		}
+		[[nodiscard]] T& reach(size_t index) requires(is_default)
 		{
 			if (!contains_index(index))
 			{
 				geometric_expand(index + 1);
+			}
+			return list[index];
+		}
+		[[nodiscard]] T& reach(size_t index,const T& value)requires(is_copyable)
+		{
+			if (!contains_index(index))
+			{
+				geometric_expand(index + 1,value);
 			}
 			return list[index];
 		}
@@ -138,23 +198,46 @@ namespace stn {
 				fn(list[i]);
 			}
 		}
-		Option<uint32_t> find(const T& value) const {
+		Option<size_t> find(const T& value) const requires std::equality_comparable<T>  {
 			for (size_t i = 0; i < len; i++)
 			{
 				if (list[i] == value)
 				{
-					return Option<uint32_t>(i);
+					return Option<size_t>(i);
 				}
 			}
 			return None;
 		}
 		// contains using ranges
-		bool contains(const T& value) const {
+		bool contains(const T& value) const requires std::equality_comparable<T> {
 			return find(value).is_some();
 		}
-		template<typename Pred>
-		bool any(Pred&& pred) {
-			return pipe().any(pred);
+		//returns a refrence to the first element it finds satifying a predicate: or none if it finds no such element.
+		template<std::predicate<T> Pred>
+		Option<T&> such_that(Pred&& pred) {
+			for (size_t i = 0; i < len; i++)
+			{
+				if (pred(list[i]))
+				{
+					return list[i];
+				}
+			}
+			return None;
+		}
+		template<std::predicate<const T> Pred>
+		Option<const T&> such_that(Pred&& pred) const {
+			for (size_t i = 0; i < len; i++)
+			{
+				if (pred(list[i]))
+				{
+					return list[i];
+				}
+			}
+			return None;
+		}
+		template<std::predicate<const T> Pred>
+		bool any(Pred&& pred) const {
+			return such_that(pred).is_some();
 		}
 
 		template<typename Pred>
@@ -165,20 +248,31 @@ namespace stn {
 		decltype(auto) filter(Pred&& pred) const {
 			return pipe().filter(pred);
 		}
+		template<typename Pred>
+		decltype(auto) filter(Pred&& pred) {
+			return pipe().filter(pred);
+		}
 		template<typename Function>
 		decltype(auto) map(Function&& func) const {
 			return pipe().map(func);
 		}
 		template<typename Function>
+		decltype(auto) map(Function&& func){
+			return pipe().map(func);
+		}
 		decltype(auto) enumerate() const {
+			return pipe().enumerate();
+		}
+		decltype(auto) enumerate() {
 			return pipe().enumerate();
 		}
 
 		template<typename... Args>
 			requires std::constructible_from<T, Args&&...>
-		void emplace(Args&&... args) {
+		T& emplace(Args&&... args) {
 			geometric_reserve(len + 1);
-			list.construct_at(len++, std::forward<Args>(args)...);
+			list.construct_at(len, std::forward<Args>(args)...);
+			return list[len++];
 		}
 
 		template<typename U>
@@ -216,7 +310,7 @@ namespace stn {
 		template<typename... Args>
 		T& emplace_at(size_t index, Args&&... args) 	requires std::constructible_from<T, Args&&...> {
 			if (index > len) {
-				throw make_range_exception("Emplace failed: index {} out of bounds (length {})", index, len);
+				throw_range_exception("Emplace failed: index {} out of bounds (len {})", index, len);
 			}
 
 			geometric_reserve(len + 1);
@@ -265,10 +359,9 @@ namespace stn {
 			}
 			list.destruct_at(--len);
 		}
-		void swap_drop(uint32_t index) {
+		void swap_drop(size_t index) {
 			if (!contains_index(index)) {
-				throw make_range_exception(
-					"swap_drop failed: index {} out of bounds (length {})", index, len);
+				throw_range_exception("swap_drop failed: index {} out of bounds (len {})", index, len);
 			}
 
 
@@ -280,10 +373,10 @@ namespace stn {
 			len--;
 		}
 		// Delete an element at the given index, shifting others.
-		void remove_at(uint32_t index) {
+		void remove_at(size_t index) {
 			if (!contains_index(index))
 			{
-				throw make_range_exception("Deletion failed: index {} out of bounds (length {})", index, len);
+				throw_range_exception("Deletion failed: index {} out of bounds (len {})", index, len);
 			}
 			//works by backtracking all elements above it overiding them
 			len--;
@@ -301,7 +394,7 @@ namespace stn {
 			list.destruct_at(len);
 		}
 
-		[[nodiscard]] bool operator==(const array& other) const
+		[[nodiscard]] bool operator==(const array& other) const requires std::equality_comparable<T>
 		{
 			if (len != other.len)
 			{
@@ -316,7 +409,7 @@ namespace stn {
 			}
 			return true;
 		}
-		[[nodiscard]] bool operator!=(const array& other) const
+		[[nodiscard]] bool operator!=(const array& other) const requires std::equality_comparable<T>
 		{
 			return !(*this == other);
 		}
@@ -330,24 +423,17 @@ namespace stn {
 
 		constexpr array() noexcept :len(0), capacity(0), list() {}
 
-		array(uint32_t length, const T& default_value)  requires (is_copyable) {
+		array(size_t length, const T& default_value)  requires (is_copyable) {
 
-			len = length;
+			len = 0;
 			capacity = 0;
-			geometric_reserve(len);
-			for (size_t i = 0; i < len; i++)
-			{
-				list.construct_at(i, default_value);
-			}
+			geometric_expand(length, default_value);
 		}
-		array(uint32_t length)  requires(is_default) {
-			len = length;
+		array(size_t length)  requires(is_default) {
+			
 			capacity = 0;
-			geometric_reserve(len);
-			for (size_t i = 0; i < len; i++)
-			{
-				list.construct_at(i, T());
-			}
+			len = 0;
+			geometric_expand(length);
 		}
 		
 		// Copy constructor.
@@ -377,10 +463,11 @@ namespace stn {
 				list.mem_copy_from(other.list, other.len);
 			}
 			else {
-				for (size_t i = 0; i < len; i++) {
+				size_t elements_to_move= std::min(len, other.len);
+				for (size_t i = 0; i < elements_to_move; i++) {
 					list.expand_at(i, other.list[i]);
 				}
-				for (size_t i = len; i < other.len; i++) {
+				for (size_t i = elements_to_move; i < other.len; i++) {
 					list.construct_at(i, other.list[i]);
 				}
 				for (size_t i = other.len; i < len; i++) {
@@ -399,16 +486,26 @@ namespace stn {
 			other.capacity = 0;
 
 		}
-		array& operator=(array&& other) = default;
+		array& operator=(array&& other) noexcept {
+			clear();
+			len = other.len;
+			capacity = other.capacity;
+			list = std::move(other.list);
+			other.len = 0;
+			other.capacity = 0;
+			return *this;
+
+		};
 
 		template<std::forward_iterator InputIt>
+			requires std::constructible_from<T, typename std::iterator_traits<InputIt>::value_type>
 		array(InputIt first, InputIt last) : len(0), capacity(0), list() {
 			// Count elements if possible
-			uint32_t length = std::distance(first, last);
+			size_t length = std::distance(first, last);
 			if (length != 0) {
 				reserve(length);
 
-				uint32_t i = 0;
+				size_t i = 0;
 				for (; first != last; ++first, ++i) {
 					// move if possible, otherwise copy
 					list.construct_at(i, std::forward<decltype(*first)>(*first));
@@ -423,7 +520,7 @@ namespace stn {
 		array(std::initializer_list<U> ilist) : array(ilist.begin(), ilist.end()) {}
 		void clear()
 		{
-			if (!empty()) {
+			if (capacity!=0) {
 				if constexpr (!std::is_trivially_destructible_v<T>)
 				{
 					for (size_t i = 0; i < len; i++)
@@ -431,13 +528,15 @@ namespace stn {
 						list.destruct_at(i);
 					}
 				}
-				list.reset();
+				//because list.clear  in this case must this is bad design so rmove later
+				list.clear();
 				len = 0;
 				capacity = 0;
 			}
 		}
 
 		~array() {
+
 			clear();
 		}
 
@@ -496,55 +595,87 @@ namespace stn {
 			return const_iterator(d ? d + len : nullptr);
 		}
 		//expands the length and capacity to fit size exactly
-		void expand(uint32_t size) requires(is_default) {
+		void expand(size_t size, const T& value)requires (is_copyable) {
 			if (len < size)
 			{
 				reserve(size);
-				for (uint32_t i = len; i < size; i++) {
-					list.construct_at(i, T());
+				for (size_t i = len; i < size; i++) {
+					list.construct_at(i, value);
 				}
 				len = size;
 			}
 
 		}
-		void geometric_expand(uint32_t size) requires(is_default) {
+		void expand(size_t size) requires(is_default) {
 			if (len < size)
 			{
-				reserve(resize_length(size));
+				reserve(size);
 				for (size_t i = len; i < size; i++) {
 					list.construct_at(i, T());
 				}
 				len = size;
 			}
+
+		}
+		void geometric_expand(size_t new_size) requires(is_default) {
+			if (capacity < new_size)
+			{
+				reserve(resize_length(new_size));
+				
+			}
+			if (len<new_size)
+			{
+				for (size_t i = len; i < new_size; i++) {
+					list.construct_at(i, T());
+				}
+				len = new_size;
+			}
+		}
+		
+		void geometric_expand(size_t new_size, const T& value) requires (is_copyable){
+			if (capacity < new_size)
+			{
+				reserve(resize_length(new_size));
+
+			}
+			if (len < new_size)
+			{
+
+				for (size_t i = len; i < new_size; i++) {
+					list.construct_at(i, value);
+				}
+				len = new_size;
+
+			}
 		}
 
 		//expands the capacity geometricly
-		void geometric_reserve(uint32_t size) {
-			if (capacity < size)
+		void geometric_reserve(size_t new_size) {
+			if (capacity < new_size)
 			{
-				reserve(resize_length(size));
+				reserve(resize_length(new_size));
 			}
 
 		}
 
-		void reserve(uint32_t size) {
-			if (size <= capacity)
+		void reserve(size_t new_size) {
+			if (new_size <= capacity)
 			{
 				return;
 			}
 			// arbitrary safety margin to prevent overflow errors 
-			constexpr uint32_t max_size = 2<<30;
-			if (size > max_size) {
-				throw make_range_exception("Requested reserve size {} exceeds maximum allowed {}", size, max_size);
+			constexpr size_t max_size = 2<<30;
+			if (new_size > max_size) {
+				throw_range_exception("Requested reserve size {} exceeds maximum allowed {}", new_size, max_size);
 			}
-			list.size_to(len, capacity, size);
-			capacity = size;
+			list.size_to(len, capacity, new_size);
+			capacity = new_size;
 		}
 
 	private:
 		array_storage::array_storage<T> list;
-		uint32_t len;
-		uint32_t capacity;
+		size_t len;
+		size_t capacity;
 		inline constexpr bool use_mem_ops() const {
 			if constexpr (is_trivially_copyable) {
 				constexpr size_t mem_oper_mul = 128;

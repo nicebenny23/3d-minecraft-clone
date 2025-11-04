@@ -10,7 +10,10 @@
 #include "Option.h"
 
 namespace stn {
-
+    template<typename Func, typename Arg>
+    concept map_on =
+        std::invocable<Func&, Arg> &&
+        (!std::same_as<std::invoke_result_t<Func&, Arg>, void>);
     // --- minimal Range concept ---
     template<typename RangeType>
     concept Range = requires(RangeType & r) {
@@ -32,7 +35,8 @@ namespace stn {
         requires requires(Func f, std::iter_value_t<std::ranges::iterator_t<Source&>> const& elem) {
             { f(elem) } -> std::same_as<void>; // func must accept const ref and return void
     }struct InspectView;
-    template<Range Source, typename Func> struct MapView;
+    template<Range Source, typename Func>
+        struct MapView;
     template<Range Source, typename Pred> struct FilterView;
     template<Range Source> struct EnumView;
     template<Range A, Range B> struct ZipView;
@@ -56,7 +60,8 @@ namespace stn {
         const_iterator begin() const { return std::begin(stored_range); }
         const_iterator end()   const { return std::end(stored_range); }
 
-        using value_type = std::iter_value_t<iterator>;
+        using value_type = std::ranges::range_value_t<stored_type>;
+       
 
 
         template<typename R>
@@ -78,28 +83,25 @@ namespace stn {
         }
 
         //you cannot make it just a const version because they can only deduce arguments when it is an extenral fyntction
-        template<typename Func>
-        auto map(Func&& f)&& {
+        template<map_on<std::ranges::range_reference_t<stored_type>> Func>
+        range<MapView<stored_type, std::decay_t<Func>>> map(Func&& f)&& {
             using View = MapView<stored_type, std::decay_t<Func>>;
-            return range<View>{
-                View{ std::move(stored_range), std::forward<Func>(f) }
-            };
+            View v(std::forward<stored_type>(stored_range), std::forward<Func>(f));
+            return range<View>(std::move(v));                       
         }
 
-        // Lvalue map: preserves the original range
-        template<typename Func>
-        auto map(Func&& f) const& {
+        // lvalue map
+        template<map_on<const std::ranges::range_reference_t<stored_type>> Func>
+        range<MapView<const stored_type&, std::decay_t<Func>>> map(Func&& f) const& {
             using View = MapView<const stored_type&, std::decay_t<Func>>;
-            return range<View>{
-                View{ stored_range, std::forward<Func>(f) }
-            };
+            //passing as && would be dangerous as you would store asT&&
+            
+            return range<View>(View (stored_range, std::forward<Func>(f)));
         }
         template<typename Func>
         auto inspect(Func&& f)&& {
             using View = InspectView<stored_type, std::decay_t<Func>>;
-            return range<View>{
-                View{ std::move(stored_range), std::forward<Func>(f) }
-            };
+            return range<View>(View(std::move(stored_range), std::forward<Func>(f)));
         }
 
         // Lvalue map: preserves the original range
@@ -110,34 +112,32 @@ namespace stn {
                 View{ stored_range, std::forward<Func>(f) }
             };
         }
-        template<typename Pred>
-        auto filter(Pred&& p)&& {
-            using view = FilterView<stored_type, std::decay_t<Pred>>;
-            return range<view>{
-                view{ std::move(stored_range), std::forward<Pred>(p) }
-            };
+        template<std::predicate<value_type&> Pred>
+        range<FilterView<stored_type, std::decay_t<Pred>>> filter(Pred&& p)&& {
+            using View = FilterView<stored_type, std::decay_t<Pred>>;
+            // if stored_type is a copy then we can refrence the orignal otherwise if it owns it we should steal it.
+
+            return range<View>(View(stored_range, std::forward<Pred>(p)));
         }
 
-        template<typename Pred>
-        auto filter(Pred&& p) const& {
-            using view = FilterView<const stored_type&, std::decay_t<Pred>>;
-            return range<view>{
-                view{ stored_range, std::forward<Pred>(p) }
-            };
+        // lvalue filter
+        template<std::predicate<const value_type&> Pred>
+        range<FilterView<const stored_type&, std::decay_t<Pred>>>  filter(Pred&& p) const& {
+            using View = FilterView<const stored_type&, std::decay_t<Pred>>;
+            return range<View>(View(stored_range, std::forward<Pred>(p)));
         }
-
         auto enumerate()&& {
-            using view = EnumView<stored_type>;
-            return range<view>{
-                view{ std::move(stored_range) }
+            using View = EnumView<stored_type>;
+            return range<View>{
+                View{ std::move(stored_range) }
             };
         }
 
 
         auto enumerate() const& {
-            using view = EnumView<const stored_type&>;
-            return range<view>{
-                view{ stored_range}
+            using View = EnumView<const stored_type&>;
+            return range<View>{
+                View{ stored_range}
             };
         }
 
@@ -152,10 +152,10 @@ namespace stn {
 
         template<template<typename...> class Container>
             requires std::constructible_from<Container<value_type>, iterator, iterator>
-        auto into() const {
+        Container<value_type> into() const {
             return Container<value_type>{ begin(), end()};
         }
-
+  
         template<typename Func>
         void for_each(Func&& f) {
             for (auto&& element : stored_range) {
@@ -248,7 +248,7 @@ namespace stn {
         Func func;
         //same functoinality as above,takes ownership of R values and refrences L values
         template<typename S>
-        MapView(S&& s, Func f)
+        MapView(S&& s, Func f) requires std::constructible_from<stored_t,S&&>
             : source(std::forward<S>(s)), func(std::move(f)) {
         }
         // Iterator template: Iter = underlying iterator type, FuncPtr = Func* or const Func*
@@ -259,7 +259,7 @@ namespace stn {
             using base_category = typename std::iterator_traits<iter_t>::iterator_category;
 
             // Determine value_type and reference type
-            using value_type = std::invoke_result_t<Func&, decltype(*iter)>;
+            using value_type = std::invoke_result_t<Func&, std::iter_reference_t<iter_t>>;
             using reference = value_type;
             using pointer = void;
             using difference_type = std::iter_difference_t<iter_t>;
@@ -269,7 +269,9 @@ namespace stn {
                 std::random_access_iterator_tag,
                 base_category
             >;
-
+            // compute result of invoking func on the iterator reference
+         
+            static_assert(!std::is_void_v<value_type>, "MapView Func must not return void (use InspectView for void).");
             static constexpr bool is_bidirectional = std::derived_from<iterator_category, std::bidirectional_iterator_tag>;
             static constexpr bool is_random_access = std::derived_from<iterator_category, std::random_access_iterator_tag>;
 
@@ -393,6 +395,7 @@ namespace stn {
         const_iterator end()   const { return const_iterator{ std::end(source), &func }; }
     };
     // ---------------- FilterView ----------------
+    //predicate checked in the .method
     template<Range Source, typename Pred>
     struct FilterView {
         using stored_t = stored_range_t<Source>;
@@ -400,7 +403,7 @@ namespace stn {
         Pred pred;
 
         template<typename S>
-        FilterView(S&& s, Pred p)
+        FilterView(S&& s, Pred p) requires std::constructible_from<stored_t, S&&>
             : source(std::forward<S>(s)), pred(std::move(p)) {
         }
         //while it is techniccly  bidiectional making it bidirectioal would slow it down
@@ -612,11 +615,11 @@ namespace stn {
         std::sized_sentinel_for<std::ranges::sentinel_t<R>, std::ranges::iterator_t<R>>;
     template<RandomRange R, typename Compare = std::less<>>
     struct SortAction {
-        R& src; // always a reference; we sort in-place
+        R& src; 
         Compare comp;
 
         explicit SortAction(R& r, Compare c = {}) : src(r), comp(c) {
-            //  std::sort(std::begin(src), std::end(src), comp); // in-place sort
+            std::sort(std::begin(src), std::end(src), comp); 
         }
 
         auto begin() { return std::begin(src); }

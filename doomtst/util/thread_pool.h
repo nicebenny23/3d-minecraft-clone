@@ -3,6 +3,7 @@
 #include <functional>
 #include <condition_variable>
 #include "mathutil.h"
+#include "../debugger/debug.h"
 #include <atomic>
 #pragma once
 namespace thread {
@@ -93,12 +94,19 @@ namespace thread {
 		}
 		~thread_pool() {
 			wait();
+
+			tasks.clear();
 		}
 
 		thread_pool(size_t n):tasks(){
 			stop = false;
 			working_threads = 0;
 			size_t max_threads = Min(n, std::thread::hardware_concurrency());
+			if constexpr (debug_slow)
+			{
+				//singlethread
+				max_threads = 1;
+			}
 			for (size_t i = 0; i < max_threads; i++)
 			{
 				threads.push(std::thread([this] {thread_wait(); }));

@@ -5,13 +5,12 @@
 
 void integertext::set_handle()
 {
-	if (handle)
+	if (!handle)
 	{
-		handle.destroy();
+		handle = CtxName::ctx.Ren->gen_renderable();
+		handle.set_material("Text");
+		handle.set_layout(vertice::vertex().push<float, 2>().push<float, 3>());
 	}
-	handle = CtxName::ctx.Ren->gen_renderable();
-	handle.set_material("Text");
-	handle.set_layout(vertice::vertex().push<float, 2>().push<float, 3>());
 }
 integertext::integertext(v2::Vec2 textcenter, float textscale)
 {
@@ -63,10 +62,10 @@ void inittextarray()
 	texlist[7] = "bitmaptext\\sevenimg.png";
 	texlist[8] = "bitmaptext\\eightimg.png";
 	texlist[9] = "bitmaptext\\nineimg.png";
-	Ids::Id textarray = CtxName::ctx.Ren->Textures.LoadTextureArray(texlist, "Letters");
+	renderer::texture_id textarray= CtxName::ctx.Ren->Textures.LoadTextureArray(texlist, "Letters");
 	CtxName::ctx.Ren->set_uniform("letters", textarray);
 ;	CtxName::ctx.Ren->Shaders.Compile("TextShader", "shaders\\textvertex.vs", "shaders\\textfragment.vs");
-	CtxName::ctx.Ren->Construct("Text", "TextShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+	CtxName::ctx.Ren->construct_material("Text", "TextShader", renderer::RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
 		uniforms::uparam("aspect_ratio", "aspectratio"),
 		uniforms::uparam("letters", "tex")
 

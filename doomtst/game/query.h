@@ -43,18 +43,18 @@ namespace query {
 
 	template<typename... Components>
 	struct View {
-		stn::array<gameobject::arch_id> archtypes;
+		stn::array<gameobject::archetype_id> archetypes;
 		gameobject::Ecs* ecs;
-		gameobject::Archtype& operator[](size_t index) {
-			return (*ecs)[archtypes[index]];
+		gameobject::Archetype& operator[](size_t index) {
+			return (*ecs)[archetypes[index]];
 		}
-		array<comp::Id> positions;
+		array<ecs::component_id> positions;
 		struct Iterator {
 			View& owner;
-			size_t entity_index;
-			size_t arch_index;
+			std::uint32_t entity_index;
+			std::uint32_t arch_index;
 
-			Iterator(View& vw, size_t ent_index = 0,size_t ArchIndex=0)
+			Iterator(View& vw, std::uint32_t ent_index = 0, std::uint32_t ArchIndex=0)
 				:owner(vw), arch_index(ArchIndex), entity_index(ent_index) {
 			}
 
@@ -62,7 +62,7 @@ namespace query {
 				entity_index++;
 
 				// loop until we find a valid entity in a valid archetype
-				while (arch_index < owner.archtypes.length()) {
+				while (arch_index < owner.archetypes.length()) {
 					auto& arch = owner[arch_index];
 					if (entity_index < arch.count()) {
 						break;
@@ -81,11 +81,11 @@ namespace query {
 				return !(*this == other);
 			}
 			auto operator*() {
-				auto& archtype = owner[arch_index];
-				if (archtype.count() == 0) {
+				auto& archetype = owner[arch_index];
+				if (archetype.count() == 0) {
 					throw std::out_of_range("Invalid dereference: View is empty or index out of range.");
 				}
-				return owner.ecs->get_tuple<Components...>(archtype[entity_index],owner.positions);
+				return owner.ecs->get_tuple<Components...>(archetype[entity_index],owner.positions);
 			}
 			
 		};
@@ -94,38 +94,35 @@ namespace query {
 			Iterator it(*this, 0, 0);
 
 			// Skip empty archetypes at the beginning
-			while (it.arch_index < archtypes.length() &&
-				ecs->arch[archtypes[it.arch_index]].elems.length() == 0) {
+			while (it.arch_index < archetypes.length() &&
+				ecs->arch[archetypes[it.arch_index]].elems.length() == 0) {
 				++it.arch_index;
 			}
 
 			return it;
 		}
 		Iterator end() {
-			return Iterator(*this, 0, archtypes.length());
+			return Iterator(*this, 0, archetypes.length());
 		}
-		View(gameobject::Ecs* world):ecs(world), archtypes(),positions(){
-			if (!ecs->component_indexer.contains_all<Components...>())
+		View(gameobject::Ecs* world):ecs(world), archetypes(),positions(){
+			if (!ecs->component_indexer.contains_ids<Components...>())
 			{
 				return;
 			}
-			positions = ecs->component_indexer.get_type_ids<Components...>();
+			positions = ecs->component_indexer.get_ids<Components...>();
 
-			bitset::bitset bitlist;
-			bitlist.expand(ecs->component_indexer.size());
-			for (auto id : positions) {
-				bitlist.set(id.id);
-			}
+			stn::bitset bitlist(positions);
+
 			for (auto& arch : ecs->arch) {
 				if (arch->has_components(bitlist)) {
 					if (arch->id()>100)
 					{
 						int l =arch->id();
 					}
-					archtypes.push(gameobject::arch_id(arch->id()));
+					archetypes.push(gameobject::archetype_id(arch->id()));
 				}
 			}
-			for (auto& arch:archtypes )
+			for (auto& arch:archetypes )
 			{
 				if (arch.id> 100) {
 					int l1 = 1;
@@ -144,18 +141,18 @@ namespace query {
 		View<result> Build(gameobject::Ecs* ecs) {
 			View<result> output_arch;
 			output_arch.ecs = ecs;
-			bitset::bitset exclude;
-			bitset::bitset require;
-			stn::array<comp::Id> output;
+			stn::bitset exclude;
+			stn::bitset require;
+			stn::array<ecs::component_id> output;
 
-			output = ecs->component_indexer.get_type_ids<result...>();
+			output = ecs->component_indexer.get_ids<result...>();
 			require = ecs->bitset_of<needed...>();
 			exclude = ecs->bitset_of<excluded...>();
-			for (auto arch : ecs->arch.archtypes)
+			for (auto arch : ecs->arch.archetypes)
 			{
 				if (arch->has_components(require) && !arch->has_any(exclude))
 				{
-					output_arch.archtypes.push(arch);
+					output_arch.archetypes.push(arch);
 
 				}
 
@@ -169,22 +166,22 @@ namespace query {
 	struct ComponentIterator {
 		gameobject::obj owner;
 		gameobject::Ecs* manager;
-		const array<size_t>& dense_bits;
+		const array<ecs::component_id>& dense_bits;
 		size_t ind = 0;
 
-		ComponentIterator(gameobject::obj obj, gameobject::Ecs* man, const array<size_t>& bits, size_t index)
+		ComponentIterator(gameobject::obj obj, gameobject::Ecs* man, const array<ecs::component_id>& bits, size_t index)
 			: owner(obj), manager(man), dense_bits(bits), ind(index) {
 		}
 
 		gameobject::component* operator*() {
-			size_t comp_id = dense_bits[ind];
-			auto& store = manager->comp_storage[comp_id].store;
-			gameobject::component* value = store[owner.id()];
+			ecs::component_id comp_id = dense_bits[ind];
+			auto& store = manager->comp_storage[comp_id.id];
+			gameobject::component* value = store[owner];
 			if (value == nullptr) {
 				// FAIL FAST with a clear error
 				throw std::logic_error(
 					"ECS invariant violated: archetype lists comp_id " +
-					std::to_string(comp_id) +
+					std::to_string(comp_id.id) +
 					" for entity " + std::to_string(owner.id()) +
 					", but store does not contain that key.");
 			}
@@ -202,9 +199,8 @@ namespace query {
 	//will not care if component list has been changed during the iteration
 	struct ComponentView {
 		gameobject::obj owner;
-		array<size_t> dense_bits;
-		ComponentView(gameobject::obj o) : owner(o) {
-			dense_bits = (*o.OC)[owner.meta().arch].bit_list.indices();
+		array<ecs::component_id>& dense_bits;
+		ComponentView(gameobject::obj o) : owner(o), dense_bits((*o.OC)[o.meta().arch].positions){
 		}
 
 		ComponentIterator begin() {

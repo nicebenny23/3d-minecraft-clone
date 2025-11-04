@@ -57,7 +57,7 @@ int chaotic_overide(float chaotic, biometype biome) {
 	{
 		return minecraftcrystal;
 	}
-	if (inter::range(.01,.03f).contains(chaotic))
+	if (inter::range(.01f,.03f).contains(chaotic))
 	{
 		return get_secondary_block(biome);
 	}
@@ -149,7 +149,7 @@ struct idblock {
 	}
 	idblock() {
 		id = -1;
-		pos = zeroiv;
+		pos = ZeroCoord;
 	}
 };
 
@@ -195,9 +195,9 @@ struct idmap
 
 	}
 	idmap(Coord location) {
-		slow= genperlin(1,1, .005f, 1.2);
-		map = genperlin(3, .6f, .02f, 1.2);
-		crazy= genperlin(4, 1.f, .005f, 1.2);
+		slow= genperlin(1,1, .005, 1.2);
+		map = genperlin(3, .6, .02, 1.2);
+		crazy= genperlin(4, 1., .005, 1.2);
 		middle_map = genperlin(2, 1, .005, 1.2);
 		array<size_t> x_pos;
 		for (auto i = 0; i < chunkaxis; i++)
@@ -226,7 +226,7 @@ Chunk::chunk* ChunkLoader::AllocChunk(Coord location)
 	newchunk.modified = false;
 	createchunkmesh(&newchunk);
 	newchunk.loc = location;
-	newchunk.blockbuf = new gameobject::obj[chunksize];
+	newchunk.blockbuf =array< gameobject::obj>(chunksize);
 	for (int i = 0; i < chunksize; i++) {
 		newchunk.blockbuf[i]= Grid->ctx->OC->spawn_empty();
 		newchunk.blockbuf[i].addcomponent < block>();

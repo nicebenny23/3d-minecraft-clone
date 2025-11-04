@@ -46,7 +46,7 @@ struct spawn_mobs :System {
 			{
 				return stn::None;
 			}
-			v3::Vec3 pos = spawn_loc().center;
+			v3::Vec3 pos = spawn_loc.unwrap().center;
 			if (!ensure_light_level(pos))
 			{
 				continue;
@@ -60,7 +60,7 @@ struct spawn_mobs :System {
 		return stn::None;
 	}
 	void run(gameobject::Ecs* ecs) {
-
+		return;
 		if (!blockrender::enablelighting)
 		{
 			return;
@@ -100,7 +100,7 @@ struct spawn_mobs :System {
 					{
 						continue;
 					}
- 					createslime(spawn_loc().center, false);
+ 					createslime(spawn_loc.unwrap().center, false);
 					
 				
 

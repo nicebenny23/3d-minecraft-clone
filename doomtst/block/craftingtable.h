@@ -98,14 +98,5 @@ inline void tableinit(blockname::block* blk) {
 		blk->owner.addcomponent<craftingtablecomp>();
 
 	}
-	blk->owner.addcomponent<loottable>()->addelem(craftingtableitem, 1, false);
+	blk->owner.addcomponent<loottable>().addelem(craftingtableitem, 1, false);
 }
-inline void tabledelete(blockname::block* blk) {
-	blk->owner.removecomponent<aabb::Collider>();
-
-	blk->owner.removecomponent<craftingtablecomp>();
-	
-	blk->owner.removecomponent<loottable>();
-}
- // !wood_HPP
-

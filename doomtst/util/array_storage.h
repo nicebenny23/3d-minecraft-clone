@@ -7,7 +7,7 @@ namespace array_storage {
 	template <typename T>
 	struct aligned_store {
 		template<typename ...Args>
-		void construct_at(size_t index, Args&&... args) {
+		void construct_at(size_t index, Args&&... args) requires(std::is_constructible_v<T,Args&&...>){
 			new (get_ptr(index)) T(std::forward<Args>(args)...);
 		}
 		aligned_store() = default;
@@ -20,10 +20,10 @@ namespace array_storage {
 			*(get_ptr(index)) = std::move(value);
 
 		}
-		void reset() {
+		void clear() {
 			if (storage != nullptr)
 			{
-				delete[] storage;
+				::operator delete(storage);
 				storage = nullptr;
 			}
 		}
@@ -32,41 +32,39 @@ namespace array_storage {
 		}
 
 		const T& operator[](size_t index) const {
-			return *get_ptr(index);
+			return storage[index];
 		}
 		//contract index<length
 		T& operator[](size_t index) {
-			return *get_ptr(index);
+			return storage[index];
 		}
+		//never used
 		void mem_copy_from(const aligned_store& other, size_t length) {
-			std::memcpy(storage, other.storage, sizeof(T) * length);
+			//should never be called ;
+			std::unreachable();
 		}
 		void size_to(size_t len, size_t capacity, size_t new_capacity) {
 			// allocate new raw byte buffer
-			std::byte* newbuf = new std::byte[new_capacity * sizeof(T)];
+			T* new_buf = static_cast<T*>(::operator new(sizeof(T) * new_capacity));
 			// move-construct existing elements into new buffer
 			if (storage != nullptr) {
 				for (size_t i = 0; i < len; ++i) {
-					T* src = std::launder(reinterpret_cast<T*>(storage + i * sizeof(T)));
-					T* dst = std::launder(reinterpret_cast<T*>(newbuf + i * sizeof(T)));
-					
-					new (dst) T(std::move(*src));
-					src->~T();
+					new (new_buf + i) T(std::move(storage[i]));
+					storage[i].~T();
 				}
-				delete[] storage;
+				clear();
 			}
-			
-			storage = newbuf;
+			storage = new_buf;
 		}
 
 		explicit operator bool() const {
 			return storage != nullptr;
 		}
 		const T* data() const {
-			return (T*)(storage);
+			return storage;
 		}
 		T* data() {
-			return (T*)(storage);
+			return storage;
 		}
 
 		void swap(aligned_store& other) {
@@ -84,15 +82,15 @@ namespace array_storage {
 	private:
 
 		const T* get_ptr(size_t index) const {
-			return std::launder(reinterpret_cast<const T*>(storage + index * sizeof(T)));
+			return storage + index;
 		}
 		T* get_ptr(size_t index) {
-			return std::launder(reinterpret_cast<T*>(storage + index * sizeof(T)));
+			return storage+ index;
 		}
 
 
 	private:
-		std::byte* storage = nullptr;
+		T* storage = nullptr;
 
 	};
 
@@ -111,10 +109,10 @@ namespace array_storage {
 			return storage[index];
 		}
 		default_store() = default;
-		void reset() {
+		void clear() {
 			if (storage != nullptr)
 			{
-				delete[] storage;
+				free(storage);
 				storage = nullptr;
 			}
 		}
@@ -150,6 +148,7 @@ namespace array_storage {
 					else {
 						newlist = (T*)realloc((void*)storage, sizeof(T) * new_capacity);
 						std::memset(newlist + capacity, 0, (new_capacity - capacity) * sizeof(T));
+						
 					}
 
 				}
@@ -167,19 +166,13 @@ namespace array_storage {
 			}
 			else
 			{
-				newlist = new T[new_capacity];
-				for (size_t i = 0; i < capacity; i++) {
-
-					newlist[i] = std::move(storage[i]);
-
+				 newlist = static_cast<T*>(malloc(sizeof(T) * new_capacity));
+				
+				for (size_t i = 0; i < len; ++i) {
+					new (newlist + i) T(std::move(storage[i]));
+					storage[i].~T();
 				}
-			
-				if (capacity != 0)
-				{
-
-					delete[] storage;
-				}
-
+					clear();
 			}
 			storage = newlist;
 		}

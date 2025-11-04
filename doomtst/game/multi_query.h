@@ -19,12 +19,12 @@ struct multi_iter {
 	multi_iter(query::View<Components...>& vw,size_t start,size_t end,const query_func<Components...> func):owner(vw),index(start),end_index(end),function(func) {
 		size_t counter=0;
 		begin = index;
-		for (size_t i = 0; i < owner.archtypes.length(); i++)
+		for (size_t i = 0; i < owner.archetypes.length(); i++)
 		{
 
 			size_t to_add = owner[i].count();
-			size_t archtype_end_index = counter + to_add;
-			if (start < archtype_end_index)
+			size_t archetype_end_index = counter + to_add;
+			if (start < archetype_end_index)
 			{
 				arch_index = i;
 				entity_index = start - counter;
@@ -53,7 +53,7 @@ struct multi_iter {
 			entity_index++;
 
 			// loop until we find a valid entity in a valid archetype
-			while (arch_index < owner.archtypes.length()) {
+			while (arch_index < owner.archetypes.length()) {
 				auto& arch = owner[arch_index];
 				if (entity_index < arch.count()) {
 					break;
@@ -69,9 +69,10 @@ struct multi_iter {
 
 template<typename... Components>
 void multi_query(query::View<Components...>& view, std::function<void(std::tuple<Components*...>)> quer, size_t threads_wanted,size_t count) {
+	
 	size_t total_length = 0;
 
-	for (auto& arch : view.archtypes)
+	for (auto& arch : view.archetypes)
 	{
 		total_length += (*view.ecs)[arch].count();
 	}
@@ -96,10 +97,10 @@ template<typename... Components>
 void multi_query(query::View<Components...>& view, std::function<void(std::tuple<Components*...>)> quer, size_t threads_wanted) {
 	size_t total_length = 0;
 
-	for (auto& arch : view.archtypes)
+	for (auto& arch : view.archetypes)
 	{
 		total_length += (*view.ecs)[arch].count();
 	}
-	multi_query(view, quer, threads_wanted, total_length / threads_wanted);
+	multi_query(view, quer, threads_wanted, 1+total_length/ threads_wanted);
 
 }

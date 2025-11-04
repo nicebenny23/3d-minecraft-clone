@@ -1,8 +1,11 @@
+#pragma once 
 #include <cmath>
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <Windows.h>
 
 #include <glm/glm.hpp>
-#pragma once 
 namespace v2 {
 	struct Vec2;
 	struct Coord2
@@ -134,7 +137,7 @@ namespace v2 {
 	struct Vec2
 	{
 
-		constexpr Vec2(float X, float Y) noexcept;
+		constexpr Vec2(double X, double Y) noexcept;
 		Vec2();
 		Vec2(glm::vec2 glm);
 		explicit Vec2(Coord2 crd);
@@ -147,17 +150,17 @@ namespace v2 {
 		Vec2& operator-=(const Vec2& p1);
 		Vec2 operator-(const Vec2& p1) const;
 
-		Vec2 operator*(float scale) const;
+		Vec2 operator*(double scale) const;
 		
-		Vec2& operator*=(float scale);
+		Vec2& operator*=(double scale);
 
 
-		Vec2 operator/(float scale) const;
+		Vec2 operator/(double scale) const;
 
-		Vec2& operator/=(float scale);
+		Vec2& operator/=(double scale);
 		bool operator==(const Coord2& p1);
-		float x;
-		float y;
+		double x;
+		double y;
 		void operator= (const Coord2 & p1) ;
 		Vec2 operator*(Vec2 scale) const;
 
@@ -184,7 +187,7 @@ namespace v2 {
 		x = crd.x;
 		y = crd.y;
 	}
-	inline float dist(const Vec2& p, const Vec2& p1) {
+	inline double dist(const Vec2& p, const Vec2& p1) {
 
 		return(sqrt((p.x - p1.x) * (p.x - p1.x) + (p.y - p1.y) * (p.y - p1.y)));
 	}
@@ -198,7 +201,7 @@ namespace v2 {
 	}
 
 
-	inline float mag(const Vec2& p) {
+	inline double len(const Vec2& p) {
 
 		return(sqrt(p.x * p.x + p.y * p.y));
 	}
@@ -207,22 +210,22 @@ namespace v2 {
 		{
 			return zerov;
  		}
-		return(p / mag(p));
+		return(p / len(p));
 	}
 	
-	inline float dot(const Vec2& p, const Vec2& p1) {
+	inline double dot(const Vec2& p, const Vec2& p1) {
 
 		return (p.x * p1.x + p.y + p1.y);
 	}
 
 
-	inline Vec2 lerp(const Vec2& p, const Vec2& p1, float t) {
+	inline Vec2 lerp(const Vec2& p, const Vec2& p1, double t) {
 		return p * (1 - t) + p1 * t;
 
 
 	}
 
-	inline float slope(const Vec2& p, const Vec2& p1) {
+	inline double slope(const Vec2& p, const Vec2& p1) {
 		return (p1.y - p.y) / (p1.x - p.x);
 
 
@@ -275,7 +278,7 @@ namespace v2 {
 
 	}
 
-	inline Vec2 Vec2::operator*(float scale) const {
+	inline Vec2 Vec2::operator*(double scale) const {
 
 		return Vec2(x * scale, y * scale);
 
@@ -289,7 +292,7 @@ namespace v2 {
 
 
 	}
-	inline Vec2& Vec2::operator*=(float scale) {
+	inline Vec2& Vec2::operator*=(double scale) {
 
 
 		x *= scale;
@@ -298,13 +301,13 @@ namespace v2 {
 
 	}
 
-	inline Vec2 Vec2::operator/(float scale) const {
+	inline Vec2 Vec2::operator/(double scale) const {
 
 		return Vec2(x / scale, y / scale);
 	}
 
 	
-	inline Vec2& Vec2::operator/=(float scale) {
+	inline Vec2& Vec2::operator/=(double scale) {
 
 
 		x /= scale;
@@ -315,7 +318,7 @@ namespace v2 {
 
 
 	
-	inline constexpr Vec2::Vec2(float X, float Y) noexcept{
+	inline constexpr Vec2::Vec2(double X, double Y) noexcept{
 
 		x = X;
 		y = Y;

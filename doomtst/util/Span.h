@@ -5,11 +5,9 @@
 #include "pipeline.h"
 #include <ranges>
 #include <initializer_list>
+#include "exception.h"
 namespace stn {
-    template<typename... Args>
-    std::out_of_range make_range_exception(const std::format_string<Args...>& fmt, Args&&... args) {
-        return std::out_of_range(std::format(fmt, std::forward<Args>(args)...));
-    }
+
     template <typename T>
     struct span {
 
@@ -21,14 +19,14 @@ namespace stn {
         constexpr bool contains_index(size_t index) const noexcept { return index < len; }
         T& operator[](size_t index) {
             if (!contains_index(index)) {
-                throw make_range_exception("span index {} out of range (length={})", index, len);
+                throw_range_exception("span index {} out of range (len={})", index, len);
             }
             return ptr[index];
         }
 
         const T& operator[](size_t index) const {
             if (!contains_index(index)) {
-                throw make_range_exception("span index {} out of range (length={})", index, len);
+                throw_range_exception("span index {} out of range (len={})", index, len);
             }
             return ptr[index];
         }
@@ -79,27 +77,27 @@ namespace stn {
         }
         span from(size_t start, size_t count) const {
             //in the second important case len>start so it wont overflow
-            if (len<start  || len-start<count) {
-                throw make_range_exception("span::from requested range [{}:{}) out of bounds (valid: [0:{})", start, start + count, len);
+            if (len < start || len - start < count) {
+                throw_range_exception("span::from requested range [{}:{}) out of bounds (valid: [0:{})", start, start + count, len);
             }
             return span<T>(ptr + start, count);
         }
         //Returns a new span that represents the range [start, end)
         span slice(size_t start, size_t end) const {
             if (start > end || end > len) {
-                throw make_range_exception(
+                throw_range_exception(
                     "span::slice requested range [{}:{}) out of bounds (valid: [0:{})",
                     start, end, len
                 );
             }
             return span(ptr + start, end - start);
         }
-        
+
 
         //Returns a new span that represents the range [0, index)
         span first(size_t elements) const {
             if (len < elements) {
-                throw make_range_exception(
+                throw_range_exception(
                     "span::first requested [0:{}) out of range (valid [0:{}))",
                     elements, len
                 );
@@ -108,7 +106,7 @@ namespace stn {
         }
         span last(size_t elements) const {
             if (elements > len) {
-                throw make_range_exception(
+                throw_range_exception(
                     "span::last requested last {} elements out of range (valid [0:{}))",
                     elements, len
                 );
@@ -118,18 +116,38 @@ namespace stn {
         }
         constexpr span skip(size_t n) const {
             if (n > len) {
-                throw make_range_exception(
-                    "span::skip requested {} elements, but length is {}",
+                throw_range_exception(
+                    "span::skip requested {} elements, but len is {}",
                     n, len
                 );
             }
             return span(ptr + n, len - n);
         }
-        
+
         auto pipe()& { return stn::range(*this); }
-
         auto pipe()&& { return stn::range(std::move(*this)); }
-
+        template<typename Pred>
+        decltype(auto) filter(Pred&& pred) const {
+            return pipe().filter(pred);
+        }
+        template<typename Pred>
+        decltype(auto) filter(Pred&& pred) {
+            return pipe().filter(pred);
+        }
+        template<typename Function>
+        decltype(auto) map(Function&& func) const {
+            return pipe().map(func);
+        }
+        template<typename Function>
+        decltype(auto) map(Function&& func) {
+            return pipe().map(func);
+        }
+        decltype(auto) enumerate() const {
+            return pipe().enumerate();
+        }
+        decltype(auto) enumerate() {
+            return pipe().enumerate();
+        }
     private:
         T* ptr;
         size_t len;

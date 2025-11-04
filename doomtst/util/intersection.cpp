@@ -16,7 +16,7 @@ namespace geointersect {
 			double tst_val_1= box.center[i] - box.scale[i] - fray.start[i];
 
 			double tst_val_2 = box.center[i] + box.scale[i] - fray.start[i];
-			if (apxf(dir[i], 0))
+			if (apx(dir[i], 0))
 			{
 				if (inter::range(tst_val_1,tst_val_2).apx_contains(0))
 				{
@@ -33,10 +33,10 @@ namespace geointersect {
 		
 
 
-		if (max_min< min_max||apxf(max_min,min_max))
+		if (max_min< min_max||apx(max_min,min_max))
 		{
 			
-			if (0 < max_min||apxf(max_min, 0))
+			if (0 < max_min||apx(max_min, 0))
 			{
 				return stn::Construct<RayHit>(fray, max_min);
 			}

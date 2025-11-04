@@ -1,22 +1,25 @@
 #include "dynamicarray.h"
 #pragma once
-namespace util{
-
+namespace stn {
+	template<typename T>
 	struct counter {
 		counter():current(0) {
 
 		}
-		size_t next() {
-			return current++;
+
+		T next() {
+			return T(current++);
 		}
-		private:
-		size_t current;
-		size_t operator()() { 
-			return current++; 
-		}
-		void reset()
+		void clear()
 		{
 			current = 0;
 		}
+		T value() const{
+			return T(current);
+		}
+		private:
+		size_t current;
+		
+		
 	};
 }

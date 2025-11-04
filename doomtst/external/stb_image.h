@@ -2237,7 +2237,7 @@ static int stbi__jpeg_decode_block(stbi__jpeg* j, short data[64], stbi__huffman*
         if (r) { // fast-AC path
             k += (r >> 4) & 15; // run
             s = r & 15; // combined length
-            if (s > j->code_bits) return stbi__err("bad huffman code", "Combined length longer than code bits available");
+            if (s > j->code_bits) return stbi__err("bad huffman code", "Combined len longer than code bits available");
             j->code_buffer <<= s;
             j->code_bits -= s;
             // decode into unzigzag'd location
@@ -2318,7 +2318,7 @@ static int stbi__jpeg_decode_block_prog_ac(stbi__jpeg* j, short data[64], stbi__
             if (r) { // fast-AC path
                 k += (r >> 4) & 15; // run
                 s = r & 15; // combined length
-                if (s > j->code_bits) return stbi__err("bad huffman code", "Combined length longer than code bits available");
+                if (s > j->code_bits) return stbi__err("bad huffman code", "Combined len longer than code bits available");
                 j->code_buffer <<= s;
                 j->code_bits -= s;
                 zig = stbi__jpeg_dezigzag[k++];
@@ -7356,7 +7356,7 @@ static float* stbi__hdr_load(stbi__context* s, int* x, int* y, int* comp, int re
             }
             len <<= 8;
             len |= stbi__get8(s);
-            if (len != width) { STBI_FREE(hdr_data); STBI_FREE(scanline); return stbi__errpf("invalid decoded scanline length", "corrupt HDR"); }
+            if (len != width) { STBI_FREE(hdr_data); STBI_FREE(scanline); return stbi__errpf("invalid decoded scanline len", "corrupt HDR"); }
             if (scanline == NULL) {
                 scanline = (stbi_uc*)stbi__malloc_mad2(width, 4, 0);
                 if (!scanline) {

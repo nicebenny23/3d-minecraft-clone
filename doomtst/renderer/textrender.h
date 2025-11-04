@@ -1,5 +1,5 @@
 #include "../util/vector2.h"
-#include "texture.h"
+
 #include "../util/dynamicarray.h"
 #include <string>
 #include "../util/geometry.h"
@@ -7,7 +7,7 @@
 #pragma once
 
 
-extern Ids::Id textarray;
+extern stn::Id textarray;
 void inittextarray();
 const v2::Vec2 cubeuv[] = {
 	v2::Vec2(0, 1),

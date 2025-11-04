@@ -1,7 +1,6 @@
 #pragma once
 #include "../util/vector3.h"
 #include "../game/gameobject.h"
-#include "../renderer/texture.h"
 #include "../util/dynamicarray.h"
 #include "../util/queue.h"
 #include "../game/entity.h"
@@ -44,7 +43,7 @@ struct particle: gameobject::component
 	particleemiter* emit;
 	~particle() {
 
-	//	emit->particlearray[ind].GenId=Ids::NoneG;
+	//	emit->particlearray[ind].GenId=stn::NoneG;
 	}
 	particle() = default;
 }; 

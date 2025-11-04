@@ -141,7 +141,7 @@ namespace stn::variant {
 		variant operator=(typed<T> value) requires is_member<T> {
 
 			if (index != index_of<T>()) {
-				reset();
+				clear();
 				storage.construct<T>(std::forward<T>(value.value));
 			}
 			else
@@ -156,7 +156,7 @@ namespace stn::variant {
 		void set(std::type_identity<T>::type&& value)  requires is_member<T> {
 			//swaped types case
 			if (index != index_of<T>()) {
-				reset();
+				clear();
 				storage.construct<T>(std::forward<T>(value));
 			}
 			else
@@ -267,7 +267,7 @@ namespace stn::variant {
 
 		template <typename VariantType>
 		void copy_from(const VariantType& other) {
-			reset();
+			clear();
 			index = other.index;
 			(other).match([this](auto&& value) {
 				using T = std::decay_t<decltype(value)>;
@@ -276,19 +276,19 @@ namespace stn::variant {
 		}
 		template <typename VariantType>
 		void move_from(VariantType&& other) {
-			reset();
+			clear();
 			index = other.index;
 			other.match([this](auto& value) {
 				using T = std::decay_t<decltype(value)>;
 				storage.template construct<T>(std::move(value));
 				});
 		}
-		void reset() {
+		void clear() {
 			match([this](auto& value) {
 				using T = std::decay_t<decltype(value)>;
-				storage.template reset<T>();
+				storage.template clear<T>();
 				});
-			//invalid index that should never be seen by user;
+			
 
 		}
 		erasure::erased<types...> storage;

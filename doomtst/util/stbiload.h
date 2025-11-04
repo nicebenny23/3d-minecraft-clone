@@ -1,8 +1,9 @@
+#pragma once
+
 #include "../external/stb_image.h"
 #include <iostream>
 #include "../debugger/debug.h"
 #include "vector2.h"
-#pragma once
 
 namespace texdata {
 	inline unsigned char* loadtexdata(int* width, int* height, const char* name) {

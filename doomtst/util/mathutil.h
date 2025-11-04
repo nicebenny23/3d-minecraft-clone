@@ -4,26 +4,27 @@
 #include <stdexcept>
 #include <type_traits>
 #include "pair.h"
-#define NaNf std::numeric_limits<float>::max()
-__forceinline bool apxf(double a, double b) {
+#define NaNf std::numeric_limits<double>::max()
+__forceinline bool apx(double a, double b) {
 	constexpr double EPS = 1e-4f;
-	return (fabsf(a - b) < EPS);
+	return (abs(a - b) < EPS);
 }
 
 
-inline float  interoplatequintic(const float& t) {
+inline double  interoplate_quintic(double t) {
 
 	return (6 * t * t - 15 * t + 10) * t * t * t;
 
 }
 
 //at zero val one is selected at one val2 is selected
-inline float lerp(float val, float val2, float selector)
+
+inline double lerp(double val, double val2, double selector)
 {
 	return val2 * selector + val * (1 - selector);
 }
 
-inline float clamp(float val, float low, float high)
+inline double clamp(double val, double low, double high)
 {
 	if (val > high)
 	{
@@ -51,18 +52,18 @@ inline int clamp(int val, int low, int high)
 }
 
 
-inline bool inrange(float val, float low, float high)
+inline bool inrange(double val, double low, double high)
 {
 	return val >= low && val <= high;
 }
-inline bool inrange_apx(float val, float low, float high)
+inline bool inrange_apx(double val, double low, double high)
 {
-	return val >= low && val <= high||apxf(val,low)||apxf(val,high);
+	return val >= low && val <= high||apx(val,low)||apx(val,high);
 }
 
-inline  float sigmoid(float v1) {
+inline  double sigmoid(double v1) {
 
-	return	1.0/ (1.0+ exp(-v1));
+	return	1.0f/ (1.0f+ exp(-v1));
 }
 
 template<typename T1, typename T2, typename... Ts>
@@ -91,7 +92,7 @@ constexpr auto Min(T1 a, T2 b, Ts... rest)-> typename std::common_type<T1, T2, T
 	}
 }
 
-inline int next_boundary(float x, bool positiveDirection) {
+inline int next_boundary(double x, bool positiveDirection) {
 	int i = static_cast<int>(std::floor(x));
 
 	if (positiveDirection) {
@@ -111,7 +112,7 @@ inline stn::pair<int,int> extended_range(double x) {
 	int low = static_cast<int>(std::floorl(x));
 	int high = low;
 	int rnd = std::lround(x);
-	if (apxf(rnd,x))
+	if (apx(rnd,x))
 	{
 		if (rnd==low)
 		{
@@ -133,16 +134,16 @@ __forceinline  int symmetric_mod(int x, int m) noexcept {
 	return (r < 0) ? (r + m) : r;
 } 
 
-__forceinline float symmetric_modf(float x, float m) noexcept {
-	float r = std::fmodf(x, m);
+__forceinline double symmetric_modf(double x, double m) noexcept {
+	double r = std::fmod(x, m);
 	return r < 0.0f ? r + m : r;
 }
 
-inline  int FastFloor(float f) {
+inline  int FastFloor(double f) {
 	return f >= 0 ? (int)f : (int)f - 1;
 }
 
-inline  float symmetric_floor(float x) {
+inline  double symmetric_floor(double x) {
 
 	if (x < 0)
 	{
@@ -153,33 +154,32 @@ inline  float symmetric_floor(float x) {
 		return floor(x);
 	}
 }
-inline int symmetric_ceil(float x) {
+inline int symmetric_ceil(double x) {
 
 	if (x < 0)
 	{
-		return -1 * ceil(-1 * x);
+		return int(- 1 * ceil(-1 * x));
 	}
 	else
 	{
-		return ceil(x);
+		return int(ceil(x));
 	}
 }
 
-//zero is mapped to 1
-inline int sign(float x) {
+inline int sign(double x) {
 	return (x < 0) ? -1 : 1;
 }
 
 //Zero is mapped to zero
-inline int z_sign(float x) {
+inline int z_sign(double x) {
 
 	return (x < 0) ? -1 : ((x > 0) ? 1 : 0);
 }
 
 
-int comparefloat(const void* b, const void* a);
+int comparedouble(const void* b, const void* a);
 
 
-inline float wrap_to_range(float val, float low, float high) noexcept {
+inline double wrap_to_range(double val, double low, double high) noexcept {
 	return symmetric_modf(val - low, high - low) + low;
 }

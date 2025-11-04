@@ -13,9 +13,4 @@ inline void waterinit(blockname::block* blk) {
 
 	blk->minedfastwithpick = false;
 }
-inline void waterdelete (blockname::block* blk) {
-	blk->owner.removecomponent<liquidprop>();
-	blk->owner.removecomponent < aabb::Collider>();
-}
-
-#endif // !wood_HPP
+#endif

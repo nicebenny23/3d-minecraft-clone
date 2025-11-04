@@ -57,7 +57,7 @@ struct estate : gameobject::component
 				if (owner.getcomponent<rigidbody>().velocity.y < -5)
 				{
 
-					damage(-(owner.getcomponent<rigidbody>().oldvelocity.y / 44444));
+					damage(static_cast<int>(- (owner.getcomponent<rigidbody>().oldvelocity.y / 44444)));
 
 				}
 

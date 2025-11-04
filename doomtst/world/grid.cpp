@@ -58,15 +58,12 @@ namespace grid {
 	int Grid::localChunkIndex(Coord NormedChunk)
 	{
 
-		int val= NormedChunk.x + NormedChunk.y* (dim()) + NormedChunk.z* dim()*dim();
-		return val;
+		return NormedChunk.x + NormedChunk.y* (dim()) + NormedChunk.z* dim()*dim();
 
 	}
 	int Grid::chunkIndex(Coord Chunk)
 	{
-		
-		Chunk+= Coord(rad, rad, rad) - gridpos;
-		return localChunkIndex(Chunk);
+		return localChunkIndex(Chunk + Coord(rad, rad, rad) - gridpos);
 	}
 	
 	//gets the voxel at a place in world space
@@ -76,7 +73,7 @@ namespace grid {
 		return(GetChunk(loc) != nullptr);
 	}
 
-	bool Grid::containsChunk(Coord loc)
+	bool Grid::containsChunk(Coord loc) const
 	{
 		loc -= gridpos;
 		return (abs(loc.x) <= rad && abs(loc.y) <= rad && abs(loc.z) <= rad);
@@ -91,9 +88,7 @@ namespace grid {
 
 		if (containsChunk(chnk))
 		{
-
-			return chunklist[chunkIndex(chnk)];
-			
+			return chunklist[chunkIndex(chnk)];	
 		}
 		return nullptr;
 	} 
@@ -109,20 +104,22 @@ namespace grid {
 		return nullptr;
 	}
 
+	bool Grid::containsChunkIndex(int index) const
+	{
+		return 0 <= index && index < totalChunks;
+	}
+
 	gameobject::obj* Grid::getObject(const v3::Coord pos)
 	{
 		Coord chunk_pos = chunkfromblockpos(pos);
-		if (containsChunk(chunk_pos))
+		int chunk_index = chunkIndex(chunk_pos);
+		//since if it was le than zero it would fit
+		if (containsChunkIndex(chunk_index))
 		{
-
-
-			Chunk::chunk* chnk = chunklist[chunkIndex(chunk_pos)];
+			Chunk::chunk* chnk = chunklist.unchecked_at(static_cast<size_t>(chunk_index));
 			if (chnk != nullptr)
 			{
-
-				return &(*chnk)[Chunk::indexfrompos(pos)];
-
-
+				return &chnk->blockbuf.unchecked_at(Chunk::indexfrompos(pos));
 			}
 		}
 		return nullptr;
@@ -224,7 +221,7 @@ namespace grid {
 					int x = (i) + (gridpos.x - rad);
 					int y = (j) + (gridpos.y - rad);
 					int z = (k) + (gridpos.z - rad);
-					if (!has_loaded_chunk)
+					if (debug_slow||!has_loaded_chunk)
 					{
 						
 						newchunklist[ind] = loader.LoadChunk(Coord(x, y, z));
@@ -267,13 +264,13 @@ namespace grid {
 		ctx = Context;
 		Context->Grid = this;
 		loader.Init(ctx);
-		gridpos =zeroiv;
-		griddt = zeroiv;
+		gridpos = ZeroCoord;
+		griddt = ZeroCoord;
 		chunklist = stn::array<Chunk::chunk*>(totalChunks,nullptr);
 	
 		load();
 	}
 	bool Grid::haschanged() {
-		return(griddt != zeroiv)||has_loaded_chunk;
+		return(griddt != ZeroCoord)||(has_loaded_chunk)|| (griddt != ZeroCoord&&debug_slow);
 	}
 }

@@ -15,6 +15,7 @@ gameobject::obj& Chunk::chunk::operator[](size_t index)
 }
 
 
+//must be a valid index
 size_t Chunk::indexfrompos(Coord pos)
 {
 	int x = symmetric_mod(pos.x, chunkaxis);
@@ -57,7 +58,6 @@ void Chunk::chunkmesh::destroy()
 {			 
 	SolidGeo.destroy();
 	TransparentGeo.destroy();
-	
 	facebuf.clear();
 }
 
@@ -67,11 +67,6 @@ void Chunk::createchunkmesh(Chunk::chunk* aschunk)
 	mesh->genbufs();
 	aschunk->mesh = mesh;
 
-}
-Chunk::chunk* Chunk::airload(Coord location)
-{
-	chunk& newchunk = *(new chunk());
-	return &newchunk;
 }
 //complete
 
@@ -143,9 +138,8 @@ void Chunk::chunk::write()
 
 Chunk::chunk::chunk()
 {
-	loc = zeroiv;
+	loc = ZeroCoord;
 	modified = false;
-	blockbuf = nullptr;
 	mesh = nullptr;
 }
 
@@ -158,5 +152,5 @@ void Chunk::chunk::destroy()
 	blockbuf[i].destroy();
 	}
 	mesh->destroy();
-	delete[] blockbuf;
+	blockbuf.clear();
 }

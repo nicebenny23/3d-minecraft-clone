@@ -114,6 +114,7 @@
     <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\opengl\lib;C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\lib\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)x64</OutDir>
+    <IntDir>R:\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|x64'">
     <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
@@ -174,12 +175,14 @@
       <UseDynamicDebugging>false</UseDynamicDebugging>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <WholeProgramOptimization>false</WholeProgramOptimization>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+      <AdditionalOptions>/VERBOSE:INCR /time %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|x64'">
@@ -218,7 +221,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <MultiProcessorCompilation>Yes</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp23</LanguageStandard>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
@@ -238,6 +241,8 @@
     <ClCompile Include="debugger\debug.cpp" />
     <ClCompile Include="entities\slime.cpp" />
     <ClCompile Include="game\Core.cpp" />
+    <ClCompile Include="game\ecs\component.cpp" />
+    <ClCompile Include="game\ecs\ecs.cpp" />
     <ClCompile Include="game\entity.cpp" />
     <ClCompile Include="game\entitystate.cpp" />
     <ClCompile Include="game\GameContext.cpp" />
@@ -261,28 +266,28 @@
     <ClCompile Include="items\new_item.cpp" />
     <ClCompile Include="items\recipe.cpp" />
     <ClCompile Include="renderer\decal.cpp" />
-    <ClCompile Include="renderer\Mesh.cpp" />
+    <ClCompile Include="renderer\renderer\Mesh.cpp" />
     <ClCompile Include="player\playermodification.cpp" />
     <ClCompile Include="renderer\guirender.cpp" />
-    <ClCompile Include="renderer\RenderContext.cpp" />
-    <ClCompile Include="renderer\ShaderManager.cpp" />
-    <ClCompile Include="renderer\TextureManager.cpp" />
+    <ClCompile Include="renderer\renderer\RenderContext.cpp" />
+    <ClCompile Include="renderer\renderer\ShaderManager.cpp" />
     <ClCompile Include="Resources\ResourceManager.cpp" />
-    <ClCompile Include="util\algorthm.cpp" />
+    <ClCompile Include="Source.cpp" />
     <ClCompile Include="renderer\ModelMesh.cpp" />
     <ClCompile Include="player\player.cpp" />
     <ClCompile Include="player\playerinventory.cpp" />
     <ClCompile Include="renderer\model.cpp" />
     <ClCompile Include="renderer\textrender.cpp" />
     <ClCompile Include="renderer\ui.cpp" />
-    <ClCompile Include="util\chainpool.cpp" />
-    <ClCompile Include="util\fileloader.cpp" />
     <ClCompile Include="game\aabb.cpp" />
     <ClCompile Include="block\block.cpp" />
     <ClCompile Include="renderer\uibox.cpp" />
+    <ClCompile Include="util\algorthm.cpp" />
+    <ClCompile Include="util\chainpool.cpp" />
+    <ClCompile Include="util\fileloader.cpp" />
     <ClCompile Include="util\intersection.cpp" />
     <ClCompile Include="util\mathutil.cpp" />
-    <ClCompile Include="renderer\VertexObjectManager.cpp" />
+    <ClCompile Include="util\random.cpp" />
     <ClCompile Include="util\time.cpp" />
     <ClCompile Include="util\userinput.cpp" />
     <ClCompile Include="world\chunkload.cpp" />
@@ -295,11 +300,9 @@
     <ClCompile Include="game\gameobject.cpp" />
     <ClCompile Include="external\glad.c" />
     <ClCompile Include="world\grid.cpp" />
-    <ClCompile Include="util\random.cpp" />
     <ClCompile Include="renderer\renderer.cpp" />
-    <ClCompile Include="renderer\shader.cpp" />
-    <ClCompile Include="Source.cpp" />
-    <ClCompile Include="renderer\texture.cpp" />
+    <ClCompile Include="renderer\renderer\shader.cpp" />
+    <ClCompile Include="renderer\renderer\texture.cpp" />
     <ClCompile Include="world\noise.cpp" />
     <ClCompile Include="world\tick.cpp" />
     <ClCompile Include="world\voxeltraversal.cpp" />
@@ -343,7 +346,20 @@
     <ClInclude Include="game\Commands.h" />
     <ClInclude Include="game\compid.h" />
     <ClInclude Include="game\ecs\archtype.h" />
+    <ClInclude Include="game\ecs\commands.h" />
+    <ClInclude Include="game\ecs\command_buffer.h" />
+    <ClInclude Include="game\ecs\component.h" />
+    <ClInclude Include="game\ecs\component_id.h" />
+    <ClInclude Include="game\ecs\ecs.h" />
+    <ClInclude Include="game\ecs\entities.h" />
     <ClInclude Include="game\ecs\entity.h" />
+    <ClInclude Include="game\ecs\event.h" />
+    <ClInclude Include="game\ecs\game_object.h" />
+    <ClInclude Include="game\ecs\message.h" />
+    <ClInclude Include="game\ecs\multi_query.h" />
+    <ClInclude Include="game\ecs\query.h" />
+    <ClInclude Include="game\ecs\system.h" />
+    <ClInclude Include="game\ecs\World.h" />
     <ClInclude Include="game\entity.h" />
     <ClInclude Include="game\entityutil.h" />
     <ClInclude Include="game\Event.h" />
@@ -420,10 +436,9 @@
     <ClInclude Include="items\torchitem.h" />
     <ClInclude Include="player\playermovment.h" />
     <ClInclude Include="renderer\decal.h" />
-    <ClInclude Include="renderer\GlUtil.h" />
-    <ClInclude Include="renderer\gl_id.h" />
+    <ClInclude Include="renderer\renderer\GlUtil.h" />
     <ClInclude Include="renderer\HandleMap.h" />
-    <ClInclude Include="renderer\Mesh.h" />
+    <ClInclude Include="renderer\renderer\Mesh.h" />
     <ClInclude Include="player\cameracomp.h" />
     <ClInclude Include="player\daggerthrow.h" />
     <ClInclude Include="player\playerattack.h" />
@@ -434,7 +449,7 @@
     <ClInclude Include="player\playertpsword.h" />
     <ClInclude Include="renderer\grandrenderer.h" />
     <ClInclude Include="renderer\guirender.h" />
-    <ClInclude Include="renderer\meshStorage.h" />
+    <ClInclude Include="renderer\renderer\meshStorage.h" />
     <ClInclude Include="renderer\ModelMesh.h" />
     <ClInclude Include="renderer\model.h" />
     <ClInclude Include="game\particles.h" />
@@ -443,62 +458,70 @@
     <ClInclude Include="player\playerhealth.h" />
     <ClInclude Include="player\playerinventory.h" />
     <ClInclude Include="renderer\overlay.h" />
-    <ClInclude Include="renderer\renderable.h" />
-    <ClInclude Include="renderer\RenderContext.h" />
-    <ClInclude Include="renderer\ShaderManager.h" />
+    <ClInclude Include="renderer\renderer\renderable.h" />
+    <ClInclude Include="renderer\renderer\renderables.h" />
+    <ClInclude Include="renderer\renderer\ShaderManager.h" />
     <ClInclude Include="renderer\textrender.h" />
-    <ClInclude Include="renderer\TextureManager.h" />
+    <ClInclude Include="renderer\renderer\TextureManager.h" />
     <ClInclude Include="renderer\ui.h" />
-    <ClInclude Include="renderer\RenderProperties.h" />
-    <ClInclude Include="renderer\Uniform.h" />
-    <ClInclude Include="renderer\vertex.h" />
+    <ClInclude Include="renderer\renderer\RenderProperties.h" />
+    <ClInclude Include="renderer\renderer\Uniform.h" />
+    <ClInclude Include="renderer\renderer\vertex.h" />
     <ClInclude Include="Resources\Resource.h" />
     <ClInclude Include="Resources\ResourceManager.h" />
     <ClInclude Include="shaders\decal_frag.vs" />
-    <ClInclude Include="util\arraypool.h" />
+    <ClInclude Include="game\aabb.h" />
+    <ClInclude Include="player\playermodification.h" />
+    <ClInclude Include="game\rigidbody.h" />
+    <ClInclude Include="renderer\uibox.h" />
+    <ClInclude Include="util\algorthm.h" />
     <ClInclude Include="util\array_storage.h" />
     <ClInclude Include="util\bitset.h" />
+    <ClInclude Include="util\bit_mask.h" />
     <ClInclude Include="util\cached.h" />
+    <ClInclude Include="util\chainpool.h" />
     <ClInclude Include="util\composite.h" />
+    <ClInclude Include="util\counter.h" />
     <ClInclude Include="util\dependency.h" />
     <ClInclude Include="util\deque.h" />
+    <ClInclude Include="util\dir.h" />
+    <ClInclude Include="util\dynamicarray.h" />
+    <ClInclude Include="util\dynpool.h" />
     <ClInclude Include="util\erased.h" />
+    <ClInclude Include="util\exception.h" />
+    <ClInclude Include="util\fileloader.h" />
     <ClInclude Include="util\filter_argument.h" />
+    <ClInclude Include="util\geometry.h" />
     <ClInclude Include="util\Id.h" />
     <ClInclude Include="util\index.h" />
     <ClInclude Include="util\InterfaceStore.h" />
+    <ClInclude Include="util\intersection.h" />
     <ClInclude Include="util\interval.h" />
     <ClInclude Include="util\Invoke.h" />
     <ClInclude Include="util\layout.h" />
     <ClInclude Include="util\lazy.h" />
     <ClInclude Include="util\LinearBuffer.h" />
     <ClInclude Include="util\List.h" />
+    <ClInclude Include="util\mathutil.h" />
     <ClInclude Include="util\member_hash.h" />
+    <ClInclude Include="util\memorypool.h" />
+    <ClInclude Include="renderer\renderer\Vao.h" />
+    <ClInclude Include="util\messages.h" />
     <ClInclude Include="util\Not.h" />
     <ClInclude Include="util\Option.h" />
     <ClInclude Include="util\pair.h" />
     <ClInclude Include="util\pipeline.h" />
-    <ClInclude Include="util\counter.h" />
+    <ClInclude Include="util\queue.h" />
+    <ClInclude Include="util\random.h" />
+    <ClInclude Include="util\ray.h" />
     <ClInclude Include="util\robinHood.h" />
-    <ClInclude Include="util\Span.h" />
-    <ClInclude Include="util\SparseSet.h" />
-    <ClInclude Include="util\chainpool.h" />
-    <ClInclude Include="util\dynpool.h" />
-    <ClInclude Include="util\geometry.h" />
-    <ClInclude Include="util\fileloader.h" />
-    <ClInclude Include="game\aabb.h" />
-    <ClInclude Include="player\playermodification.h" />
-    <ClInclude Include="game\rigidbody.h" />
-    <ClInclude Include="renderer\uibox.h" />
-    <ClInclude Include="util\intersection.h" />
-    <ClInclude Include="util\memorypool.h" />
     <ClInclude Include="util\sharedptr.h" />
     <ClInclude Include="util\SlMove.h" />
+    <ClInclude Include="util\Span.h" />
+    <ClInclude Include="util\SparseSet.h" />
     <ClInclude Include="util\stack.h" />
     <ClInclude Include="util\stats.h" />
     <ClInclude Include="util\stbiload.h" />
-    <ClInclude Include="renderer\Vao.h" />
-    <ClInclude Include="renderer\VertexObjectManager.h" />
     <ClInclude Include="util\tag.h" />
     <ClInclude Include="util\thread_pool.h" />
     <ClInclude Include="util\thread_split.h" />
@@ -509,36 +532,29 @@
     <ClInclude Include="util\type_index.h" />
     <ClInclude Include="util\type_tag.h" />
     <ClInclude Include="util\ultraAsnc.h" />
-    <ClInclude Include="util\UniquePtr.h" />
+    <ClInclude Include="util\unique.h" />
+    <ClInclude Include="util\userinput.h" />
     <ClInclude Include="util\variant.h" />
+    <ClInclude Include="util\vector2.h" />
+    <ClInclude Include="util\vector3.h" />
     <ClInclude Include="world\bicube_array.h" />
     <ClInclude Include="world\chunkload.h" />
     <ClInclude Include="world\managegrid.h" />
-    <ClInclude Include="util\queue.h" />
-    <ClInclude Include="util\algorthm.h" />
     <ClInclude Include="block\block.h" />
     <ClInclude Include="renderer\blockrender.h" />
     <ClInclude Include="game\camera.h" />
     <ClInclude Include="world\chunk.h" />
     <ClInclude Include="renderer\chunkrender.h" />
     <ClInclude Include="game\collision.h" />
-    <ClInclude Include="util\dir.h" />
-    <ClInclude Include="util\dynamicarray.h" />
     <ClInclude Include="game\gameobject.h" />
     <ClInclude Include="world\grid.h" />
-    <ClInclude Include="util\mathutil.h" />
     <ClInclude Include="world\noise.h" />
     <ClInclude Include="game\objecthelper.h" />
-    <ClInclude Include="util\random.h" />
-    <ClInclude Include="util\ray.h" />
     <ClInclude Include="renderer\renderer.h" />
-    <ClInclude Include="util\userinput.h" />
-    <ClInclude Include="util\vector2.h" />
-    <ClInclude Include="util\vector3.h" />
-    <ClInclude Include="renderer\shader.h" />
+    <ClInclude Include="renderer\renderer\shader.h" />
     <ClInclude Include="external\stb_image.h" />
-    <ClInclude Include="renderer\texture.h" />
-    <ClInclude Include="renderer\vertexobject.h" />
+    <ClInclude Include="renderer\renderer\texture.h" />
+    <ClInclude Include="renderer\renderer\vertexobject.h" />
     <ClInclude Include="world\tick.h" />
     <ClInclude Include="world\voxeltraversal.h" />
     <ClInclude Include="renderer\Window.h" />
@@ -560,6 +576,7 @@
     <None Include="shaders\uifragment.vs" />
     <None Include="shaders\uivertex.vs" />
     <None Include="shaders\vert1.vs" />
+    <None Include="util\async" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

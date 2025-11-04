@@ -65,7 +65,7 @@ namespace Dir {
 				return v3::FrontCoord;//front
 			case Ind3d::Back:
 				return v3::BackCoord;//back
-			case Ind3d::None:
+			 default:
 				throw std::invalid_argument("Attempted to access invalid direction");
 				break;
 
