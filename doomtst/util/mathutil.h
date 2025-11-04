@@ -11,7 +11,7 @@ __forceinline bool apxf(double a, double b) {
 }
 
 
-inline float  interoplatequintic(const float& t) {
+inline float  interoplate_quintic(float t) {
 
 	return (6 * t * t - 15 * t + 10) * t * t * t;
 

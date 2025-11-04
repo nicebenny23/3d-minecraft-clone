@@ -41,7 +41,7 @@ inline void Assert(const char* comment)
 	TerminateThread(mainThread, 0);
 	CloseHandle(mainThread);
 }
-void reset();
+void clear();
 
 
 void writetodebug(std::string string);

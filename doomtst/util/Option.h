@@ -4,7 +4,6 @@
 #include <type_traits>
 #include <stdexcept>
 #include <concepts>
-#include <optional>
 #include "erased.h"
 namespace stn {
     
@@ -79,7 +78,7 @@ namespace stn {
             if (this != &other) {
                 //non_null_reset
                 if (has_value) {
-                    value.reset<T>();
+                    value.clear<T>();
                 }
                 has_value = other.has_value;
                 if (has_value) {
@@ -94,7 +93,7 @@ namespace stn {
             if (this != &other) {
                 //non_null_reset
                 if (has_value) {
-                    value.reset<T>();
+                    value.clear<T>();
                 }
                 has_value = other.has_value;
                 if (has_value) {
@@ -113,7 +112,7 @@ namespace stn {
        
         void clear() {
             if (has_value) {
-                value.reset<T>();
+                value.clear<T>();
                 has_value = false;
             }
         }

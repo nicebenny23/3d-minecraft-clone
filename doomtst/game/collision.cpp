@@ -249,7 +249,7 @@ void collision::handleCollisionWithGrid(Collider& entity,bool is_trigger)
 		{
 			Vec3 force = colideentandblock(entity, blklist[ind],is_trigger);
 
-			if (mag(force) > mag(minforce) || mag(minforce) == 0)
+			if (force.length() > minforce.length()|| minforce.length() == 0)
 			{
 
 				minblock = blklist[ind];

@@ -40,7 +40,7 @@ namespace sharedptr {
 
         }
 
-        void reset(T* pointer=nullptr) {
+        void clear(T* pointer=nullptr) {
             if (ptr == pointer) {
                 return;
             }

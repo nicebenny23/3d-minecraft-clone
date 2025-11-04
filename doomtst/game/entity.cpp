@@ -1,3 +1,5 @@
+
+#pragma once
 #include "entity.h"
 namespace gameobject {
     namespace Observe {
@@ -45,7 +47,7 @@ namespace gameobject {
                 return *this;
             }
 
-            reset();
+            clear();
             (*oth).addcomponent<SlotTracker>()->swapSlots(&oth, this);
             held = std::move(oth.held);
             oth.held = stn::None;
@@ -54,11 +56,11 @@ namespace gameobject {
 
 
         entity_slot::~entity_slot() {
-            reset();
+            clear();
         }
 
 
-        void entity_slot::reset() {
+        void entity_slot::clear() {
             if (held) {
                 get().addcomponent<SlotTracker>()->unregisterSlot(this);
                 held = stn::None;

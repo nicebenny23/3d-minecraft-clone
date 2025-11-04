@@ -143,7 +143,7 @@ void Chunk::chunk::write()
 
 Chunk::chunk::chunk()
 {
-	loc = zeroiv;
+	loc = ZeroCoord;
 	modified = false;
 	blockbuf = nullptr;
 	mesh = nullptr;

@@ -70,7 +70,7 @@ namespace uiboxname {
 		if (state.enabled)
 		{
 			
-			tex_handle.set_uniform(uniforms::uniform(box.scale.x, "scale"));
+			tex_handle.set_uniform(uniforms::uniform(float(box.scale.x), "scale"));
 			tex_handle.set_uniform(uniforms::uniform(box.center, "center"));
 			tex_handle.render();
 		}

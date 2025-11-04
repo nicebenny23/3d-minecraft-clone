@@ -267,13 +267,13 @@ namespace grid {
 		ctx = Context;
 		Context->Grid = this;
 		loader.Init(ctx);
-		gridpos =zeroiv;
-		griddt = zeroiv;
+		gridpos = ZeroCoord;
+		griddt = ZeroCoord;
 		chunklist = stn::array<Chunk::chunk*>(totalChunks,nullptr);
 	
 		load();
 	}
 	bool Grid::haschanged() {
-		return(griddt != zeroiv)||has_loaded_chunk;
+		return(griddt != ZeroCoord)||has_loaded_chunk;
 	}
 }

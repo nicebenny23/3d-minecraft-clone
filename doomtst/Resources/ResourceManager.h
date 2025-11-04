@@ -41,5 +41,5 @@ struct ResourceManager {
 
 private:
     stn::array<void*> resources;
-    type_id::type_indexer resources_ids;
+    type_map::type_indexer<> resources_ids;
 };

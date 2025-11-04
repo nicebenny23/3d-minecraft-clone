@@ -30,7 +30,7 @@ void gridutil::computecover(face& blkface)
 
 {
 
-	if (!apx(blkface.mesh->box.scale, blockscale))
+	if (blkface.mesh->box.scale!= blockscale)
 	{
 		
 			blkface.cover= cover_state::Uncovered;

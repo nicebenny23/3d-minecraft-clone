@@ -9,7 +9,7 @@
 
 // Helper function for heuristic calculation (Manhattan distance)
 float appdist(const navnode& a, const navnode& b) {
-    return v3::mag(Vec3( a.pos- b.pos));
+    return Vec3( a.pos- b.pos).length();
 }
 
 array<navnode> getneighborsdefault( navnode& node) {

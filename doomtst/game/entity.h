@@ -38,7 +38,7 @@ namespace gameobject {
             void swap(entity_slot& other);
         
             
-            void reset();
+            void clear();
         private:
             friend struct SlotTracker;
 

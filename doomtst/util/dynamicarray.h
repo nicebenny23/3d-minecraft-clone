@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdexcept>
-#include <vector>
+
 #include <new>
 #include <cstdlib>
 #include <cstring>
@@ -22,6 +22,7 @@ namespace stn {
 	public:
 
 		static constexpr bool is_default = std::is_default_constructible_v<T>;
+		static constexpr bool is_trivial_default = std::is_default_constructible_v<T>;
 		static constexpr bool is_trivially_copyable = std::is_trivially_copyable_v<T>;
 		static constexpr bool is_copyable = std::is_copy_assignable_v<T>;
 		inline constexpr bool empty() const
@@ -32,10 +33,19 @@ namespace stn {
 		{
 			return capacity;
 		}
+		inline constexpr std::uint32_t last_index() const
+		{
+			if (empty())
+			{
+				throw std::logic_error("Cannot access the last index of an empty array");
+			}
+			return len-1;
+		}
 		inline constexpr std::uint32_t length() const
 		{
 			return len;
 		}
+
 		inline constexpr std::uint32_t size() const {
 			return len;
 		}
@@ -93,6 +103,14 @@ namespace stn {
 			if (!contains_index(index))
 			{
 				geometric_expand(index + 1);
+			}
+			return list[index];
+		}
+		[[nodiscard]] T& reach(uint32_t index,const T& value)requires(is_copyable)
+		{
+			if (!contains_index(index))
+			{
+				geometric_expand(index + 1,value);
 			}
 			return list[index];
 		}
@@ -176,9 +194,10 @@ namespace stn {
 
 		template<typename... Args>
 			requires std::constructible_from<T, Args&&...>
-		void emplace(Args&&... args) {
+		T& emplace(Args&&... args) {
 			geometric_reserve(len + 1);
-			list.construct_at(len++, std::forward<Args>(args)...);
+			list.construct_at(len, std::forward<Args>(args)...);
+			return list[len++];
 		}
 
 		template<typename U>
@@ -301,7 +320,7 @@ namespace stn {
 			list.destruct_at(len);
 		}
 
-		[[nodiscard]] bool operator==(const array& other) const
+		[[nodiscard]] bool operator==(const array& other) const requires std::equality_comparable<T>
 		{
 			if (len != other.len)
 			{
@@ -316,7 +335,7 @@ namespace stn {
 			}
 			return true;
 		}
-		[[nodiscard]] bool operator!=(const array& other) const
+		[[nodiscard]] bool operator!=(const array& other) const requires std::equality_comparable<T>
 		{
 			return !(*this == other);
 		}
@@ -341,9 +360,10 @@ namespace stn {
 			}
 		}
 		array(uint32_t length)  requires(is_default) {
-			len = length;
+			
 			capacity = 0;
-			geometric_reserve(len);
+			geometric_reserve(length);
+			len = length;
 			for (size_t i = 0; i < len; i++)
 			{
 				list.construct_at(i, T());
@@ -424,14 +444,15 @@ namespace stn {
 		void clear()
 		{
 			if (!empty()) {
-				if constexpr (!std::is_trivially_destructible_v<T>)
+				if constexpr (!std::is_trivially_destructible_v<T>&&!is_default)
 				{
 					for (size_t i = 0; i < len; i++)
 					{
 						list.destruct_at(i);
 					}
 				}
-				list.reset();
+				//because list.clear  in this case must this is bad design so rmove later
+				list.clear();
 				len = 0;
 				capacity = 0;
 			}
@@ -496,6 +517,17 @@ namespace stn {
 			return const_iterator(d ? d + len : nullptr);
 		}
 		//expands the length and capacity to fit size exactly
+		void expand(uint32_t size, const T& value)requires (is_copyable) {
+			if (len < size)
+			{
+				reserve(size);
+				for (uint32_t i = len; i < size; i++) {
+					list.construct_at(i, value);
+				}
+				len = size;
+			}
+
+		}
 		void expand(uint32_t size) requires(is_default) {
 			if (len < size)
 			{
@@ -507,38 +539,59 @@ namespace stn {
 			}
 
 		}
-		void geometric_expand(uint32_t size) requires(is_default) {
-			if (len < size)
+		void geometric_expand(uint32_t new_size) requires(is_default) {
+			if (capacity < new_size)
 			{
-				reserve(resize_length(size));
-				for (size_t i = len; i < size; i++) {
+				reserve(resize_length(new_size));
+				
+			}
+			if (len<new_size)
+			{
+				for (size_t i = len; i < new_size; i++) {
 					list.construct_at(i, T());
 				}
-				len = size;
+				len = new_size;
+			}
+		}
+		
+		void geometric_expand(uint32_t new_size, const T& value) requires (is_copyable){
+			if (capacity < new_size)
+			{
+				reserve(resize_length(new_size));
+
+			}
+			if (len < new_size)
+			{
+
+				for (size_t i = len; i < new_size; i++) {
+					list.construct_at(i, value);
+				}
+				len = new_size;
+
 			}
 		}
 
 		//expands the capacity geometricly
-		void geometric_reserve(uint32_t size) {
-			if (capacity < size)
+		void geometric_reserve(uint32_t new_size) {
+			if (capacity < new_size)
 			{
-				reserve(resize_length(size));
+				reserve(resize_length(new_size));
 			}
 
 		}
 
-		void reserve(uint32_t size) {
-			if (size <= capacity)
+		void reserve(uint32_t new_size) {
+			if (new_size <= capacity)
 			{
 				return;
 			}
 			// arbitrary safety margin to prevent overflow errors 
 			constexpr uint32_t max_size = 2<<30;
-			if (size > max_size) {
-				throw make_range_exception("Requested reserve size {} exceeds maximum allowed {}", size, max_size);
+			if (new_size > max_size) {
+				throw make_range_exception("Requested reserve size {} exceeds maximum allowed {}", new_size, max_size);
 			}
-			list.size_to(len, capacity, size);
-			capacity = size;
+			list.size_to(len, capacity, new_size);
+			capacity = new_size;
 		}
 
 	private:

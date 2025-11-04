@@ -149,7 +149,7 @@ struct idblock {
 	}
 	idblock() {
 		id = -1;
-		pos = zeroiv;
+		pos = ZeroCoord;
 	}
 };
 

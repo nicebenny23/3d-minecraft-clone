@@ -37,16 +37,16 @@ void initbreakparticle(gameobject::obj newent);
 
 struct playerbreak : gameobject::component {
     voxtra::WorldRayCollision closest;
-    util::change <item*> pickaxe;
+    stn::change <item*> pickaxe;
 
     decal break_decal;
     float break_start_time = 0.f;
     float timeuntilbreak = 0.f;
-    util::change<block*> currmining;
+    stn::change<block*> currmining;
 
     void start() override {
         currmining();
-        currmining.reset(nullptr);
+        currmining.clear(nullptr);
         CtxName::ctx.Ren->Textures.LoadTexture("images\\menutex.png", "MenuTexture");
     }
 
@@ -89,8 +89,8 @@ struct playerbreak : gameobject::component {
         if (!engaged())
         {
 
-            pickaxe.reset(owner.getcomponent<inventory>().selected);
-            currmining.reset( blk);
+            pickaxe.clear(owner.getcomponent<inventory>().selected);
+            currmining.clear( blk);
             break_start_time = block_power(blk);
             timeuntilbreak = break_start_time;
         }
@@ -101,8 +101,8 @@ struct playerbreak : gameobject::component {
         }
     }
     void disengage_block() {
-        currmining.reset(nullptr);
-        pickaxe.reset(nullptr);
+        currmining.clear(nullptr);
+        pickaxe.clear(nullptr);
         timeuntilbreak = -1;
 
     }
@@ -154,7 +154,7 @@ struct playerbreak : gameobject::component {
             // Show progress decal
             float prog = (break_start_time - timeuntilbreak) / break_start_time;
             size_t phase = clamp(size_t(prog * 7.f), 0, 6);
-            if (apx(currmining()->mesh.box.scale, blockscale)) {
+            if (currmining()->mesh.box.scale== blockscale) {
                 spawn_decal(phase);
             }
             if (timeuntilbreak <= 0.f) {

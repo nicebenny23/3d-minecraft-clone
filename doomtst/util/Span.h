@@ -10,6 +10,10 @@ namespace stn {
     std::out_of_range make_range_exception(const std::format_string<Args...>& fmt, Args&&... args) {
         return std::out_of_range(std::format(fmt, std::forward<Args>(args)...));
     }
+    template<typename... Args>
+    std::logic_error make_logic_exception(const std::format_string<Args...>& fmt, Args&&... args) {
+        return std::logic_error(std::format(fmt, std::forward<Args>(args)...));
+    }
     template <typename T>
     struct span {
 

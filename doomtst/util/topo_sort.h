@@ -271,7 +271,7 @@ Dag<T> filter(Dag<T> full, const stn::array<T>& keep) {
            
             DagNode<T>& new_element = new_dag[remap[i]];
             new_element.successors = filter(full[i].successors,filter_ind);
-            for (size_t j = 0; j < new_element.successors.length(); j++)
+            for (std::uint32_t j = 0; j < new_element.successors.length(); j++)
             {
 
                 new_element.successors[j]= remap[new_element.successors[j]];

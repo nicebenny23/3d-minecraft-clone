@@ -114,6 +114,7 @@
     <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\opengl\lib;C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\lib\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)x64</OutDir>
+    <IntDir>R:\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|x64'">
     <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
@@ -174,12 +175,14 @@
       <UseDynamicDebugging>false</UseDynamicDebugging>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <WholeProgramOptimization>false</WholeProgramOptimization>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+      <AdditionalOptions>/VERBOSE:INCR %(AdditionalOptions)</AdditionalOptions>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|x64'">
@@ -268,6 +271,7 @@
     <ClCompile Include="renderer\ShaderManager.cpp" />
     <ClCompile Include="renderer\TextureManager.cpp" />
     <ClCompile Include="Resources\ResourceManager.cpp" />
+    <ClCompile Include="Source.cpp" />
     <ClCompile Include="util\algorthm.cpp" />
     <ClCompile Include="renderer\ModelMesh.cpp" />
     <ClCompile Include="player\player.cpp" />
@@ -298,7 +302,6 @@
     <ClCompile Include="util\random.cpp" />
     <ClCompile Include="renderer\renderer.cpp" />
     <ClCompile Include="renderer\shader.cpp" />
-    <ClCompile Include="Source.cpp" />
     <ClCompile Include="renderer\texture.cpp" />
     <ClCompile Include="world\noise.cpp" />
     <ClCompile Include="world\tick.cpp" />
@@ -343,7 +346,13 @@
     <ClInclude Include="game\Commands.h" />
     <ClInclude Include="game\compid.h" />
     <ClInclude Include="game\ecs\archtype.h" />
+    <ClInclude Include="game\ecs\component.h" />
+    <ClInclude Include="game\ecs\component_id.h" />
+    <ClInclude Include="game\ecs\ecs.h" />
+    <ClInclude Include="game\ecs\entities.h" />
     <ClInclude Include="game\ecs\entity.h" />
+    <ClInclude Include="game\ecs\game_object.h" />
+    <ClInclude Include="game\ecs\World.h" />
     <ClInclude Include="game\entity.h" />
     <ClInclude Include="game\entityutil.h" />
     <ClInclude Include="game\Event.h" />

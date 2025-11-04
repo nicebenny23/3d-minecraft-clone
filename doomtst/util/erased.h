@@ -57,7 +57,7 @@ namespace stn {
 
             template<typename T>
                 requires(is_member<T>)
-           inline void reset() {
+           inline void clear() {
                 if constexpr (!std::is_trivially_destructible_v<T> && !std::is_reference_v<T>) {
                     get_ptr<T>()->~T();
                 }

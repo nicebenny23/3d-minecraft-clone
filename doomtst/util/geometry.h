@@ -147,7 +147,7 @@ namespace geometry {
 		}
 		
 		Sphere(Box bx)
-			: radius(mag(bx.scale)), center(bx.center) {}
+			: radius(bx.scale.length()), center(bx.center) {}
 		
 		Vec3 project(Vec3 point) const{
 			return center + normal(point - center) * radius;

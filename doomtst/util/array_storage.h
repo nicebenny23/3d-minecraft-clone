@@ -20,7 +20,7 @@ namespace array_storage {
 			*(get_ptr(index)) = std::move(value);
 
 		}
-		void reset() {
+		void clear() {
 			if (storage != nullptr)
 			{
 				delete[] storage;
@@ -111,10 +111,10 @@ namespace array_storage {
 			return storage[index];
 		}
 		default_store() = default;
-		void reset() {
+		void clear() {
 			if (storage != nullptr)
 			{
-				delete[] storage;
+				free(storage);
 				storage = nullptr;
 			}
 		}
@@ -167,19 +167,13 @@ namespace array_storage {
 			}
 			else
 			{
-				newlist = new T[new_capacity];
-				for (size_t i = 0; i < capacity; i++) {
-
-					newlist[i] = std::move(storage[i]);
-
+				 newlist = static_cast<T*>(malloc(sizeof(T) * new_capacity));
+				
+				for (size_t i = 0; i < len; ++i) {
+					new (newlist + i) T(std::move(storage[i]));
+					storage[i].~T();
 				}
-			
-				if (capacity != 0)
-				{
-
-					delete[] storage;
-				}
-
+					clear();
 			}
 			storage = newlist;
 		}

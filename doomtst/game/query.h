@@ -43,12 +43,12 @@ namespace query {
 
 	template<typename... Components>
 	struct View {
-		stn::array<gameobject::arch_id> archtypes;
+		stn::array<gameobject::archetype_id> archtypes;
 		gameobject::Ecs* ecs;
 		gameobject::Archtype& operator[](size_t index) {
 			return (*ecs)[archtypes[index]];
 		}
-		array<comp::Id> positions;
+		array<ecs::component_id> positions;
 		struct Iterator {
 			View& owner;
 			size_t entity_index;
@@ -111,7 +111,7 @@ namespace query {
 			}
 			positions = ecs->component_indexer.get_type_ids<Components...>();
 
-			bitset::bitset bitlist;
+			stn::bitset bitlist;
 			bitlist.expand(ecs->component_indexer.size());
 			for (auto id : positions) {
 				bitlist.set(id.id);
@@ -122,7 +122,7 @@ namespace query {
 					{
 						int l =arch->id();
 					}
-					archtypes.push(gameobject::arch_id(arch->id()));
+					archtypes.push(gameobject::archetype_id(arch->id()));
 				}
 			}
 			for (auto& arch:archtypes )
@@ -144,9 +144,9 @@ namespace query {
 		View<result> Build(gameobject::Ecs* ecs) {
 			View<result> output_arch;
 			output_arch.ecs = ecs;
-			bitset::bitset exclude;
-			bitset::bitset require;
-			stn::array<comp::Id> output;
+			stn::bitset exclude;
+			stn::bitset require;
+			stn::array<ecs::component_id> output;
 
 			output = ecs->component_indexer.get_type_ids<result...>();
 			require = ecs->bitset_of<needed...>();
@@ -178,8 +178,8 @@ namespace query {
 
 		gameobject::component* operator*() {
 			size_t comp_id = dense_bits[ind];
-			auto& store = manager->comp_storage[comp_id].store;
-			gameobject::component* value = store[owner.id()];
+			auto& store = manager->comp_storage[comp_id];
+			gameobject::component* value = store[owner];
 			if (value == nullptr) {
 				// FAIL FAST with a clear error
 				throw std::logic_error(
