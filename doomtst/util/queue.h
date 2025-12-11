@@ -6,6 +6,11 @@ namespace stn {
 
     template<typename T>
     struct queue {
+        template<typename ...Args>
+        void emplace(Args&&... args) {
+            data.emplace_back(std::forward<Args>(args)...);
+        }
+
 
         void push(const T& val) {
             data.push_back(val);
@@ -23,39 +28,6 @@ namespace stn {
             }
             return data.pop_front();
         }
-
-        T& front() {
-            if (empty())
-            {
-                stn::throw_out_of_range("cannot get the front element of an empty queue");
-            }
-            return data.list[data.front];
-        }
-
-        const T& front() const {
-            if (empty())
-            {
-                stn::throw_out_of_range("cannot get the front element of an empty queue");
-            }
-            return data.list[data.front];
-        }
-
-        T& back() {
-            if (empty())
-            {
-                stn::throw_out_of_range("cannot get the back element of an empty queue");
-            }
-            return data.list[data.back];
-        }
-
-        const T& back() const {
-            if (empty())
-            {
-                stn::throw_out_of_range("cannot get the back element of an empty queue");
-            }
-            return data.list[data.back];
-        }
-
         bool empty() const {
             return data.empty();
         }
@@ -66,6 +38,13 @@ namespace stn {
 
         void clear() {
             data.clear();
+        }
+        using iterator = stn::deque<T>::iterator;
+        iterator begin() {
+            return data.begin();
+        }
+        iterator end() {
+            return data.end();
         }
     private:
         stn::deque<T> data;

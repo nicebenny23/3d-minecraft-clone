@@ -6,7 +6,7 @@
 #include <cstdint>
 #include "pair.h"
 #include "Id.h"
-namespace type_map {
+namespace stn {
 
 
     // Global counter for assigning unique type IDs

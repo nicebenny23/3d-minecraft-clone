@@ -6,7 +6,7 @@
 #include "dynamicarray.h"
 #include <bit>
 namespace stn {
-    
+
     inline size_t bits_to_words(size_t bits) {
         return (bits + 63) / 64;
     }
@@ -30,32 +30,30 @@ namespace stn {
         using uint64 = uint64_t;
         stn::array<uint64> bitlist;
         size_t bits;
-       inline bool contains_index(size_t index) const {
+        inline bool contains_index(size_t index) const {
             return index < bits;
         }
 
-        bitset(size_t initial_zeros) noexcept :bits(initial_zeros){
+        bitset(size_t initial_zeros) noexcept :bits(initial_zeros) {
             bitlist.expand(bits_to_words(initial_zeros));
         };
 
         constexpr bitset() noexcept :bits(0), bitlist() {};
 
         template<typename T>
-        bitset(const stn::array<T>& array){
+        bitset(const stn::array<T>& array) {
             size_t max = 0;
             bits = 0;
-            for (size_t i = 0; i < array.length(); i++)
-            {
+            for (size_t i = 0; i < array.length(); i++) {
                 max = Max(static_cast<size_t>(array[i]), max);
             }
-            expand(max+1);
-            for (size_t i = 0; i < array.length(); i++)
-            {
-                
+            expand(max + 1);
+            for (size_t i = 0; i < array.length(); i++) {
+
                 enable(static_cast<size_t>(array[i]));
             }
         }
-        
+
         bitset(const bitset& oth) : bitlist(oth.bitlist), bits(oth.bits) {}
 
         bitset(bitset&& oth) noexcept : bitlist(std::move(oth.bitlist)), bits(oth.bits) {
@@ -88,9 +86,8 @@ namespace stn {
         }
         template<typename T>
         stn::array<T> indices() const {
-            stn::array<T> inds=stn::array<T>();
-            for (size_t i = 0; i < bits; i++)
-            {
+            stn::array<T> inds = stn::array<T>();
+            for (size_t i = 0; i < bits; i++) {
                 if ((*this)[i]) {
                     inds.emplace(i);
                 }
@@ -102,40 +99,35 @@ namespace stn {
         }
         //zero initilizes and expands
         void expand(size_t new_bit_count) {
-            if (bits< new_bit_count)
-            {
+            if (bits < new_bit_count) {
                 bits = new_bit_count;
                 bitlist.expand(bits_to_words(new_bit_count));
             }
         }
-      
-        void set(size_t bit,bool value) {
+
+        void set(size_t bit, bool value) {
             if (!contains_index(bit)) {
                 stn::throw_range_exception("set failed: index {} out of bounds (len {})", bit, bits);
             }
             size_t idx = calc_full_words(bit);
             size_t off = calc_leftover_bits(bit);
-            if (value)
-            {
+            if (value) {
                 bitlist[idx] |= bit_at(off);
             }
-            else
-            {
+            else {
                 bitlist[idx] &= ~(bit_at(off));
             }
         }
         void reaching_set(size_t bit, bool value) {
             if (!contains_index(bit)) {
-                expand(bit+1);
+                expand(bit + 1);
             }
             size_t idx = calc_full_words(bit);
             size_t off = calc_leftover_bits(bit);
-            if (value)
-            {
+            if (value) {
                 bitlist[idx] |= bit_at(off);
             }
-            else
-            {
+            else {
                 bitlist[idx] &= ~(bit_at(off));
             }
         }
@@ -167,7 +159,7 @@ namespace stn {
             size_t off = calc_leftover_bits(bit);
             bitlist[idx] ^= (bit_at(off));
         }
-        
+
 
         bool operator[](size_t bit) const {
             if (!contains_index(bit)) {
@@ -195,13 +187,13 @@ namespace stn {
             return *this;
         }
 
-        bitset operator~()  {
+        bitset operator~() {
             bitset result(bits);
             size_t full_words = calc_full_words(bits);
             for (size_t i = 0; i < full_words; ++i) {
                 result.bitlist[i] = ~bitlist[i];
             }
-            
+
             result.mask_end();
             return result;
         }
@@ -209,7 +201,7 @@ namespace stn {
         bitset operator&(const bitset& oth) const {
             size_t min_size = Min(bitlist.length(), oth.bitlist.length());
             bitset result(Min(bits, oth.bits));
-           for (size_t i = 0; i < min_size; i++) {
+            for (size_t i = 0; i < min_size; i++) {
                 result.bitlist[i] = bitlist[i] & oth.bitlist[i];
             }
             return result;
@@ -228,12 +220,12 @@ namespace stn {
             size_t min_size = Min(bitlist.length(), oth.bitlist.length());
             bitset result(Max(bits, oth.bits));
             for (size_t i = 0; i < min_size; i++) {
-                result.bitlist[i]=( bitlist[i] ^ oth.bitlist[i]);
+                result.bitlist[i] = (bitlist[i] ^ oth.bitlist[i]);
             }
             for (size_t i = min_size; i < max_size; i++) {
                 result.bitlist[i] = (bitlist.length() == max_size) ? bitlist[i] : oth.bitlist[i];
             }
-           
+
             return result;
         }
 
@@ -244,59 +236,50 @@ namespace stn {
 
         bool operator==(const bitset& oth) = delete;
         bool empty() {
-            for (std::uint64_t word : bitlist)
-            {
-                if (word != 0)
-                {
+            for (std::uint64_t word : bitlist) {
+                if (word != 0) {
                     return false;
                 }
             }
             return true;
         }
         bool operator!=(const bitset& oth) = delete;
-        size_t popcount() const{
+        size_t popcount() const {
             size_t cnt = 0;
-            for (std::uint64_t word:bitlist)
-            {
+            for (std::uint64_t word : bitlist) {
                 cnt += std::popcount(word);
             }
             return cnt;
         }
-        bool ones_match(const bitset& oth) const{
+        bool ones_match(const bitset& oth) const {
             size_t min_size = Min(oth.bitlist.length(), bitlist.length());
 
-            for (size_t i = 0; i < min_size; i++)
-            {
-                if (bitlist[i] != oth.bitlist[i])
-                {
+            for (size_t i = 0; i < min_size; i++) {
+                if (bitlist[i] != oth.bitlist[i]) {
                     return false;
                 }
             }
-            for (size_t i = min_size; i < bitlist.length(); i++)
-            {
-                if (bitlist[i] != 0)
-                {
+            for (size_t i = min_size; i < bitlist.length(); i++) {
+                if (bitlist[i] != 0) {
                     return false;
                 }
             }
-        
-            for (size_t i = min_size; i < oth.bitlist.length(); i++)
-            {
-                if (oth.bitlist[i] != 0)
-                {
+
+            for (size_t i = min_size; i < oth.bitlist.length(); i++) {
+                if (oth.bitlist[i] != 0) {
                     return false;
                 }
             }
             return true;
         }
-        
-        size_t matches(const bitset& oth) const{
+
+        size_t matches(const bitset& oth) const {
             return (*this & oth).popcount();
         }
         bool matches_any(const bitset& oth) const {
             return this->matches(oth) != 0;
         }
-        
+
     private:
         //trims the unused bits
         void mask_end() {
@@ -307,5 +290,5 @@ namespace stn {
         }
 
     };
-    
+
 }

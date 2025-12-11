@@ -578,22 +578,22 @@ namespace stn {
     };
 
     template<ClearableRange C>
-    struct DrainAction {
+    struct DrainRange {
         C&& src;
 
         using iterator = decltype(std::begin(src));
         using value_type = std::ranges::range_value_t<C>;
 
-        explicit DrainAction(C&& c) noexcept : src(std::move(c)) {}
+        explicit DrainRange(C&& c) noexcept : src(std::move(c)) {}
 
         iterator begin() noexcept { return std::begin(src); }
         iterator end() noexcept { return std::end(src); }
 
         // Default move/copy
-        DrainAction(DrainAction&&) noexcept = default;
-        DrainAction& operator=(DrainAction&&) noexcept = default;
+        DrainRange(DrainRange&&) noexcept = default;
+        DrainRange& operator=(DrainRange&&) noexcept = default;
 
-        ~DrainAction() {
+        ~DrainRange() {
             src.clear();
         }
     };
@@ -603,7 +603,7 @@ namespace stn {
         auto operator()(C&& c) const noexcept
             requires std::is_rvalue_reference_v<C&&>
         {
-            return DrainAction<C&&>(static_cast<C&&>(c));
+            return DrainRange<C&&>(static_cast<C&&>(c));
         }
     };
 

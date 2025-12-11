@@ -49,7 +49,7 @@ struct CommandBuffer {
 	stn::array< CommandPool> pools;
 	inline void pop() {
 		
-	stn::array<std::uint32_t> indices=DependencySystem.sortedActive;
+	stn::array<std::uint32_t> indices=stn::array<std::uint32_t>(DependencySystem.sortedActive);
 		for (auto& index:indices)
 		{
 			pools[index].apply(World);
@@ -79,7 +79,7 @@ struct CommandBuffer {
 	}
 	
 	gameobject::Ecs* World;
-	type_map::type_indexer<> commandSystem;
+	stn::type_indexer<> commandSystem;
 	Depends::DependencySystem DependencySystem;
 	
 }; 

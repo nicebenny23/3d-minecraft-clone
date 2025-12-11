@@ -431,7 +431,7 @@ namespace gameobject {
 			const size_t max_size = static_cast<size_t>(1) << 19;
 			ctx = nullptr;
 			entitymeta = array<EntityMetadata>(max_size);
-			component_indexer = type_map::type_indexer<ecs::component_id>();
+			component_indexer = stn::type_indexer<ecs::component_id>();
 			free_ids = array<uint32_t>(max_size);
 			for (size_t i = 0; i < max_size; i++)
 			{
@@ -473,7 +473,7 @@ namespace gameobject {
 		template <ComponentType T, typename... types>
 		stn::flux_token<component> create_component(obj& entity, types&&... initval);
 		void bind_component(stn::flux_token<component>&& comp,obj& entity);
-		type_map::type_indexer<ecs::component_id> component_indexer;
+		stn::type_indexer<ecs::component_id> component_indexer;
 		Archetypes arch;
 		Archetype& operator[](archetype_id index) {
 			return arch[index];

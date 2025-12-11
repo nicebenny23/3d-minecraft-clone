@@ -6,15 +6,15 @@ inline void setdefault(blockname::block* blk) {
 	blk->attributes.transparent = true;
 	blk->emitedlight = 0;
 	blk->id = minecraftair;
-	blk->mesh.setfaces(0,0,0,0,0,0);
+	blk->mesh.setfaces(0, 0, 0, 0, 0, 0);
 	blk->mesh.box.center = blk->center();
 
-	
-blk->minedfastwithpick = false;
+
+	blk->minedfastwithpick = false;
 	blk->mininglevel = 0;
 	blk->lightval = 0;
 	blk->bstate.broken = false;
 }
 
 
- // !wood_HPP
+// !wood_HPP

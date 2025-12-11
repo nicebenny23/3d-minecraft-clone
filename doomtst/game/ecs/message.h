@@ -1,95 +1,126 @@
 #pragma once
+#include "../../util/type_index.h"
 #include "../../util/queue.h"
-
-#include "../../util/dynpool.h"
+#include "resources.h"
+#include <algorithm>
 namespace ecs {
-	struct Event {
-
+	struct event_tag {
 	};
-	template<typename T>
-	concept EventType =std::derived_from<T,Event>;
-	using event_count = stn::typed_index<Event>;
+	using event_count = stn::typed_count<event_tag >;
 	struct event_reader_tag {};
-	using event_reader_id = stn::typed_id<event_reader_tag>;
+	using reader_id = stn::typed_id<event_reader_tag>;
 
 	template<typename T>
-	struct EventReader {
-		EventReader() = delete;
-	private:
-		event_reader_id reader_id;
-		friend struct EventBuffer;
-	};
-	using event_reader_count = stn::typed_index<EventReader>;
-	template<typename T>
-	struct EventBuffer {
-		EventBuffer() : amount_read() {}
+	struct Events:resource{
+		
+		Events() {}
 		template<typename ...Args>
 		void write(Args&&... args) {
-			if (reading_count!=0)
-			{
-				stn::throw_logic_error("you may not write to a EventBuffer with {} current readers", reading_count);
+			if (being_read_from()) {
+				stn::throw_logic_error("you may not write to a Events with {} current readers", current_readers.length());
 			}
-			queue.emplace(std::forward<Args>(args)...);
-
-		}
-
-		size_t event_count() const {
-			return queue.length();
-		}
-		
-
-		event_count max_count() const{
-			return amount_read() + event_count();
-		}
-		event_range read(EventReader reader) {
-			reading_count++;
-			counts[reader.reader_id] = max_count();
-		
-		}
-
-		struct event_range {
-			event_range(EventBuffer& buffer) : events(buffer) {
-				
+			constexpr size_t max_events = 2 << 18;
+			if (max_events <active_events().count) {
+				stn::throw_logic_error("you may not write with {} active events",active_events());
 			}
-			using iterator = events.queue::iterator;
+			if (counts.nonempty()) {
+				queue.push(std::forward<Args>(args)...);
+			}
+
+		}
+		//returns the total number of active events
+		event_count active_events() const {
+			return event_count(queue.length());
+		}
+		//returns whether it is being read from
+		bool being_read_from() const {
+			return current_readers.nonempty();
+		}
+		struct EventRange {
+			using iterator = stn::queue<T>::iterator;
 			iterator begin() {
-				//add offset 
-				return events.queue.begin();
+				size_t offset = events.counts[id.id].count;
+				return events.queue.begin() + offset;
 			}
 			iterator end() {
 				return events.queue.end();
 			}
-
-			~event_range() {
-				//events.counts
+			~EventRange() {
+				events.recieve(id);
 			}
-			iterator
-			EventBuffer& events;
 
-
+		private:
+			Events& events;
+			reader_id id;
+			EventRange(Events& buffer, reader_id read_id) : events(buffer), id(read_id) {};
+			friend struct Events;
+		
 		};
-	private:
-		void recieve(EventReader id,event_count total_read) {
 
-			size_t original_count = counts[id.reader_id];
-			counts[id.reader_id] = total_read;
-			reading_count--;
-			if (reading_count==0)
-			{
-				event_count all_read = max_count();
-				for (event_count& count : counts)
-				{
-					all_read = std::min(count, all_read);
-				}
+		struct EventReader {
+			EventReader() = delete;
+			bool operator==(const EventReader& other)const {
+				return other.id == id;
 			}
-			queue.drop_many(all_read - original_count);
+			bool operator!=(const EventReader& other)const {
+				return !((*this) == other);
+			} 
+			EventReader(const EventReader&) = delete;            
+			EventReader& operator=(const EventReader&) = delete; 
+			
+			EventReader(EventReader&& other):id(other.id),events(other.events) {
+				
+			}
+			EventRange read(){
+				return events.create_range(*this);
+			}
+		private:
+			EventReader(Events& event_system, reader_id read_id) :events(event_system), id(read_id) {};
+			//returns if not in a move only state
+			Events& events;
+			reader_id id;
+			friend struct Events;
+		};
+		
+		
+		EventReader make_reader() {
+			reader_id id = reader_id(counts.length());
+			counts.push(active_events());
+			return	EventReader(*this, id);
 		}
-		friend struct event_range;
-		event_reader_count reading_count;
+	private:
+		EventRange create_range(const EventReader& reader) {
+			if (current_readers.contains(reader.id)) {
+				stn::throw_logic_error("You may not Read from Events with the same reader id {} while it is currently being read", reader.id.id);
+			}
+			current_readers.push(reader.id);
+			return EventRange(*this, reader.id);
+		}
+		void recieve(reader_id reader) {
+			if (!current_readers.contains(reader)) {
+				stn::throw_logic_error("Invariant violated: Event Reader must be a current_reader");
+			}
+			size_t index = reader.id;
+			counts[index] = active_events();
+			current_readers.remove_at(index);
+			if (!being_read_from()) {
+				event_count all_read_upto = active_events();
+				for (event_count& count : counts) {
+					all_read_upto = std::min(count, all_read_upto);
+				}
+				for (event_count& count : counts) {
+					count -= all_read_upto;
+				}
+				queue.drop_many(all_read_upto.count);
+			}
+
+		}
+		friend struct EventRange;
+		stn::array<reader_id> current_readers;
 		stn::array<event_count> counts;
 		stn::queue<T> queue;
-		event_count amount_read;
-	
+
 	};
-	
+	template <typename T>
+	using EventReader = Events<T>::EventReader;
 }

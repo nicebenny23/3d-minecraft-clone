@@ -4,6 +4,7 @@
 #include "../../util/unique.h"
 #include "../../util/pair.h"
 #include <concepts>
+#include "../../util/dependency.h"
 namespace ecs {
 	struct System {
 
@@ -50,7 +51,7 @@ namespace ecs {
 		Depends::DependencySystem dependency_executor;
 		stn::array<System*> sys_list;
 		stn::array<stn::box<System>> stored_systems;
-		type_map::type_indexer<> types;
+		stn::type_indexer<> types;
 
 	};
 }

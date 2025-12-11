@@ -45,11 +45,11 @@ namespace ecs {
 			return ecs->add_component<T>(ent, std::forward<Args>(args)...);
 		}
 		void destroy() {
-			ecs->insert_command(DestroyEntity(ent));
+		//	ecs->insert_command(DestroyEntity(ent));
 		}
 		template<ComponentType C>
 		void destroy_component() {
-			ecs->insert_command(DestroyComponent(ent,ecs->get_component_id<C>()));
+		ecs->write_command< DestroyComponent>(DestroyComponent(ent,ecs->get_component_id<C>()));
 		}
 	private:
 		space_id ent;

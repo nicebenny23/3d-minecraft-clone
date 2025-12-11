@@ -347,7 +347,7 @@
     <ClInclude Include="game\compid.h" />
     <ClInclude Include="game\ecs\archtype.h" />
     <ClInclude Include="game\ecs\commands.h" />
-    <ClInclude Include="game\ecs\command_buffer.h" />
+    <ClInclude Include="game\ecs\ecs_commands.h" />
     <ClInclude Include="game\ecs\component.h" />
     <ClInclude Include="game\ecs\component_id.h" />
     <ClInclude Include="game\ecs\ecs.h" />
@@ -358,6 +358,7 @@
     <ClInclude Include="game\ecs\message.h" />
     <ClInclude Include="game\ecs\multi_query.h" />
     <ClInclude Include="game\ecs\query.h" />
+    <ClInclude Include="game\ecs\resources.h" />
     <ClInclude Include="game\ecs\system.h" />
     <ClInclude Include="game\ecs\World.h" />
     <ClInclude Include="game\entity.h" />

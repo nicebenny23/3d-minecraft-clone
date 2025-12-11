@@ -152,7 +152,7 @@ namespace Depends {
 
             sortedActive = dag_sort(builder.getFiltered());
         }
-        const type_map::type_indexer<> indexer() const {
+        const stn::type_indexer<> indexer() const {
             return typeSystem;
         }
         Dag<uint32_t> filtered() {
@@ -169,7 +169,7 @@ namespace Depends {
         };
 
         DagBuilder<uint32_t> builder;
-        type_map::type_indexer<> typeSystem;
+        stn::type_indexer<> typeSystem;
 
     };
 

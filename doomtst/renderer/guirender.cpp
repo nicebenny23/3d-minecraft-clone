@@ -26,18 +26,13 @@ namespace guirender {
     }
     void rendergui()
     {   // Start a new ImGui frame
-
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
-
         // ... your other windows
         console::Console::Instance().Render();
-
-
         // 7. Render UI
         ImGui::Render();
-        stn::Timer time("poll");
         GlUtil::poll_errors();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 

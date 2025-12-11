@@ -44,6 +44,9 @@ namespace stn {
 		constexpr insertion(T&& val, bool newly_inserted)
 			: value(std::move(val)), is_new(newly_inserted) {
 		}
+		bool is_not_new() const {
+			return !is_new;
+		}
 		constexpr explicit operator bool() const noexcept {
 			return is_new;
 		}

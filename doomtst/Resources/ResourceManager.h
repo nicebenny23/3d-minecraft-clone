@@ -10,14 +10,14 @@ struct ResourceManager {
         auto [id, is_new] = resources_ids.insert<T>();
         if (is_new) {
             // New type inserted: store pointer at dense id index
-            if (id.id >= resources.length()) {
+            if (id.id >= Resources.length()) {
                 // resize array to fit new index
-                resources.reserve(id.id + 1, nullptr);
+                Resources.reserve(id.id + 1, nullptr);
             }
-            resources[id.id] = &representative;
+            Resources[id.id] = &representative;
         }
         else {
-            resources[id.id] = &representative;
+            Resources[id.id] = &representative;
         }
     }
 
@@ -30,8 +30,8 @@ struct ResourceManager {
         }
         auto id = resources_ids.get<T>();
         void* ptr = nullptr;
-        if (id.id < resources.length()) {
-            ptr = resources[id.id];
+        if (id.id < Resources.length()) {
+            ptr = Resources[id.id];
         }
         if (!ptr) {
             throw std::runtime_error(std::string(typeid(T).name()) + " resource pointer is null");
@@ -40,6 +40,6 @@ struct ResourceManager {
     }
 
 private:
-    stn::array<void*> resources;
-    type_map::type_indexer<> resources_ids;
+    stn::array<void*> Resources;
+    stn::type_indexer<> resources_ids;
 };

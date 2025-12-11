@@ -43,7 +43,7 @@ namespace event {
             event_subsystem[index].Call(event);
         }
         stn::array<EventSubsystem> event_subsystem;
-        type_map::type_indexer<> event_indexer;
+        stn::type_indexer<> event_indexer;
         EventBus() {
         }
     };

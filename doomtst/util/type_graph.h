@@ -33,7 +33,7 @@ using Dependees = std::conditional_t<
 // Builds a type-indexed DAG from pushed types
 struct TypeDag {
     Dag<size_t> graph;
-    type_map::type_indexer<> typeSystem;
+    stn::type_indexer<> typeSystem;
 
     template<typename T>
     void push() {

@@ -84,8 +84,8 @@ namespace stn {
 			}
 			return *this;
 		}
-		template<typename U> requires std::constructible_from<T, U&&>
-		void push_front(U&& val)
+		template<typename ...Args> requires std::constructible_from<T, Args&&...>
+		void emplace_front(Args&&... args)
 		{
 			if (full()) {
 				reserve(resize_length(capacity));
@@ -93,12 +93,12 @@ namespace stn {
 			if (!empty()) {
 				dec_index(front);
 			}
-			construct_at(front, std::forward<U>(val));
+			construct_at(front, std::forward<Args>(args)...);
 			len++;
 
 		}
-		template<typename U> requires std::constructible_from<T, U&&>
-		void push_back(U&& val)
+		template<typename ...Args> requires std::constructible_from<T, Args&&...>
+		void emplace_back(Args&&... args)
 		{
 			if (full()) {
 				reserve(resize_length(capacity));
@@ -106,8 +106,19 @@ namespace stn {
 			if (!empty()) {
 				inc_index(back);
 			}
-			construct_at(back,std::forward<U>(val));
+			construct_at(back, std::forward<Args>(args)...);
 			len++;
+
+		}
+		template<typename U> requires std::constructible_from<T, U&&>
+		void push_back(U&& val)
+		{
+			emplace_back(std::forward<U>(val));
+		}
+		template<typename U> requires std::constructible_from<T, U&&>
+		void push_front(U&& val)
+		{
+			emplace_front(std::forward<U>(val));
 		}
 		void drop_front()
 		{
@@ -222,7 +233,8 @@ namespace stn {
 			using pointer = U*;
 			using reference = U&;
 			iterator_base(deque_store_type store, size_t idx) : deque_store(store), logical_pos(idx) {}
-
+			iterator_base() :deque_store(nullptr), logical_pos(nullptr) {
+			}
 			bool operator==(const iterator_base& other) const {
 				return deque_store == other.deque_store && logical_pos == other.logical_pos;
 			}
@@ -256,6 +268,31 @@ namespace stn {
 				iterator_base temp = *this;
 				--(*this);
 				return temp;
+			}
+			iterator_base& operator+=(difference_type n) {
+				logical_pos += n;
+				return *this;
+			}
+
+			iterator_base operator+(difference_type n) const {
+				iterator_base tmp = *this;
+				tmp += n;
+				return tmp;
+			}
+
+			friend iterator_base operator+(difference_type n, const iterator_base& it) {
+				return it + n;
+			}
+
+			iterator_base& operator-=(difference_type n) {
+				logical_pos -= n;
+				return *this;
+			}
+
+			iterator_base operator-(difference_type n) const {
+				iterator_base tmp = *this;
+				tmp -= n;
+				return tmp;
 			}
 		private:
 			deque_store_type deque_store;

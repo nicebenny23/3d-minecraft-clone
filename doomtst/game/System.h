@@ -38,6 +38,6 @@ struct Systems {
 	gameobject::Ecs* ecs;
 	Depends::DependencySystem dependency_executor;
 	stn::array<System*> sys_list;
-	type_map::type_indexer<> type_list;
+	stn::type_indexer<> type_list;
 
 };

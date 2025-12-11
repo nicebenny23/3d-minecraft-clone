@@ -251,7 +251,7 @@ namespace ecs {
 		}
 	private:
 		stn::array<component_type> component_list;
-		type_map::type_indexer<component_id> component_indexer;
+		stn::type_indexer<component_id> component_indexer;
 		Ecs* ecs_instance;
 	};
 

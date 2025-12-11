@@ -164,7 +164,7 @@ namespace stn {
         }
 
         // Get type ID of the pointed object (throws if null)
-        type_map::type_id id() const {
+        stn::type_id id() const {
             if (ptr == nullptr)
             {
                 throw std::logic_error("cannot get the type_id of a nullptr");
@@ -173,7 +173,7 @@ namespace stn {
         }
 
         // Get type ID of the pointed object (Ub if null)
-        inline type_map::type_id id_unchecked() const
+        inline stn::type_id id_unchecked() const
         {
             return get_flux().object_id;
         }
@@ -191,7 +191,7 @@ namespace stn {
         flux_token<U> downcast() requires std::derived_from<U, T> {
             if (ptr)
             {
-                if (id_unchecked() != type_map::type_id::make_type_id<U>()) {
+                if (id_unchecked() != stn::type_id::make_type_id<U>()) {
                     stn::throw_range_exception("Cannot downcast flux_token of type {} to {}", get_flux().stored_type_info->name(), typeid(U).name());
                 }
             }
@@ -250,7 +250,7 @@ namespace stn {
     struct flux {
         //constructs from a derived class
         template<typename T>
-        flux(std::type_identity<T> identity) : object_id(type_map::type_id::make_type_id<T>()) {
+        flux(std::type_identity<T> identity) : object_id(stn::type_id::make_type_id<T>()) {
             destructor = [](void* ptr) {
                 ((T*)(ptr))->~T(); 
                 };
@@ -342,7 +342,7 @@ namespace stn {
         template<typename U, typename ...Args>
         flux_token<U> emplace(Args&&...args)  requires std::constructible_from<U, Args&&...> {
 
-            if (type_map::type_id::make_type_id<U>() != object_id)
+            if (stn::type_id::make_type_id<U>() != object_id)
             {
                 stn::throw_range_exception("cannot emplace object of type {} in pool of type {} ", typeid(U).name(), stored_type_info->name());
             }
@@ -434,7 +434,7 @@ namespace stn {
         void(*destructor)(void*);
         const std::type_info* stored_type_info;
         stn::memory::layout block_layout;
-        type_map::type_id object_id;
+        stn::type_id object_id;
         stn::array<std::byte*> pools;
 
         // block_info inline_stack always nullptr or in free state
