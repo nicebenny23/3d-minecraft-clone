@@ -3,7 +3,7 @@
 #include "../world/grid.h"
 #include "../util/dir.h"
 #include "entity.h"
-
+#include "../util/time.h"
 
 struct navnode {
     Coord pos;
@@ -55,9 +55,9 @@ inline bool operator==(const navnode& nav1, const navnode& nav2) {
 
 array<navnode> getneighborsdefault(navnode& node);
 bool normaltestfunc(Coord  pos, int dir);
-struct navigator: gameobject::component
+struct navigator: ecs::component
 {
-    navigator(gameobject::obj parentref, array<navnode> (*testfunc)(navnode& pos));
+    navigator(ecs::obj parentref, array<navnode> (*testfunc)(navnode& pos));
     bool isblockvalid;
     v3::Vec3 esize;
     timename::duration path_creation_dur;
@@ -65,7 +65,7 @@ struct navigator: gameobject::component
     size_t headed_index;
     array<v3::Vec3> headed_list;
     array<navnode> (*testfunction)(navnode& pos);
-    gameobject::obj goingtwords;
+    ecs::obj goingtwords;
     void calcpath();
     bool noblockinrange(Coord pos);
     void update();

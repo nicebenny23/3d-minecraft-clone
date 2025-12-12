@@ -1,5 +1,5 @@
 #pragma once
-#include "../game/gameobject.h"
+#include "../game/ecs/game_object.h"
 #include "../game/collision.h"
 #include "../world/managegrid.h"
 #include "../game/objecthelper.h"
@@ -8,7 +8,7 @@
 #include "../items/itemutil.h"
 
 
-struct playerplace : gameobject::component
+struct playerplace : ecs::component
 {
 	int curplaceid;
 	voxtra::WorldRayCollision Hit;
@@ -19,7 +19,6 @@ struct playerplace : gameobject::component
 	void start() {
 		select = nullptr;
 		curplaceid = 0;
-		priority = 101010101;
 	}
 	bool caninteract() {
 
@@ -34,7 +33,7 @@ struct playerplace : gameobject::component
 			return false;
 		}
 		voxtra::RayWorldHit closest = Hit.unwrap();
-		if (!closest.gameobject().hascomponent<blockname::block>())
+		if (!closest.ecs().has_component<blockname::block>())
 		{
 			return false;
 		}
@@ -45,7 +44,7 @@ struct playerplace : gameobject::component
 		return true;
 	}
 	void placeblock() {
-		ray cameraray = ray(owner.transform().position,owner.transform().position +owner.transform().getnormaldirection() * 7);
+		ray cameraray = ray(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.position +owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * 7);
 		block* plamentblock = voxtra::findprevblock(cameraray,voxtra::countsolid);
 		if (plamentblock==nullptr)
 		{
@@ -97,10 +96,10 @@ struct playerplace : gameobject::component
 		{
 			return;
 		}
-		select = owner.getcomponent<inventory>().selected;
+		select = owner().get_component<inventory>().selected;
 	
-		ray cameraray = ray(owner.transform().position, owner.transform().position + owner.transform().getnormaldirection() * 7);
-		Hit = collision::raycastall(cameraray, collision::HitQuery(owner));
+		ray cameraray = ray(owner().get_component<ecs::transform_comp>().transform.position, owner().get_component<ecs::transform_comp>().transform.position + owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * 7);
+		Hit = collision::raycastall(cameraray, collision::HitQuery(owner()));
 		if (!caninteract())
 		{
 			return;
@@ -130,3 +129,9 @@ struct playerplace : gameobject::component
 
 	
 };
+namespace ecs {
+	template<>
+	inline constexpr ComponentInfo ComponentTraits<playerplace> = {
+		.priority = 3333333
+	};
+}

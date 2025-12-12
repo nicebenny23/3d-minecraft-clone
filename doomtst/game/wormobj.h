@@ -8,7 +8,7 @@ inline float lerpfloat(float f1, float f2, float lval) {
 
 	return f1 * (1 - lval) + f2 * lval;
 }
-struct worm: gameobject::component
+struct worm: ecs::component
 {
 	float magoffset;
 	int length;
@@ -22,14 +22,14 @@ struct worm: gameobject::component
 		updateglobals();
 	}
 	void updateglobals() {
-		Transform currtransform= owner.getcomponent<model>()[0].transform;
+		Transform currtransform= owner().get_component<model>()[0].transform;
 		float speed = .01;
 		float lerpv = .01;
-		aabb::Collider& col = owner.getcomponent<aabb::Collider>();
+		aabb::Collider& col = owner().get_component<aabb::Collider>();
 	
 
-			ModelMeshName::ModelMesh* meshatpos= owner.getcomponent<model>().meshlist[i];
-			Transform& local = col.transform();
+			ModelMeshName::ModelMesh* meshatpos= owner().get_component<model>().meshlist[i];
+			Transform& local = col.get_component<ecs::transform_comp>().transform;
 			local.position += currtransform.getnormaldirection() * speed;
 
 			
@@ -38,7 +38,7 @@ struct worm: gameobject::component
          local.pitch = lerpfloat(local.pitch, shouldbetransform.pitch, lerpv);
          local.yaw = lerpfloat(local.yaw, shouldbetransform.yaw, lerpv);
 		 local.position = lerp(local.position, shouldbetransform.position, lerpv);
-		 currtransform = owner.getcomponent<model>()[i].transform;
+		 currtransform = owner().get_component<model>()[i].transform;
 		}
 
 		

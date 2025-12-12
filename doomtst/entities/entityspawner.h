@@ -19,7 +19,7 @@ inline bool spawnable_dist(v3::Vec3 pos, v3::Vec3 player) {
 
 }
 
-struct spawn_mobs :System {
+struct spawn_mobs :ecs::System {
 	bool ensure_light_level(v3::Vec3 pos) {
 		blockname::block* blk = CtxName::ctx.Grid->getBlock(CtxName::ctx.Grid->getVoxel(pos));
 		if (!blk)
@@ -51,7 +51,7 @@ struct spawn_mobs :System {
 			{
 				continue;
 			}
-			if (!spawnable_dist(pos,player::goblin.transform().position))
+			if (!spawnable_dist(pos,player::goblin.get_component<ecs::transform_comp>().transform.position))
 			{
 				continue;
 			}
@@ -59,7 +59,7 @@ struct spawn_mobs :System {
 		}
 		return stn::None;
 	}
-	void run(gameobject::Ecs* ecs) {
+	void run(ecs::Ecs& ecs) {
 		return;
 		if (!blockrender::enablelighting)
 		{
@@ -69,29 +69,23 @@ struct spawn_mobs :System {
 		float randomnum = random();
 		size_t total_alive = 0;
 
-		query::View<slimemove> slimes(ecs);
+		ecs::View<slimemove> slimes(ecs);
 			for (auto [slime] : slimes) {
 
-				if (should_despawn(slime->owner.transform().position,player::goblin.transform().position))
+				if (should_despawn(slime.owner().get_component<ecs::transform_comp>().transform.position,player::goblin.get_component<ecs::transform_comp>().transform.position))
 				{
-					slime->owner.destroy();
+					slime.owner().destroy();
 				}
 				total_alive++;
-
-
-
-
 			}
 			const size_t max_alive=1;
 			if (max_alive<=total_alive)
 			{
 				return;
 			}
-			query::View<player::player_tag> players(ecs);
+			ecs::View<player::player_tag> players(ecs);
 			for (auto [player] : players) {
 			{
-
-
 				if (randomnum < spawnthreshold)
 				{
 
@@ -101,11 +95,6 @@ struct spawn_mobs :System {
 						continue;
 					}
  					createslime(spawn_loc.unwrap().center, false);
-					
-				
-
-
-
 				}
 			}
 		}

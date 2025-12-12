@@ -1,13 +1,13 @@
 #include "../game/objecthelper.h"
 #include "../game/rigidbody.h"
 #pragma once 
-struct rotatetwordsvel: gameobject::component
+struct rotatetwordsvel: ecs::component
 {
 	void update() {
 
-		Vec3 vel = owner.getcomponent<rigidbody>().velocity;
+		Vec3 vel = owner().get_component<rigidbody>().velocity;
 		vel= normal(vel);
-		owner.transform().OrientDir(vel);
+		owner().get_component<ecs::transform_comp>().transform.OrientDir(vel);
 	}
 };
 

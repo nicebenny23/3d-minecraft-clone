@@ -26,17 +26,17 @@ void particleemiter::update()
 	timetillspawn = Min(timetillspawn-CtxName::ctx.Time->dt,particlespawntime);
 	for (int i = 0; i < particlearray.length(); i++)
 	{
-		if (particlearray[i].exists())
+		//if (particlearray[i].exists())
 		{
 
 
-			if (particlearray[i].hascomponent<particle>())
+			if (particlearray[i].has_component<particle>())
 			{
 
 
-				if (particlearray[i].getcomponent<particle>().endtime < CtxName::ctx.Time->now().value)
+				if (particlearray[i].get_component<particle>().endtime < CtxName::ctx.Time->now().value)
 				{
-					gameobject::obj EntityDeletionBuffer = particlearray[i];
+					ecs::obj EntityDeletionBuffer = particlearray[i];
 					EntityDeletionBuffer.destroy();
 				
 				
@@ -52,16 +52,16 @@ void particleemiter::update()
 		
 		 for (size_t i = 0; i < maxparticles; i++)
 		 {
-			 if (particlearray[i].exists())
+			// if (particlearray[i])
 			 {
-				 gameobject::obj newparticle = CtxName::ctx.OC->spawn_with_transform(position);
+			//	 ecs::obj newparticle = CtxName::ctx.OC->spawn_with_transform(position);
 				 
-				 newparticle.addcomponent<particle>().endtime= CtxName::ctx.Time->now().value +particlelifetime;
-				 newparticle.getcomponent<particle>().ind = i;
-				 newparticle.getcomponent<particle>().emit = this;
-				 (*particleinit)(newparticle);
+			//	 newparticle.add_component<particle>().endtime= CtxName::ctx.Time->now().value +particlelifetime;
+			//	 newparticle.get_component<particle>().ind = i;
+			//	 newparticle.get_component<particle>().emit = this;
+				// (*particleinit)(newparticle);
 				
-				 particlearray[i] = newparticle;
+				// particlearray[i] = newparticle;
 				 break;
 			 };
 
@@ -73,7 +73,7 @@ void particleemiter::update()
 
 void particleemiter::start()
 {
-	position = owner.transform().position;
+	position = owner().get_component<ecs::transform_comp>().transform.position;
 }
 
 void particleemiter::renderparticles()
@@ -107,10 +107,10 @@ void particleemiter::renderparticles()
 	for (int i = 0; i < particlearray.length(); i++)
 	{
 
-		if (particlearray[i].exists())
+		//if (particlearray[i].exists())
 		{
-			CtxName::ctx.Ren->CurrentShader().SetVector3f(particlearray[i].transform().position.glm(), "offset");
-			CtxName::ctx.Ren->CurrentShader().SetVector3f(particlearray[i].transform().scale.glm(), "scale");
+			CtxName::ctx.Ren->CurrentShader().SetVector3f(particlearray[i].get_component<ecs::transform_comp>().transform.position.glm(), "offset");
+			CtxName::ctx.Ren->CurrentShader().SetVector3f(particlearray[i].get_component<ecs::transform_comp>().transform.scale.glm(), "scale");
 			CtxName::ctx.Ren->Render(&ParticleMesh);
 		}
 	}
@@ -118,14 +118,14 @@ void particleemiter::renderparticles()
 	glBindVertexArray(0);
 	//databuf.destroy();
 }
-void initbaseparticle(gameobject::obj newent) {
-	newent.transform().position += Vec3(random(), 1, random()) / 10;
-	newent.addcomponent<aabb::Collider>(newent.transform().position, unitv / 9, true);
-	newent.addcomponent<rigidbody>(1, .1).velocity = Vec3(random(), 1, random()) * 2;
-	newent.transform().scale = blockscale / 22;
+void initbaseparticle(ecs::obj newent) {
+	newent.get_component<ecs::transform_comp>().transform.position += Vec3(random(), 1, random()) / 10;
+	newent.add_component<aabb::Collider>(newent.get_component<ecs::transform_comp>().transform.position, unitv / 9, true);
+	newent.add_component<rigidbody>(1, .1).velocity = Vec3(random(), 1, random()) * 2;
+	newent.get_component<ecs::transform_comp>().transform.scale = blockscale / 22;
 	
 }
-particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) (gameobject::obj),Texture2D* newtex)
+particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) (ecs::obj),Texture2D* newtex)
 {
 	tex = newtex;
 	

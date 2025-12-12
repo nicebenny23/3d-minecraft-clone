@@ -1,5 +1,5 @@
 
-#include "../game/gameobject.h"
+#include "../game/ecs/game_object.h"
 #include "../game/objecthelper.h"
 #include "../util/dynamicarray.h"
 #include "../items/Container.h"
@@ -7,7 +7,7 @@
 #include "../player/playerhealth.h"
 #include "../items/itemutil.h"
 #pragma once 
-struct playereat : gameobject::component
+struct playereat : ecs::component
 {
 
 	
@@ -38,7 +38,7 @@ struct playereat : gameobject::component
 		{
 			return false;
 		}
-		if (owner.getcomponent<estate>().health == owner.getcomponent<estate>().maxhealth)
+		if (owner().get_component<estate>().health == owner().get_component<estate>().maxhealth)
 		{
 			return false;
 		}
@@ -73,7 +73,7 @@ struct playereat : gameobject::component
 			if (timetoeat < 0) {
 
 				timetoeat = 1;
-				owner.getcomponent<estate>().heal(food->amt);
+				owner().get_component<estate>().heal(food->amt);
 				wearduribilty();
 			}
 			prevfood = food;
@@ -88,7 +88,7 @@ struct playereat : gameobject::component
 
 
 
-		food = owner.getcomponent<inventory>().selected;
+		food = owner().get_component<inventory>().selected;
 		tryeat();
 	
 	}

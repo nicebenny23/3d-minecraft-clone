@@ -1,7 +1,7 @@
 #pragma once
 #include "managegrid.h"
 #include "../block/blockinit.h"
-#include "../game/multi_query.h"
+#include "../game/ecs/multi_query.h"
 
 
 queue<block*> lightingq;
@@ -91,11 +91,11 @@ void gridutil::computecover(face& blkface)
 
 }
 
-void Iter(std::tuple<blockname::block*> block) {
+void Iter(std::tuple<blockname::block&> block) {
 	
 	for (size_t faceind = 0; faceind < 6; ++faceind)
 	{
-		face& tocover = (*std::get<0>(block))[faceind];
+		face& tocover = (std::get<0>(block))[faceind];
 		if (tocover.cover == cover_state::Uncomputed)
 		{
 			gridutil::computecover(tocover);
@@ -106,8 +106,8 @@ void Iter(std::tuple<blockname::block*> block) {
 
 void gridutil::computeallcover()
 {
-	query::View<block> blk(CtxName::ctx.OC);
-	multi_query<block>(blk, std::function(Iter), 5,400);
+	ecs::View<blockname::block> blk(*CtxName::ctx.OC);
+	ecs::multi_query<block>(blk, std::function(Iter), 10);
 	sendrecreatemsg();
 }
 
@@ -149,35 +149,35 @@ void gridutil::emitlight()
 	}
 }
 //removes a block from the grid whilst still keeping it in the work
-gameobject::obj gridutil::dislocate(gameobject::obj blk)
+ecs::obj gridutil::dislocate(ecs::obj blk)
 {
-	auto& blk_comp = blk.getcomponent<block>();
+	auto& blk_comp = blk.get_component<block>();
 	
 	auto position = blk_comp.pos;
-	gameobject::obj& to_flip = *CtxName::ctx.Grid->getObject(position);
+	ecs::obj& to_flip = *CtxName::ctx.Grid->getObject(position);
 	to_flip=CtxName::ctx.OC->spawn_empty();
 
-	to_flip.addcomponent<block>().create(position, minecraftair, blk_comp.mesh.attachdir, blk_comp.mesh.direction);
-	setdefault(&to_flip.getcomponent<block>());
-	blk.removecomponent<block>();
+	to_flip.add_component<block>().create(position, minecraftair, blk_comp.mesh.attachdir, blk_comp.mesh.direction);
+	setdefault(&to_flip.get_component<block>());
+	blk.remove_component<block>();
 	return blk;
 }
-void gridutil::set_air(gameobject::obj blk)
+void gridutil::set_air(ecs::obj blk)
 {
 	dislocate(blk).destroy();
 }
-void collect_if_light(std::tuple<blockname::block*> block, std::mutex& push_mutex) {
+void collect_if_light(std::tuple<blockname::block&> block, std::mutex& push_mutex) {
 	auto& [blk] = block;
 	for (int faceind = 0; faceind < 6; faceind++)
 	{
 
-		(blk->mesh.faces)[faceind].light = 0;
+		(blk.mesh.faces)[faceind].light = 0;
 	}
-	blk->lightval = blk->emitedlight;
-	if (0 < blk->emitedlight)
+	blk.lightval = blk.emitedlight;
+	if (0 < blk.emitedlight)
 	{
 		push_mutex.lock();
-		lightingq.push(blk);
+		lightingq.push(&blk);
 
 		push_mutex.unlock();
 	}
@@ -194,8 +194,8 @@ void gridutil::redolighting()
 	{
 		std::mutex fill_mutex;
 
-		query::View<block> blk(CtxName::ctx.OC);
-		multi_query(blk, std::function([&fill_mutex](std::tuple<blockname::block*> block) { return collect_if_light(block,fill_mutex);}),4);
+		ecs::View<block> blk(*CtxName::ctx.OC);
+		ecs::multi_query<block>(blk, std::function([&fill_mutex](std::tuple<blockname::block&> block) { return collect_if_light(block,fill_mutex);}),4);
 		emitlight();
 		redoallighting = false;
 	}
@@ -276,7 +276,7 @@ void gridutil::setblock(Coord loc, int blockid)
 			//i made no progress
 			int prevemit = CtxName::ctx.Grid->getBlock(loc)->emitedlight;
 			CtxName::ctx.Grid->GetChunk(loc)->modified = true;
-			set_air(location->owner);
+			set_air(location->owner());
 			location = CtxName::ctx.Grid->getBlock(loc);
 			location->id = blockid;
 			blkinitname::blockinit(location);

@@ -96,10 +96,10 @@ namespace grid {
 	block* Grid::getBlock(const v3::Coord pos)
 	{
 
-		gameobject::obj* blk = getObject(pos);
+		ecs::obj* blk = getObject(pos);
 		if (blk)
 		{
-			return &blk->getcomponent<block>();
+			return &blk->get_component<block>();
 		}
 		return nullptr;
 	}
@@ -109,7 +109,7 @@ namespace grid {
 		return 0 <= index && index < totalChunks;
 	}
 
-	gameobject::obj* Grid::getObject(const v3::Coord pos)
+	ecs::obj* Grid::getObject(const v3::Coord pos)
 	{
 		Coord chunk_pos = chunkfromblockpos(pos);
 		int chunk_index = chunkIndex(chunk_pos);

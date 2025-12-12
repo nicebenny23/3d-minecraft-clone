@@ -14,11 +14,35 @@ namespace stn {
 		}
 		void operator=(const box& other) = delete;
 		box(const box& other) = delete;
+
+
 		template<typename U>
-		box(box<U>&& other)	requires std::is_convertible_v<U*, T*>
-			: ptr(other.ptr) {
-			other.ptr = nullptr;
+			requires (std::derived_from<T, U>&& std::has_virtual_destructor_v<U>)
+		box<U> upcast() && noexcept {
+			box<U> other(static_cast<U*>(ptr));
+			ptr = nullptr;
+			return other;
 		}
+
+,
+		template<typename U> requires std::derived_from<U, T>
+		box<U> downcast_unchecked() && noexcept {
+			box<U> other(static_cast<U*>(ptr));
+			if (other) {
+				ptr = nullptr;
+			}
+			return other;
+		}
+
+		template<typename U> requires std::derived_from<U, T>
+		box<U> dynamic_downcast() && noexcept{
+			box<U> other(dynamic_cast<U*>(ptr));
+			if (other) {
+				ptr = nullptr;
+			}
+			return other;
+		}
+
 		void operator=(box&& other) noexcept {
 			if (this == &other) {
 				return;
@@ -71,11 +95,13 @@ namespace stn {
 		const T& operator[](std::size_t index) const  requires std::is_array_v<T> {
 			return ptr[index];
 		}
+
 		T* unbox() noexcept {
 			T* temp = ptr;
 			ptr = nullptr;
 			return temp;
 		}
+
 		void clear() {
 			if (ptr) {
 				if constexpr (std::is_array_v<T>) {

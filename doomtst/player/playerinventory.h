@@ -1,5 +1,5 @@
 #include "../items/menu.h"
-#include "../game/gameobject.h"
+#include "../game/ecs/game_object.h"
 #include "../util/userinput.h"
 #include "../items/recipe.h"
 #pragma once 
@@ -54,7 +54,7 @@ struct inventorymen :menu
 
 	inventorymen() = default;
 };
-struct inventory : gameobject::component
+struct inventory : ecs::component
 {
 	Container blkcont;
 	inventorymen playermenu;

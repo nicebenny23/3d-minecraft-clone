@@ -3,19 +3,19 @@
 #include "../world/managegrid.h"
 #include "../game/objecthelper.h"
 #include "../items/loottable.h"
-#include "../game/gameobject.h"
+#include "../game/ecs/game_object.h"
 #pragma once 
-struct sandfall : gameobject::component {
+struct sandfall : ecs::component{
     float timetilltest = .4f;
     
     void update() {
         if (timetilltest > 0) {
 
-            timetilltest -= tick::tickdt;
+          //  timetilltest -= tick::tickdt;
             return;
         }
         timetilltest = .29f;
-        Coord pos = objutil::toblk(owner).pos;
+        Coord pos = owner().get_component<blockname::block>().pos;
         Coord lowpos = pos - Coord(0, 1, 0);
 
   
@@ -34,7 +34,6 @@ struct sandfall : gameobject::component {
     }
  
     sandfall() {
-        utype = gameobject::updatetick;
 
     }
     ~sandfall() = default;
@@ -48,7 +47,7 @@ inline void sandinit(blockname::block* blk) {
     blk->mininglevel = .5f;
     blk->mesh.box.scale = blockname::blockscale;
     blk->createdefaultaabb();
-    blk->owner.addcomponent<sandfall>();
+    blk->owner().add_component<sandfall>();
     
-     blk->owner.addcomponent<loottable>().addelem(sanditem,1, false);
+     blk->owner().add_component<loottable>().addelem(sanditem,1, false);
 }

@@ -6,7 +6,7 @@
 #include "../items/menu.h"
 #include "../game/query.h"
 #pragma once
-struct playercamcontrols : gameobject::component
+struct playercamcontrols : ecs::component
 {
 	void update() {
 
@@ -30,24 +30,26 @@ struct playercamcontrols : gameobject::component
 			xoffset *= sensitivity;
 			yoffset *= sensitivity;
 
-			owner.transform().pitch += yoffset;
+			owner().get_component<ecs::transform_comp>().transform.pitch += yoffset;
 
-			owner.transform().yaw += xoffset;
+			owner().get_component<ecs::transform_comp>().transform.yaw += xoffset;
 
-			owner.transform().pitch = clamp(owner.transform().pitch, -89.99, 89.99);
+			owner().get_component<ecs::transform_comp>().transform.pitch = clamp(owner().get_component<ecs::transform_comp>().transform.pitch, -89.99, 89.99);
 
 		}
 		else
 		{
 			CtxName::ctx.Window->EnableCursor();
 		}
-		ray cameraray = ray(owner.transform().position,owner.transform().position +owner.transform().getnormaldirection() * interactmaxrange);
+		ray cameraray = ray(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.position +owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * interactmaxrange);
 		voxtra::WorldRayCollision closest = collision::raycastall(cameraray, collision::HitQuery());
 		if (closest)
 		{
-			for (component* comp:query::ComponentView(closest.unwrap().gameobject())) {
-				comp->onplayerclick();
+			/*
+			for (component* comp:ecs(closest.unwrap().ecs())) {
+				//comp->onplayerclick();
 			}
+			*/
 		}
 
 	}

@@ -11,7 +11,7 @@ inline void altarinit(blockname::block* blk) {
 	blk->mininglevel = .3f;
 	blk->mesh.box.scale = blockname::blockscale;
 	blk->createdefaultaabb();
-	blk->owner.addcomponent<loottable>().addelem(altaritem, 1, true);
+	blk->owner().add_component<loottable>().addelem(altaritem, 1, true);
 	//CtxName::ctx.EntMan->shouldspawnfinalboss = true;
 	blk->minedfastwithpick = false;
 }

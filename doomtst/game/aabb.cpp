@@ -30,7 +30,6 @@ namespace aabb {
     Collider::Collider(const v3::Vec3& objcenter, const v3::Vec3& objscale,bool appendtolist, bool iseffector)
     {
         effector = iseffector;
-        utype = gameobject::updatenone;
         box.center = objcenter;
         box.scale = objscale;
         
@@ -50,4 +49,10 @@ namespace aabb {
         return geometry::boxes_intersect(p1, p2.globalbox());
     }
 
+}
+namespace ecs {
+	template<>
+	inline constexpr ComponentInfo ComponentTraits<aabb::Collider> = {
+		.updates = false
+	};
 }

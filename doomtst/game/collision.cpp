@@ -26,7 +26,7 @@ bool collision::boxCollidesWithEntity(geometry::Box blk, HitQuery query)
 
 
 
-		if (Collider1->owner == query.orgin)
+		if (Collider1->owner() == query.orgin)
 		{
 			continue;
 		}
@@ -46,7 +46,7 @@ voxtra::WorldRayCollision collision::raycastentity(ray nray, HitQuery query)
 	voxtra::WorldRayCollision closest = stn::None;
 	for (Collider* Collider1 : Colliderlist)
 	{
-		if (query.orgin && Collider1->owner == query.orgin.unwrap())
+		if (query.orgin && Collider1->owner() == query.orgin.unwrap())
 		{
 			continue;
 		}
@@ -64,20 +64,23 @@ voxtra::WorldRayCollision collision::raycastentity(ray nray, HitQuery query)
 	return closest;
 }
 
-void propagatecollisionmessage(gameobject::obj o1, gameobject::obj o2) {
+void propagatecollisionmessage(ecs::obj o1, ecs::obj o2) {
 
-	for (gameobject::component* comp : query::ComponentView(o1))
+	/*
+	for (ecs::component* comp : ::ComponentView(o1))
 	{
 		comp->oncollision(o2);
 	}
-	for (gameobject::component* comp : query::ComponentView(o2))
+	for (ecs::component* comp : query::ComponentView(o2))
 	{
 		comp->oncollision(o1);
 	}
-}
-void moveobj(v3::Vec3 force, gameobject::obj object) {
+	*/
 
-	if (object.hascomponent<blockname::block>())
+}
+void moveobj(v3::Vec3 force, ecs::obj object) {
+
+	if (object.has_component<blockname::block>())
 	{
 		Assert("block rigidbodies not supported yet");
 	}
@@ -88,15 +91,15 @@ void moveobj(v3::Vec3 force, gameobject::obj object) {
 		{
 			int l = 3;
 		}
-		object.transform().position += force;
+		object.get_component<ecs::transform_comp>().transform.position += force;
 	}
 }Vec3 colideentandblock(Collider& entity, block* tocollide, bool is_trigger) {
-	if (tocollide == nullptr || !tocollide->owner.hascomponent<aabb::Collider>())
+	if (tocollide == nullptr || !tocollide->owner().has_component<aabb::Collider>())
 	{
 
 		return zerov;
 	}
-	aabb::Collider& blockcol = tocollide->owner.getcomponent<aabb::Collider>();
+	aabb::Collider& blockcol = tocollide->owner().get_component<aabb::Collider>();
 	Vec3 my = entity.globalbox().center;
 	Vec3 otherpos = blockcol.globalbox().center;
 	Option<Vec3> force = aabb::collideaabb(entity, blockcol);
@@ -106,7 +109,7 @@ void moveobj(v3::Vec3 force, gameobject::obj object) {
 	}
 	if (is_trigger)
 	{
-		propagatecollisionmessage(entity.owner, tocollide->owner);
+		propagatecollisionmessage(entity.owner(), tocollide->owner());
 	}
 	if (!blockcol.effector && !entity.effector)
 	{
@@ -116,19 +119,19 @@ void moveobj(v3::Vec3 force, gameobject::obj object) {
 	
 }
 
-void distributeforce(gameobject::obj p1, gameobject::obj p2, Vec3 force) {
+void distributeforce(ecs::obj p1, ecs::obj p2, Vec3 force) {
 
-	colideentandblock(p1.getcomponent<Collider>(), p2.getcomponentptr<block>(),false);
+	colideentandblock(p1.get_component<Collider>(), p2.get_component_ptr<block>(),false);
 	float totalforcemag = 0;
 	float e1mass = 0;
 	float e2mass = 0;
-	if (p1.hascomponent<rigidbody>())
+	if (p1.has_component<rigidbody>())
 	{
-		e1mass = p1.getcomponent<rigidbody>().mass;
+		e1mass = p1.get_component<rigidbody>().mass;
 	}
-	if (p2.hascomponent<rigidbody>())
+	if (p2.has_component<rigidbody>())
 	{
-		e1mass = p2.getcomponent<rigidbody>().mass;
+		e1mass = p2.get_component<rigidbody>().mass;
 	}
 	totalforcemag = e1mass + e2mass;
 	if (totalforcemag == 0)
@@ -140,7 +143,7 @@ void distributeforce(gameobject::obj p1, gameobject::obj p2, Vec3 force) {
 		moveobj(-1*force, p1);
 		moveobj(force, p1);
 
-		colideentandblock(p1.getcomponent<Collider>(), p2.getcomponentptr<block>(), false);
+		colideentandblock(p1.get_component<Collider>(), p2.get_component_ptr<block>(), false);
 		moveobj(force, p1);
 		return;
 	}
@@ -159,7 +162,7 @@ void collision::handleduelentitycollisions()
 	{
 		for (Collider* Collider2 : Colliderlist)
 		{
-			if (Collider1->owner == Collider2->owner) {
+			if (Collider1->owner() == Collider2->owner()) {
 
 				continue;
 			}
@@ -168,13 +171,13 @@ void collision::handleduelentitycollisions()
 			{
 				continue;
 			}
-			propagatecollisionmessage(Collider1->owner, Collider2->owner);
+			propagatecollisionmessage(Collider1->owner(), Collider2->owner());
 
 			if (Collider1->effector || Collider2->effector) {
 
 				continue;
 			}
-			distributeforce(Collider1->owner, Collider2->owner, force.unwrap());
+			distributeforce(Collider1->owner(), Collider2->owner(), force.unwrap());
 		}
 	}
 }
@@ -221,7 +224,7 @@ void collision::handleCollisionWithGrid(Collider& entity, bool is_trigger)
 		if (!entity.effector)
 		{
 
-			distributeforce(entity.owner, minblock->owner, minforce);
+			distributeforce(entity.owner(), minblock->owner(), minforce);
 
 		}
 	}

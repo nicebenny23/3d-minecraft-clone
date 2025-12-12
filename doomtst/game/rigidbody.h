@@ -1,11 +1,12 @@
 #include "../util/vector3.h"
-#include "../game/gameobject.h"
+#include "../game/ecs/game_object.h"
 #include "../game/aabb.h"
 #include "../util/time.h"
 #include "../game/entity.h"
 #include "../game/objecthelper.h"
 #include "../util/geometry.h"
 #include "../world/voxeltraversal.h"
+#include "ecs/query.h"
 #include "System.h"
 #include "../util/pipeline.h"
 #include "../util/tag.h"
@@ -42,7 +43,7 @@ struct rigid_force {
 
     }
 };
-struct rigidbody : gameobject::component {
+struct rigidbody : ecs::component{
     Vec3 velocity;
     Vec3 oldvelocity;
     Vec3 acceleration;
@@ -57,12 +58,12 @@ struct rigidbody : gameobject::component {
     void calculateonground() {
 
         inliquid = false;
-        Vec3 boxcenter = owner.transform().position - Vec3(0, boundingbox->globalbox().scale.y + .01, 0);
+        Vec3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position - Vec3(0, boundingbox->globalbox().scale.y + .01, 0);
         geometry::Box checkbox = geometry::Box(boxcenter, Vec3(boundingbox->globalbox().scale.x, .005, boundingbox->globalbox().scale.z*.9f) * .92);
         isonground = (voxtra::Boxcollwithgrid(checkbox ));
     }
     void calculateonceil() {
-        Vec3 boxcenter = owner.transform().position + Vec3(0, boundingbox->globalbox().scale.y + .01, 0);
+        Vec3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position + Vec3(0, boundingbox->globalbox().scale.y + .01, 0);
         geometry::Box checkbox = geometry::Box(boxcenter, Vec3(boundingbox->globalbox().scale.x, .005, boundingbox->globalbox().scale.z) * .9);
         isonceil = (voxtra::Boxcollwithgrid(checkbox));
         if (isonceil)
@@ -85,9 +86,8 @@ struct rigidbody : gameobject::component {
     void start() {
         forces.push(rigid_force(v3::Vec3(0,-10,0), "gravity"));
         acceleration = zerov;
-        oldvelocity = owner.transform().position;
-        boundingbox = &owner.getcomponent<aabb::Collider>();  
-        priority = -111;
+        oldvelocity = owner().get_component<ecs::transform_comp>().transform.position;
+        boundingbox = &owner().get_component<aabb::Collider>();  
     }
 
 
@@ -143,12 +143,12 @@ struct rigidbody : gameobject::component {
 
             for (int i = 0; i < 3; i++)
             {
-                v3::Vec3 curr_pos = owner.transform().position;
+                v3::Vec3 curr_pos = owner().get_component<ecs::transform_comp>().transform.position;
                 v3::Vec3 new_pos = curr_pos + v3::Vec3(velocity[i]/mini_steps, i) * deltaTime;
                 int sgn = sign(velocity[i]);
-                double scale_in_dir = owner.getcomponent<Collider>().globalbox().scale[i];
+                double scale_in_dir = owner().get_component<Collider>().globalbox().scale[i];
                 v3::Vec3 max_dir_rel = Vec3(sgn * scale_in_dir, i);
-                ray dir_ray(owner.transform().position + max_dir_rel, max_dir_rel + new_pos);
+                ray dir_ray(owner().get_component<ecs::transform_comp>().transform.position + max_dir_rel, max_dir_rel + new_pos);
 
                 if (1.435<curr_pos.y)
                 {
@@ -156,50 +156,50 @@ struct rigidbody : gameobject::component {
                         int l = 5;
                     }
                 }
-                  voxtra::WorldRayCollision coll = collision::raycastall(dir_ray, collision::HitQuery(owner));
+                  voxtra::WorldRayCollision coll = collision::raycastall(dir_ray, collision::HitQuery(owner()));
                 if (!coll)
                 {
                     //we can move completly
-                    owner.transform().position[i] = new_pos[i];
+                    owner().get_component<ecs::transform_comp>().transform.position[i] = new_pos[i];
                 }
                 else
                 {
                    v3::Vec3 new_posdiff= coll.unwrap().Hit.intersectionpoint - max_dir_rel-v3::Vec3(1e-4* sgn, i);
-                   Coord pos = coll.unwrap().gameobject().getcomponent<block>().pos;
-                   owner.transform().position = new_posdiff;
+                   Coord pos = coll.unwrap().ecs().get_component<block>().pos;
+                   owner().get_component<ecs::transform_comp>().transform.position = new_posdiff;
 
                 }
             }
         }
-       // owner.transform().position += velocity * deltaTime;
+       // owner().get_component<ecs::transform_comp>().transform.position += velocity * deltaTime;
         acceleration = Vec3(0, 0, 0);  // Reset acceleration after integration
     }
 
   
 };
-struct RigidbodySystem :System {
+struct RigidbodySystem :ecs::System {
 
-    void run(gameobject::Ecs* ecs) override {
+    void run(ecs::Ecs& ecs) override {
 
         int l = 6;
          
 
-        query::View< gameobject::transform_comp, rigidbody> rigids(ecs);
+        ecs::View< ecs::transform_comp, rigidbody> rigids(ecs);
         for (auto [pos,body] : rigids) {
-            if (isnan(body->velocity.x))
+            if (isnan(body.velocity.x))
             {
                 int l = 2;
             }
-            body->oldvelocity = body->velocity;
-            body->calculateonground();
-            body->calculateonceil();
-            if (isnan(body->velocity.x))
+            body.oldvelocity = body.velocity;
+            body.calculateonground();
+            body.calculateonceil();
+            if (isnan(body.velocity.x))
             {
                 int l = 2;
             }
-            body->apply_forces();
-            body->integrate();
-            if (isnan(body->velocity.x))
+            body.apply_forces();
+            body.integrate();
+            if (isnan(body.velocity.x))
             {
                 int l = 2;
             }
@@ -209,3 +209,9 @@ struct RigidbodySystem :System {
     }
 
 };
+namespace ecs {
+	template<>
+	inline constexpr ComponentInfo ComponentTraits<rigidbody> = {
+		.priority=-111
+	};
+}

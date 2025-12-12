@@ -211,7 +211,8 @@ namespace ecs {
 				//in this case we have not created an archetype connected to old_archetype at index yet
 				component_ids new_arch = old_archetype.id_set.flipped(index);
 				add_archetype(new_arch);
-				new_id_opt = old_archetype.arch_connection_at(index);
+				//we may not continue using old_archetype because a new one was added
+				new_id_opt = archetype_at(entity_location.id).arch_connection_at(index);
 				if (!new_id_opt) {
 					stn::throw_logic_error("Failed to create a new archetype when flipping component id {} for entity {}", index.id, ent.id());
 				}

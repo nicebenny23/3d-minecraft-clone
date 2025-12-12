@@ -1,4 +1,4 @@
-#include "gameobject.h"
+#include "ecs/game_object.h"
 #include "../util/mathutil.h"
 #include "entity.h"
 #include "rigidbody.h"
@@ -10,7 +10,7 @@ struct entityeffects {
 
 };                 
 
-struct estate : gameobject::component
+struct estate : ecs::component
 {
 	
 	entityeffects effects;
@@ -28,19 +28,19 @@ struct estate : gameobject::component
 	void update() {
 		if (model_red_dur.state()==timename::duration_state::ending)
 		{
-			if (owner.hascomponent<model>())
+			if (owner().has_component<model>())
 			{
-				for (ModelMeshName::ModelMesh& msh : owner.getcomponent<model>())
+				for (ModelMeshName::ModelMesh& msh : owner().get_component<model>())
 				{
 					msh.color = Vec3(1, 1, 1);
 				}
 			}
 		}
 		timetilldmg -= CtxName::ctx.Time->dt;
-		if (owner.hascomponent<rigidbody>())
+		if (owner().has_component<rigidbody>())
 		{
 			testfalldamage();
-			prevonground = owner.getcomponent<rigidbody>().isonground;
+			prevonground = owner().get_component<rigidbody>().isonground;
 		}
 		
 	}
@@ -50,30 +50,30 @@ struct estate : gameobject::component
 
 
 
-			if (owner.getcomponent<rigidbody>().isonground && !prevonground)
+			if (owner().get_component<rigidbody>().isonground && !prevonground)
 			{
-				float ypos = owner.transform().position.y;
+				float ypos = owner().get_component<ecs::transform_comp>().transform.position.y;
 
-				if (owner.getcomponent<rigidbody>().velocity.y < -5)
+				if (owner().get_component<rigidbody>().velocity.y < -5)
 				{
 
-					damage(static_cast<int>(- (owner.getcomponent<rigidbody>().oldvelocity.y / 44444)));
+					damage(static_cast<int>(- (owner().get_component<rigidbody>().oldvelocity.y / 44444)));
 
 				}
 
 			}
-			if (owner.getcomponent<rigidbody>().isonground) {
+			if (owner().get_component<rigidbody>().isonground) {
 
 
-				lastongroundy = owner.transform().position.y;
+				lastongroundy = owner().get_component<ecs::transform_comp>().transform.position.y;
 			}
 		}
 	}
 	void start() {
 		model_red_dur=CtxName::ctx.Time->create_dur();
-		priority = 11;
+	
 		health = maxhealth;
-		lastongroundy = owner.transform().position.y;
+		lastongroundy = owner().get_component<ecs::transform_comp>().transform.position.y;
 	}
 	estate(int maxhp, bool falls){
 		maxhealth = maxhp;
@@ -93,11 +93,11 @@ struct estate : gameobject::component
 		{
 
 			model_red_dur.set(.3f);
-			if (owner.hascomponent<model>())
+			if (owner().has_component<model>())
 			{
 
 				
-				for (ModelMeshName::ModelMesh& msh:owner.getcomponent<model>())
+				for (ModelMeshName::ModelMesh& msh:owner().get_component<model>())
 				{
 					msh.color = Vec3(1.0f, .3f, .3f);
 				}
@@ -130,4 +130,10 @@ struct estate : gameobject::component
 
 	}
 };
+namespace ecs {
+	template<>
+	inline constexpr ComponentInfo ComponentTraits<estate> = {
+		.priority = 11
+	};
+}
  // ! entitystate_HPP;

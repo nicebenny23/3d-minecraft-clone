@@ -1,7 +1,7 @@
-#include "gameobject.h"
+#include "ecs.h"
 #include "../util/dynamicarray.h"
 #pragma once
-namespace gameobject {
+namespace ecs {
 	namespace spawn {
 		struct Spawner {
 
@@ -11,7 +11,7 @@ namespace gameobject {
 			Spawner& with(Args&&... args) {
 				pending.push([argsTuple = std::make_tuple(std::forward<Args>(args)...)](obj e) mutable {
 					std::apply([&e](auto&&... params) {
-						e.addcomponent<Comp>(std::forward<decltype(params)>(params)...);
+						e.add_component<Comp>(std::forward<decltype(params)>(params)...);
 						}, argsTuple);
 					});
 				return *this;

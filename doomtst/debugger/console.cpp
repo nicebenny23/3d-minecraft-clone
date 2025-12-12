@@ -37,14 +37,14 @@ namespace console {
                 ImGui::Text("Debug:");
                 ImGui::Text(std::format("Fps: {:.3f}", CtxName::ctx.Time->smooth_fps).c_str());
 
-                Vec3 pos = player::goblin.getcomponent<gameobject::transform_comp>().transform.position;
+                Vec3 pos = player::goblin.get_component<ecs::transform_comp>().transform.position;
                 ImGui::Text(std::format("position: {}", pos).c_str());
 
-                ImGui::Text(std::format("yaw:{:.3f},pitch:{:.3f}", player::goblin.getcomponent<CameraComp>().CamTransform.yaw, player::goblin.getcomponent<CameraComp>().CamTransform.pitch).c_str());
+                ImGui::Text(std::format("yaw:{:.3f},pitch:{:.3f}", player::goblin.get_component<CameraComp>().CamTransform.yaw, player::goblin.get_component<CameraComp>().CamTransform.pitch).c_str());
                 ImGui::Text(std::format("Chunk: {}", CtxName::ctx.Grid->chunkfromblockpos(Coord(pos))).c_str());
-                std::string text_for_look = player::goblin.getcomponent<playerplace>().Hit
-                    .filter([&](const voxtra::RayWorldHit& blk) {return blk.gameobject().exists() && blk.gameobject().hascomponent<block>(); })
-                    .map([&](const voxtra::RayWorldHit& blk) {return std::format("looking at {}", blk.gameobject().getcomponent<block>().pos); })
+                std::string text_for_look = player::goblin.get_component<playerplace>().Hit
+                    .filter([&](const voxtra::RayWorldHit& blk) {return blk.ecs().exists() && blk.ecs().has_component<block>(); })
+                    .map([&](const voxtra::RayWorldHit& blk) {return std::format("looking at {}", blk.ecs().get_component<block>().pos); })
                     .unwrap_or("not looking at a block");
                 
                 ImGui::Text(text_for_look.c_str());

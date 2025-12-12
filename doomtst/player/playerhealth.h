@@ -1,13 +1,13 @@
 #pragma once
 #include "../util/dynamicarray.h"
 #include "../renderer/uibox.h"
-#include "../game/gameobject.h"
+#include "../game/ecs/game_object.h"
 #include <conio.h>
 #include "../game/entitystate.h"
 #include "playerinventory.h"
 #include "../util/cached.h"
 
-struct playerhealth: gameobject::component
+struct playerhealth: ecs::component
 {
 	Cptr::cptr<uibox> damage_decal;
 	timename::duration damage_decal_duration;
@@ -23,8 +23,7 @@ struct playerhealth: gameobject::component
 	array<Cptr::cptr<uibox>>healthboxes;
 	void start(){
 		damage_decal_duration=CtxName::ctx.Time->create_dur();
-		size_t max_health = owner.getcomponent<estate>().maxhealth;
-		priority = -224;
+		size_t max_health = owner().get_component<estate>().maxhealth;
 		v2::Vec2 scale = v2::unitv / 100;
 		healthboxes = array<Cptr::cptr<uibox>>();
 		for (int i = 0; i < max_health; i++) {
@@ -37,19 +36,19 @@ struct playerhealth: gameobject::component
 	}
 	void update() {
 		
-		damage_decal->state.enabled= owner.getcomponent<estate>().model_red_dur.is_active();
-		size_t max_health = owner.getcomponent<estate>().maxhealth;
+		damage_decal->state.enabled= owner().get_component<estate>().model_red_dur.is_active();
+		size_t max_health = owner().get_component<estate>().maxhealth;
 		float dmgmul = 1;
 		for (int i = 0; i < 2; i++)
 		{
-			item* itm = owner.getcomponent<inventory>().playermenu.armor.at(i).helditem;
+			item* itm = owner().get_component<inventory>().playermenu.armor.at(i).helditem;
 			if (itm != nullptr)
 			{
 				dmgmul *= itm->properties.armor;
 			}
 		}
-		owner.getcomponent<estate>().damagemultiplyer = dmgmul;
-		int health = owner.getcomponent<estate>().health;
+		owner().get_component<estate>().damagemultiplyer = dmgmul;
+		int health = owner().get_component<estate>().health;
 		if (health <= 0)
 		{
 
@@ -57,14 +56,14 @@ struct playerhealth: gameobject::component
 
 
 		}
-		if (owner.getcomponent<estate>().invincablilitymax != owner.getcomponent<estate>().timetilldmg)
+		if (owner().get_component<estate>().invincablilitymax != owner().get_component<estate>().timetilldmg)
 		{
 			if (!dmgimmune) {
 
 				dmgimmune = true;
 				for (int i = 0; i < 2; i++)
 				{
-					item* itm = owner.getcomponent<inventory>().playermenu.armor.at(i).helditem;
+					item* itm = owner().get_component<inventory>().playermenu.armor.at(i).helditem;
 					if (itm != nullptr)
 					{
 						if (itm->properties.armor != 1) {
@@ -90,3 +89,9 @@ struct playerhealth: gameobject::component
 	}
 };
 
+namespace ecs {
+	template<>
+	inline constexpr ComponentInfo ComponentTraits<playerhealth> = {
+		.priority = -233,
+	};
+}

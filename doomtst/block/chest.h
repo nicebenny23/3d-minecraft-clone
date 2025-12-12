@@ -51,7 +51,7 @@ struct chestmenu :menu {
 
 
 };
-struct chestcomp : gameobject::component {
+struct chestcomp : ecs::component{
 
 	chestmenu men;
 	void onplayerclick() {
@@ -88,11 +88,11 @@ inline void chestinit(blockname::block* blk) {
 	blk->mesh.box.scale = blockname::blockscale;
 
 	blk->createdefaultaabb(false);
-	if (!blk->owner.hascomponent<chestcomp>())
+	if (!blk->owner().has_component<chestcomp>())
 	{
 
-		blk->owner.addcomponent<chestcomp>();
+		blk->owner().add_component<chestcomp>();
 
 	}
-blk->owner.addcomponent < loottable > ().addelem(chestitem, 1, false);
+blk->owner().add_component < loottable > ().addelem(chestitem, 1, false);
 }

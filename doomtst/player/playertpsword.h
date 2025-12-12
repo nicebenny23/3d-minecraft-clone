@@ -6,14 +6,14 @@
 #include "../game/collision.h"
 #include "../entities/crystaldaggers.h"
 
-struct playertpcomp : gameobject::component
+struct playertpcomp : ecs::component
 {
 	float chargetime;
 
 	float timetilluse;
 	const float cooldown = 1;
 	void wearduribilty() {
-		item* select = owner.getcomponent<inventory>().selected;
+		item* select = owner().get_component<inventory>().selected;
 		if (select != nullptr)
 		{
 
@@ -23,7 +23,7 @@ struct playertpcomp : gameobject::component
 	}
 	void update() {
 		timetilluse -= CtxName::ctx.Time->dt;
-		item* select = owner.getcomponent<inventory>().selected;
+		item* select = owner().get_component<inventory>().selected;
 		if (select == nullptr)
 		{
 			return;
@@ -41,21 +41,21 @@ struct playertpcomp : gameobject::component
 				{
 					if (CtxName::ctx.Inp->mouseleft().released)
 					{
-						Vec3 pos =owner.transform().position;
-						Vec3 offset =owner.transform().getnormaldirection() * chargetime * chargetime;
+						Vec3 pos =owner().get_component<ecs::transform_comp>().transform.position;
+						Vec3 offset =owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * chargetime * chargetime;
 						ray moveray = ray(pos, pos + offset);
 					voxtra::WorldRayCollision grid=	voxtra::travvox(moveray, voxtra::countall);
 					if (!grid)
 					{
 
-					 owner.transform().position += offset;
+					 owner().get_component<ecs::transform_comp>().transform.position += offset;
 
 					}
 					else
 					{
-						owner.transform().position = grid.unwrap().intersection();
+						owner().get_component<ecs::transform_comp>().transform.position = grid.unwrap().intersection();
 					}
-					owner.getcomponent<rigidbody>().velocity.y = 0;
+					owner().get_component<rigidbody>().velocity.y = 0;
 						wearduribilty();
 						chargetime = 0;
 						timetilluse = cooldown;

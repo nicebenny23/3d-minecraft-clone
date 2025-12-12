@@ -8,7 +8,7 @@ inline void waterinit(blockname::block* blk) {
 	blk->attributes.transparent = true;
 	blk->emitedlight = 0;
 	blk->mesh.box.scale = blockname::blockscale;
-	blk->owner.addcomponent<liquidprop>(15);
+	blk->owner().add_component<liquidprop>(15);
 	blk->createdefaultaabb(true);
 
 	blk->minedfastwithpick = false;

@@ -5,7 +5,7 @@
 #include "../game/System.h"
 #pragma once
 
-struct item_ui :gameobject::component {
+struct item_ui :ecs::component{
 	void disable() {
 		sprite.state.enabled = false;
 		count.state.enabled = false;
@@ -38,7 +38,7 @@ private:
 };
 struct ItemUisync:System{
 	
-	void run(gameobject::Ecs* ecs) {
+	void run(ecs::Ecs* ecs) {
 		
 	
 

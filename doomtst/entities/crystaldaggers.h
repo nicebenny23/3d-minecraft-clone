@@ -10,22 +10,23 @@
 #include "../items/loottable.h"
 #include "rotatetovelocity.h"
 #pragma once 
-inline gameobject::obj spawndagger(v3::Vec3 pos,v3::Vec3 velocity,float gravscale=.4f) {
+inline ecs::obj spawndagger(v3::Vec3 pos,v3::Vec3 velocity,float gravscale=.4f) {
 
-    gameobject::obj refmodel = CtxName::ctx.OC->spawn_with_transform(pos);
-  refmodel.addcomponent<model>().add("objs\\crystaldagger.obj", "images\\crystaldagger.png");
+	ecs::obj refmodel = CtxName::ctx.OC->spawn_empty();
+	refmodel.add_component<ecs::transform_comp>(pos);
+  refmodel.add_component<model>().add("objs\\crystaldagger.obj", "images\\crystaldagger.png");
    
-    refmodel.addcomponent<aabb::Collider>(zerov, blockscale / 2, true);
+    refmodel.add_component<aabb::Collider>(zerov, blockscale / 2, true);
 
-    refmodel.addcomponent<dmgonhit<estate>>(3,  7);
-    //refmodel.addcomponent<destroyonhit<>>();
-    refmodel.addcomponent<rigidbody>().velocity=velocity;
+    refmodel.add_component<dmgonhit<estate>>(3,  7);
+    //refmodel.add_component<destroyonhit<>>();
+    refmodel.add_component<rigidbody>().velocity=velocity;
   
-    refmodel.addcomponent<rotatetwordsvel>();
+    refmodel.add_component<rotatetwordsvel>();
 
-    refmodel.getcomponent<rigidbody>().gravityscale=gravscale;
-    refmodel.getcomponent<rigidbody>().friction = .7f *gravscale/ .4f  ;
-    refmodel.transform().scale = blockscale / 2;
+    refmodel.get_component<rigidbody>().gravityscale=gravscale;
+    refmodel.get_component<rigidbody>().friction = .7f *gravscale/ .4f  ;
+    refmodel.get_component<ecs::transform_comp>().transform.scale = blockscale / 2;
     return refmodel;
 }
 

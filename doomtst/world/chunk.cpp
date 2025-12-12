@@ -9,7 +9,7 @@
 #include <format>
 #include "../util/algorthm.h"#include "../util/dynamicarray.h"
 #include "../renderer/renderer.h"
-gameobject::obj& Chunk::chunk::operator[](size_t index)
+ecs::obj& Chunk::chunk::operator[](size_t index)
 {
 	return blockbuf[index];
 }
@@ -83,26 +83,26 @@ std::string  Chunk::getcorefilename(Coord pos)
 //this whole system has to be completly redone
 void appendspecialbytelist(array<unsigned short>& bytelist, int index, block* blk) {
 
-	liquidprop* getliq = blk->owner.getcomponentptr<liquidprop>();
+	liquidprop* getliq = blk->owner().get_component_ptr<liquidprop>();
 	if (getliq != nullptr)
 	{
 		bytelist[chunksize+ index] = getliq->liqval;
 
 	}
-	if (blk->owner.hascomponent<craftingtablecomp>())
+	if (blk->owner().has_component<craftingtablecomp>())
 	{
 		
-		bytelist[chunksize+index] =blk->owner.getcomponent<craftingtablecomp>().men.blkcont.getcombinedid();
+		bytelist[chunksize+index] =blk->owner().get_component<craftingtablecomp>().men.blkcont.getcombinedid();
 
 	}
-	if (blk->owner.hascomponent<chestcomp>())
+	if (blk->owner().has_component<chestcomp>())
 	{
-		bytelist[chunksize+ index] = blk->owner.getcomponent<chestcomp>().men.blkcont.containerid;
+		bytelist[chunksize+ index] = blk->owner().get_component<chestcomp>().men.blkcont.containerid;
 		
 	}
-	if (blk->owner.hascomponent<furnacecomp>())
+	if (blk->owner().has_component<furnacecomp>())
 	{
-		bytelist[chunksize + index] = blk->owner.getcomponent<furnacecomp>().men.blkcont.getcombinedid();
+		bytelist[chunksize + index] = blk->owner().get_component<furnacecomp>().men.blkcont.getcombinedid();
 
 	}
 }
@@ -114,9 +114,9 @@ void Chunk::chunk::write()
 	array<unsigned short> bytelist = array<unsigned short >();
 	for (int i = 0; i < chunksize; i++)
 	{
-		size_t v1= blockbuf[i].getcomponent<block>().id;
-		size_t dir = blockbuf[i].getcomponent<block>().mesh.direction.ind();
-		size_t attach = (blockbuf[i].getcomponent<block>().mesh.attachdir.ind());
+		size_t v1= blockbuf[i].get_component<block>().id;
+		size_t dir = blockbuf[i].get_component<block>().mesh.direction.ind();
+		size_t attach = (blockbuf[i].get_component<block>().mesh.attachdir.ind());
 		
 		size_t v2 = dir | attach << 3;
 		size_t fin = v1 | (v2 << 8);
@@ -129,7 +129,7 @@ void Chunk::chunk::write()
 	for (int i = 0; i < chunksize; i++)
 	{
 		bytelist.reach(chunksize + i) = 0;
-		appendspecialbytelist(bytelist, i, blockbuf[i].getcomponentptr<block>());
+		appendspecialbytelist(bytelist, i, blockbuf[i].get_component_ptr<block>());
 	}
 	file.write<unsigned short>(bytelist.data(), bytelist.length());
 	

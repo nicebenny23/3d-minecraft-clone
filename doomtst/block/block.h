@@ -1,10 +1,8 @@
 #include "../util/dir.h"
 #include "../renderer/renderer.h"
 #include <glm/glm.hpp>
-#include "../game/gameobject.h"
-
 #include "../game/camera.h"
-
+#include "../game/ecs/game_object.h"
 #include "../util/geometry.h"
 #pragma once 
 constexpr double blocksize = 1.f;
@@ -134,18 +132,6 @@ namespace blockname {
 	};
 	
 		
-	
-
-	
-
-
-
-
-
-
-
-
-
 	struct blockstate {
 
 		bool broken;
@@ -158,7 +144,7 @@ namespace blockname {
 		bool transparent;
 		bool solid;
 	};
-	struct  block: gameobject::component
+	struct  block: ecs::component
 	{
 
 		blockmesh mesh;
@@ -182,13 +168,16 @@ namespace blockname {
 		void create(v3::Coord location, int blockid, Dir::Dir3d blkattachface, Dir::Dir2d blkdirection);
 		
 		block():mesh(), pos(),emitedlight(),lightval(),id(),bstate(){
-			utype = gameobject::updatenone;
+			
 		};
 		 	 void createdefaultaabb(bool effector=false);
 		
 	};
 
-
+}
+namespace ecs {
+	template<>
+	inline constexpr ComponentInfo ComponentTraits<blockname::block> = ComponentInfo{ .updates = false };
 }
 //if you have a\
 

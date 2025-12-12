@@ -118,6 +118,10 @@ namespace ecs {
 		void insert_system(Sys& sys) {
 			systems.insert(sys);
 		}
+		template<SystemType T, typename...Args>
+		void emplace_system(Args&&... args) {
+			systems.emplace<T>(std::forward<Args>(args)...);
+		}
 		void run_systems() {
 			systems.run_on(*this);
 		}
@@ -137,8 +141,13 @@ namespace ecs {
 			entities.assert_valid(object);
 			return has_component(object, components.insert_id<T>());
 		}
+		template<ComponentType... Components>
+		bool has_components(space_id object) {
+			entities.assert_valid(object);
+			return archetypes.archetype_of(object).has_components(components.get_ids<Components...>());
+		}
 		template<ComponentType T, typename ...Args>
-		T& add_component(space_id object, Args&&... args) {
+		T& add_component(space_id object, Args&&... args)   requires std::constructible_from<T, Args&&...> {
 			entities.assert_valid(object);
 			T& component = components.emplace<T>(object, std::forward<Args>(args)...);
 			archetypes.transfer_entity_to_flipped_index(object, components.insert_id<T>());
@@ -154,8 +163,9 @@ namespace ecs {
 			entities.assert_valid(object);
 			return components.get_component<T>(object);
 		}
-		template<typename... Components>
-		std::tuple<Components&...> get_tuple_unchecked(space_id obj, const stn::array<component_id>& indices) {
+		template<ComponentType... Components>
+		std::tuple<Components&...> get_tuple_unchecked(space_id obj, stn::span<const component_id> indices) {
+			
 			return[&]<size_t... Is>(std::index_sequence<Is...>) {
 				return std::tuple<Components&...>{
 					(Components&)components[indices[Is]][obj]...

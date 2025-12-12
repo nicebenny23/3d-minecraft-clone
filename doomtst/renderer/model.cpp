@@ -16,15 +16,15 @@ meshlist.last().transform.position = pos;
 }
 model::model(meshconnecttype connectmethod )
 {
-	utype = gameobject::updaterender;
+	//utype = ecs::updaterender;
 	connectiontype = connectmethod;
 	meshlist = array<ModelMeshName::ModelMesh>();
 }
 
 void model::update()
 {
-	v3::Vec3 how = owner.transform().position;
-	glm::mat4* model =new glm::mat4((owner.transform().ToMatrix()));
+	v3::Vec3 how = owner().get_component<ecs::transform_comp>().transform.position;
+	glm::mat4* model =new glm::mat4((owner().get_component<ecs::transform_comp>().transform.ToMatrix()));
 	for (int i = 0; i < meshlist.length(); i++)
 	{
 		meshlist[i].modelmatrix =model;

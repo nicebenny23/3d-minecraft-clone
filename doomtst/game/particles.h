@@ -1,6 +1,6 @@
 #pragma once
 #include "../util/vector3.h"
-#include "../game/gameobject.h"
+#include "../game/ecs/game_object.h"
 #include "../util/dynamicarray.h"
 #include "../util/queue.h"
 #include "../game/entity.h"
@@ -10,19 +10,19 @@
 
 using namespace v3;
 using namespace stn;
-struct particleemiter: gameobject::component
+struct particleemiter: ecs::component
 {
 
 	v3::Vec3 position;
 	Texture2D* tex;
 	int maxparticles = 1000;
 	Mesh ParticleMesh;
-	array<gameobject::obj> particlearray;
+	array<ecs::obj> particlearray;
 	float particlespawntime;
 	float particlelifetime;
 	float timetillspawn;
-	void (*particleinit) (gameobject::obj);
-	particleemiter(float spawntime,float lifetime, void (*initfunc) (gameobject::obj),Texture2D* newtex);
+	void (*particleinit) (ecs::obj);
+	particleemiter(float spawntime,float lifetime, void (*initfunc) (ecs::obj),Texture2D* newtex);
 	bool shouldspawnparticle();
 	void update();
 	void start();
@@ -32,9 +32,9 @@ struct particleemiter: gameobject::component
 	}
 	void renderparticles();
 };
-void initbaseparticle(gameobject::obj* newent);
+void initbaseparticle(ecs::obj* newent);
 
-struct particle: gameobject::component
+struct particle: ecs::component
 {
 	
 	

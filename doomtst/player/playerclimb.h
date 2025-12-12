@@ -1,24 +1,24 @@
-#include "../game/gameobject.h"
+#include "../game/ecs/game_object.h"
 #include "../game/rigidbody.h"
 #include "../game/objecthelper.h"
 #pragma once 
-struct playerclimb: gameobject::component
+struct playerclimb: ecs::component
 {
 
 	bool onrope;
 
 	playerclimb() {
-		priority = 111;
+		//priority = 111;
 		onrope = false;
 	}	
-	void oncollision(gameobject::obj* collidedwith) {
-		if (collidedwith->hascomponent<blockname::block>())
+	void oncollision(ecs::obj* collidedwith) {
+		if (collidedwith->has_component<blockname::block>())
 		{
-			blockname::block* potrope =&objutil::toblk(collidedwith);
+			blockname::block* potrope =collidedwith->get_component_ptr<blockname::block>();
 			if (potrope->id==minecraftrope)
 			{
 				onrope = true;
-				owner.getcomponent<rigidbody>().gravityscale= 0;
+				owner().get_component<rigidbody>().gravityscale= 0;
 			}
 		}
 	}
@@ -28,7 +28,7 @@ struct playerclimb: gameobject::component
 		if (onrope==false)
 		{
 
-			owner.getcomponent<rigidbody>().gravityscale = 1;
+			owner().get_component<rigidbody>().gravityscale = 1;
 
 		}onrope = false;
 	}

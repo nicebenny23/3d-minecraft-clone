@@ -3,26 +3,26 @@
 #include "../util/dynpool.h"
 #include "../util/dependency.h"
 #pragma once
-namespace gameobject {
+namespace ecs {
 	struct Ecs;
 }
 
 struct Command {
 	Command() {}; 
-	virtual void Apply(gameobject::Ecs* world) = 0; 
+	virtual void Apply(ecs::Ecs* world) = 0; 
 	
 }
 ; template<typename T>
 concept CommandType =
 std::is_base_of_v<Command, T>&&
-	requires(T a, gameobject::Ecs* world) {
+	requires(T a, ecs::Ecs* world) {
 		{ a.Apply(world) } -> std::same_as<void>;
 };
 
 struct CommandPool {
 	stn::flux store;
 	stn::array<stn::flux_token<Command>> queue;
-	void apply(gameobject::Ecs* World) {
+	void apply(ecs::Ecs* World) {
 		while (!queue.empty())
 		{
 			stn::flux_token<Command> cmd = queue.pop();
@@ -72,13 +72,13 @@ struct CommandBuffer {
 		pools[insert_id<T>()].emplace<T>(value);
 	}
 
-	CommandBuffer(gameobject::Ecs* world):World(world){
+	CommandBuffer(ecs::Ecs* world):World(world){
 	}
 	CommandBuffer() {
 		World = nullptr;
 	}
 	
-	gameobject::Ecs* World;
+	ecs::Ecs* World;
 	stn::type_indexer<> commandSystem;
 	Depends::DependencySystem DependencySystem;
 	

@@ -7,7 +7,7 @@
 #include "../../util/dependency.h"
 namespace ecs {
 	struct System {
-
+		virtual ~System() = default;
 		virtual void run(Ecs& ecs) = 0;
 	};
 
@@ -20,7 +20,7 @@ namespace ecs {
 		
 		template<SystemType T,typename ...Args> requires std::constructible_from<T,Args&&...>
 		void emplace(Args&&... args ) {
-			stored_systems.push(stn::box<T>(std::forward<Args>(args)...));
+			stored_systems.push(stn::box<T>(std::forward<Args>(args)...).upcast<System>());
 			insert<T>(*(T*)stored_systems.last().get());
 		}
 		

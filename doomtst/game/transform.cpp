@@ -6,13 +6,13 @@
 #include <glm/gtx/euler_angles.hpp>
 
 using namespace v3;
+
 Transform::Transform()
 {
     yaw =90;
     pitch = 0;
 	scale = v3::unitv ;
 }
-
 Transform::Transform(v3::Vec3 pos, float newyaw, float newpitch, v3::Vec3 newscale)
 {
 	position = pos;
@@ -111,7 +111,7 @@ Transform Decompose(const glm::mat4& matrix) {
 
     glm::vec3 eulerRotation = glm::eulerAngles(quatRotation);
 
-    Transform transform = Transform();
+    Transform transform;
     transform.position = Vec3(pos);
     transform.yaw = glm::degrees(eulerRotation.y);
     transform.pitch = glm::degrees(eulerRotation.x);

@@ -226,10 +226,10 @@ Chunk::chunk* ChunkLoader::AllocChunk(Coord location)
 	newchunk.modified = false;
 	createchunkmesh(&newchunk);
 	newchunk.loc = location;
-	newchunk.blockbuf =array< gameobject::obj>(chunksize);
+	newchunk.blockbuf =array< ecs::obj>(chunksize);
 	for (int i = 0; i < chunksize; i++) {
 		newchunk.blockbuf[i]= Grid->ctx->OC->spawn_empty();
-		newchunk.blockbuf[i].addcomponent < block>();
+		newchunk.blockbuf[i].add_component < block>();
 
 	}
 	return &newchunk;
@@ -267,51 +267,51 @@ Chunk::chunk* ChunkLoader::LoadFromFile(Coord location)
 					throw std::logic_error("Directional corruption error");
 
 				}
-				blkinitname::genblock(newchunk.blockbuf[i].getcomponentptr<block>(), blockid, blockpos, mesh_attachdir, dir);
+				blkinitname::genblock(newchunk.blockbuf[i].get_component_ptr<block>(), blockid, blockpos, mesh_attachdir, dir);
 
-				if (newchunk.blockbuf[i].hascomponent<liquidprop>())
+				if (newchunk.blockbuf[i].has_component<liquidprop>())
 				{
-					newchunk.blockbuf[i].getcomponent<liquidprop>().liqval = randomproperties[i];
+					newchunk.blockbuf[i].get_component<liquidprop>().liqval = randomproperties[i];
 				}
-				if (newchunk.blockbuf[i].hascomponent<craftingtablecomp>())
+				if (newchunk.blockbuf[i].has_component<craftingtablecomp>())
 				{
 
-					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.destroy();
+					newchunk.blockbuf[i].get_component<craftingtablecomp>().men.blkcont.destroy();
 					//we created a contaner so we are going back
 					currentcontid -= 2;
 					int resourceid = randomproperties[i] & 255;
 
 					int newloc = randomproperties[i] / 256.f;
-					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.resourcecontainer = new Container(resourceid);
-					newchunk.blockbuf[i].getcomponent<craftingtablecomp>().men.blkcont.newitemlocation = new Container(newloc);
+					newchunk.blockbuf[i].get_component<craftingtablecomp>().men.blkcont.resourcecontainer = new Container(resourceid);
+					newchunk.blockbuf[i].get_component<craftingtablecomp>().men.blkcont.newitemlocation = new Container(newloc);
 
 				}
-				if (newchunk.blockbuf[i].hascomponent<chestcomp>())
+				if (newchunk.blockbuf[i].has_component<chestcomp>())
 				{
 
-					newchunk.blockbuf[i].getcomponent<chestcomp>().men.blkcont.destroy();
+					newchunk.blockbuf[i].get_component<chestcomp>().men.blkcont.destroy();
 					//we created a contaner so we are going back
 					currentcontid -= 1;
 					int resourceid = randomproperties[i] & 255;
 
 
-					newchunk.blockbuf[i].getcomponent<chestcomp>().men.blkcont = Container(resourceid);
+					newchunk.blockbuf[i].get_component<chestcomp>().men.blkcont = Container(resourceid);
 
 				}
-				if (newchunk.blockbuf[i].hascomponent<furnacecomp>())
+				if (newchunk.blockbuf[i].has_component<furnacecomp>())
 				{
 
-					newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.destroy();
+					newchunk.blockbuf[i].get_component<furnacecomp>().men.blkcont.destroy();
 					//we created a contaner so we are going back
 					currentcontid -= 2;
 					int resourceid = randomproperties[i] & 255;
 
 					int newloc = randomproperties[i] / 256.f;
-					newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.resourcecontainer = new Container(resourceid);
-					newchunk.blockbuf[i].getcomponent<furnacecomp>().men.blkcont.newitemlocation = new Container(newloc);
+					newchunk.blockbuf[i].get_component<furnacecomp>().men.blkcont.resourcecontainer = new Container(resourceid);
+					newchunk.blockbuf[i].get_component<furnacecomp>().men.blkcont.newitemlocation = new Container(newloc);
 
 				}
-				//if (newchunk.blockbuf[i].hascomponent<>())
+				//if (newchunk.blockbuf[i].has_component<>())
 
 				i++;
 			}
@@ -343,7 +343,7 @@ Chunk::chunk* ChunkLoader::LoadFromNoise(Coord location)
 				int id = statemap.ids[ind].id;
 
 				
-				blkinitname::genblock(newchunk.blockbuf[ind].getcomponentptr<block>(), id, pos, 0, 0);
+				blkinitname::genblock(newchunk.blockbuf[ind].get_component_ptr<block>(), id, pos, 0, 0);
 
 				ind++;
 			}

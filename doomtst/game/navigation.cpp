@@ -172,10 +172,9 @@ return        array<navnode>();
     return array<navnode>(); // No path found
 }
 
-navigator::navigator(gameobject::obj parentref, array<navnode>(*testfunc)(navnode& pos))
+navigator::navigator(ecs::obj parentref, array<navnode>(*testfunc)(navnode& pos))
 {
     headed_index = 0;
-    priority = 4411;
     path_creation_dur=CtxName::ctx.Time->create_dur();
     goingtwords = parentref;
     testfunction = testfunc;
@@ -185,7 +184,7 @@ v3::Vec3 navigator::headed()
 {
     if (headed_list.length()<=headed_index)
     {
-        return owner.transform().position;
+        return owner().get_component<ecs::transform_comp>().transform.position;
     }
 
     return headed_list[headed_index];
@@ -227,9 +226,9 @@ Vec3 transformnormal(Vec3 pos, Vec3 scale)
 void navigator::calcpath()
 {
     
-    Coord currpos = CtxName::ctx.Grid->getVoxel( owner.transform().position);
+    Coord currpos = CtxName::ctx.Grid->getVoxel( owner().get_component<ecs::transform_comp>().transform.position);
 
-    Vec3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.transform().position);
+    Vec3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.get_component<ecs::transform_comp>().transform.position);
     array<navnode>  finding = astarpathfinding(navnode(currpos),navnode(Coord(gotopos)), testfunction);
     headed_list.clear();
     headed_index = 0;
@@ -270,9 +269,9 @@ void navigator::update()
 {
     float timetillupdatespeed = .5;
 
-    Vec3 gotopos = goingtwords.transform().position;
+    Vec3 gotopos = goingtwords.get_component<ecs::transform_comp>().transform.position;
 
-    v3::Vec3 loc = owner.transform().position;
+    v3::Vec3 loc = owner().get_component<ecs::transform_comp>().transform.position;
    
     if (dist(loc,headed())<.1f)
     {
@@ -291,7 +290,7 @@ void navigator::update()
 
 bool navigator::should_update_path()
 {
-    Vec3 headed_pos= goingtwords.transform().position;
+    Vec3 headed_pos= goingtwords.get_component<ecs::transform_comp>().transform.position;
     if (true)
     {
 

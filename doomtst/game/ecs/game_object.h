@@ -1,8 +1,14 @@
 #pragma once
 #include "ecs.h"
+#include "../transform.h"
 #include "commands.h"
 namespace ecs {
-
+	struct transform_comp : component {
+		Transform transform;
+		transform_comp(v3::Vec3 pos) {
+			transform.position = pos;
+		}
+	};
 	struct obj {
 
 		size_t id() const {
@@ -14,7 +20,11 @@ namespace ecs {
 		space_id inner() const {
 			return ent;
 		}
+		obj() :ent(0,0), ecs(nullptr) {};
 		obj(space_id inner, Ecs* ecs) :ecs(ecs), ent(inner) {}
+		bool operator ==(const obj& other) const{
+			return ent == other.ent&&ecs==other.ecs;
+		}
 		template<ComponentType T>
 		T& get_component() {
 			return ecs->get_component<T>(ent);
@@ -31,7 +41,9 @@ namespace ecs {
 		bool has_component() const {
 			return ecs->has_component<T>(ent);
 		}
-
+		Ecs* world() {
+			return ecs;
+		}
 		template<ComponentType T>
 		T* get_component_ptr() {
 			if (!has_component<T>())
@@ -40,16 +52,19 @@ namespace ecs {
 			}
 			return &get_component<T>();
 		}
-		template<typename T, typename ...Args>
-		const T& add_component(Args&&... args) const {
+		template<ComponentType T, typename ...Args > requires std::constructible_from<T, Args&&...>
+		T& add_component(Args&&... args) {
 			return ecs->add_component<T>(ent, std::forward<Args>(args)...);
 		}
 		void destroy() {
-		//	ecs->insert_command(DestroyEntity(ent));
+			ecs->write_command(DestroyEntity(ent));
 		}
 		template<ComponentType C>
 		void destroy_component() {
 		ecs->write_command< DestroyComponent>(DestroyComponent(ent,ecs->get_component_id<C>()));
+		}
+		bool exists() const{
+			return ecs->entities.is_valid(ent);
 		}
 	private:
 		space_id ent;

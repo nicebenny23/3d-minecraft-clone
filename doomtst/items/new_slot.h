@@ -12,7 +12,7 @@ namespace items{
 	geometry::Box2d slot_box(v2::Coord2 coord) {
 		return geometry::Box2d(slot_center(coord),grid_pixel_scale/2);
 	}
-	struct ItemSlot:gameobject::component {
+	struct ItemSlot:ecs::component{
 	
 		bool has() const {
 
@@ -42,7 +42,7 @@ namespace items{
 			if (empty()) {
 				throw std::logic_error("Access error: cannot get item from an empty ItemSlot.");
 			}
-			return (*held).getcomponent<item_name::item>();
+			return (*held).get_component<item_name::item>();
 		}	
 		size_t fill_amt(item_name::item& itm) {
 			if (!held)
@@ -51,11 +51,11 @@ namespace items{
 			}
 		}
 		private:
-			gameobject::Observe::entity_slot held;
+			ecs::Observe::entity_slot held;
 		
 
 	};
-	struct SlotUi :gameobject::component {
+	struct SlotUi :ecs::component{
 
 		geometry::Box2d slotbox() const {
 			return	 slot_box(location);
@@ -71,10 +71,10 @@ namespace items{
 
 		}
 		void disable() {
-			ItemSlot* slot = owner.getcomponentptr<ItemSlot>();
+			ItemSlot* slot = owner().get_component_ptr<ItemSlot>();
 			if (slot&&slot->has())
 			{
-				slot->get().owner.getcomponent<item_ui>().disable();
+				slot->get().owner().get_component<item_ui>().disable();
 			}
 			if (framedecal.valid())
 			{
@@ -82,18 +82,18 @@ namespace items{
 			}
 		}
 		item_ui* get() {
-			ItemSlot* slot = owner.getcomponentptr<ItemSlot>();
+			ItemSlot* slot = owner().get_component_ptr<ItemSlot>();
 			if (slot && slot->has())
 			{
-				return slot->get().owner.getcomponentptr<item_ui>();
+				return slot->get().owner().get_component_ptr<item_ui>();
 			}
 			return nullptr;
 		}
 		void enable() {
-			ItemSlot* slot = owner.getcomponentptr<ItemSlot>();
+			ItemSlot* slot = owner().get_component_ptr<ItemSlot>();
 			if (slot && slot->has())
 			{
-				slot->get().owner.getcomponent<item_ui>().enable();
+				slot->get().owner().get_component<item_ui>().enable();
 			}
 			if (framedecal.valid())
 			{
@@ -114,7 +114,7 @@ namespace items{
 	};
 
 	struct UiSlot :System {
-		void run(gameobject::Ecs* ecs) {
+		void run(ecs::Ecs* ecs) {
 
 			query::View<SlotUi> items(ecs);
 			for (auto [itm] : items) {

@@ -13,38 +13,38 @@
 #include "daggerthrow.h"
 #include "playertpsword.h"
 using namespace player;
-gameobject::obj player::goblin;
+ecs::obj player::goblin;
 
 void player::initplayer()
 {
 
 	float playerfric = 5;
-	goblin = CtxName::ctx.OC->spawn_with_transform(Vec3(0, 2, 0));
+	goblin = CtxName::ctx.OC->spawn_empty();
+	goblin.add_component<ecs::transform_comp>(v3::Vec3(0,2,0));
+	goblin.add_component<estate>(10, true);
+	goblin.get_component<ecs::transform_comp>().transform.scale = unitv / 2;
 
-	goblin.addcomponent<estate>(10, true);
-	goblin.transform().scale = unitv / 2;
+	goblin.add_component<inventory>();
+	goblin.add_component<Collider>(zerov, unitv / 2.3f, true, false);
+	goblin.add_component<rigidbody>(playerfric);
 
-	goblin.addcomponent<inventory>();
-	goblin.addcomponent<Collider>(zerov, unitv / 2.3f, true, false);
-	goblin.addcomponent<rigidbody>(playerfric);
+	goblin.add_component<playereat>();
+	goblin.add_component<playerhealth>();
 
-	goblin.addcomponent<playereat>();
-	goblin.addcomponent<playerhealth>();
-
-	goblin.addcomponent<playertpcomp>();
-	goblin.addcomponent<playerclimb>();
+	goblin.add_component<playertpcomp>();
+	goblin.add_component<playerclimb>();
 
 
-	goblin.addcomponent< playerbreak>();
-	goblin.addcomponent< playerplace>();
+	goblin.add_component< playerbreak>();
+	goblin.add_component< playerplace>();
 
-	goblin.addcomponent<player_tag>();
+	goblin.add_component<player_tag>();
 
-	goblin.addcomponent<playerattackcomp>();
-	goblin.addcomponent<playerdaggercomp>();
-	goblin.addcomponent<gameobject::StaticComponent>();
+	goblin.add_component<playerattackcomp>();
+	goblin.add_component<playerdaggercomp>();
+//	goblin.add_component<ecs::StaticComponent>();
 
-	goblin.addcomponent<CameraComp>();
-	goblin.addcomponent<playermovement>();
-	goblin.addcomponent<playercamcontrols>();
+	goblin.add_component<CameraComp>();
+	goblin.add_component<playermovement>();
+	goblin.add_component<playercamcontrols>();
 }

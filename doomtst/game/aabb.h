@@ -1,6 +1,6 @@
 #pragma once
 #include "../util/vector3.h"
-#include "../game/gameobject.h"
+#include "../game/ecs/game_object.h"
 #include "../util/dynamicarray.h"
 #include "../util/ray.h"
 #include "../util/geometry.h"
@@ -16,7 +16,7 @@ namespace aabb {
 
     
   
-    struct Collider : gameobject::component {
+    struct Collider : ecs::component{
         bool effector;
        //local box
         geometry::Box box;
@@ -25,18 +25,18 @@ namespace aabb {
 
             geometry::Box global;
           
-            if (owner.hascomponent<gameobject::transform_comp>())
+            if (owner().has_component<ecs::transform_comp>())
             {
-                Transform transform = owner.transform();
+                Transform transform = owner().get_component<ecs::transform_comp>().transform;
                
                 global.scale = box.scale * transform.scale * 2; 
                 global.center = box.center * transform.scale * 2 + transform.position;
                
 
             }
-            if (owner.hascomponent<blockname::block>())
+            if (owner().has_component<blockname::block>())
             {
-                blockname::block&  blk= owner.getcomponent<blockname::block>();
+                blockname::block&  blk= owner().get_component<blockname::block>();
                 if (blk.id==7)
                 {
                     int l = 1;

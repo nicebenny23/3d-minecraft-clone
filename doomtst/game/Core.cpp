@@ -86,9 +86,6 @@ namespace Core {
     void Engine::InitOC()
     {
         ctx->OC = &OC;
-        ctx->OC->inject_context(ctx); 
-        new (&SystemRunner) Systems(&OC);
-        ctx->Executor = &SystemRunner;
     }
 
     void Engine::CreateWorld()

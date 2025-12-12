@@ -23,15 +23,16 @@ namespace Core {
         void CreateWorld();
         void InitRenderer();
        CtxName::Context* ctx;
-       Systems SystemRunner;
         timename::TimeManager Time;
         userinput::InputManager Inp;
         window::Window Window;
         renderer::Renderer ren;
         World::world world;
         grid::Grid Grid;
-        
-        gameobject::Ecs OC;
+		Engine():OC(2<<20) {
+
+		}
+        ecs::Ecs OC;
     };
     extern Engine game;
     

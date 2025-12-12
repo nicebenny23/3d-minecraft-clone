@@ -151,7 +151,7 @@ void recreatechunkmesh(Chunk::chunk* aschunk,std::mutex& fill_lock) {
 	renderer::MeshData mesh= aschunk->mesh->SolidGeo.create_mesh();
 	
 	for (int ind = 0; ind < chunksize; ind++) {
-		block& blockatpos = (aschunk->blockbuf[ind].getcomponent<block>());//g
+		block& blockatpos = (aschunk->blockbuf[ind].get_component<block>());//g
 		
 		if (!blockatpos.attributes.transparent) {
 			emitblock(blockatpos, mesh);//g

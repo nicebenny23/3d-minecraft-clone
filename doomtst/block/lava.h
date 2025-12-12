@@ -13,8 +13,8 @@ inline void lavainit(blockname::block* blk) {
 	blk->mesh.box.scale = blockname::blockscale * .8;
 	blk->createdefaultaabb(true);
 	blk->mesh.box.scale = blockname::blockscale;
-	blk->owner.addcomponent<liquidprop>(5);
+	blk->owner().add_component<liquidprop>(5);
 
-	blk->owner.addcomponent<dmgonhit<estate>>(1, 0);
+	blk->owner().add_component<dmgonhit<estate>>(1, 0);
 	blk->minedfastwithpick = false;
 }

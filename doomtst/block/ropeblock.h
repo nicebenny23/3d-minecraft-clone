@@ -12,7 +12,7 @@ inline void ropeinit(blockname::block* blk) {
 	blk->minedfastwithpick = 1;
 	blk->mininglevel = .3f;
 	blk->createdefaultaabb(true);
-	blk->owner.addcomponent<loottable>().addelem(ropeitem, 1, false);
+	blk->owner().add_component<loottable>().addelem(ropeitem, 1, false);
 
 	blk->minedfastwithpick = false;
 }

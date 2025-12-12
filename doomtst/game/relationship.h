@@ -1,5 +1,5 @@
 #pragma once
-#include "gameobject.h"
+#include "ecs.h"
 #include "../util/Option.h"
 #include "../util/SparseSet.h"
 #include "../util/pipeline.h"
@@ -8,70 +8,70 @@
 namespace Hierarchy {
 
     struct Parent;
-    struct Child : gameobject::component {
-        bool is_child_of(const gameobject::obj& other) const {
+    struct Child : ecs::component{
+        bool is_child_of(const ecs::obj& other) const {
             return parent_entity == other;
         }
 
-        gameobject::obj parent() const {
+        ecs::obj parent() const {
             return parent_entity;
         }
 
     private:
         friend struct Parent;
 
-        explicit Child(gameobject::obj& parent)
+        explicit Child(ecs::obj& parent)
             : parent_entity(parent) {
         }
 
         void destroy_hook() {
-            parent_entity.getcomponent<Parent>().remove_child(owner);
+            parent_entity.get_component<Parent>().remove_child(owner);
         }
 
-        gameobject::obj parent_entity;
+        ecs::obj parent_entity;
     };
 
 
-    struct Parent : gameobject::component {
-        const array<gameobject::obj>& children() const {
+    struct Parent : ecs::component{
+        const array<ecs::obj>& children() const {
             return children_list;
         }
 
-        bool has_child(const gameobject::obj& obj) const {
+        bool has_child(const ecs::obj& obj) const {
             return children_list.contains(obj);
         }
         size_t child_count() const {
             return children_list.length();
         }
 
-        explicit Parent(gameobject::obj& child) {
+        explicit Parent(ecs::obj& child) {
             children_list.push(child);
         }
         void start() {
             add_child(children_list[0]);
         }
 
-        void add_child(gameobject::obj& child) {
+        void add_child(ecs::obj& child) {
             if (child == owner) {
                 throw std::logic_error("An object cannot be its own parent.");
             }
             if (children_list.contains(child)) {
-                auto& existing = child.getcomponent<Child>();
+                auto& existing = child.get_component<Child>();
                 if (existing.parent_entity == owner) {
                     return;
                 }
-                existing.parent_entity.getcomponent<Parent>().remove_child(child);
+                existing.parent_entity.get_component<Parent>().remove_child(child);
                 existing.parent_entity = owner;
             }
             else {
-                child.addcomponent<Child>(owner);
+                child.add_component<Child>(owner);
             }
             children_list.push(child);
         }
     private:
 
         friend struct Child;
-        void remove_child(const gameobject::obj& child) {
+        void remove_child(const ecs::obj& child) {
             for (size_t i = 0; i < children_list.length(); ++i) {
                 if (children_list[i] == child) {
                     children_list.remove_at(i);
@@ -86,36 +86,36 @@ namespace Hierarchy {
             }
         }
 
-        array<gameobject::obj> children_list;
+        array<ecs::obj> children_list;
     };
   
     struct HierarchyView {
-        gameobject::obj entity;
+        ecs::obj entity;
         
-        HierarchyView(const gameobject::obj e) : entity(e) {}
-        gameobject::obj& operator*() {
+        HierarchyView(const ecs::obj e) : entity(e) {}
+        ecs::obj& operator*() {
             return entity;
         }
-        const gameobject::obj& operator*() const {
+        const ecs::obj& operator*() const {
             return entity;
         }
 
-        gameobject::obj* operator->() {
+        ecs::obj* operator->() {
             return &entity;
         }
-        const gameobject::obj* operator->() const {
+        const ecs::obj* operator->() const {
             return &entity;
         }
        
         bool has_children() {
-            Parent* prnt = entity.getcomponentptr<Parent>();
+            Parent* prnt = entity.get_component_ptr<Parent>();
             return prnt && prnt->child_count() != 0;
         }
         bool has_parent() {
-            return entity.hascomponent<Child>();
+            return entity.has_component<Child>();
         }
         stn::Option<HierarchyView> parent() {
-            Child* res = entity.getcomponentptr<Child>();
+            Child* res = entity.get_component_ptr<Child>();
             if (res)
             {
                 return HierarchyView(res->owner);
@@ -123,9 +123,9 @@ namespace Hierarchy {
             return stn::None;
         }
         array<HierarchyView> children() {
-            if (!entity.hascomponent<Parent>()) return {};
+            if (!entity.has_component<Parent>()) return {};
 
-            const auto& children_list= entity.getcomponent<Parent>().children();
+            const auto& children_list= entity.get_component<Parent>().children();
             array<HierarchyView> view;
             for (auto& child: children_list)
             {
@@ -133,27 +133,27 @@ namespace Hierarchy {
             }
             return  view;
         }
-        array<gameobject::obj> children_obj() {
-            if (!entity.hascomponent<Parent>()) return {};
+        array<ecs::obj> children_obj() {
+            if (!entity.has_component<Parent>()) return {};
 
-            return array(entity.getcomponent<Parent>().children());
+            return array(entity.get_component<Parent>().children());
             
         }
     };
-    HierarchyView view(gameobject::obj& object) {
+    HierarchyView view(ecs::obj& object) {
 
         return HierarchyView(object);
     }
-  inline   bool has_children(gameobject::obj& entity) {
+  inline   bool has_children(ecs::obj& entity) {
       return view(entity).has_children();
   }
-    bool has_parent(gameobject::obj& entity) {
+    bool has_parent(ecs::obj& entity) {
         return view(entity).has_parent();
     }
-    stn::Option<gameobject::obj> parent(gameobject::obj entity) {
+    stn::Option<ecs::obj> parent(ecs::obj entity) {
         return view(entity).parent().map(std::function([](HierarchyView view) {return view.entity; }));
     }
-    array<gameobject::obj> children(gameobject::obj& entity) {
+    array<ecs::obj> children(ecs::obj& entity) {
         return view(entity).children_obj();
     }
 } 

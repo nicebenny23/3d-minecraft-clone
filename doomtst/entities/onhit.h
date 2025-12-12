@@ -4,22 +4,20 @@
 #include "../game/rigidbody.h"
 #include "../game/entityutil.h"
 #pragma once 
-template<typename T,bool is_not_tag =false>
-struct destroyonhit : gameobject::component {
+template<typename T,bool is_not_tag>
+struct destroyonhit : ecs::component{
 
 	
 
 	destroyonhit() {
-		priority = 1111;
-		utype == gameobject::updatenone;
 	}
-	void oncollision(gameobject::obj collidedwith) {
+	void oncollision(ecs::obj collidedwith) {
 
 		
 		
-			if (collidedwith.hascomponent<T>()^is_not_tag)
+			if (collidedwith.has_component<T>()^is_not_tag)
 			{
-				owner.destroy();
+				owner().destroy();
 			}
 		
 	}
@@ -28,7 +26,7 @@ struct destroyonhit : gameobject::component {
 };
 template<typename T>
 
-struct dmgonhit: gameobject::component
+struct dmgonhit: ecs::component
 {
 
 	
@@ -36,31 +34,28 @@ struct dmgonhit: gameobject::component
 
 	int dmgdone;
 	dmgonhit(int dmg,float kb=0) {
-	priority = 1111;
-	
 	dmgdone = dmg;
 	knockback = kb;
-	utype = gameobject::updatenone;
 	
 	}
-	void oncollision(gameobject::obj collidedwith) {
+	void oncollision(ecs::obj collidedwith) {
 
 		
-			if (!collidedwith.hascomponent<estate>()) {
+			if (!collidedwith.has_component<estate>()) {
 			
 				return;
 			}
-			if (!(collidedwith.hascomponent<T>()))
+			if (!(collidedwith.has_component<T>()))
 			{
 				return;
 			}
-			if (collidedwith.hascomponent < gameobject::transform_comp>())
+			if (collidedwith.has_component < ecs::transform_comp>())
 			{
 
 
-				v3::Vec3 center = owner.transform().position;
-				v3::Vec3 othercenter = collidedwith.transform().position;
-				if (collidedwith.hascomponent<rigidbody>()) {
+				v3::Vec3 center = owner().get_component<ecs::transform_comp>().transform.position;
+				v3::Vec3 othercenter = collidedwith.get_component<ecs::transform_comp>().transform.position;
+				if (collidedwith.has_component<rigidbody>()) {
 
 
 					kb(center, knockback, collidedwith);
@@ -68,7 +63,7 @@ struct dmgonhit: gameobject::component
 
 
 				}
-				collidedwith.getcomponent<estate>().damage(dmgdone);
+				collidedwith.get_component<estate>().damage(dmgdone);
 			}
 		
 	}
@@ -76,3 +71,13 @@ struct dmgonhit: gameobject::component
 };
 
  // !properties.dmgonhit_HPP
+namespace ecs {
+	template<typename T, bool b>
+	inline constexpr ComponentInfo ComponentTraits<destroyonhit<T, b>> = {
+		.updates = false
+	};
+	template<typename T>
+	inline constexpr ComponentInfo ComponentTraits<dmgonhit<T>> = {
+		.updates = false
+	};
+}

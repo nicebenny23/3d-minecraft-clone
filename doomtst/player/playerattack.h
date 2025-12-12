@@ -6,10 +6,10 @@
 #include "../game/entityutil.h"
 #include "../debugger/console.h"
 
-struct playerattackcomp: gameobject::component
+struct playerattackcomp: ecs::component
 {
 	void wearduribilty() {
-		item* select =owner.getcomponent<inventory>().selected;
+		item* select =owner().get_component<inventory>().selected;
 		if (select!=nullptr)
 		{
 			if (select->itemtype == wear) {
@@ -21,7 +21,7 @@ struct playerattackcomp: gameobject::component
 		
 
 		item* select;
-		select = owner.getcomponent<inventory>().selected;
+		select = owner().get_component<inventory>().selected;
 		if (select == nullptr)
 		{
 			return 1;
@@ -35,26 +35,26 @@ struct playerattackcomp: gameobject::component
 	
 		ray cameraray = ray(camera::campos(), camera::campos() + camera::GetCamFront() * 7);
 		
-		voxtra::WorldRayCollision Hit = collision::raycastall(cameraray, collision::HitQuery(owner));
+		voxtra::WorldRayCollision Hit = collision::raycastall(cameraray, collision::HitQuery(owner()));
 		if (!Hit)
 		{
 			return;
 		}
 		voxtra::RayWorldHit closest = Hit.unwrap();
-		if (!closest.collider.owner.hascomponent<estate>())
+		if (!closest.collider.owner().has_component<estate>())
 		{
 			return;
 		}
 		debug("sees"+std::to_string(CtxName::ctx.Time->dt));
-		if (closest.collider.owner.hascomponent<estate>()&&CtxName::ctx.Inp->mouseleft().pressed)
+		if (closest.collider.owner().has_component<estate>()&&CtxName::ctx.Inp->mouseleft().pressed)
 		{
-			if (closest.gameobject().hascomponent<rigidbody>())
+			if (closest.ecs().has_component<rigidbody>())
 			{
-				kb(owner.transform().position, 7, (closest.gameobject()));
+				kb(owner().get_component<ecs::transform_comp>().transform.position, 7, (closest.ecs()));
 				
 			}
 			int dmgdone = computeattackdmg();
-			closest.gameobject().getcomponent<estate>().damage(dmgdone);
+			closest.ecs().get_component<estate>().damage(dmgdone);
 			wearduribilty();
 		
 		}
@@ -70,4 +70,4 @@ struct playerattackcomp: gameobject::component
 
 
 
- // !gameobject_HPP
+ // !ecs_HPP

@@ -4,17 +4,17 @@
 #include "../items/loottable.h"
 void estate::remove()
 {
-	if (owner.hascomponent<loottable>())
+	if (owner().has_component<loottable>())
 	{
-		owner.getcomponent<loottable>().should_drop = true;
+		owner().get_component<loottable>().should_drop = true;
 	}
 
-	if (!owner.hascomponent<gameobject::StaticComponent>())
+	//if (!owner().has_component<ecs::StaticComponent>())
 	{
-		if (owner.hascomponent<gameobject::transform_comp>())
+		if (owner().has_component<ecs::transform_comp>())
 		{
 			int l = 1;
 		}
-		owner.destroy();
+		owner().destroy();
 	}
 }

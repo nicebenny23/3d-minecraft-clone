@@ -1,7 +1,7 @@
 #pragma once
 #include "../game/objecthelper.h"
 #include "ModelMesh.h"
-#include "../game/gameobject.h"
+#include "../game/ecs/game_object.h"
 #include "../game/transform.h"
 
 enum  meshconnecttype
@@ -9,7 +9,7 @@ enum  meshconnecttype
 	normalmeshconnect = 0,
 	wormmeshconnect = 1,
 };
-struct model: gameobject::component
+struct model: ecs::component
 {
 	ModelMeshName::ModelMesh& operator[](int index);
 

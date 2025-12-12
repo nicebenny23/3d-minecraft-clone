@@ -11,5 +11,5 @@ inline void obsidianinit(blockname::block* blk) {
 	blk->createdefaultaabb(false);
 	blk->mininglevel = 5;
 	blk->minedfastwithpick = true;
-	blk->owner.addcomponent<loottable>().addelem(obsidianitem, 1, false);
+	blk->owner().add_component<loottable>().addelem(obsidianitem, 1, false);
 }

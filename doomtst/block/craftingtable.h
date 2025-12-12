@@ -51,7 +51,7 @@ struct craftingmenu :menu {
 
 
 };
-struct craftingtablecomp : gameobject::component {
+struct craftingtablecomp : ecs::component{
 	
 	craftingmenu men;
 	void onplayerclick() {
@@ -92,11 +92,11 @@ inline void tableinit(blockname::block* blk) {
 
 	blk->createdefaultaabb(false);
 	//stupid thing
-	if (!blk->owner.hascomponent<craftingtablecomp>())
+	if (!blk->owner().has_component<craftingtablecomp>())
 	{
 
-		blk->owner.addcomponent<craftingtablecomp>();
+		blk->owner().add_component<craftingtablecomp>();
 
 	}
-	blk->owner.addcomponent<loottable>().addelem(craftingtableitem, 1, false);
+	blk->owner().add_component<loottable>().addelem(craftingtableitem, 1, false);
 }

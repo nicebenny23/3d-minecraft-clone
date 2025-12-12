@@ -1,14 +1,14 @@
 #include "new_slot.h"
 #include "../game/GameContext.h"
-#include "../game/gameobject.h"
+#include "../game/ecs/game_object.h"
 #include "../game/spawn.h"
 #pragma once
 namespace cont
 {
 	struct Container {
-		stn::array<gameobject::obj> slots;
+		stn::array<ecs::obj> slots;
 		size_t fill_amt() {
-			for (gameobject::obj )
+			for (ecs::obj )
 			{
 
 			}
@@ -23,15 +23,15 @@ namespace cont
 			{
 				for (size_t x = 0; x++; x < grid.x)
 				{
-					gameobject::spawn::Spawner spawner(CtxName::ctx.OC);
-	gameobject::obj new_slot= spawner.with<slot::ItemSlot>()
+					ecs::spawn::Spawner spawner(CtxName::ctx.OC);
+	ecs::obj new_slot= spawner.with<slot::ItemSlot>()
 						.with<slot::UiSlot>(v2::Coord2(x, y) + lowest).build();	
 				slots.push(new_slot);
 				}
 			}
 		}
 		void destroy() {
-			for (gameobject::obj& elem:slots )
+			for (ecs::obj& elem:slots )
 			{
 				elem.destroy();
 			}
@@ -39,16 +39,16 @@ namespace cont
 		}
 
 		void Enable() {
-			for (gameobject::obj& elem : slots)
+			for (ecs::obj& elem : slots)
 			{
-				elem.getcomponent<slot::SlotUi>().enable();
+				elem.get_component<slot::SlotUi>().enable();
 			}
 		}
 
 		void Disable() {
-			for (gameobject::obj& elem : slots)
+			for (ecs::obj& elem : slots)
 			{
-				elem.getcomponent<slot::SlotUi>().disable();
+				elem.get_component<slot::SlotUi>().disable();
 			}
 		}
 	};

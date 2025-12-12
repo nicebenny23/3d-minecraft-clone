@@ -53,7 +53,7 @@ struct furnacemenu :menu {
 
 
 };
-struct furnacecomp : gameobject::component {
+struct furnacecomp : ecs::component{
 
 	
 	furnacemenu men;
@@ -75,7 +75,7 @@ struct furnacecomp : gameobject::component {
 
 	
 		
-		blockname::block* getblockbelow = CtxName::ctx.Grid->getBlock(objutil::toblk(owner).pos - Coord(0, 1, 0));
+		blockname::block* getblockbelow = CtxName::ctx.Grid->getBlock(owner().get_component<blockname::block>().pos - Coord(0, 1, 0));
 		men.blkcont.state.cancraft = false;
 	
 		if (getblockbelow != nullptr)
@@ -88,7 +88,7 @@ struct furnacecomp : gameobject::component {
 
 				if (men.blkcont.state.craftedthisframe)
 				{
-					getblockbelow->owner.getcomponent<liquidprop>().liqval -= 1;
+					getblockbelow->owner().get_component<liquidprop>().liqval -= 1;
 				}
 			}
 
@@ -123,15 +123,15 @@ inline void furnaceinit(blockname::block* blk) {
 
 	blk->createdefaultaabb(false);
 	//stupid thing
-	if (!blk->owner.hascomponent<furnacecomp>())
+	if (!blk->owner().has_component<furnacecomp>())
 	{
 
-		blk->owner.addcomponent<furnacecomp>();
+		blk->owner().add_component<furnacecomp>();
 
 	}
 	
 
-	blk->owner.getcomponent<furnacecomp>().men.blkcont.attributes.timetocraft = 1;
-	blk->owner.getcomponent<furnacecomp>().men.blkcont.attributes.isauto = true;
-	blk->owner.addcomponent<loottable>().addelem(furnaceitem, 1, false);
+	blk->owner().get_component<furnacecomp>().men.blkcont.attributes.timetocraft = 1;
+	blk->owner().get_component<furnacecomp>().men.blkcont.attributes.isauto = true;
+	blk->owner().add_component<loottable>().addelem(furnaceitem, 1, false);
 }

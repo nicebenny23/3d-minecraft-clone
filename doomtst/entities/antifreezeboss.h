@@ -16,12 +16,12 @@ enum bosstate {
     shooting=1,
     ramming=2,
 };
-struct firedaggerfinalboss : gameobject::component {
+struct firedaggerfinalboss : ecs::component{
     float timetillshoot;
     int shotsleft = 0;
     bosstate state;
     void update(){
-        Transform& currtransform = owner->getcomponent<model>()[0].transform;
+        Transform& currtransform = owner->get_component<model>()[0].transform;
         Vec3 pos = player::goblin->transform.position;
         if (state == following)
         {
@@ -52,7 +52,7 @@ struct firedaggerfinalboss : gameobject::component {
             if (timetillshoot<0&&0<shotsleft)
             {
 
-                v3::Vec3 pos = owner->getcomponent<model>()[0].transform.position + owner->getcomponent<model>()[0].transform.getnormaldirection() * 4+Vec3(random(),random(),random());
+                v3::Vec3 pos = owner->get_component<model>()[0].transform.position + owner->get_component<model>()[0].transform.getnormaldirection() * 4+Vec3(random(),random(),random());
                 Vec3 ppos = player::goblin.toent()->transform.position;
                 Vec3 velocity = normal(pos-ppos) * -6+(Vec3(random(),random(),random())-unitv/2);
                 spawndagger(pos, velocity, 0);
@@ -92,22 +92,22 @@ struct firedaggerfinalboss : gameobject::component {
 inline Ent::entityref createfinalboss(v3::Vec3 pos) {
     
     Ent::entityref refmodel = CtxName::ctx.EntMan->CreateEntity(zerov, "enemy");
-    refmodel.toent()->addcomponent<model>();
+    refmodel.toent()->add_component<model>();
     Coord cpos = pos;
-    //  refmodel.toent()->getcomponent<model>().add("slime2.obj", "images\\slimetex.png");
+    //  refmodel.toent()->get_component<model>().add("slime2.obj", "images\\slimetex.png");
     for (int i = 0; i <160; i++)
     {
-        refmodel.toent()->getcomponent<model>().add("objs\\finalboss.obj", "images\\bosstex.png", Vec3(i, 0, 0)+cpos);
-       refmodel.toent()->getcomponent<model>()[i].transform.yaw = 0;
+        refmodel.toent()->get_component<model>().add("objs\\finalboss.obj", "images\\bosstex.png", Vec3(i, 0, 0)+cpos);
+       refmodel.toent()->get_component<model>()[i].transform.yaw = 0;
     }
-    refmodel.toent()->addcomponent<firedaggerfinalboss>();
-    refmodel.toent()->addcomponent<estate>(100, false);
+    refmodel.toent()->add_component<firedaggerfinalboss>();
+    refmodel.toent()->add_component<estate>(100, false);
 
-    refmodel.toent()->addcomponent<dmgonhit>(4, "player", 6);
-    refmodel.toent()->addcomponent<loottable>()->addelem(playertpsword, 512);
-   // refmodel.toent()->addcomponent<rigidbody>();
+    refmodel.toent()->add_component<dmgonhit>(4, "player", 6);
+    refmodel.toent()->add_component<loottable>()->addelem(playertpsword, 512);
+   // refmodel.toent()->add_component<rigidbody>();
     refmodel.toent()->transform.scale = unitv;
-    refmodel.toent()->addcomponent<worm>(160,1);
+    refmodel.toent()->add_component<worm>(160,1);
     refmodel->canbedestroyed = false;
     return refmodel;
 }

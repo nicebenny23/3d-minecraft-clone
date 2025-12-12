@@ -9027,7 +9027,7 @@ bool ImGui::SetShortcutRouting(ImGuiKeyChord key_chord, ImGuiInputFlags flags, I
         if (g.NavWindow == NULL)
             return false;
 
-    // Note how ImGuiInputFlags_RouteAlways won't set routing and thus won't set owner. May want to rework this?
+    // Note how ImGuiInputFlags_RouteAlways won't set routing and thus won't set owner(). May want to rework this?
     if (flags & ImGuiInputFlags_RouteAlways)
     {
         IMGUI_DEBUG_LOG_INPUTROUTING("SetShortcutRouting(%s, flags=%04X, owner_id=0x%08X) -> always, no register\n", GetKeyChordName(key_chord), flags, owner_id);

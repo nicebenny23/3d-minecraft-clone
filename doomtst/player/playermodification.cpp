@@ -8,10 +8,10 @@
 #include "../game/particles.h"
 
 
-void playerbreak::make_drop(gameobject::obj Hit)
+void playerbreak::make_drop(ecs::obj Hit)
 {
-	if (Hit.hascomponent<loottable>())
+	if (Hit.has_component<loottable>())
 	{
-		Hit.getcomponent<loottable>().should_drop = true;
+		Hit.get_component<loottable>().should_drop = true;
 	}
 }

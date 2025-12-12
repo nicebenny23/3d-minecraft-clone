@@ -17,7 +17,29 @@ namespace stn {
         constexpr T* data() noexcept { return ptr; }
         constexpr const T* data() const noexcept { return ptr; }
         constexpr bool contains_index(size_t index) const noexcept { return index < len; }
-        T& operator[](size_t index) {
+		constexpr span() noexcept :ptr(nullptr), len(0) {
+		};
+		constexpr span(T* data, size_t length) noexcept
+			: ptr(data), len(length) {
+		}
+		template <size_t N>
+		constexpr span(T(&arr)[N]) noexcept
+			: ptr(arr), len(N) {
+		}
+		template <std::contiguous_iterator Iter>
+		span(Iter first, Iter last)
+			: ptr(&(*first)), len(static_cast<size_t>(std::distance(first, last))) {
+			static_assert(std::is_pointer_v<Iter> ||
+				std::is_same_v<typename std::iterator_traits<Iter>::iterator_category,
+				std::random_access_iterator_tag>, "span requires random access iterators or pointers");
+		}
+		template <std::ranges::contiguous_range Container>
+		span(Container& c) : span(std::begin(c), std::end(c)) {
+		}
+		constexpr operator stn::span<const T>() const {
+			return stn::span<const T>(ptr, len);
+		}
+		T& operator[](size_t index) {
             if (!contains_index(index)) {
                 throw_range_exception("span index {} out of range (len={})", index, len);
             }
@@ -36,25 +58,6 @@ namespace stn {
         T& unchecked_at(size_t index) {
             return ptr[index];
         }
-
-        constexpr span() noexcept :ptr(nullptr), len(0) {};
-        constexpr span(T* data, size_t length) noexcept
-            : ptr(data), len(length) {
-        }
-        template <size_t N>
-        constexpr span(T(&arr)[N]) noexcept
-            : ptr(arr), len(N) {
-        }
-        template <std::contiguous_iterator Iter>
-        span(Iter first, Iter last)
-            : ptr(&(*first)), len(static_cast<size_t>(std::distance(first, last))) {
-            static_assert(std::is_pointer_v<Iter> ||
-                std::is_same_v<typename std::iterator_traits<Iter>::iterator_category,
-                std::random_access_iterator_tag>, "span requires random access iterators or pointers");
-        }
-        template <std::ranges::contiguous_range Container>
-        span(Container& c) : span(std::begin(c), std::end(c)) {}
-
 
         using iterator = T*;
         using const_iterator = const T*;

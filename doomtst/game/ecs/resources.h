@@ -5,7 +5,10 @@
 #include "../../util/pair.h"
 #pragma once
 namespace ecs {
-	struct resource {};
+	struct resource {
+		virtual ~resource() {
+		}
+	};
 	using resource_id = stn::typed_id<resource>;
 	template<typename T>
 	concept ResourceType = std::derived_from < T, resource>;
@@ -21,7 +24,7 @@ namespace ecs {
 					return *ptr;
 				}
 			}
-			resource_list.push(stn::box<T>(std::forward<Args>(args)...));
+			resource_list.push(stn::box<T>(std::forward<Args>(args)...).upcast<resource>());
 			return resource_list[insertion.value.id].ref_as_unchecked<T>();
 		}
 		template<ResourceType T>

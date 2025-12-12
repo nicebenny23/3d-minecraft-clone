@@ -4,8 +4,15 @@ namespace ecs {
 	// Views iterate over entities containing the specified Components.
 	template<typename... Components>
 	struct View {
-
-
+		Ecs& world() {
+			return ecs;
+		}
+		stn::span<archetype_id> view_archetypes() {
+			return archetypes.span();
+		}
+		stn::span<component_id> view_indices() {
+			return positions.span();
+		}
 		struct Iterator {
 			View& owner;
 			//actual location
@@ -19,7 +26,7 @@ namespace ecs {
 			//finds the next valid/final entry, returning whether it was a valid entry
 			bool find_next_entry() {
 				while (owner.archetypes.contains_index(archetype_list_index)) {
-					Archetype& arch = owner.ecs->archetypes.archetype_at(owner.archetypes[archetype_list_index]);
+					Archetype& arch = owner.ecs.archetypes.archetype_at(owner.archetypes[archetype_list_index]);
 					if (arch.contains_index(arch_index)) {
 						return true;
 					}
@@ -53,8 +60,8 @@ namespace ecs {
 				{
 					stn::throw_logic_error("Cannot dereference iterator: reached end of View");
 				}
-				space_id ent= owner.ecs->archetypes.archetype_at(owner.archetypes.unchecked_at(archetype_list_index))[arch_index];
-				return owner.ecs->get_tuple_unchecked<Components...>(ent, owner.positions);
+				space_id ent= owner.ecs.archetypes.archetype_at(owner.archetypes.unchecked_at(archetype_list_index))[arch_index];
+				return owner.ecs.get_tuple_unchecked<Components...>(ent, owner.view_indices());
 			}
 
 		};
@@ -74,15 +81,15 @@ namespace ecs {
 			return it;
 		}
 
-		View(Ecs* world) :ecs(world), archetypes(), positions() {
-			component_ids bitlist = ecs->components.insert_ids<Components...>();
-			positions =bitlist.into_list();
-			archetypes = ecs->archetypes.archetypes_passing(ecs::archetype_predicate(component_ids(), bitlist)); 
+		View(Ecs& world) :ecs(world), archetypes(), positions() {
+			component_ids bitlist = ecs.components.insert_ids<Components...>();
+			positions =ecs.components.insert_id_list<Components...>();
+			archetypes = ecs.archetypes.archetypes_passing(ecs::archetype_predicate(component_ids(), bitlist)); 
 		}
 		
 		//returns the archetype at index in archetypes
 		Archetype& archetype_at(size_t index) {
-			return ecs->archetypes.archetype_at(archetypes[index]);
+			return ecs.archetypes.archetype_at(archetypes[index]);
 		}
 		
 		//returns the total number of archetypes in this view
@@ -91,7 +98,7 @@ namespace ecs {
 		}
 		
 	private:
-		Ecs* ecs;
+		Ecs& ecs;
 		friend struct Iterator;
 		stn::array<component_id> positions;
 		stn::array<archetype_id> archetypes;

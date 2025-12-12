@@ -1,6 +1,5 @@
-#include "../game/gameobject.h"
+#include "../game/ecs/game_object.h"
 #include "../block/block.h"
-#include "../game/objecthelper.h"
 #include "../world/grid.h"
 #include "../world/managegrid.h"
 #include "../util/time.h"
@@ -10,59 +9,52 @@
 extern float liquidtick;
 
 void updateltick();
-struct liquidprop : gameobject::component {
+struct liquidprop : ecs::component {
 	int maxliq;
 	int liqval;
 
 	liquidprop(int value) {
 		int maxliquid = 0;
 		maxliq = value;
-	
+
 		liqval = value;
 	}
 	float diffusetime;
 	void start() {
-		if (!owner.hascomponent<block>())
-		{
+		if (!owner().has_component<block>()) {
 			throw std::logic_error("all liquids must be blocks");
 		}
 		diffusetime = 0;
-		utype = gameobject::updatetick;
+		//utype = ecs::updatetick;
 
 	}
-	void oncollision(gameobject::obj* collidedwith) {
-		if (collidedwith->hascomponent<rigidbody>())
-		{
-			collidedwith->getcomponent<rigidbody>().inliquid = true;
-			collidedwith->getcomponent<rigidbody>().velocity *= 1 - CtxName::ctx.Time->dt * 5;
+	void oncollision(ecs::obj* collidedwith) {
+		if (collidedwith->has_component<rigidbody>()) {
+			collidedwith->get_component<rigidbody>().inliquid = true;
+			collidedwith->get_component<rigidbody>().velocity *= 1 - CtxName::ctx.Time->dt * 5;
 		}
 	}
 	void updateinface(Dir::Dir3d face) {
 
-		if (liqval <= 1)
-		{
+		if (liqval <= 1) {
 			return;
 		}
-		Coord newpos =face.ToVec() + objutil::toblk(owner).pos;
+		Coord newpos = face.ToVec() + owner().get_component<block>().pos;
 		blockname::block* blk = CtxName::ctx.Grid->getBlock(newpos);
-		if (blk == nullptr)
-		{
+		if (blk == nullptr) {
 			return;
 		}
-		
+
 		//instert for what dor==3 was
-		
-		if (blk->id != minecraftair)
-		{
-			if (blk->id == objutil::toblk(owner).id)
-			{
-				if (liqval > 1)
-				{
+
+		if (blk->id != minecraftair) {
+			if (blk->id == owner().id()) {
+				if (liqval > 1) {
 
 
-					if (blk->owner.getcomponent<liquidprop>().liqval < liqval) {
+					if (blk->owner().get_component<liquidprop>().liqval < liqval) {
 
-						blk->owner.getcomponent<liquidprop>().liqval += 1;
+						blk->owner().get_component<liquidprop>().liqval += 1;
 						liqval -= 1;
 					}
 				}
@@ -70,8 +62,7 @@ struct liquidprop : gameobject::component {
 
 
 
-			if (blk->id == minecrafttorch)
-			{
+			if (blk->id == minecrafttorch) {
 				gridutil::setblock(newpos, minecraftair);
 			}
 
@@ -82,44 +73,37 @@ struct liquidprop : gameobject::component {
 		}
 
 		Coord pos = blk->pos;
-		gridutil::setblock(pos, objutil::toblk(owner).id);
+		gridutil::setblock(pos, owner().get_component<blockname::block>().id);
 		blk = (CtxName::ctx.GridRef().getBlock(pos));
 
-		if (!blk->owner.hascomponent<liquidprop>())
-		{
+		if (!blk->owner().has_component<liquidprop>()) {
 			Assert("block must be inititated with liquid component");
 		}
-	
-				blk->owner.getcomponent<liquidprop>().liqval = 1;
-				liqval -= 1;
-			
-	
+
+		blk->owner().get_component<liquidprop>().liqval = 1;
+		liqval -= 1;
+
+
 		blk->mesh.attachdir = Dir::up3d;
 
 	}
 
 	void update() {
-		
+	//	diffusetime += tick::tickdt;
+		if (.4 < diffusetime) {
+			diffusetime = 0;
 
+			for (auto dir : Dir::Directions3d) {
+				if (dir != Dir::up3d) {
 
-			diffusetime +=tick::tickdt;
-			if (.4 < diffusetime)
-			{
-				diffusetime = 0;
-
-				for (auto dir: Dir::Directions3d)
-				{
-					if (dir != Dir::up3d) {
-
-						updateinface(dir);
-					}
+					updateinface(dir);
 				}
 			}
-			if (liqval <= 0)
-			{
-				gridutil::setblock(objutil::toblk(owner).pos, minecraftair);
-			}
-		
+		}
+		if (liqval <= 0) {
+			gridutil::setblock(owner().get_component<blockname::block>().pos, minecraftair);
+		}
+
 	}
 
 

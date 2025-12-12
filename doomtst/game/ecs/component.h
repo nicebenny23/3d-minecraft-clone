@@ -85,7 +85,7 @@ namespace ecs {
 			return ref;
 		}
 		template<typename T, typename...Args>
-		T& emplace(space_id ent, Args&&... args) {
+		T& emplace(space_id ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
 			if (has(ent))
 			{
 				throw std::logic_error("emplace<T> cannot overwrite an existing component");
@@ -157,11 +157,12 @@ namespace ecs {
 			return store.get_as_unchecked<T>(space_id);
 		}
 		template<ComponentType T,typename...Args>
-		T& emplace(space_id ent,Args&&... args) {
+		T& emplace(space_id ent,Args&&... args)  requires std::constructible_from<T, Args&&...> {
 			T& comp = store.emplace<T>(ent,std::forward<Args>(args)...);
 			comp.comp_id = id();
 			comp.ent= ent;
 			comp.ecs = ecs_instance;
+			comp.start();
 			return comp;
 		}
 		bool has(space_id owner) const{
@@ -200,6 +201,10 @@ namespace ecs {
 		inline component_ids insert_ids() {
 			return component_ids(stn::bitset(stn::array({ insert_id<Types>()... })));
 		}
+		template<ComponentType ...Types>
+		inline stn::array<component_id> insert_id_list() {
+			return stn::array({ insert_id<Types>()... });
+		}
 		stn::span<component_type> component_types() {
 			return component_list.span();
 		}
@@ -213,7 +218,7 @@ namespace ecs {
 			return component_list[id.id];
 		}
 		template<ComponentType T,typename ...Args>
-		T& emplace(space_id id, Args&&... args){
+		T& emplace(space_id id, Args&&... args) requires std::constructible_from<T, Args&&...> {
 			component_id comp_id = insert_id<T>();
 			return (*this)[comp_id].emplace<T>(id,std::forward<Args>(args)...);
 		}

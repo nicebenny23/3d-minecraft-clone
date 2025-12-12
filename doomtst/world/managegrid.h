@@ -11,8 +11,8 @@ namespace gridutil {
 	void computeallcover();
 
 	void emitlight();
-	gameobject::obj dislocate(gameobject::obj blk);
-	void set_air(gameobject::obj blk);
+	ecs::obj dislocate(ecs::obj blk);
+	void set_air(ecs::obj blk);
 
 	void redolighting();
 	

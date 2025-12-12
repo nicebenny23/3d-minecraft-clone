@@ -1,6 +1,6 @@
 #pragma once
 #include "../renderer/uibox.h"
-#include "../game/gameobject.h"
+#include "../game/ecs/game_object.h"
 #include "../game/collision.h"
 #include "../world/managegrid.h"
 #include "../game/objecthelper.h"
@@ -12,6 +12,7 @@
 #include "../renderer/decal.h"
 #include "../game/System.h"
 #include "../util/cached.h"
+#include "../game/ecs/query.h"
 
 // Picks the face of the block that the point lies closest to
 inline Dir::Dir3d closest_face(v3::Vec3 pos, block* blk) {
@@ -33,9 +34,9 @@ inline stn::pair<v3::Vec3, v3::Vec3> get_flat_frame(Dir::Dir3d dir) {
     }
 }
 
-void initbreakparticle(gameobject::obj newent);
+void initbreakparticle(ecs::obj newent);
 
-struct playerbreak : gameobject::component {
+struct playerbreak : ecs::component{
     voxtra::WorldRayCollision closest;
     stn::change <item*> pickaxe;
 
@@ -93,7 +94,7 @@ struct playerbreak : gameobject::component {
             {
                 break_decal.handle.disable();
             }
-            pickaxe.clear(owner.getcomponent<inventory>().selected);
+            pickaxe.clear(owner().get_component<inventory>().selected);
             currmining.clear( blk);
             break_start_time = block_power(blk);
             timeuntilbreak = break_start_time;
@@ -101,7 +102,7 @@ struct playerbreak : gameobject::component {
         }
         else
         {
-            pickaxe.set(owner.getcomponent<inventory>().selected);
+            pickaxe.set(owner().get_component<inventory>().selected);
             currmining.set(blk);
         }
     }
@@ -120,14 +121,14 @@ struct playerbreak : gameobject::component {
     }
     //returns current speed
     bool ensure_engage()  {
-        ray r(owner.transform().position,
-        owner.transform().position + owner.transform().getnormaldirection() * 7.f);
-        closest = collision::raycastall(r, collision::HitQuery(owner), voxtra::countsolid);
+        ray r(owner().get_component<ecs::transform_comp>().transform.position,
+        owner().get_component<ecs::transform_comp>().transform.position + owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * 7.f);
+        closest = collision::raycastall(r, collision::HitQuery(owner()), voxtra::countsolid);
         if (!closest) {
             return false;
         }
         auto hit = closest.unwrap();
-        if (!hit.gameobject().hascomponent<blockname::block>()) { 
+        if (!hit.ecs().has_component<blockname::block>()) { 
             return false;
         }
         if (!inrange(hit.dist(), interactminrange, interactmaxrange)) {
@@ -137,7 +138,7 @@ struct playerbreak : gameobject::component {
         {
             return false;
         }
-        engage_block(hit.gameobject().getcomponentptr<block>());
+        engage_block(hit.ecs().get_component_ptr<block>());
             if (engaged())
             {
                 if (currmining.changed()|| pickaxe.changed()) {
@@ -181,7 +182,7 @@ struct playerbreak : gameobject::component {
             }
             if (!currmining()->minedfastwithpick || currmining()->mininglevel <= curr_mining_power())
             {
-                make_drop(broken->owner);
+                make_drop(broken->owner());
             }
             gridutil::setblock(broken->pos, minecraftair);
             disengage_block();
@@ -191,18 +192,14 @@ struct playerbreak : gameobject::component {
     void update() {
         try_modify();
     }
-    void make_drop(gameobject::obj Hit);
+    void make_drop(ecs::obj Hit);
 
 };
 
-struct PlayerUpdateSystem : System {
-    void run(gameobject::Ecs* ecs) override {
-        for (auto [pb] : query::View<playerbreak>(ecs)) {
-         
-
-            pb->try_modify();
-            
-
+struct PlayerUpdateSystem : ecs::System {
+    void run(ecs::Ecs& ecs) override {
+        for (auto [pb] : ecs::View<playerbreak>(ecs)) {
+            pb.try_modify();
         };
     }
 };

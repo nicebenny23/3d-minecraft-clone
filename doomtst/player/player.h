@@ -5,12 +5,12 @@
 // settings
 
 namespace player {
-	struct player_tag : gameobject::component {
+	struct player_tag : ecs::component{
 
 
 
 	};
-	extern gameobject::obj goblin;
+	extern ecs::obj goblin;
 	void initplayer();
 	extern bool playeractive;
 

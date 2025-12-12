@@ -18,8 +18,8 @@ namespace voxtra {
 			return Hit.intersectionpoint;
 		}
 		
-		gameobject::obj gameobject() const {
-			return collider.owner;
+		ecs::obj ecs() const {
+			return collider.owner();
 		}
 		float dist() const {
 			return Hit.dist;

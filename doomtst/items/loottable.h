@@ -1,4 +1,4 @@
-#include "../game/gameobject.h"
+#include "../game/ecs/game_object.h"
 #include "../util/dynamicarray.h"
 
 #include "../util/random.h"
@@ -28,7 +28,7 @@ struct lootelement
 	~lootelement() = default;
 	
 };
-struct  loottable : gameobject::component
+struct  loottable : ecs::component
 {
 	
 	bool should_drop;
@@ -36,7 +36,6 @@ struct  loottable : gameobject::component
 
 		should_drop = false;
 		lootlist = array<lootelement>();
-		utype = gameobject::updatenone;
 	}
 	void start() {
 		
@@ -63,6 +62,12 @@ struct  loottable : gameobject::component
 		}
 	}
 };
+namespace ecs {
+	template<>
+	inline constexpr ComponentInfo ComponentTraits<loottable> = {
+		.updates = false
+	};
+}
 
 
 

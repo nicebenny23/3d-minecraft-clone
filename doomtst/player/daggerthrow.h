@@ -4,10 +4,10 @@
 #include "../game/collision.h"
 #include "../entities/crystaldaggers.h"
 #pragma once 
-struct playerdaggercomp : gameobject::component
+struct playerdaggercomp : ecs::component
 {
 	void wearduribilty() {
-		item* select = owner.getcomponent<inventory>().selected;
+		item* select = owner().get_component<inventory>().selected;
 		if (select != nullptr)
 		{
 		
@@ -16,7 +16,7 @@ struct playerdaggercomp : gameobject::component
 		}
 	}
 	void update() {
-		item* select = owner.getcomponent<inventory>().selected;
+		item* select = owner().get_component<inventory>().selected;
 		if (select==nullptr)
 		{
 			return;
@@ -28,8 +28,8 @@ struct playerdaggercomp : gameobject::component
 			{
 				return;
 			}
-			Vec3 spawpos =owner.transform().position + owner.transform().getnormaldirection() * 3;
-			Vec3 velocity =owner.transform().getnormaldirection() * 10;
+			Vec3 spawpos =owner().get_component<ecs::transform_comp>().transform.position + owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * 3;
+			Vec3 velocity =owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * 10;
 
 			spawndagger(spawpos, velocity);
 			wearduribilty();
@@ -45,4 +45,4 @@ struct playerdaggercomp : gameobject::component
 
 
 
- // !gameobject_HPP
+ // !ecs_HPP
