@@ -2,8 +2,7 @@
 #pragma once
 namespace renderer {
 
-	struct renderables
-	{
+	struct renderables {
 
 		Sparse::KeySet<renderable> renderable_list;
 		stn::array<renderable_id> free_ids;
@@ -32,8 +31,7 @@ namespace renderer {
 			return renderable_list.length();
 		}
 		renderable_id gen() {
-			if (free_ids.empty())
-			{
+			if (free_ids.empty()) {
 				//1
 				free_ids.push(renderable_id(static_cast<uint32_t>(total_renderables())));
 			}

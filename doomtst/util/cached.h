@@ -35,4 +35,39 @@ namespace stn {
 		T cached;
 		T value;
 	};
+	struct dirty_flag {
+		explicit dirty_flag(bool should_clean) noexcept :dirty(should_clean) {
+
+		}
+		dirty_flag(const dirty_flag&) = delete;
+		dirty_flag& operator=(const dirty_flag&) = delete;
+		dirty_flag& operator=(dirty_flag&&) = delete;
+		dirty_flag(dirty_flag&& other) noexcept
+			: dirty(other.dirty) {
+			other.dirty = false;
+		}
+		
+
+		template<typename Func>
+		void clean(Func&& func) {
+			if (dirty) {
+				func();
+				dirty = false;
+			}
+		}
+		
+		explicit operator bool() const noexcept {
+			return dirty;
+		}
+		bool is_dirty() const noexcept {
+			return dirty;
+		}
+
+		void mark_dirty() noexcept {
+			dirty = true;
+		}
+	private:
+		bool dirty;
+
+	};
 }

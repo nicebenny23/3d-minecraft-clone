@@ -18,8 +18,17 @@ namespace stn {
 
 	template<typename T>
 	struct Option;
+
+	template<typename>
+	struct is_option : std::false_type {
+	};
+
 	template<typename T>
-	concept OptionType = requires { typename T::value_type; }&& std::same_as<T, Option<typename T::value_type>>;
+	struct is_option<Option<T>> : std::true_type {
+	};
+	template<typename T>
+	concept OptionType =
+		is_option<std::remove_cvref_t<T>>::value;
 
 
 	template<typename T>
@@ -265,6 +274,14 @@ namespace stn {
 			return stn::None;
 		}
 		template<typename Func>
+		auto map(Func&& f) &-> Option< std::invoke_result_t<Func, T&>> requires std::invocable<Func, T&> && !std::is_void_v<std::invoke_result_t<Func, T&>>{
+			using U = std::invoke_result_t<Func, T&>;
+			if (has_value) {
+				return Option<U>(std::invoke(std::forward<Func>(f), value.get<T>()));
+			}
+			return stn::None;
+		}
+		template<typename Func>
 		auto map(Func&& f) && ->Option< std::invoke_result_t<Func, T>> requires std::invocable<Func, T> && !std::is_void_v<std::invoke_result_t<Func, T>>{
 			using U = std::invoke_result_t<Func, T>;
 			if (has_value) {
@@ -274,6 +291,7 @@ namespace stn {
 			return stn::None;
 
 		}
+
 		template<typename Func> requires std::invocable<Func, const T&>&& OptionType<std::invoke_result_t<Func, const T&>>
 		auto and_then(Func&& f) const -> std::invoke_result_t<Func, const T&> {
 			if (has_value) {

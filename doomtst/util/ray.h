@@ -3,16 +3,16 @@
 using namespace v3;
 struct ray
 {
-	v3::Vec3 start;
-	v3::Vec3 end;
-	ray(const v3::Vec3& startray, const v3::Vec3& endray)
+	v3::Point3 start;
+	v3::Point3 end;
+	ray(const v3::Point3& startray, const v3::Point3& endray)
 	{
 		start = startray;
 		end = endray;
 	}
 
 	bool degenerate() const {
-		return  dist2(start, end) == 0;
+		return  v3::dist2(start, end) == 0;
 	}
 	v3::Vec3 diff() const {
 		return end - start;
@@ -27,7 +27,7 @@ struct ray
 
 	
 
-	Vec3 project(v3::Vec3 vector) const {
+	Point3 project(Point3 vector) const {
 
 
 		Vec3 aoffset = vector - start;
@@ -37,17 +37,16 @@ struct ray
 		}
 		Vec3 normed = dir();
 		double t = dot(aoffset, normed);
-		Vec3 position = start + normed * t;
-		return position;
+		return start + normed * t;
 	}
-	double distance(v3::Vec3 vector) const {
+	double distance(v3::Point3 vector) const {
 		return dist(vector, project(vector));
 	}
 
-	Vec3 pointAt(float t) const {
+	Point3 pointAt(float t) const {
 		return start + dir() * t;
 	}
-	Vec3 lerp(float t) const {
+	Point3 lerp(float t) const {
 		return start + diff() * t;
 	}
 

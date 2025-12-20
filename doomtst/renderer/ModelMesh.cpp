@@ -28,7 +28,7 @@ handle.set_material("Model");
 handle.set_uniform(uniforms::uniform(CtxName::ctx.Ren->Textures.LoadTexture(locaion, name), "tex"));
 }
 
-Vec3 ModelMesh::nthvertex(size_t i)
+Point3 ModelMesh::nthvertex(size_t i)
 {
 	size_t ind = vertexindices[i] - 1;
 
@@ -59,7 +59,7 @@ ModelMesh ModelMeshName::loadmesh(const char* location,const char* name, Vec3 po
 		if (strcmp(header, "v") == 0) {
 			float c1 = 0, c2 = 0, c3 = 0;
 			meshfile.fscanf(3, "%f %f %f\n", &c1, &c2, &c3);
-			newmesh.vertices.push(Vec3(c1,c2,c3));
+			newmesh.vertices.push(Point3(c1,c2,c3));
 		}
 		if (strcmp(header, "vt") == 0) {
 			v2::Vec2 texcoord;
@@ -96,13 +96,13 @@ void ModelMeshName::rendermesh(ModelMesh& torender)
 //	CtxName::ctx.Ren->Bind_Texture(torender->tex);
 	
 	renderer::MeshData data=torender.handle.create_mesh(renderer::indice_mode::generate_indices);
-	v3::Vec3 pos = torender.transform.position;
+	v3::Point3 pos = torender.transform.position;
 	
 	torender.setmodeluniform();
 	torender.handle.set_uniform(uniforms::uniform(torender.color,"col"));
 	for (int i = 0; i < torender.vertexindices.length(); i++)
 	{
-		Vec3 vertex = torender.nthvertex(i);
+		Point3 vertex = torender.nthvertex(i);
 		v2::Vec2 Texture2D = torender.nthtex(i);
 		Texture2D.y= 1 - Texture2D.y;
 		data.add_point(vertex, Texture2D);

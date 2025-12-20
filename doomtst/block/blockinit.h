@@ -26,76 +26,70 @@ namespace blkinitname {
 
 	inline void blockinit(block* blk) {
 		///blk->bstate.broken = false;
-	switch (blk->id)
-		{
+		switch (blk->id) {
 		case minecraftair:
-			setdefault(blk);
-			break;
+		setdefault(blk);
+		break;
 		case minecrafttreestone:
-			treestoneinit(blk);
-			break;
+		treestoneinit(blk);
+		break;
 		case minecraftmoss:
-			mossinit(blk);
-			break;
+		mossinit(blk);
+		break;
 		case minecraftstone:
-			stoneinit(blk);
-			break;
+		stoneinit(blk);
+		break;
 		case minecraftglass:
-			glassinit(blk);
-			break;
+		glassinit(blk);
+		break;
 		case minecraftwater:
-			waterinit(blk);
-			break;
+		waterinit(blk);
+		break;
 		case minecraftcrystal:
-			crystalinit(blk);
-			break;
+		crystalinit(blk);
+		break;
 		case minecrafttorch:
-			torchinit(blk);
-			break;
+		torchinit(blk);
+		break;
 		case minecraftsand:
-			sandinit(blk);
-			break;
+		sandinit(blk);
+		break;
 		case minecraftcraftingtable:
-			tableinit(blk);
-			break;
+		tableinit(blk);
+		break;
 		case minecraftcrystaltorch:
-			crystaltorchinit(blk);
-			break;
+		crystaltorchinit(blk);
+		break;
 		case minecraftrope:
-			ropeinit(blk);
-			break;
+		ropeinit(blk);
+		break;
 		case minecraftlava:
-			lavainit(blk);
-			break;
+		lavainit(blk);
+		break;
 		case minecraftobsidian:
-			obsidianinit(blk);
-			break;
+		obsidianinit(blk);
+		break;
 		case minecraftchest:
-			chestinit(blk);
-			break;
+		chestinit(blk);
+		break;
 		case minecraftfurnace:
-			furnaceinit(blk);
-			break;
+		furnaceinit(blk);
+		break;
 		case minecraftironore:
-			ironinit(blk);
-			break;
+		ironinit(blk);
+		break;
 		case minecraftaltar:
-			altarinit(blk);
-			break;
+		altarinit(blk);
+		break;
 		case minecraftplank:
-			plankinit(blk);
-			break;
+		plankinit(blk);
+		break;
 		}
 
 	}
-	inline void genblock(block* blk, int blkid, Coord location, byte attachface, byte direction)  {
-
-		blk->create(location, blkid,Dir::Dir3d(attachface),Dir::Dir2d(direction));
-
-
+	inline void genblock(block* blk, int blkid, Coord location, byte attachface, byte direction) {
+		blk->create(location, blkid, Dir::Dir3d(attachface), Dir::Dir2d(direction));
 		blkinitname::blockinit(blk);
-
-
 	}
-	
+
 }

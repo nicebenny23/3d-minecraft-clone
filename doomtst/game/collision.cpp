@@ -63,20 +63,33 @@ voxtra::WorldRayCollision collision::raycastentity(ray nray, HitQuery query)
 	}
 	return closest;
 }
+struct collision_event {
+	template<ecs::ComponentType T>
+	bool source_has_component() const{
+		return source.has_component<T>();
+	}
+	template<ecs::ComponentType T>
+	T& source_get_component() const{
+		return source.get_component<T>();
+	}
+	template<ecs::ComponentType T>
+	bool target_has_component() {
+		return target.has_component<T>();
+	}
+	template<ecs::ComponentType T>
+	T& target_get_component() {
+		return target.get_component<T>();
+	}
+	//the target and source are abstrctions for dealing with events and for now each event wil lalso have a 
+	ecs::obj target;
+	ecs::obj source;
 
+	collision_event(ecs::obj o1, ecs::obj o2) :source(o1), target(o2) {
+	}
+};
 void propagatecollisionmessage(ecs::obj o1, ecs::obj o2) {
-
-	/*
-	for (ecs::component* comp : ::ComponentView(o1))
-	{
-		comp->oncollision(o2);
-	}
-	for (ecs::component* comp : query::ComponentView(o2))
-	{
-		comp->oncollision(o1);
-	}
-	*/
-
+	o1.world()->write_event<collision_event>(o1, o2);
+	o2.world()->write_event<collision_event>(o2, o1);
 }
 void moveobj(v3::Vec3 force, ecs::obj object) {
 
@@ -86,11 +99,6 @@ void moveobj(v3::Vec3 force, ecs::obj object) {
 	}
 	else
 	{
-		
-		if (.3f<force.length())
-		{
-			int l = 3;
-		}
 		object.get_component<ecs::transform_comp>().transform.position += force;
 	}
 }Vec3 colideentandblock(Collider& entity, block* tocollide, bool is_trigger) {
@@ -100,8 +108,8 @@ void moveobj(v3::Vec3 force, ecs::obj object) {
 		return zerov;
 	}
 	aabb::Collider& blockcol = tocollide->owner().get_component<aabb::Collider>();
-	Vec3 my = entity.globalbox().center;
-	Vec3 otherpos = blockcol.globalbox().center;
+	Point3 my = entity.globalbox().center;
+	Point3 otherpos = blockcol.globalbox().center;
 	Option<Vec3> force = aabb::collideaabb(entity, blockcol);
 	if (!force)
 	{
@@ -140,7 +148,7 @@ void distributeforce(ecs::obj p1, ecs::obj p2, Vec3 force) {
 	}
 	if (e2mass == 0)
 	{
-		moveobj(-1*force, p1);
+		moveobj(force*-1.0, p1);
 		moveobj(force, p1);
 
 		colideentandblock(p1.get_component<Collider>(), p2.get_component_ptr<block>(), false);

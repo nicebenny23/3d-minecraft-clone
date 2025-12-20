@@ -27,7 +27,7 @@
 #include "Core.h"
 #include "rigidbody.h"
 #include "../player/playermovment.h"
-#include "../game/System.h"
+
 #include "../game/entity.h"
 #include "../entities/entityspawner.h"
 #pragma once 
@@ -50,14 +50,9 @@ void startframe() {
 
 void updateworld() {
 	collision::update();
-	CtxName::ctx.OC->run_systems();
-	if (isnan(player::goblin.get_component<rigidbody>().velocity.x)) {
-		int l = 2;
-	}
-	gridutil::gridupdate();
-	if (isnan(player::goblin.get_component<rigidbody>().velocity.x)) {
-		int l = 2;
-	}
+	CtxName::ctx.Ecs->run_systems();
+
+
 }
 void update() {
 
@@ -89,8 +84,7 @@ void init() {
 
 	Core::game.CreateGrid();
 	player::initplayer();
-	gridutil::computeallcover();
-	gridutil::redolighting();
+	
 	CtxName::ctx.Inp->endupdate();
 
 	glfwSwapInterval(0);
@@ -102,13 +96,24 @@ void endgame() {
 	glfwTerminate();
 
 }
+struct block_renderer_plugin :Core::Plugin {
+	void Build(Core::Engine& engine) {
+
+		//mesh after the grid has been reloaded
+		engine.Ecs.emplace_system<blockrender::ChunkMesher>();
+		engine.Ecs.emplace_system<gridutil::GridCoverer>();
+		engine.Ecs.emplace_system<gridutil::GridLighter>();
+		engine.Ecs.emplace_system<gridutil::GridManager>();
+		//allow blocks to reload before changing grid
+	}
+};
 void rungame() {
 	init();
 
-	CtxName::ctx.OC->emplace_system<RigidbodySystem>();
-	CtxName::ctx.OC->emplace_system<spawn_mobs>();
-	CtxName::ctx.OC->emplace_system<PlayerMovementSys>();
-	// createslime(zerov+Vec3(0,10,0), false);
+	CtxName::ctx.Ecs->emplace_system<RigidbodySystem>();
+	CtxName::ctx.Ecs->emplace_system<spawn_mobs>();
+	CtxName::ctx.Ecs->emplace_system<PlayerMovementSys>();
+	Core::game.insert_plugin<block_renderer_plugin>();
 	float lastupdate = 0;
 	{
 

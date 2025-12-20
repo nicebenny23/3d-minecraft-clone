@@ -31,10 +31,10 @@ namespace camera {
 		}
 		return  cam->CamTransform;
 	}
-	v3::Vec3 campos() {
+	v3::Point3 campos() {
 
 		
-		return GetCam().position.glm();
+		return GetCam().position;
 
 	}
 	

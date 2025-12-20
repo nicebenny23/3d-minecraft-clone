@@ -30,9 +30,9 @@ array<navnode> getneighborslime(navnode& node)
                     continue;
                 }
                 //center of block
-                v3::Vec3 center = place + unitv / 2;
+				v3::Point3 center = place + unitv / 2;
 
-                v3::Vec3 scale = blockscale * v3::Vec3(.99f, .99f, .99f);
+                v3::Scale3 scale = blockscale *.99f;
                 //where we are now
                 geometry::Box bx = geometry::Box(node.center(), scale);
                 

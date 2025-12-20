@@ -4,23 +4,23 @@
 #include "../world/grid.h"
 #include"../world/voxeltraversal.h"
 #include "../renderer/blockrender.h"
-#include "../game/System.h"
+
 #include "../player/player.h"
 #pragma once 
 #define enemytag 1
-inline bool should_despawn(v3::Vec3 pos, v3::Vec3 player) {
+inline bool should_despawn(v3::Point3 pos, v3::Point3 player) {
 
 	return 24<v3::dist(pos, player);
 
 }
-inline bool spawnable_dist(v3::Vec3 pos, v3::Vec3 player) {
+inline bool spawnable_dist(v3::Point3 pos, v3::Point3 player) {
 
 	return !should_despawn(pos,player)&&8<v3::dist(pos, player);
 
 }
 
 struct spawn_mobs :ecs::System {
-	bool ensure_light_level(v3::Vec3 pos) {
+	bool ensure_light_level(v3::Point3 pos) {
 		blockname::block* blk = CtxName::ctx.Grid->getBlock(CtxName::ctx.Grid->getVoxel(pos));
 		if (!blk)
 		{
@@ -41,12 +41,12 @@ struct spawn_mobs :ecs::System {
 		{
 
 
-			stn::Option<Box> spawn_loc = voxtra::findground(unitv);
+			stn::Option<Box> spawn_loc = voxtra::findground(unit_scale);
 			if (!spawn_loc)
 			{
 				return stn::None;
 			}
-			v3::Vec3 pos = spawn_loc.unwrap().center;
+			v3::Point3 pos = spawn_loc.unwrap().center;
 			if (!ensure_light_level(pos))
 			{
 				continue;
@@ -94,7 +94,7 @@ struct spawn_mobs :ecs::System {
 					{
 						continue;
 					}
- 					createslime(spawn_loc.unwrap().center, false);
+ 					createslime(Coord(spawn_loc.unwrap().center), false);
 				}
 			}
 		}

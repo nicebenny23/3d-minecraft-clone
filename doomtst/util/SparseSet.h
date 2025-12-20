@@ -249,7 +249,18 @@ namespace Sparse {
 			if (!contains_key(key)) throw std::out_of_range("Key does not exist in KeySet");
 			return dense[sparse[key]];
 		}
-
+		Option<T&> get(size_t key) {
+			if (!contains_key(key)) {
+				return stn::None;
+			};
+			return stn::Option<T&>(dense[sparse[key]]);
+		}
+		Option<const T&> get(size_t key) const{
+			if (!contains_key(key)) {
+				return stn::None;
+			};
+			return stn::Option<const T&>(dense[sparse[key]]);
+		}
 		void erase_key(size_t key) {
 			if (!contains_key(key)) {
 				stn::throw_range_exception("Element  at key {} does not exist", key);

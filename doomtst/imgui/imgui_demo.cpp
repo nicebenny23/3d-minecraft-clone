@@ -925,7 +925,7 @@ static void ShowDemoWindowWidgets(ImGuiDemoWindowData* demo_data)
 
             IMGUI_DEMO_MARKER("Widgets/Basic/SliderAngle");
             static float angle = 0.0f;
-            ImGui::SliderAngle("slider angle", &angle);
+            ImGui::SliderAngle("slider Angle", &angle);
 
             // Using the format string to display a name instead of an integer.
             // Here we completely omit '%d' from the format string, so it'll only display a name.

@@ -18,9 +18,9 @@ noisemap::noisemap()
 float noisemap::Eval(Coord pos)
 {
 
-	return Eval(Vec3(pos));
+	return Eval(Point3(pos));
 }
-float noisemap::Eval(Vec3 pos)
+float noisemap::Eval(Point3 pos)
 {
 
 	return equalizer.apply_distribution((EvaluateNoiseAtPoint(pos+ NoiseOffset, properties)));
@@ -93,7 +93,7 @@ float interpolatenoisemap(float x, float y, float z)
 	
 }
 
-float EvaluateNoiseAtPoint(Vec3 point,noiseparams params)
+float EvaluateNoiseAtPoint(Point3 point,noiseparams params)
 {
 	float value = 0;
 	float maxintensity = 0;
@@ -102,7 +102,7 @@ float EvaluateNoiseAtPoint(Vec3 point,noiseparams params)
 	float scale = params.startscale;
 	for (int i = 0; i < params.octaves; i++)
 	{
-		Vec3 testpoint = point * scale;
+		Point3 testpoint = point * scale;
 		float toadd = intensity * interpolatenoisemap(testpoint.x, testpoint.y, testpoint.z);
 		value += toadd;
 		maxintensity += intensity;

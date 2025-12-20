@@ -3,6 +3,7 @@
 #include "../util/geometry.h"
 #include "../util/intersection.h"
 
+#include "../util/mutex.h"
 #include "../game/GameContext.h"
 #include <mutex>
 bool blockrender::enablelighting;
@@ -34,14 +35,14 @@ const float cubeuv[] = {
 bool chunkviewable(Chunk::chunk* chk) {
 	return true;
 	float slope = tan(CtxName::ctx.Ren->fov / 2);
-	geometry::Box chkb = geometry::Box(chk->center(), unitv * float( chunklength )/ 2.f);
+	geometry::Box chkb = geometry::Box(chk->center(), unit_scale * float( chunklength )/ 2.f);
 	ray camray = ray(camera::campos(), camera::campos() + camera::GetCamFront() * 1);
 	geometry::cone ncone = geometry::cone(camray, slope);
 	geometry::Plane pln = geometry::Plane(camera::GetCamFront(), camray.start);
 	bool srf = false;
 	for (int i = 0; i < 8; i++)
 	{
-		Vec3 vertex = chk->center() + (vert[i] - unitv / 2.f) *float( chunklength);
+		Point3 vertex = chk->center() + (vert[i] - unitv / 2.f) *float( chunklength);
 		if (dot(vertex - camera::campos(), camera::GetCamFront()) > 0) {
 
 			srf = true;
@@ -58,7 +59,7 @@ bool chunkviewable(Chunk::chunk* chk) {
 
 // Calculate UV coordinates for a face centered at the mesh
 v2::Vec2 facecoordtouv(const face* fce, int ind) {
-	const v3::Vec3& meshscale = fce->mesh->box.scale;
+	const v3::Scale3& meshscale = fce->mesh->box.scale;
 	int facetype = fce->facenum.ind() / 2;
 	v2::Vec2 offset;
 
@@ -98,12 +99,12 @@ const int indiceoffsetfrombaselocation[] = {
 };
 
 // Emit the vertices and indices for a single face of a block
-void emitface(const int face, block& torender, renderer::MeshData& mesh) {
+void emitface(const int face, const block& torender, renderer::MeshData& mesh) {
 		if (torender.mesh.faces[face].cover==cover_state::Uncovered) {
 			const int baselocation = mesh.length();
 			const int* uniqueInds = &uniqueindices[4 * face];
-			const Vec3& scale = torender.mesh.box.scale;
-			const Vec3& position = torender.mesh.box.center;
+			Scale3 scale = torender.scale();
+			Point3 position = torender.center();
 
 			// Precompute texture number and lighting
 			const int textureNumber = torender.mesh[face].tex;
@@ -114,15 +115,14 @@ void emitface(const int face, block& torender, renderer::MeshData& mesh) {
 			for (int j = 0; j < 4; j++) {
 				int uniqueind = uniqueInds[j];
 				Vec3 offsetfromcenter = (vert[uniqueind] - unitv / 2) * scale * 2;
-				Vec3 offset = position + offsetfromcenter;
+				Point3 offset = position + offsetfromcenter;
 
 				// Calculate UV coordinates
-				v2::Vec2 coords = facecoordtouv(&torender[face], j);
+				v2::Vec2 coords = facecoordtouv(&torender.mesh[face], j);
 
 				// Fill vertex data
 				mesh.add_point(offset,coords,textureNumber,lightValue);
-				//mesh.pointlist.push(offset.x, offset.y, offset.z, coords.x, coords.y, textureNumber, lightValue);
-
+				
 			}
 
 			
@@ -144,42 +144,50 @@ void emitblock(block& torender, renderer::MeshData& mesh) {
 }
 
 // Recreate the mesh for a chunk
-void recreatechunkmesh(Chunk::chunk* aschunk,std::mutex& fill_lock) {
+void recreatechunkmesh(Chunk::chunk& chunk_to_fill,std::mutex& fill_lock) {
 	
-	aschunk->mesh->facebuf.clear();//g
-	aschunk->mesh->facebuf = stn::array<face>();//g
-	renderer::MeshData mesh= aschunk->mesh->SolidGeo.create_mesh();
-	
+	chunk_to_fill.mesh->facebuf.clear();
+	renderer::MeshData mesh= chunk_to_fill.mesh->SolidGeo.create_mesh();
 	for (int ind = 0; ind < chunksize; ind++) {
-		block& blockatpos = (aschunk->blockbuf[ind].get_component<block>());//g
+		block& blockatpos = (chunk_to_fill.blockbuf[ind].get_component_unchecked<block>());//g
 		
 		if (!blockatpos.attributes.transparent) {
 			emitblock(blockatpos, mesh);//g
 			continue;
 		}
-		
-		if (blockatpos.id == minecraftair) {
-			
+		else {
+			if (blockatpos.id == minecraftair) {
 				continue;
+			}
+			for (int x = 0; x < 6; x++) {
+				if (blockatpos.mesh[x].uncovered()) {
+					chunk_to_fill.mesh->facebuf.push(blockatpos.mesh[x]);
+				}
+			}
 		}
-
-
-		for (int x = 0; x < 6; x++) {
-					if ((blockatpos.mesh)[x].cover==cover_state::Uncovered) {
-						aschunk->mesh->facebuf.push((blockatpos.mesh)[x]);
-					}
-		}
-		
 	}
-	
 	{
 		std::unique_lock lck(fill_lock);
+		chunk_to_fill.mesh->SolidGeo.fill(std::move(mesh));
+	}
+}
+	void blockrender::ChunkMesher::run(ecs::Ecs& ecs) {
+		grid::Grid& world_grid = ecs.get_resource<grid::Grid>().unwrap();
+		std::mutex fill_mutex;
+		auto recompute_for = [&fill_mutex](Chunk::chunk* item) {
+			if (item) {
 
-		aschunk->mesh->SolidGeo.fill(std::move(mesh));
+				item->mesh->recreate_mesh.clean([&item, &fill_mutex]() {
+					recreatechunkmesh(*item, fill_mutex);
+					});
+			}
+			};
+
+		thread_util::par_iter(world_grid.chunklist.begin(), world_grid.chunklist.end(), recompute_for, 4);
+		CtxName::ctx.Ren->pop();
 	}
 
-	aschunk->mesh->meshrecreateneeded = false;
-}
+
 
 // Render a chunk mesh
 void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
@@ -187,7 +195,7 @@ void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 		mesh.SolidGeo.render();
 	}
 	else {
-		// Enable 2D render
+		mesh.sortbuf();
 		renderer::MeshData mesh_data=mesh.TransparentGeo.create_mesh();
 		for (int i = 0; i < mesh.facebuf.length(); i++) {
 			emitface(mesh.facebuf[i].facenum.ind(), *(mesh.facebuf[i].mesh->blk), mesh_data);
@@ -203,10 +211,7 @@ void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 
 // Initialize the data buffer and render chunks
 void blockrender::renderblocks(bool rendertransparent) {
-	//CtxName::ctx.Ren->context.Bind(CtxName::ctx.Ren->Shaders["BlockShader"]);
-
 	array<Chunk::chunk*> tosort = array<Chunk::chunk*>();
-
 	for (int i = 0; i < CtxName::ctx.Grid->totalChunks; i++) {
 		if (CtxName::ctx.GridRef()[i]==nullptr)
 		{
@@ -216,45 +221,19 @@ void blockrender::renderblocks(bool rendertransparent) {
 			tosort.push((CtxName::ctx.GridRef()[i]));
 		}
 	}
-	std::mutex fill_mutex;
-
-	auto func = [&fill_mutex](Chunk::chunk*& item) {
-		
-		if (item->mesh->meshrecreateneeded) {
-			recreatechunkmesh(item, fill_mutex);  // or just recreatechunkmesh(item);
-		}
-		item->mesh->sortbuf();
-		};
-	
-	//thread_util::par_iter(tosort.begin(), tosort.end(), func, 4);
-	for (auto& elem:tosort)
-	{
-		func(elem);
-	}
-	CtxName::ctx.Ren->pop();
-	
 	if (tosort.length() != 0)
 	{
-
 		std::stable_sort(tosort.begin(), tosort.end(), [](Chunk::chunk* a, Chunk::chunk* b) {
 			return (*a) < (*b);
-			});
+		});
 	}	
-		int renderamt = 0;
-		for (int i = 0; i < tosort.length(); i++) {
-		
-				renderamt++;
-				renderchunk(*tosort[i]->mesh, false);
-			
-		}
- 		
-	
-	
-		for (int i = 0; i < tosort.length(); i++) {
-		
-				renderchunk(*tosort[i]->mesh, true);
-			
-		}
+	for (int i = 0; i < tosort.length(); i++) {
+			renderchunk(*tosort[i]->mesh, false);		
+	}
+ 	
+	for (int i = 0; i < tosort.length(); i++) {
+			renderchunk(*tosort[i]->mesh, true);
+	}
 	
 }
 struct bind_block_texture {};

@@ -4,7 +4,6 @@
 #include "../util/userinput.h"
 #include "../util/time.h"
 #include "entity.h"
-#include "System.h"
 #pragma once
 
 
@@ -31,14 +30,14 @@ namespace CtxName {
 			Window = nullptr;
 			Grid = nullptr;
 			Time = nullptr;
-			OC = nullptr;
+			Ecs = nullptr;
 			wrld = nullptr;
 		}
 		World::world* wrld;
 		userinput::InputManager* Inp;
 		window::Window* Window;
 		timename::TimeManager* Time;
-		ecs::Ecs* OC;
+		ecs::Ecs* Ecs;
 
 		renderer::Renderer* Ren;
 		

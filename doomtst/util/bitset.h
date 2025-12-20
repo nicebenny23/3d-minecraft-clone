@@ -33,7 +33,9 @@ namespace stn {
         inline bool contains_index(size_t index) const {
             return index < bits;
         }
-
+		inline bool contains(size_t index) const {
+			return index < bits&&unchecked_at(index);
+		}
         bitset(size_t initial_zeros) noexcept :bits(initial_zeros) {
             bitlist.expand(bits_to_words(initial_zeros));
         };
@@ -95,7 +97,7 @@ namespace stn {
             return inds;
         }
         ~bitset() {
-            bits = 0;
+
         }
         //zero initilizes and expands
         void expand(size_t new_bit_count) {
@@ -160,7 +162,9 @@ namespace stn {
             bitlist[idx] ^= (bit_at(off));
         }
 
-
+		bool unchecked_at(size_t bit) const {
+			return (bitlist.unchecked_at(calc_full_words(bit))>> calc_leftover_bits(bit)) & 1;
+		}
         bool operator[](size_t bit) const {
             if (!contains_index(bit)) {
                 stn::throw_range_exception("operator[] failed: index {} out of bounds (len {})", bit, bits);
@@ -279,7 +283,10 @@ namespace stn {
         bool matches_any(const bitset& oth) const {
             return this->matches(oth) != 0;
         }
-
+		void clear() {
+			bitlist.clear();
+			bits = 0;
+		}
     private:
         //trims the unused bits
         void mask_end() {

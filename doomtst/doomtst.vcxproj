@@ -60,7 +60,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableASAN>true</EnableASAN>
+    <EnableASAN>false</EnableASAN>
     <EnableFuzzer>false</EnableFuzzer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|x64'" Label="Configuration">
@@ -236,6 +236,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="block\blockinit.cpp" />
     <ClCompile Include="block\liquid.cpp" />
     <ClCompile Include="debugger\console.cpp" />
     <ClCompile Include="debugger\debug.cpp" />
@@ -297,7 +298,6 @@
     <ClCompile Include="world\chunk.cpp" />
     <ClCompile Include="renderer\chunkrender.cpp" />
     <ClCompile Include="game\collision.cpp" />
-    <ClCompile Include="game\gameobject.cpp" />
     <ClCompile Include="external\glad.c" />
     <ClCompile Include="world\grid.cpp" />
     <ClCompile Include="renderer\renderer.cpp" />
@@ -347,6 +347,7 @@
     <ClInclude Include="game\compid.h" />
     <ClInclude Include="game\ecs\archtype.h" />
     <ClInclude Include="game\ecs\commands.h" />
+    <ClInclude Include="game\ecs\component_pages.h" />
     <ClInclude Include="game\ecs\ecs_commands.h" />
     <ClInclude Include="game\ecs\component.h" />
     <ClInclude Include="game\ecs\component_id.h" />
@@ -374,8 +375,6 @@
     <ClInclude Include="game\relationship.h" />
     <ClInclude Include="game\Settings.h" />
     <ClInclude Include="game\spawn.h" />
-    <ClInclude Include="game\System.h" />
-    <ClInclude Include="game\table.h" />
     <ClInclude Include="game\TagIndex.h" />
     <ClInclude Include="game\transform.h" />
     <ClInclude Include="game\world_commands.h" />
@@ -435,6 +434,8 @@
     <ClInclude Include="items\stoneitem.h" />
     <ClInclude Include="items\sworditem.h" />
     <ClInclude Include="items\torchitem.h" />
+    <ClInclude Include="math.h\angle.h" />
+    <ClInclude Include="math.h\Scale3.h" />
     <ClInclude Include="player\playermovment.h" />
     <ClInclude Include="renderer\decal.h" />
     <ClInclude Include="renderer\renderer\GlUtil.h" />
@@ -487,6 +488,7 @@
     <ClInclude Include="util\deque.h" />
     <ClInclude Include="util\dir.h" />
     <ClInclude Include="util\dynamicarray.h" />
+    <ClInclude Include="game\dynpool.h" />
     <ClInclude Include="util\dynpool.h" />
     <ClInclude Include="util\erased.h" />
     <ClInclude Include="util\exception.h" />
@@ -508,6 +510,7 @@
     <ClInclude Include="util\memorypool.h" />
     <ClInclude Include="renderer\renderer\Vao.h" />
     <ClInclude Include="util\messages.h" />
+    <ClInclude Include="util\mutex.h" />
     <ClInclude Include="util\Not.h" />
     <ClInclude Include="util\Option.h" />
     <ClInclude Include="util\pair.h" />
@@ -547,7 +550,6 @@
     <ClInclude Include="world\chunk.h" />
     <ClInclude Include="renderer\chunkrender.h" />
     <ClInclude Include="game\collision.h" />
-    <ClInclude Include="game\gameobject.h" />
     <ClInclude Include="world\grid.h" />
     <ClInclude Include="world\noise.h" />
     <ClInclude Include="game\objecthelper.h" />
@@ -577,7 +579,6 @@
     <None Include="shaders\uifragment.vs" />
     <None Include="shaders\uivertex.vs" />
     <None Include="shaders\vert1.vs" />
-    <None Include="util\async" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

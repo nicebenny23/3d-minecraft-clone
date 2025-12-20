@@ -273,6 +273,7 @@ inline int blockidfromitemid(item* itm) {
 	case playertpsword:
 		return tpswordblockid;
 	default:
+
 		break;
 	}
 

@@ -40,6 +40,9 @@ namespace renderer {
 		Mesh& operator[](mesh_id key) {
 			return meshes[key.get()];
 		}
+		Option<Mesh&> get(mesh_id key) {
+			return meshes.get(key.get());
+		}
 
 	};
 }

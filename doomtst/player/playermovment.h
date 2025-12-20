@@ -5,7 +5,6 @@
 #include "../util/time.h"
 #include "../game/rigidbody.h"
 #include "../world/voxeltraversal.h"
-#include "../game/System.h"
 #include "../game/entitystate.h"
 #include "playerclimb.h"
 
@@ -124,7 +123,7 @@ struct PlayerMovementSys : ecs::System
                 {
                     body.velocity.y -= effSpeed;
                 }
-          //    body.owner().get_component<ecs::transform_comp>().transform.position += Vec3(16, 0, 0); 
+				body.owner().get_component<ecs::transform_comp>().transform.position += Vec3(2, 0, 0); 
                 
             }
         }

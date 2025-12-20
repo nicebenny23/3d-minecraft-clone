@@ -1,8 +1,9 @@
 #include "archtype.h"
 #include "entities.h"
-
+#include "component_pages.h"
 #include "../../util/dynpool.h"
 #include "component_id.h"
+#include "../../util/exception.h"
 #pragma once
 namespace ecs {
 	struct obj;
@@ -32,7 +33,7 @@ namespace ecs {
 	private:
 		Ecs* ecs;
 		component_id comp_id;
-		space_id ent;
+		entity ent;
 		friend struct component_storage;
 		friend struct component_type;
 	};
@@ -51,50 +52,50 @@ namespace ecs {
 		template<ComponentType T>
 		component_storage(std::type_identity<T> type_identity) :
 			pool(stn::flux(std::type_identity<T>())),
-			store(stn::array<stn::flux_token<component>>())
+			store()
 		{
 
 		}
-		component& operator[](space_id space_id) {
-			return store[space_id.id()].get_unchecked();
+		component& operator[](entity entity) {
+			return store.unchecked_at(entity.id()).get_unchecked();
 		}
-		const component& operator[](space_id space_id) const {
-			return store[space_id.id()].get_unchecked();
-		}
-		template<ComponentType T>
-		T& get_as_unchecked(space_id space_id) {
-			return store[space_id.id()].get_unchecked_as<T>();
+		const component& operator[](entity entity) const {
+			return store.unchecked_at(entity.id()).get_unchecked();
 		}
 		template<ComponentType T>
-		const T& get_as_unchecked(space_id space_id) const{
-			return store[space_id.id()].get_unchecked_as<T>();
+		T& get_as_unchecked(entity entity) {
+			return store.unchecked_at(entity.id()).get_unchecked_as<T>();
 		}
-		bool has(space_id ent) const {
-			return store.contains_index(ent.id()) && store[ent.id()];
+		template<ComponentType T>
+		const T& get_as_unchecked(entity entity) const{
+			return store.unchecked_at(entity.id()).get_unchecked_as<T>();
+		}
+		bool has(entity ent) const {
+			return store.contains(ent.id());
 		}
 		template<typename T, typename... Args>
-		T& emplace_unchecked(space_id ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
+		T& emplace_unchecked(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
 			// Direct initialization to satisfy MSVC parsing rules
 			stn::flux_token<T> token(pool.template emplace_unchecked<T>(std::forward<Args>(args)...));
 
 			T& ref = token.get_unchecked();
 
 			// Add 'template' keyword for member template call
-			store.reach(ent.id()) = token.template abstract<component>();
+			store.insert_at(ent.id(),token.template abstract<component>());
 
 			return ref;
 		}
 		template<typename T, typename...Args>
-		T& emplace(space_id ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
+		T& emplace(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
 			if (has(ent))
 			{
 				throw std::logic_error("emplace<T> cannot overwrite an existing component");
 			}
 			return this->template emplace_unchecked<T>(ent,std::forward<Args>(args)...);
 		}
-		void remove_at(space_id space_id) {
-			store[space_id.id()].get_unchecked().destroy_hook();
-			store[space_id.id()].release();
+		void remove_at(entity entity) {
+			store[entity.id()].get_unchecked().destroy_hook();
+			store.remove_at(entity.id());
 		}
 		void clear() {
 			store.clear();
@@ -118,7 +119,7 @@ namespace ecs {
 			clear();
 		}
 	private:
-		stn::array<stn::flux_token<component>> store;
+		component_pages<stn::flux_token<component>,10> store;
 		stn::flux pool;
 	};
 	//component concept
@@ -142,22 +143,22 @@ namespace ecs {
 		component_storage& storage() {
 			return store;
 		}
-		component& operator[](space_id space_id) {
-			return store[space_id];
+		component& operator[](entity entity) {
+			return store[entity];
 		}
-		const component& operator[](space_id space_id) const {
-			return store[space_id];
-		}
-		template<ComponentType T>
-		T& get_as_unchecked(space_id space_id) {
-			return store.get_as_unchecked<T>(space_id);
+		const component& operator[](entity entity) const {
+			return store[entity];
 		}
 		template<ComponentType T>
-		const T& get_as_unchecked(space_id space_id) const{
-			return store.get_as_unchecked<T>(space_id);
+		T& get_as_unchecked(entity entity) {
+			return store.get_as_unchecked<T>(entity);
+		}
+		template<ComponentType T>
+		const T& get_as_unchecked(entity entity) const{
+			return store.get_as_unchecked<T>(entity);
 		}
 		template<ComponentType T,typename...Args>
-		T& emplace(space_id ent,Args&&... args)  requires std::constructible_from<T, Args&&...> {
+		T& emplace(entity ent,Args&&... args)  requires std::constructible_from<T, Args&&...> {
 			T& comp = store.emplace<T>(ent,std::forward<Args>(args)...);
 			comp.comp_id = id();
 			comp.ent= ent;
@@ -165,7 +166,7 @@ namespace ecs {
 			comp.start();
 			return comp;
 		}
-		bool has(space_id owner) const{
+		bool has(entity owner) const{
 			return store.has(owner);
 		}
 		void inject_ecs_instance(Ecs* instance) {
@@ -182,6 +183,10 @@ namespace ecs {
 		template<ComponentType T>
 		inline component_id get_id() const{
 			return component_indexer.get<T>();
+		}
+		template<ComponentType T>
+		inline component_id get_id_unchecked() const {
+			return component_indexer.get_unchecked<T>();
 		}
 		//for later
 		template<ComponentType ...Types>
@@ -217,34 +222,45 @@ namespace ecs {
 		const component_type& operator[](component_id id) const {
 			return component_list[id.id];
 		}
+		component_type& unchecked_at(component_id id) {
+			return component_list.unchecked_at(id.id);
+		}
+		const component_type& unchecked_at(component_id id) const {
+			return component_list.unchecked_at(id.id);
+		}
 		template<ComponentType T,typename ...Args>
-		T& emplace(space_id id, Args&&... args) requires std::constructible_from<T, Args&&...> {
+		T& emplace(entity id, Args&&... args) requires std::constructible_from<T, Args&&...> {
 			component_id comp_id = insert_id<T>();
 			return (*this)[comp_id].emplace<T>(id,std::forward<Args>(args)...);
 		}
 
-		bool has_component(space_id object,component_id id) const {
+		bool has_component(entity object,component_id id) const {
 			return (*this)[id].has(object);
 		}
 		template<ComponentType T>
-		bool has_component(space_id object) const{
+		bool has_component(entity object) const{
 			return has_component(object, get_id<T>());
 		}
 		template<ComponentType T> 
-		T& get_component(space_id space_id){
-			component_type& comp_type= (*this)[get_id<T>()];
-			if (!comp_type.has(space_id))
+		T& get_component(entity entity){
+			component_type& comp_type= unchecked_at(get_id<T>());
+			if (!comp_type.has(entity))
 			{
 				stn::throw_logic_error("object does not have specified component");
 			}
-			return comp_type.get_as_unchecked<T>(space_id);
+			return comp_type.get_as_unchecked<T>(entity);
 		}
 		template<ComponentType T>
-		const T& get_component(space_id space_id)const {
+		T& get_component_unchecked(entity entity){
+			return unchecked_at(get_id_unchecked<T>()).get_as_unchecked<T>(entity);
+			
+		}
+		template<ComponentType T>
+		const T& get_component(entity entity)const {
 			component_type& comp_type = (*this)[get_id<T>()];
-			if (comp_type.has(space_id))
+			if (comp_type.has(entity))
 			{
-				return comp_type.get_as_unchecked<T>(space_id);
+				return comp_type.get_as_unchecked<T>(entity);
 			}
 			else
 			{

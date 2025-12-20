@@ -2,7 +2,7 @@
 #include "../renderer/uibox.h"
 #include "../renderer/textrender.h"
 
-#include "../game/System.h"
+
 #pragma once
 
 struct item_ui :ecs::component{

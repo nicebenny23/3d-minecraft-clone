@@ -96,6 +96,7 @@ namespace stn {
 
     template<typename T>
     struct typed_index {
+		using count_type = typed_count<T>;
         uint32_t index;
         //tag inheritance operator
         template<typename Base>
@@ -112,6 +113,9 @@ namespace stn {
         constexpr typed_index operator++(int) noexcept { auto tmp = *this; ++(*this); return tmp; }
 
         constexpr typed_index& operator--() {
+			if (index==0) {
+				stn::throw_range_exception("typed_index<{}>: decrement below zero", typeid(T).name());
+			}
             --index;
             return *this;
         }
@@ -129,20 +133,20 @@ namespace stn {
             return *this;
         }
         
-        constexpr typed_count<T> operator-(const typed_index& other) const noexcept {
-            if (other.index> index) {
+        constexpr count_type operator-(const typed_index& other) const noexcept {
+            if (index<other.index) {
                 stn::throw_range_exception("typed_index<{}>: cannot subtract index {} from {}", typeid(T).name(), other.index, index);
             }
-            return typed_count(index - other.index);
+            return count_type(index - other.index);
         }
-        constexpr typed_index<T> operator-(typed_count<T> cnt) const noexcept {
-            if (cnt.count > index) {
+        constexpr typed_index operator-(count_type cnt) const noexcept {
+            if (index<cnt.count) {
                 stn::throw_range_exception("typed_index<{}>: cannot subtract count {} from {}", typeid(T).name(), cnt.count, index);
             }
             return typed_index(index - cnt.count);
         }
-        constexpr typed_index& operator-=(const typed_count<T>& cnt) noexcept {
-            if (cnt.count > index) {
+        constexpr typed_index& operator-=(const count_type& cnt) noexcept {
+            if (index<cnt.count ) {
                 stn::throw_range_exception("typed_index<{}>: cannot subtract count {} from {}", typeid(T).name(), cnt.count, index);
             }
             index -= cnt.count;

@@ -14,7 +14,7 @@ namespace voxtra {
 		aabb::Collider& collider;
 		geointersect::RayHit Hit;
 		RayWorldHit(geointersect::RayHit rayHit, aabb::Collider& WorldCollider) :Hit(rayHit),collider(WorldCollider){}
-		Vec3 intersection() const {
+		Point3 intersection() const {
 			return Hit.intersectionpoint;
 		}
 		
@@ -41,14 +41,14 @@ namespace voxtra {
 	WorldRayCollision travvox(ray nray, GridTraverseMode trav = countnormal);
 	block* findprevblock(ray nray, GridTraverseMode trav = countnormal);
 
-	inline stn::Option<geometry::Box> findemptyspace(v3::Vec3 scale) {
+	inline stn::Option<geometry::Box> findemptyspace(v3::Scale3 scale) {
 		size_t max_tst = 40;
 		for (size_t tst = 0; tst < max_tst; tst++)
 		{
 			double ranx = (random() - .5) * 2;
 			double rany = (random() - .5) * 2;
 			double ranz = (random() - .5) * 2;
-			v3::Vec3 test_pos = (Vec3(ranx, rany, ranz) * (2 * CtxName::ctx.Grid->rad + 1) / 2 + CtxName::ctx.Grid->gridpos) * chunkaxis;
+			v3::Point3 test_pos = (Vec3(ranx, rany, ranz) * (2 * CtxName::ctx.Grid->rad + 1) / 2 + CtxName::ctx.Grid->gridpos) * chunkaxis;
 			geometry::Box test_box = geometry::Box(test_pos,scale);
 			if (!Boxcollwithgrid(test_box))
 			{
@@ -58,7 +58,7 @@ namespace voxtra {
 
 		return stn::None;
 	}
-	inline stn::Option<geometry::Box> findground(v3::Vec3 scale) {
+	inline stn::Option<geometry::Box> findground(v3::Scale3 scale) {
 		size_t max_checks = 100;
 		for (size_t checks = 0; checks < max_checks; checks++)
 		{
@@ -69,7 +69,7 @@ namespace voxtra {
 			{
 				continue;
 			}
-			geometry::Box ground_tst_box = geometry::Box(test_box.unwrap().center - Vec3(0, scale.y, 0), v3::Vec3(scale.x, .1f, scale.z));;
+			geometry::Box ground_tst_box = geometry::Box(test_box.unwrap().center - Vec3(0, scale.y, 0), v3::Scale3(scale.x, .1f, scale.z));;
 		
 			if (Boxcollwithgrid(ground_tst_box))
 			{

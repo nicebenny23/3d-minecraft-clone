@@ -15,22 +15,13 @@
 #include "renderer/RenderContext.h"
 #include "renderer/vertex.h"
 #include "renderer/renderables.h"
+#include "../game/ecs/resources.h"
 #include "../util/Id.h"
 using namespace buffer_object;
 //Fix
 
 namespace renderer {
-	struct Renderer;
 	
-	inline array<unsigned int> trivial_buffer(vertice::vertex& layout, stn::array<float>& points) {
-		array<unsigned int> trivial;
-		size_t vertices = points.length() / layout.stride();
-		for (size_t i = 0; i < vertices; i++)
-		{
-			trivial.push(i);
-		}
-		return trivial;
-	}
 	enum class indice_mode {
 		generate_indices = 0,
 		manual_generate = 1,
@@ -74,11 +65,10 @@ namespace renderer {
 		mesh_id mesh;
 		indice_mode generate_trivial;
 		vertice::vertex layout;
-		friend Renderer;
 		stn::array<float> pointlist;
 		stn::array<unsigned int> indicelist;
 	private:
-		inline void push_single(const v3::Vec3& v) {
+		inline void push_single(const v3::Point3& v) {
 			pointlist.push({ float(v.x),float(v.y),float(v.z) });
 		}
 		inline void push_single(const v2::Vec2& v) {
@@ -88,13 +78,9 @@ namespace renderer {
 			pointlist.push(f);
 		}
 	};
+	struct Renderer;
 	struct RenderableHandle {
-		Option<renderable_id> id;
-		Renderer* renderer;
-		RenderableHandle():id(),renderer() {
-
-
-		}
+		RenderableHandle():id(),renderer() {}
 		RenderableHandle(renderable_id id, Renderer* renderer)
 			: id(id), renderer(renderer) {
 		}
@@ -108,9 +94,10 @@ namespace renderer {
 		void set_uniform(const uniforms::uniform& u);
 		
 		void render();
-		void disable();
 
 		void enable();
+		void disable();
+
 		void destroy();
 		bool operator==(const RenderableHandle& other) const{
 			return other.id == id && other.renderer == renderer;
@@ -119,11 +106,14 @@ namespace renderer {
 		explicit operator bool() const noexcept {
 			return static_cast<bool>(id);
 		}
+	private:
+		Option<renderable_id> id;
+		Renderer* renderer;
+
 	};
-	struct Renderer {
+	struct Renderer: ecs::resource {
 
 		Renderer();
-		void InitilizeBaseMaterials();
 
 		renderer::Shaders Shaders;
 		TextureManager Textures;
@@ -235,9 +225,13 @@ namespace renderer {
 			to_fill.push(std::move(mesh));
 		}
 		void fill_mesh(MeshData& data) {
-
+			
 			data.mesh.assert_bounded("mesh must be bounded to be filled");
-			Mesh& mesh = meshes[data.mesh];
+			Option<Mesh&> mabye_mesh = meshes.get(data.mesh);
+			if (!mabye_mesh) {
+				return;
+			}
+			Mesh& mesh = mabye_mesh.expect("Since we just checked the mesh must now exist");
 			if (data.pointlist.length() % mesh.Voa.attributes.components() != 0)
 			{
 				throw std::logic_error("Vertex Data is corrupted");

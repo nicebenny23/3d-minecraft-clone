@@ -11,7 +11,7 @@ return wrap_to_range(a,0,360);
 }
 struct CameraComp : ecs::component
 {
-	CameraComp():CamTransform(zerov,0,0,unitv) {
+	CameraComp():CamTransform(Point3(0,0,0), 0, 0, unit_scale) {
 
 		//utype = ecs::updaterender;
 	}

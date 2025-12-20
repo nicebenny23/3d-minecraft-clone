@@ -4,8 +4,8 @@
 #include "List.h"
 namespace Dir {
 
-	enum class Ind3d:char {
-		Right= 0,
+	enum class Ind3d :char {
+		Right = 0,
 		Left = 1,
 		Up = 2,
 		Down = 3,
@@ -15,59 +15,87 @@ namespace Dir {
 	};
 
 
-	
+
 	struct Dir3d {
-	
+
 	private:
 		Ind3d dir;
-	
+
 	public:
 		// Direction constants
-		constexpr Dir3d():dir(Ind3d::None) {
+		constexpr Dir3d() :dir(Ind3d::None) {
 		}
 
 		// Constructor
-		constexpr Dir3d(Ind3d d) noexcept : dir((d)) {}
+		constexpr Dir3d(Ind3d d) noexcept : dir((d)) {
+		}
 		explicit Dir3d(char direction) {
-			if (direction>=static_cast<char>(Ind3d::None)) {
-				throw std::invalid_argument("Invalid Dir3d: " +((int)direction));
+			if (direction >= static_cast<char>(Ind3d::None)) {
+				throw std::invalid_argument("Invalid Dir3d: " + ((int)direction));
 			}
 			dir = static_cast<Ind3d>(direction);
 		}
-		constexpr char ind() const  {
-			if (dir ==Ind3d::None) {
+		constexpr char ind() const {
+			if (dir == Ind3d::None) {
 				throw std::logic_error("Invalid dir");
-			
+
 			}
 			return static_cast<char>(dir);
 		}
+		constexpr size_t axis_index() const {
+			if (dir == Ind3d::None) {
+				throw std::logic_error("Invalid dir");
+
+			}
+			return static_cast<char>(dir)/2;
+		}
 		// Inverse direction
-		 Dir3d Inv() const  {
+		Dir3d Inv() const {
 			if (dir == Ind3d::None) {
 				throw std::invalid_argument("Attempted to access invalid direction ");
 			}
-				return Dir3d(static_cast<Ind3d>(static_cast<char>(dir) ^ 1)); // Swaps 0↔1, 2↔3, 4↔5
-			}
+			return Dir3d(static_cast<Ind3d>(static_cast<char>(dir) ^ 1)); // Swaps 0↔1, 2↔3, 4↔5
+		}
 
 		// Convert to vector
-		v3::Coord ToVec() const {
-			switch (dir)
-			{
+		v3::Coord to_coord() const {
+			switch (dir) {
 			case Ind3d::Right:
-				return  v3::RightCoord;//right
+			return  v3::RightCoord;//right
 			case Ind3d::Left:
-				return v3::LeftCoord;//left
+			return v3::LeftCoord;//left
 			case Ind3d::Up:
-				return v3::UpCoord;//north
+			return v3::UpCoord;//north
 			case Ind3d::Down:
-				return v3::DownCoord;//south
+			return v3::DownCoord;//south
 			case Ind3d::Front:
-				return v3::FrontCoord;//front
+			return v3::FrontCoord;//front
 			case Ind3d::Back:
-				return v3::BackCoord;//back
-			 default:
-				throw std::invalid_argument("Attempted to access invalid direction");
-				break;
+			return v3::BackCoord;//back
+			default:
+			throw std::invalid_argument("Attempted to access invalid direction");
+			break;
+
+
+			}
+		}
+		v3::Vec3 to_vec() const {
+			switch (dir) {
+			case Ind3d::Right:
+			return  v3::right;//right
+			case Ind3d::Left:
+			return v3::left;//left
+			case Ind3d::Up:
+			return v3::up;//north
+			case Ind3d::Down:
+			return v3::down;//south
+			case Ind3d::Front:
+			return v3::forward;//front
+			case Ind3d::Back:
+			return v3::back;//back
+			default:
+			throw std::invalid_argument("Attempted to access invalid direction");
+			break;
 
 
 			}
@@ -87,43 +115,38 @@ namespace Dir {
 	static constexpr Dir3d front3d = Dir3d(Ind3d::Front);  // (0, 0, 1)
 	static constexpr Dir3d  back3d = Dir3d(Ind3d::Back);   // (0, 0, -1)
 	static constexpr Dir3d  None3d = Dir3d(Ind3d::None);   // (0, 0, -1)
-	static constexpr  stn::List<Dir3d, 6> Directions3d= { right3d,left3d,up3d,down3d,front3d,back3d };
+	static constexpr  stn::List<Dir3d, 6> Directions3d = { right3d,left3d,up3d,down3d,front3d,back3d };
 	inline Dir3d Align(v3::Vec3 point) {
 
 
 		double max = Max(abs(point.x), abs(point.y), abs(point.z));
 		int ind = 0;
-		if (abs(point.x) == max)
-		{
+		if (abs(point.x) == max) {
 			ind = ((1 - sign(point.x)) / 2);
 		}
-		if (abs(point.y) == max)
-		{
+		if (abs(point.y) == max) {
 			ind = (2 + ((1 - sign(point.y)) / 2));
 		}
-		if (abs(point.z) == max)
-		{
+		if (abs(point.z) == max) {
 			ind = 4 + ((1 - sign(point.z)) / 2);
 		}
 		return Dir3d(static_cast<char>(ind));
 	}
-	
+
 	inline int max2ddirection(v3::Vec3 point) {
 
 
 		double max = Max(abs(point.x), abs(point.z));
-		if (abs(point.x) == max)
-		{
+		if (abs(point.x) == max) {
 			return (1 - sign(point.x)) / 2;
 		}
 
-		if (abs(point.z) == max)
-		{
+		if (abs(point.z) == max) {
 			return 2 + (1 - sign(point.z)) / 2;
 		}
 		throw std::logic_error("work");
 	}
-	
+
 	enum class Ind2d : char {
 		Right = 0,
 		Left = 1,
@@ -138,10 +161,12 @@ namespace Dir {
 
 	public:
 		// Default constructor (None)
-		constexpr Dir2d() : dir(Ind2d::None) {}
+		constexpr Dir2d() : dir(Ind2d::None) {
+		}
 
 		// Constructor from enum
-		constexpr Dir2d(Ind2d d) noexcept : dir(d) {}
+		constexpr Dir2d(Ind2d d) noexcept : dir(d) {
+		}
 
 		// Constructor from char with validation
 		explicit Dir2d(char direction) {
@@ -159,7 +184,6 @@ namespace Dir {
 			return static_cast<char>(dir);
 		}
 
-		// Inverse direction: swaps 0↔1, 2↔3
 		Dir2d Inv() const {
 			if (dir == Ind2d::None) {
 				throw std::invalid_argument("Attempted to access invalid direction");
@@ -168,18 +192,18 @@ namespace Dir {
 		}
 
 		// Convert to vector (assuming v2::Coord exists similar to v3::Coord)
-		v2::Coord2 ToVec() const {
+		v2::Coord2 to_coord() const {
 			switch (dir) {
 			case Ind2d::Right:
-				return v2::Coord2(1,0);  // (1, 0)
+			return v2::Coord2(1, 0);  // (1, 0)
 			case Ind2d::Left:
-				return v2::Coord2(-1, 0);   // (-1, 0)
+			return v2::Coord2(-1, 0);   // (-1, 0)
 			case Ind2d::Up:
-				return v2::Coord2(0, 1);     // (0, 1)
+			return v2::Coord2(0, 1);     // (0, 1)
 			case Ind2d::Down:
-				return v2::Coord2(0, -1);   // (0, -1)
+			return v2::Coord2(0, -1);   // (0, -1)
 			case Ind2d::None:
-				throw std::invalid_argument("Attempted to access invalid direction");
+			throw std::invalid_argument("Attempted to access invalid direction");
 			}
 			// Just to suppress compiler warnings (unreachable)
 			return v2::Coord2(0, 0);

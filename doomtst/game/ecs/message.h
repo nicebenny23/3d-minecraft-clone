@@ -15,7 +15,7 @@ namespace ecs {
 		
 		Events() {}
 		template<typename ...Args>
-		void write(Args&&... args) {
+		void write(Args&&... args) requires std::constructible_from<T,Args&&...>{
 			if (being_read_from()) {
 				stn::throw_logic_error("you may not write to a Events with {} current readers", current_readers.length());
 			}
@@ -24,7 +24,7 @@ namespace ecs {
 				stn::throw_logic_error("you may not write with {} active events",active_events());
 			}
 			if (counts.nonempty()) {
-				queue.push(std::forward<Args>(args)...);
+				queue.emplace(std::forward<Args>(args)...);
 			}
 
 		}

@@ -54,7 +54,11 @@ namespace stn {
             return  stn::insertion(dense_id, false);
 
         }
-        template<typename T>
+		template<typename T>
+		id_type get_unchecked() const {
+				return sparse_map.unchecked_at(typeIndex<T>());
+		}
+		template<typename T>
         id_type get() const {
 
             id_type dense_id = sparse_map[typeIndex<T>()];

@@ -4,14 +4,12 @@
 #include "../game/aabb.h"
 
 using namespace blockname;
-Vec3 face::center()
-{
-	return Vec3( facenum.ToVec())* mesh->box.scale + mesh->box.center;
-}
 void face::calccameradist() {
-	cameradist = 128 * dist2((*this).center(), Vec3(camera::campos()));
+	cameradist = 128 * v3::dist2((*this).center(), camera::campos());
 }
-
+Point3 face::center() {
+		return facenum.to_vec() * mesh->box.scale + mesh->box.center;
+	}
 void blockmesh::setfaces(int leftface, int rightface, int upface, int downface, int frontface, int backface) {
 	//0,left
 //1,right
@@ -61,23 +59,29 @@ void blockmesh::setfaces(int leftface, int rightface, int upface, int downface, 
 
 
 
-face& blockmesh::operator[](size_t index)
-{
-	if (index<6&&0<=index)
-	{
+face& blockmesh::operator[](size_t index) {
+	if (index < 6 && 0 <= index) {
 		return faces[index];
 	}
 
-	
-		Assert("index too high/low for faces");
+
+	Assert("index too high/low for faces");
 
 }
+const face& blockmesh::operator[](size_t index) const{
+	if (index < 6 && 0 <= index) {
+		return faces[index];
+	}
 
+
+	Assert("index too high/low for faces");
+
+}
 void blockname::blockmesh::attachindirection()
 {
 
-	Vec3 maxpos = blk->center() + box.scale * (blk->mesh.attachdir.ToVec());
-	Vec3 blkpos = Vec3(blk->mesh.attachdir.ToVec())*blocksize / 2 + blk->center();
+	Point3 maxpos = blk->center() + (blk->mesh.attachdir.to_vec()* box.scale);
+	Point3 blkpos = blk->mesh.attachdir.to_vec()*blocksize / 2 + blk->center();
 	box.center += blkpos - maxpos;
 }
 face& blockname::block::operator[](size_t index)
@@ -85,18 +89,16 @@ face& blockname::block::operator[](size_t index)
 	return (mesh)[index];
 }
 
-blockname::blockmesh::blockmesh(block* parent, Vec3 blkscale)
+bool blockname::blockmesh::invisible() const {
+	return blk->id==minecraftair;
+}
+
+blockname::blockmesh::blockmesh(block* parent, Scale3 blkscale):box(parent->pos + unitv / 2* blocksize,blkscale)
 {
 	blk = parent;
 	direction = Dir::up2d;
 	attachdir = Dir::front3d;
-
 	box.scale = blkscale;
-
-	box.center =Vec3(blk->pos+unitv/2) * blocksize;
-
-
-
 }
 
 void blockname::block::create(v3::Coord location, int blockid, Dir::Dir3d blkattachface, Dir::Dir2d blkdirection)
@@ -125,6 +127,6 @@ void blockname::block::create(v3::Coord location, int blockid, Dir::Dir3d blkatt
 
 void blockname::block::createdefaultaabb(bool effector)
 {
-	owner().add_component<aabb::Collider>(zerov, unitv/2.f, false,effector);
+	owner().add_component<aabb::Collider>(v3::Point3(0,0,0), unit_scale / 2.f, false, effector);
 
 }

@@ -10,16 +10,15 @@
 #include "playerinventory.h"
 #include "../items/itemutil.h"
 #include "../renderer/decal.h"
-#include "../game/System.h"
 #include "../util/cached.h"
 #include "../game/ecs/query.h"
 
 // Picks the face of the block that the point lies closest to
-inline Dir::Dir3d closest_face(v3::Vec3 pos, block* blk) {
-    pos -= blk->center();
+inline Dir::Dir3d closest_face(v3::Point3 pos, block* blk) {
+    Vec3 offset_pos=pos - blk->center();
     Dir::Dir3d best = Dir::up3d;
     for (auto d : Dir::Directions3d) {
-        if (dot(d.ToVec(), pos) > dot(best.ToVec(), pos)) best = d;
+        if (dot(d.to_vec(), offset_pos) > dot(best.to_vec(), offset_pos)) best = d;
     }
     return best;
 }
@@ -66,7 +65,7 @@ struct playerbreak : ecs::component{
         Dir::Dir3d fd = closest_face(hit, currmining());
         auto& f = currmining()->mesh[fd.ind()];
         break_decal.center = f.center();
-        break_decal.normal = fd.ToVec();
+        break_decal.normal = fd.to_vec();
         auto [b, t] = get_flat_frame(fd);
         break_decal.bi_tangent = b * 0.5f;
         break_decal.tangent = t * 0.5f;
@@ -158,7 +157,7 @@ struct playerbreak : ecs::component{
             // Show progress decal
             float prog = (break_start_time - timeuntilbreak) / break_start_time;
             size_t phase = clamp(size_t(prog * 7.f), 0, 6);
-            if (currmining()->mesh.box.scale== blockscale) {
+            if (currmining()->scale() == blockscale) {
                 spawn_decal(phase);
             }
             if (timeuntilbreak <= 0.f) {
@@ -184,7 +183,7 @@ struct playerbreak : ecs::component{
             {
                 make_drop(broken->owner());
             }
-            gridutil::setblock(broken->pos, minecraftair);
+            gridutil::set_block(broken->pos, minecraftair);
             disengage_block();
             
         }

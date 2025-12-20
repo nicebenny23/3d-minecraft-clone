@@ -24,7 +24,6 @@ namespace stn {
 			return other;
 		}
 
-,
 		template<typename U> requires std::derived_from<U, T>
 		box<U> downcast_unchecked() && noexcept {
 			box<U> other(static_cast<U*>(ptr));

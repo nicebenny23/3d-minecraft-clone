@@ -16,7 +16,7 @@ namespace ecs {
 		stn::type_indexer<resource_id> indexer;
 		stn::array<stn::box<resource>> resource_list;
 		template<ResourceType T, typename ...Args>
-		T& insert(Args&&... args) requires std::constructible_from<T,Args&&...>{
+		T& insert(Args&&... args) requires std::constructible_from<T, Args&&...> {
 			stn::insertion<ecs::resource_id> insertion = indexer.insert<T>();
 			if (insertion.is_not_new()) {
 				T* ptr = resource_list[insertion.value.id].get_as_unchecked<T>();
@@ -30,20 +30,20 @@ namespace ecs {
 		template<ResourceType T>
 		stn::Option<T&> get() {
 			return indexer.get_opt<T>().and_then([&](ecs::resource_id id) {
-				T* ptr = resource_list[id].get_as_unchecked<T>();
+				T* ptr = resource_list[id.id].get_as_unchecked<T>();
 				if (ptr) {
-					return *ptr;
+					return stn::Option<T&>(*ptr);
 				}
-				return stn::None; });
+				return stn::Option<T&>(stn::None); });
 		}
 		template<ResourceType T>
 		stn::Option<const T&> get() const {
 			return indexer.get_opt<T>().and_then([&](resource_id id) {
-				T* ptr = resource_list[id].get_as_unchecked<T>();
+				T* ptr = resource_list[id.id].get_as_unchecked<T>();
 				if (ptr) {
-					return *ptr;
+					return stn::Option<const T&>(*ptr);
 				}
-				return stn::None; });
+				return stn::Option<T&>(stn::None); });
 		}
 		template<ResourceType T>
 		T& get_or_default() {
@@ -59,7 +59,7 @@ namespace ecs {
 		bool has() const {
 			return indexer.get_opt<T>().is_some_and([&](resource_id id) {return resource_list[id.id]; });
 		}
-		
+
 		template<ResourceType T>
 		void remove() {
 			stn::Option<resource_id> insertion = indexer.get_opt<T>();

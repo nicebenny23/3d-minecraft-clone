@@ -39,7 +39,7 @@ namespace stn::memory {
 	//variant
 	template<typename ...Args>
 	constexpr layout overlay(const Args&... layouts) {
-		size_t max_size = (std::max)({ static_cast<size_t>(layouts.size)... }); // same effect
+		size_t max_size = (std::max)({ static_cast<size_t>(layouts.size)... }); 
 		size_t max_align = (std::max)({ static_cast<size_t>(layouts.alignment)... });
 		return layout(max_size, max_align);
 	}
@@ -47,7 +47,7 @@ namespace stn::memory {
 	template<typename... Args>
 	constexpr layout join(const Args&... layouts) noexcept {
 		size_t total_size = 0;
-		((total_size += layouts.size), ...); // proper fold expression
+		((total_size += layouts.size), ...);
 		size_t max_align = (std::max)({ static_cast<size_t>(layouts.alignment)... });
 		return layout(total_size, max_align);
 	}

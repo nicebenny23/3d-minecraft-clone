@@ -8,14 +8,12 @@ namespace CtxName {
 }
 namespace grid {
 	
-	struct Grid {
+	struct Grid:ecs::resource {
 		//total length in one dimention
-		inline int dim() {
-			return 2 * rad + 1;
-		};
+		
 	//how many chunks it spans from the center chunk 
-
 		const int rad;
+		int dim_axis;
 		 int totalChunks;
 		v3::Coord gridpos;
 		v3::Coord griddt;
@@ -40,15 +38,18 @@ namespace grid {
 			return chunklist[index];
 		}
 
-	Vec3 toBlockPos(Vec3 point);
+		Point3 toBlockPos(Point3 point);
 	Coord chunkfromblockpos(Coord pos);
-	Coord getVoxel(Vec3 pos);
-
+	Coord getVoxel(Point3 pos);
+	Coord get_chunk(Point3 pos);
 	bool ChunkLoaded(Coord loc);
 	bool containsChunk(Coord loc) const;
 	int localChunkIndex(Coord NormedChunk);
 	int chunkIndex(Coord Chunk);
 	Chunk::chunk* GetChunk(Coord pos);
+
+	stn::Option<Chunk::chunk&> get_chunk(Coord pos);
+	 Option< ecs::obj&> get_object(const v3::Coord pos);
 	block* getBlock(const v3::Coord pos);
 	bool containsChunkIndex(int index) const;
 	ecs::obj* getObject(const v3::Coord pos);

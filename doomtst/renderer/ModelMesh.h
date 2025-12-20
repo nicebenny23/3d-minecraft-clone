@@ -30,14 +30,14 @@ namespace ModelMeshName {
 		ModelMesh();
 		void create_handle(const char* location, const char* name);
 		Transform transform;
-		array<Vec3> vertices;
+		array<Point3> vertices;
 		array<unsigned int> vertexindices;
 		array<v2::Vec2> texcoords;
 		array<unsigned int> texindices;
 		void destroy() {
 			handle.destroy();
 		}
-		Vec3 nthvertex(size_t i);
+		Point3 nthvertex(size_t i);
 		v2::Vec2 nthtex(size_t i);
 		renderer::RenderableHandle handle;
 		

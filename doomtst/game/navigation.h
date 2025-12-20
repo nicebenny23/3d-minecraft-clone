@@ -10,7 +10,7 @@ struct navnode {
 
     //distance to objective
     float gcost;
-    v3::Vec3 center() {
+    v3::Point3 center() {
         return pos + unitv / 2;
     }
     //distance to start
@@ -61,9 +61,9 @@ struct navigator: ecs::component
     bool isblockvalid;
     v3::Vec3 esize;
     timename::duration path_creation_dur;
-    v3::Vec3 headed();
+    v3::Point3 headed();
     size_t headed_index;
-    array<v3::Vec3> headed_list;
+    array<v3::Point3> headed_list;
     array<navnode> (*testfunction)(navnode& pos);
     ecs::obj goingtwords;
     void calcpath();

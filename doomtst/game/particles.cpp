@@ -36,11 +36,7 @@ void particleemiter::update()
 
 				if (particlearray[i].get_component<particle>().endtime < CtxName::ctx.Time->now().value)
 				{
-					ecs::obj EntityDeletionBuffer = particlearray[i];
-					EntityDeletionBuffer.destroy();
-				
-				
-					//particlearray[i].GenId =stn::NoneG;
+					std::move(particlearray[i]).destroy();
 				}
 			}
 		}
@@ -54,7 +50,7 @@ void particleemiter::update()
 		 {
 			// if (particlearray[i])
 			 {
-			//	 ecs::obj newparticle = CtxName::ctx.OC->spawn_with_transform(position);
+			//	 ecs::obj newparticle = CtxName::ctx.Ecs->spawn_with_transform(position);
 				 
 			//	 newparticle.add_component<particle>().endtime= CtxName::ctx.Time->now().value +particlelifetime;
 			//	 newparticle.get_component<particle>().ind = i;
@@ -120,7 +116,7 @@ void particleemiter::renderparticles()
 }
 void initbaseparticle(ecs::obj newent) {
 	newent.get_component<ecs::transform_comp>().transform.position += Vec3(random(), 1, random()) / 10;
-	newent.add_component<aabb::Collider>(newent.get_component<ecs::transform_comp>().transform.position, unitv / 9, true);
+	newent.add_component<aabb::Collider>(newent.get_component<ecs::transform_comp>().transform.position, unit_scale / 9, true);
 	newent.add_component<rigidbody>(1, .1).velocity = Vec3(random(), 1, random()) * 2;
 	newent.get_component<ecs::transform_comp>().transform.scale = blockscale / 22;
 	

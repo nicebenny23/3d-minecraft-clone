@@ -107,6 +107,18 @@ namespace stn {
 			}
 			return list[index];
 		}
+		[[nodiscard]] Option<T&> get(size_t index) {
+			if (contains_index(index)) {
+				return stn::Option<T&>((*this)[index]);
+			}
+			return None;
+		}
+		[[nodiscard]] Option<const T&> get(size_t index) const{
+			if (contains_index(index)) {
+				return stn::Option<const T&>((*this)[index]);
+			}
+			return None;
+		}
 
 		[[nodiscard]] T& operator[](typed_index<T> index) {
 			return (*this)[index.index];

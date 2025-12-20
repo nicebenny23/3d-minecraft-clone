@@ -15,7 +15,7 @@ struct model: ecs::component
 
 	meshconnecttype connectiontype;
 	void draw();
-	void add(const char* meshname, const char* meshtexname,Vec3 pos=zerov);
+	void add(const char* meshname, const char* meshtexname);
 	model(meshconnecttype connectmethod = normalmeshconnect);
 	void update();
 	

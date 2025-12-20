@@ -45,7 +45,7 @@ struct noisemap
     
     noisemap();
     //evaluates Noise At pos
-    float Eval(Vec3 pos);
+    float Eval(Point3 pos);
  //evaluates Noise At pos
     float Eval(Coord pos);
    
@@ -56,7 +56,7 @@ struct noisemap
 };
 
 float interpolatenoisemap(float x, float y, float z);
-float EvaluateNoiseAtPoint(Vec3 point, noiseparams params);
+float EvaluateNoiseAtPoint(Point3 point, noiseparams params);
 
 inline void noisemap::createdist() {
     
@@ -68,7 +68,7 @@ for (int i = 0; i < properties.distributionsize; i++)
 {
     
     Vec3 randomPoint =NoiseOffset +randompointonsphere(0,i,0)/ScaleRange;
-    float val = EvaluateNoiseAtPoint(randomPoint, properties);
+    float val = EvaluateNoiseAtPoint(Point3(randomPoint.x,randomPoint.y,randomPoint.z), properties);
     distribution.push(val);
 }
 equalizer= statistics::HistogramEqualizer(array<float>(distribution));

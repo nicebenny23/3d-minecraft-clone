@@ -10,20 +10,17 @@ namespace geometry {
 
 	
 	struct Box {
-		Vec3 center;
+		Point3 center;
 		//scale is not divided by 2
-		Vec3 scale;
-		Box() {
-			center = zerov;
-			scale = zerov;
-		}
-		Box(Vec3 cent, Vec3 scl) : center(cent), scale(scl) {}
+		Scale3 scale;
+	
+		Box(Point3 cent, Scale3 scl) : center(cent), scale(scl) {}
 
-		Vec3 max() const{
-			return center + scale;
+		Point3 max() const{
+			return center +Vec3(scale);
 		}
-		Vec3 min() const {
-			return center-scale;
+		Point3 min() const {
+			return center-Vec3(scale);
 		}
 		bool contains_orgin() const
 		{
@@ -40,14 +37,14 @@ namespace geometry {
 			return false;
 		}
 
-		bool contains(v3::Vec3 pos) const
+		bool contains(Point3 pos) const
 		{
-			pos -= center;
-			if (abs(pos.x) <= scale.x)
+			Vec3 shifted= center-pos;
+			if (abs(shifted.x) <= scale.x)
 			{
-				if (abs(pos.y) <= scale.y)
+				if (abs(shifted.y) <= scale.y)
 				{
-					if (abs(pos.z) <= scale.z)
+					if (abs(shifted.z) <= scale.z)
 					{
 						return true;
 					}
@@ -57,12 +54,12 @@ namespace geometry {
 		}
 
 		bool contains_box(Box b) const{
-			b.center -= center;
-			if (abs(b.center.x)+b.scale.x<scale.x)
+		Vec3 sub= b.center-center;
+			if (abs(sub.x)+b.scale.x<scale.x)
 			{
-				if (abs(b.center.y) + b.scale.y < scale.y)
+				if (abs(sub.y) + b.scale.y < scale.y)
 				{
-					if (abs(b.center.z) + b.scale.z < scale.z)
+					if (abs(sub.z) + b.scale.z < scale.z)
 					{
 						return true;
 					}
@@ -72,13 +69,12 @@ namespace geometry {
 			}
 			return false;
 		}
-		// Minkowski sum operator
-		Box operator+(const Box& other) const {
-			return Box(center + other.center, scale + other.scale);
-		}
+		
 		// Minkowski difference operator
 		Box operator-(const Box& other) const {
-			return Box(center - other.center, scale + other.scale);
+			//minkoski diffrence changes affinity
+			Vec3 sub=center - other.center;
+			return Box(Point3(sub.x,sub.y,sub.z), Scale3(scale.x+other.scale.x,scale.y+other.scale.y,scale.z+other.scale.z));
 		}
 		Box translate(Vec3 translation_vector) const{
 			return Box(center + translation_vector, scale);
@@ -114,45 +110,45 @@ namespace geometry {
 
 	struct Plane {
 		Vec3 normal;
-		Vec3 point;
+		Point3 point;
 
 		Plane() = default;
-		Plane(Vec3 norm, Vec3 pnt)
+		Plane(Vec3 norm, Point3 pnt)
 			: normal(norm), point(pnt) {}
 
-		Plane(Vec3 p1, Vec3 p2, Vec3 p3) {
+		Plane(Point3 p1, Point3 p2, Point3 p3) {
 			Vec3 v1 = p2 - p1;
 			Vec3 v2 = p3 - p1;
 			normal = v3::normal(Cross(v1, v2));
 			point = p1;
 		}
-		bool above(Vec3 pnt) const{
-			return dot(point,normal)<= dot(normal,pnt);
+		bool above(Point3 pnt) const{
+			return 0<=dot(normal,pnt- point);
 		}
 		bool crosses(ray potential_crossing) const{
 			return above(potential_crossing.start) != above(potential_crossing.end);
 		}
 
 
-		double distance_to_point(const Vec3& p) const {
+		double distance_to_point(const Point3& p) const {
 			return dot(normal, p - point);
 		}
 	};
 
 	struct Sphere {
 		double radius;
-		Vec3 center;
-		bool contains(Vec3 point) const{
+		Point3 center;
+		bool contains(Point3 point) const{
 			return dist(center, point) <= radius;
 		}
 		
 		Sphere(Box bx)
-			: radius(bx.scale.length()), center(bx.center) {}
+			: radius(Vec3(bx.scale).length()), center(bx.center) {}
 		
-		Vec3 project(Vec3 point) const{
+		Point3 project(Point3 point) const{
 			return center + normal(point - center) * radius;
 		}
-		Vec3 bound(Vec3 point) const {
+		Point3 bound(Point3 point) const {
 			if (contains(point))
 			{
 				return point;
@@ -176,13 +172,13 @@ namespace geometry {
 		Vec3 direction() const{
 			return direction_ray.dir();
 		}
-		Vec3 orgin() const{
+		Point3 orgin() const{
 			return direction_ray.start;
 		}
 
-		double distanceFromPoint(Vec3 samplePoint) const{
+		double distanceFromPoint(Point3 samplePoint) const{
 			// Project the sample point onto the cone's central axis (ray)
-			Vec3 axisProjection = direction_ray.project(samplePoint);
+			Point3 axisProjection = direction_ray.project(samplePoint);
 
 			// Compute the perpendicular distance from the sample point to the cone's axis.
 			double distanceToAxis = dist(samplePoint, axisProjection);

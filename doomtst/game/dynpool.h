@@ -37,7 +37,7 @@ namespace stn {
 				ptr = reinterpret_cast<std::uintptr_t>(other_ptr) | tag_mask;
 			}
 		}
-		// Type test
+
 		template<typename T>
 			requires(std::is_same_v<T, A> || std::is_same_v<T, B>)
 		inline constexpr bool is() const noexcept {
@@ -154,12 +154,12 @@ namespace stn {
 		}
 		template<typename U>
 		U& get_unchecked_as() {
-			return *reinterpret_cast<U*>(ptr);
+			return *get_unchecked_ptr<U>();
 		}
 
 		template<typename U>
 		const U& get_unchecked_as() const {
-			return *reinterpret_cast<const U*>(ptr);
+			return *get_unchecked_ptr<U>();
 		}
 
 		// Get type ID of the pointed object (throws if null)
@@ -322,10 +322,10 @@ namespace stn {
 				stn::throw_logic_error("Error: requested pool with size of 1<<{} is too big to exist", pool_number);
 			}
 			else {
-				return size_t(1) << pool_number;  // promote 1 to size_t
+				return size_t(1) << pool_number; 
 			}
 		}
-		//type safe emplace that checks the type_id first
+
 		template<typename U, typename ...Args>
 		flux_token<U> emplace(Args&&...args)  requires std::constructible_from<U, Args&&...> {
 

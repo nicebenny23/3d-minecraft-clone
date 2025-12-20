@@ -4,6 +4,7 @@
 #include "../world/managegrid.h"
 #include "../util/time.h"
 #include "../debugger/debug.h"
+
 #include "../game/rigidbody.h"
 #pragma once 
 extern float liquidtick;
@@ -39,7 +40,7 @@ struct liquidprop : ecs::component {
 		if (liqval <= 1) {
 			return;
 		}
-		Coord newpos = face.ToVec() + owner().get_component<block>().pos;
+		Coord newpos = face.to_coord() + owner().get_component<block>().pos;
 		blockname::block* blk = CtxName::ctx.Grid->getBlock(newpos);
 		if (blk == nullptr) {
 			return;
@@ -63,7 +64,7 @@ struct liquidprop : ecs::component {
 
 
 			if (blk->id == minecrafttorch) {
-				gridutil::setblock(newpos, minecraftair);
+				gridutil::set_block(newpos, minecraftair);
 			}
 
 
@@ -73,7 +74,7 @@ struct liquidprop : ecs::component {
 		}
 
 		Coord pos = blk->pos;
-		gridutil::setblock(pos, owner().get_component<blockname::block>().id);
+		gridutil::set_block(pos, owner().get_component<blockname::block>().id);
 		blk = (CtxName::ctx.GridRef().getBlock(pos));
 
 		if (!blk->owner().has_component<liquidprop>()) {
@@ -101,7 +102,7 @@ struct liquidprop : ecs::component {
 			}
 		}
 		if (liqval <= 0) {
-			gridutil::setblock(owner().get_component<blockname::block>().pos, minecraftair);
+			gridutil::set_block(owner().get_component<blockname::block>().pos, minecraftair);
 		}
 
 	}

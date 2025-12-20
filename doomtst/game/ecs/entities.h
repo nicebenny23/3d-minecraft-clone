@@ -41,28 +41,28 @@ namespace ecs {
 		const space_id_metadata& operator[](size_t index)	const{
 			return space_id_list[index];
 		}
-		bool is_valid(space_id space_id) const{
+		bool is_valid(entity entity) const{
 
-			return space_id.generation() == space_id_list[space_id.id()].gen_count;
+			return entity.generation() == space_id_list[entity.id()].gen_count;
 		}
 		//for more expressive 
-		space_id_metadata& at(space_id space_id) {
-			return space_id_list[space_id.id()];
+		space_id_metadata& at(entity entity) {
+			return space_id_list[entity.id()];
 		}
-		void assert_valid(space_id space_id) const{
-			if (!is_valid(space_id))
+		void assert_valid(entity entity) const{
+			if (!is_valid(entity))
 			{
-				stn::throw_logic_error("refrence to space_id with id {} is a member of outdated generation {} of {}", space_id.id(), space_id.generation(), space_id_list[space_id.id()].gen_count);
+				stn::throw_logic_error("refrence to entity with id {} is a member of outdated generation {} of {}", entity.id(), entity.generation(), space_id_list[entity.id()].gen_count);
 			}
 		}
-		const space_id_metadata& at(space_id space_id) const{
-			return space_id_list[space_id.id()];
+		const space_id_metadata& at(entity entity) const{
+			return space_id_list[entity.id()];
 		}
-		space_id_metadata& operator[](space_id space_id) {
-			return at(space_id);
+		space_id_metadata& operator[](entity entity) {
+			return at(entity);
 		}
-		const space_id_metadata& operator[](space_id space_id) const {
-			return at(space_id);
+		const space_id_metadata& operator[](entity entity) const {
+			return at(entity);
 		}
 		
 		size_t length() const{
@@ -73,14 +73,14 @@ namespace ecs {
 		}
 		stn::array<uint32_t> free_ids;
 		stn::array<space_id_metadata> space_id_list;
-		space_id allocate_space_id() {
+		entity allocate_space_id() {
 			std::uint32_t id= free_ids.pop();
 
-			return space_id(id, space_id_list[id].gen_count);
+			return entity(id, space_id_list[id].gen_count);
 		}
-		void remove_space_id(space_id space_id) {
-			at(space_id).clear();
-			free_ids.push(space_id.id());
+		void remove_space_id(entity entity) {
+			at(entity).clear();
+			free_ids.push(entity.id());
 		}
 		Entities(std::uint32_t count):space_id_list(count){
 

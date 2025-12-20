@@ -9,10 +9,9 @@ ModelMeshName::ModelMesh& model::operator[](int index)
 void model::draw()
 {
 }
-void model::add(const char* meshname,const char * meshtexname,Vec3 pos)
+void model::add(const char* meshname,const char * meshtexname)
 {
 	meshlist.push(ModelMeshName::loadmesh(meshtexname,meshname, zerov));
-meshlist.last().transform.position = pos;
 }
 model::model(meshconnecttype connectmethod )
 {
@@ -23,7 +22,7 @@ model::model(meshconnecttype connectmethod )
 
 void model::update()
 {
-	v3::Vec3 how = owner().get_component<ecs::transform_comp>().transform.position;
+	v3::Point3 how = owner().get_component<ecs::transform_comp>().transform.position;
 	glm::mat4* model =new glm::mat4((owner().get_component<ecs::transform_comp>().transform.ToMatrix()));
 	for (int i = 0; i < meshlist.length(); i++)
 	{

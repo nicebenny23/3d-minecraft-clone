@@ -6,6 +6,13 @@ namespace blockrender {
 	void initblockrendering();
 	//for final boss
 	extern bool enablelighting;
+	struct ChunkMesher :ecs::System {
+		ChunkMesher() {
+
+		}
+
+		void run(ecs::Ecs& ecs);
+	};
 }
 
  // !blockrender_HPP

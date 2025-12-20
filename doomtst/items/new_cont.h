@@ -23,7 +23,7 @@ namespace cont
 			{
 				for (size_t x = 0; x++; x < grid.x)
 				{
-					ecs::spawn::Spawner spawner(CtxName::ctx.OC);
+					ecs::spawn::Spawner spawner(CtxName::ctx.Ecs);
 	ecs::obj new_slot= spawner.with<slot::ItemSlot>()
 						.with<slot::UiSlot>(v2::Coord2(x, y) + lowest).build();	
 				slots.push(new_slot);

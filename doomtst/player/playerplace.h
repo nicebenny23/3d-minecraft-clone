@@ -79,7 +79,7 @@ struct playerplace : ecs::component
 			{
 				return;
 			}
-			gridutil::setblock(plamentblock->pos, placeid);
+			gridutil::set_block(plamentblock->pos, placeid);
 	
 			select->use(1);
 		}

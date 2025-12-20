@@ -1,7 +1,7 @@
 #include "rigidbody.h"
 #include "entitystate.h"
 #pragma once 
-inline void kb(Vec3 point, float force,ecs::obj ent) {
+inline void kb(Point3 point, float force,ecs::obj ent) {
 	if (ent.has_component<estate>()&&ent.has_component<ecs::transform_comp>())
 	{
 

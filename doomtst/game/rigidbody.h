@@ -7,7 +7,6 @@
 #include "../util/geometry.h"
 #include "../world/voxeltraversal.h"
 #include "ecs/query.h"
-#include "System.h"
 #include "../util/pipeline.h"
 #include "../util/tag.h"
 #include "../game/collision.h"
@@ -58,13 +57,13 @@ struct rigidbody : ecs::component{
     void calculateonground() {
 
         inliquid = false;
-        Vec3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position - Vec3(0, boundingbox->globalbox().scale.y + .01, 0);
-        geometry::Box checkbox = geometry::Box(boxcenter, Vec3(boundingbox->globalbox().scale.x, .005, boundingbox->globalbox().scale.z*.9f) * .92);
+        Point3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position - Vec3(0, boundingbox->globalbox().scale.y + .01, 0);
+        geometry::Box checkbox = geometry::Box(boxcenter, Scale3(boundingbox->globalbox().scale.x, .005, boundingbox->globalbox().scale.z*.9f) * .92);
         isonground = (voxtra::Boxcollwithgrid(checkbox ));
     }
     void calculateonceil() {
-        Vec3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position + Vec3(0, boundingbox->globalbox().scale.y + .01, 0);
-        geometry::Box checkbox = geometry::Box(boxcenter, Vec3(boundingbox->globalbox().scale.x, .005, boundingbox->globalbox().scale.z) * .9);
+		Point3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position + Vec3(0, boundingbox->globalbox().scale.y + .01, 0);
+        geometry::Box checkbox = geometry::Box(boxcenter, Scale3(boundingbox->globalbox().scale.x, .005, boundingbox->globalbox().scale.z) * .9);
         isonceil = (voxtra::Boxcollwithgrid(checkbox));
         if (isonceil)
         {
@@ -86,7 +85,7 @@ struct rigidbody : ecs::component{
     void start() {
         forces.push(rigid_force(v3::Vec3(0,-10,0), "gravity"));
         acceleration = zerov;
-        oldvelocity = owner().get_component<ecs::transform_comp>().transform.position;
+        oldvelocity = zerov;
         boundingbox = &owner().get_component<aabb::Collider>();  
     }
 
@@ -143,8 +142,8 @@ struct rigidbody : ecs::component{
 
             for (int i = 0; i < 3; i++)
             {
-                v3::Vec3 curr_pos = owner().get_component<ecs::transform_comp>().transform.position;
-                v3::Vec3 new_pos = curr_pos + v3::Vec3(velocity[i]/mini_steps, i) * deltaTime;
+                v3::Point3 curr_pos = owner().get_component<ecs::transform_comp>().transform.position;
+                v3::Point3 new_pos = curr_pos + v3::Vec3(velocity[i]/mini_steps, i) * deltaTime;
                 int sgn = sign(velocity[i]);
                 double scale_in_dir = owner().get_component<Collider>().globalbox().scale[i];
                 v3::Vec3 max_dir_rel = Vec3(sgn * scale_in_dir, i);
@@ -164,7 +163,7 @@ struct rigidbody : ecs::component{
                 }
                 else
                 {
-                   v3::Vec3 new_posdiff= coll.unwrap().Hit.intersectionpoint - max_dir_rel-v3::Vec3(1e-4* sgn, i);
+                   v3::Point3 new_posdiff= coll.unwrap().Hit.intersectionpoint - max_dir_rel-v3::Vec3(1e-4* sgn, i);
                    Coord pos = coll.unwrap().ecs().get_component<block>().pos;
                    owner().get_component<ecs::transform_comp>().transform.position = new_posdiff;
 

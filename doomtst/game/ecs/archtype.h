@@ -1,3 +1,4 @@
+#pragma once
 #include "entities.h"
 #include "../../util/bitset.h"
 #include "component_id.h"
@@ -12,6 +13,11 @@ namespace ecs {
 		stn::span<const component_id> view_cached() const {
 			return cached_ids.span();
 		}
+		
+		bool empty() const {
+			return elems.empty();
+		}
+
 		archetype_id id() const {
 			return Id;
 		}
@@ -22,38 +28,27 @@ namespace ecs {
 		bool contains_index(archetype_index index) const {
 			return elems.contains_index(index.index);
 		}
-		space_id& operator[](std::uint32_t arch_index) {
-			return elems[arch_index];
-		}
-		const space_id& operator[](std::uint32_t arch_index) const {
-			return elems[arch_index];
-		}
-
-		space_id& operator[](archetype_index arch_index) {
+		
+		entity& operator[](archetype_index arch_index) {
 			return elems[arch_index.index];
 		}
-		const space_id& operator[](archetype_index arch_index) const {
+		const entity& operator[](archetype_index arch_index) const {
 			return elems[arch_index.index];
 		}
 
 		bool passes(const archetype_predicate& pred) const {
 			return pred.passes(id_set);
 		}
-		const space_id& last() const {
+		const entity& last() const {
 			return elems.last();
 		}
-		space_id& last() {
+		entity& last() {
 			return elems.last();
 		}
+		
 
 		archetype_index last_index() const {
-			return archetype_index(elems.last_index());
-		}
-		archetype_location first_location() const {
-			return archetype_location(id(), archetype_index(0));
-		}
-		archetype_location last_location() const {
-			return archetype_location(id(), last_index());
+			return archetype_index(static_cast<uint32_t>(elems.last_index()));
 		}
 		bool has_component(component_id id) const {
 			return id_set[id];
@@ -67,8 +62,8 @@ namespace ecs {
 		}
 
 		//returns the new archetype location
-		archetype_location add(space_id& entityect) {
-			elems.push(entityect);
+		archetype_location add(entity& element) {
+			elems.push(element);
 			return archetype_location(id(), last_index());
 		}
 
@@ -88,7 +83,7 @@ namespace ecs {
 		}
 
 
-		using iterator = typename stn::array<space_id>::iterator;
+		using iterator = typename stn::array<entity>::iterator;
 
 		iterator begin() {
 			return elems.begin();
@@ -98,7 +93,7 @@ namespace ecs {
 		}
 
 		component_ids id_set;
-		stn::array<space_id> elems;
+		stn::array<entity> elems;
 		stn::array<stn::Option<archetype_id>> moves;
 	private:
 		stn::array<component_id> cached_ids;
@@ -114,8 +109,8 @@ namespace ecs {
 			//empty archetype
 			add_archetype(component_ids(stn::None));
 		};
-		inline size_t total_archetypes() const {
-			return archetypes.length();
+		inline std::uint32_t total_archetypes() const {
+			return static_cast<uint32_t>(archetypes.length());
 		}
 		const Archetype& empty_archetype() const {
 			return archetypes[0];
@@ -129,22 +124,22 @@ namespace ecs {
 		const Archetype& archetype_at(archetype_id Id) const {
 			return archetypes[Id.id];
 		}
-		space_id& entity_at(archetype_location location) {
+		entity& entity_at(archetype_location location) {
 			return archetype_at(location.id)[location.index];
 		}
-		const space_id& entity_at(archetype_location location) const {
+		const entity& entity_at(archetype_location location) const {
 			return archetype_at(location.id)[location.index];
 		}
-		archetype_location& location_of(space_id ent) {
+		archetype_location& location_of(entity ent) {
 			return locations[ent.id()];
 		}
-		const archetype_location& location_of(space_id ent) const {
+		const archetype_location& location_of(entity ent) const {
 			return locations[ent.id()];
 		}
-		const Archetype& archetype_of(space_id ent) const {
+		const Archetype& archetype_of(entity ent) const {
 			return archetype_at(location_of(ent).id);
 		}
-		Archetype& archetype_of(space_id ent) {
+		Archetype& archetype_of(entity ent) {
 			return archetype_at(location_of(ent).id);
 		}
 		bool contains(archetype_id id) const {
@@ -162,7 +157,7 @@ namespace ecs {
 				arch.moves.expand(arch.moves.length() + 1);
 			}
 		}
-		void add_to_empty(space_id new_spawn) {
+		void add_to_empty(entity new_spawn) {
 			locations[new_spawn.id()] = empty_archetype().add(new_spawn);
 		}
 		void add_archetype(const component_ids& Components) {
@@ -192,14 +187,14 @@ namespace ecs {
 				.into<stn::array>();
 		}
 
-		inline void remove_from_archetypes(space_id ent) {
+		inline void remove_from_archetypes(entity ent) {
 			archetype_location entity_location = location_of(ent);
 			Archetype& old_archetype = archetype_at(entity_location.id);
 			location_of(old_archetype.last()) = entity_location;
 			old_archetype.remove(entity_location.index);
 		}
 
-		archetype_location transfer_entity_to_flipped_index(space_id ent, component_id index) {
+		archetype_location transfer_entity_to_flipped_index(entity ent, component_id index) {
 			//same subroutine as remove_from_archetypes but does not seem to optimize correctly
 			archetype_location& entity_location = location_of(ent);
 			Archetype& old_archetype = archetype_at(entity_location.id);
@@ -211,7 +206,7 @@ namespace ecs {
 				//in this case we have not created an archetype connected to old_archetype at index yet
 				component_ids new_arch = old_archetype.id_set.flipped(index);
 				add_archetype(new_arch);
-				//we may not continue using old_archetype because a new one was added
+				//we cannot use old_archetype because a new one was added
 				new_id_opt = archetype_at(entity_location.id).arch_connection_at(index);
 				if (!new_id_opt) {
 					stn::throw_logic_error("Failed to create a new archetype when flipping component id {} for entity {}", index.id, ent.id());
@@ -237,7 +232,6 @@ namespace ecs {
 		const const_iterator end() const {
 			return archetypes.end();
 		}
-
 
 	private:
 		stn::array<archetype_location> locations;

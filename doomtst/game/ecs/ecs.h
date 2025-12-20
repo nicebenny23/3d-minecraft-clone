@@ -52,9 +52,9 @@ namespace ecs {
 				for (component_type* mgr : types) {
 					for (Archetype& archetype : stn::range(ecs.archetypes).filter([&](auto&& archetype) {return archetype.has_component(mgr->id()); })) {
 						// 1) Snapshot the count _once_
-						size_t originalCount = archetype.count();
-						for (size_t i = 0; i < originalCount; ++i) {
-							(*mgr)[archetype[i]].update();
+						uint32_t originalCount = archetype.count();
+						for (uint32_t i = 0; i < originalCount; ++i) {
+							(*mgr)[archetype[archetype_index(i)]].update();
 						}
 					}
 				}
@@ -76,7 +76,7 @@ namespace ecs {
 		}
 		template<ResourceType T, typename ...Args>
 		T& insert_resource(Args&&... args) requires std::constructible_from<T, Args&&...> {
-			return resources.insert<T>(std::forward<Args>(args));
+			return resources.insert<T>(std::forward<Args>(args)...);
 		}
 		template<ResourceType T>
 		T& get_resource_or_default() {
@@ -128,52 +128,56 @@ namespace ecs {
 
 		obj spawn_empty();
 
-		bool contains(space_id ent) const {
+		bool contains(entity ent) const {
 			return entities.is_valid(ent);
 		}
-		bool has_component(space_id ent, component_id id) const {
+		bool has_component(entity ent, component_id id) const {
 			entities.assert_valid(ent);
 			return components.has_component(ent, id);
 		}
 
 		template<typename T>
-		bool has_component(space_id object) {
+		bool has_component(entity object) {
 			entities.assert_valid(object);
 			return has_component(object, components.insert_id<T>());
 		}
 		template<ComponentType... Components>
-		bool has_components(space_id object) {
+		bool has_components(entity object) {
 			entities.assert_valid(object);
 			return archetypes.archetype_of(object).has_components(components.get_ids<Components...>());
 		}
 		template<ComponentType T, typename ...Args>
-		T& add_component(space_id object, Args&&... args)   requires std::constructible_from<T, Args&&...> {
+		T& add_component(entity object, Args&&... args)   requires std::constructible_from<T, Args&&...> {
 			entities.assert_valid(object);
 			T& component = components.emplace<T>(object, std::forward<Args>(args)...);
 			archetypes.transfer_entity_to_flipped_index(object, components.insert_id<T>());
 			return component;
 		}
 		template<ComponentType T>
-		T& get_component(space_id object) {
+		T& get_component_unchecked(entity object) {
+			return components.get_component_unchecked<T>(object);
+		}
+		template<ComponentType T>
+		T& get_component(entity object) {
 			entities.assert_valid(object);
 			return components.get_component<T>(object);
 		}
 		template<ComponentType T>
-		const T& get_component(space_id object) const {
+		const T& get_component(entity object) const {
 			entities.assert_valid(object);
 			return components.get_component<T>(object);
 		}
 		template<ComponentType... Components>
-		std::tuple<Components&...> get_tuple_unchecked(space_id obj, stn::span<const component_id> indices) {
+		std::tuple<Components&...> get_tuple_unchecked(entity obj,const stn::span<const component_id>& indices) {
 			
 			return[&]<size_t... Is>(std::index_sequence<Is...>) {
 				return std::tuple<Components&...>{
-					(Components&)components[indices[Is]][obj]...
+					components.unchecked_at(indices.unchecked_at(Is)).get_as_unchecked<Components>(obj)...
 				};
 			}(std::index_sequence_for<Components...>{});
 		}
 
-		const component& get_by_id(space_id object, component_id id) const {
+		const component& get_by_id(entity object, component_id id) const {
 			entities.assert_valid(object);
 			return components[id][object];
 		}
@@ -186,13 +190,13 @@ namespace ecs {
 		component_id get_component_id() const {
 			return components.get_id<T>();
 		}
-		void remove_component_unchecked(space_id object, component_id id) {
+		void remove_component_unchecked(entity object, component_id id) {
 
 			component_storage& store = components[id].storage();
 			store.remove_at(object);
 			archetypes.transfer_entity_to_flipped_index(object, id);
 		}
-		void remove_object_unchecked(space_id object) {
+		void remove_object_unchecked(entity object) {
 			stn::span<const component_id> cached = archetypes.archetype_of(object).view_cached();
 			for (component_id id : cached) {
 				components[id].storage().remove_at(object);

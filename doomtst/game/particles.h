@@ -13,7 +13,7 @@ using namespace stn;
 struct particleemiter: ecs::component
 {
 
-	v3::Vec3 position;
+	v3::Point3 position;
 	Texture2D* tex;
 	int maxparticles = 1000;
 	Mesh ParticleMesh;

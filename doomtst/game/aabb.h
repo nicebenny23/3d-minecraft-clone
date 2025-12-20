@@ -23,14 +23,13 @@ namespace aabb {
         //world box
         geometry::Box globalbox() {
 
-            geometry::Box global;
+          
           
             if (owner().has_component<ecs::transform_comp>())
             {
                 Transform transform = owner().get_component<ecs::transform_comp>().transform;
                
-                global.scale = box.scale * transform.scale * 2; 
-                global.center = box.center * transform.scale * 2 + transform.position;
+                return geometry::Box(box.center * transform.scale * 2 +v3::Vec3(transform.position.x, transform.position.y, transform.position.z), box.scale * transform.scale * 2);
                
 
             }
@@ -41,19 +40,17 @@ namespace aabb {
                 {
                     int l = 1;
                 }
-                Vec3 scale = blk.mesh.box.scale/2/blockname::blockscale;
-                Vec3 pos = blk.center();
-                global.center = box.center * scale * 2 + pos;
-                global.scale = box.scale * scale * 2;
+                Scale3 scale = blk.mesh.box.scale/blockname::blockscale;
+				Point3 pos = blk.center();
+				return geometry::Box(box.center * scale + v3::Vec3(pos.x,pos.y,pos.z), box.scale * scale);
 
             }
-            return global;
         }
         
         bool in_list;
       
         Collider() = default;
-        Collider(const v3::Vec3& objcenter, const v3::Vec3& objscale, bool appendtolist,bool iseffector=false);
+        Collider(const v3::Point3& objcenter, const v3::Scale3& objscale, bool appendtolist,bool iseffector=false);
         ~Collider() = default;
 
        

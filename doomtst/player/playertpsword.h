@@ -41,7 +41,7 @@ struct playertpcomp : ecs::component
 				{
 					if (CtxName::ctx.Inp->mouseleft().released)
 					{
-						Vec3 pos =owner().get_component<ecs::transform_comp>().transform.position;
+						Point3 pos =owner().get_component<ecs::transform_comp>().transform.position;
 						Vec3 offset =owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * chargetime * chargetime;
 						ray moveray = ray(pos, pos + offset);
 					voxtra::WorldRayCollision grid=	voxtra::travvox(moveray, voxtra::countall);

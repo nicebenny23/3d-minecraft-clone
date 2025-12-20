@@ -12,7 +12,7 @@
 #include "../renderer/decal.h"
 
 void rendergame() {
-  //  CtxName::ctx.OC->updatecomponents(ecs::Rendercall);
+  //  CtxName::ctx.Ecs->updatecomponents(ecs::Rendercall);
     blockrender::renderblocks(false);
     render_decals();
     

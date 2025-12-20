@@ -81,7 +81,7 @@ voxtra::WorldRayCollision  voxtra::travvox(ray nray, GridTraverseMode trav)
 		}
 
 	}
-	v3::Vec3 pos = nray.start-(1e-6*norm_ray);
+	v3::Point3 pos = nray.start-(norm_ray*1e-6);
 
 	Coord curvox = CtxName::ctx.Grid->getVoxel(pos);
 	Coord Boundry;
@@ -165,6 +165,6 @@ block* voxtra::findprevblock(ray nray, GridTraverseMode trav)
 		return nullptr;
 	}
 	float BackMag = 1 / 1000.f;
-	Vec3 BackProp = Intersection.unwrap().intersection() - nray.dir() * BackMag;
+	Point3 BackProp = Intersection.unwrap().intersection() - nray.dir() * BackMag;
 	return	(CtxName::ctx.Grid->getBlock(CtxName::ctx.Grid->getVoxel(BackProp)));
 }

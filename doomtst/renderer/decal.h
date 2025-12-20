@@ -3,7 +3,7 @@
 #pragma once
 
 struct decal {
-	v3::Vec3 center;
+	v3::Point3 center;
 	
 	v3::Vec3 tangent;
 	v3::Vec3 bi_tangent;

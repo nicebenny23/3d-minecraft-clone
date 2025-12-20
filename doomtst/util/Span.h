@@ -1,3 +1,4 @@
+#pragma once
 #include <iterator> // for std::distance
 #include <stdexcept>
 #include <format>
@@ -36,6 +37,7 @@ namespace stn {
 		template <std::ranges::contiguous_range Container>
 		span(Container& c) : span(std::begin(c), std::end(c)) {
 		}
+		
 		constexpr operator stn::span<const T>() const {
 			return stn::span<const T>(ptr, len);
 		}

@@ -110,7 +110,7 @@ int idfromnoise( float biome,float chaotic,float cave_carve,float cave_carve2,fl
 	return neid;
 
 }
-int generatechunkvalfromnoise(Vec3 pos, noisemap* map, noisemap* crazy, noisemap* slow)
+int generatechunkvalfromnoise(Point3 pos, noisemap* map, noisemap* crazy, noisemap* slow)
 {
 	if (generateflat)
 	{
@@ -120,19 +120,19 @@ int generatechunkvalfromnoise(Vec3 pos, noisemap* map, noisemap* crazy, noisemap
 		}
 		return minecraftstone;
 	}
-	pos *= blocksize;
+	Point3 scaled_pos= 	pos * blocksize;
 	
 	Coord localpos;
-	localpos.x = symmetric_mod (pos.x, chunkaxis);
+	localpos.x = symmetric_mod (scaled_pos.x, chunkaxis);
 
-	localpos.y = symmetric_mod(pos.y, chunkaxis);
+	localpos.y = symmetric_mod(scaled_pos.y, chunkaxis);
 
-	localpos.z = symmetric_mod(pos.z, chunkaxis);
-	float carve1 = (*map).Eval(pos + Vec3(0, pos.y, 0));
-	float carve2= map->Eval(pos + Coord(0, 103, 40));
-	float biome= slow->Eval(pos + Coord(893, 103, 40));
-	float cave_region = slow->Eval(pos + Coord(893, 103, 40));
-	float random_n = crazy->Eval(pos + Coord(101, 300, 33));
+	localpos.z = symmetric_mod(scaled_pos.z, chunkaxis);
+	float carve1 = (*map).Eval(scaled_pos + Vec3(0, scaled_pos.y, 0));
+	float carve2= map->Eval(scaled_pos + Coord(0, 103, 40));
+	float biome= slow->Eval(scaled_pos + Coord(893, 103, 40));
+	float cave_region = slow->Eval(scaled_pos + Coord(893, 103, 40));
+	float random_n = crazy->Eval(scaled_pos + Coord(101, 300, 33));
 
 		return idfromnoise(biome, random_n, carve1, carve2, cave_region);
 	
@@ -228,7 +228,7 @@ Chunk::chunk* ChunkLoader::AllocChunk(Coord location)
 	newchunk.loc = location;
 	newchunk.blockbuf =array< ecs::obj>(chunksize);
 	for (int i = 0; i < chunksize; i++) {
-		newchunk.blockbuf[i]= Grid->ctx->OC->spawn_empty();
+		newchunk.blockbuf[i]= Grid->ctx->Ecs->spawn_empty();
 		newchunk.blockbuf[i].add_component < block>();
 
 	}

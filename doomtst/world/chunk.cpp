@@ -18,6 +18,7 @@ ecs::obj& Chunk::chunk::operator[](size_t index)
 //must be a valid index
 size_t Chunk::indexfrompos(Coord pos)
 {
+	
 	int x = symmetric_mod(pos.x, chunkaxis);
 	int y = symmetric_mod(pos.y, chunkaxis);
 	int z = symmetric_mod(pos.z, chunkaxis);
@@ -63,9 +64,9 @@ void Chunk::chunkmesh::destroy()
 
 void Chunk::createchunkmesh(Chunk::chunk* aschunk)
 {
-	chunkmesh* mesh = new chunkmesh;
-	mesh->genbufs();
-	aschunk->mesh = mesh;
+	aschunk->mesh = stn::box<chunkmesh>();
+	aschunk->mesh->genbufs();
+
 
 }
 //complete
@@ -140,7 +141,7 @@ Chunk::chunk::chunk()
 {
 	loc = ZeroCoord;
 	modified = false;
-	mesh = nullptr;
+	mesh.clear();
 }
 
 void Chunk::chunk::destroy()
@@ -149,7 +150,7 @@ void Chunk::chunk::destroy()
 	{		write();
 	}
 	for (int i = 0; i < chunksize; i++) {	
-	blockbuf[i].destroy();
+	std::move(blockbuf[i]).destroy();
 	}
 	mesh->destroy();
 	blockbuf.clear();

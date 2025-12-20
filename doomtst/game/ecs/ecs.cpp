@@ -5,7 +5,7 @@ namespace ecs {
 	obj Ecs::spawn_empty()
 	{
 		//adds to both
-		space_id new_entity = entities.allocate_space_id();
+		entity new_entity = entities.allocate_space_id();
 		archetypes.add_to_empty(new_entity);
 		return obj(new_entity, this);
 	}

@@ -1,6 +1,6 @@
 #include "../block/block.h"
 #include "../renderer/chunkrender.h"
-
+#include "../util/cached.h"
 #pragma once 
 constexpr int chunklength = 16;
 constexpr int chunkaxis =int(chunklength/blocksize);
@@ -11,7 +11,8 @@ namespace Chunk {
 	struct chunk;
 	struct chunkmesh
 	{
-		chunkmesh() = default;
+		chunkmesh() :recreate_mesh(false){
+		};
 		
 
 		renderer::RenderableHandle SolidGeo;
@@ -19,7 +20,7 @@ namespace Chunk {
 		//voa vertexspec;
 		void genbufs();
 	
-		bool meshrecreateneeded;
+		stn::dirty_flag recreate_mesh;
 		chunk* aschunk;
 		array<face> facebuf;
 		
@@ -32,12 +33,12 @@ namespace Chunk {
 	{
 		bool init;
 		Coord loc;
-		chunkmesh* mesh;
+		stn::box<chunkmesh> mesh;
 		bool modified;
 		void write();
 		chunk();
 		
-		Vec3 center() const {
+		Point3 center() const {
 			return (loc+ unitv /2.f)*chunklength;
 		}
 		ecs::obj& operator[](size_t index);

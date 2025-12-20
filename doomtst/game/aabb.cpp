@@ -27,11 +27,10 @@ namespace aabb {
         }
     }
     
-    Collider::Collider(const v3::Vec3& objcenter, const v3::Vec3& objscale,bool appendtolist, bool iseffector)
+    Collider::Collider(const v3::Point3& objcenter, const v3::Scale3& objscale,bool appendtolist, bool iseffector): box(objcenter,objscale)
     {
         effector = iseffector;
-        box.center = objcenter;
-        box.scale = objscale;
+        
         
         in_list = appendtolist;
         if (appendtolist) {

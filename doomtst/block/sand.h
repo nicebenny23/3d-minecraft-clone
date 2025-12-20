@@ -26,8 +26,8 @@ struct sandfall : ecs::component{
             if (!obj->attributes.solid)
             {
 
-                gridutil::setblock(lowpos, minecraftsand);
-                gridutil::setblock(pos, minecraftair); 
+                gridutil::set_block(lowpos, minecraftsand);
+                gridutil::set_block(pos, minecraftair); 
             }
         }
     

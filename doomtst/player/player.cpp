@@ -19,13 +19,13 @@ void player::initplayer()
 {
 
 	float playerfric = 5;
-	goblin = CtxName::ctx.OC->spawn_empty();
-	goblin.add_component<ecs::transform_comp>(v3::Vec3(0,2,0));
+	goblin = CtxName::ctx.Ecs->spawn_empty();
+	goblin.add_component<ecs::transform_comp>(v3::Point3(0,2,0));
 	goblin.add_component<estate>(10, true);
-	goblin.get_component<ecs::transform_comp>().transform.scale = unitv / 2;
+	goblin.get_component<ecs::transform_comp>().transform.scale = unit_scale/ 2;
 
 	goblin.add_component<inventory>();
-	goblin.add_component<Collider>(zerov, unitv / 2.3f, true, false);
+	goblin.add_component<Collider>(v3::Point3(0,0,0), unit_scale / 2.3f, true, false);
 	goblin.add_component<rigidbody>(playerfric);
 
 	goblin.add_component<playereat>();

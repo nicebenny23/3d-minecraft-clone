@@ -5,7 +5,7 @@
 namespace ecs {
 	struct transform_comp : component {
 		Transform transform;
-		transform_comp(v3::Vec3 pos) {
+		transform_comp(v3::Point3 pos) {
 			transform.position = pos;
 		}
 	};
@@ -17,17 +17,23 @@ namespace ecs {
 		size_t generation() const {
 			return ent.generation();
 		}
-		space_id inner() const {
+		entity inner() const {
 			return ent;
 		}
 		obj() :ent(0,0), ecs(nullptr) {};
-		obj(space_id inner, Ecs* ecs) :ecs(ecs), ent(inner) {}
+		obj(entity inner, Ecs* ecs) :ecs(ecs), ent(inner) {}
 		bool operator ==(const obj& other) const{
 			return ent == other.ent&&ecs==other.ecs;
 		}
+		
+		//we live as long as we can no need to check
 		template<ComponentType T>
 		T& get_component() {
 			return ecs->get_component<T>(ent);
+		}
+		template<ComponentType T>
+		T& get_component_unchecked() {
+			return ecs->get_component_unchecked<T>(ent);
 		}
 		template<ComponentType T>
 		void remove_component() {
@@ -45,6 +51,13 @@ namespace ecs {
 			return ecs;
 		}
 		template<ComponentType T>
+		stn::Option<T&> get_component_opt() {
+			if (has_component<T>()) {
+				return stn::Option<T&>(get_component<T>());
+			}
+			return stn::None;
+		}
+		template<ComponentType T>
 		T* get_component_ptr() {
 			if (!has_component<T>())
 			{
@@ -56,7 +69,7 @@ namespace ecs {
 		T& add_component(Args&&... args) {
 			return ecs->add_component<T>(ent, std::forward<Args>(args)...);
 		}
-		void destroy() {
+		void destroy() &&{
 			ecs->write_command(DestroyEntity(ent));
 		}
 		template<ComponentType C>
@@ -67,7 +80,7 @@ namespace ecs {
 			return ecs->entities.is_valid(ent);
 		}
 	private:
-		space_id ent;
+		entity ent;
 		Ecs* ecs;
 	};
 

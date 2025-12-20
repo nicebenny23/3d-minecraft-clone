@@ -9,7 +9,7 @@ namespace camera {
 	v3::Vec3 GetCamUp();
 	v3::Vec3 GetCamRight();
 	Transform GetCam();
-v3::Vec3 campos();
+v3::Point3 campos();
 
 }
 

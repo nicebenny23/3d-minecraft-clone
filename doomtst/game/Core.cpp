@@ -70,9 +70,9 @@ namespace Core {
 
     void Engine::CreateGrid()
     {
-      
-        new(&Grid) grid::Grid(1,ctx);
-        ctx->Grid = &Grid;
+		Grid=&Ecs.insert_resource<grid::Grid>(1, ctx);
+        
+        ctx->Grid = Grid;
     }
 
     void Engine::InitTime()
@@ -85,22 +85,20 @@ namespace Core {
     }
     void Engine::InitOC()
     {
-        ctx->OC = &OC;
+        ctx->Ecs = &Ecs;
     }
 
     void Engine::CreateWorld()
     {
+		
         new (&world) World::world(0);
         ctx->wrld = &world;
     }
 
     void Engine::InitRenderer()
-    {
-        const char* versionStr = (const char*)glGetString(GL_VERSION);
-        std::cout << "OpenGL Version: " << versionStr << std::endl;
-       
-        ren.InitilizeBaseMaterials();
-        ctx->Ren = &ren;
+    {  
+		ren = &Ecs.insert_resource<renderer::Renderer>();
+        ctx->Ren = ren;
     }
    
 }

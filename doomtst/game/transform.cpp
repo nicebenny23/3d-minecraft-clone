@@ -11,9 +11,9 @@ Transform::Transform()
 {
     yaw =90;
     pitch = 0;
-	scale = v3::unitv ;
+	scale = v3::unit_scale;
 }
-Transform::Transform(v3::Vec3 pos, float newyaw, float newpitch, v3::Vec3 newscale)
+Transform::Transform(v3::Point3 pos, float newyaw, float newpitch, v3::Scale3 newscale)
 {
 	position = pos;
 	yaw = newyaw;
@@ -54,7 +54,7 @@ void Transform::OrientDir(v3::Vec3 Direction)
     yaw = (glm::degrees(std::atan2(Direction.z, Direction.x)));
 
 }
-void Transform::Orient(v3::Vec3 LookTowards)
+void Transform::Orient(v3::Point3 LookTowards)
 {
     OrientDir(LookTowards-position);
 }
@@ -88,7 +88,7 @@ glm::mat4 LookAt(Transform& transform)
 glm::mat4 Transform::ToMatrix()
 {
     glm::mat4 rotation = lookRotationMatrix(getnormaldirection());
-    glm::mat4 scaleMat = glm::scale(glm::mat4(1.0f), scale.glm());
+    glm::mat4 scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(scale.x,scale.y,scale.z));
     glm::mat4 translation = glm::translate(glm::mat4(1.0f), position.glm());
 
     // Combine all transformations (scale * rotation * translation)
@@ -112,10 +112,10 @@ Transform Decompose(const glm::mat4& matrix) {
     glm::vec3 eulerRotation = glm::eulerAngles(quatRotation);
 
     Transform transform;
-    transform.position = Vec3(pos);
+    transform.position = Point3(pos.x,pos.y,pos.z);
     transform.yaw = glm::degrees(eulerRotation.y);
     transform.pitch = glm::degrees(eulerRotation.x);
-    transform.scale = Vec3(scale);
+    transform.scale = Scale3(scale.x,scale.y,scale.z);
     return transform;
 }
 // Function to combine two Transforms into a new Transform

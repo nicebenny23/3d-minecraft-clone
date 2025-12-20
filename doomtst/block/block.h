@@ -4,6 +4,7 @@
 #include "../game/camera.h"
 #include "../game/ecs/game_object.h"
 #include "../util/geometry.h"
+#include "../util/geometry.h"
 #pragma once 
 constexpr double blocksize = 1.f;
 enum blocktex {
@@ -36,10 +37,13 @@ enum blocktex {
 	sandtex=26,
 	planktex=27,
 };
-using namespace v3;
-#define  unitscale   unitv * 1 / 2.00005f
+using namespace v3; 
+constexpr float unitaxis = 1.0f / 2.00005f;
+constexpr v3::Scale3  unitscale = unit_scale*unitaxis;
 namespace blockname {
-	const v3::Vec3 blockscale = unitscale * blocksize;
+	const double block_axis_scale = unitaxis * blocksize;
+	const v3::Scale3 blockscale =  v3::Scale3(block_axis_scale);
+
 	enum id
 	{
 		minecraftair = 0,
@@ -80,8 +84,15 @@ namespace blockname {
 		byte tex;
 		Dir::Dir3d facenum;
 		byte light;
-	
-
+		bool uncomputed() const {
+			return cover == cover_state::Uncomputed;
+		}
+		bool uncovered() const {
+			return cover == cover_state::Uncovered;
+		}
+		bool covered() const {
+			return cover == cover_state::Covered;
+		}
 		cover_state cover;
 		face() {
 			cover = cover_state::Uncomputed;
@@ -98,7 +109,7 @@ namespace blockname {
 			facenum =Dir::Dir3d(num);
 			mesh = owner;
 		}
-		Vec3 center();
+		Point3 center();
 		void calccameradist();
 
 	};
@@ -109,23 +120,26 @@ namespace blockname {
 	{
 		Dir::Dir2d direction;
 		Dir::Dir3d attachdir;
-		blockmesh() {
-
-			box.center = zerov;
-			box.scale = zerov;
+		blockmesh():box(Point3(0,0,0), v3::unit_scale) {
 			blk = nullptr;
 		}	
-	
-		blockmesh(block* parent,  Vec3 blkscale);
+		Point3 center() const {
+			return box.center;
+		}
+
+		Scale3 scale() const {
+			return box.scale;
+		}
+		geometry::Box bounds() const {
+			return box;
+		}
+		bool invisible() const;
+		blockmesh(block* parent,  Scale3 blkscale);
 		geometry::Box box;
 		block* blk;
-	
-		
 		face faces[6];
-		
-		
-		
 		face& operator[](size_t index);
+		const face& operator[](size_t index) const;
 		void attachindirection();
 		void setfaces(int leftface, int rightface, int upface, int downface, int frontface, int backface);
 		
@@ -143,6 +157,10 @@ namespace blockname {
 	{
 		bool transparent;
 		bool solid;
+		blockatt() {
+			solid = true;
+			transparent = false;
+		}
 	};
 	struct  block: ecs::component
 	{
@@ -151,8 +169,8 @@ namespace blockname {
 
 		v3::Coord pos;
 		byte emitedlight;
-		char  lightval;
-		char  id;
+		char lightval;
+		char id;
 
 		blockstate bstate;
 	
@@ -162,12 +180,20 @@ namespace blockname {
 	
 		char mininglevel;
 		bool minedfastwithpick;
-		Vec3 center() {
+		Point3 center() const{
 			return mesh.box.center;
 		}
+
+		Scale3 scale() const{
+			return mesh.box.scale;
+		}
+		geometry::Box bounds() const {
+			return mesh.box;
+		}
+
 		void create(v3::Coord location, int blockid, Dir::Dir3d blkattachface, Dir::Dir2d blkdirection);
 		
-		block():mesh(), pos(),emitedlight(),lightval(),id(),bstate(){
+		block():mesh(), pos(),emitedlight(),lightval(),id(),bstate(),attributes(){
 			
 		};
 		 	 void createdefaultaabb(bool effector=false);

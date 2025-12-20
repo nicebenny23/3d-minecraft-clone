@@ -25,8 +25,8 @@ struct slimemove : ecs::component{
 
 
         timesincejump -= CtxName::ctx.Time->dt;
-        Vec3 pos = owner().get_component<ecs::transform_comp>().transform.position;
-        v3::Vec3 headed = owner().get_component<navigator>().headed();
+        Point3 pos = owner().get_component<ecs::transform_comp>().transform.position;
+		Point3 headed = owner().get_component<navigator>().headed();
         
             v3::Vec3 gotopos = headed - pos;
             if (gotopos!=zerov)
@@ -52,9 +52,9 @@ struct slimemove : ecs::component{
     }
 };
 
-inline ecs::obj createslime(v3::Vec3 pos,bool type) {
+inline ecs::obj createslime(v3::Coord pos,bool type) {
 
-    ecs::obj refmodel = CtxName::ctx.OC->spawn_empty();
+    ecs::obj refmodel = CtxName::ctx.Ecs->spawn_empty();
 	refmodel.add_component<ecs::transform_comp>(pos);
   
         refmodel.add_component<model>().add("meshes\\cubetest.obj", "images\\slimetex.png");
@@ -62,7 +62,7 @@ inline ecs::obj createslime(v3::Vec3 pos,bool type) {
     refmodel.add_component<loottable>().addelem(slimeballitem, 1, false);
  
     refmodel.add_component<estate>(10, true);
-    refmodel.add_component<aabb::Collider>(zerov, blockscale, true);
+    refmodel.add_component<aabb::Collider>(v3::Point3(0,0,0), blockscale, true);
     float dmg = 3;
     if (type == true) {
         dmg = 5;

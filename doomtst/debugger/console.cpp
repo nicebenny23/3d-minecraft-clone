@@ -37,7 +37,7 @@ namespace console {
                 ImGui::Text("Debug:");
                 ImGui::Text(std::format("Fps: {:.3f}", CtxName::ctx.Time->smooth_fps).c_str());
 
-                Vec3 pos = player::goblin.get_component<ecs::transform_comp>().transform.position;
+				Point3 pos = player::goblin.get_component<ecs::transform_comp>().transform.position;
                 ImGui::Text(std::format("position: {}", pos).c_str());
 
                 ImGui::Text(std::format("yaw:{:.3f},pitch:{:.3f}", player::goblin.get_component<CameraComp>().CamTransform.yaw, player::goblin.get_component<CameraComp>().CamTransform.pitch).c_str());

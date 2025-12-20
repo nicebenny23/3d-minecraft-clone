@@ -9,7 +9,7 @@
 
 // Helper function for heuristic calculation (Manhattan distance)
 float appdist(const navnode& a, const navnode& b) {
-    return float(Vec3( a.pos- b.pos).length());
+    return dist2(a.pos,b.pos);
 }
 
 array<navnode> getneighborsdefault( navnode& node) {
@@ -19,10 +19,10 @@ array<navnode> getneighborsdefault( navnode& node) {
         if (dir==Dir::down3d||dir==Dir::up3d) {
             continue;
         }
-        Coord point= Coord(dir.ToVec() + node.pos);
+        Coord point= Coord(dir.to_coord() + node.pos);
 
-        v3::Vec3 center = point + unitv / 2;
-        v3::Vec3 scale = blockscale * v3::Vec3(1.1, .9f, 1.1);
+        v3::Point3 center = point + unitv / 2;
+        v3::Scale3 scale = blockscale * v3::Scale3(1.1, .9f, 1.1);
         geometry::Box bx = geometry::Box(center, scale);
         if (!voxtra::Boxcollwithgrid(bx))
         {
@@ -180,7 +180,7 @@ navigator::navigator(ecs::obj parentref, array<navnode>(*testfunc)(navnode& pos)
     testfunction = testfunc;
 }
 
-v3::Vec3 navigator::headed()
+v3::Point3 navigator::headed()
 {
     if (headed_list.length()<=headed_index)
     {
@@ -204,7 +204,7 @@ Vec3 transformnormal(Vec3 pos, Vec3 scale)
         {
            
 
-                Vec3 center = Vec3(xind, pos.y - 1, zind);
+				Point3 center = Point3(xind, pos.y - 1, zind);
                 geometry::Box posbx = geometry::Box(center+unitv/2, blockscale);
                 if (!voxtra::Boxcollwithgrid(posbx))
                 {
@@ -228,7 +228,7 @@ void navigator::calcpath()
     
     Coord currpos = CtxName::ctx.Grid->getVoxel( owner().get_component<ecs::transform_comp>().transform.position);
 
-    Vec3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.get_component<ecs::transform_comp>().transform.position);
+	Point3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.get_component<ecs::transform_comp>().transform.position);
     array<navnode>  finding = astarpathfinding(navnode(currpos),navnode(Coord(gotopos)), testfunction);
     headed_list.clear();
     headed_index = 0;
@@ -247,9 +247,9 @@ void navigator::calcpath()
 
 bool navigator::noblockinrange(Coord pos)
 {
-    Coord lowest = Coord(pos-unitv * esize);
+    Coord lowest = Coord(pos-esize);
 
-    Coord heighest=Coord(pos + unitv * esize);
+    Coord heighest=Coord(pos + esize);
 
     for (int xind= -lowest.x; xind < heighest.x; xind++)
     {
@@ -269,9 +269,9 @@ void navigator::update()
 {
     float timetillupdatespeed = .5;
 
-    Vec3 gotopos = goingtwords.get_component<ecs::transform_comp>().transform.position;
+	Point3 gotopos = goingtwords.get_component<ecs::transform_comp>().transform.position;
 
-    v3::Vec3 loc = owner().get_component<ecs::transform_comp>().transform.position;
+    v3::Point3 loc = owner().get_component<ecs::transform_comp>().transform.position;
    
     if (dist(loc,headed())<.1f)
     {
@@ -290,10 +290,7 @@ void navigator::update()
 
 bool navigator::should_update_path()
 {
-    Vec3 headed_pos= goingtwords.get_component<ecs::transform_comp>().transform.position;
-    if (true)
-    {
-
-    }
+	Point3 headed_pos= goingtwords.get_component<ecs::transform_comp>().transform.position;
+  
     return false;
 }

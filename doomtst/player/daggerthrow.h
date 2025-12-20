@@ -28,7 +28,7 @@ struct playerdaggercomp : ecs::component
 			{
 				return;
 			}
-			Vec3 spawpos =owner().get_component<ecs::transform_comp>().transform.position + owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * 3;
+			Point3 spawpos =owner().get_component<ecs::transform_comp>().transform.position + owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * 3;
 			Vec3 velocity =owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * 10;
 
 			spawndagger(spawpos, velocity);
