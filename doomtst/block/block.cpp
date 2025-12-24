@@ -1,6 +1,6 @@
 #include "../debugger/debug.h"
 #include "block.h"
-#include "../util/vector2.h"
+#include "../math/vector2.h"
 #include "../game/aabb.h"
 
 using namespace blockname;

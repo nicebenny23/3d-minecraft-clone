@@ -1,5 +1,6 @@
 #include "renderer.h"
 #include "../game/GameContext.h"
+#include "../game/Core.h"
 #pragma once
 
 struct decal {
@@ -11,7 +12,7 @@ struct decal {
 	void destroy() {
 		handle.destroy();
 	}
-
+	
 	renderer::RenderableHandle handle;
 	void create_mesh();
 	void remove();
@@ -22,7 +23,6 @@ struct decal {
 	void render();
 };
 
-void render_decals();
 inline void create_decal_material() {
 
 	CtxName::ctx.Ren->Shaders.Compile("decal_shader", "shaders\\decal_vert.vs", "shaders\\decal_frag.vs");
@@ -34,3 +34,37 @@ inline void create_decal_material() {
 
 
 }
+struct decal_system :ecs::resource {
+
+	stn::array<renderer::RenderableHandle> decals;
+	void add(renderer::RenderableHandle handle) {
+		if (!decals.contains(handle)) {
+			decals.push(handle);
+		}
+
+	}
+	void remove(renderer::RenderableHandle handle) {
+		Option<size_t> index = decals.find(handle);
+		if (index) {
+			decals.remove_at(index.unwrap());
+		}
+	}
+};
+struct render_decals :ecs::System {
+	render_decals() {
+
+	};
+	void run(ecs::Ecs& world) {
+		for (auto& dec : world.ensure_resource<decal_system>().decals) {
+			dec.render();
+		}
+	}
+};
+struct decal_plugin:Core::Plugin{
+	void Build(Core::Engine& engine) {
+		engine.emplace_system<render_decals>();
+		engine.emplace_resource<decal_system>();
+
+	}
+
+};

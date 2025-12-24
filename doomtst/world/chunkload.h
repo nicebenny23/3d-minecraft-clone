@@ -10,11 +10,11 @@ struct ChunkLoader
 {
 	void Init(CtxName::Context* ctx);
 	
-	Chunk::chunk* LoadChunk(Coord location);
-	Chunk::chunk* AllocChunk(Coord location);
-	Chunk::chunk* LoadFromFile(Coord location);
-	Chunk::chunk* LoadFromNoise(Coord location);
+	Chunk::chunk& LoadChunk(Coord location);
+	Chunk::chunk& AllocChunk(Coord location);	
 private:
+	Chunk::chunk& LoadFromFile(Coord location);
+	Chunk::chunk& LoadFromNoise(Coord location);
 	grid::Grid* Grid;
 };
  // chunkload_HPP

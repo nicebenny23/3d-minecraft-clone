@@ -2,7 +2,7 @@
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/rotate_vector.hpp> 
 #include <glm/gtc/quaternion.hpp>
-#include "../util/mathutil.h"
+#include "../math/mathutil.h"
 #include <cmath>
 #pragma once
 namespace math {

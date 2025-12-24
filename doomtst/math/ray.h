@@ -1,4 +1,4 @@
-#include "../util/vector3.h"
+#include "../math/vector3.h"
 #pragma once 
 using namespace v3;
 struct ray

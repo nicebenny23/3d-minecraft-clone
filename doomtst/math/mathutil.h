@@ -3,7 +3,7 @@
 #include <limits.h>
 #include <stdexcept>
 #include <type_traits>
-#include "pair.h"
+#include "../util/pair.h"
 #define NaNf std::numeric_limits<double>::max()
 __forceinline bool apx(double a, double b) {
 	constexpr double EPS = 1e-4f;
@@ -175,9 +175,6 @@ inline int z_sign(double x) {
 
 	return (x < 0) ? -1 : ((x > 0) ? 1 : 0);
 }
-
-
-int comparedouble(const void* b, const void* a);
 
 
 inline double wrap_to_range(double val, double low, double high) noexcept {

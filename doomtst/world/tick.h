@@ -1,4 +1,4 @@
-#include "../util/time.h"
+#include "../game/time.h"
 #pragma once 
 constexpr auto ticktime = .15;
 namespace tick {

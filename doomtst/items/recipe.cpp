@@ -1,6 +1,6 @@
 #pragma once
 #include "recipe.h"
-#include "../util/time.h"
+#include "../game/time.h"
 void recipemanager::destroy() {
 
     newitemlocation->destroy();
@@ -199,7 +199,7 @@ void recipemanager::autoupdate()
             if (currstate!=notcrafting)
             {
 
-                attributes.timetillcraft -= CtxName::ctx.Time->dt;
+                attributes.timetillcraft -= CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
               
             }
             if (currstate!=iscrafting)

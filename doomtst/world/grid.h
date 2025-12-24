@@ -1,7 +1,7 @@
 #include "../game/camera.h"
 #include "chunkload.h"
-#include "../util/vector3.h"
-#include "../util/geometry.h"
+#include "../math/vector3.h"
+#include "../math/geometry.h"
 #pragma once
 namespace CtxName {
 	struct Context;
@@ -50,6 +50,8 @@ namespace grid {
 
 	stn::Option<Chunk::chunk&> get_chunk(Coord pos);
 	 Option< ecs::obj&> get_object(const v3::Coord pos);
+
+	 Option<block&> get_block(const v3::Coord pos);
 	block* getBlock(const v3::Coord pos);
 	bool containsChunkIndex(int index) const;
 	ecs::obj* getObject(const v3::Coord pos);

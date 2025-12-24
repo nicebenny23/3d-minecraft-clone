@@ -132,7 +132,7 @@ void Chunk::chunk::write()
 		bytelist.reach(chunksize + i) = 0;
 		appendspecialbytelist(bytelist, i, blockbuf[i].get_component_ptr<block>());
 	}
-	file.write<unsigned short>(bytelist.data(), bytelist.length());
+	file.write<unsigned short>(bytelist.span());
 	
 	file.close();
 }

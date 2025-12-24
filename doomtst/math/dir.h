@@ -1,7 +1,7 @@
 ﻿
 #pragma once
 #include "vector3.h"
-#include "List.h"
+#include "../util/List.h"
 namespace Dir {
 
 	enum class Ind3d :char {

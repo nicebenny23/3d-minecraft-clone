@@ -2,7 +2,7 @@
 #include "../game/objecthelper.h"
 #include "../util/userinput.h"
 #include <GLFW/glfw3.h>
-#include "../util/time.h"
+#include "../game/time.h"
 #include "../game/rigidbody.h"
 #include "../world/voxeltraversal.h"
 #include "../game/entitystate.h"
@@ -17,8 +17,8 @@ struct playermovement : ecs::component
     void start()
     {
         has_jumped = false;
-        lastGroundedTime = CtxName::ctx.Time->now();
-        jumpBufferTime = CtxName::ctx.Time->now() - 1.0f;
+        lastGroundedTime = CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now();
+        jumpBufferTime = CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now() - 1.0f;
         slamUsed = false;
     }
 };
@@ -44,8 +44,8 @@ struct PlayerMovementSys : ecs::System
             {
                 int l = 2;
             }
-            float dt = CtxName::ctx.Time->dt;
-            timename::time now = CtxName::ctx.Time->now();
+            float dt = CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
+            timename::time now = CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now();
             // — horizontal movement unchanged —
             float slowdown = 2.0f;
             float speed = 16.0f;
@@ -123,7 +123,9 @@ struct PlayerMovementSys : ecs::System
                 {
                     body.velocity.y -= effSpeed;
                 }
-				body.owner().get_component<ecs::transform_comp>().transform.position += Vec3(2, 0, 0); 
+					//body.owner().get_component<ecs::transform_comp>().transform.position += Vec3(3, 0, 0);
+				
+			
                 
             }
         }

@@ -1,5 +1,5 @@
 #include "aabb.h"
-#include "../util/geometry.h"
+#include "../math/geometry.h"
 //simple aabb class without collision implemented 
 namespace aabb {
     

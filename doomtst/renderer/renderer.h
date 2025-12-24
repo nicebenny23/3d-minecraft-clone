@@ -3,7 +3,7 @@
 #include "renderer/vertexobject.h"
 #include "renderer/shader.h"
 #include <glm/mat4x4.hpp>
-#include "../util/vector3.h"
+#include "../math/vector3.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "renderer/texture.h"
 #include "renderer/ShaderManager.h"
@@ -35,17 +35,17 @@ namespace renderer {
 			return layout.stride();
 		}
 		size_t length() const {
-			return pointlist.length()/ components();
+			return points.length()/ components();
 		}
-		MeshData(mesh_id msh,const vertice::vertex& vertex_layout, indice_mode indices) :mesh(msh),generate_trivial(indices),layout(vertex_layout), pointlist(){}
+		MeshData(mesh_id msh,const vertice::vertex& vertex_layout, indice_mode indices) :mesh(msh),generate_trivial(indices),layout(vertex_layout), points(){}
 		template<typename ...Args>
 		inline void add_point(const Args& ...values)
 		{
-			size_t start_len = pointlist.length();
+			size_t start_len = points.length();
 
 			(push_single(values), ...);
 
-			size_t end_len = pointlist.length();
+			size_t end_len = points.length();
 			size_t floats_pushed = end_len - start_len;
 
 			if (components() != floats_pushed) {
@@ -53,29 +53,31 @@ namespace renderer {
 			}
 
 			if (generate_trivial==indice_mode::generate_indices) {
-				indicelist.push(indicelist.length());
+				indices.push(indices.length());
 			}
 
 		}
-		
-		void add_index(size_t index) {
-			indicelist.push(index);
+		void add_indices(std::initializer_list<std::uint32_t> indice_list) {
+			indices.append(indice_list);
 		}
-		explicit MeshData() :generate_trivial(indice_mode::generate_indices), pointlist(), indicelist(), layout(){}
+		void add_index(std::uint32_t index) {
+			indices.push(index);
+		}
+		explicit MeshData() :generate_trivial(indice_mode::generate_indices), points(), indices(), layout(){}
 		mesh_id mesh;
 		indice_mode generate_trivial;
 		vertice::vertex layout;
-		stn::array<float> pointlist;
-		stn::array<unsigned int> indicelist;
+		stn::array<float> points;
+		stn::array<std::uint32_t> indices;
 	private:
 		inline void push_single(const v3::Point3& v) {
-			pointlist.push({ float(v.x),float(v.y),float(v.z) });
+			points.push({ float(v.x),float(v.y),float(v.z) });
 		}
 		inline void push_single(const v2::Vec2& v) {
-			pointlist.push({ float(v.x),float(v.y) });
+			points.push({ float(v.x),float(v.y) });
 		}
 		inline void push_single(float f) {
-			pointlist.push(f);
+			points.push(f);
 		}
 	};
 	struct Renderer;
@@ -232,7 +234,7 @@ namespace renderer {
 				return;
 			}
 			Mesh& mesh = mabye_mesh.expect("Since we just checked the mesh must now exist");
-			if (data.pointlist.length() % mesh.Voa.attributes.components() != 0)
+			if (data.points.length() % mesh.Voa.attributes.components() != 0)
 			{
 				throw std::logic_error("Vertex Data is corrupted");
 			}
@@ -241,10 +243,10 @@ namespace renderer {
 				throw std::invalid_argument("Cannot Fill a mesh without Generating buffers first");
 			}
 			context.bind(mesh);
-			mesh.Vbo.fillbuffer<float>(data.pointlist);
+			mesh.Vbo.fillbuffer<float>(data.points);
 			mesh.Voa.SetAllAttributes();
-			mesh.Ibo.fillbuffer<unsigned int>(data.indicelist);
-			mesh.length = data.indicelist.length();
+			mesh.Ibo.fillbuffer<unsigned int>(data.indices);
+			mesh.length = data.indices.length();
 		}
 
 		void pop() {

@@ -94,22 +94,29 @@ struct safefile {
 	}
 	safefile(const char* filepath, mode openmode);
 	safefile(std::string filepath, mode openmode);
-	void close();
 
+	safefile(const safefile&) = delete;
+	safefile& operator=(const safefile&) = delete;
+	safefile(safefile&& other) noexcept
+		: optype(other.optype), fp(other.fp), size(other.size), offset(other.offset) {
+		other.fp = nullptr;
+	}
+	void close();
+	~safefile() {
+		close();
+	}
 	void go(unsigned int byteoffset);
 
 	template <typename T>
-	void write(T* ptr, size_t amt)
+	void write(stn::span<T> span)
 	{
 		if (canwrite(optype) || canappend(optype))
 		{
-			size_t writeval = fwrite(ptr, sizeof(T), amt, fp);
-			if (writeval != amt)
+			size_t amount_written = fwrite(span.data(), sizeof(T), span.length(), fp);
+			if (amount_written != span.length())
 			{
-				std::cout << "only " << writeval << " out of " << amt << " elems were written";
-				throw std::runtime_error("writing failed");
+				stn::throw_logic_error("attempted to write to a file but only {} out of {} elements were written", amount_written, span.length());
 			}
-			return;
 		}
 		else
 		{
@@ -118,18 +125,15 @@ struct safefile {
 	}
 
 	template <typename T>
-	T* read(size_t amt)
+	T* read(size_t count)
 	{
 		if (canread(optype))
 		{
-			T* newarr = (new T[amt]);
-			size_t read = fread(newarr, sizeof(T), amt, fp);
-			if (read != amt)
+			T* newarr = new T[count];
+			size_t read = fread(newarr, sizeof(T), count, fp);
+			if (read != count)
 			{
-				debug("reading failed");
-				debug("attempted to read a file but only");
-				std::cout << read << " out of " << amt << " elements were read";
-				throw std::runtime_error("reading failed");
+				stn::throw_logic_error("attempted to read a file but only {} out of {} elements were read", read, count);
 			}
 			return newarr;
 		}

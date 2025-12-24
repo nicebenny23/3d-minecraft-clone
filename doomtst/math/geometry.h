@@ -3,7 +3,7 @@
 #include "vector3.h"
 #include "mathutil.h"
 #include "vector2.h"
-#include "Option.h"
+#include "../util/Option.h"
 using namespace v3;
 
 namespace geometry {

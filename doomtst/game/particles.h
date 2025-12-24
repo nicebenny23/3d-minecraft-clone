@@ -1,10 +1,10 @@
 #pragma once
-#include "../util/vector3.h"
+#include "../math/vector3.h"
 #include "../game/ecs/game_object.h"
 #include "../util/dynamicarray.h"
 #include "../util/queue.h"
 #include "../game/entity.h"
-#include "../util/time.h"
+#include "../game/time.h"
 #include "../renderer/renderer.h"
 #include "camera.h"
 

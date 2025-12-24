@@ -1,8 +1,8 @@
 #include "grid.h"
-#include "../util/ray.h"
+#include "../math/ray.h"
 #include "../game/aabb.h"
-#include "../util/intersection.h"
-#include "../util/geometry.h"
+#include "../math/intersection.h"
+#include "../math/geometry.h"
 #include "../game/GameContext.h"
 #include "../util/Option.h"
 #include "../util/unique.h"
@@ -45,9 +45,9 @@ namespace voxtra {
 		size_t max_tst = 40;
 		for (size_t tst = 0; tst < max_tst; tst++)
 		{
-			double ranx = (random() - .5) * 2;
-			double rany = (random() - .5) * 2;
-			double ranz = (random() - .5) * 2;
+			double ranx = (random::random() - .5) * 2;
+			double rany = (random::random() - .5) * 2;
+			double ranz = (random::random() - .5) * 2;
 			v3::Point3 test_pos = (Vec3(ranx, rany, ranz) * (2 * CtxName::ctx.Grid->rad + 1) / 2 + CtxName::ctx.Grid->gridpos) * chunkaxis;
 			geometry::Box test_box = geometry::Box(test_pos,scale);
 			if (!Boxcollwithgrid(test_box))

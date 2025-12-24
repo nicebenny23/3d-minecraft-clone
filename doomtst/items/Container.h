@@ -1,4 +1,4 @@
-#include "../util/vector2.h"
+#include "../math/vector2.h"
 #include "itemslot.h"
 #include "menu.h"
 #pragma once 
@@ -147,7 +147,7 @@ struct Container
 			{
 
 
-				databuf.push( itemslot(i + xoff - float(sizex) / 2.0f, j + yoff - ysize / 2.0f));
+				databuf.push( itemslot(i + xoff - float(sizex) / 2.0f, int(j + yoff - ysize / 2.0f)));
 			
 
 			}

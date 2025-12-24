@@ -1,7 +1,7 @@
 #pragma once
 #include "../debugger/debug.h"
 #include "itemslot.h"
-#include "../util/mathutil.h"
+#include "../math/mathutil.h"
 
 void destroyonclick(itemslot& toremove) {
 	toremove.helditem->itemui.itemsprite->state.enabled= false;

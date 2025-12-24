@@ -1,4 +1,4 @@
-#include "../../util/vector2.h"
+#include "../../math/vector2.h"
 #include <GLFW/glfw3.h>
 #include "../../util/dynamicarray.h"
 #include <glad/glad.h>

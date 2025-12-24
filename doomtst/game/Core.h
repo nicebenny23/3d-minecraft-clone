@@ -5,7 +5,6 @@
 #include "GameContext.h"
 #include "entity.h"
 #include "../renderer/renderer.h"
-#include "../util/time.h"
 #include "../renderer/guirender.h"
 #include "../world/world.h"
 //start of the application
@@ -40,13 +39,12 @@ namespace Core {
         void ConnectToContext();
         void createWindow();
         void CreateGrid();
-        void InitTime();
         void InitInput();
         void InitOC();
         void CreateWorld();
         void InitRenderer();
        CtxName::Context* ctx;
-        timename::TimeManager Time;
+   
         userinput::InputManager Inp;
         window::Window Window;
         renderer::Renderer* ren;
@@ -57,10 +55,25 @@ namespace Core {
 		void insert_plugin() {
 			plugin_list.insert<T>();
 		}
+
+		template<ecs::ResourceType T,typename ...Args>
+		T& emplace_resource(Args&&... args) requires std::constructible_from<T,Args...>{
+			return Ecs.insert_resource<T>(std::forward<Args>(args)...);
+		}
+		template<ecs::ResourceType T>
+		T& ensure_resource() {
+		return Ecs.ensure_resource<T>();
+		}
+		template<ecs::SystemType T, typename ...Args>
+		void emplace_system(Args&&... args) requires std::constructible_from<T, Args&&...> {
+			Ecs.emplace_system<T>(std::forward<Args>(args)...);
+		}
+
 		Engine():Ecs(2<<18) {
 			plugin_list.inject_engine(*this);
 		}
         ecs::Ecs Ecs;
+		
     };
     extern Engine game;
     

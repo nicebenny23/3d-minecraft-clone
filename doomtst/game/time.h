@@ -1,7 +1,7 @@
-
+#include "ecs/ecs.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "mathutil.h"
+#include "../math/mathutil.h"
 #pragma once
 namespace timename {
 	struct time {
@@ -26,7 +26,7 @@ namespace timename {
 
 	};
 	struct duration;
-	struct TimeManager
+	struct TimeManager:ecs::resource
 	{
 		double real_dt;
 
@@ -35,11 +35,12 @@ namespace timename {
 		double ElapsedTime;
 
 		TimeManager() {
-			
+
 			dt = 0;
 			ElapsedTime = glfwGetTime();
 			real_dt = 1 / 60.f;
-
+			smooth_fps=0;
+			fps_counter = 0;
 		}
 			
 		
@@ -76,7 +77,6 @@ namespace timename {
 		double fps_counter;
 		const int min_frames = 20;
 	};
-
 
 	enum class duration_state {
 		active=0,

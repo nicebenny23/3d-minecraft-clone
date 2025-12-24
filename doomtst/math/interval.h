@@ -1,13 +1,11 @@
 #include "mathutil.h"
 #pragma once
-namespace inter {
+namespace math {
 	//closed interval
 	struct range {
-		range() :min(0), max(0) {};
-		range(float mn, float mx):min(mn),max(mx) {
+		range(double minimum, double maximum) :min(minimum), max(maximum) {
 
-			if (max<min)
-			{
+			if (max < min) {
 				std::swap(min, max);
 			}
 		}
@@ -19,47 +17,44 @@ namespace inter {
 			max += oth.max;
 			return *this;
 		}
-		range operator*(float scale) {
-			if (scale<0)
-			{
+		range operator*(double scale) {
+			if (scale < 0) {
 				return range(max * scale, min * scale);
-			}else
-			{
-				return range(min* scale, max* scale);
+			}
+			else {
+				return range(min * scale, max * scale);
 			}
 		}
-		range& operator*=(float scale) {
-			if (scale < 0)
-			{
+		range& operator*=(double scale) {
+			if (scale < 0) {
 				*this = range(max * scale, min * scale);
 			}
-			else
-			{
+			else {
 				*this = range(min * scale, max * scale);
 			}
 			return *this;
 		}
-		float length() {
+		double length() const {
 
 			return max - min;
 		}
-		float lower() const {
+		double lower() const {
 			return min;
 		}
-		float upper() const {
+		double upper() const {
 			return max;
 		}
-		bool contains(float val) const {
-			return inrange(val,min, max);
+		bool contains(double val) const {
+			return inrange(val, min, max);
 		}
-		bool apx_contains(float val) const {
+		bool apx_contains(double val) const {
 			return inrange_apx(val, min, max);
 		}
 		bool contains(const range& other) {
-			return contains(other.max)&&contains(other.min);
+			return contains(other.max) && contains(other.min);
 		}
-	
+
 	private:
-		float min,max;
+		double min, max;
 	};
 }

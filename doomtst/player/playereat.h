@@ -69,7 +69,7 @@ struct playereat : ecs::component
 	void tryeat() {
 		if (caneat())
 		{
-			timetoeat -= CtxName::ctx.Time->dt;
+			timetoeat -= CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
 			if (timetoeat < 0) {
 
 				timetoeat = 1;

@@ -1,9 +1,9 @@
 #pragma once
 #include "navigation.h"
 #include "objecthelper.h"
-#include "../util/time.h"
+#include "../game/time.h"
 #include "../util/dynamicarray.h"
-#include "../util/dir.h"
+#include "../math/dir.h"
 #include "../world/grid.h"
 #include "../world/voxeltraversal.h"
 
@@ -175,7 +175,7 @@ return        array<navnode>();
 navigator::navigator(ecs::obj parentref, array<navnode>(*testfunc)(navnode& pos))
 {
     headed_index = 0;
-    path_creation_dur=CtxName::ctx.Time->create_dur();
+    path_creation_dur=CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().create_dur();
     goingtwords = parentref;
     testfunction = testfunc;
 }

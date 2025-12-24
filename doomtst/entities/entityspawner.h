@@ -29,7 +29,7 @@ struct spawn_mobs :ecs::System {
 		float average = 0;
 		for (int i = 0; i < 6; i++)
 		{
-			average += blk[i].lightval / static_cast<float>(6);
+			average += blk[i].lightval.unwrap_or(0) / static_cast<float>(6);
 		
 		}
 		return 	(average < 8);
@@ -66,7 +66,7 @@ struct spawn_mobs :ecs::System {
 			return;
 		}
 		float spawnthreshold = .01f;
-		float randomnum = random();
+		float randomnum = random::random();
 		size_t total_alive = 0;
 
 		ecs::View<slimemove> slimes(ecs);

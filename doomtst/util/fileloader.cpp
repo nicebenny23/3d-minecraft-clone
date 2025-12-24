@@ -93,10 +93,9 @@ void safefile::close()
 {
     if (fp != nullptr) {
         fclose(fp);
-    }
-    else {
-        throw std::runtime_error("uninitialized files can't be closed");
-    }
+		fp = nullptr;
+	}
+    
 }
 
 void safefile::go(unsigned int byteoffset)

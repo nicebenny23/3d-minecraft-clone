@@ -7,7 +7,7 @@
 #include "message.h"
 namespace ecs {
 	struct Ecs {
-		Ecs(size_t total_entities) :entities(total_entities), archetypes(total_entities), systems() {
+		Ecs(std::uint32_t total_entities) :entities(total_entities), archetypes(total_entities), systems() {
 			components.inject_ecs_instance(this);
 			systems.emplace<run_updates>();
 			systems.emplace<delete_objects>();
@@ -54,7 +54,7 @@ namespace ecs {
 						// 1) Snapshot the count _once_
 						uint32_t originalCount = archetype.count();
 						for (uint32_t i = 0; i < originalCount; ++i) {
-							(*mgr)[archetype[archetype_index(i)]].update();
+							mgr->unchecked_at(archetype[archetype_index(i)]).update();
 						}
 					}
 				}
@@ -79,8 +79,8 @@ namespace ecs {
 			return resources.insert<T>(std::forward<Args>(args)...);
 		}
 		template<ResourceType T>
-		T& get_resource_or_default() {
-			return resources.get_or_default<T>();
+		T& ensure_resource() {
+			return resources.ensure<T>();
 		}
 		template<ResourceType T>
 		void remove_resource() {
@@ -89,9 +89,12 @@ namespace ecs {
 		void clear_resources() {
 			return resources.clear();
 		}
+
+
+
 		template<typename T>
 		Events<T>& events() {
-			return get_resource_or_default<Events<T>>();
+			return ensure_resource<Events<T>>();
 		}
 		template<typename T, typename ...Args>
 		void write_event(Args&&... args) {
@@ -102,9 +105,10 @@ namespace ecs {
 			return events<T>().make_reader();
 		}
 
+		
 		template<typename T>
 		Commands<T>& commands() {
-			return get_resource_or_default<Commands<T>>();
+			return ensure_resource<Commands<T>>();
 		}
 		template<typename T>
 		void write_command(T&& command) {
@@ -114,6 +118,8 @@ namespace ecs {
 		decltype(auto) read_commands() {
 			return commands<T>().read();
 		}
+		
+		
 		template<SystemType Sys>
 		void insert_system(Sys& sys) {
 			systems.insert(sys);
@@ -126,26 +132,24 @@ namespace ecs {
 			systems.run_on(*this);
 		}
 
+
+		template<ComponentType T>
+		component_id insert_component_id() const {
+			return components.insert_id<T>();
+		}
+
+		template<ComponentType T>
+		component_id get_component_id() const {
+			return components.get_id<T>();
+		}
+
+
 		obj spawn_empty();
 
 		bool contains(entity ent) const {
 			return entities.is_valid(ent);
 		}
-		bool has_component(entity ent, component_id id) const {
-			entities.assert_valid(ent);
-			return components.has_component(ent, id);
-		}
-
-		template<typename T>
-		bool has_component(entity object) {
-			entities.assert_valid(object);
-			return has_component(object, components.insert_id<T>());
-		}
-		template<ComponentType... Components>
-		bool has_components(entity object) {
-			entities.assert_valid(object);
-			return archetypes.archetype_of(object).has_components(components.get_ids<Components...>());
-		}
+		
 		template<ComponentType T, typename ...Args>
 		T& add_component(entity object, Args&&... args)   requires std::constructible_from<T, Args&&...> {
 			entities.assert_valid(object);
@@ -153,10 +157,27 @@ namespace ecs {
 			archetypes.transfer_entity_to_flipped_index(object, components.insert_id<T>());
 			return component;
 		}
+		
+		bool has_component(entity ent, component_id id) const {
+			entities.assert_valid(ent);
+			return components.has_component(ent, id);
+		}
+
+		template<typename T>
+		bool has_component(entity object) {
+			return has_component(object, components.insert_id<T>());
+		}
+		template<ComponentType... Components>
+		bool has_components(entity object) {
+			entities.assert_valid(object);
+			return archetypes.archetype_of(object).has_components(components.get_ids<Components...>());
+		}
+
 		template<ComponentType T>
 		T& get_component_unchecked(entity object) {
 			return components.get_component_unchecked<T>(object);
 		}
+
 		template<ComponentType T>
 		T& get_component(entity object) {
 			entities.assert_valid(object);
@@ -177,34 +198,22 @@ namespace ecs {
 			}(std::index_sequence_for<Components...>{});
 		}
 
-		const component& get_by_id(entity object, component_id id) const {
-			entities.assert_valid(object);
-			return components[id][object];
-		}
-		template<ComponentType T>
-		component_id insert_component_id() const {
-			return components.insert_id<T>();
-		}
-
-		template<ComponentType T>
-		component_id get_component_id() const {
-			return components.get_id<T>();
-		}
+		
 		void remove_component_unchecked(entity object, component_id id) {
 
 			component_storage& store = components[id].storage();
-			store.remove_at(object);
+			store.remove_at_unchecked(object);
 			archetypes.transfer_entity_to_flipped_index(object, id);
 		}
 		void remove_object_unchecked(entity object) {
 			stn::span<const component_id> cached = archetypes.archetype_of(object).view_cached();
 			for (component_id id : cached) {
-				components[id].storage().remove_at(object);
+				components[id].storage().remove_at_unchecked(object);
 			}
 
 			//removes from both at the same time
 			archetypes.remove_from_archetypes(object);
-			entities.remove_space_id(object);
+			entities.remove_entity(object);
 		}
 
 	};

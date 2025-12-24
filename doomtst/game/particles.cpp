@@ -23,7 +23,8 @@ const int indices[]{
 
 void particleemiter::update()
 {
-	timetillspawn = Min(timetillspawn-CtxName::ctx.Time->dt,particlespawntime);
+	float dt = CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
+	timetillspawn = Min(timetillspawn-dt,particlespawntime);
 	for (int i = 0; i < particlearray.length(); i++)
 	{
 		//if (particlearray[i].exists())
@@ -34,7 +35,7 @@ void particleemiter::update()
 			{
 
 
-				if (particlearray[i].get_component<particle>().endtime < CtxName::ctx.Time->now().value)
+				if (particlearray[i].get_component<particle>().endtime < CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now().value)
 				{
 					std::move(particlearray[i]).destroy();
 				}
@@ -52,7 +53,7 @@ void particleemiter::update()
 			 {
 			//	 ecs::obj newparticle = CtxName::ctx.Ecs->spawn_with_transform(position);
 				 
-			//	 newparticle.add_component<particle>().endtime= CtxName::ctx.Time->now().value +particlelifetime;
+			//	 newparticle.add_component<particle>().endtime= CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now().value +particlelifetime;
 			//	 newparticle.get_component<particle>().ind = i;
 			//	 newparticle.get_component<particle>().emit = this;
 				// (*particleinit)(newparticle);
@@ -112,12 +113,12 @@ void particleemiter::renderparticles()
 	}
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glBindVertexArray(0);
-	//databuf.destroy();
+	//databuf.clear();
 }
 void initbaseparticle(ecs::obj newent) {
-	newent.get_component<ecs::transform_comp>().transform.position += Vec3(random(), 1, random()) / 10;
+	newent.get_component<ecs::transform_comp>().transform.position += Vec3(random::random(), 1, random::random()) / 10;
 	newent.add_component<aabb::Collider>(newent.get_component<ecs::transform_comp>().transform.position, unit_scale / 9, true);
-	newent.add_component<rigidbody>(1, .1).velocity = Vec3(random(), 1, random()) * 2;
+	newent.add_component<rigidbody>(1, .1).velocity = Vec3(random::random(), 1, random::random()) * 2;
 	newent.get_component<ecs::transform_comp>().transform.scale = blockscale / 22;
 	
 }

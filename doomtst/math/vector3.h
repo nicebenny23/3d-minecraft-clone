@@ -3,7 +3,7 @@
 #include "vector2.h"
 #include <glm/glm.hpp>
 #include <string>
-#include "../math.h/Scale3.h"
+#include "Scale3.h"
 #pragma once
 
 namespace v3 {

@@ -101,6 +101,9 @@ namespace stn {
             sparse_map.clear();
             next_index = 0;
         }
+		~type_indexer() {
+			clear();
+		}
     };
     type_indexer()->type_indexer<stn::Id>;
 

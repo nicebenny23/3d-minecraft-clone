@@ -39,7 +39,10 @@ namespace stn {
 		inline constexpr std::size_t cap() const {
 			return capacity;
 		}
-
+		//incorrect if len==0
+		inline constexpr std::size_t last_index_unchecked() const {
+			return len - 1;
+		}
 		inline constexpr std::size_t last_index() const {
 			if (empty()) {
 				throw std::logic_error("Cannot access the last index of an empty array");
@@ -95,27 +98,29 @@ namespace stn {
 		}
 
 		[[nodiscard]] T& operator[](size_t index) {
-			if (!contains_index(index)) {
+			//=contains_index(index) but it is better for debug mode
+			if (len<=index) {
 				throw_range_exception("Index {} is out of bounds: cannot access element in array of len {}", index, length());
 			}
 			return list[index];
 		}
 
 		[[nodiscard]] const T& operator[](size_t index) const {
-			if (!contains_index(index)) {
+			//=contains_index(index) but it is faster for debug mode
+			if (len <= index) {
 				throw_range_exception("Index {} is out of bounds: cannot access element in array of len {}", index, length());
 			}
 			return list[index];
 		}
 		[[nodiscard]] Option<T&> get(size_t index) {
 			if (contains_index(index)) {
-				return stn::Option<T&>((*this)[index]);
+				return stn::Option<T&>(list[index]);
 			}
 			return None;
 		}
 		[[nodiscard]] Option<const T&> get(size_t index) const{
 			if (contains_index(index)) {
-				return stn::Option<const T&>((*this)[index]);
+				return stn::Option<const T&>(list[index]);
 			}
 			return None;
 		}
@@ -129,14 +134,16 @@ namespace stn {
 		}
 
 		[[nodiscard]] T& reach(size_t index) requires(is_default) {
-			if (!contains_index(index)) {
+			//=contains_index(index) but it is faster for debug mode
+			if (len <= index) {
 				geometric_expand(index + 1);
 			}
 			return list[index];
 		}
 
 		[[nodiscard]] T& reach(size_t index, const T& value)requires(is_copyable) {
-			if (!contains_index(index)) {
+			//=contains_index(index) but it is faster for debug mode
+			if (len <= index) {
 				geometric_expand(index + 1, value);
 			}
 			return list[index];
@@ -348,14 +355,12 @@ namespace stn {
 			if (!contains_index(index)) {
 				throw_range_exception("swap_drop failed: index {} out of bounds (len {})", index, len);
 			}
-
-
-			if (index != len - 1) {
-				list[index] = std::move(list[len - 1]); // move last element to 'hole'
-			}
-
-			list.destruct_at(len - 1); // destroy old last element
-			len--;
+			list[index] = std::move(list[--len]); // move last element to 'hole'
+			list.destruct_at(len); // clear old last element
+		}
+		void swap_drop_unchecked(size_t index) {
+			list[index] = std::move(list[--len]); // move last element to 'hole'
+			list.destruct_at(len); // clear old last element
 		}
 		// Delete an element at the given index, shifting others.
 		void remove_at(size_t index) {

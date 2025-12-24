@@ -1424,8 +1424,8 @@ namespace robin_hood {
                 }
 
                 mInfo[idx] = 0;
-                // don't destroy, we've moved it
-                // mKeyVals[idx].destroy(*this);
+                // don't clear, we've moved it
+                // mKeyVals[idx].clear(*this);
                 mKeyVals[idx].~Node();
             }
 
@@ -1642,7 +1642,7 @@ namespace robin_hood {
                         return *this;
                     }
 
-                    // not empty: destroy what we have there
+                    // not empty: clear what we have there
                     // clear also resets mInfo to 0, that's sometimes not necessary.
                     destroy();
                     init();
@@ -2247,7 +2247,7 @@ namespace robin_hood {
                             // might throw an exception, which is really bad since we are in the middle of
                             // moving stuff.
                             insert_move(std::move(oldKeyVals[i]));
-                            // destroy the node but DON'T destroy the data.
+                            // clear the node but DON'T clear the data.
                             oldKeyVals[i].~Node();
                         }
                     }
@@ -2256,7 +2256,7 @@ namespace robin_hood {
                     // silence g++'s overeager "attempt to free a non-heap object 'map'
                     // [-Werror=free-nonheap-object]" warning.
                     if (oldKeyVals != reinterpret_cast_no_cast_align_warning<Node*>(&mMask)) {
-                        // don't destroy old data: put it into the pool instead
+                        // don't clear old data: put it into the pool instead
                         if (forceFree) {
                             std::free(oldKeyVals);
                         }

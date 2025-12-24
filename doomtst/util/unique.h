@@ -74,10 +74,13 @@ namespace stn {
 		const U& ref_as_unchecked() const {
 			return *static_cast<U*>(ptr);
 		}
+
+		//requires the cast to be valid
 		template<typename U> requires std::derived_from<U, T>
 		U* get_as_unchecked() {
 			return static_cast<U*>(ptr);
 		}
+		//requires the cast to be valid
 		template<typename U> requires std::derived_from<U, T>
 		const U* get_as_unchecked() const {
 			return static_cast<U*>(ptr);

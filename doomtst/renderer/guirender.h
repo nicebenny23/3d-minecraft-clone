@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../util/vector3.h"
+#include "../math/vector3.h"
 #include "../debugger/console.h"
 
 namespace guirender{

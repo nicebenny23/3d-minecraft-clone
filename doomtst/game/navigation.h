@@ -1,9 +1,9 @@
 #pragma once
-#include "../util/mathutil.h"
+#include "../math/mathutil.h"
 #include "../world/grid.h"
-#include "../util/dir.h"
+#include "../math/dir.h"
 #include "entity.h"
-#include "../util/time.h"
+#include "../game/time.h"
 
 struct navnode {
     Coord pos;

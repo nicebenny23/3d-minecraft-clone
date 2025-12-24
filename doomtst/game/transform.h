@@ -1,5 +1,5 @@
 #pragma once
-#include "../util/vector3.h"
+#include "../math/vector3.h"
 #include <glm/mat4x4.hpp>
 
 struct Transform

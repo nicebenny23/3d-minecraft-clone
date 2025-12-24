@@ -19,7 +19,8 @@ namespace ecs {
 		T& insert(Args&&... args) requires std::constructible_from<T, Args&&...> {
 			stn::insertion<ecs::resource_id> insertion = indexer.insert<T>();
 			if (insertion.is_not_new()) {
-				T* ptr = resource_list[insertion.value.id].get_as_unchecked<T>();
+				//potential
+				T* ptr = resource_list.unchecked_at(insertion.value.id).get_as_unchecked<T>();
 				if (ptr) {
 					return *ptr;
 				}
@@ -46,7 +47,7 @@ namespace ecs {
 				return stn::Option<T&>(stn::None); });
 		}
 		template<ResourceType T>
-		T& get_or_default() {
+		T& ensure() {
 			return insert<T>();
 		}
 		template<ResourceType T, typename Func>

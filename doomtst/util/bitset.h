@@ -1,7 +1,7 @@
 #pragma once
-#include "mathutil.h"
 #include <cstdint>
 #include <stdexcept>
+#include "../math/mathutil.h"
 #include <algorithm>
 #include "dynamicarray.h"
 #include <bit>
@@ -89,7 +89,7 @@ namespace stn {
         template<typename T>
         stn::array<T> indices() const {
             stn::array<T> inds = stn::array<T>();
-            for (size_t i = 0; i < bits; i++) {
+            for (std::uint32_t i = 0; i < bits; i++) {
                 if ((*this)[i]) {
                     inds.emplace(i);
                 }
@@ -106,7 +106,16 @@ namespace stn {
                 bitlist.expand(bits_to_words(new_bit_count));
             }
         }
-
+		void set_unchecked(size_t bit, bool value) {
+			size_t idx = calc_full_words(bit);
+			size_t off = calc_leftover_bits(bit);
+			if (value) {
+				bitlist.unchecked_at(idx) |= bit_at(off);
+			}
+			else {
+				bitlist.unchecked_at(idx) &= ~(bit_at(off));
+			}
+		}
         void set(size_t bit, bool value) {
             if (!contains_index(bit)) {
                 stn::throw_range_exception("set failed: index {} out of bounds (len {})", bit, bits);
@@ -114,25 +123,25 @@ namespace stn {
             size_t idx = calc_full_words(bit);
             size_t off = calc_leftover_bits(bit);
             if (value) {
-                bitlist[idx] |= bit_at(off);
+                bitlist.unchecked_at(idx)|= bit_at(off);
             }
             else {
-                bitlist[idx] &= ~(bit_at(off));
+                bitlist.unchecked_at(idx) &= ~(bit_at(off));
             }
         }
         void reaching_set(size_t bit, bool value) {
-            if (!contains_index(bit)) {
+           
                 expand(bit + 1);
-            }
             size_t idx = calc_full_words(bit);
             size_t off = calc_leftover_bits(bit);
             if (value) {
-                bitlist[idx] |= bit_at(off);
+                bitlist.unchecked_at(idx)|= bit_at(off);
             }
             else {
-                bitlist[idx] &= ~(bit_at(off));
+                bitlist.unchecked_at(idx)&= ~(bit_at(off));
             }
         }
+
         void enable(size_t bit) {
             set(bit, true);
         }
@@ -145,6 +154,12 @@ namespace stn {
         void reaching_disable(size_t bit) {
             reaching_set(bit, false);
         }
+		void enable_unchecked(size_t bit) {
+			set_unchecked(bit, true);
+		}
+		void disable_unchecked(size_t bit) {
+			set_unchecked(bit, false);
+		}
         void flip(size_t bit) {
             if (!contains_index(bit)) {
                 stn::throw_range_exception("flip failed: index {} out of bounds (len {})", bit, bits);

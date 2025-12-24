@@ -21,7 +21,7 @@ namespace buffer_object {
 
 	
 		//fills data unnasotided
-		void fillbuffer(void* data,int size) {
+		void fillbuffer(void* data,size_t size) {
 			if (data!=nullptr)
 			{
 				glBufferData(type, size, data, GL_STATIC_DRAW);

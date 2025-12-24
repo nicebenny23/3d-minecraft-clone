@@ -5,7 +5,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "../util/vector2.h"
+#include "../math/vector2.h"
 #include "../util/stbiload.h"
 
 namespace CtxName {

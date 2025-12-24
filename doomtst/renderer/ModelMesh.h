@@ -1,8 +1,8 @@
 #pragma once
 #include "../util/dynamicarray.h"
 #include "../util/fileloader.h"
-#include "../util/vector2.h"
-#include "../util/vector3.h"
+#include "../math/vector2.h"
+#include "../math/vector3.h"
 
  #include "../game/GameContext.h"
 #include "../game/transform.h"

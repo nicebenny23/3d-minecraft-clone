@@ -24,9 +24,9 @@ using namespace blockname;
 #pragma once  
 namespace blkinitname {
 
-	inline void blockinit(block* blk) {
+	inline void blockinit(block& blk) {
 		///blk->bstate.broken = false;
-		switch (blk->id) {
+		switch (blk.id) {
 		case minecraftair:
 		setdefault(blk);
 		break;
@@ -87,8 +87,8 @@ namespace blkinitname {
 		}
 
 	}
-	inline void genblock(block* blk, int blkid, Coord location, byte attachface, byte direction) {
-		blk->create(location, blkid, Dir::Dir3d(attachface), Dir::Dir2d(direction));
+	inline void genblock(block& blk, int blkid, Coord location, byte attachface, byte direction) {
+		blk.create(location, blkid, Dir::Dir3d(attachface), Dir::Dir2d(direction));
 		blkinitname::blockinit(blk);
 	}
 

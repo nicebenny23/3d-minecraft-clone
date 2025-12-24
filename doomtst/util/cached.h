@@ -47,13 +47,15 @@ namespace stn {
 			other.dirty = false;
 		}
 		
-
+		//returns if it has cleaned
 		template<typename Func>
-		void clean(Func&& func) {
+		bool clean(Func&& func) {
 			if (dirty) {
 				func();
 				dirty = false;
+				return true;
 			}
+			return false;
 		}
 		
 		explicit operator bool() const noexcept {

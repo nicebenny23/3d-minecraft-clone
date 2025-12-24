@@ -2,7 +2,7 @@
 #include <stdexcept>
 #include <glm/vec3.hpp>
 #include <string>
-#include "../util/mathutil.h"
+#include "../math/mathutil.h"
 namespace v3 {
 	struct Scale3 {
 

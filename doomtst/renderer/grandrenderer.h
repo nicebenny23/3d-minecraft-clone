@@ -13,9 +13,6 @@
 
 void rendergame() {
   //  CtxName::ctx.Ecs->updatecomponents(ecs::Rendercall);
-    blockrender::renderblocks(false);
-    render_decals();
-    
     ui::updateui();
     guirender::rendergui();
 

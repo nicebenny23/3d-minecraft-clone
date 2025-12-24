@@ -1,15 +1,16 @@
-#include "../util/vector3.h"
+#include "../math/vector3.h"
 #include "../game/ecs/game_object.h"
 #include "../game/aabb.h"
-#include "../util/time.h"
+#include "../game/time.h"
 #include "../game/entity.h"
 #include "../game/objecthelper.h"
-#include "../util/geometry.h"
+#include "../math/geometry.h"
 #include "../world/voxeltraversal.h"
 #include "ecs/query.h"
 #include "../util/pipeline.h"
 #include "../util/tag.h"
 #include "../game/collision.h"
+#include "ecs/query.h"
 using namespace v3;
 #pragma once 
 
@@ -22,13 +23,13 @@ struct rigid_force {
         {
             return true;
         }
-        bool val= CtxName::ctx.Time->now()<end_time.unwrap();
+        bool val= CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now()<end_time.unwrap();
         return val;
     }
-    rigid_force(Vec3 frc, float duration,const tag::Tag& tg):force(frc), end_time(CtxName::ctx.Time->now()+duration), tag(tg) {
+    rigid_force(Vec3 frc, float duration,const tag::Tag& tg):force(frc), end_time(CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now()+duration), tag(tg) {
         
     }
-    rigid_force(Vec3 frc, float duration, const std::string& tg) :force(frc), end_time(CtxName::ctx.Time->now() + duration), tag(tg) {
+    rigid_force(Vec3 frc, float duration, const std::string& tg) :force(frc), end_time(CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now() + duration), tag(tg) {
 
     }
     rigid_force(Vec3 frc, const tag::Tag& tg) :force(frc), end_time(stn::None),tag(tg){
@@ -119,7 +120,7 @@ struct rigidbody : ecs::component{
     //should definitly clamp
     void integrate() {
       
-        double deltaTime = CtxName::ctx.Time->dt;
+        double deltaTime = CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
         velocity += acceleration * deltaTime;
        
         if (isonground||isonceil)

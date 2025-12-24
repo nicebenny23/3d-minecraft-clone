@@ -10,7 +10,7 @@
 		}
 
 		tickframe = false;
-		tickdt += CtxName::ctx.Time->real_dt;
+		tickdt += CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().real_dt;
 		if (tickdt >ticktime)
 		{
 			

@@ -15,190 +15,180 @@
 
 // Picks the face of the block that the point lies closest to
 inline Dir::Dir3d closest_face(v3::Point3 pos, block* blk) {
-    Vec3 offset_pos=pos - blk->center();
-    Dir::Dir3d best = Dir::up3d;
-    for (auto d : Dir::Directions3d) {
-        if (dot(d.to_vec(), offset_pos) > dot(best.to_vec(), offset_pos)) best = d;
-    }
-    return best;
+	Vec3 offset_pos = pos - blk->center();
+	Dir::Dir3d best = Dir::up3d;
+	for (auto d : Dir::Directions3d) {
+		if (dot(d.to_vec(), offset_pos) > dot(best.to_vec(), offset_pos)) best = d;
+	}
+	return best;
 }
 
 // Returns two orthogonal axes on the block face plane
 inline stn::pair<v3::Vec3, v3::Vec3> get_flat_frame(Dir::Dir3d dir) {
-    switch (dir.ind() / 2) {
-    case 0: return { {0,0,1}, {0,1,0} };
-    case 1: return { {1,0,0}, {0,0,1} };
-    case 2: return { {1,0,0}, {0,1,0} };
-    default: throw std::logic_error("Invalid direction");
-    }
+	switch (dir.ind() / 2) {
+	case 0: return { {0,0,1}, {0,1,0} };
+	case 1: return { {1,0,0}, {0,0,1} };
+	case 2: return { {1,0,0}, {0,1,0} };
+	default: throw std::logic_error("Invalid direction");
+	}
 }
 
 void initbreakparticle(ecs::obj newent);
 
-struct playerbreak : ecs::component{
-    voxtra::WorldRayCollision closest;
-    stn::change <item*> pickaxe;
+struct playerbreak : ecs::component {
+	voxtra::WorldRayCollision closest;
+	stn::change <item*> pickaxe;
 
-    decal break_decal;
-    float break_start_time = 0.f;
-    float timeuntilbreak = 0.f;
-    stn::change<block*> currmining;
+	decal break_decal;
+	float break_start_time = 0.f;
+	float timeuntilbreak = 0.f;
+	stn::change<block*> currmining;
 
-    void start() override {
-        currmining();
-        currmining.clear(nullptr);
-        CtxName::ctx.Ren->Textures.LoadTexture("images\\menutex.png", "MenuTexture");
-    }
+	void start() override {
+		currmining();
+		currmining.clear(nullptr);
+		CtxName::ctx.Ren->Textures.LoadTexture("images\\menutex.png", "MenuTexture");
+	}
 
-    void spawn_decal(size_t phase) {
-        if (phase == 0) return;
-       
-        static const char* tex[] = { "",
-            "images\\block_break_1.png","images\\block_break_2.png",
-            "images\\block_break_3.png","images\\block_break_4.png",
-            "images\\block_break_5.png","images\\block_break_6.png" };
-        std::string name = tex[phase];
-        std::string handle = "block_break_" + std::to_string(phase);
-        break_decal.set_handle(name.c_str(), handle.c_str());
-        break_decal.handle.enable();
-        auto hit = closest.unwrap().Hit.intersectionpoint;
-        Dir::Dir3d fd = closest_face(hit, currmining());
-        auto& f = currmining()->mesh[fd.ind()];
-        break_decal.center = f.center();
-        break_decal.normal = fd.to_vec();
-        auto [b, t] = get_flat_frame(fd);
-        break_decal.bi_tangent = b * 0.5f;
-        break_decal.tangent = t * 0.5f;
-        break_decal.create_mesh();
-        break_decal.render();
-    }
+	void spawn_decal(size_t phase) {
+		if (phase == 0) return;
 
-    playerbreak() {};
-    float block_power(block* blk) {
-        return blk->mininglevel;
+		static const char* tex[] = { "",
+			"images\\block_break_1.png","images\\block_break_2.png",
+			"images\\block_break_3.png","images\\block_break_4.png",
+			"images\\block_break_5.png","images\\block_break_6.png" };
+		std::string name = tex[phase];
+		std::string handle = "block_break_" + std::to_string(phase);
+		break_decal.set_handle(name.c_str(), handle.c_str());
+		break_decal.handle.enable();
+		auto hit = closest.unwrap().Hit.intersectionpoint;
+		Dir::Dir3d fd = closest_face(hit, currmining());
+		auto& f = currmining()->mesh[fd.ind()];
+		break_decal.center = f.center();
+		break_decal.normal = fd.to_vec();
+		auto [b, t] = get_flat_frame(fd);
+		break_decal.bi_tangent = b * 0.5f;
+		break_decal.tangent = t * 0.5f;
+		break_decal.create_mesh();
+		break_decal.render();
+	}
 
-    }
-    float curr_mining_power() {
-        if (pickaxe()==nullptr)
-        {
-            return 1;
-        }
-        return pickaxe()->properties.pickaxepower;
+	playerbreak() {
+	};
+	float block_power(block* blk) {
+		return blk->mininglevel;
 
-    }
-    void engage_block(block* blk) {
-        if (!engaged())
-        {
-            if (break_decal.handle)
-            {
-                break_decal.handle.disable();
-            }
-            pickaxe.clear(owner().get_component<inventory>().selected);
-            currmining.clear( blk);
-            break_start_time = block_power(blk);
-            timeuntilbreak = break_start_time;
+	}
+	float curr_mining_power() {
+		if (pickaxe() == nullptr) {
+			return 1;
+		}
+		return pickaxe()->properties.pickaxepower;
 
-        }
-        else
-        {
-            pickaxe.set(owner().get_component<inventory>().selected);
-            currmining.set(blk);
-        }
-    }
-    void disengage_block() {
-        currmining.clear(nullptr);
-        pickaxe.clear(nullptr);
-        if (break_decal.handle)
-        {
-            break_decal.handle.disable();
-        }
-        timeuntilbreak = -1;
+	}
+	void engage_block(block* blk) {
+		if (!engaged()) {
+			if (break_decal.handle) {
+				// break_decal.handle.disable();
+			}
+			pickaxe.clear(owner().get_component<inventory>().selected);
+			currmining.clear(blk);
+			break_start_time = block_power(blk);
+			timeuntilbreak = break_start_time;
 
-    }
-    bool engaged() {
-        return currmining() != nullptr;
-    }
-    //returns current speed
-    bool ensure_engage()  {
-        ray r(owner().get_component<ecs::transform_comp>().transform.position,
-        owner().get_component<ecs::transform_comp>().transform.position + owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * 7.f);
-        closest = collision::raycastall(r, collision::HitQuery(owner()), voxtra::countsolid);
-        if (!closest) {
-            return false;
-        }
-        auto hit = closest.unwrap();
-        if (!hit.ecs().has_component<blockname::block>()) { 
-            return false;
-        }
-        if (!inrange(hit.dist(), interactminrange, interactmaxrange)) {
-            return false;
-        }
-        if (!   CtxName::ctx.Inp->mouseleft().held)
-        {
-            return false;
-        }
-        engage_block(hit.ecs().get_component_ptr<block>());
-            if (engaged())
-            {
-                if (currmining.changed()|| pickaxe.changed()) {
-                    return false;
-                }       
-            }
-            
-            return true;
-    }
+		}
+		else {
+			pickaxe.set(owner().get_component<inventory>().selected);
+			currmining.set(blk);
+		}
+	}
+	void disengage_block() {
+		currmining.clear(nullptr);
+		pickaxe.clear(nullptr);
+		if (break_decal.handle) {
+			break_decal.handle.disable();
+		}
+		timeuntilbreak = -1;
 
-    // Called each frame while holding the mouse;
-    void try_modify() {
-        if (ensure_engage())
-        {
-            
-            timeuntilbreak -= curr_mining_power() * CtxName::ctx.Time->dt;
-            // Show progress decal
-            float prog = (break_start_time - timeuntilbreak) / break_start_time;
-            size_t phase = clamp(size_t(prog * 7.f), 0, 6);
-            if (currmining()->scale() == blockscale) {
-                spawn_decal(phase);
-            }
-            if (timeuntilbreak <= 0.f) {
-                on_break(currmining());
-             
-            }
-        }
-        else
-        {
-            disengage_block();
-        }
-    }
-       
-    void on_break(block* broken) {
-        
-        // Break when timer completes
-        if (timeuntilbreak <= 0.f) {
-            if (pickaxe())
-            {
-                pickaxe()->use(1);
-            }
-            if (!currmining()->minedfastwithpick || currmining()->mininglevel <= curr_mining_power())
-            {
-                make_drop(broken->owner());
-            }
-            gridutil::set_block(broken->pos, minecraftair);
-            disengage_block();
-            
-        }
-    }
-    void update() {
-        try_modify();
-    }
-    void make_drop(ecs::obj Hit);
+	}
+	bool engaged() {
+		return currmining() != nullptr;
+	}
+	//returns current speed
+	bool ensure_engage() {
+		ray r(owner().get_component<ecs::transform_comp>().transform.position,
+			owner().get_component<ecs::transform_comp>().transform.position + owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * 7.f);
+		closest = collision::raycastall(r, collision::HitQuery(owner()), voxtra::countsolid);
+		if (!closest) {
+			return false;
+		}
+		auto hit = closest.unwrap();
+		if (!hit.ecs().has_component<blockname::block>()) {
+			return false;
+		}
+		if (!inrange(hit.dist(), interactminrange, interactmaxrange)) {
+			return false;
+		}
+		if (!CtxName::ctx.Inp->mouseleft().held) {
+			return false;
+		}
+		engage_block(hit.ecs().get_component_ptr<block>());
+		if (engaged()) {
+			if (currmining.changed() || pickaxe.changed()) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	// Called each frame while holding the mouse;
+	void try_modify() {
+		if (ensure_engage()) {
+
+			timeuntilbreak -= curr_mining_power() * CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
+			// Show progress decal
+			float prog = (break_start_time - timeuntilbreak) / break_start_time;
+			size_t phase = clamp(size_t(prog * 7.f), 0, 6);
+			if (currmining()->scale() == blockscale) {
+				spawn_decal(phase);
+			}
+			if (timeuntilbreak <= 0.f) {
+				on_break(currmining());
+
+			}
+		}
+		else {
+			disengage_block();
+		}
+	}
+
+	void on_break(block* broken) {
+
+		// Break when timer completes
+		if (timeuntilbreak <= 0.f) {
+			if (pickaxe()) {
+				pickaxe()->use(1);
+			}
+			if (!currmining()->minedfastwithpick || currmining()->mininglevel <= curr_mining_power()) {
+				make_drop(broken->owner());
+			}
+			gridutil::set_block(broken->pos, minecraftair);
+			disengage_block();
+
+		}
+	}
+	void update() {
+		try_modify();
+	}
+	void make_drop(ecs::obj Hit);
 
 };
 
 struct PlayerUpdateSystem : ecs::System {
-    void run(ecs::Ecs& ecs) override {
-        for (auto [pb] : ecs::View<playerbreak>(ecs)) {
-            pb.try_modify();
-        };
-    }
+	void run(ecs::Ecs& ecs) override {
+		for (auto [pb] : ecs::View<playerbreak>(ecs)) {
+			pb.try_modify();
+		};
+	}
 };

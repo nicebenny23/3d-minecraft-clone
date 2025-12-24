@@ -1,6 +1,6 @@
 #pragma once
 #include "../../util/thread_split.h"
-#include "query.h"
+
 #include "../../util/thread_pool.h"
 #include "component.h"
 #include <type_traits>
@@ -8,6 +8,7 @@
 #include "entities.h"
 #include "../../util/exception.h"
 #include "../../util/index.h"
+#include "query.h"
 #pragma once
 namespace ecs {
 	template<typename Func,typename... Components>
@@ -30,7 +31,7 @@ namespace ecs {
 
 
 	template<typename Func, ComponentType... Components> requires query_function<Func, Components...>
-	void multi_query(View<Components...>& view, Func quer, size_t threads_wanted, size_t count) {
+	void multi_query(View<Components...>& view, Func quer, size_t threads_wanted, std::uint32_t count) {
 		if (count == 0) {
 			stn::throw_logic_error("count may not be 0");
 		}
@@ -43,12 +44,9 @@ namespace ecs {
 			Archetype& arch = view.archetype_at(i);
 			archetype_id id = arch.id();
 			archetype_index current = archetype_index(0);
-			if (arch.elems.empty()) {
-				continue;
-			}
-			while (current != arch.last_index()) {
-				archetype_index next = std::min(arch.last_index(), current + archetype_index::count_type(count));
-
+			archetype_index final = archetype_index(arch.count());
+			while (current != final) {
+				archetype_index next = std::min(final, current + archetype_index::count_type(count));
 				pool.push([view_ptr = &view, id, current, next, quer]() {
 					multi_iter(*view_ptr, id, current, next, quer);
 					});

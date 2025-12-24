@@ -156,7 +156,12 @@ namespace ecs {
 		const T& unchecked_at(size_t index) const {
 			return pages.unchecked_at(index >> chunk_exp)[index];
 		}
-
+		//does not check if this slot is also occupied
+		template<typename ...Args>
+		T& insert_at_unchecked(size_t index, Args&&... args) {
+				element_filter.reaching_enable(index);
+				return pages.reach(index >> chunk_exp).insert_at_unchecked(index, std::forward<Args>(args)...);
+		}
 		template<typename ...Args>
 		T& insert_at(size_t index, Args&&... args) {
 			if (!contains(index)) {
@@ -166,9 +171,14 @@ namespace ecs {
 			return pages.unchecked_at(index >> chunk_exp)[index];
 		}
 
+		//does not check if this slot is also occupied or exists
+		void remove_at_unchecked(size_t index) {
+				element_filter.disable_unchecked(index);
+				pages.unchecked_at(index >> chunk_exp).remove_at_unchecked(index);
+		}
 		void remove_at(size_t index) {
 			if (contains(index)) {
-				element_filter.disable(index);
+				element_filter.disable_unchecked(index);
 				pages.unchecked_at(index >> chunk_exp).remove_at_unchecked(index);
 			}
 

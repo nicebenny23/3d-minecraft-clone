@@ -1,5 +1,5 @@
 #include "ecs/game_object.h"
-#include "../util/mathutil.h"
+#include "../math/mathutil.h"
 #include "entity.h"
 #include "rigidbody.h"
 #include "objecthelper.h"
@@ -36,7 +36,7 @@ struct estate : ecs::component
 				}
 			}
 		}
-		timetilldmg -= CtxName::ctx.Time->dt;
+		timetilldmg -= CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
 		if (owner().has_component<rigidbody>())
 		{
 			testfalldamage();
@@ -70,7 +70,7 @@ struct estate : ecs::component
 		}
 	}
 	void start() {
-		model_red_dur=CtxName::ctx.Time->create_dur();
+		model_red_dur=CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().create_dur();
 	
 		health = maxhealth;
 		lastongroundy = owner().get_component<ecs::transform_comp>().transform.position.y;
@@ -84,7 +84,7 @@ struct estate : ecs::component
 	}
 	void remove();
 	void damage(int dmg) {
-		dmg = dmg * damagemultiplyer;
+		dmg = static_cast<int>(dmg * damagemultiplyer);
 		if (dmg <= 0)
 		{
 			return;

@@ -4,7 +4,7 @@
 #endif
 #include <Windows.h>
 #include "dynamicarray.h"
-#include "vector2.h"
+#include "../math/vector2.h"
 #include <glm/glm.hpp>
 #pragma once 
 #define esckey GLFW_KEY_ESCAPE

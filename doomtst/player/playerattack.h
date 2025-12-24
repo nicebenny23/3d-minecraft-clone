@@ -45,7 +45,7 @@ struct playerattackcomp: ecs::component
 		{
 			return;
 		}
-		debug("sees"+std::to_string(CtxName::ctx.Time->dt));
+		debug("sees"+std::to_string(CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt));
 		if (closest.collider.owner().has_component<estate>()&&CtxName::ctx.Inp->mouseleft().pressed)
 		{
 			if (closest.ecs().has_component<rigidbody>())

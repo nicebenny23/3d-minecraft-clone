@@ -2,7 +2,7 @@
 #include "../block/block.h"
 #include "../world/grid.h"
 #include "../world/managegrid.h"
-#include "../util/time.h"
+#include "../game/time.h"
 #include "../debugger/debug.h"
 
 #include "../game/rigidbody.h"
@@ -32,7 +32,7 @@ struct liquidprop : ecs::component {
 	void oncollision(ecs::obj* collidedwith) {
 		if (collidedwith->has_component<rigidbody>()) {
 			collidedwith->get_component<rigidbody>().inliquid = true;
-			collidedwith->get_component<rigidbody>().velocity *= 1 - CtxName::ctx.Time->dt * 5;
+			collidedwith->get_component<rigidbody>().velocity *= 1 - CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt * 5;
 		}
 	}
 	void updateinface(Dir::Dir3d face) {

@@ -24,7 +24,7 @@ struct slimemove : ecs::component{
     void update() {
 
 
-        timesincejump -= CtxName::ctx.Time->dt;
+        timesincejump -= CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
         Point3 pos = owner().get_component<ecs::transform_comp>().transform.position;
 		Point3 headed = owner().get_component<navigator>().headed();
         
@@ -43,7 +43,7 @@ struct slimemove : ecs::component{
             }
        
 
-           owner().get_component<rigidbody>().velocity += v3::Vec3(normal(gotopos).x, 0, normal(gotopos).z) * CtxName::ctx.Time->dt;
+           owner().get_component<rigidbody>().velocity += v3::Vec3(normal(gotopos).x, 0, normal(gotopos).z) * CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
                owner().get_component<ecs::transform_comp>().transform.OrientDir(v3::Vec3(gotopos.x,0, gotopos.z));
               owner().get_component<ecs::transform_comp>().transform.yaw = 90 * round(owner().get_component<ecs::transform_comp>().transform.yaw/90);
                

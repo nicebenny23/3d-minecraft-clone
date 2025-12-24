@@ -23,9 +23,9 @@ namespace ecs {
 		bool operator==(const archetype_location& other) const = default;
 	};
 
-	struct space_id_metadata {
+	struct entity_metadata {
 		uint32_t gen_count;
-		space_id_metadata() {
+		entity_metadata() {
 			gen_count = 0;
 		}
 		void clear() {
@@ -35,54 +35,54 @@ namespace ecs {
 
 	};
 	struct Entities {
-		space_id_metadata& operator[](size_t index) {	
-			return space_id_list[index];
+		entity_metadata& operator[](size_t index) {	
+			return entity_list[index];
 		}
-		const space_id_metadata& operator[](size_t index)	const{
-			return space_id_list[index];
+		const entity_metadata& operator[](size_t index)	const{
+			return entity_list[index];
 		}
 		bool is_valid(entity entity) const{
 
-			return entity.generation() == space_id_list[entity.id()].gen_count;
+			return entity.generation() == entity_list[entity.id()].gen_count;
 		}
 		//for more expressive 
-		space_id_metadata& at(entity entity) {
-			return space_id_list[entity.id()];
+		entity_metadata& at(entity entity) {
+			return entity_list[entity.id()];
 		}
 		void assert_valid(entity entity) const{
 			if (!is_valid(entity))
 			{
-				stn::throw_logic_error("refrence to entity with id {} is a member of outdated generation {} of {}", entity.id(), entity.generation(), space_id_list[entity.id()].gen_count);
+				stn::throw_logic_error("refrence to entity with id {} is a member of outdated generation {} of {}", entity.id(), entity.generation(), entity_list[entity.id()].gen_count);
 			}
 		}
-		const space_id_metadata& at(entity entity) const{
-			return space_id_list[entity.id()];
+		const entity_metadata& at(entity entity) const{
+			return entity_list[entity.id()];
 		}
-		space_id_metadata& operator[](entity entity) {
+		entity_metadata& operator[](entity entity) {
 			return at(entity);
 		}
-		const space_id_metadata& operator[](entity entity) const {
+		const entity_metadata& operator[](entity entity) const {
 			return at(entity);
 		}
 		
 		size_t length() const{
-			return space_id_list.length();
+			return entity_list.length();
 		}
 		bool is_empty() const {
-			return space_id_list.empty();
+			return entity_list.empty();
 		}
 		stn::array<uint32_t> free_ids;
-		stn::array<space_id_metadata> space_id_list;
-		entity allocate_space_id() {
+		stn::array<entity_metadata> entity_list;
+		entity allocate_entity() {
 			std::uint32_t id= free_ids.pop();
 
-			return entity(id, space_id_list[id].gen_count);
+			return entity(id, entity_list[id].gen_count);
 		}
-		void remove_space_id(entity entity) {
+		void remove_entity(entity entity) {
 			at(entity).clear();
 			free_ids.push(entity.id());
 		}
-		Entities(std::uint32_t count):space_id_list(count){
+		Entities(std::uint32_t count):entity_list(count){
 
 			for (std::uint32_t i = 0; i < count; i++)
 			{

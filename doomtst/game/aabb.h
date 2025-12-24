@@ -1,9 +1,9 @@
 #pragma once
-#include "../util/vector3.h"
+#include "../math/vector3.h"
 #include "../game/ecs/game_object.h"
 #include "../util/dynamicarray.h"
-#include "../util/ray.h"
-#include "../util/geometry.h"
+#include "../math/ray.h"
+#include "../math/geometry.h"
 #include "../util/random.h"
 #include "../block/block.h"
 #include "../util/SparseSet.h"

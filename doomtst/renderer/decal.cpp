@@ -1,10 +1,5 @@
 #include "decal.h"
-struct decalsys:ecs::resource {
 
-	stn::array<renderer::RenderableHandle> decals;
-
-};
-decalsys decals;
 
 const v2::Vec2 cubeuv[] = {
 	v2::Vec2(0, 1),
@@ -20,48 +15,33 @@ void decal::set_handle(const char* texloc, const char* texture) {
 		handle.set_layout(vertice::vertex().push<float, 3>().push<float, 2>());
 
 	}
-	handle.set_uniform(uniforms::uniform(handle.renderer->Textures.LoadTexture(texloc, texture), "tex"));
+	handle.set_uniform(uniforms::uniform(CtxName::ctx.Ecs->get_resource<renderer::Renderer>().unwrap().Textures.LoadTexture(texloc, texture), "tex"));
 
 }
 void decal::create_mesh() {
 	renderer::MeshData mesh = handle.create_mesh();
-
 	for (int i = 0; i < 4; i++) {
 		v2::Vec2 norm_uv = (cubeuv[i] - v2::Vec2(.5, .5)) * 2;
-		v3::Point3 point = normal * .001 + center + tangent * norm_uv.x + bi_tangent * norm_uv.y;
+		const double eps = .001;
+		//brings it above the surface
+		v3::Point3 point = normal * eps + center + tangent * norm_uv.x + bi_tangent * norm_uv.y;
 		mesh.add_point(point, cubeuv[i]);
 	}
-	mesh.add_index(0);
-	mesh.add_index(1);
-	mesh.add_index(3);
-	mesh.add_index(0);
-	mesh.add_index(3);
-	mesh.add_index(2);
+	mesh.add_indices({ 0,1,3,0,3,2 });
 	handle.fill(std::move(mesh));
-	handle.renderer->pop();
+	CtxName::ctx.Ren->pop();
 
 }
 void decal::remove() {
 
 	if (handle) {
-		Option<size_t> index = decals.decals.find(handle);
-		if (index) {
-			decals.decals.swap_drop(index.unwrap());
-		}
+		CtxName::ctx.Ecs->ensure_resource<decal_system>().remove(handle);
 	}
 }
 
 void decal::render() {
-
 	create_mesh();
-	if (!decals.decals.contains(handle)) {
-		decals.decals.push(handle);
-
-	}
+	CtxName::ctx.Ecs->ensure_resource<decal_system>().add(handle);
 }
 
-void render_decals() {
-	for (auto& dec : decals.decals) {
-		dec.render();
-	}
-}
+

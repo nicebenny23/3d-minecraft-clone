@@ -1,6 +1,6 @@
 #include "block.h"
 #include "../items/menu.h"
-#include "../util/vector2.h"
+#include "../math/vector2.h"
 #include "../world/voxeltraversal.h"
 #include "../game/objecthelper.h"
 #include "../items/recipe.h"
@@ -112,26 +112,26 @@ struct furnacecomp : ecs::component{
 		men = furnacemenu(v2::Vec2(3, 3));
 	}
 };
-inline void furnaceinit(blockname::block* blk) {
+inline void furnaceinit(blockname::block& blk) {
 	
-	blk->mesh.setfaces(stonetex, stonetex, furnacefront, stonetex, furnaceside, stonetex);
-	blk->attributes.solid = true;
-	blk->attributes.transparent = false;
-	blk->emitedlight = 0;
-	blk->mininglevel = 1;
-	blk->mesh.box.scale = blockname::blockscale;
+	blk.mesh.setfaces(stonetex, stonetex, furnacefront, stonetex, furnaceside, stonetex);
+	blk.attributes.solid = true;
+	blk.attributes.transparent = false;
+	blk.emitedlight = 0;
+	blk.mininglevel = 1;
+	blk.mesh.box.scale = blockname::blockscale;
 
-	blk->createdefaultaabb(false);
+	blk.createdefaultaabb(false);
 	//stupid thing
-	if (!blk->owner().has_component<furnacecomp>())
+	if (!blk.owner().has_component<furnacecomp>())
 	{
 
-		blk->owner().add_component<furnacecomp>();
+		blk.owner().add_component<furnacecomp>();
 
 	}
 	
 
-	blk->owner().get_component<furnacecomp>().men.blkcont.attributes.timetocraft = 1;
-	blk->owner().get_component<furnacecomp>().men.blkcont.attributes.isauto = true;
-	blk->owner().add_component<loottable>().addelem(furnaceitem, 1, false);
+	blk.owner().get_component<furnacecomp>().men.blkcont.attributes.timetocraft = 1;
+	blk.owner().get_component<furnacecomp>().men.blkcont.attributes.isauto = true;
+	blk.owner().add_component<loottable>().addelem(furnaceitem, 1, false);
 }

@@ -22,7 +22,7 @@ struct playertpcomp : ecs::component
 		}
 	}
 	void update() {
-		timetilluse -= CtxName::ctx.Time->dt;
+		timetilluse -= CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
 		item* select = owner().get_component<inventory>().selected;
 		if (select == nullptr)
 		{
@@ -66,7 +66,7 @@ struct playertpcomp : ecs::component
 			{
 				if (CtxName::ctx.Inp->mouseleft().held || CtxName::ctx.Inp->mouseleft().released)
 				{
-					chargetime += CtxName::ctx.Time->dt;
+					chargetime += CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
 					chargetime = Min(3, chargetime);
 				}
 				else {

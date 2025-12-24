@@ -39,15 +39,15 @@ struct sandfall : ecs::component{
     ~sandfall() = default;
 };
 
-inline void sandinit(blockname::block* blk) {
-    blk->mesh.setfaces(sandtex, sandtex, sandtex, sandtex, sandtex, sandtex);
-    blk->attributes.solid = true;
-    blk->attributes.transparent = false;
-    blk->emitedlight = 0;
-    blk->mininglevel = .5f;
-    blk->mesh.box.scale = blockname::blockscale;
-    blk->createdefaultaabb();
-    blk->owner().add_component<sandfall>();
+inline void sandinit(blockname::block& blk) {
+    blk.mesh.setfaces(sandtex, sandtex, sandtex, sandtex, sandtex, sandtex);
+    blk.attributes.solid = true;
+    blk.attributes.transparent = false;
+    blk.emitedlight = 0;
+    blk.mininglevel = .5f;
+    blk.mesh.box.scale = blockname::blockscale;
+    blk.createdefaultaabb();
+    blk.owner().add_component<sandfall>();
     
-     blk->owner().add_component<loottable>().addelem(sanditem,1, false);
+     blk.owner().add_component<loottable>().addelem(sanditem,1, false);
 }

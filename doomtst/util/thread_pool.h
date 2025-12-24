@@ -2,7 +2,7 @@
 #include "dynamicarray.h"
 #include <functional>
 #include <condition_variable>
-#include "mathutil.h"
+#include "../math/mathutil.h"
 #include "../debugger/debug.h"
 #include <atomic>
 #pragma once

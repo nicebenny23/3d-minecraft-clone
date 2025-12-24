@@ -1,7 +1,7 @@
 #include "../util/thread_split.h"
 #include "blockrender.h"
-#include "../util/geometry.h"
-#include "../util/intersection.h"
+#include "../math/geometry.h"
+#include "../math/intersection.h"
 
 #include "../util/mutex.h"
 #include "../game/GameContext.h"
@@ -32,25 +32,22 @@ const float cubeuv[] = {
 	1, 1
 };
 // Check if a chunk is viewable within the camera's frustum
-bool chunkviewable(Chunk::chunk* chk) {
-	return true;
+bool chunkviewable(Chunk::chunk& chk) {
 	float slope = tan(CtxName::ctx.Ren->fov / 2);
-	geometry::Box chkb = geometry::Box(chk->center(), unit_scale * float( chunklength )/ 2.f);
+	geometry::Box chkb = geometry::Box(chk.center(), unit_scale * float(chunklength) / 2.f);
 	ray camray = ray(camera::campos(), camera::campos() + camera::GetCamFront() * 1);
 	geometry::cone ncone = geometry::cone(camray, slope);
 	geometry::Plane pln = geometry::Plane(camera::GetCamFront(), camray.start);
 	bool srf = false;
-	for (int i = 0; i < 8; i++)
-	{
-		Point3 vertex = chk->center() + (vert[i] - unitv / 2.f) *float( chunklength);
+	for (int i = 0; i < 8; i++) {
+		Point3 vertex = chk.center() + (vert[i] - unitv / 2.f) * float(chunklength);
 		if (dot(vertex - camera::campos(), camera::GetCamFront()) > 0) {
 
 			srf = true;
 		}
 	}
 	//return true;
-	if (!srf)
-	{
+	if (!srf) {
 		return false;
 	}
 	return geointersect::intersects(ncone, geometry::Sphere(chkb));
@@ -65,17 +62,17 @@ v2::Vec2 facecoordtouv(const face* fce, int ind) {
 
 	switch (facetype) {
 	case 0:
-		offset = v2::Vec2(meshscale.z, meshscale.y)/blocksize;
-		break;
+	offset = v2::Vec2(meshscale.z, meshscale.y) / blocksize;
+	break;
 	case 1:
-		offset = v2::Vec2(meshscale.x, meshscale.z)/blocksize;
-		break;
+	offset = v2::Vec2(meshscale.x, meshscale.z) / blocksize;
+	break;
 	case 2:
-		offset = v2::Vec2(meshscale.x, meshscale.y)/blocksize;
-		break;
+	offset = v2::Vec2(meshscale.x, meshscale.y) / blocksize;
+	break;
 	default:
-		Assert("invalid direction");
-		break;
+	Assert("invalid direction");
+	break;
 	}
 
 	v2::Vec2 uvCoord = v2::Vec2(cubeuv[2 * ind], cubeuv[2 * ind + 1]);
@@ -99,39 +96,36 @@ const int indiceoffsetfrombaselocation[] = {
 };
 
 // Emit the vertices and indices for a single face of a block
-void emitface(const int face, const block& torender, renderer::MeshData& mesh) {
-		if (torender.mesh.faces[face].cover==cover_state::Uncovered) {
-			const int baselocation = mesh.length();
-			const int* uniqueInds = &uniqueindices[4 * face];
-			Scale3 scale = torender.scale();
-			Point3 position = torender.center();
+void emitface(int face, const block& torender, renderer::MeshData& mesh) {
+	if (torender.mesh.faces[face].cover == cover_state::Uncovered) {
+		const int baselocation = mesh.length();
+		const int* uniqueInds = &uniqueindices[4 * face];
+		Scale3 scale = torender.scale();
+		Point3 position = torender.center();
 
-			// Precompute texture number and lighting
-			const int textureNumber = torender.mesh[face].tex;
-			const float lightValue = blockrender::enablelighting ?
-				(torender.attributes.transparent ? torender.lightval : torender.mesh[face].light) : 15;
+		// Precompute texture number and lighting
+		const int textureNumber = torender.mesh[face].tex;
+		const float lightValue = blockrender::enablelighting ?
+			(torender.attributes.transparent ? torender.lightval.unwrap_or(1) : torender.mesh[face].light) : 15;
 
-		
-			for (int j = 0; j < 4; j++) {
-				int uniqueind = uniqueInds[j];
-				Vec3 offsetfromcenter = (vert[uniqueind] - unitv / 2) * scale * 2;
-				Point3 offset = position + offsetfromcenter;
 
-				// Calculate UV coordinates
-				v2::Vec2 coords = facecoordtouv(&torender.mesh[face], j);
+		for (int j = 0; j < 4; j++) {
+			int uniqueind = uniqueInds[j];
+			Vec3 offsetfromcenter = (vert[uniqueind] - unitv / 2) * scale * 2;
+			Point3 offset = position + offsetfromcenter;
 
-				// Fill vertex data
-				mesh.add_point(offset,coords,textureNumber,lightValue);
-				
-			}
+			// Calculate UV coordinates
+			v2::Vec2 coords = facecoordtouv(&torender.mesh[face], j);
 
-			
-			// Generate and append indices
-			for (int j = 0; j < 6; j++) {
-				mesh.add_index(baselocation + indiceoffsetfrombaselocation[j]);
-			}
+			// Fill vertex data
+			mesh.add_point(offset, coords, textureNumber, lightValue);
 		}
-	
+
+		for (int j = 0; j < 6; j++) {
+			mesh.add_index(baselocation + indiceoffsetfrombaselocation[j]);
+		}
+	}
+
 }
 
 // Emit the faces for a block
@@ -144,13 +138,13 @@ void emitblock(block& torender, renderer::MeshData& mesh) {
 }
 
 // Recreate the mesh for a chunk
-void recreatechunkmesh(Chunk::chunk& chunk_to_fill,std::mutex& fill_lock) {
-	
+void recreatechunkmesh(Chunk::chunk& chunk_to_fill, std::mutex& fill_lock) {
+
 	chunk_to_fill.mesh->facebuf.clear();
-	renderer::MeshData mesh= chunk_to_fill.mesh->SolidGeo.create_mesh();
+	renderer::MeshData mesh = chunk_to_fill.mesh->SolidGeo.create_mesh();
 	for (int ind = 0; ind < chunksize; ind++) {
 		block& blockatpos = (chunk_to_fill.blockbuf[ind].get_component_unchecked<block>());//g
-		
+
 		if (!blockatpos.attributes.transparent) {
 			emitblock(blockatpos, mesh);//g
 			continue;
@@ -171,21 +165,21 @@ void recreatechunkmesh(Chunk::chunk& chunk_to_fill,std::mutex& fill_lock) {
 		chunk_to_fill.mesh->SolidGeo.fill(std::move(mesh));
 	}
 }
-	void blockrender::ChunkMesher::run(ecs::Ecs& ecs) {
-		grid::Grid& world_grid = ecs.get_resource<grid::Grid>().unwrap();
-		std::mutex fill_mutex;
-		auto recompute_for = [&fill_mutex](Chunk::chunk* item) {
-			if (item) {
+void blockrender::ChunkMesher::run(ecs::Ecs& ecs) {
+	grid::Grid& world_grid = ecs.get_resource<grid::Grid>().unwrap();
+	std::mutex fill_mutex;
+	auto recompute_for = [&fill_mutex](Chunk::chunk* item) {
+		if (item) {
 
-				item->mesh->recreate_mesh.clean([&item, &fill_mutex]() {
-					recreatechunkmesh(*item, fill_mutex);
-					});
-			}
-			};
+			item->mesh->recreate_mesh.clean([&item, &fill_mutex]() {
+				recreatechunkmesh(*item, fill_mutex);
+				});
+		}
+		};
 
-		thread_util::par_iter(world_grid.chunklist.begin(), world_grid.chunklist.end(), recompute_for, 4);
-		CtxName::ctx.Ren->pop();
-	}
+	thread_util::par_iter(world_grid.chunklist.begin(), world_grid.chunklist.end(), recompute_for, 4);
+	CtxName::ctx.Ren->pop();
+}
 
 
 
@@ -196,7 +190,7 @@ void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 	}
 	else {
 		mesh.sortbuf();
-		renderer::MeshData mesh_data=mesh.TransparentGeo.create_mesh();
+		renderer::MeshData mesh_data = mesh.TransparentGeo.create_mesh();
 		for (int i = 0; i < mesh.facebuf.length(); i++) {
 			emitface(mesh.facebuf[i].facenum.ind(), *(mesh.facebuf[i].mesh->blk), mesh_data);
 		}
@@ -204,50 +198,43 @@ void renderchunk(Chunk::chunkmesh& mesh, bool transparent) {
 		mesh.TransparentGeo.fill(std::move(mesh_data));
 		CtxName::ctx.Ren->pop();
 		mesh.TransparentGeo.render();
-	
+
 	}
 }
 
-
-// Initialize the data buffer and render chunks
-void blockrender::renderblocks(bool rendertransparent) {
-	array<Chunk::chunk*> tosort = array<Chunk::chunk*>();
-	for (int i = 0; i < CtxName::ctx.Grid->totalChunks; i++) {
-		if (CtxName::ctx.GridRef()[i]==nullptr)
-		{
-			continue;
-		}
-		if (chunkviewable(CtxName::ctx.GridRef()[i])) {
-			tosort.push((CtxName::ctx.GridRef()[i]));
+void blockrender::BlockRenderer::run(ecs::Ecs& ecs) {
+	array<Chunk::chunk*> to_render = array<Chunk::chunk*>();
+	Grid& grid = ecs.get_resource<grid::Grid>().unwrap();
+	for (int i = 0; i<grid.totalChunks; i++) {
+		
+		if (grid[i]&&chunkviewable(*grid[i])) {
+			to_render.push(grid[i]);
 		}
 	}
-	if (tosort.length() != 0)
-	{
-		std::stable_sort(tosort.begin(), tosort.end(), [](Chunk::chunk* a, Chunk::chunk* b) {
+	if (to_render.length() != 0) {
+		std::stable_sort(to_render.begin(), to_render.end(), [](Chunk::chunk* a, Chunk::chunk* b) {
 			return (*a) < (*b);
-		});
-	}	
-	for (int i = 0; i < tosort.length(); i++) {
-			renderchunk(*tosort[i]->mesh, false);		
+			});
 	}
- 	
-	for (int i = 0; i < tosort.length(); i++) {
-			renderchunk(*tosort[i]->mesh, true);
+	for (int i = 0; i < to_render.length(); i++) {
+		renderchunk(*to_render[i]->mesh, false);
 	}
-	
+
+	for (int i = 0; i < to_render.length(); i++) {
+		renderchunk(*to_render[i]->mesh, true);
+	}
 }
-struct bind_block_texture {};
-void blockrender::initblockrendering()
-{
+
+void blockrender::initblockrendering() {
 	auto* renderer = CtxName::ctx.Ren;
-	CtxName::ctx.Ren->Shaders.Compile( "BlockShader","shaders\\vert1.vs", "shaders\\frag1.vs");
+	CtxName::ctx.Ren->Shaders.Compile("BlockShader", "shaders\\vert1.vs", "shaders\\frag1.vs");
 	renderer->construct_material("SolidBlock", "BlockShader", renderer::RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-		uniforms::uparam("aspect_ratio","aspectratio"),
-		uniforms::uparam("proj_matrix","projection"),
-		uniforms::uparam("view_matrix","view"),
-		uniforms::uparam("bind_block_texture","tex")
+		uniforms::uparam("aspect_ratio", "aspectratio"),
+		uniforms::uparam("proj_matrix", "projection"),
+		uniforms::uparam("view_matrix", "view"),
+		uniforms::uparam("bind_block_texture", "tex")
 	);
-	
+
 	renderer->construct_material("TransparentBlock", "BlockShader", renderer::RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
 		uniforms::uparam("aspect_ratio", "aspectratio"),
 		uniforms::uparam("proj_matrix", "projection"),
@@ -256,7 +243,7 @@ void blockrender::initblockrendering()
 	);
 
 	array<const char*> texlist = array<const char*>();
-	texlist.reach(treestonetex)= "images\\treestone.png";
+	texlist.reach(treestonetex) = "images\\treestone.png";
 	texlist.reach(grasstex) = "images\\grass.png";
 	texlist.reach(stonetex) = "images\\stone.png";
 	texlist.reach(altartex) = "images\\crystalaltarside.png";
@@ -287,11 +274,11 @@ void blockrender::initblockrendering()
 	texlist.reach(ultraaltarpngultrapng) = "images\\ultraaltar.png";
 	texlist.reach(sandtex) = "images\\sand.png";
 	texlist.reach(planktex) = "images\\treestoneblock.png";
-	
-	renderer::texture_id texarray = CtxName::ctx.Ren->Textures.LoadTextureArray(texlist,"BlockTextures");
-	
+
+	renderer::texture_id texarray = CtxName::ctx.Ren->Textures.LoadTextureArray(texlist, "BlockTextures");
+
 	CtxName::ctx.Ren->Bind_Texture(texarray);
-	CtxName::ctx.Ren->set_uniform("bind_block_texture",texarray);
+	CtxName::ctx.Ren->set_uniform("bind_block_texture", texarray);
 	enablelighting = true;
 }
 

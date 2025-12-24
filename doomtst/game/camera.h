@@ -1,7 +1,7 @@
 #pragma once 
 #include "../util/userinput.h"
 #include "../game/transform.h"
-#include "../util/vector3.h"
+#include "../math/vector3.h"
 #include "../renderer/renderer.h"
 namespace camera {
 	

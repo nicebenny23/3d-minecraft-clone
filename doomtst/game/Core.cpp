@@ -54,7 +54,6 @@ namespace Core {
 
     void Engine::createWindow()
     {
-        InitTime();
         InitInput();
         new (&Window) window::Window("Benny Render 3d", "images\\crystaloreenhanced.png");
       
@@ -75,10 +74,6 @@ namespace Core {
         ctx->Grid = Grid;
     }
 
-    void Engine::InitTime()
-    {
-        ctx->Time = &Time;
-    }
     void Engine::InitInput() {
   
         ctx->Inp = &Inp;   

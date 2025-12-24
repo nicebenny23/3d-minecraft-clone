@@ -4,7 +4,9 @@
 #include <format>
 #include "../player/cameracomp.h"
 #include "../player/playermodification.h"
+#include "../game/Settings.h"
 #include "../player/playerplace.h"
+
 namespace console {
 
     Console& Console::Instance() {
@@ -35,7 +37,7 @@ namespace console {
 
                 ImGui::BeginChild("Debug Info", ImVec2(0, 150), true);
                 ImGui::Text("Debug:");
-                ImGui::Text(std::format("Fps: {:.3f}", CtxName::ctx.Time->smooth_fps).c_str());
+                ImGui::Text(std::format("Fps: {:.3f}", CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().smooth_fps).c_str());
 
 				Point3 pos = player::goblin.get_component<ecs::transform_comp>().transform.position;
                 ImGui::Text(std::format("position: {}", pos).c_str());
@@ -43,7 +45,8 @@ namespace console {
                 ImGui::Text(std::format("yaw:{:.3f},pitch:{:.3f}", player::goblin.get_component<CameraComp>().CamTransform.yaw, player::goblin.get_component<CameraComp>().CamTransform.pitch).c_str());
                 ImGui::Text(std::format("Chunk: {}", CtxName::ctx.Grid->chunkfromblockpos(Coord(pos))).c_str());
                 std::string text_for_look = player::goblin.get_component<playerplace>().Hit
-                    .filter([&](const voxtra::RayWorldHit& blk) {return blk.ecs().exists() && blk.ecs().has_component<block>(); })
+					.filter([&](const voxtra::RayWorldHit& blk) {return blk.ecs().exists(); })
+					.filter([](const voxtra::RayWorldHit& blk) {return blk.ecs().has_component<block>(); })
                     .map([&](const voxtra::RayWorldHit& blk) {return std::format("looking at {}", blk.ecs().get_component<block>().pos); })
                     .unwrap_or("not looking at a block");
                 
@@ -59,7 +62,9 @@ namespace console {
                 if (ImGui::RadioButton("Clear", true)) {
                     Clear();
                 }
-
+				if (ImGui::RadioButton("set_view", false)) {
+					settings::Gamesettings.viewmode ^= true;
+				}
                 ImGui::BeginChild("ConsoleOutput", ImVec2(0, 200), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
                 float scrollY = ImGui::GetScrollY();
                 float scrollMax = ImGui::GetScrollMaxY();

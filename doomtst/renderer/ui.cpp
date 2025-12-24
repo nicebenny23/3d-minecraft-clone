@@ -1,6 +1,6 @@
 #pragma once
 #include "ui.h"
-#include "../util/mathutil.h"
+#include "../math/mathutil.h"
 array<cptr<ui::uielement>>ui::uielemlist;
 
 void ui::createuilist()

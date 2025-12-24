@@ -4,8 +4,8 @@
 #include <stdexcept>
 #include <glad/glad.h>
 #include <glm/mat4x4.hpp>
-#include "../../util/vector2.h"
-#include "../../util/vector3.h"
+#include "../../math/vector2.h"
+#include "../../math/vector3.h"
 
 struct shader
 {

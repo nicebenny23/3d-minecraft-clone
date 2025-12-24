@@ -2,8 +2,8 @@
 #include "ui.h"
 #include "renderer.h"
 #include "../util/dynamicarray.h"
-#include "../util/vector2.h"
-#include "../util/geometry.h"
+#include "../math/vector2.h"
+#include "../math/geometry.h"
 using namespace stn;
 using namespace geometry;
 using namespace Cptr;

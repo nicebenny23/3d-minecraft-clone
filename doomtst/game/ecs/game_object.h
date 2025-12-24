@@ -53,17 +53,16 @@ namespace ecs {
 		template<ComponentType T>
 		stn::Option<T&> get_component_opt() {
 			if (has_component<T>()) {
-				return stn::Option<T&>(get_component<T>());
+				return stn::Option<T&>(ecs->get_component_unchecked<T>(ent));
 			}
 			return stn::None;
 		}
 		template<ComponentType T>
 		T* get_component_ptr() {
-			if (!has_component<T>())
-			{
-				return nullptr;
+			if (has_component<T>()) {
+				return &ecs->get_component_unchecked<T>(ent);
 			}
-			return &get_component<T>();
+			return nullptr;
 		}
 		template<ComponentType T, typename ...Args > requires std::constructible_from<T, Args&&...>
 		T& add_component(Args&&... args) {

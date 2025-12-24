@@ -3,18 +3,18 @@
 #include "../entities/onhit.h"
 #include "../player/playerhealth.h"
 #pragma once 
-inline void lavainit(blockname::block* blk) {
-	blk->mesh.setfaces(lavatex, lavatex, lavatex, lavatex, lavatex, lavatex);
-	blk->attributes.solid = false;
-	blk->attributes.transparent = true;
-	blk->emitedlight = 6;
+inline void lavainit(blockname::block& blk) {
+	blk.mesh.setfaces(lavatex, lavatex, lavatex, lavatex, lavatex, lavatex);
+	blk.attributes.solid = false;
+	blk.attributes.transparent = true;
+	blk.emitedlight = 6;
 
-	//`blk->lightval = 6;
-	blk->mesh.box.scale = blockname::blockscale * .8;
-	blk->createdefaultaabb(true);
-	blk->mesh.box.scale = blockname::blockscale;
-	blk->owner().add_component<liquidprop>(5);
+	//`blk.lightval = 6;
+	blk.mesh.box.scale = blockname::blockscale * .8;
+	blk.createdefaultaabb(true);
+	blk.mesh.box.scale = blockname::blockscale;
+	blk.owner().add_component<liquidprop>(5);
 
-	blk->owner().add_component<dmgonhit<estate>>(1, 0);
-	blk->minedfastwithpick = false;
+	blk.owner().add_component<dmgonhit<estate>>(1, 0);
+	blk.minedfastwithpick = false;
 }

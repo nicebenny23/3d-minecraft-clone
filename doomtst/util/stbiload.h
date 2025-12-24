@@ -3,7 +3,7 @@
 #include "../external/stb_image.h"
 #include <iostream>
 #include "../debugger/debug.h"
-#include "vector2.h"
+#include "../math/vector2.h"
 
 namespace texdata {
 	inline unsigned char* loadtexdata(int* width, int* height, const char* name) {

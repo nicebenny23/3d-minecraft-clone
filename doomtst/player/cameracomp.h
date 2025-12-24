@@ -3,7 +3,7 @@
 #include "../world/voxeltraversal.h"
 #include "../game/collision.h"
 #include "../game/entityutil.h"
-#include "../util/mathutil.h"
+#include "../math/mathutil.h"
 #include "../game/entity.h"
 #pragma once
 inline double wrap_angle(double a) {

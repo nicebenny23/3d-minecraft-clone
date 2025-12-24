@@ -10,24 +10,27 @@ namespace ecs {
 			cached_ids = id_set.into_list();
 			moves.expand(id_set.id_bitset.bits);
 		};
-		stn::span<const component_id> view_cached() const {
-			return cached_ids.span();
-		}
-		
-		bool empty() const {
-			return elems.empty();
-		}
 
 		archetype_id id() const {
 			return Id;
 		}
+		bool contains_index(archetype_index index) const {
+			return elems.contains_index(index.index);
+		}
+
+		bool empty() const {
+			return elems.empty();
+		}
+
+		stn::span<const component_id> view_cached() const {
+			return cached_ids.span();
+		}
+		
 		std::uint32_t count() const {
 			return std::uint32_t(elems.length());
 		}
 
-		bool contains_index(archetype_index index) const {
-			return elems.contains_index(index.index);
-		}
+		
 		
 		entity& operator[](archetype_index arch_index) {
 			return elems[arch_index.index];
@@ -39,17 +42,22 @@ namespace ecs {
 		bool passes(const archetype_predicate& pred) const {
 			return pred.passes(id_set);
 		}
+
+		archetype_index last_index() const {
+			return archetype_index(static_cast<uint32_t>(elems.last_index()));
+		}
+		
+		archetype_index last_index_unchecked() const {
+			return archetype_index(static_cast<uint32_t>(elems.last_index_unchecked()));
+		}
+
 		const entity& last() const {
 			return elems.last();
 		}
 		entity& last() {
 			return elems.last();
 		}
-		
 
-		archetype_index last_index() const {
-			return archetype_index(static_cast<uint32_t>(elems.last_index()));
-		}
 		bool has_component(component_id id) const {
 			return id_set[id];
 		}
@@ -64,22 +72,20 @@ namespace ecs {
 		//returns the new archetype location
 		archetype_location add(entity& element) {
 			elems.push(element);
-			return archetype_location(id(), last_index());
+			//we have just added an element
+			return archetype_location(id(), last_index_unchecked());
 		}
 
 		void remove(archetype_index index) {
 			if (!elems.contains_index(index.index)) {
 				stn::throw_range_exception("cannot remove entity at index {} from archetype of size {}", index.index, count());
 			}
-			elems.swap_drop(index.index);
+			elems.swap_drop_unchecked(index.index);
 		}
 
 
 		stn::Option<archetype_id> arch_connection_at(component_id index) const {
-			if (moves.contains_index(index.id)) {
-				return moves[index.id];
-			}
-			return stn::None;
+				return moves.get(index.id).flatten();
 		}
 
 
@@ -118,12 +124,22 @@ namespace ecs {
 		Archetype& empty_archetype() {
 			return archetypes[0];
 		}
-		Archetype& archetype_at(archetype_id Id) {
-			return archetypes[Id.id];
+		Archetype& archetype_at(archetype_id id) {
+			return archetypes[id.id];
 		}
-		const Archetype& archetype_at(archetype_id Id) const {
-			return archetypes[Id.id];
+		const Archetype& archetype_at(archetype_id id) const {
+			return archetypes[id.id];
 		}
+		bool contains(archetype_id id) const {
+			return archetypes.contains_index(id.id);
+		}
+		bool contains(archetype_location location) const {
+			if (!contains(location.id)) {
+				return false;
+			}
+			return archetypes.unchecked_at(location.id.id).contains_index(location.index);
+		}
+
 		entity& entity_at(archetype_location location) {
 			return archetype_at(location.id)[location.index];
 		}
@@ -142,21 +158,13 @@ namespace ecs {
 		Archetype& archetype_of(entity ent) {
 			return archetype_at(location_of(ent).id);
 		}
-		bool contains(archetype_id id) const {
-			return archetypes.contains_index(id.id);
-		}
-		bool contains(archetype_location location) const {
-			if (!contains(location.id)) {
-				return false;
-			}
-			return archetype_at(location.id).contains_index(location.index);
-		}
-
+		
 		void expandArchetype() {
 			for (auto& arch : archetypes) {
 				arch.moves.expand(arch.moves.length() + 1);
 			}
 		}
+		
 		void add_to_empty(entity new_spawn) {
 			locations[new_spawn.id()] = empty_archetype().add(new_spawn);
 		}
@@ -201,19 +209,14 @@ namespace ecs {
 			location_of(old_archetype.last()).index = entity_location.index;
 			old_archetype.remove(entity_location.index);
 			//get the archetype that is inverted at index
-			stn::Option<archetype_id> new_id_opt = old_archetype.arch_connection_at(index);
-			if (!new_id_opt) {
-				//in this case we have not created an archetype connected to old_archetype at index yet
-				component_ids new_arch = old_archetype.id_set.flipped(index);
-				add_archetype(new_arch);
-				//we cannot use old_archetype because a new one was added
-				new_id_opt = archetype_at(entity_location.id).arch_connection_at(index);
-				if (!new_id_opt) {
-					stn::throw_logic_error("Failed to create a new archetype when flipping component id {} for entity {}", index.id, ent.id());
-				}
-			}
-			archetype_id new_archetype_id = new_id_opt.unwrap();
-			entity_location = archetype_at(new_archetype_id).add(ent);
+			archetype_id new_id_opt = old_archetype.arch_connection_at(index).unwrap_or_else([&](){
+					//in this case we have not created an archetype connected to old_archetype at index yet
+					component_ids new_arch = old_archetype.id_set.flipped(index);
+					add_archetype(new_arch);
+					//we cannot use old_archetype because a new one was added
+					return archetype_at(entity_location.id).arch_connection_at(index).unwrap();
+				});
+			entity_location = archetype_at(new_id_opt).add(ent);
 			return entity_location;
 		}
 

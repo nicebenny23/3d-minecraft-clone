@@ -13,7 +13,7 @@
 #include "../world/grid.h"
 #include "../renderer/blockrender.h"
 #include "../world/managegrid.h"
-#include "../util/time.h"
+#include "../game/time.h"
 #include "../game/collision.h"
 #include "../util/fileloader.h"
 #include "../player/player.h"
@@ -42,7 +42,7 @@ void endframe() {
 void startframe() {
 
 
-	CtxName::ctx.Time->calcfps();
+	Core::game.ensure_resource<timename::TimeManager>().calcfps();
 	tick::trytick();
 	managemenus();
 
@@ -62,16 +62,24 @@ void update() {
 	rendergame();
 	endframe();
 }
+struct TimePlugin :Core::Plugin {
+	void Build(Core::Engine& Engine) {
+		Engine.emplace_resource<timename::TimeManager>();
+	}
+};
 void init() {
-
 	Core::game.ConnectToContext();
 
+	Core::game.InitOC();
+	Core::game.insert_plugin<TimePlugin>();
 	Core::game.createWindow();
+	
+	
 
 	Core::game.InitRenderer();
-	initrandom();
+	random::initrandom();
 	Core::game.CreateWorld();
-	Core::game.InitOC();
+
 	aabb::initCollider();
 	ui::createuilist();
 	inittextarray();
@@ -98,15 +106,16 @@ void endgame() {
 }
 struct block_renderer_plugin :Core::Plugin {
 	void Build(Core::Engine& engine) {
-
-		//mesh after the grid has been reloaded
-		engine.Ecs.emplace_system<blockrender::ChunkMesher>();
-		engine.Ecs.emplace_system<gridutil::GridCoverer>();
-		engine.Ecs.emplace_system<gridutil::GridLighter>();
-		engine.Ecs.emplace_system<gridutil::GridManager>();
-		//allow blocks to reload before changing grid
+		engine.emplace_system<gridutil::GridManager>();
+		engine.emplace_system<gridutil::GridCoverer>();
+		engine.emplace_system<gridutil::GridDarkener>();
+		engine.emplace_system<gridutil::GridLighter>();
+		engine.emplace_system<blockrender::ChunkMesher>();
+		engine.emplace_system<blockrender::BlockRenderer>();
 	}
 };
+
+
 void rungame() {
 	init();
 
@@ -114,12 +123,9 @@ void rungame() {
 	CtxName::ctx.Ecs->emplace_system<spawn_mobs>();
 	CtxName::ctx.Ecs->emplace_system<PlayerMovementSys>();
 	Core::game.insert_plugin<block_renderer_plugin>();
+	Core::game.insert_plugin<decal_plugin>();
 	float lastupdate = 0;
-	{
-
-	}
 	while (!CtxName::ctx.Window->shouldClose()) {
-
 		update();
 	}
 	endgame();

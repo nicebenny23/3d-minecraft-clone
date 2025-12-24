@@ -6,6 +6,7 @@
 #include "dynamicarray.h"  // Assume Cont::array<T>
 #include "stack.h"         // Assume Cont::stack<T>
 #include "Option.h"        // Assume stn::Option<T>
+#include "queue.h"
 
 // Templated DAG node with static npos for "none"
 template<typename T>
@@ -98,7 +99,7 @@ template<typename T>
 inline stn::array<T> dag_sort(const Dag<T>& graph) {
     size_t nodeCount = graph.length();
     stn::array<int> inDegree(nodeCount, 0);
-    stn::stack<size_t> zeroQueue;
+    stn::queue<size_t> zeroQueue;
 
     // compute in-degrees
     for (size_t i = 0; i < nodeCount; i++) {
@@ -177,7 +178,7 @@ struct DagBuilder {
     size_t ensureNode(const T& nodeValue) {
         auto it = valueIndex.find(nodeValue);
         if (it != valueIndex.end()) return it->second;
-        size_t newIdx = fullGraph.addNode(nodeValue);
+		uint32_t newIdx = fullGraph.addNode(nodeValue);
         valueIndex[nodeValue] = newIdx;
         return newIdx;
     }

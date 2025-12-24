@@ -2,7 +2,7 @@
 #include "../world/grid.h"
 #include "../world/world.h"
 #include "../util/userinput.h"
-#include "../util/time.h"
+#include "../game/time.h"
 #include "entity.h"
 #pragma once
 
@@ -20,23 +20,19 @@ namespace CtxName {
 
 			return *Window;
 		}
-		timename::TimeManager& TimeRef() {
-
-			return *Time;
-		}
+	
 		Context() {
 
 			Inp = nullptr;
 			Window = nullptr;
 			Grid = nullptr;
-			Time = nullptr;
 			Ecs = nullptr;
 			wrld = nullptr;
 		}
 		World::world* wrld;
 		userinput::InputManager* Inp;
 		window::Window* Window;
-		timename::TimeManager* Time;
+	
 		ecs::Ecs* Ecs;
 
 		renderer::Renderer* Ren;

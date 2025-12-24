@@ -1,5 +1,5 @@
 #include "item.h"
-#include "../util/vector3.h"
+#include "../math/vector3.h"
 #include "../renderer/uibox.h"
 #include  "../util/userinput.h"
 #include "itemutil.h"

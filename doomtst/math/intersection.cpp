@@ -18,7 +18,7 @@ namespace geointersect {
 			double tst_val_2 = box.center[i] + box.scale[i] - fray.start[i];
 			if (apx(dir[i], 0))
 			{
-				if (inter::range(tst_val_1,tst_val_2).apx_contains(0))
+				if (math::range(tst_val_1,tst_val_2).apx_contains(0))
 				{
 					continue;
 				}

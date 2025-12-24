@@ -1,6 +1,6 @@
 
 #include "camera.h"
-#include "../util/vector3.h";
+#include "../math/vector3.h";
 #include "../items/menu.h"
 #include "../player/player.h"
 #include "../player/cameracomp.h"

@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <concepts>
 #include "erased.h"
+#include "traits.h"
 namespace stn {
 
 
@@ -103,6 +104,22 @@ namespace stn {
 				return stn::None;
 			}
 		}
+		Option<std::remove_cvref_t<T>> const copied() requires std::is_reference_v<T>&& std::is_copy_constructible_v<std::remove_cvref_t<T>> {
+			if (has_value) {
+				return Option<std::remove_cvref_t<T>>{value.get<T>()};
+			}
+			else {
+				return stn::None;
+			}
+		}
+		[[nodiscard]] T flatten() const requires OptionType<T>{
+			if (!has_value) {
+				return None;
+			}
+
+			return value.get<T>();
+			
+		}
 
 		Option& operator=(Option&& other) noexcept(std::is_nothrow_move_assignable_v<T>) {
 			if (this != &other) {
@@ -162,6 +179,7 @@ namespace stn {
 		bool operator==(const U& other) const {
 			return has_value && value.get<T>() == other;
 		}
+
 
 		template<typename U>
 		bool operator!=(const U& other) const {
@@ -230,6 +248,7 @@ namespace stn {
 		}
 		T unwrap_or(const T& default_val) const noexcept(std::is_nothrow_copy_constructible_v<T>) {
 			return has_value ? value.get<T>() : default_val;
+
 		}
 		template<typename DefaultFunc>
 		auto unwrap_or_else(DefaultFunc&& default_func) -> T
@@ -286,12 +305,30 @@ namespace stn {
 			using U = std::invoke_result_t<Func, T>;
 			if (has_value) {
 				has_value = false;
-				return Option<U>(std::invoke(std::forward<Func>(f), std::move(value.get<T>())));
+				return Option<U>(stn::invoke_carry(std::forward<Func>(f), value.get<T>()));
 			}
 			return stn::None;
 
 		}
 
+
+		template<typename Func>
+		Option& then(Func&& f)&
+			requires std::invocable<Func, T&>&& std::is_void_v<std::invoke_result_t<Func, T&>> {
+			if (has_value) {
+				std::invoke(std::forward<Func>(f), value.get<T>());
+			}
+			return *this; // return lvalue
+		}
+
+		template<typename Func>
+		Option then(Func&& f) && requires std::invocable<Func, T>&& std::is_void_v<std::invoke_result_t<Func, T&&>>{
+			if (has_value) {
+				std::invoke(std::forward<Func>(f), std::forward<T>(value.get<T>()));
+			}
+			return std::move(*this);
+		}
+		
 		template<typename Func> requires std::invocable<Func, const T&>&& OptionType<std::invoke_result_t<Func, const T&>>
 		auto and_then(Func&& f) const -> std::invoke_result_t<Func, const T&> {
 			if (has_value) {
@@ -315,6 +352,41 @@ namespace stn {
 	template<typename T, typename... Args>
 	Option<T> Construct(Args&&... args) {
 		return Option<T>(T(std::forward<Args>(args)...));
+	}
+	
+	template<typename T>
+	std::partial_ordering partial_compare(const Option<T>& lhs, const Option<T>& rhs)
+		requires requires(const T& a, const T& b) {
+			{
+				a <=> b
+			} -> std::convertible_to<std::partial_ordering>;
+	}
+	{
+		if (!lhs.is_some() && !rhs.is_some()) return std::partial_ordering::equivalent;
+		if (!lhs.is_some()) return std::partial_ordering::less;
+		if (!rhs.is_some()) return std::partial_ordering::greater;
+		return lhs.unwrap() <=> rhs.unwrap(); // defer to T’s partial ordering
+	}
+	template<typename T>
+	bool operator<(const Option<T>& lhs, const Option<T>& rhs) {
+		return partial_compare(lhs, rhs) == std::partial_ordering::less;
+	}
+
+	template<typename T>
+	bool operator>(const Option<T>& lhs, const Option<T>& rhs) {
+		return partial_compare(lhs, rhs) == std::partial_ordering::greater;
+	}
+
+	template<typename T>
+	bool operator<=(const Option<T>& lhs, const Option<T>& rhs) {
+		auto cmp = partial_compare(lhs, rhs);
+		return cmp == std::partial_ordering::less || cmp == std::partial_ordering::equivalent;
+	}
+
+	template<typename T>
+	bool operator>=(const Option<T>& lhs, const Option<T>& rhs) {
+		auto cmp = partial_compare(lhs, rhs);
+		return cmp == std::partial_ordering::greater || cmp == std::partial_ordering::equivalent;
 	}
 }
 #include <format>

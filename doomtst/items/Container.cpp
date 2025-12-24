@@ -67,7 +67,7 @@ void Container::writetofile()
 	sizeamts[1]=sizey;
 	sizeamts[2]=offset.x;
 	 sizeamts[3]= offset.y;
-	 contfile.write<float>(sizeamts, 4);
+	 contfile.write<float>(stn::span<float>(sizeamts, 4));
 	 contfile.go(sizeof(float) * 4);
 	 delete[] sizeamts;
 	short* objdata = new short[size_t(sizex) * size_t(sizey)];
@@ -83,7 +83,7 @@ void Container::writetofile()
 			objdata[ind] = (databuf[ind].helditem->amt * 256) | idval;
 		
 	}
-	contfile.write<short>(objdata, size_t( sizex )* size_t( sizey));
+	contfile.write<short>(stn::span<short>(objdata, size_t( sizex )* size_t( sizey)));
 	contfile.close();
 	delete[] objdata;
 }

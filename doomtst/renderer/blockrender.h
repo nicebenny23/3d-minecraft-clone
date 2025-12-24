@@ -2,12 +2,18 @@
 #include "../util/algorthm.h"
 #pragma once 
 namespace blockrender {
-	void renderblocks(bool transparent);
 	void initblockrendering();
 	//for final boss
 	extern bool enablelighting;
 	struct ChunkMesher :ecs::System {
 		ChunkMesher() {
+
+		}
+
+		void run(ecs::Ecs& ecs);
+	};
+	struct BlockRenderer:ecs::System {
+		BlockRenderer() {
 
 		}
 

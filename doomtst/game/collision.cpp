@@ -3,7 +3,7 @@
 #include "objecthelper.h"
 #include "../world/managegrid.h"
 #include "../game/rigidbody.h"
-#include "query.h"
+
 void collision::update()
 {
 	for (int iters = 0; iters < collisioniterations; iters++)

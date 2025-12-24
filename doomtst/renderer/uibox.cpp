@@ -1,6 +1,6 @@
 #pragma once
 #include "uibox.h"
-#include "../util/geometry.h"
+#include "../math/geometry.h"
 #include "../util/userinput.h"
 #include "../game/Core.h"#include "../game/GameContext.h"
 

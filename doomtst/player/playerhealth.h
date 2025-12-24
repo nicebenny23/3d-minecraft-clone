@@ -22,7 +22,7 @@ struct playerhealth: ecs::component
 	}
 	array<Cptr::cptr<uibox>>healthboxes;
 	void start(){
-		damage_decal_duration=CtxName::ctx.Time->create_dur();
+		damage_decal_duration=CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().create_dur();
 		size_t max_health = owner().get_component<estate>().maxhealth;
 		v2::Vec2 scale = v2::unitv / 100;
 		healthboxes = array<Cptr::cptr<uibox>>();

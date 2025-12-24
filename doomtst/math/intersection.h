@@ -1,5 +1,5 @@
 #include "geometry.h"
-#include "Option.h"
+#include "../util/Option.h"
 #pragma once 
 namespace geointersect {
 	struct RayHit {

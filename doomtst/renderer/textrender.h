@@ -1,8 +1,8 @@
-#include "../util/vector2.h"
+#include "../math/vector2.h"
 
 #include "../util/dynamicarray.h"
 #include <string>
-#include "../util/geometry.h"
+#include "../math/geometry.h"
 #include "ui.h"
 #pragma once
 

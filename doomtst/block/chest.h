@@ -1,6 +1,6 @@
 #include "block.h"
 #include "../items/menu.h"
-#include "../util/vector2.h"
+#include "../math/vector2.h"
 #include "../items/recipe.h"
 #pragma once 
 struct chestmenu :menu {
@@ -78,21 +78,21 @@ struct chestcomp : ecs::component{
 		men = chestmenu(v2::Vec2(3, 3));
 	}
 };
-inline void chestinit(blockname::block* blk) {
+inline void chestinit(blockname::block& blk) {
 
-	blk->mesh.setfaces(chestside, chestside, chestside, chestside, chestfront, chestside);
-	blk->attributes.solid = true;
-	blk->attributes.transparent = false;
-	blk->emitedlight = 0;
-	blk->mininglevel = 1;
-	blk->mesh.box.scale = blockname::blockscale;
+	blk.mesh.setfaces(chestside, chestside, chestside, chestside, chestfront, chestside);
+	blk.attributes.solid = true;
+	blk.attributes.transparent = false;
+	blk.emitedlight = 0;
+	blk.mininglevel = 1;
+	blk.mesh.box.scale = blockname::blockscale;
 
-	blk->createdefaultaabb(false);
-	if (!blk->owner().has_component<chestcomp>())
+	blk.createdefaultaabb(false);
+	if (!blk.owner().has_component<chestcomp>())
 	{
 
-		blk->owner().add_component<chestcomp>();
+		blk.owner().add_component<chestcomp>();
 
 	}
-blk->owner().add_component < loottable > ().addelem(chestitem, 1, false);
+blk.owner().add_component < loottable > ().addelem(chestitem, 1, false);
 }

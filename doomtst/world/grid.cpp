@@ -1,10 +1,10 @@
 #pragma once
 #include "grid.h"
 #include <cmath>
-#include "../util/mathutil.h"
-#include "../util/vector2.h"
+#include "../math/mathutil.h"
+#include "../math/vector2.h"
 #include "chunkload.h"	
-#include "../util/geometry.h"
+#include "../math/geometry.h"
 #include "../game/GameContext.h"
 #include "../util/random.h"
 using namespace v3;
@@ -18,22 +18,18 @@ namespace grid {
 	Point3 Grid::toBlockPos(Point3 point) {
 		return Point3(point.x / blocksize, point.y / blocksize, point.z / blocksize);
 	}
-
-	constexpr int powof2(int num) {
-		float newnum = num;
+	template<size_t axis>
+	constexpr size_t powof2() requires (axis!=0) &&((axis&(axis-1))==0){
+		size_t newnum = axis;
 		int shifts = 0;
 		while (newnum > 1) {
 			shifts++;
 			newnum /= 2;
 		}
-		if (newnum == 1) {
-			return shifts;
-		}
-		static_assert("chunkaxis msut be a power of 2");
-		return -1;
+			return shifts;		
 	}
 
-	constexpr int shift = powof2(chunkaxis);
+	constexpr int shift = powof2< chunkaxis>();
 	Coord Grid::chunkfromblockpos(Coord pos) {
 		return  Coord(pos.x >> shift, pos.y >> shift, pos.z >> shift);
 	}
@@ -86,28 +82,24 @@ namespace grid {
 		Coord chnk = chunkfromblockpos(pos);
 
 		if (containsChunk(chnk)) {
-			Chunk::chunk* chunk = chunklist.unchecked_at(chunkIndex(chnk));
-			if (chunk) {
-				return stn::Option<Chunk::chunk&>(*chunk);
-			}
-		}
-		return None;
-	}
-
-
-	Option<ecs::obj&> Grid::get_object(const v3::Coord pos) {
-		Coord chunk_pos = chunkfromblockpos(pos);
-		int chunk_index = chunkIndex(chunk_pos);
-		//since if it was le than zero it would fit
-		if (containsChunkIndex(chunk_index)) {
-			Chunk::chunk* chnk = chunklist.unchecked_at(static_cast<size_t>(chunk_index));
-			if (chnk != nullptr) {
-				return stn::Option<ecs::obj&>(chnk->blockbuf.unchecked_at(Chunk::indexfrompos(pos)));
+			Chunk::chunk* cnk_ptr= chunklist.unchecked_at(chunkIndex(chnk));
+			if (cnk_ptr) {
+				return *cnk_ptr;
 			}
 		}
 		return stn::None;
 	}
 
+
+	Option<ecs::obj&> Grid::get_object(const v3::Coord pos) 
+	{
+		return get_chunk(pos).map([&](Chunk::chunk& chnk)->ecs::obj&{return chnk.blockbuf.unchecked_at(Chunk::indexfrompos(pos)); });
+	}
+
+
+	Option<block&> Grid::get_block(const v3::Coord pos) {
+		return get_object(pos).map([&](ecs::obj& object)->block&{return object.get_component_unchecked<block>(); });
+	}
 
 	block* Grid::getBlock(const v3::Coord pos) {
 
@@ -123,15 +115,10 @@ namespace grid {
 	}
 
 	ecs::obj* Grid::getObject(const v3::Coord pos) {
-		Coord chunk_pos = chunkfromblockpos(pos);
-		int chunk_index = chunkIndex(chunk_pos);
-		//since if it was le than zero it would fit
-		if (containsChunkIndex(chunk_index)) {
-			Chunk::chunk* chnk = chunklist.unchecked_at(static_cast<size_t>(chunk_index));
-			if (chnk != nullptr) {
-
-				return &chnk->blockbuf.unchecked_at(Chunk::indexfrompos(pos));
-			}
+		
+		Chunk::chunk* chnk = GetChunk(pos);
+		if (chnk) {
+			return &chnk->blockbuf.unchecked_at(Chunk::indexfrompos(pos));
 		}
 		return nullptr;
 
@@ -167,15 +154,14 @@ namespace grid {
 	void Grid::load() {
 		stn::array<Chunk::chunk*> newchunklist = stn::array<Chunk::chunk*>(totalChunks, nullptr);
 		int indexdxchange = localChunkIndex(griddt);
-
 		for (int ind = 0; ind < totalChunks; ind++) {
 			bool ChunkLoaded = chunklist[ind] != nullptr;
 			//sadley need the 2 things in an and to clear it up
-			if (ChunkLoaded && containsChunk(chunklist[ind]->loc)) {
-				newchunklist[ind - indexdxchange] = chunklist[ind];
-			}
-			else {
-				if (ChunkLoaded) {
+			if (ChunkLoaded) {
+				if (ChunkLoaded && containsChunk(chunklist[ind]->loc)) {
+					newchunklist[ind - indexdxchange] = chunklist[ind];
+				}
+				else {
 					chunklist[ind]->destroy();
 				}
 			}
@@ -188,7 +174,7 @@ namespace grid {
 				for (int i = 0; i < dim_axis; i++) {
 					if (newchunklist[ind] == nullptr) {
 						if (debug_slow || !has_loaded_chunk) {
-							newchunklist[ind] = loader.LoadChunk(Coord(i, j, k) + gridpos - Coord(rad, rad, rad));
+							newchunklist[ind] = &loader.LoadChunk(Coord(i, j, k) + gridpos - Coord(rad, rad, rad));
 							has_loaded_chunk = true;
 						}
 					}
@@ -221,8 +207,6 @@ namespace grid {
 		gridpos = ZeroCoord;
 		griddt = ZeroCoord;
 		chunklist = stn::array<Chunk::chunk*>(totalChunks, nullptr);
-
-		load();
 	}
 	bool Grid::haschanged() {
 		return(griddt != ZeroCoord) || (has_loaded_chunk) || (griddt != ZeroCoord && debug_slow);

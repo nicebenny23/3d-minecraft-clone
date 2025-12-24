@@ -1,10 +1,15 @@
-#include "../util/dir.h"
+#include "../math/dir.h"
 #include "../renderer/renderer.h"
 #include <glm/glm.hpp>
 #include "../game/camera.h"
 #include "../game/ecs/game_object.h"
-#include "../util/geometry.h"
-#include "../util/geometry.h"
+#include "../math/geometry.h"
+#include "../math/geometry.h"
+#include <rpcndr.h>
+#include "../game/ecs/component.h"
+#include "../math/Scale3.h"
+#include "../util/Option.h"
+#include "../math/vector3.h"
 #pragma once 
 constexpr double blocksize = 1.f;
 enum blocktex {
@@ -80,7 +85,7 @@ namespace blockname {
 
 		blockmesh* mesh;
 
-		float cameradist;
+		float       cameradist;
 		byte tex;
 		Dir::Dir3d facenum;
 		byte light;
@@ -146,13 +151,7 @@ namespace blockname {
 	};
 	
 		
-	struct blockstate {
 
-		bool broken;
-		blockstate() {
-			broken = false;
-		}
-	};
 	struct blockatt
 	{
 		bool transparent;
@@ -168,11 +167,11 @@ namespace blockname {
 		blockmesh mesh;
 
 		v3::Coord pos;
-		byte emitedlight;
-		char lightval;
+		size_t emitedlight;
+		stn::Option<size_t> lightval;
 		char id;
 
-		blockstate bstate;
+		
 	
 		face& operator[](size_t index);
 		blockatt attributes;
@@ -193,9 +192,7 @@ namespace blockname {
 
 		void create(v3::Coord location, int blockid, Dir::Dir3d blkattachface, Dir::Dir2d blkdirection);
 		
-		block():mesh(), pos(),emitedlight(),lightval(),id(),bstate(),attributes(){
-			
-		};
+		block() = default;
 		 	 void createdefaultaabb(bool effector=false);
 		
 	};

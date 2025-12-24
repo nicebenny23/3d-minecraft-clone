@@ -32,12 +32,12 @@ struct firedaggerfinalboss : ecs::component{
             currtransform.Orient(pos);
             currtransform.position += currtransform.getnormaldirection() * .02f;
 
-            if (random() < CtxName::ctx.Time->dt * 1 / 20.f) {
+            if (random() < CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt * 1 / 20.f) {
                 state = shooting;
                 timetillshoot = .1;
                 shotsleft = 11;
             }
-            if (random() > 1-CtxName::ctx.Time->dt * 1 / 20.f) {
+            if (random() > 1-CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt * 1 / 20.f) {
                 state = ramming;
                 timetillshoot = 1.5;
      
@@ -46,7 +46,7 @@ struct firedaggerfinalboss : ecs::component{
         if (state == shooting)
         {
             currtransform.OrientDir(Vec3(0, 1, 0));
-            currtransform.position += currtransform.getnormaldirection()*CtxName::ctx.Time->dt * 4;
+            currtransform.position += currtransform.getnormaldirection()*CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt * 4;
 
             //currtransform.position += Vec3(1, 0, 0)*.002f;
             if (timetillshoot<0&&0<shotsleft)
@@ -63,7 +63,7 @@ struct firedaggerfinalboss : ecs::component{
             {
                 state = following;
             }
-            timetillshoot -= CtxName::ctx.Time->dt;
+            timetillshoot -= CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
         }
         if (state == ramming)
         {
@@ -72,8 +72,8 @@ struct firedaggerfinalboss : ecs::component{
 
             //currtransform.position = pos;
             currtransform.Orient(pos);
-            currtransform.position += currtransform.getnormaldirection() * CtxName::ctx.Time->dt*9;
-            timetillshoot -= CtxName::ctx.Time->dt;
+            currtransform.position += currtransform.getnormaldirection() * CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt*9;
+            timetillshoot -= CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
             if (timetillshoot<0)
             {
                 state = following;
@@ -81,7 +81,7 @@ struct firedaggerfinalboss : ecs::component{
 
         }
     }
-    void destroy() {
+    void clear() {
 
         player::goblin->transform.position = Vec3(0, 300, 0);
 

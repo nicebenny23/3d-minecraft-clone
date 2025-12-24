@@ -1865,7 +1865,7 @@ struct ImGuiViewportP : public ImGuiViewport
 //-----------------------------------------------------------------------------
 
 // Windows data saved in imgui.ini file
-// Because we never destroy or rename ImGuiWindowSettings, we can store the names in a separate buffer easily.
+// Because we never clear or rename ImGuiWindowSettings, we can store the names in a separate buffer easily.
 // (this is designed to be stored in a ImChunkStream buffer, with the variable-length Name following our structure)
 struct ImGuiWindowSettings
 {
@@ -3027,7 +3027,7 @@ namespace ImGui
 
     // Init
     IMGUI_API void          Initialize();
-    IMGUI_API void          Shutdown();    // Since 1.60 this is a _private_ function. You can call DestroyContext() to destroy the context created by CreateContext().
+    IMGUI_API void          Shutdown();    // Since 1.60 this is a _private_ function. You can call DestroyContext() to clear the context created by CreateContext().
 
     // NewFrame
     IMGUI_API void          UpdateInputEvents(bool trickle_fast_inputs);

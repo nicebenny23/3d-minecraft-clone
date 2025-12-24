@@ -4,7 +4,6 @@
 #include "../game/collision.h"
 #include "../game/entityutil.h"
 #include "../items/menu.h"
-#include "../game/query.h"
 #pragma once
 struct playercamcontrols : ecs::component
 {

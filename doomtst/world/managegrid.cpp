@@ -9,10 +9,13 @@ void gridutil::GridManager::set_block(Coord loc, int blockid, grid::Grid& grid) 
 		set_air(location->owner());
 		location = CtxName::ctx.Grid->getBlock(loc);
 		location->id = blockid;
-		blkinitname::blockinit(location);
+		blkinitname::blockinit(*location);
 		
 		blockchangecoverupdate(*CtxName::ctx.Ecs,location);
-		blocklightingupdateevent(prevemit, location->emitedlight, loc);
+		if (0 != location->emitedlight) {
+			CtxName::ctx.Ecs->write_command(partial_relight_command(*CtxName::ctx.Grid, loc));
+		}
+		CtxName::ctx.Ecs->write_command(partial_reshade_command(*CtxName::ctx.Grid, loc));
 		sendrecreatemsg(grid);
 	}
 
