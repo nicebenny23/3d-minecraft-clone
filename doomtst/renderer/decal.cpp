@@ -1,4 +1,5 @@
 #include "decal.h"
+#include "../player/player.h"
 
 
 const v2::Vec2 cubeuv[] = {
@@ -15,7 +16,7 @@ void decal::set_handle(const char* texloc, const char* texture) {
 		handle.set_layout(vertice::vertex().push<float, 3>().push<float, 2>());
 
 	}
-	handle.set_uniform(uniforms::uniform(CtxName::ctx.Ecs->get_resource<renderer::Renderer>().unwrap().Textures.LoadTexture(texloc, texture), "tex"));
+	handle.set_uniform(uniforms::uniform(CtxName::ctx.Ecs->load_asset_emplaced<TexturePath>(texloc, texture).unwrap(), "tex"));
 
 }
 void decal::create_mesh() {
@@ -29,7 +30,8 @@ void decal::create_mesh() {
 	}
 	mesh.add_indices({ 0,1,3,0,3,2 });
 	handle.fill(std::move(mesh));
-	CtxName::ctx.Ren->pop();
+	CtxName::ctx.Ren->pop(); 
+	handle.set_order_key(dist(camera::GetCam().position, center));
 
 }
 void decal::remove() {

@@ -44,14 +44,14 @@ void integertext::render()
 	write();
 		
 	
-	handle.render();
+	//handle.render();
 }
 
 
 void inittextarray()
 {
 
-    array<const char*> texlist = array<const char*>(10);
+    array<std::string> texlist = array<std::string>(10);
 	texlist[0] = "bitmaptext\\zeroimg.png";
 	texlist[1] = "bitmaptext\\oneimg.png";
 	texlist[2] = "bitmaptext\\twoimg.png";
@@ -62,10 +62,11 @@ void inittextarray()
 	texlist[7] = "bitmaptext\\sevenimg.png";
 	texlist[8] = "bitmaptext\\eightimg.png";
 	texlist[9] = "bitmaptext\\nineimg.png";
-	renderer::texture_id textarray= CtxName::ctx.Ren->Textures.LoadTextureArray(texlist, "Letters");
+	renderer::texture_array_id textarray= CtxName::ctx.Ecs->load_asset_emplaced<TextureArrayPath>(texlist, std::string("Letters")).unwrap();
 	CtxName::ctx.Ren->set_uniform("letters", textarray);
-;	CtxName::ctx.Ren->Shaders.Compile("TextShader", "shaders\\textvertex.vs", "shaders\\textfragment.vs");
-	CtxName::ctx.Ren->construct_material("Text", "TextShader", renderer::RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+	renderer::shader_id decal_shader=CtxName::ctx.Ecs->load_asset_emplaced<shader_load>( "TextShader", "shaders\\textvertex.vs", "shaders\\textfragment.vs").unwrap();
+
+	CtxName::ctx.Ren->construct_material("Text","ui_phase", decal_shader, renderer::RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
 		uniforms::uparam("aspect_ratio", "aspectratio"),
 		uniforms::uparam("letters", "tex")
 
@@ -78,13 +79,8 @@ void writeletter(renderer::MeshData& mesh_data,geometry::Box2d location, int let
 
 	const int baselocation = mesh_data.length();
 	for (int j = 0; j < 4; j++) {
-		// Index of unique vertex in each face
 		v2::Vec2 pointtoappend = location.scale * offset[j] + location.center;
-		// Actual location
 		mesh_data.add_point(pointtoappend,cubeuv[j],letter);
-
-
-		
 	}	
 	mesh_data.add_index( 0+baselocation);
 	mesh_data.add_index(1+ baselocation);
@@ -97,9 +93,10 @@ void writeletter(renderer::MeshData& mesh_data,geometry::Box2d location, int let
 }
 void integertext::write()
 {
-	v2::Vec2 min = center - (v2::Vec2(1.5f*word.length(), 1.f) * scale) / 2;
-	v2::Vec2 boxoffset = v2::Vec2(1.5, 1) * scale / 2.0;
-	v2::Vec2 increse=  v2::Vec2(1.5,0) * scale;
+	float char_offset = 1.5f;
+	v2::Vec2 min = center - (v2::Vec2(char_offset *word.length(), 1.f) * scale) / 2;
+	v2::Vec2 boxoffset = v2::Vec2(char_offset, 1) * scale / 2.0;
+	v2::Vec2 increse=  v2::Vec2(char_offset,0) * scale;
 	geometry::Box2d charlocation = geometry::Box2d(min+boxoffset, v2::unitv * scale);
 	renderer::MeshData mesh_data=handle.create_mesh();
 	for (int i = 0; i < word.length(); i++)
@@ -108,6 +105,8 @@ void integertext::write()
 		charlocation.center += increse;
 	}
 	handle.fill(std::move(mesh_data));
+	handle.set_order_key(priority);
+
 	CtxName::ctx.Ren->pop();
 
 }

@@ -59,21 +59,33 @@ void update() {
 	startframe();
 
 	updateworld();
-	rendergame();
 	endframe();
 }
 struct TimePlugin :Core::Plugin {
-	void Build(Core::Engine& Engine) {
-		Engine.emplace_resource<timename::TimeManager>();
+	void Build(Core::App& App) {
+		App.emplace_resource<timename::TimeManager>();
 	}
 };
+struct RenderPlugin :Core::Plugin {
+	void Build(Core::App& App) {
+
+	App.Ecs.emplace_asset_loader<assets::SelfDescriptorLoader<renderer::render_phase>>();
+	App.Ecs.emplace_asset_loader<TextureLoader>();
+	App.Ecs.emplace_asset_loader<TextureArrayLoader>();
+	App.Ecs.emplace_asset_loader<shader_loader>();
+	App.ensure_resource<renderer::Renderer>();
+	App.Ecs.emplace_system<renderer::render_all>();
+	}
+};
+
 void init() {
 	Core::game.ConnectToContext();
 
 	Core::game.InitOC();
-	Core::game.insert_plugin<TimePlugin>();
+
 	Core::game.createWindow();
-	
+	Core::game.insert_plugin<RenderPlugin>();
+
 	
 
 	Core::game.InitRenderer();
@@ -83,11 +95,6 @@ void init() {
 	aabb::initCollider();
 	ui::createuilist();
 	inittextarray();
-
-	create_decal_material();
-
-	blockrender::initblockrendering();
-
 	ui::createuielement<uibox>("images\\crosshair.png", "CrosshairTexture", v2::unitv / 32, v2::zerov, -3);
 
 	Core::game.CreateGrid();
@@ -104,26 +111,15 @@ void endgame() {
 	glfwTerminate();
 
 }
-struct block_renderer_plugin :Core::Plugin {
-	void Build(Core::Engine& engine) {
-		engine.emplace_system<gridutil::GridManager>();
-		engine.emplace_system<gridutil::GridCoverer>();
-		engine.emplace_system<gridutil::GridDarkener>();
-		engine.emplace_system<gridutil::GridLighter>();
-		engine.emplace_system<blockrender::ChunkMesher>();
-		engine.emplace_system<blockrender::BlockRenderer>();
-	}
-};
-
-
 void rungame() {
 	init();
 
 	CtxName::ctx.Ecs->emplace_system<RigidbodySystem>();
 	CtxName::ctx.Ecs->emplace_system<spawn_mobs>();
 	CtxName::ctx.Ecs->emplace_system<PlayerMovementSys>();
-	Core::game.insert_plugin<block_renderer_plugin>();
+	Core::game.insert_plugin<blockrender::BlockRenderPlugin>();
 	Core::game.insert_plugin<decal_plugin>();
+	Core::game.insert_plugin<ui::UiPlugin>();
 	float lastupdate = 0;
 	while (!CtxName::ctx.Window->shouldClose()) {
 		update();

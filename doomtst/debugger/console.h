@@ -7,6 +7,7 @@
 #include <format>
 #include "../imgui/imgui.h"
 #include <sstream>
+//i dont get imgui so this is not mine
 namespace console {
 
     // Log severity levels
@@ -18,7 +19,6 @@ namespace console {
         std::string text;
     };
 
-    // Console singleton: fixed-size ring buffer
     class Console {
     public:
         static constexpr int MaxEntries = 1024;

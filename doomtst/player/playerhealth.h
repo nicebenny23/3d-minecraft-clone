@@ -30,7 +30,7 @@ struct playerhealth: ecs::component
 			v2::Vec2 pos = v2::Vec2(i / 40.f-.4f, -.45);
 
 			damage_decal= ui::createuielement<uibox>("images\\red_back.png", "on_dmg_texture", v2::unitv, v2::zerov, -3);
-			damage_decal->state.enabled = false;
+			damage_decal->disable();
 			healthboxes.push(ui::createuielement<uibox>("images\\health.png","HealthTexture",scale,pos,55));
 		}
 	}
@@ -79,11 +79,11 @@ struct playerhealth: ecs::component
 			}
 			for (int i = 0; i < health; i++) {
 
-				healthboxes[i]->state.enabled = true;
+				healthboxes[i]->enable();
 			}
 			for (int i = health; i < max_health; i++) {
 
-				healthboxes[i]->state.enabled = false;
+				healthboxes[i]->disable();
 			}
 		}
 	}

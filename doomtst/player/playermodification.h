@@ -47,7 +47,7 @@ struct playerbreak : ecs::component {
 	void start() override {
 		currmining();
 		currmining.clear(nullptr);
-		CtxName::ctx.Ren->Textures.LoadTexture("images\\menutex.png", "MenuTexture");
+	//	CtxName::ctx.Ren->Textures.LoadTexture("images\\menutex.png", "MenuTexture");
 	}
 
 	void spawn_decal(size_t phase) {
@@ -116,14 +116,13 @@ struct playerbreak : ecs::component {
 	}
 	//returns current speed
 	bool ensure_engage() {
-		ray r(owner().get_component<ecs::transform_comp>().transform.position,
-			owner().get_component<ecs::transform_comp>().transform.position + owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * 7.f);
+		ray r= ray::from_offset(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * 7.f);
 		closest = collision::raycastall(r, collision::HitQuery(owner()), voxtra::countsolid);
 		if (!closest) {
 			return false;
 		}
 		auto hit = closest.unwrap();
-		if (!hit.ecs().has_component<blockname::block>()) {
+		if (!hit.owner().has_component<blockname::block>()) {
 			return false;
 		}
 		if (!inrange(hit.dist(), interactminrange, interactmaxrange)) {
@@ -132,7 +131,7 @@ struct playerbreak : ecs::component {
 		if (!CtxName::ctx.Inp->mouseleft().held) {
 			return false;
 		}
-		engage_block(hit.ecs().get_component_ptr<block>());
+		engage_block(hit.owner().get_component_ptr<block>());
 		if (engaged()) {
 			if (currmining.changed() || pickaxe.changed()) {
 				return false;

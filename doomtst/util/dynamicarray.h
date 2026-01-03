@@ -27,15 +27,15 @@ namespace stn {
 		static constexpr bool is_trivial_default = std::is_default_constructible_v<T>;
 		static constexpr bool is_trivially_copyable = std::is_trivially_copyable_v<T>;
 		static constexpr bool is_copyable = std::is_copy_assignable_v<T>;
-		
+
 		inline constexpr bool empty() const {
 			return len == 0;
 		}
-		
+
 		inline constexpr bool nonempty() const {
 			return len != 0;
 		}
-		
+
 		inline constexpr std::size_t cap() const {
 			return capacity;
 		}
@@ -79,7 +79,7 @@ namespace stn {
 		decltype(auto) pipe() const& {
 			return stn::range(*this);
 		}
-		
+
 		decltype(auto) pipe()& {
 
 			return stn::range(*this);
@@ -99,7 +99,7 @@ namespace stn {
 
 		[[nodiscard]] T& operator[](size_t index) {
 			//=contains_index(index) but it is better for debug mode
-			if (len<=index) {
+			if (len <= index) {
 				throw_range_exception("Index {} is out of bounds: cannot access element in array of len {}", index, length());
 			}
 			return list[index];
@@ -118,7 +118,7 @@ namespace stn {
 			}
 			return None;
 		}
-		[[nodiscard]] Option<const T&> get(size_t index) const{
+		[[nodiscard]] Option<const T&> get(size_t index) const {
 			if (contains_index(index)) {
 				return stn::Option<const T&>(list[index]);
 			}
@@ -199,6 +199,16 @@ namespace stn {
 		}
 
 		//returns a refrence to the first element it finds satifying a predicate: or none if it finds no such element.
+		
+		template<std::predicate<const T> Pred>
+		Option<size_t> index_such_that(Pred&& pred) const {
+			for (size_t i = 0; i < len; i++) {
+				if (pred(list[i])) {
+					return i;
+				}
+			}
+			return None;
+		}
 		template<std::predicate<T> Pred>
 		Option<T&> such_that(Pred&& pred) {
 			for (size_t i = 0; i < len; i++) {
@@ -261,8 +271,9 @@ namespace stn {
 			requires std::constructible_from<T, Args&&...>
 		T& emplace(Args&&... args) {
 			geometric_reserve(len + 1);
-			list.construct_at(len, std::forward<Args>(args)...);
-			return list[len++];
+			size_t last_index = len++;
+			list.construct_at(last_index, std::forward<Args>(args)...);
+			return list[last_index];
 		}
 
 		template<typename U>
@@ -709,7 +720,23 @@ namespace stn {
 }
 #include <format>
 #include <concepts>
+
+#include <functional>
 namespace std {
+	template <typename T>
+	struct hash<stn::array<T>> {
+		size_t operator()(const stn::array<T>& arr) const noexcept {
+			size_t h = 0;
+			std::hash<T> hasher;
+
+			for (const auto& elem : arr) {
+				h ^= hasher(elem) + 0x9e3779b9 + (h << 6) + (h >> 2);
+			}
+
+			return h;
+		}
+	};
+
 
 	template<typename T>
 	struct formatter<stn::array<T>> {

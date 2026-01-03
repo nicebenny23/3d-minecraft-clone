@@ -291,7 +291,7 @@ void recipemanager::save()
 void recipemanager::enable()
 {
 
-    state.enabled = true;
+    state.enabled=true;
     newitemlocation->enable();
     resourcecontainer->enable();
 }

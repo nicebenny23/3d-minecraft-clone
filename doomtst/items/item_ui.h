@@ -7,12 +7,12 @@
 
 struct item_ui :ecs::component{
 	void disable() {
-		sprite.state.enabled = false;
-		count.state.enabled = false;
+		sprite.disable();
+		count.disable();
 	}
 	void enable() {
-		sprite.state.enabled = false;
-		count.state.enabled = false;
+		sprite.disable();
+		count.disable();
 	}
 	void set_count(size_t cnt) {
 		count.value = cnt;

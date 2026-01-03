@@ -48,13 +48,13 @@ struct playerattackcomp: ecs::component
 		debug("sees"+std::to_string(CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt));
 		if (closest.collider.owner().has_component<estate>()&&CtxName::ctx.Inp->mouseleft().pressed)
 		{
-			if (closest.ecs().has_component<rigidbody>())
+			if (closest.owner().has_component<rigidbody>())
 			{
-				kb(owner().get_component<ecs::transform_comp>().transform.position, 7, (closest.ecs()));
+				kb(owner().get_component<ecs::transform_comp>().transform.position, 7, (closest.owner()));
 				
 			}
 			int dmgdone = computeattackdmg();
-			closest.ecs().get_component<estate>().damage(dmgdone);
+			closest.owner().get_component<estate>().damage(dmgdone);
 			wearduribilty();
 		
 		}

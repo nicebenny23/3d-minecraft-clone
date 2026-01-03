@@ -34,17 +34,40 @@ namespace stn {
 	struct insertion {
 		T value;
 		bool is_new;
-		
+
 		insertion() = default;
 
-		constexpr insertion(const T& val, bool newly_inserted)
+		template<typename U = T>
+			requires (!std::is_reference_v<T>&& std::constructible_from<T, U&&>)
+		constexpr insertion(U&& val, bool newly_inserted)
+			: value(std::forward<U>(val)), is_new(newly_inserted) {
+		}
+
+		template<typename U = T>
+			requires std::is_reference_v<T>
+		constexpr insertion(U val, bool newly_inserted)
 			: value(val), is_new(newly_inserted) {
 		}
 
-		constexpr insertion(T&& val, bool newly_inserted)
-			: value(std::move(val)), is_new(newly_inserted) {
+		//stateful
+		template<typename F>
+		insertion& on_insert(F&& f)& {
+			if (is_new) {
+				f(value);
+			}
+			return *this;
 		}
-		bool is_not_new() const {
+
+		//stateful
+		template<typename F>
+		insertion&& on_insert(F&& f)&& {
+			if (is_new) {
+				f(value);
+			}
+			return std::move(*this);
+		}
+
+		bool is_not_new() const noexcept {
 			return !is_new;
 		}
 		constexpr explicit operator bool() const noexcept {

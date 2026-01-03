@@ -5,6 +5,11 @@
 #include "../game/entityutil.h"
 #include "../items/menu.h"
 #pragma once
+struct camera_event {
+	ecs::obj object_viewed;
+	camera_event(ecs::obj viewed) :object_viewed(viewed) {
+	}
+};
 struct playercamcontrols : ecs::component
 {
 	void update() {
@@ -40,15 +45,11 @@ struct playercamcontrols : ecs::component
 		{
 			CtxName::ctx.Window->EnableCursor();
 		}
-		ray cameraray = ray(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.position +owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * interactmaxrange);
+		ray cameraray = ray::from_offset(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * interactmaxrange);
 		voxtra::WorldRayCollision closest = collision::raycastall(cameraray, collision::HitQuery());
 		if (closest)
 		{
-			/*
-			for (component* comp:ecs(closest.unwrap().ecs())) {
-				//comp->onplayerclick();
-			}
-			*/
+			owner().world()->write_event<camera_event>(closest.unwrap().owner());
 		}
 
 	}

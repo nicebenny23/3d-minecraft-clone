@@ -45,15 +45,15 @@ namespace console {
                 ImGui::Text(std::format("yaw:{:.3f},pitch:{:.3f}", player::goblin.get_component<CameraComp>().CamTransform.yaw, player::goblin.get_component<CameraComp>().CamTransform.pitch).c_str());
                 ImGui::Text(std::format("Chunk: {}", CtxName::ctx.Grid->chunkfromblockpos(Coord(pos))).c_str());
                 std::string text_for_look = player::goblin.get_component<playerplace>().Hit
-					.filter([&](const voxtra::RayWorldHit& blk) {return blk.ecs().exists(); })
-					.filter([](const voxtra::RayWorldHit& blk) {return blk.ecs().has_component<block>(); })
-                    .map([&](const voxtra::RayWorldHit& blk) {return std::format("looking at {}", blk.ecs().get_component<block>().pos); })
+					.filter([&](const voxtra::RayWorldHit& blk) {return blk.owner().exists(); })
+					.filter([](const voxtra::RayWorldHit& blk) {return blk.owner().has_component<block>(); })
+                    .map([&](const voxtra::RayWorldHit& blk) {return std::format("looking at {}", blk.owner().get_component<block>().pos); })
                     .unwrap_or("not looking at a block");
                 
                 ImGui::Text(text_for_look.c_str());
                 ImGui::EndChild();
 
-                ImGui::EndTabItem();  // <-- Add this!
+                ImGui::EndTabItem(); 
             }
 
             if (ImGui::BeginTabItem("Search")) {
@@ -92,7 +92,7 @@ namespace console {
 
                 ImGui::EndChild();
 
-                ImGui::EndTabItem();  // <-- Add this!
+                ImGui::EndTabItem();  
             }
 
             ImGui::EndTabBar();

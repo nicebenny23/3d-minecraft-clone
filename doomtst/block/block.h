@@ -85,10 +85,9 @@ namespace blockname {
 
 		blockmesh* mesh;
 
-		float       cameradist;
 		byte tex;
 		Dir::Dir3d facenum;
-		byte light;
+		std::uint8_t light;
 		bool uncomputed() const {
 			return cover == cover_state::Uncomputed;
 		}
@@ -103,7 +102,6 @@ namespace blockname {
 			cover = cover_state::Uncomputed;
 			mesh= nullptr;
 			facenum = Dir::None3d;
-			cameradist = -1;
 			tex = 0;
 			light = 0;
 		}
@@ -115,7 +113,6 @@ namespace blockname {
 			mesh = owner;
 		}
 		Point3 center();
-		void calccameradist();
 
 	};
 	struct block;

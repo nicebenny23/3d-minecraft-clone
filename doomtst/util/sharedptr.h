@@ -1,276 +1,177 @@
 #pragma once
 #include <stdexcept>
-namespace sharedptr {
-    template <typename T>
-    class rc {
-    private:
-        T* ptr;                // Raw pointer to the managed object
-        unsigned int* count;   // Reference count
-        void incrementCount() {
-            if (count) {
-                (*count)++;
-            }
-        }
-        
-        void destroy() {
-            delete ptr;
-            delete count;
-            ptr = nullptr;
-            count = nullptr;
-        }
+#include <concepts>
+namespace stn {
+	template <typename T>
+	struct rc {
 
 
-    public:
+		template<typename ...Args>
+			requires std::constructible_from<T, Args...>
+		rc(Args&&... args)
+			: count(new unsigned int(1)), ptr(new T(std::forward<Args>(args)...)) {
+		}
 
-        [[nodiscard]] bool isValid() const {
+		rc(const rc& other) : ptr(other.ptr), count(other.count) {
+			(*count)++;
+		}
+		rc& operator=(const rc<T>& other) {
+			(*other.count)++;
+			if (!--(*count)) {
+				delete ptr;
+				delete count;
+			}
 
-            return count!=nullptr;
-        }
-        void free() {
-            if (count)
-            {
-                    (*count)--;
-                    if (*count == 0) {
-                        destroy();
-                    }
-            }
+			ptr = other.ptr;
+			count = other.count;
+			return *this;
 
-            ptr = nullptr;
-            count = nullptr;
+		}
+		template <typename U> requires std::has_virtual_destructor_v<U>
+		rc<U> upcast() requires std::derived_from<T, U> {
+			(*count)++;
+			return rc<U>(ptr, count);
+		
+		}
+		template<typename U>
+		rc<U> downcast_unchecked() requires std::derived_from<U, T> {
+			(*count)++;          // increment reference count
+			return rc<U>(static_cast<U*>(ptr), count);
+		}
 
-        }
+		T& operator*() {
+			return *ptr;
+		}
+		const T& operator*() const {
+			return *ptr;
+		}
+		T* operator->() {
+			return ptr;
+		}
+		const T* operator->() const{
+			return ptr;
+		}
+		
+		std::size_t use_count() const noexcept {
+			return *count;
+		}
 
-        void clear(T* pointer=nullptr) {
-            if (ptr == pointer) {
-                return;
-            }
+		~rc() {
+			if (!--(*count)) {
+				delete ptr;
+				delete count;
+			}
+		}
+	private:
+		T* ptr;
+		size_t* count;
+		rc(T* ptr, size_t* cnt) :ptr(ptr), count(cnt) {
 
-           free();
-            ptr = pointer;
-            if (pointer != nullptr)
-            {
-                count = new unsigned int(1);
-            }
-        }
-        // Move constructor
+		}
+	};
+	template <typename T>
+	struct rc_ptr {
 
+		rc_ptr()
+			: count(nullptr), ptr(nullptr) {
+		}
 
+		template<typename ...Args>
+			requires std::constructible_from<T, Args...>
+		rc_ptr(Args&&... args)
+			: count(new size_t(1)), ptr(new T(std::forward<Args>(args)...)) {
+		}
+		
+		std::size_t use_count() const noexcept {
+			return count ? *count : 0;
+		}
 
+		explicit operator bool() const noexcept {
+			return ptr != nullptr;
+		}
+		rc_ptr(const rc_ptr& other) : ptr(other.ptr), count(other.count) {
+			inc();
+		}
+		rc_ptr& operator=(const rc_ptr<T>& other) {
+			if (ptr!=other.ptr) {
+				dec();
+				ptr = other.ptr;
+				count = other.count;
+				inc();
+			}
+			return *this;
 
+		}
+		rc_ptr(rc_ptr<T>&& other) noexcept
+			: ptr(other.ptr), count(other.count) {
+			other.ptr = nullptr;
+			other.count = nullptr;
+		}
+		rc_ptr& operator=(rc_ptr<T>&& other) {
+			if (ptr != other.ptr) {
+				dec();
+				ptr = other.ptr;
+				count = other.count;
+				other.ptr = nullptr;
+				other.count = nullptr;
+			}
+			return *this;
+		}
 
+		template <typename U> requires std::has_virtual_destructor_v<U>
+		rc_ptr<U> upcast() requires std::derived_from<T, U> {
+			inc();
+			return rc_ptr<U>(ptr, count);
 
+		}
+		template<typename U>
+		rc_ptr<U> downcast_unchecked() requires std::derived_from<U, T> {
+			inc();
+			return rc_ptr<U>(static_cast<U*>(ptr), count);
+		}
 
-        rc(): ptr(nullptr),count(nullptr)
-        {
-        }
-        ~rc() {
+		T& operator*() {
+			return *ptr;
+		}
+		const T& operator*() const {
+			return *ptr;
+		}
+		T* operator->() {
+			return ptr;
+		}
+		const T* operator->() const {
+			return ptr;
+		}
 
-            free();
-        }
-        // Constructor
-        explicit rc(T* pointer):ptr(pointer),count(nullptr)
-        {
-            if (ptr != nullptr)
-            {
-                count = new unsigned int(1);
-               
-            }
-        }
-        // Copy constructor
-        rc(const rc<T>& other) : ptr(other.ptr), count(other.count)  {
-            incrementCount();
-        }
-    
-        // Template Assignment Operator for Derived Types
-        template <typename U>
-        rc& operator=(const rc<U>& other) {
-            static_assert(std::is_base_of<T, U>::value, "U must be derived from T");
-            if (reinterpret_cast<void*>(this) != reinterpret_cast<const void*>(&other)) {
-                free();
-                ptr = other.ptr;
-                count = other.count;
-                incrementCount();
-            }
-            return *this;
-        }
+	
 
+		
+		
+		void clear() {
+			dec();
+			ptr = nullptr;
+			count = nullptr;
+		}
+		~rc_ptr() {
+			dec();
+		}
+	private:
+		void inc() {
+			if (count) {
+				(*count)++;
+			}
+		}
+		void dec() {
+			if (count && !--(*count)) {
+				delete ptr;
+				delete count;
+			}
+		}
+		T* ptr;
+		size_t* count;
+		rc_ptr(T* ptr, size_t* cnt) :ptr(ptr), count(cnt) {
 
-        rc& operator=(const rc<T>& other) {
-            if (this != &other) {
-                
-                free();
-                ptr = other.ptr;
-
-                count = other.count;
-                incrementCount();
-            }
-            return *this;
-        }
-        
-        rc(rc<T>&& other) noexcept {
-            ptr = std::exchange(other.ptr, nullptr);
-            count = std::exchange(other.count, nullptr);
-        }
-
-        rc& operator=(rc<T>&& other) noexcept {
-            if (this != &other) {
-                free();
-               ptr= std::exchange(other.ptr, nullptr);
-               count = std::exchange(other.count, nullptr);
-            }
-            return *this;
-        }
-        // Get the reference count
-
-
-
-
-      
-   
-
-
-        // Get the raw pointer
-        T* get() const {
-
-            return ptr;
-        }
-        T& operator*() const {
-            if (!ptr) {
-                throw std::runtime_error("Dereferencing null shared pointer");
-            }
-            return *ptr;
-        }
-        T* operator->() const {
-            if (!ptr) {
-                throw std::runtime_error("Dereferencing null shared pointer");
-            }
-            return ptr;
-        }
-        
-  bool operator==(T* other) const {
-            return ptr == other;
-        }
- bool operator!=(T* other) const {
-            return ptr != other;
-        }
-        // Release the current object
-    
-    };
-
-}
-
-namespace Cptr {
-
-    template <typename T>
-    struct cptr {
-      
-        sharedptr::rc<bool> exists;
-    private:
-        T* pntr;
-        //unsafe function
-       
-        //unsafe function
-        void updatestate() {
-
-
-            if (!exists.isValid() || !*exists)
-            {
-                pntr = nullptr;
-            }
-        }
-
-    public:
-        cptr() = default;
-        cptr(const cptr<T>& other) = default;
-
-
-        explicit cptr(T* p)
-        {
-            pntr = p;
-            if (pntr != nullptr)
-            {
-
-                exists = sharedptr::rc< bool>(new bool(true));
-            }
-            else {
-                exists = sharedptr::rc<bool>(nullptr);
-            }
-        }
-
-        // Template Assignment Operator for Derived Types
-        template <typename U>
-        void set(cptr<U>& other) {
-            static_assert(std::is_base_of<T, U>::value, "U must be derived from T");
-            exists = other.exists;
-            pntr = other.ptr();
-        }
-        //safe
-        bool valid() {
-            updatestate();
-            return (pntr != nullptr);
-          
-
-        }
-
-
-
-        //safe
-        T*& ptr() {
-            updatestate();
-            return pntr;
-        };
-
-        //safe
-        void free() {
-            updatestate();
-            if (pntr == nullptr)
-            {
-                throw std::logic_error("cant delete a nullptr");
-            }
-            
-                delete pntr;
-                pntr = nullptr;
-                if (exists.isValid())
-                {
-
-                    *exists = false;
-                    exists.free();
-                }
-        }
-        
-
-        T*& operator->() {
-
-            return ptr();
-
-        }
-        //safe
-        T& operator*() {
-            return *ptr();
-        }
-
-        //safe
-        bool operator==( T* other)  {
-
-            return ptr() == other;
-        }
-        //safe
-        bool operator==(cptr<T>& other){
-
-            return ptr() == other.ptr();
-        }
-        bool operator!=(T* other)  {
-
-            return (ptr() != other);
-        }
-        //safe
-        bool operator!=(cptr<T>& other) {
-
-            return  (ptr() != other.ptr());
-        }
-
-        cptr(cptr&& other) noexcept = default;
-        cptr& operator=(cptr&& other) noexcept = default;
-    };
+		}
+	};
 
 }

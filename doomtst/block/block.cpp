@@ -4,9 +4,7 @@
 #include "../game/aabb.h"
 
 using namespace blockname;
-void face::calccameradist() {
-	cameradist = 128 * v3::dist2((*this).center(), camera::campos());
-}
+
 Point3 face::center() {
 		return facenum.to_vec() * mesh->box.scale + mesh->box.center;
 	}

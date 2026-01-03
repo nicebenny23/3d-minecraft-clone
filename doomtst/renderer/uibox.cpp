@@ -72,9 +72,11 @@ namespace uiboxname {
 			
 			tex_handle.set_uniform(uniforms::uniform(float(box.scale.x), "scale"));
 			tex_handle.set_uniform(uniforms::uniform(box.center, "center"));
-			tex_handle.render();
+			//tex_handle.render();
 		}
-
+		else {
+			tex_handle.disable();
+		}
 	}
 
 
@@ -108,17 +110,21 @@ namespace uiboxname {
 			tex_handle.fill(std::move(mesh));
 			CtxName::ctx.Ren->pop();
 		}
-		tex_handle.set_uniform(uniforms::uniform(CtxName::ctx.Ren->Textures.LoadTexture(texloc, texture), "tex"));
-		
+		tex_handle.set_uniform(uniforms::uniform(CtxName::ctx.Ecs->load_asset_emplaced<TexturePath>(texloc, texture).unwrap(), "tex"));
+		tex_handle.set_order_key(priority);
+
+
 	}
 
 
 	uibox::uibox(const char* texloc, const char* TextureName, v2::Vec2 scl, v2::Vec2 position, float boxpriority)
 	{
+		
+		priority = boxpriority; 
 		LoadTex(texloc, TextureName);
-		priority = boxpriority;
+		
 		box.scale = scl;
 		box.center = position;
-		state.enabled = true;
+		enable();
 	}
 }

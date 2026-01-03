@@ -5,12 +5,15 @@
 #include "System.h"
 #include "commands.h"
 #include "message.h"
+#include "archtype.h"
+#include "../../assets/Assets.h"
 namespace ecs {
 	struct Ecs {
-		Ecs(std::uint32_t total_entities) :entities(total_entities), archetypes(total_entities), systems() {
+		Ecs(std::uint32_t total_entities) :entities(total_entities), archetypes(total_entities){
 			components.inject_ecs_instance(this);
-			systems.emplace<run_updates>();
-			systems.emplace<delete_objects>();
+			ensure_resource<Systems>();
+			emplace_system<run_updates>();
+			emplace_system<delete_objects>();
 		}
 
 		struct delete_objects :System {
@@ -64,8 +67,9 @@ namespace ecs {
 		Archetypes archetypes;
 		Components components;
 		Entities entities;
-		Systems systems;
 		Resources resources;
+
+
 		template<ResourceType T>
 		stn::Option<T&> get_resource() {
 			return resources.get<T>();
@@ -90,7 +94,27 @@ namespace ecs {
 			return resources.clear();
 		}
 
+		
+		template<assets::LoadDescriptorType T>
+		stn::Option<assets::AssetHandle<assets::DescriptorAssetType<T>>> load_asset(const T& descriptor) {
+			return ensure_resource<assets::Assets>().load(descriptor);
+		}
+		
+		template<assets::LoadDescriptorType T,typename ...Args> requires std::constructible_from<T,Args&&...>
+		stn::Option<assets::AssetHandle<assets::DescriptorAssetType<T>>> load_asset_emplaced(Args&&... args ) {
+			return load_asset<T>(T(std::forward<Args>(args)...));
+		}
 
+		template<assets::LoaderType T, typename ...Args> 
+			requires std::constructible_from<T, Args&&...>
+		void emplace_asset_loader(Args&&... args) {
+			return ensure_resource<assets::Assets>().emplace_loader<T>(std::forward<Args>(args)...);
+		}
+
+		template<assets::AssetType T> 
+		stn::Option<assets::AssetHandle<T>> from_name(std::string name) {
+			return ensure_resource<assets::Assets>().from_name<T>(name);
+		}
 
 		template<typename T>
 		Events<T>& events() {
@@ -119,17 +143,23 @@ namespace ecs {
 			return commands<T>().read();
 		}
 		
-		
+		const Systems& systems() const {
+			return get_resource<Systems>().unwrap();
+		}
+
+		Systems& systems() {
+		return get_resource<Systems>().unwrap();
+		}
 		template<SystemType Sys>
 		void insert_system(Sys& sys) {
-			systems.insert(sys);
+			systems().insert(sys);
 		}
 		template<SystemType T, typename...Args>
 		void emplace_system(Args&&... args) {
-			systems.emplace<T>(std::forward<Args>(args)...);
+			systems().emplace<T>(std::forward<Args>(args)...);
 		}
 		void run_systems() {
-			systems.run_on(*this);
+			systems().run_on(*this);
 		}
 
 
@@ -149,7 +179,14 @@ namespace ecs {
 		bool contains(entity ent) const {
 			return entities.is_valid(ent);
 		}
-		
+		template<ComponentType T, typename ...Args>
+		T& ensure_component(entity object, Args&&... args)   requires std::constructible_from<T, Args&&...> {
+			entities.assert_valid(object);
+			return components.ensure<T>(object, std::forward<Args>(args)...)
+				.on_insert([this, object](T& component) {
+				archetypes.transfer_entity_to_flipped_index(object, components.get_id_unchecked<T>());
+				}).value;
+		}
 		template<ComponentType T, typename ...Args>
 		T& add_component(entity object, Args&&... args)   requires std::constructible_from<T, Args&&...> {
 			entities.assert_valid(object);
@@ -201,14 +238,14 @@ namespace ecs {
 		
 		void remove_component_unchecked(entity object, component_id id) {
 
-			component_storage& store = components[id].storage();
-			store.remove_at_unchecked(object);
+			component_storage& pages = components.unchecked_at(id).storage();
+			pages.remove_at_unchecked(object);
 			archetypes.transfer_entity_to_flipped_index(object, id);
 		}
 		void remove_object_unchecked(entity object) {
 			stn::span<const component_id> cached = archetypes.archetype_of(object).view_cached();
 			for (component_id id : cached) {
-				components[id].storage().remove_at_unchecked(object);
+				components.unchecked_at(id).storage().remove_at_unchecked(object);
 			}
 
 			//removes from both at the same time
@@ -217,6 +254,5 @@ namespace ecs {
 		}
 
 	};
-
 
 }

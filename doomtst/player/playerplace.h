@@ -33,7 +33,7 @@ struct playerplace : ecs::component
 			return false;
 		}
 		voxtra::RayWorldHit closest = Hit.unwrap();
-		if (!closest.ecs().has_component<blockname::block>())
+		if (!closest.owner().has_component<blockname::block>())
 		{
 			return false;
 		}

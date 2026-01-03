@@ -24,7 +24,9 @@ struct ray
 	double length() const {
 		return dist(start, end);
 	}
-
+	static ray from_offset(v3::Point3 start, v3::Vec3 offset) {
+		return ray(start, start + offset);
+	}
 	
 
 	Point3 project(Point3 vector) const {

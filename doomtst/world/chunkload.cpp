@@ -1,7 +1,5 @@
-
 #include "chunk.h"
 #include "noise.h"
-#include "../renderer/chunkrender.h"
 #include <string>
 #include "../math/interval.h"
 #include "../util/fileloader.h"
@@ -201,7 +199,7 @@ struct idmap {
 Chunk::chunk& ChunkLoader::AllocChunk(Coord location) {
 	Chunk::chunk& newchunk = *(new Chunk::chunk());
 	newchunk.modified = false;
-	createchunkmesh(&newchunk);
+	newchunk.mesh->genbufs();
 	newchunk.loc = location;
 	newchunk.blockbuf = array< ecs::obj>(chunksize);
 	for (int i = 0; i < chunksize; i++) {

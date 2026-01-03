@@ -43,7 +43,7 @@ namespace window {
 		width = mode->width;
 		height = mode->height;
 
-		WinPtr = glfwCreateWindow(width, height, state.Name, nullptr, nullptr);
+		WinPtr = glfwCreateWindow(width, height, state.name, nullptr, nullptr);
 		if (WinPtr == nullptr) {
 			glfwTerminate();
 			Assert("Window creation failed: WinPtr is null");
@@ -51,7 +51,7 @@ namespace window {
 	}
 
 	Window::Window(const char* name, const char* icon) {
-		state.Name = name;
+		state.name = name;
 		InitGLFW();
 		ApplyDefaults();
 		SetIcon(icon);

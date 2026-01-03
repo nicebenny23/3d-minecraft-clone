@@ -111,7 +111,7 @@ void itemslot::destroyitem() {
 
 void itemslot::enable() {
 	
-	framedecal->state.enabled = true;
+	framedecal->enable();
 	if (helditem != nullptr && helditem->itemui.itemsprite.ptr() != nullptr) {
 		helditem->setviewable(true);
 	}
@@ -159,7 +159,7 @@ void itemslot::setdecal(decaltype toset)
 }
 void itemslot::disable() {
 
-	framedecal->state.enabled = false;
+	framedecal->disable();
 	if (helditem != nullptr && helditem->itemui.itemsprite.ptr() != nullptr) {
 		helditem->setviewable(false);
 	}

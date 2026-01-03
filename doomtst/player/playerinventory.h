@@ -12,7 +12,7 @@ struct inventorymen :menu
 	inventorymen(v2::Vec2 size) {
 		menubox = ui::createuielement<uibox>("images\\menutex.png", "MenuBoxTexture", size, v2::zerov, 11);
 		
-		menubox->state.enabled = false;
+		menubox->disable();
 		
 		manager=recipemanager("crafting\\2x2craft.txt", 1, 1);
 		blkcont = Container(8, 4, 0, 0);

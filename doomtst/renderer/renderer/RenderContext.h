@@ -1,5 +1,6 @@
 #include "texture.h"
 #include "shader.h"
+#include "Uniform.h"
 #include "ShaderManager.h"
 #include "mesh.h"
 #pragma once
@@ -39,12 +40,17 @@ namespace renderer{
 	{
 
 		void bind(Mesh& mesh);
-		void bind(ITexture& Tex);
+		void bind(Texture2D& Tex);
+
+		void bind(TextureArray& Tex);
 		void bind(shader& Shader);
 		void unbind_mesh();
-		void unbind_texture();
-		void unbind_shader();
+		void unbind_texture_2d();
 
+		void unbind_texture_array();
+		void unbind_shader();
+		
+		void set_uniform(uniforms::uniform value);
 		
 
 		
@@ -56,12 +62,14 @@ namespace renderer{
 		}
 		
 		void bind_properties(const RenderProperties& props);
-		Context():BoundShader(),BoundTexture(), bound_mesh(){}
+		Context():BoundShader(), BoundTexture2d(),BoundTextureArray(), bound_mesh() { }
 	
 	private:
 		RenderProperties properties;
 		stn::Option<shader&> BoundShader;
-		stn::Option <ITexture&> BoundTexture;
+		stn::Option <Texture2D> BoundTexture2d;
+		stn::Option <TextureArray> BoundTextureArray;
+
 		stn::Option <Mesh&> bound_mesh;
 
 

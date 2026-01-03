@@ -165,7 +165,7 @@ struct rigidbody : ecs::component{
                 else
                 {
                    v3::Point3 new_posdiff= coll.unwrap().Hit.intersectionpoint - max_dir_rel-v3::Vec3(1e-4* sgn, i);
-                   Coord pos = coll.unwrap().ecs().get_component<block>().pos;
+                   Coord pos = coll.unwrap().owner().get_component<block>().pos;
                    owner().get_component<ecs::transform_comp>().transform.position = new_posdiff;
 
                 }

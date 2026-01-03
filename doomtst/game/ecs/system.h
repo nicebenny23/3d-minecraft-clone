@@ -4,6 +4,7 @@
 #include "../../util/unique.h"
 #include "../../util/pair.h"
 #include <concepts>
+#include "resources.h"
 #include "../../util/dependency.h"
 namespace ecs {
 	struct System {
@@ -14,7 +15,7 @@ namespace ecs {
 	template<typename T>
 	concept SystemType = std::derived_from<T,System>;
 
-	struct Systems {
+	struct Systems:ecs::resource {
 		Systems():dependency_executor(){
 		}		
 		

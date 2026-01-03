@@ -1,15 +1,44 @@
 #include "meshStorage.h"
 #include "Uniform.h"
-#include "../util/Id.h"
+#include "../../util/Id.h"
 #include "RenderProperties.h"
+#include "../../game/ecs/game_object.h"
 #pragma once
-namespace renderer {
+namespace renderer{
 	struct renderable_tag;
+	
 	using renderable_id = stn::typed_id<renderable_tag>;
-	struct renderable {
+	struct order_key :ecs::component {
+		float order;
+		order_key(float priority) :order(priority) {
+
+		}
+	};
+	struct material_component:ecs::component {
+		material_id mat_id;
+		material_component(material_id mat_id) :mat_id(mat_id) {
+
+		}
+	};
+	struct is_enabled : ecs::component {
+		bool enabled;
+		is_enabled(bool v = true) : enabled(v) {
+		}
+		void enable() {
+			enabled = true;
+		}
+		void disable() {
+			enabled = false;
+		}
+	};
+	struct renderable{
+		ecs::obj object;
+		renderable_id id;
 		renderer::mesh_id mesh;
-		material_id material;
-		bool should_render;
+		material_id material() {
+			return object.get_component<material_component>().mat_id;
+		}
+
 		template <typename T>
 		void set(const char* shader_alias, T& value) {
 
@@ -25,18 +54,33 @@ namespace renderer {
 			overides.push(uniforms::uniform(shader_alias, value));
 
 		}
-		renderable() :should_render(true) {
-
-
+		void set_order(float key) {
+			object.add_component<order_key>(key);
 		}
+		float get_order() const{
+			return object.get_component<order_key>().order;
+		}
+		bool should_render() {
+			return object.get_component<is_enabled>().enabled;
+		}
+		void enable() {
+			object.get_component<is_enabled>().enable();
+		}
+		void disable() {
+			object.get_component<is_enabled>().disable();
+		}
+		renderable(renderable_id id);
+
+		
 		stn::array<uniforms::uniform> overides;
 		~renderable() {
 		}
 		void set_material(material_id mat_id) {
-			material = mat_id;
+			object.ensure_component<material_component>(mat_id).mat_id= mat_id;
 		}
 		void set_mesh(renderer::mesh_id msh_id) {
 			mesh = msh_id;
 		}
+		
 	};
 }

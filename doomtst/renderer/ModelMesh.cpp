@@ -25,7 +25,7 @@ void ModelMeshName::ModelMesh::create_handle(const char* locaion,const char* nam
 handle=CtxName::ctx.Ren->gen_renderable(); 
 handle.set_layout(vertice::vertex().push<float, 3>().push<float, 2>());
 handle.set_material("Model");
-handle.set_uniform(uniforms::uniform(CtxName::ctx.Ren->Textures.LoadTexture(locaion, name), "tex"));
+handle.set_uniform(uniforms::uniform( CtxName::ctx.Ecs->load_asset_emplaced<TexturePath>(locaion, name).unwrap(), "tex"));
 }
 
 Point3 ModelMesh::nthvertex(size_t i)

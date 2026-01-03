@@ -12,6 +12,7 @@ namespace ecs {
 	using resource_id = stn::typed_id<resource>;
 	template<typename T>
 	concept ResourceType = std::derived_from < T, resource>;
+	
 	struct Resources {
 		stn::type_indexer<resource_id> indexer;
 		stn::array<stn::box<resource>> resource_list;
@@ -20,31 +21,31 @@ namespace ecs {
 			stn::insertion<ecs::resource_id> insertion = indexer.insert<T>();
 			if (insertion.is_not_new()) {
 				//potential
-				T* ptr = resource_list.unchecked_at(insertion.value.id).get_as_unchecked<T>();
-				if (ptr) {
-					return *ptr;
+				T* resource_for_t = resource_list.unchecked_at(insertion.value.id).get_as_unchecked<T>();
+				if (resource_for_t) {
+					return *resource_for_t;
 				}
 			}
-			resource_list.push(stn::box<T>(std::forward<Args>(args)...).upcast<resource>());
-			return resource_list[insertion.value.id].ref_as_unchecked<T>();
+			//dont push as it is a bug if it pushes on insert
+			return resource_list.emplace(stn::construct_derived<T>(), std::forward<Args>(args)...).ref_as_unchecked<T>();
 		}
 		template<ResourceType T>
 		stn::Option<T&> get() {
 			return indexer.get_opt<T>().and_then([&](ecs::resource_id id) {
-				T* ptr = resource_list[id.id].get_as_unchecked<T>();
-				if (ptr) {
-					return stn::Option<T&>(*ptr);
+				T* resource_for_t = resource_list[id.id].get_as_unchecked<T>();
+				if (resource_for_t) {
+					return stn::Option<T&>(*resource_for_t);
 				}
 				return stn::Option<T&>(stn::None); });
 		}
 		template<ResourceType T>
 		stn::Option<const T&> get() const {
 			return indexer.get_opt<T>().and_then([&](resource_id id) {
-				T* ptr = resource_list[id.id].get_as_unchecked<T>();
-				if (ptr) {
-					return stn::Option<const T&>(*ptr);
+				const T* resource_for_t = resource_list[id.id].get_as_unchecked<T>();
+				if (resource_for_t) {
+					return stn::Option<const T&>(*resource_for_t);
 				}
-				return stn::Option<T&>(stn::None); });
+				return stn::Option<const T&>(stn::None); });
 		}
 		template<ResourceType T>
 		T& ensure() {

@@ -22,6 +22,14 @@ namespace uiboxname {
 		bool mouseonblock();
 		uibox(uibox& toreplace);
 		void render();
+		void disable(){
+			tex_handle.disable();
+			state.enabled = false;
+		}
+		void enable() {
+			tex_handle.enable();
+			state.enabled = true;
+		}
 		void customdestroy();
 		void LoadTex(const char* texloc, const char* texture);
 		uibox(const char* texloc, const char* TextureName, v2::Vec2 scl, v2::Vec2 position, float boxpriority);

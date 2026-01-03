@@ -79,10 +79,9 @@ namespace ecs {
 			return *ptr;
 		}
 
+
 		//Assumes an object exists at the index 
 		void remove_at_unchecked(size_t index) {
-			// Call the destructor of the element being removed
-			// Once element_count reaches 0, the page is empty and safe to delete
 			get_ptr(index)->~T();
 			--element_count;
 			if (empty()) {

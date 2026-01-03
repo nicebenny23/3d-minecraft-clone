@@ -42,7 +42,7 @@ void menu::close()
 	{
 
 		enabled = false;
-		menubox->state.enabled = false;
+		menubox->disable();
 		customclose();
 		return;
 	}
@@ -60,7 +60,7 @@ void menu::open()
 	{
 
 
-		menubox->state.enabled = true;
+		menubox->enable();
 		enabled = true;
 		customopen();
 		return;
@@ -78,7 +78,7 @@ void menu::open()
 	{
 			openmenu->close();
 	}
-	menubox->state.enabled = true;
+	menubox->enable();
 	enabled = true;
 	openmenu = this;
 	customopen();
@@ -105,7 +105,7 @@ menu::menu(v2::Vec2 size)
 {
 
 	menubox = ui::createuielement<uibox>("images\\menutex.png", "MenuTexture", size,v2::zerov,11);
-	menubox->state.enabled = false;
+	menubox->disable();
 	enabled = false;
 }
  void menu::testclick()

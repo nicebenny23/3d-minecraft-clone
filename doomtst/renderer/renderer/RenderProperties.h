@@ -8,7 +8,7 @@
 #include "Uniform.h"
 #include "ShaderManager.h"
 #include "../../util/counter.h"
-
+#include "pass.h"
 #include "RenderContext.h"
 namespace renderer {
 	struct  Renderer;
@@ -16,70 +16,82 @@ namespace renderer {
 
 	struct material_tag {
 	};
-	using material_id = stn::default_id< material_tag>;
-	struct Material {
+	struct Material:assets::Asset {
+		std::string name;
 
-		std::string Name;
+		phase_handle pass;
 		RenderProperties prop;
+		
 		array<uniforms::uniform_ref> handles;
-		shader_id shader;
-		material_id id;
-		// Default constructor
-		Material(const std::string& name, shader_id shader_handle, const RenderProperties& props = {}) : Name(name), shader(shader_handle), prop(props) {
+		assets::AssetHandle<shader> shader;
+		bool operator==(const Material& other) const = default;
+		
+		Material(const std::string& name, phase_handle phase_handle, renderer::shader_id shade_handle, const RenderProperties& props = {}, const stn::array<uniforms::uniform_ref>& uniforms) :
+			pass(phase_handle), shader(shade_handle), name(name), prop(props), handles(uniforms)
+		{
 		}
 	};
 
-	class MaterialManager {
+	struct MaterialDescriptor {
+		using asset_type = Material;
+		MaterialDescriptor(std::string& material_name, std::string phase_name, std::string shader_name, const RenderProperties& props = {}, std::initializer_list<stn::pair<const char*, const char*>> uniforms) {
+			elements = uniforms;
+			name = material_name;
+			phase = phase_name;
+			shader = shader_name;
+			properties = props;
+		}
+		bool operator==(const MaterialDescriptor& other) const = default;
 
+		stn::array<stn::pair<const char*, const char*>> elements;
+		std::string name;
+		std::string phase;
+		std::string shader;
+		RenderProperties properties;
+	};
+}
+namespace std {
+	template<>
+	struct hash<renderer::MaterialDescriptor> {
+		size_t operator()(const renderer::MaterialDescriptor& mat) const noexcept {
+			return hash<string>{}(mat.name);
+		}
+	};
+
+}
+
+namespace renderer {
+	
+	using material_handle = assets::AssetHandle<Material>;
+	class MaterialManager {
+		using load_descriptor = MaterialDescriptor;
 	public:
-		MaterialManager(renderer::Shaders* shader_manager, uniforms::UniformManager* uniform_manager) :shader_man(shader_manager), uniform_manager(uniform_manager) {
+		MaterialManager(uniforms::UniformManager* uniform_manager) :uniform_manager(uniform_manager) {
 		}
 		MaterialManager() {
 		}
-		// Check if a RenderType with the given name exists
-		bool Has(const std::string& name) const {
-			return materials.any([&](const Material& mat) {return mat.Name == name; });
-		}
+	
+		stn::box<Material> load(const MaterialDescriptor& descriptor,assets::Assets& assets) {
+			phase_handle phase = assets.from_name<render_phase>(descriptor.phase).expect("phase should exist");
+			shader_id phase = assets.from_name<shader>(descriptor.shader).expect("shader should exist");
 
+
+		}
 		template <typename... Args>
-		void construct_material(const std::string& name, const std::string& shade, const RenderProperties& props = {}, Args&&... args) {
+		void construct_material(const std::string& name, phase_handle handle, assets::AssetHandle<shader> shade, const RenderProperties& props = {}, std::initializer_list<stn::pair<const char*,const char*>> uniforms) {
 
 			if (Has(name)) {
 				throw std::runtime_error("RenderType Already Created: " + name);
 			}
 
-			auto val = Material(name, shader_man->handle_of(shade), props);
-			(evaluate_uniform_paramater(val, std::forward<Args>(args)), ...);
-			val.id = alloc.next();
-			materials.push(val);
+			Material new_mat = CtxName::(name, handle, shade, props);
+			(evaluate_uniform_paramater(new_mat, std::forward<Args>(args)), ...);
+			new_mat.id = alloc.next();
+			materials.push(new_mat);
 
 		}
 
-		void evaluate_uniform_paramater(Material& mat, stn::pair<const char*, const char*> uniform_ref) {
-			mat.handles.push(uniforms::uniform_ref(uniform_manager->get_handle(uniform_ref.first), uniform_ref.second));
-		}
 
-
-
-		const material_id get_id(const std::string& name) const {
-			Option<const Material&> mat = materials.such_that([&](const Material& mat) {return mat.Name == name; });
-			return mat.expect("material does not exist").id;
-		}
-		const Material& operator[](const material_id& id) const {
-
-			return materials[id.get()];
-		}
-		// Clear all stored RenderTypes
-		void Clear() {
-
-		}
-
-		// Destructor
-		~MaterialManager() = default;
-	private:
-		stn::counter<material_id> alloc;
-		stn::array<Material> materials;
-		renderer::Shaders* shader_man;
 		uniforms::UniformManager* uniform_manager;
 	};
 }

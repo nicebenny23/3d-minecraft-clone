@@ -1,7 +1,7 @@
-#include "../util/SparseSet.h"
+#include "../../util/SparseSet.h"
 #include "Mesh.h"
 #include "RenderContext.h"
-#include "../util/Id.h"
+#include "../../util/Id.h"
 #pragma once
 
 namespace renderer {

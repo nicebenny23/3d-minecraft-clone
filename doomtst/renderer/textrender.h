@@ -11,22 +11,9 @@ extern stn::Id textarray;
 void inittextarray();
 const v2::Vec2 cubeuv[] = {
 	v2::Vec2(0, 1),
-
-
 	v2::Vec2(1, 1),
-
 	v2::Vec2(0, 0),
 	v2::Vec2(1, 0),
-
-
-
-	
-
-
-
-
-	
-
 }; const v2::Vec2 offset[] = {
 	v2::Vec2(-1,-1),
 	v2::Vec2(1, -1),

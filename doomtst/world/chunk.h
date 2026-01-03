@@ -1,5 +1,4 @@
 #include "../block/block.h"
-#include "../renderer/chunkrender.h"
 #include "../util/cached.h"
 #pragma once 
 constexpr int chunklength = 16;
@@ -11,20 +10,19 @@ namespace Chunk {
 	struct chunk;
 	struct chunkmesh
 	{
-		chunkmesh() :recreate_mesh(false){
+		chunkmesh(chunk& cnk) :recreate_mesh(false),owner(cnk){
 		};
 		
 
 		renderer::RenderableHandle SolidGeo;
 		renderer::RenderableHandle TransparentGeo;
-		//voa vertexspec;
 		void genbufs();
 	
 		stn::dirty_flag recreate_mesh;
-		chunk* aschunk;
-		array<face> facebuf;
+		chunk& owner;
+		array<face> faces;
 		
-		void sortbuf();
+		void sort_faces();
 		void destroy();
 	};
 	std::string getcorefilename(Coord pos);
@@ -44,19 +42,10 @@ namespace Chunk {
 		ecs::obj& operator[](size_t index);
 		stn::array<ecs::obj> blockbuf;
 		void destroy();
-		double cameradist() const {
-			return 	 dist(center(), camera::campos());
-		}
-		bool operator<(const chunk& b) const {
-			return b.cameradist() < cameradist();
-		}
-		bool operator>(const chunk& b) const {
-			return b.cameradist() > cameradist();
-		}
+	
 
 	};
 
-	void createchunkmesh(chunk* aschunk);
 }
 
  // !Chunk_H

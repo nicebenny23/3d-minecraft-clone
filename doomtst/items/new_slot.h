@@ -78,7 +78,7 @@ namespace items{
 			}
 			if (framedecal.valid())
 			{
-				framedecal->state.enabled = false;	
+				framedecal->disable();	
 			}
 		}
 		item_ui* get() {
@@ -97,7 +97,7 @@ namespace items{
 			}
 			if (framedecal.valid())
 			{
-				framedecal->state.enabled = true;
+				framedecal->.enable();
 			}
 		}
 		void bind_box() {

@@ -2,13 +2,38 @@
 #include <type_traits>
 #include <concepts>
 namespace stn {
+
+
+	template<typename D>
+	struct construct_derived {
+		using type = D;
+		constexpr construct_derived() = default;
+	};
+	template<typename Tag>
+	concept ConstructDerivedTagType =
+		requires { typename Tag::type; }&&
+	std::is_same_v<Tag, construct_derived<typename Tag::type>>;
 	template<typename T>
 	struct box {
-
-		template<typename... Args> requires std::constructible_from<T, Args&&...>
+		
+		using element_type = T;
+		template<typename... Args> 
+			requires std::constructible_from<T, Args&&...>
 		explicit box(Args&&... args) : ptr(new T(std::forward<Args>(args)...)) {
 		}
-		box(box&& other) {
+
+		template<ConstructDerivedTagType Tag, typename... Args> 
+			requires std::derived_from<typename Tag::type, T>&&
+		std::constructible_from<typename Tag::type, Args&&...>
+			explicit box(Tag /*tag*/, Args&&... args)
+			: ptr(new typename Tag::type(std::forward<Args>(args)...)) {
+		}
+
+
+
+		box() requires std::default_initializable<T> : ptr(new T()) {
+		}
+		box(box&& other) noexcept{
 			ptr = other.ptr;
 			other.ptr = nullptr;
 		}
@@ -72,7 +97,7 @@ namespace stn {
 		}
 		template<typename U> requires std::derived_from<U, T>
 		const U& ref_as_unchecked() const {
-			return *static_cast<U*>(ptr);
+			return *static_cast<const U*>(ptr);
 		}
 
 		//requires the cast to be valid
@@ -122,6 +147,10 @@ namespace stn {
 		void swap(box& other) noexcept {
 			std::swap(ptr, other.ptr);
 		}
+		template<typename T>
+		bool is() const {
+			return dynamic_cast<const T*>(ptr) != nullptr;
+		}
 	private:
 		explicit box(T* pointer) noexcept : ptr(pointer) {
 		}
@@ -134,4 +163,17 @@ namespace stn {
 	void swap(box<T>& lhs, box<T>& rhs) noexcept {
 		lhs.swap(rhs);
 	}
+	
+	template<typename T>
+	struct is_box : std::false_type {
+	};
+
+	template<typename T>
+	struct is_box<box<T>> : std::true_type {
+	};
+	template<typename T>
+	concept BoxType =is_box<T>::value;
+
+
+	
 }

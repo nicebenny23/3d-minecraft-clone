@@ -13,11 +13,6 @@ namespace ecs {
 		archetype_index index;
 		archetype_id id;
 		archetype_location(archetype_id arch_id, archetype_index  arch_index) :id(arch_id), index(arch_index) {
-
-		}
-		//returns the archetype at the next entry
-		archetype_location next_archetype() const{
-		return archetype_location(archetype_id(id.id + 1), archetype_index(0));
 		}
 		bool operator!=(const archetype_location& other) const = default;
 		bool operator==(const archetype_location& other) const = default;
@@ -35,6 +30,13 @@ namespace ecs {
 
 	};
 	struct Entities {
+		Entities(std::uint32_t count) :entity_list(count) {
+
+			for (std::uint32_t i = 0; i < count; i++) {
+				free_ids.push(i);
+			}
+		}
+
 		entity_metadata& operator[](size_t index) {	
 			return entity_list[index];
 		}
@@ -71,23 +73,17 @@ namespace ecs {
 		bool is_empty() const {
 			return entity_list.empty();
 		}
-		stn::array<uint32_t> free_ids;
-		stn::array<entity_metadata> entity_list;
 		entity allocate_entity() {
 			std::uint32_t id= free_ids.pop();
-
 			return entity(id, entity_list[id].gen_count);
 		}
 		void remove_entity(entity entity) {
 			at(entity).clear();
 			free_ids.push(entity.id());
 		}
-		Entities(std::uint32_t count):entity_list(count){
+	private:
 
-			for (std::uint32_t i = 0; i < count; i++)
-			{
-				free_ids.push(i);
-			}
-		}
+		stn::array<uint32_t> free_ids;
+		stn::array<entity_metadata> entity_list;
 	};
 }

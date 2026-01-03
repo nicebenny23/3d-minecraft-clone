@@ -68,7 +68,11 @@ namespace ecs {
 		T& add_component(Args&&... args) {
 			return ecs->add_component<T>(ent, std::forward<Args>(args)...);
 		}
-		void destroy() &&{
+		template<ComponentType T, typename ...Args > requires std::constructible_from<T, Args&&...>
+		T& ensure_component(Args&&... args) {
+			return ecs->ensure_component<T>(ent, std::forward<Args>(args)...);
+		}
+		void destroy() {
 			ecs->write_command(DestroyEntity(ent));
 		}
 		template<ComponentType C>

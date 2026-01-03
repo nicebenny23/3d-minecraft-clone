@@ -61,10 +61,7 @@ struct spawn_mobs :ecs::System {
 	}
 	void run(ecs::Ecs& ecs) {
 		return;
-		if (!blockrender::enablelighting)
-		{
-			return;
-		}
+	
 		float spawnthreshold = .01f;
 		float randomnum = random::random();
 		size_t total_alive = 0;

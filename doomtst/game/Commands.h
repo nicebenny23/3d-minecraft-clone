@@ -20,7 +20,7 @@ std::is_base_of_v<Command, T>&&
 };
 
 struct CommandPool {
-	stn::flux store;
+	stn::flux pages;
 	stn::array<stn::flux_token<Command>> queue;
 	void apply(ecs::Ecs* World) {
 		while (!queue.empty())
@@ -32,12 +32,12 @@ struct CommandPool {
 	}
 	template<CommandType T,typename...Args>
 	void emplace(Args&& ...args) {
-		stn::flux_token<T> command = store.emplace_unchecked<T>(std::forward<Args>(args)...);
+		stn::flux_token<T> command = pages.emplace_unchecked<T>(std::forward<Args>(args)...);
 		queue.push(command.abstract<Command>());
 
 	}
 	template<CommandType T>
-	CommandPool(std::type_identity<T> ): store(std::type_identity<T>()){}
+	CommandPool(std::type_identity<T> ): pages(std::type_identity<T>()){}
 	size_t commands() const{
 		return queue.length();
 	}

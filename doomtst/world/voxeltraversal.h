@@ -18,7 +18,7 @@ namespace voxtra {
 			return Hit.intersectionpoint;
 		}
 		
-		ecs::obj ecs() const {
+		ecs::obj owner() const {
 			return collider.owner();
 		}
 		float dist() const {

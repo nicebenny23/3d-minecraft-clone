@@ -21,15 +21,15 @@ namespace stn {
 	struct Option;
 
 	template<typename>
-	struct is_option : std::false_type {
+	struct is_option_t : std::false_type {
 	};
 
 	template<typename T>
-	struct is_option<Option<T>> : std::true_type {
+	struct is_option_t<Option<T>> : std::true_type {
 	};
 	template<typename T>
 	concept OptionType =
-		is_option<std::remove_cvref_t<T>>::value;
+		is_option_t<std::remove_cvref_t<T>>::value;
 
 
 	template<typename T>

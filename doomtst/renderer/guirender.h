@@ -2,11 +2,29 @@
 
 #include "../math/vector3.h"
 #include "../debugger/console.h"
+#include "../imgui/imgui_impl_opengl3.h"
+#include "../imgui/imgui_impl_glfw.h"
+#include "../game/ecs/ecs.h"
 
 namespace guirender{
 
 	void initgui();
 	void destroygui();
-	void rendergui();
+	struct GuiSystem :ecs::System {   // Start a new ImGui frame
+		GuiSystem() {
+
+
+		}
+		void run(ecs::Ecs& ecs) {
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+			// ... your other windows
+			console::Console::Instance().Render();
+			// 7. Render UI
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		}
+	};
 }
 

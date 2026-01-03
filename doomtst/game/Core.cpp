@@ -5,7 +5,7 @@ namespace Core {
 #include <iostream>
 
    
-    Engine game; 
+    App game; 
     // Error callback: Logs GLFW errors.
     void errorCallback(int /*error*/, const char* description)
     {
@@ -47,12 +47,12 @@ namespace Core {
 
 
 
-    void Engine::ConnectToContext()
+    void App::ConnectToContext()
     {
         ctx = &CtxName::ctx;
     }
 
-    void Engine::createWindow()
+    void App::createWindow()
     {
         InitInput();
         new (&Window) window::Window("Benny Render 3d", "images\\crystaloreenhanced.png");
@@ -67,32 +67,32 @@ namespace Core {
         guirender::initgui();
     }
 
-    void Engine::CreateGrid()
+    void App::CreateGrid()
     {
 		Grid=&Ecs.insert_resource<grid::Grid>(1, ctx);
         
         ctx->Grid = Grid;
     }
 
-    void Engine::InitInput() {
+    void App::InitInput() {
   
         ctx->Inp = &Inp;   
     }
-    void Engine::InitOC()
+    void App::InitOC()
     {
         ctx->Ecs = &Ecs;
     }
 
-    void Engine::CreateWorld()
+    void App::CreateWorld()
     {
 		
         new (&world) World::world(0);
         ctx->wrld = &world;
     }
 
-    void Engine::InitRenderer()
+    void App::InitRenderer()
     {  
-		ren = &Ecs.insert_resource<renderer::Renderer>();
+		ren = &Ecs.get_resource<renderer::Renderer>().unwrap();
         ctx->Ren = ren;
     }
    

@@ -10,10 +10,3 @@
 #include "../renderer/model.h"
 #include "guirender.h"
 #include "../renderer/decal.h"
-
-void rendergame() {
-  //  CtxName::ctx.Ecs->updatecomponents(ecs::Rendercall);
-    ui::updateui();
-    guirender::rendergui();
-
-}

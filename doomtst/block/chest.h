@@ -10,7 +10,7 @@ struct chestmenu :menu {
 	chestmenu(v2::Vec2 size) {
 		menubox = ui::createuielement<uibox>("images\\menutex.png", "MenuTexture", size, v2::zerov, 11);
 
-		menubox->state.enabled = false;
+		menubox->disable();
 		menutype = normalmenu;
 
 		blkcont= Container(3,3,0,3);

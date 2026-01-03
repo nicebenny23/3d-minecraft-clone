@@ -232,7 +232,7 @@ namespace stn {
 			using difference_type = std::ptrdiff_t;
 			using pointer = U*;
 			using reference = U&;
-			iterator_base(deque_store_type store, size_t idx) : deque_store(store), logical_pos(idx) {}
+			iterator_base(deque_store_type pages, size_t idx) : deque_store(pages), logical_pos(idx) {}
 			iterator_base() :deque_store(nullptr), logical_pos(nullptr) {
 			}
 			bool operator==(const iterator_base& other) const {

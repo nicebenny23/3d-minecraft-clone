@@ -16,7 +16,7 @@ namespace window {
 	struct WindowState {
 		bool cursorEnabled;
 		GLFWimage icon;
-		const char* Name;
+		const char* name;
 
 		const int MinSize = 400;
 

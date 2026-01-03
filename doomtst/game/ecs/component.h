@@ -1,9 +1,17 @@
-#include "archtype.h"
-#include "entities.h"
 #include "component_pages.h"
 #include "../../util/dynpool.h"
 #include "component_id.h"
 #include "../../util/exception.h"
+#include <concepts>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
+#include "entity.h"
+#include "../../util/bitset.h"
+#include "../../util/dynamicarray.h"
+#include "../../util/pair.h"
+#include "../../util/Span.h"
+#include "../../util/type_index.h"
 #pragma once
 namespace ecs {
 	struct obj;
@@ -52,65 +60,71 @@ namespace ecs {
 		template<ComponentType T>
 		component_storage(std::type_identity<T> type_identity) :
 			pool(stn::flux(std::type_identity<T>())),
-			store() {
+			pages() {
 
 		}
 		component_storage& operator=(component_storage&& other) noexcept {
 			if (this != &other) {
 				clear();
-				store = std::move(other.store);
+				pages = std::move(other.pages);
 				pool = std::move(other.pool);
 			}
 			return *this;
 		}
 
 		component_storage(component_storage&& other) noexcept
-			: store(std::move(other.store)),
+			: pages(std::move(other.pages)),
 			pool(std::move(other.pool)) {
 		}
 
 		bool has(entity ent) const {
-			return store.contains(ent.id());
+			return pages.contains(ent.id());
 		}
 
 
 		component& unchecked_at(entity entity) {
-			return store.unchecked_at(entity.id()).get_unchecked();
+			return pages.unchecked_at(entity.id()).get_unchecked();
 		}
 		const component& unchecked_at(entity entity) const {
-			return store.unchecked_at(entity.id()).get_unchecked();
+			return pages.unchecked_at(entity.id()).get_unchecked();
 		}
 		template<ComponentType T>
 		T& get_as_unchecked(entity entity) {
-			return store.unchecked_at(entity.id()).get_unchecked_as<T>();
+			return pages.unchecked_at(entity.id()).get_unchecked_as<T>();
 		}
 		template<ComponentType T>
 		const T& get_as_unchecked(entity entity) const {
-			return store.unchecked_at(entity.id()).get_unchecked_as<T>();
+			return pages.unchecked_at(entity.id()).get_unchecked_as<T>();
 		}
 
 
-		template<typename T, typename... Args>
+		template<ComponentType T, typename... Args>
 		T& emplace_unchecked(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
 			// Direct initialization to satisfy MSVC parsing rules
 			stn::flux_token<T> token(pool.template emplace_unchecked<T>(std::forward<Args>(args)...));
 			T& ref = token.get_unchecked();
-			store.insert_at_unchecked(ent.id(), token.template abstract<component>());
+			pages.insert_at_unchecked(ent.id(), token.template abstract<component>());
 
 			return ref;
 		}
-		template<typename T, typename...Args>
+		template<ComponentType T, typename...Args>
 		T& emplace(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
 			if (has(ent)) {
 				throw std::logic_error("emplace<T> cannot overwrite an existing component");
 			}
 			return emplace_unchecked<T>(ent, std::forward<Args>(args)...);
 		}
-
+		template<ComponentType T, typename...Args>
+		stn::insertion<T&> insert(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
+			if (has(ent)) {
+				return stn::insertion<T&>(get_as_unchecked<T>(ent), false);
+			}
+			return stn::insertion<T&>(emplace_unchecked<T>(ent, std::forward<Args>(args)...),true);
+		}
 
 		void remove_at_unchecked(entity ent) {
-			store[ent.id()].get_unchecked().destroy_hook();
-			store.remove_at_unchecked(ent.id());
+			pages[ent.id()].get_unchecked().destroy_hook();
+			pages.remove_at_unchecked(ent.id());
 		}
 		void remove_at(entity ent) {
 			if (has(ent)) {
@@ -121,14 +135,14 @@ namespace ecs {
 
 
 		void clear() {
-			store.clear();
+			pages.clear();
 			pool.clear();
 		}
 		~component_storage() {
 			clear();
 		}
 	private:
-		component_pages<stn::flux_token<component>, 10> store;
+		component_pages<stn::flux_token<component>, 10> pages;
 		stn::flux pool;
 	};
 	//component concept
@@ -137,7 +151,7 @@ namespace ecs {
 
 
 		template<ComponentType T>
-		component_type(component_id mid, std::type_identity<T> type_identity) :store(std::type_identity<T>()), component_id(mid), traits(ComponentTraits<T>), ecs_instance(nullptr) {
+		component_type(component_id mid, std::type_identity<T> type_identity) :pages(std::type_identity<T>()), component_id(mid), traits(ComponentTraits<T>), ecs_instance(nullptr) {
 		}
 		bool updates() const {
 			return traits.updates;
@@ -150,38 +164,48 @@ namespace ecs {
 			return component_id;
 		}
 		component_storage& storage() {
-			return store;
+			return pages;
 		}
 
 		bool has(entity owner) const {
-			return store.has(owner);
+			return pages.has(owner);
 		}
 
 
 		component& unchecked_at(entity entity) {
-			return store.unchecked_at(entity);
+			return pages.unchecked_at(entity);
 		}
 		const component& unchecked_at(entity entity) const {
-			return store.unchecked_at(entity);
+			return pages.unchecked_at(entity);
 		}
 
 
 		template<ComponentType T>
 		T& get_as_unchecked(entity entity) {
-			return store.get_as_unchecked<T>(entity);
+			return pages.get_as_unchecked<T>(entity);
 		}
 		template<ComponentType T>
 		const T& get_as_unchecked(entity entity) const {
-			return store.get_as_unchecked<T>(entity);
+			return pages.get_as_unchecked<T>(entity);
 		}
 		template<ComponentType T, typename...Args>
 		T& emplace(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
-			T& comp = store.emplace<T>(ent, std::forward<Args>(args)...);
+			T& comp = pages.emplace<T>(ent, std::forward<Args>(args)...);
 			comp.comp_id = id();
 			comp.ent = ent;
 			comp.ecs = ecs_instance;
 			comp.start();
 			return comp;
+		}
+		template<ComponentType T, typename...Args>
+		stn::insertion<T&> ensure(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
+			return pages.insert<T>(ent, std::forward<Args>(args)...)
+				.on_insert([this, ent](T& value) {
+					value.comp_id = id();
+					value.ent = ent;
+					value.ecs = ecs_instance;
+					value.start();
+				});
 		}
 
 		
@@ -192,7 +216,7 @@ namespace ecs {
 		//for injecting into the type 
 		Ecs* ecs_instance;
 		component_id component_id;
-		component_storage store;
+		component_storage pages;
 		ComponentInfo traits;
 	};
 	struct Components {
@@ -221,11 +245,11 @@ namespace ecs {
 		}
 		template<ComponentType T>
 		inline component_id insert_id() {
-			auto [id, is_new] = component_indexer.insert<T>();
-			if (is_new) {
-				component_list.emplace(id, std::type_identity<T>()).inject_ecs_instance(ecs_instance);
+			stn::insertion< component_id> inserted_id = component_indexer.insert<T>();
+			if (inserted_id.is_new) {
+				component_list.emplace(inserted_id.value, std::type_identity<T>()).inject_ecs_instance(ecs_instance);
 			}
-			return id;
+			return inserted_id.value;
 		}
 		template<ComponentType ...Types>
 		inline component_ids insert_ids() {
@@ -256,7 +280,11 @@ namespace ecs {
 			component_id comp_id = insert_id<T>();
 			return unchecked_at(comp_id).emplace<T>(id, std::forward<Args>(args)...);
 		}
-
+		template<ComponentType T, typename ...Args>
+		stn::insertion<T&> ensure(entity id, Args&&... args) requires std::constructible_from<T, Args&&...> {
+			component_id comp_id = insert_id<T>();
+			return unchecked_at(comp_id).ensure<T>(id, std::forward<Args>(args)...);
+		}
 		bool has_component(entity object, component_id id) const {
 			return (*this)[id].has(object);
 		}

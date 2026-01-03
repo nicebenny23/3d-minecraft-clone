@@ -9,9 +9,9 @@
 #include "../world/world.h"
 //start of the application
 namespace Core {
-	struct Engine;
+	struct App;
 	struct Plugin {
-		virtual void Build(Engine& engine) = 0;
+		virtual void Build(App& engine) = 0;
 		Plugin() {
 		}
 	};
@@ -26,14 +26,14 @@ namespace Core {
 				T().Build(*engine);
 			}
 		}
-		void inject_engine(Engine& eng) {
+		void inject_engine(App& eng) {
 			engine = &eng;
 		}
 		Plugins() :engine() {}
 	private:
-		Engine* engine;
+		App* engine;
 	};
-    struct Engine
+    struct App
     {
 
         void ConnectToContext();
@@ -69,13 +69,13 @@ namespace Core {
 			Ecs.emplace_system<T>(std::forward<Args>(args)...);
 		}
 
-		Engine():Ecs(2<<18) {
+		App():Ecs(2<<18) {
 			plugin_list.inject_engine(*this);
 		}
         ecs::Ecs Ecs;
 		
     };
-    extern Engine game;
+    extern App game;
     
 }
 

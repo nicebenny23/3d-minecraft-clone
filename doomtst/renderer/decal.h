@@ -25,12 +25,7 @@ struct decal {
 
 inline void create_decal_material() {
 
-	CtxName::ctx.Ren->Shaders.Compile("decal_shader", "shaders\\decal_vert.vs", "shaders\\decal_frag.vs");
-	CtxName::ctx.Ren->construct_material("decal_mat", "decal_shader", renderer::RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-		uniforms::uparam("aspect_ratio", "aspectratio"),
-		uniforms::uparam("proj_matrix", "projection"),
-		uniforms::uparam("view_matrix", "view")
-	);
+
 
 
 }
@@ -61,10 +56,15 @@ struct render_decals :ecs::System {
 	}
 };
 struct decal_plugin:Core::Plugin{
-	void Build(Core::Engine& engine) {
+	void Build(Core::App& engine) {
 		engine.emplace_system<render_decals>();
 		engine.emplace_resource<decal_system>();
-
+		renderer::shader_id decal_shader= CtxName::ctx.Ecs->load_asset_emplaced<shader_load>("decal_shader", "shaders\\decal_vert.vs", "shaders\\decal_frag.vs").unwrap();
+		CtxName::ctx.Ren->construct_material("decal_mat","transparent_phase", decal_shader, renderer::RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+			uniforms::uparam("aspect_ratio", "aspectratio"),
+			uniforms::uparam("proj_matrix", "projection"),
+			uniforms::uparam("view_matrix", "view")
+		);
 	}
 
 };

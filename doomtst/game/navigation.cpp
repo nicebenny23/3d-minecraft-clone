@@ -64,7 +64,6 @@ return        array<navnode>();
     }
     array<navnode> openlist;
     array<navnode> closedlist;
-    array<navnode*> todeallocatelist;
     start.gcost = dist(start.pos, goal.pos);
 
     openlist.push(start);
@@ -90,7 +89,6 @@ return        array<navnode>();
 
         navnode current = openlist[shortestind.unwrap()];
         navnode* newnode = new navnode(current);
-        todeallocatelist.push(newnode);
 
         openlist.remove_at(shortestind.unwrap());
         
@@ -99,10 +97,6 @@ return        array<navnode>();
         {
             
             array<navnode> toret = reconstructpath(&current);
-            for (int i = 0; i < todeallocatelist.length(); i++)
-            {
-                delete todeallocatelist[i];
-            }
             return array<navnode>( toret);
         }
     
@@ -112,10 +106,6 @@ return        array<navnode>();
          
          
             array<navnode> toret=reconstructpath(&current);
-            for (int i = 0; i < todeallocatelist.length(); i++)
-            {
-                delete todeallocatelist[i];
-            }
             return toret;
         }
 
@@ -149,7 +139,7 @@ return        array<navnode>();
                     //updates gcost to be shorter
                     if (potentialg < openlist[j].gcost) {
                         openlist[j].gcost = potentialg;
-                        openlist[j].parent = newnode;
+                        openlist[j].parent =newnode;
                     }
                     break;
                 }
@@ -160,14 +150,10 @@ return        array<navnode>();
             }
                 neighbor.gcost = potentialg;
                 neighbor.hcost = appdist(neighbor, goal);
-                neighbor.parent = newnode;
+                neighbor.parent =newnode;
                 openlist.push(neighbor);
             
         }
-    }
-    for (int i = 0; i < todeallocatelist.length(); i++)
-    {
-        delete todeallocatelist[i];
     }
     return array<navnode>(); // No path found
 }
