@@ -13,11 +13,15 @@ namespace renderer{
 		order_key(float priority) :order(priority) {
 
 		}
+	
 	};
 	struct material_component:ecs::component {
-		material_id mat_id;
-		material_component(material_id mat_id) :mat_id(mat_id) {
-
+		material_handle mat_id;
+		material_component(material_handle mat) :mat_id(mat) {
+			int l = 3;
+		}
+		void start() {
+			int l = 3;
 		}
 	};
 	struct is_enabled : ecs::component {
@@ -35,7 +39,7 @@ namespace renderer{
 		ecs::obj object;
 		renderable_id id;
 		renderer::mesh_id mesh;
-		material_id material() {
+		material_handle material() {
 			return object.get_component<material_component>().mat_id;
 		}
 
@@ -75,8 +79,9 @@ namespace renderer{
 		stn::array<uniforms::uniform> overides;
 		~renderable() {
 		}
-		void set_material(material_id mat_id) {
-			object.ensure_component<material_component>(mat_id).mat_id= mat_id;
+		void set_material(material_handle mat_id) {
+			material_handle id =object.ensure_component<material_component>(mat_id).mat_id;
+			int l = 2;
 		}
 		void set_mesh(renderer::mesh_id msh_id) {
 			mesh = msh_id;

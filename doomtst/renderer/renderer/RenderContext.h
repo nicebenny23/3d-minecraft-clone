@@ -33,7 +33,7 @@ namespace renderer{
 			blendFuncDst(BlendFunctionDst)
 		{
 		}
-
+		bool operator==(const RenderProperties& other) const = default;
 
 	};
 	struct Context

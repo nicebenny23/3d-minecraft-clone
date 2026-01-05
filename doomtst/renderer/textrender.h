@@ -14,26 +14,31 @@ const v2::Vec2 cubeuv[] = {
 	v2::Vec2(1, 1),
 	v2::Vec2(0, 0),
 	v2::Vec2(1, 0),
-}; const v2::Vec2 offset[] = {
+}; 
+const v2::Vec2 offset[] = {
 	v2::Vec2(-1,-1),
 	v2::Vec2(1, -1),
-
-v2::Vec2(-1, 1),
-v2::Vec2(1, 1)
+	v2::Vec2(-1, 1),
+	v2::Vec2(1, 1),
 
 };
-struct integertext:ui::uielement
-{	float scale;
-	v2::Vec2 center;
+struct text_component:ecs::component
+{	
+
 	void set_handle();
-	integertext(v2::Vec2 textcenter,float textscale);
+	text_component(v2::Vec2 textcenter,float textscale);
 	void write();
 	renderer::RenderableHandle handle;
-	int value;
-	std::string word;
-		void recalculateword();
+	std::string word;  
+	template<typename... Args>
+	void format(const std::format_string<Args...>& fmt, Args&&... args) {
+		word = std::format(fmt, std::forward<Args>(args)...);
+	}
+	void recalculateword();
 	void customdestroy();
 	void render();
 
 };
+
+
 

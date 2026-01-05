@@ -16,7 +16,7 @@ Box2d getboxfrominvloc(int xloc, int yloc) {
 
 itemslot::itemslot(int xloc, int yloc) {
 	Box2d frameboxsize = getboxfrominvloc(xloc, yloc);
-	framedecal = ui::createuielement<uibox>("images\\blockholder.png", "DefaultItemSlotTexture",frameboxsize.scale, frameboxsize.center, 13);
+	framedecal = ui::createuielement<ui_image_component>("images\\blockholder.png", "DefaultItemSlotTexture",frameboxsize.scale, frameboxsize.center, 13);
 	helditem = nullptr;
 
 	dtype = normaldecal;

@@ -9,7 +9,7 @@
 
 struct playerhealth: ecs::component
 {
-	Cptr::cptr<uibox> damage_decal;
+	Cptr::cptr<ui_image_component> damage_decal;
 	timename::duration damage_decal_duration;
 	
 	bool dmgimmune = false;
@@ -20,18 +20,18 @@ struct playerhealth: ecs::component
 	
 	
 	}
-	array<Cptr::cptr<uibox>>healthboxes;
+	array<Cptr::cptr<ui_image_component>>healthboxes;
 	void start(){
 		damage_decal_duration=CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().create_dur();
 		size_t max_health = owner().get_component<estate>().maxhealth;
 		v2::Vec2 scale = v2::unitv / 100;
-		healthboxes = array<Cptr::cptr<uibox>>();
+		healthboxes = array<Cptr::cptr<ui_image_component>>();
 		for (int i = 0; i < max_health; i++) {
 			v2::Vec2 pos = v2::Vec2(i / 40.f-.4f, -.45);
 
-			damage_decal= ui::createuielement<uibox>("images\\red_back.png", "on_dmg_texture", v2::unitv, v2::zerov, -3);
+			damage_decal= ui::createuielement<ui_image_component>("images\\red_back.png", "on_dmg_texture", v2::unitv, v2::zerov, -3);
 			damage_decal->disable();
-			healthboxes.push(ui::createuielement<uibox>("images\\health.png","HealthTexture",scale,pos,55));
+			healthboxes.push(ui::createuielement<ui_image_component>("images\\health.png","HealthTexture",scale,pos,55));
 		}
 	}
 	void update() {

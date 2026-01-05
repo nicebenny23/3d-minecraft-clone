@@ -356,6 +356,7 @@
     <ClInclude Include="game\ecs\multi_query.h" />
     <ClInclude Include="game\ecs\query.h" />
     <ClInclude Include="game\ecs\resources.h" />
+    <ClInclude Include="game\ecs\spawner.h" />
     <ClInclude Include="game\ecs\system.h" />
     <ClInclude Include="game\ecs\World.h" />
     <ClInclude Include="game\entity.h" />

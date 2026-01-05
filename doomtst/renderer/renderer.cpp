@@ -28,29 +28,31 @@ namespace renderer {
 
 
 
-	Renderer::Renderer():uniform_manager() {
-		Modes = MaterialManager(&uniform_manager);
+	Renderer::Renderer() :uniform_manager() {
+
 		fov = 90;
 		setprojmatrix(90, .21f, 100);
-		renderer::shader_id ui_shader= CtxName::ctx.Ecs->load_asset_emplaced<shader_load>("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs").unwrap();
+		CtxName::ctx.Ecs->emplace_asset_loader<MaterialManager>(uniform_manager);
+		renderer::shader_id ui_shader = CtxName::ctx.Ecs->load_asset_emplaced<shader_load>("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs").unwrap();
 		CtxName::ctx.Ecs->load_asset(render_phase(12, true, "ui_phase"));
 		CtxName::ctx.Ecs->load_asset(render_phase(0, false, "solid_phase"));
 		CtxName::ctx.Ecs->load_asset(render_phase(1, true, "transparent_phase"));
 
-		construct_material("Ui","ui_phase", ui_shader, RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-			{ uniforms::uparam("aspect_ratio", "aspectratio") }
+		CtxName::ctx.Ecs->load_asset_emplaced<MaterialDescriptor>("Ui", "ui_phase", "UiShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+			stn::array{ uniforms::uparam("aspect_ratio", "aspectratio") }
 		);
 		renderer::shader_id model_shader = CtxName::ctx.Ecs->load_asset_emplaced<shader_load>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
-		construct_material("Model","solid_phase", model_shader, RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+		CtxName::ctx.Ecs->load_asset_emplaced<MaterialDescriptor>("Model", "solid_phase", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+			stn::array<uniforms::UniformParam>{
 			uniforms::uparam("aspect_ratio", "aspectratio"),
 			uniforms::uparam("proj_matrix", "projection"),
 			uniforms::uparam("view_matrix", "view")
-
+			}
 		);
 		renderer::shader_id particle_shader = CtxName::ctx.Ecs->load_asset_emplaced<shader_load>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
 
 		CtxName::ctx.Ecs->load_asset_emplaced<shader_load>("ParticleShader", "shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
-		construct_material("Particle", "solid_phase", particle_shader, RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+		//xName::ctx.Ecs->load_asset_emplaced<MaterialDescriptor>("Particle", "solid_phase", particle_shader, RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 		set_uniform("aspect_ratio", CtxName::ctx.Window->AspectRatio());
 		meshes = MeshRegistry(&context);
 	}
@@ -59,21 +61,20 @@ namespace renderer {
 		set_uniform("proj_matrix", glm::perspective(glm::radians(newfov), float(4 / 3.f), nearclipplane, farclipplane));
 	}
 
-	void Renderer::bind_material(material_id material) {
-		Material& mat = Modes[material];
+	void Renderer::set_material(renderable_id id, std::string name) {
+	renderable_list[id].set_material(CtxName::ctx.Ecs->from_name<Material>(name).expect("material should exist"));
+	}
+
+	void Renderer::bind_material(material_handle material) {
+		Material& mat = *material;
 		context.bind(*mat.shader);
 		for (const auto& elem : mat.handles) {
 			apply_uniform(uniform_manager.get(elem), elem.name);
 		}
 		context.bind_properties(mat.prop);
 	}
-
-	phase_handle Renderer::phase_of(std::string name) {
-		return CtxName::ctx.Ecs->from_name<render_phase>(name).expect("asset handle should exist");
-	}
-
-	void Renderer::apply_uniform(const uniforms::uniform_val& val, const char* location_in_shader) {
-		context.set_uniform(uniforms::uniform(val, location_in_shader));
+	void Renderer::apply_uniform(const uniforms::uniform_val& val, const std::string& location_in_shader) {
+		context.set_uniform(uniforms::uniform(val, location_in_shader.c_str()));
 	}
 
 
@@ -100,7 +101,7 @@ namespace renderer {
 	}
 
 	void RenderableHandle::fill(MeshData&& new_mesh) {
-		renderer->fill_cmd(std::move(new_mesh));
+		CtxName::ctx.Ecs->write_command(std::move(new_mesh));
 	}
 
 	void RenderableHandle::disable() {

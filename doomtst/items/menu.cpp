@@ -49,7 +49,7 @@ void menu::close()
 
 	enabled = false;
 	openmenu = nullptr;
-	menubox->state.enabled=false;
+	menubox->enabled() = false;
 	customclose();
 	inventorylocation->close();
 }
@@ -104,7 +104,7 @@ void menu::customopen()
 menu::menu(v2::Vec2 size)
 {
 
-	menubox = ui::createuielement<uibox>("images\\menutex.png", "MenuTexture", size,v2::zerov,11);
+	menubox = ui::createuielement<ui_image_component>("images\\menutex.png", "MenuTexture", size,v2::zerov,11);
 	menubox->disable();
 	enabled = false;
 }

@@ -29,7 +29,7 @@ namespace renderer {
 		void set_mesh(renderable_id id, mesh_id msh) {
 			renderable_list[id.id].mesh = msh;
 		}
-		void set_material(renderable_id id, material_id material) {
+		void set_material(renderable_id id, material_handle material) {
 			renderable_list[id.id].set_material(material);
 		}
 		size_t total_renderables() const {

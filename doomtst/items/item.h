@@ -6,9 +6,9 @@
 #include "../renderer/uibox.h"
 
 #pragma once 
-inline cptr<uiboxname::uibox> createitembox(const char* boxname,const char* TextureName) {
+inline cptr<uiboxname::ui_image_component> createitembox(const char* boxname,const char* TextureName) {
 
-	return ui::createuielement<uiboxname::uibox>(boxname, TextureName , v2::unitv / 40.f, v2::zerov, 100.f);
+	return ui::createuielement<uiboxname::ui_image_component>(boxname, TextureName , v2::unitv / 40.f, v2::zerov, 100.f);
 }
 enum itemid {
 
@@ -77,7 +77,7 @@ struct item
 		maxamt = 0;
 		amt = 0;
 		properties.foodval = 0;
-		itemui.textvalue = ui::createuielement<integertext>(v2::zerov, 1 / 70.f);
+		itemui.textvalue = ui::createuielement<text_component>(v2::zerov, 1 / 70.f);
 	}
 	
 
@@ -102,8 +102,8 @@ struct item
 
 	struct  itemuistruct
 	{
-		cptr<integertext> textvalue;
-		cptr<uiboxname::uibox> itemsprite;
+		cptr<text_component> textvalue;
+		cptr<uiboxname::ui_image_component> itemsprite;
 	};
 
 	itemproperties properties;

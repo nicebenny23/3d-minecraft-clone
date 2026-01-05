@@ -28,8 +28,8 @@ namespace stn {
 	// For rvalues
 	template<typename T>
 	indexed(size_t, T&&) -> indexed<T>;
-	
-	
+
+
 	template<typename T>
 	struct insertion {
 		T value;
@@ -43,9 +43,8 @@ namespace stn {
 			: value(std::forward<U>(val)), is_new(newly_inserted) {
 		}
 
-		template<typename U = T>
-			requires std::is_reference_v<T>
-		constexpr insertion(U val, bool newly_inserted)
+
+		constexpr insertion(T val, bool newly_inserted) noexcept requires std::is_reference_v<T>
 			: value(val), is_new(newly_inserted) {
 		}
 
@@ -53,16 +52,16 @@ namespace stn {
 		template<typename F>
 		insertion& on_insert(F&& f)& {
 			if (is_new) {
-				f(value);
+				std::invoke(std::forward<F>(f), value);
 			}
 			return *this;
 		}
 
 		//stateful
 		template<typename F>
-		insertion&& on_insert(F&& f)&& {
+		insertion on_insert(F&& f)&& {
 			if (is_new) {
-				f(value);
+				std::invoke(std::forward<F>(f), value);
 			}
 			return std::move(*this);
 		}
@@ -74,14 +73,14 @@ namespace stn {
 			return is_new;
 		}
 	};
-	template<typename T>
-	insertion(T&&,bool) -> insertion<T>;
+	template<typename U>
+	insertion(U&&, bool) -> insertion<std::remove_reference_t<U>>;
 
-	template<typename T>
-	insertion(T&, bool) -> insertion<T>;
+	template<typename U>
+	insertion(U&, bool) -> insertion<U&>;
 
-	template<typename T>
-	insertion( const T&,bool) -> insertion<T>;
+	template<typename U>
+	insertion(const U&, bool) -> insertion<const U&>;
 
 	template<std::size_t I, typename T>
 	constexpr decltype(auto) get(insertion<T>& x) noexcept {
@@ -116,27 +115,41 @@ namespace stn {
 
 		pair() = default;
 
-		pair(T1&& a, T2&& b) : first(std::move(a)), second(std::move(b)) {}
-		pair(const T1& a, const T2& b) : first(a), second(b) {}
+		pair(T1&& a, T2&& b) : first(std::move(a)), second(std::move(b)) {
+		}
+		pair(const T1& a, const T2& b) : first(a), second(b) {
+		}
 		template<std::size_t I>
 		constexpr decltype(auto) at() & noexcept {
 			static_assert(I < 2, "Index out of bounds");
-			if constexpr (I == 0) return (first);
-			else return (second);
+			if constexpr (I == 0) {
+				return (first);
+			}
+			else {
+				return (second);
+			}
 		}
 
 		template<std::size_t I>
 		constexpr decltype(auto) at() const& noexcept {
 			static_assert(I < 2, "Index out of bounds");
-			if constexpr (I == 0) return (first);
-			else return (second);
+			if constexpr (I == 0) {
+				return (first);
+			}
+			else {
+				return (second);
+			}
 		}
 
 		template<std::size_t I>
 		constexpr decltype(auto) at() && noexcept {
 			static_assert(I < 2, "Index out of bounds");
-			if constexpr (I == 0) return std::move(first);
-			else return std::move(second);
+			if constexpr (I == 0) {
+				return std::move(first);
+			}
+			else {
+				return std::move(second);
+			}
 		}
 		friend constexpr bool operator==(const pair& lhs, const pair& rhs) {
 			return lhs.first == rhs.first && lhs.second == rhs.second;
@@ -181,16 +194,22 @@ namespace stn {
 
 namespace std {
 	template<typename T>
-	struct tuple_size<stn::indexed<T>> : std::integral_constant<std::size_t, 2> {};
+	struct tuple_size<stn::indexed<T>> : std::integral_constant<std::size_t, 2> {
+	};
 
 	template<typename T>
-	struct tuple_element<0, stn::indexed<T>> { using type = std::size_t; };
+	struct tuple_element<0, stn::indexed<T>> {
+		using type = std::size_t;
+	};
 
 	template<typename T>
-	struct tuple_element<1, stn::indexed<T>> { using type = T; };
+	struct tuple_element<1, stn::indexed<T>> {
+		using type = T;
+	};
 
 	template<typename T>
-	struct tuple_size<stn::insertion<T>> : std::integral_constant<std::size_t, 2> {};
+	struct tuple_size<stn::insertion<T>> : std::integral_constant<std::size_t, 2> {
+	};
 
 	template<typename T>
 	struct tuple_element<0, stn::insertion<T>> {
@@ -202,7 +221,8 @@ namespace std {
 		using type = bool;
 	};
 	template<typename T1, typename T2>
-	struct tuple_size<stn::pair<T1, T2>> : std::integral_constant<std::size_t, 2> {};
+	struct tuple_size<stn::pair<T1, T2>> : std::integral_constant<std::size_t, 2> {
+	};
 
 	template<typename T1, typename T2>
 	struct tuple_element<0, stn::pair<T1, T2>> {

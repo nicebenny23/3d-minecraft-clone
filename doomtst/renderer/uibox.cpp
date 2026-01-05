@@ -5,88 +5,22 @@
 #include "../game/Core.h"#include "../game/GameContext.h"
 
 constexpr int listsize= 400;
-const float cubeuv[] = {
-	0, 1,
-	1, 1,
-
-0, 0,
-1, 0
-
+const v2::Vec2 cubeuv[] = {
+v2::Vec2(0, 1),
+v2::Vec2(1, 1),
+v2::Vec2(0, 0),
+v2::Vec2(1, 0)
 };
-const v2::Vec2 offset[] = {
-	v2::Vec2(-1,-1),
-	v2::Vec2(1, -1),
 
-v2::Vec2(-1, 1),
-v2::Vec2(1, 1)
-
-};
 namespace uiboxname {
-	void uibox::update()
-	{
-		state.rightclicked = false;
-		state.hovered = false;
-		state.leftclicked = false;
-		if (mouseonblock())
-		{
-			state.hovered = true;
-			state.leftclicked = CtxName::ctx.Inp->mouseleft().pressed;
-			state.rightclicked = CtxName::ctx.Inp->mouseright().pressed;
+	
 
-		}
-	}
-	bool uibox::mouseonblock()
-
-	{
-
-		v2::Vec2 normedpos = CtxName::ctx.Window->FitToAspectRatio(CtxName::ctx.Inp->mousepos);
-		normedpos -= box.center;
-		if (abs(normedpos.x) < box.scale.x)
-		{
-			if (abs(normedpos.y) < box.scale.y)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	uibox::uibox(uibox& toreplace)
-	{
-		id = toreplace.id;
-		tex_handle = toreplace.tex_handle;
-		box = toreplace.box;
-
-		ui::uielemlist[id].set<uibox>(*new cptr<uibox>(this));
-		priority = toreplace.priority;
-		state.enabled = toreplace.state.enabled;
-
-		toreplace.destroy();
-	}
-
-	void uibox::render()
-	{
-
-		if (state.enabled)
-		{
-			
-			tex_handle.set_uniform(uniforms::uniform(float(box.scale.x), "scale"));
-			tex_handle.set_uniform(uniforms::uniform(box.center, "center"));
-			//tex_handle.render();
-		}
-		else {
-			tex_handle.disable();
-		}
-	}
-
-
-
-	void uibox::customdestroy()
+	void ui_image_component::destroy_hook()
 	{
 		tex_handle.destroy();
 	}
 
-	void uibox::LoadTex(const char* texloc, const char* texture)
+	void ui_image_component::LoadTex(const char* texloc, const char* texture)
 	{
 		if (!tex_handle)
 		{
@@ -94,37 +28,41 @@ namespace uiboxname {
 			tex_handle.set_material("Ui");
 			tex_handle.set_layout(vertice::vertex().push<float, 2>());
 			renderer::MeshData mesh = tex_handle.create_mesh();
-			mesh.add_index(0);
-			mesh.add_index(1);
-			mesh.add_index(3);
-			mesh.add_index(0);
-			mesh.add_index(3);
-			mesh.add_index(2);
+			mesh.add_indices({ 0,1,3,0,3,2 });
 			array<float> databuf = array<float>();
 			for (int j = 0; j < 4; j++)
 			{
-				mesh.add_point(cubeuv[2 * j], cubeuv[2 * j + 1]);
-
+				mesh.add_point(cubeuv[j]);
 			}
-
 			tex_handle.fill(std::move(mesh));
-			CtxName::ctx.Ren->pop();
 		}
 		tex_handle.set_uniform(uniforms::uniform(CtxName::ctx.Ecs->load_asset_emplaced<TexturePath>(texloc, texture).unwrap(), "tex"));
-		tex_handle.set_order_key(priority);
+	//	tex_handle.set_order_key(priority);
 
 
 	}
 
 
-	uibox::uibox(const char* texloc, const char* TextureName, v2::Vec2 scl, v2::Vec2 position, float boxpriority)
+	ui_image_component::ui_image_component(const char* texloc, const char* TextureName, v2::Vec2 scl, v2::Vec2 center, float boxpriority):handle(*CtxName::ctx.Ecs, geometry::Box2d(center, scl))
 	{
-		
-		priority = boxpriority; 
-		LoadTex(texloc, TextureName);
-		
-		box.scale = scl;
-		box.center = position;
+		LoadTex(texloc, TextureName);	
+		handle.set_bounds(geometry::Box2d(center, scl));
 		enable();
 	}
+	struct prepare_ui_image:ecs::System{
+		void run(ecs::Ecs& world) {
+
+			ecs::View<ui::ui_enabled, ui::ui_bounds, ui::InteractionState, ui_image_component> bounds_view(world);
+			for (auto&& [enabled, bounds, ui_interaction, ui_image] : bounds_view) {
+				if (enabled.enabled()) {
+
+					ui_image.tex_handle.set_uniform(uniforms::uniform(float(bounds.global().scale.x), "scale"));
+					ui_image.tex_handle.set_uniform(uniforms::uniform(bounds.global().center, "center"));
+				}
+				else {
+					ui_image.tex_handle.disable();
+				}
+			}
+		}
+	};
 }

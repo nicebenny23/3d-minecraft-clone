@@ -25,10 +25,10 @@ inline Dir::Dir3d closest_face(v3::Point3 pos, block* blk) {
 
 // Returns two orthogonal axes on the block face plane
 inline stn::pair<v3::Vec3, v3::Vec3> get_flat_frame(Dir::Dir3d dir) {
-	switch (dir.ind() / 2) {
-	case 0: return { {0,0,1}, {0,1,0} };
-	case 1: return { {1,0,0}, {0,0,1} };
-	case 2: return { {1,0,0}, {0,1,0} };
+	switch (dir.axis_index()) {
+	case 0: return { v3::Vec3(0,0,1), v3::Vec3(0,1,0) };
+	case 1: return { v3::Vec3(1,0,0), v3::Vec3(0,0,1) };
+	case 2: return { v3::Vec3(1,0,0), v3::Vec3(0,1,0)};
 	default: throw std::logic_error("Invalid direction");
 	}
 }

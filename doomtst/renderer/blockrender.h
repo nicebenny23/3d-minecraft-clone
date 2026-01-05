@@ -181,7 +181,7 @@ namespace blockrender {
 			mesh.TransparentGeo.set_order_key(dist(camera::GetCam().position, mesh.owner.center()));
 
 			mesh.TransparentGeo.fill(std::move(mesh_data));
-			CtxName::ctx.Ren->pop();
+		
 
 		}
 	}
@@ -204,7 +204,6 @@ namespace blockrender {
 				};
 
 			thread_util::par_iter(world_grid.chunklist.begin(), world_grid.chunklist.end(), recompute_for, 4);
-			CtxName::ctx.Ren->pop();
 		}
 	};
 	struct BlockRenderer :ecs::System {
@@ -250,19 +249,20 @@ namespace blockrender {
 
 			auto& renderer = ecs.get_resource<renderer::Renderer>().unwrap();
 			renderer::shader_id block_shader=CtxName::ctx.Ecs->load_asset_emplaced<shader_load>("BlockShader", "shaders\\vert1.vs", "shaders\\frag1.vs").unwrap();
-			renderer.construct_material("SolidBlock", "solid_phase", block_shader, renderer::RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+			ecs.load_asset_emplaced<renderer::MaterialDescriptor>("SolidBlock", "solid_phase", "BlockShader", renderer::RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+				stn::array{
 				uniforms::uparam("aspect_ratio", "aspectratio"),
 				uniforms::uparam("proj_matrix", "projection"),
 				uniforms::uparam("view_matrix", "view"),
 				uniforms::uparam("bind_block_texture", "tex")
-			);
+				});
 
-			renderer.construct_material("TransparentBlock", "transparent_phase", block_shader, renderer::RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-				uniforms::uparam("aspect_ratio", "aspectratio"),
+			ecs.load_asset_emplaced<renderer::MaterialDescriptor>("TransparentBlock", "transparent_phase", "BlockShader", renderer::RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+				stn::array{uniforms::uparam("aspect_ratio", "aspectratio"),
 				uniforms::uparam("proj_matrix", "projection"),
 				uniforms::uparam("view_matrix", "view"),
 				uniforms::uparam("bind_block_texture", "tex")
-			);
+				});
 
 			array<std::string> texlist = array<std::string>();
 			texlist.reach(treestonetex) = "images\\treestone.png";

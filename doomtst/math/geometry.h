@@ -92,11 +92,20 @@ namespace geometry {
 		
 		Box2d(v2::Vec2 cent, v2::Vec2 scl)
 			: center(cent), scale(scl) {}
+		v2::Vec2 upper() const {
+			return center + scale / 2;
+		}
+		v2::Vec2 lower() const {
+			return center-scale / 2;
+		}
 
-		bool contains(v2::Vec2 point) {
+		bool contains(Box2d box) const{
+			return contains(box.upper()) && contains(box.lower());
+		}
+		bool contains(v2::Vec2 point) const{
 
 			point -= center;
-			if (abs(point.x)<scale.x&&abs(point.y)<scale.y)
+			if (abs(point.x)<=scale.x&&abs(point.y)<=scale.y)
 			{
 				return true;
 			}

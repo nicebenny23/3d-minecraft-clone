@@ -12,8 +12,9 @@ namespace ecs {
 		decltype(auto) read() {
 			return stn::drain(std::move(commands));
 		}
+		
 		template<typename ...Args>
-		void write(Args&&... args) {
+		void emplace(Args&&... args) {
 			commands.emplace(std::forward<Args>(args)...);
 		}
 	private:

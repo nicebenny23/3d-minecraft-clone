@@ -43,7 +43,7 @@ struct shader_load {
 	std::string shader_name;
 	std::string vertex_path;
 	std::string fragment_path;
-
+	
 	bool operator==(const shader_load& other) const noexcept {
 		return shader_name == other.shader_name
 			&& vertex_path == other.vertex_path
@@ -88,6 +88,7 @@ struct shader_loader{
 	void unload(stn::box<shader> shader) {
 	
 	}
+	static constexpr bool immortal = true;
 	stn::box<shader> load(const shader_load& load_info) {	
 		int VertexShader = compile_shader(load_info.vertex_path.c_str(), GL_VERTEX_SHADER);
 		int FragmentShader = compile_shader(load_info.fragment_path.c_str(), GL_FRAGMENT_SHADER);

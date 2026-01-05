@@ -26,7 +26,7 @@ namespace renderer {
 		assets::AssetHandle<shader> shader;
 		bool operator==(const Material& other) const = default;
 		
-		Material(const std::string& name, phase_handle phase_handle, renderer::shader_id shade_handle, const RenderProperties& props = {}, const stn::array<uniforms::uniform_ref>& uniforms) :
+		Material(const std::string& name, phase_handle phase_handle, renderer::shader_id shade_handle, const RenderProperties& props, const stn::array<uniforms::uniform_ref>& uniforms) :
 			pass(phase_handle), shader(shade_handle), name(name), prop(props), handles(uniforms)
 		{
 		}
@@ -34,7 +34,7 @@ namespace renderer {
 
 	struct MaterialDescriptor {
 		using asset_type = Material;
-		MaterialDescriptor(std::string& material_name, std::string phase_name, std::string shader_name, const RenderProperties& props = {}, std::initializer_list<stn::pair<const char*, const char*>> uniforms) {
+		MaterialDescriptor(const std::string& material_name,const std::string& phase_name, const std::string& shader_name, const RenderProperties& props,const stn::array<uniforms::UniformParam>& uniforms) {
 			elements = uniforms;
 			name = material_name;
 			phase = phase_name;
@@ -43,7 +43,7 @@ namespace renderer {
 		}
 		bool operator==(const MaterialDescriptor& other) const = default;
 
-		stn::array<stn::pair<const char*, const char*>> elements;
+		stn::array<uniforms::UniformParam> elements;
 		std::string name;
 		std::string phase;
 		std::string shader;
@@ -63,35 +63,27 @@ namespace std {
 namespace renderer {
 	
 	using material_handle = assets::AssetHandle<Material>;
-	class MaterialManager {
+	struct MaterialManager {
 		using load_descriptor = MaterialDescriptor;
 	public:
-		MaterialManager(uniforms::UniformManager* uniform_manager) :uniform_manager(uniform_manager) {
-		}
-		MaterialManager() {
+		MaterialManager(uniforms::UniformManager& uniform_manager) :uniform_manager(uniform_manager) {
 		}
 	
 		stn::box<Material> load(const MaterialDescriptor& descriptor,assets::Assets& assets) {
 			phase_handle phase = assets.from_name<render_phase>(descriptor.phase).expect("phase should exist");
-			shader_id phase = assets.from_name<shader>(descriptor.shader).expect("shader should exist");
-
-
-		}
-		template <typename... Args>
-		void construct_material(const std::string& name, phase_handle handle, assets::AssetHandle<shader> shade, const RenderProperties& props = {}, std::initializer_list<stn::pair<const char*,const char*>> uniforms) {
-
-			if (Has(name)) {
-				throw std::runtime_error("RenderType Already Created: " + name);
+			shader_id shader_handle = assets.from_name<shader>(descriptor.shader).expect("shader should exist");
+			stn::array<uniforms::uniform_ref> refrences;
+			for (uniforms::UniformParam pair: descriptor.elements) {
+				refrences.push(uniform_manager.from_param(pair));
 			}
-
-			Material new_mat = CtxName::(name, handle, shade, props);
-			(evaluate_uniform_paramater(new_mat, std::forward<Args>(args)), ...);
-			new_mat.id = alloc.next();
-			materials.push(new_mat);
-
+			return stn::box<Material>(descriptor.name, phase, shader_handle, descriptor.properties, refrences);
 		}
 
+		uniforms::UniformManager& uniform_manager;
+		static constexpr bool immortal = true;
+		void unload(stn::box<Material> mat) {
 
-		uniforms::UniformManager* uniform_manager;
+		}
 	};
+	
 }

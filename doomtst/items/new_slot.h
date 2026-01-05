@@ -65,7 +65,7 @@ namespace items{
 		void setdecal(const char* location, const char* name) {
 			if (!framedecal.valid())
 			{
-				framedecal = ui::createuielement<uiboxname::uibox>("images\\blockholder.png", "DefaultItemSlotTexture", slotbox().center, slotbox().scale, 13);
+				framedecal = ui::createuielement<uiboxname::ui_image_component>("images\\blockholder.png", "DefaultItemSlotTexture", slotbox().center, slotbox().scale, 13);
 			}
 			framedecal->LoadTex(location, name);
 
@@ -109,7 +109,7 @@ namespace items{
 
 		private:
 		v2::Coord2 location;
-		Cptr::cptr<uiboxname::uibox> framedecal;
+		Cptr::cptr<uiboxname::ui_image_component> framedecal;
 
 	};
 

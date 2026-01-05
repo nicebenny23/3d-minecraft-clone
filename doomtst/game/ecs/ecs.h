@@ -121,7 +121,7 @@ namespace ecs {
 			return ensure_resource<Events<T>>();
 		}
 		template<typename T, typename ...Args>
-		void write_event(Args&&... args) {
+		void write_event(Args&&... args) requires std::constructible_from<T, Args&&...> {
 			return events<T>().write(std::forward<Args>(args)...);
 		}
 		template<typename T>
@@ -136,7 +136,11 @@ namespace ecs {
 		}
 		template<typename T>
 		void write_command(T&& command) {
-			commands<T>().write(std::forward<T>(command));
+			commands<T>().emplace(std::forward<T>(command));
+		}
+		template<typename T, typename ...Args> requires std::constructible_from<T,Args&&...>
+		void write_command(Args&&... args) {
+			commands<T>().emplace(std::forward<Args>(args)...);
 		}
 		template<typename T>
 		decltype(auto) read_commands() {

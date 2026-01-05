@@ -33,8 +33,8 @@ struct item_ui :ecs::component{
 		count.destroy();
 	}
 private:
-	uiboxname::uibox sprite;
-	integertext count;
+	uiboxname::ui_image_component sprite;
+	text_component count;
 };
 struct ItemUisync:System{
 	

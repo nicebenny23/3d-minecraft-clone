@@ -18,7 +18,7 @@ namespace ecs {
 	struct Ecs;
 	struct component {
 
-		obj owner();
+		obj owner() const;
 		//called on clear used for deallocation
 		component() :ecs(nullptr), comp_id(0) {
 
@@ -204,7 +204,7 @@ namespace ecs {
 					value.comp_id = id();
 					value.ent = ent;
 					value.ecs = ecs_instance;
-					value.start();
+					value.start();					
 				});
 		}
 

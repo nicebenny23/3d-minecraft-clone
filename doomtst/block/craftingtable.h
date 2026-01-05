@@ -8,7 +8,7 @@ struct craftingmenu :menu {
 	recipemanager blkcont;
 	
 	craftingmenu(v2::Vec2 size) {
-		menubox = ui::createuielement<uibox>("images\\menutex.png", "MenuTexture", size, v2::zerov, 11);
+		menubox = ui::createuielement<ui_image_component>("images\\menutex.png", "MenuTexture", size, v2::zerov, 11);
 
 		menubox->disable();
 		menutype = normalmenu;

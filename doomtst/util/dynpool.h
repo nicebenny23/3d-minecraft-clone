@@ -178,7 +178,7 @@ namespace stn {
 		//converts a memory_token from a derived class to a base class
 		template<typename U>
 		flux_token<U> abstract() requires std::derived_from<T, U> {
-			flux_token<U> other(reinterpret_cast<U*>(ptr));
+			flux_token<U> other(static_cast<U*>(ptr));
 			ptr = nullptr;
 			return other;
 		};
@@ -195,7 +195,7 @@ namespace stn {
 		};
 		template<typename U>
 		flux_token<U> downcast_unchecked() requires std::derived_from<U, T> {
-			flux_token<U> other(reinterpret_cast<U*>(ptr));
+			flux_token<U> other(static_cast<U*>(ptr));
 			ptr = nullptr;
 			return other;
 		}

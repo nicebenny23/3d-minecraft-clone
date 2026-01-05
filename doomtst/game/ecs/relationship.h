@@ -44,8 +44,7 @@ namespace ecs {
 			return children_list.length();
 		}
 
-		explicit Parent(ecs::obj child) {
-			children_list.push(child);
+		explicit Parent() {
 		}
 		void start() {
 			add_child(children_list[0]);
@@ -127,7 +126,7 @@ namespace ecs {
 
 			const auto& children_list = entity.get_component<Parent>().children();
 			stn::array<HierarchyView> view;
-			for (auto& child : children_list) {
+			for (const auto& child : children_list) {
 				view.push(HierarchyView(child));
 			}
 			return  view;
@@ -139,20 +138,20 @@ namespace ecs {
 
 		}
 	};
-	HierarchyView view(ecs::obj& object) {
+	HierarchyView view(ecs::obj object) {
 
 		return HierarchyView(object);
 	}
-	inline  bool has_children(ecs::obj& entity) {
+	inline  bool has_children(ecs::obj entity) {
 		return view(entity).has_children();
 	}
-	bool has_parent(ecs::obj& entity) {
+	bool has_parent(ecs::obj entity) {
 		return view(entity).has_parent();
 	}
 	stn::Option<ecs::obj> parent(ecs::obj entity) {
 		return view(entity).parent().map(std::function([](HierarchyView view) {return view.entity; }));
 	}
-	stn::span<ecs::obj> children(ecs::obj& entity) {
+	stn::span<ecs::obj> children(ecs::obj entity) {
 		return view(entity).children_obj();
 	}
 }

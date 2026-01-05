@@ -4,6 +4,7 @@
 #include "../util/dynamicarray.h"
 #include "../math/vector2.h"
 #include "../math/geometry.h"
+#include "ui.h"
 using namespace stn;
 using namespace geometry;
 using namespace Cptr;
@@ -13,26 +14,23 @@ namespace uiboxname {
 
 	
 
-	struct uibox:ui::uielement
+	struct ui_image_component:ecs::component
 	{
-		uibox() = default;
+		ui_image_component() = default;
 		renderer::RenderableHandle tex_handle;
-		geometry::Box2d box;
+		ui::ui_handle handle;
 		void update();
-		bool mouseonblock();
-		uibox(uibox& toreplace);
-		void render();
 		void disable(){
 			tex_handle.disable();
-			state.enabled = false;
+			handle.disable();
 		}
 		void enable() {
 			tex_handle.enable();
-			state.enabled = true;
+			handle.enable();
 		}
-		void customdestroy();
+		void destroy_hook();
 		void LoadTex(const char* texloc, const char* texture);
-		uibox(const char* texloc, const char* TextureName, v2::Vec2 scl, v2::Vec2 position, float boxpriority);
+		ui_image_component(const char* texloc, const char* TextureName, v2::Vec2 scl, v2::Vec2 position, float boxpriority);
 	};
 	
 }

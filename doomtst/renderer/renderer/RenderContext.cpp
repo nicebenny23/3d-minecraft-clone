@@ -56,7 +56,7 @@ namespace renderer {
 	}
 
 	void Context::set_uniform(uniforms::uniform value) {
-		GLint location = BoundShader.unwrap().uniformlocation(value.name);
+		GLint location = BoundShader.unwrap().uniformlocation(value.name.c_str());
 		switch (value.current_type()) {
 		case uniforms::uform_int:
 		glad_glUniform1i(location, value.get<int>());

@@ -65,6 +65,11 @@ namespace renderer {
 		void add_index(std::uint32_t index) {
 			indices.push(index);
 		}
+		void add_indices_offset_from(std::initializer_list<std::uint32_t> indice_list, std::uint32_t offset) {
+			for (auto i : indice_list) {
+				indices.push(i + offset);
+			}
+		}
 		explicit MeshData() :generate_trivial(indice_mode::generate_indices), points(), indices(), layout() {
 		}
 		mesh_id mesh;
@@ -120,14 +125,8 @@ namespace renderer {
 	struct Renderer : ecs::resource {
 
 		Renderer();
-		MaterialManager Modes;
-		template <typename... Args>
-		void construct_material(const char* name, const char* pass, shader_id id, RenderProperties props, Args&&...args) {
-			Modes.construct_material(name, phase_of(pass), id, props, std::forward<Args>(args)...);
-		}
-		void bind_material(material_id material);
-
-		phase_handle phase_of(std::string name);
+	
+		void bind_material(material_handle material);
 
 		void Bind_Texture(texture_2d_id Handle) {
 			context.bind(*Handle);
@@ -143,16 +142,14 @@ namespace renderer {
 			uniform_manager.set(name, uniforms::uniform_val{ std::in_place_type<val_type>, val });
 
 		}
-		void apply_uniform(const uniforms::uniform_val& val, const char* location_in_shader);
+		void apply_uniform(const uniforms::uniform_val& val, const std::string& location_in_shader);
 
-		shader& CurrentShader() {
-			return context.bound_shader();
-		}
 		void Clear();
 
 		void Render(Mesh* mesh);
 
 		void setprojmatrix(float newfov, float nearclipplane, float farclipplane);
+		void set_material(renderable_id id,std::string name);
 
 		RenderableHandle gen_renderable() {
 			return RenderableHandle(renderable_list.gen(), this);
@@ -165,9 +162,6 @@ namespace renderer {
 			renderable_list.remove(id);
 		}
 
-		void set_material(renderable_id id, std::string material_name) {
-			renderable_list.set_material(id, Modes.get_id(material_name));
-		}
 		void set_uniform(renderable_id id, const uniforms::uniform& value) {
 			auto& rend = renderable_list[id];
 			for (auto& overide : rend.overides) {
@@ -191,11 +185,7 @@ namespace renderer {
 			if (!value.should_render()) {
 				return;
 			}
-			material_id mat_id = value.material();
-			if (mat_id.unbounded()) {
-				throw std::logic_error("Material was not set");
-			}
-
+			material_handle mat_id = value.material();
 			mesh_id mesh_id = value.mesh;
 
 			bind_material(mat_id);
@@ -215,9 +205,6 @@ namespace renderer {
 		MeshData create(renderable_id id, indice_mode is_trivial = indice_mode::manual_generate) {
 			auto& renderable = renderable_list[id];
 			return MeshData(renderable.mesh, meshes[renderable.mesh].Voa.attributes, is_trivial);
-		}
-		void fill_cmd(MeshData&& mesh) {
-			to_fill.push(std::move(mesh));
 		}
 		void fill_mesh(MeshData& data) {
 
@@ -239,17 +226,7 @@ namespace renderer {
 			mesh.Ibo.fillbuffer<unsigned int>(data.indices);
 			mesh.length = data.indices.length();
 		}
-		void render_world() {
-
-
-		}
-		void pop() {
-			while (!to_fill.empty()) {
-				fill_mesh(to_fill.peek());
-				to_fill.pop();
-			}
-		}
-
+		
 		renderables renderable_list;
 
 		float fov;
@@ -264,7 +241,6 @@ namespace renderer {
 			}
 			return value.mesh;
 		}
-		stn::stack<MeshData> to_fill;
 		MeshRegistry meshes;
 
 	};
@@ -288,13 +264,17 @@ namespace renderer {
 	};
 	struct render_all :ecs::System {
 		void run(ecs::Ecs& world) {
-			
 			Renderer& ren = world.get_resource<Renderer>().unwrap();
+
+			for (MeshData& mesh:world.read_commands<MeshData>()) {
+				ren.fill_mesh(mesh);
+			}
+
 			std::unordered_map<phase_handle,render_pass> pass_map;
 
 			for (renderable& renderable : ren.renderable_list) {
 				if (renderable.should_render()) {
-					phase_handle pass = ren.Modes[renderable.material()].pass;
+					phase_handle pass = renderable.material()->pass;
 					pass_map.try_emplace(pass, render_pass(pass));
 					pass_map.at(pass).phase_elements.emplace(renderable.id);
 				}

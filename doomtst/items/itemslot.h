@@ -27,7 +27,7 @@ struct itemslot
 	//(0...9),(0...14)
 	Coord location;
 	
-	Cptr::cptr<uibox> framedecal;
+	Cptr::cptr<ui_image_component> framedecal;
 	decaltype dtype;
 	
 	itemslot(int xloc, int yloc);

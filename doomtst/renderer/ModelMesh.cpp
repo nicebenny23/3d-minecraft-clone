@@ -106,12 +106,7 @@ void ModelMeshName::rendermesh(ModelMesh& torender)
 		v2::Vec2 Texture2D = torender.nthtex(i);
 		Texture2D.y= 1 - Texture2D.y;
 		data.add_point(vertex, Texture2D);
-	
-
 	}
-	
-
-	torender.handle.fill(std::move(data));	//enable position
-		CtxName::ctx.Ren->pop();
+	torender.handle.fill(std::move(data));
 		torender.handle.render();
 }

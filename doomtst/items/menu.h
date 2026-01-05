@@ -15,7 +15,7 @@ struct menu
 	
 	void close();
 	void(*closeinven);
-	Cptr::cptr<uibox> menubox;
+	Cptr::cptr<ui_image_component> menubox;
 		type menutype;
 		
 	bool enabled;
@@ -24,7 +24,7 @@ struct menu
 
 	virtual void customopen();
 	menu() {
-		menubox = Cptr::cptr<uibox>( nullptr);
+		menubox = Cptr::cptr<ui_image_component>( nullptr);
 		closeinven = nullptr;
 	};
 	menu(v2::Vec2 size);

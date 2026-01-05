@@ -8,13 +8,13 @@
 struct furnacemenu :menu {
 
 	recipemanager blkcont;
-	Cptr::cptr<uibox> progressbar;
+	Cptr::cptr<ui_image_component> progressbar;
 	furnacemenu(v2::Vec2 size) {
-		menubox = ui::createuielement<uibox>("images\\menutex.png", "MenuTexture", size, v2::zerov, 1);
+		menubox = ui::createuielement<ui_image_component>("images\\menutex.png", "MenuTexture", size, v2::zerov, 1);
 	
 		menubox->disable();
 		menutype = normalmenu;
-		progressbar = ui::createuielement<uibox>("images\\greenbar.png", "GreenBarTexture", v2::Vec2(0, .1) , v2::Vec2(0, 0), 100);
+		progressbar = ui::createuielement<ui_image_component>("images\\greenbar.png", "GreenBarTexture", v2::Vec2(0, .1) , v2::Vec2(0, 0), 100);
 		blkcont = recipemanager("crafting\\furnace.txt", 1,1);
 		progressbar->state.enabled= false;
 		enabled = false;

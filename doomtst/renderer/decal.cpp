@@ -30,7 +30,6 @@ void decal::create_mesh() {
 	}
 	mesh.add_indices({ 0,1,3,0,3,2 });
 	handle.fill(std::move(mesh));
-	CtxName::ctx.Ren->pop(); 
 	handle.set_order_key(dist(camera::GetCam().position, center));
 
 }

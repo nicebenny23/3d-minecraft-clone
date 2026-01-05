@@ -9,8 +9,8 @@ item::item(int itemid)
 		id = itemid;
 
 		properties.foodval = 0;
-	itemui.itemsprite =Cptr::cptr< uiboxname::uibox>( nullptr);
-	itemui.textvalue= ui::createuielement<integertext>(v2::zerov,1/80.0f);
+	itemui.itemsprite =Cptr::cptr< uiboxname::ui_image_component>( nullptr);
+	itemui.textvalue= ui::createuielement<text_component>(v2::zerov,1/80.0f);
 	maxamt = 0;
 	properties.pickaxepower = 1;
 	properties.dmg = 1;

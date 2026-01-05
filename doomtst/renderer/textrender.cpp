@@ -3,7 +3,7 @@
 #include "textrender.h"
 #include "renderer.h"
 
-void integertext::set_handle()
+void text_component::set_handle()
 {
 	if (!handle)
 	{
@@ -12,7 +12,7 @@ void integertext::set_handle()
 		handle.set_layout(vertice::vertex().push<float, 2>().push<float, 3>());
 	}
 }
-integertext::integertext(v2::Vec2 textcenter, float textscale)
+text_component::text_component(v2::Vec2 textcenter, float textscale)
 {
 	center = textcenter;
 	scale = textscale; 
@@ -20,13 +20,13 @@ integertext::integertext(v2::Vec2 textcenter, float textscale)
 	state.enabled = false;
 }
 
- void integertext::recalculateword()
+ void text_component::recalculateword()
 {
 	 word.clear();
 	word= std::to_string(value);
 
 }
-void integertext::customdestroy()
+void text_component::customdestroy()
 {
 
 	word.clear();
@@ -36,7 +36,7 @@ void integertext::customdestroy()
 	}
 }
 
-void integertext::render()
+void text_component::render()
 {
 	set_handle();
 	recalculateword();
@@ -64,13 +64,12 @@ void inittextarray()
 	texlist[9] = "bitmaptext\\nineimg.png";
 	renderer::texture_array_id textarray= CtxName::ctx.Ecs->load_asset_emplaced<TextureArrayPath>(texlist, std::string("Letters")).unwrap();
 	CtxName::ctx.Ren->set_uniform("letters", textarray);
-	renderer::shader_id decal_shader=CtxName::ctx.Ecs->load_asset_emplaced<shader_load>( "TextShader", "shaders\\textvertex.vs", "shaders\\textfragment.vs").unwrap();
-
-	CtxName::ctx.Ren->construct_material("Text","ui_phase", decal_shader, renderer::RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+	CtxName::ctx.Ecs->load_asset_emplaced<shader_load>( "TextShader", "shaders\\textvertex.vs", "shaders\\textfragment.vs").unwrap();
+	CtxName::ctx.Ecs->load_asset_emplaced<renderer::MaterialDescriptor>("Text", "ui_phase", "TextShader", renderer::RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+		stn::array{
 		uniforms::uparam("aspect_ratio", "aspectratio"),
 		uniforms::uparam("letters", "tex")
-
-	);
+		});
  
    
 }
@@ -82,16 +81,10 @@ void writeletter(renderer::MeshData& mesh_data,geometry::Box2d location, int let
 		v2::Vec2 pointtoappend = location.scale * offset[j] + location.center;
 		mesh_data.add_point(pointtoappend,cubeuv[j],letter);
 	}	
-	mesh_data.add_index( 0+baselocation);
-	mesh_data.add_index(1+ baselocation);
-	mesh_data.add_index(3 + baselocation);
-	mesh_data.add_index(0 + baselocation);
-	mesh_data.add_index(3 + baselocation);
-	mesh_data.add_index(2 + baselocation);
-
+	mesh_data.add_indices_offset_from({ 0,1,3,0,3,2 },baselocation);
 
 }
-void integertext::write()
+void text_component::write()
 {
 	float char_offset = 1.5f;
 	v2::Vec2 min = center - (v2::Vec2(char_offset *word.length(), 1.f) * scale) / 2;
@@ -105,8 +98,7 @@ void integertext::write()
 		charlocation.center += increse;
 	}
 	handle.fill(std::move(mesh_data));
-	handle.set_order_key(priority);
+	
 
-	CtxName::ctx.Ren->pop();
 
 }

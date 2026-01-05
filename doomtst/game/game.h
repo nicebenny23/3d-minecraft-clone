@@ -95,7 +95,7 @@ void init() {
 	aabb::initCollider();
 	ui::createuilist();
 	inittextarray();
-	ui::createuielement<uibox>("images\\crosshair.png", "CrosshairTexture", v2::unitv / 32, v2::zerov, -3);
+	ui::createuielement<ui_image_component>("images\\crosshair.png", "CrosshairTexture", v2::unitv / 32, v2::zerov, -3);
 
 	Core::game.CreateGrid();
 	player::initplayer();

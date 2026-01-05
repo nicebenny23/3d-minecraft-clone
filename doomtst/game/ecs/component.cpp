@@ -2,7 +2,7 @@
 #include "game_object.h"
 namespace ecs{
 
-	obj component::owner()
+	obj component::owner() const
 	{
 		return obj(ent, ecs);
 	}

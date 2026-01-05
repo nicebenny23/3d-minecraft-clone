@@ -37,8 +37,8 @@ namespace uniforms{
 
     struct uniform_ref {
         stn::Id id;
-        const char* name;
-        uniform_ref(stn::Id ind, const char* uniform_name) :id(ind), name(uniform_name) {
+		std::string name;
+        uniform_ref(stn::Id ind, std::string uniform_name) :id(ind), name(uniform_name) {
             
 
         }
@@ -46,15 +46,27 @@ namespace uniforms{
 
         }
    };
+
+	struct UniformParam {
+		std::string uniform_name;
+		std::string shader_alias;
+		bool operator==(const UniformParam& other) const = default;
+		UniformParam(std::string uniform, std::string alias)
+			: uniform_name(std::move(uniform)), shader_alias(std::move(alias)) {
+		}
+		UniformParam(const char* uniform, const char* alias)
+			: uniform_name(std::move(uniform)), shader_alias(std::move(alias)) {
+		}
+	};
     struct UniformManager {
         
         handle::HandleMap< std::string,uniform_val> name_uniform_map;
-        void set(const char* name,const uniform_val& value) {
+        void set(std::string name,const uniform_val& value) {
             name_uniform_map.insert(name, value);
         }
         
 
-        stn::Id get_handle(const char* name) {
+        stn::Id handle_of(std::string name) {
             
                 return name_uniform_map.reserve(name);
 
@@ -64,20 +76,25 @@ namespace uniforms{
             return name_uniform_map.element_of(handle.id);
 
         }
+		uniform_ref from_param(const UniformParam& param) {
+
+			return uniform_ref(handle_of(param.uniform_name),param.shader_alias);
+
+		}
         template< typename T>
         T& get(const uniform_ref handle) {
             return std::get<T>(get(handle));
         }
     }; 
     
-    
-   inline stn::pair<const char*,const char*> uparam(const char* uniform_name, const char* shader_alias) {
-        return stn::pair(uniform_name, shader_alias);
-    };
-   //self contained uniform
-   struct uniform {
+
+	inline UniformParam uparam(std::string uniform_name, std::string shader_alias) {
+		return UniformParam{ std::move(uniform_name), std::move(shader_alias) };
+	} 
+	
+	struct uniform {
        uniform_val value;
-       const char* name;
+       std::string name;
        
        template< typename T>
        T& get() {

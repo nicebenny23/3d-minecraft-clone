@@ -588,7 +588,9 @@ namespace stn {
 
         iterator begin() noexcept { return std::begin(src); }
         iterator end() noexcept { return std::end(src); }
-
+		bool empty(){
+			return begin() == end();
+		}
         // Default move/copy
         DrainRange(DrainRange&&) noexcept = default;
         DrainRange& operator=(DrainRange&&) noexcept = default;

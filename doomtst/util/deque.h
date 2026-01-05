@@ -115,11 +115,29 @@ namespace stn {
 		{
 			emplace_back(std::forward<U>(val));
 		}
+		template<std::ranges::forward_range R>
+			requires std::same_as<std::ranges::range_value_t<R>, T>
+		void push_back(R&& range) {
+			for (auto&& element : range) {
+				push_back(std::forward<decltype(element)>(element));
+			}
+		}
+
+
 		template<typename U> requires std::constructible_from<T, U&&>
 		void push_front(U&& val)
 		{
 			emplace_front(std::forward<U>(val));
 		}
+		
+		template<std::ranges::forward_range R>
+			requires std::same_as<std::ranges::range_value_t<R>, T>
+		void push_front(R&& range) {
+			for (auto&& element : range) {
+				push_front(std::forward<decltype(element)>(element));
+			}
+		}
+
 		void drop_front()
 		{
 			if (empty())

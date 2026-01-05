@@ -11,7 +11,11 @@ namespace stn {
             data.emplace_back(std::forward<Args>(args)...);
         }
 
-
+		template<std::ranges::forward_range R>
+			requires std::same_as<std::ranges::range_value_t<R>, T>
+		void push_many(R&& range) {
+			data.push_back(std::forward<R>(range));
+		}
         void push(const T& val) {
             data.push_back(val);
         }
