@@ -18,16 +18,14 @@ enum decaltype {
 };
 struct itemslot
 {
-	itemslot() {
-	//	Assert("invblockconstrutur cant be used just to get complier to work");
-
-	}
 	item* helditem;
-	
+
+	itemslot(itemslot&&) = default;
+	itemslot& operator=(itemslot&&) = default;
 	//(0...9),(0...14)
 	Coord location;
 	
-	Cptr::cptr<ui_image_component> framedecal;
+	ui_image framedecal;
 	decaltype dtype;
 	
 	itemslot(int xloc, int yloc);

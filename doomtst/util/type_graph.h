@@ -14,7 +14,7 @@ concept HasDependencies = requires { typename T::Dependencies; };
 template<typename T>
 concept HasDependees = requires { typename T::Dependees; };
 
-// Get dependencies if they exist, else empty list
+
 template<typename T>
 using Dependencies = std::conditional_t<
     HasDependencies<T>,
@@ -22,7 +22,6 @@ using Dependencies = std::conditional_t<
     TypeList::TypeList<>
 >;
 
-// Get dependees if they exist, else empty list
 template<typename T>
 using Dependees = std::conditional_t<
     HasDependees<T>,
@@ -71,7 +70,7 @@ private:
             size_t to = maybe.id();
             if (to >= sys.graph.length()())
                 sys.graph.resize(to + 1);
-            sys.graph.list[source].succs.push(to); // Use `succs`
+            sys.graph.list[source].succs.push(to); 
         }
     };
 };

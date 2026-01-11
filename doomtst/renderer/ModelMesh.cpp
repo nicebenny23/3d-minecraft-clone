@@ -10,7 +10,7 @@ void ModelMesh::setmodeluniform()
 	glm::mat4 trans2 = (transform.ToMatrix());
 	
 	trans *= trans2;
-	handle.set_uniform(uniforms::uniform(trans, "model"));
+	handle.set_uniform(renderer::uniform(trans, "model"));
 	
 }
 
@@ -25,7 +25,7 @@ void ModelMeshName::ModelMesh::create_handle(const char* locaion,const char* nam
 handle=CtxName::ctx.Ren->gen_renderable(); 
 handle.set_layout(vertice::vertex().push<float, 3>().push<float, 2>());
 handle.set_material("Model");
-handle.set_uniform(uniforms::uniform( CtxName::ctx.Ecs->load_asset_emplaced<TexturePath>(locaion, name).unwrap(), "tex"));
+handle.set_uniform(renderer::uniform( CtxName::ctx.Ecs->load_asset_emplaced<renderer::TexturePath>(locaion, name).unwrap(), "tex"));
 }
 
 Point3 ModelMesh::nthvertex(size_t i)
@@ -99,7 +99,7 @@ void ModelMeshName::rendermesh(ModelMesh& torender)
 	v3::Point3 pos = torender.transform.position;
 	
 	torender.setmodeluniform();
-	torender.handle.set_uniform(uniforms::uniform(torender.color,"col"));
+	torender.handle.set_uniform(renderer::uniform(torender.color,"col"));
 	for (int i = 0; i < torender.vertexindices.length(); i++)
 	{
 		Point3 vertex = torender.nthvertex(i);

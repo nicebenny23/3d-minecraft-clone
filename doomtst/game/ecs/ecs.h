@@ -7,6 +7,7 @@
 #include "message.h"
 #include "archtype.h"
 #include "../../assets/Assets.h"
+#include "spawner.h"
 namespace ecs {
 	struct Ecs {
 		Ecs(std::uint32_t total_entities) :entities(total_entities), archetypes(total_entities){
@@ -228,6 +229,20 @@ namespace ecs {
 		const T& get_component(entity object) const {
 			entities.assert_valid(object);
 			return components.get_component<T>(object);
+		}
+		template<ComponentType T>
+		stn::Option<T&> get_component_opt(entity object) {
+			if (entities.is_valid(object)) {
+				return components.get_component_opt<T>(object);
+			}
+			return stn::None;
+		}
+		template<ComponentType T>
+		stn::Option<const T&> get_component_opt(entity object) const{
+			if (entities.is_valid(object)) {
+				return stn::Option<const T&>(components.get_component_opt<T>(object));
+			}
+			return stn::None;
 		}
 		template<ComponentType... Components>
 		std::tuple<Components&...> get_tuple_unchecked(entity obj,const stn::span<const component_id>& indices) {

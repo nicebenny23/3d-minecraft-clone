@@ -37,7 +37,9 @@ namespace ecs {
 		}
 		virtual void destroy_hook() {
 		};
-
+		Ecs& world() {
+			return *ecs;
+		}
 	private:
 		Ecs* ecs;
 		component_id comp_id;
@@ -235,6 +237,10 @@ namespace ecs {
 			return component_indexer.get<T>();
 		}
 		template<ComponentType T>
+		inline stn::Option<component_id> get_id_opt() const {
+			return component_indexer.get_opt<T>();
+		}
+		template<ComponentType T>
 		inline component_id get_id_unchecked() const {
 			return component_indexer.get_unchecked<T>();
 		}
@@ -315,7 +321,29 @@ namespace ecs {
 			}
 			return comp_type.get_as_unchecked<T>(entity);
 		}
+		template<ComponentType T>
+		stn::Option<T&> get_component_opt(entity entity) {
+			stn::Option<component_id> id = get_id_opt<T>();
+			if (id) {
+				component_type& comp_type = unchecked_at(id.unwrap());
+				if (comp_type.has(entity)) {
+					return stn::Option<T&>(comp_type.get_as_unchecked<T>(entity));
+				}
+			}
+			return stn::None;
+		}
 
+		template<ComponentType T>
+		stn::Option<const T&> get_component_opt(entity entity) const{
+			stn::Option<component_id> id = get_id_opt<T>();
+			if (id) {
+				const component_type& comp_type = unchecked_at(id.unwrap());
+				if (comp_type.has(entity)) {
+					return stn::Option<const T&>(comp_type.get_as_unchecked<T>(entity));
+				}
+			}
+			return stn::None;
+		}
 		void inject_ecs_instance(Ecs* instance) {
 			ecs_instance = instance;
 		}

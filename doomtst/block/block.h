@@ -44,10 +44,10 @@ enum blocktex {
 };
 using namespace v3; 
 constexpr float unitaxis = 1.0f / 2.00005f;
-constexpr v3::Scale3  unitscale = unit_scale*unitaxis;
+constexpr v3::Scale3 unitscale = unit_scale*unitaxis;
 namespace blockname {
 	const double block_axis_scale = unitaxis * blocksize;
-	const v3::Scale3 blockscale =  v3::Scale3(block_axis_scale);
+	const v3::Scale3 blockscale = v3::Scale3(block_axis_scale);
 
 	enum id
 	{
@@ -106,7 +106,7 @@ namespace blockname {
 			light = 0;
 		}
 	
-		void create(byte texval,  char num, blockmesh* owner) {
+		void create(byte texval, char num, blockmesh* owner) {
 			cover= cover_state::Uncomputed;
 			tex = texval;
 			facenum =Dir::Dir3d(num);
@@ -132,12 +132,12 @@ namespace blockname {
 		Scale3 scale() const {
 			return box.scale;
 		}
-		geometry::Box bounds() const {
+		geo::Box bounds() const {
 			return box;
 		}
 		bool invisible() const;
-		blockmesh(block* parent,  Scale3 blkscale);
-		geometry::Box box;
+		blockmesh(block* parent, Scale3 blkscale);
+		geo::Box box;
 		block* blk;
 		face faces[6];
 		face& operator[](size_t index);
@@ -158,7 +158,7 @@ namespace blockname {
 			transparent = false;
 		}
 	};
-	struct  block: ecs::component
+	struct block: ecs::component
 	{
 
 		blockmesh mesh;
@@ -183,7 +183,7 @@ namespace blockname {
 		Scale3 scale() const{
 			return mesh.box.scale;
 		}
-		geometry::Box bounds() const {
+		geo::Box bounds() const {
 			return mesh.box;
 		}
 

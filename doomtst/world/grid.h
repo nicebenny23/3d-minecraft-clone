@@ -55,7 +55,7 @@ namespace grid {
 	block* getBlock(const v3::Coord pos);
 	bool containsChunkIndex(int index) const;
 	ecs::obj* getObject(const v3::Coord pos);
-	array<block*> voxelinrange(geometry::Box span);
+	array<block*> voxelinrange(geo::Box span);
 	
 	
 

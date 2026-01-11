@@ -1,22 +1,27 @@
 
 #pragma once
-#include "../util/owner.h"
 #include "../util/dynamicarray.h"
 #include "../debugger/debug.h"
 #include "../game/Core.h"
 #include "../game/ecs/relationship.h"
 #include "../game/ecs/query.h"
 #include "../game/ecs/spawner.h"
-#define uisize 400
 using namespace stn;
-using namespace Cptr;
 namespace ui {
 
-	struct ui_handle;
+	struct ui_priority :ecs::component {
+		size_t priority;
+		ui_priority(size_t predecence):priority(predecence){
+
+		}
+		size_t set_priority(size_t predecence){
+			priority = predecence;
+		}
+	};
 
 	struct ui_bounds :ecs::component {
-		geometry::Box2d local;
-		ui_bounds(geometry::Box2d local_bounds) :local(local_bounds) {
+		geo::Box2d local;
+		ui_bounds(geo::Box2d local_bounds) :local(local_bounds) {
 		};
 		v2::Vec2 local_center() const {
 			return local.center;
@@ -24,16 +29,31 @@ namespace ui {
 		v2::Vec2 local_scale() const {
 			return local.scale;
 		}
-		geometry::Box2d global() const {
+		geo::Box2d global() const {
 			if (ecs::has_parent(owner())) {
-				geometry::Box2d owner_box = ecs::parent(owner()).unwrap().get_component<ui_bounds>().global();
-				v2::Vec2 scale = owner_box.scale * local_scale();
-				return geometry::Box2d(owner_box.center + scale * local_center(), scale);
+				geo::Box2d owner_box = ecs::parent(owner()).unwrap().get_component<ui_bounds>().global();
+				v2::Vec2 owner_scale = owner_box.scale;
+				return geo::Box2d(owner_box.center + owner_scale*local_center(), owner_scale*local_scale());
 			}
 			else {
 				return local;
 			}
 		}
+		v2::Vec2 center() const {
+			return global().center;
+		}
+
+		v2::Vec2 scale() const {
+			return global().scale;
+		}
+	};
+
+	struct ui_state_command {
+		ui_state_command(ecs::entity ent, bool enabled) :ent(ent), should_enable(enabled) {
+
+		}
+		bool should_enable;
+		ecs::entity ent;
 	};
 
 	struct ui_enabled :ecs::component {
@@ -47,22 +67,42 @@ namespace ui {
 		};
 		bool local_enabled;
 		void disable() {
-			local_enabled = false;
+
+			set_enabled(false);
 		}
 		void enable() {
-			local_enabled = true;
+			set_enabled(true);
+		}
+		void set_enabled(bool is_enabled) {
+			world().write_command(ui_state_command(owner().inner(), is_enabled));
+		}
+		void set_enable_state(bool enabled) {
+			local_enabled = enabled;
 		}
 	};
+
+	
+	
+	
 	struct InteractionState :ecs::component {
 		bool hovered;
 		bool right_clicked;
 		bool left_clicked;
-		InteractionState() = default;
+		InteractionState() :hovered(false), right_clicked(false), left_clicked(false) {
+		};
 	};
 
 
 
+	struct ui_enabler_system :ecs::System {
+		void run(ecs::Ecs& world) {
+			for (ui_state_command cmd:world.read_commands<ui_state_command>()) {
+				world.get_component<ui_enabled>(cmd.ent).set_enable_state(cmd.should_enable);
+			}
 
+
+		}
+	};
 	struct ui_interaction_system :ecs::System {
 		void run(ecs::Ecs& world) {
 			v2::Vec2 pos = CtxName::ctx.Inp->mousepos;
@@ -78,55 +118,39 @@ namespace ui {
 			}
 		}
 	};
-
-	struct ui_spawner {
-		geometry::Box2d bounds;
-
-		ui_spawner(geometry::Box2d bounds) :bounds(bounds) {
-
+	struct base_ui_node :ecs::resource {
+		ecs::obj base_node;
+		base_ui_node(ecs::obj base):base_node(base) {
+			
 		}
-		void apply(ecs::obj object) {
+	};
+
+	struct ui_spawner :ecs::Recipe {
+		geo::Box2d bounds;
+		size_t priority;
+		ui_spawner(geo::Box2d box,size_t priority) :bounds(geo::Box2d(box.center,box.scale)), priority(priority){
+		}
+		void apply(ecs::obj& object) {
 			object.add_component<ui_bounds>(bounds);
 			object.add_component<ui_enabled>();
 			object.add_component<InteractionState>();
+			object.add_component<ui_priority>(priority);
+			stn::Option<ecs::obj> node = object.world().get_resource<base_ui_node>().
+				map([](base_ui_node node) {return node.base_node; });
+				if (node.is_some()) {
+					ecs::add_child(node.unwrap(), object);
+				}
 		}
 	};
-	//ecs object specilized for ui
-	struct ui_handle {
-		ui_handle(ecs::Ecs& world, geometry::Box2d bounds) :object(ecs::spawn_emplaced<ui_spawner>(world, bounds)) {
-
-		}
-		ecs::obj object;
-		InteractionState state() {
-			return object.get_component<InteractionState>();
-		}
-		bool enabled() {
-			return object.get_component<ui_enabled>().enabled();
-		}
-		void enable() {
-			object.get_component<ui_enabled>().enable();
-		}
-		void disable() {
-			object.get_component<ui_enabled>().disable();
-		}
-		Box2d bounds() const {
-			return object.get_component<ui_bounds>().global();
-		}
-		void set_bounds(Box2d bounds) {
-			object.get_component<ui_bounds>().local = bounds;
-		}
-		void set_center(v2::Vec2 center) {
-			object.get_component<ui_bounds>().local.center = center;
-		}
-
-
-		void add_child(const ui_handle& child) {
-			object.ensure_component<ecs::Parent>().add_child(child.object);
-		}
-		template<ecs::ComponentType T>
-		T& get_component() {
-			return object.get_component<T>();
+	struct UiPlugin:Core::Plugin {
+		void build(Core::App& app) {
+			app.emplace_system< ui_enabler_system>();
+			app.emplace_system< ui_interaction_system>();
+			ecs::obj entity = ecs::spawn_emplaced<ui_spawner>(app.Ecs, geo::Box2d::origin_centered(v2::unitv), 2);
+			app.emplace_resource<base_ui_node>(entity);
 		}
 
 	};
+
+
 }

@@ -4,7 +4,7 @@
 #include "../math/mathutil.h"
 
 void destroyonclick(itemslot& toremove) {
-	toremove.helditem->itemui.itemsprite->state.enabled= false;
+	toremove.helditem->itemui.itemsprite->disable();
 }
 Box2d getboxfrominvloc(int xloc, int yloc) {
 
@@ -14,9 +14,7 @@ Box2d getboxfrominvloc(int xloc, int yloc) {
 	return Box2d(v2::Vec2(xval, yval), scale);
 }
 
-itemslot::itemslot(int xloc, int yloc) {
-	Box2d frameboxsize = getboxfrominvloc(xloc, yloc);
-	framedecal = ui::createuielement<ui_image_component>("images\\blockholder.png", "DefaultItemSlotTexture",frameboxsize.scale, frameboxsize.center, 13);
+itemslot::itemslot(int xloc, int yloc):framedecal(*CtxName::ctx.Ecs, "images\\blockholder.png", "DefaultItemSlotTexture", getboxfrominvloc(xloc, yloc), 13) {
 	helditem = nullptr;
 
 	dtype = normaldecal;
@@ -39,7 +37,7 @@ bool itemslot::givefreeamt(size_t amt)
 	{
 		freeditem = inititem(helditem->id,0);
 		
-		freeditem->setviewable(framedecal->state.enabled);
+		freeditem->setviewable(framedecal.enabled());
 
 		freeditem->state = beingheld;
 	}
@@ -50,7 +48,7 @@ bool itemslot::givefreeamt(size_t amt)
 		freeditem->amt += amt;
 		helditem->amt -= amt;
 		freeditem->updateui();
-		freeditem->itemui.itemsprite->box.center = framedecal->box.center;
+		freeditem->itemui.itemsprite->set_center(framedecal.bounds().center);
 		return true;
 	}
 	return false;
@@ -63,10 +61,10 @@ void itemslot::giveitem(int id,int amt) {
 		return;
 	}
 	helditem = inititem(id,amt);
-	helditem->setviewable(framedecal->state.enabled);
+	helditem->setviewable(framedecal.enabled());
 	helditem->state = ininventoryblock;
-	
-	helditem->itemui.itemsprite->box.center = framedecal->box.center;
+
+	helditem->itemui.itemsprite->set_center(framedecal.bounds().center);
 
 }
 void itemslot::transferitem(item* otherholder) {
@@ -86,7 +84,7 @@ void itemslot::transferitem(item* otherholder) {
 
 		helditem->state = ininventoryblock;
 
-		helditem->itemui.itemsprite->box.center = framedecal->box.center;
+		helditem->itemui.itemsprite->set_center(framedecal.bounds().center);
 
 	}
 
@@ -111,8 +109,9 @@ void itemslot::destroyitem() {
 
 void itemslot::enable() {
 	
-	framedecal->enable();
-	if (helditem != nullptr && helditem->itemui.itemsprite.ptr() != nullptr) {
+	framedecal.enable();
+	// && helditem->itemui.itemsprite->ptr() != nullptr
+	if (helditem != nullptr) {
 		helditem->setviewable(true);
 	}
 }
@@ -129,38 +128,39 @@ void itemslot::setdecal(decaltype toset)
 	dtype = toset;
 	if (toset==importantdecal) {
 		
-		framedecal->LoadTex("images\\importantblockholder.png","ImportantBlockHolderTexture");
+		framedecal.set_image("images\\importantblockholder.png","ImportantBlockHolderTexture");
 	
 		return;
 	}
 	if (toset == normaldecal) {
-		framedecal->LoadTex("images\\blockholder.png","BlockHolderTexture");
+		framedecal.set_image("images\\blockholder.png","BlockHolderTexture");
 	
 		return;
 	}
 	if (toset == destroydecal) {
 
-		framedecal->LoadTex("images\\x.png","XTexture");
+		framedecal.set_image("images\\x.png","XTexture");
 		
 		return;
 	}
 	if (toset == leggingdecal) {
 
-		framedecal->LoadTex("images\\leggingdecal.png","LeggingDecalTexture");
+		framedecal.set_image("images\\leggingdecal.png","LeggingDecalTexture");
 
 		return;
 	}
 	if (toset == chestdecal) {
 
-		framedecal->LoadTex("images\\chestdecal.png", "ChestDecalTexture");
+		framedecal.set_image("images\\chestdecal.png", "ChestDecalTexture");
 
 		return;
 	}
 }
 void itemslot::disable() {
 
-	framedecal->disable();
-	if (helditem != nullptr && helditem->itemui.itemsprite.ptr() != nullptr) {
+	framedecal.disable();
+	//&& helditem->itemui.itemsprite->ptr() != nullptr
+	if (helditem != nullptr ) {
 		helditem->setviewable(false);
 	}
 }
@@ -175,7 +175,7 @@ void itemslot::updatestate() {
 		{
 
 
-			if (framedecal->state.leftclicked) {
+			if (framedecal.get_component<ui::InteractionState>().left_clicked) {
 				if (freeditem != nullptr && helditem != nullptr)
 				{
 
@@ -193,7 +193,7 @@ void itemslot::updatestate() {
 				transferitem(freeditem);
 			}
 
-			if (framedecal->state.rightclicked) {
+			if (framedecal.get_component<ui::InteractionState>().right_clicked) {
 				if (helditem != nullptr)
 				{
 					int giveamt = helditem->amt / 2;

@@ -14,7 +14,7 @@ namespace geointersect {
 	using boxRayCollision = stn::Option<RayHit>;
 
 
-	boxRayCollision intersection(geometry::Box box, ray fray);
-	bool intersects(geometry::cone cone, geometry::Sphere sph);
+	boxRayCollision intersection(geo::Box box, ray fray);
+	bool intersects(geo::cone cone, geo::Sphere sph);
 }
  // !intersection_HPP

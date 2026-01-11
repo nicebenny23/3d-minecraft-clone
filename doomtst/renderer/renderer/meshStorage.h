@@ -33,7 +33,7 @@ namespace renderer {
 				free.push(static_cast<std::uint32_t>(meshes.length()));
 			}
 			std::uint32_t id = free.pop();
-			Mesh new_mesh = ctx->create();
+			Mesh new_mesh = ctx->create_mesh();
 			meshes.push(id, new_mesh);
 			return mesh_id(id);
 		}

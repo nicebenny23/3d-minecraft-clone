@@ -9,8 +9,8 @@ namespace items{
 	v2::Vec2 slot_center(v2::Coord2 coord) {
 		return grid_pixel_scale * v2::Vec2(coord)+grid_pixel_scale/2;
 	}
-	geometry::Box2d slot_box(v2::Coord2 coord) {
-		return geometry::Box2d(slot_center(coord),grid_pixel_scale/2);
+	geo::Box2d slot_box(v2::Coord2 coord) {
+		return geo::Box2d(slot_center(coord),grid_pixel_scale/2);
 	}
 	struct ItemSlot:ecs::component{
 	
@@ -57,7 +57,7 @@ namespace items{
 	};
 	struct SlotUi :ecs::component{
 
-		geometry::Box2d slotbox() const {
+		geo::Box2d slotbox() const {
 			return	 slot_box(location);
 		}
 		
@@ -65,9 +65,9 @@ namespace items{
 		void setdecal(const char* location, const char* name) {
 			if (!framedecal.valid())
 			{
-				framedecal = ui::createuielement<uiboxname::ui_image_component>("images\\blockholder.png", "DefaultItemSlotTexture", slotbox().center, slotbox().scale, 13);
+				framedecal = ui::createuielement<ui::ui_image_component>("images\\blockholder.png", "DefaultItemSlotTexture", slotbox().center, slotbox().scale, 13);
 			}
-			framedecal->LoadTex(location, name);
+			framedecal->set_image(location, name);
 
 		}
 		void disable() {
@@ -109,7 +109,7 @@ namespace items{
 
 		private:
 		v2::Coord2 location;
-		Cptr::cptr<uiboxname::ui_image_component> framedecal;
+		Cptr::cptr<ui::ui_image_component> framedecal;
 
 	};
 

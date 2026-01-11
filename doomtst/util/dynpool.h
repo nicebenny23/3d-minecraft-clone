@@ -344,6 +344,9 @@ namespace stn {
 			block_info* node = top;
 			U* element = reinterpret_cast<U*>(get_element(node));
 			new (element) U(std::forward<Args>(args)...);
+			if (top==nullptr) {
+				int l = 2;
+			}
 			top = &top->ptr.as<block_info>();
 			node->ptr.from<flux>(this);
 			return flux_token<U>(element);

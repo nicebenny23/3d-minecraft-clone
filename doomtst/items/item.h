@@ -6,9 +6,9 @@
 #include "../renderer/uibox.h"
 
 #pragma once 
-inline cptr<uiboxname::ui_image_component> createitembox(const char* boxname,const char* TextureName) {
+inline ui::ui_image* createitembox(const char* boxname,const char* TextureName) {
 
-	return ui::createuielement<uiboxname::ui_image_component>(boxname, TextureName , v2::unitv / 40.f, v2::zerov, 100.f);
+	return new ui::ui_image(*CtxName::ctx.Ecs, boxname, TextureName , geo::Box2d::origin_centered(v2::unitv / 40.f), 100.f);
 }
 enum itemid {
 
@@ -67,18 +67,16 @@ struct item
 	int amt;
 	void setviewable(bool isviewable) {
 
-
-		itemui.textvalue->state.enabled = isviewable;
-		itemui.itemsprite->state.enabled = isviewable;
+		if (isviewable) {
+			itemui.textvalue.enable();
+		}
+		else {
+			itemui.textvalue.disable();
+		}
 	}
 	item(int itemid);
 	item(int itemid,int amt);
-	item() {
-		maxamt = 0;
-		amt = 0;
-		properties.foodval = 0;
-		itemui.textvalue = ui::createuielement<text_component>(v2::zerov, 1 / 70.f);
-	}
+	
 	
 
 
@@ -102,8 +100,12 @@ struct item
 
 	struct  itemuistruct
 	{
-		cptr<text_component> textvalue;
-		cptr<uiboxname::ui_image_component> itemsprite;
+		ui::ui_text textvalue;
+		ui::ui_image* itemsprite;
+		itemuistruct():itemsprite(nullptr),
+		textvalue(*CtxName::ctx.Ecs,geo::Box2d::origin_centered(v2::unitv*1 / 80.0f),67){
+
+		}
 	};
 
 	itemproperties properties;
@@ -117,15 +119,15 @@ struct item
 		if (state==beingheld)
 		{
 			//adjust for apwect ratio 
-			itemui.itemsprite->box.center = CtxName::ctx.Window->FitToAspectRatio( CtxName::ctx.Inp->mousepos);
+			itemui.itemsprite->set_center(CtxName::ctx.Window->FitToAspectRatio(CtxName::ctx.Inp->mousepos));
 		}
-		double text_offset_ideal = .8f;
-		itemui.textvalue->center = itemui.itemsprite->box.center-itemui.itemsprite->box.scale* text_offset_ideal;
-		itemui.textvalue->value= amt;
+		double text_offset_ideal = .01f;
+		itemui.textvalue.set_center(itemui.itemsprite->bounds().center -v2::unitv*text_offset_ideal);
+		itemui.textvalue.format("{}", amt);
 		if (itemtype==wear)
 		{
 			int textamt = round((amt *5)/ maxamt);
-			itemui.textvalue->value = textamt;
+			itemui.textvalue.format("{}", textamt);
 		}
 		
 	}

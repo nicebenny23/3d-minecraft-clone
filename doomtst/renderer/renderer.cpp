@@ -6,20 +6,20 @@
 namespace renderer {
 
 
-	void Renderer::Render(Mesh* mesh) {
+	void Renderer::Render(Mesh& mesh) {
 
-		if (!mesh->filled()) {
+		if (!mesh.filled()) {
 			return;
 		}
 
-		context.bind(*mesh);
+		context.bind(mesh);
 
-		mesh->Voa.SetAllAttributes();
+		mesh.Voa.SetAllAttributes();
 		if (settings::Gamesettings.viewmode) {
-			glDrawElements(GL_LINES, mesh->length, GL_UNSIGNED_INT, 0);
+			glDrawElements(GL_LINES, mesh.length, GL_UNSIGNED_INT, 0);
 		}
 		else {
-			glDrawElements(GL_TRIANGLES, mesh->length, GL_UNSIGNED_INT, 0);
+			glDrawElements(GL_TRIANGLES, mesh.length, GL_UNSIGNED_INT, 0);
 		}
 	}
 
@@ -33,25 +33,25 @@ namespace renderer {
 		fov = 90;
 		setprojmatrix(90, .21f, 100);
 		CtxName::ctx.Ecs->emplace_asset_loader<MaterialManager>(uniform_manager);
-		renderer::shader_id ui_shader = CtxName::ctx.Ecs->load_asset_emplaced<shader_load>("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs").unwrap();
+		renderer::shader_id ui_shader = CtxName::ctx.Ecs->load_asset_emplaced<renderer::shader_descriptor>("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs").unwrap();
 		CtxName::ctx.Ecs->load_asset(render_phase(12, true, "ui_phase"));
 		CtxName::ctx.Ecs->load_asset(render_phase(0, false, "solid_phase"));
 		CtxName::ctx.Ecs->load_asset(render_phase(1, true, "transparent_phase"));
 
 		CtxName::ctx.Ecs->load_asset_emplaced<MaterialDescriptor>("Ui", "ui_phase", "UiShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-			stn::array{ uniforms::uparam("aspect_ratio", "aspectratio") }
+			stn::array{ renderer::uparam("aspect_ratio", "aspectratio") }
 		);
-		renderer::shader_id model_shader = CtxName::ctx.Ecs->load_asset_emplaced<shader_load>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
+		renderer::shader_id model_shader = CtxName::ctx.Ecs->load_asset_emplaced<renderer::shader_descriptor>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
 		CtxName::ctx.Ecs->load_asset_emplaced<MaterialDescriptor>("Model", "solid_phase", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-			stn::array<uniforms::UniformParam>{
-			uniforms::uparam("aspect_ratio", "aspectratio"),
-			uniforms::uparam("proj_matrix", "projection"),
-			uniforms::uparam("view_matrix", "view")
+			stn::array<renderer::UniformParam>{
+			renderer::uparam("aspect_ratio", "aspectratio"),
+			renderer::uparam("proj_matrix", "projection"),
+			renderer::uparam("view_matrix", "view")
 			}
 		);
-		renderer::shader_id particle_shader = CtxName::ctx.Ecs->load_asset_emplaced<shader_load>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
+		renderer::shader_id particle_shader = CtxName::ctx.Ecs->load_asset_emplaced<renderer::shader_descriptor>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
 
-		CtxName::ctx.Ecs->load_asset_emplaced<shader_load>("ParticleShader", "shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
+		CtxName::ctx.Ecs->load_asset_emplaced<renderer::shader_descriptor>("ParticleShader", "shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
 		//xName::ctx.Ecs->load_asset_emplaced<MaterialDescriptor>("Particle", "solid_phase", particle_shader, RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 		set_uniform("aspect_ratio", CtxName::ctx.Window->AspectRatio());
 		meshes = MeshRegistry(&context);
@@ -61,8 +61,8 @@ namespace renderer {
 		set_uniform("proj_matrix", glm::perspective(glm::radians(newfov), float(4 / 3.f), nearclipplane, farclipplane));
 	}
 
-	void Renderer::set_material(renderable_id id, std::string name) {
-	renderable_list[id].set_material(CtxName::ctx.Ecs->from_name<Material>(name).expect("material should exist"));
+	void Renderer::set_material(renderable id, std::string name) {
+	id.set_material(CtxName::ctx.Ecs->from_name<Material>(name).expect("material should exist"));
 	}
 
 	void Renderer::bind_material(material_handle material) {
@@ -73,8 +73,8 @@ namespace renderer {
 		}
 		context.bind_properties(mat.prop);
 	}
-	void Renderer::apply_uniform(const uniforms::uniform_val& val, const std::string& location_in_shader) {
-		context.set_uniform(uniforms::uniform(val, location_in_shader.c_str()));
+	void Renderer::apply_uniform(const renderer::uniform_val& val, const std::string& location_in_shader) {
+		context.set_uniform(renderer::uniform(val, location_in_shader.c_str()));
 	}
 
 
@@ -109,20 +109,14 @@ namespace renderer {
 	}
 
 	void RenderableHandle::set_order_key(float key) {
-		stn::Option<order_key&> order= renderer->entity_of(id.unwrap()).get_component_opt<order_key>();
-		if (!order) {
-			renderer->entity_of(id.unwrap()).add_component<order_key>(key);
-		}
-		else {
-			order.unwrap().order = key;
-		}
+		id.unwrap().set_order(key);
 	}
 
 	void RenderableHandle::enable() {
 
 		renderer->set_enabled(id.unwrap(), true);
 	}
-	void RenderableHandle::set_uniform(const uniforms::uniform& u) {
+	void RenderableHandle::set_uniform(const renderer::uniform& u) {
 		renderer->set_uniform(id.unwrap(), u);
 	}
 

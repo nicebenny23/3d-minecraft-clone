@@ -8,15 +8,14 @@
 struct furnacemenu :menu {
 
 	recipemanager blkcont;
-	Cptr::cptr<ui_image_component> progressbar;
-	furnacemenu(v2::Vec2 size) {
-		menubox = ui::createuielement<ui_image_component>("images\\menutex.png", "MenuTexture", size, v2::zerov, 1);
+	ui_image progressbar;
+	furnacemenu(v2::Vec2 size):menu(size), progressbar(*CtxName::ctx.Ecs, "images\\greenbar.png", "GreenBarTexture", geo::Box2d(v2::Vec2(0, .1), v2::zerov), 100){
+		menubox =new ui_image(*CtxName::ctx.Ecs,"images\\menutex.png", "MenuTexture", geo::Box2d::origin_centered(size), 1);
 	
 		menubox->disable();
 		menutype = normalmenu;
-		progressbar = ui::createuielement<ui_image_component>("images\\greenbar.png", "GreenBarTexture", v2::Vec2(0, .1) , v2::Vec2(0, 0), 100);
 		blkcont = recipemanager("crafting\\furnace.txt", 1,1);
-		progressbar->state.enabled= false;
+		progressbar.disable();
 		enabled = false;
 		blkcont.attributes = extrarecipeattributes(true, 2);
 	}
@@ -29,12 +28,12 @@ struct furnacemenu :menu {
 
 	}
 	void customopen() {
-		progressbar->state.enabled= true;
+		progressbar.enable();
 		enabled = true;
 		blkcont.enable();
 	}
 	void customclose() {
-		progressbar->disable();
+		progressbar.disable();
 		enabled = false;
 		blkcont.disable();
 
@@ -71,7 +70,7 @@ struct furnacecomp : ecs::component{
 		v2::Vec2 center = v2::Vec2(0, .2) + v2::Vec2(scale1/2 , .1);
 		v2::Vec2 scale = v2::Vec2(scale1, .03);
 		Box2d progbox = Box2d(center, scale/2);
-		men.progressbar->box = progbox;
+		men.progressbar.set_bounds(progbox);
 
 	
 		
@@ -101,6 +100,9 @@ struct furnacecomp : ecs::component{
 		}
 	
 	}
+	furnacecomp():men(v2::Vec2(3, 3)) {
+
+	}
 	void destroy_hook() {
 	
 			men.blkcont.save();
@@ -109,7 +111,7 @@ struct furnacecomp : ecs::component{
 	}
 	void start() {
 
-		men = furnacemenu(v2::Vec2(3, 3));
+		men = std::move(furnacemenu(v2::Vec2(3, 3)));
 	}
 };
 inline void furnaceinit(blockname::block& blk) {
@@ -123,14 +125,7 @@ inline void furnaceinit(blockname::block& blk) {
 
 	blk.createdefaultaabb(false);
 	//stupid thing
-	if (!blk.owner().has_component<furnacecomp>())
-	{
-
-		blk.owner().add_component<furnacecomp>();
-
-	}
-	
-
+	blk.owner().ensure_component<furnacecomp>();
 	blk.owner().get_component<furnacecomp>().men.blkcont.attributes.timetocraft = 1;
 	blk.owner().get_component<furnacecomp>().men.blkcont.attributes.isauto = true;
 	blk.owner().add_component<loottable>().addelem(furnaceitem, 1, false);

@@ -34,7 +34,7 @@ array<navnode> getneighborslime(navnode& node)
 
                 v3::Scale3 scale = blockscale *.99f;
                 //where we are now
-                geometry::Box bx = geometry::Box(node.center(), scale);
+                geo::Box bx = geo::Box(node.center(), scale);
                 
                 bool cango = true;
                 //if close enigh 

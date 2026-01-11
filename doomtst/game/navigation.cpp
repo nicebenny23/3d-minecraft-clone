@@ -23,7 +23,7 @@ array<navnode> getneighborsdefault( navnode& node) {
 
         v3::Point3 center = point + unitv / 2;
         v3::Scale3 scale = blockscale * v3::Scale3(1.1, .9f, 1.1);
-        geometry::Box bx = geometry::Box(center, scale);
+        geo::Box bx = geo::Box(center, scale);
         if (!voxtra::Boxcollwithgrid(bx))
         {
             neighbors.push(navnode(point));
@@ -191,7 +191,7 @@ Vec3 transformnormal(Vec3 pos, Vec3 scale)
            
 
 				Point3 center = Point3(xind, pos.y - 1, zind);
-                geometry::Box posbx = geometry::Box(center+unitv/2, blockscale);
+                geo::Box posbx = geo::Box(center+unitv/2, blockscale);
                 if (!voxtra::Boxcollwithgrid(posbx))
                 {
                     continue;

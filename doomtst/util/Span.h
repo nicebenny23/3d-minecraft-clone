@@ -30,14 +30,11 @@ namespace stn {
 		template <std::contiguous_iterator Iter>
 		span(Iter first, Iter last)
 			: ptr(&(*first)), len(static_cast<size_t>(std::distance(first, last))) {
-			static_assert(std::is_pointer_v<Iter> ||
-				std::is_same_v<typename std::iterator_traits<Iter>::iterator_category,
-				std::random_access_iterator_tag>, "span requires random access iterators or pointers");
+	
 		}
 		template <std::ranges::contiguous_range Container>
 		span(Container& c) : span(std::begin(c), std::end(c)) {
 		}
-		
 		constexpr operator stn::span<const T>() const {
 			return stn::span<const T>(ptr, len);
 		}
@@ -76,7 +73,7 @@ namespace stn {
         }
 
         template <template<typename...> class Container>
-            requires std::is_constructible_v<Container<T>, T*, T*>
+            requires std::is_constructible_v<Container<T>, iterator, iterator>
         Container<T> to() const {
             return Container<T>(begin(), end());
         }
@@ -156,5 +153,10 @@ namespace stn {
     private:
         T* ptr;
         size_t len;
-    };
+    };   
+	//for clarity
+	template<typename T>
+	concept Spanable = std::ranges::contiguous_range<T>;
+
+
 }

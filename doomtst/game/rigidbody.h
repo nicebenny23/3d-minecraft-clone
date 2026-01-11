@@ -59,12 +59,12 @@ struct rigidbody : ecs::component{
 
         inliquid = false;
         Point3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position - Vec3(0, boundingbox->globalbox().scale.y + .01, 0);
-        geometry::Box checkbox = geometry::Box(boxcenter, Scale3(boundingbox->globalbox().scale.x, .005, boundingbox->globalbox().scale.z*.9f) * .92);
+        geo::Box checkbox = geo::Box(boxcenter, Scale3(boundingbox->globalbox().scale.x, .005, boundingbox->globalbox().scale.z*.9f) * .92);
         isonground = (voxtra::Boxcollwithgrid(checkbox ));
     }
     void calculateonceil() {
 		Point3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position + Vec3(0, boundingbox->globalbox().scale.y + .01, 0);
-        geometry::Box checkbox = geometry::Box(boxcenter, Scale3(boundingbox->globalbox().scale.x, .005, boundingbox->globalbox().scale.z) * .9);
+        geo::Box checkbox = geo::Box(boxcenter, Scale3(boundingbox->globalbox().scale.x, .005, boundingbox->globalbox().scale.z) * .9);
         isonceil = (voxtra::Boxcollwithgrid(checkbox));
         if (isonceil)
         {

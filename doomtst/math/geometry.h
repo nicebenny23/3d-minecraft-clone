@@ -6,7 +6,7 @@
 #include "../util/Option.h"
 using namespace v3;
 
-namespace geometry {
+namespace geo {
 
 	
 	struct Box {
@@ -69,7 +69,9 @@ namespace geometry {
 			}
 			return false;
 		}
-		
+		Scale3 half_size() const {
+			return scale / 2;
+		}
 		// Minkowski difference operator
 		Box operator-(const Box& other) const {
 			//minkoski diffrence changes affinity
@@ -98,7 +100,9 @@ namespace geometry {
 		v2::Vec2 lower() const {
 			return center-scale / 2;
 		}
-
+		v2::Vec2 half_size() const{
+			return scale / 2;
+		}
 		bool contains(Box2d box) const{
 			return contains(box.upper()) && contains(box.lower());
 		}
@@ -111,8 +115,9 @@ namespace geometry {
 			}
 			return false;    
 		}
-
-		Box2d() = default;
+		static Box2d origin_centered(v2::Vec2 scale) {
+			return Box2d(v2::zerov, scale);
+		}
 	};
 
 
@@ -171,29 +176,29 @@ namespace geometry {
 	};
 
 	struct cone {
-		ray direction_ray;
+		ray direction;
 		double slope;
 
 		cone(const ray newray, double cone_slope)
-			: direction_ray(newray), slope(cone_slope) {}
+			: direction(newray), slope(cone_slope) {}
 
-		//returns the normized direction
-		Vec3 direction() const{
-			return direction_ray.dir();
+		//returns the normalized direction
+		Vec3 normal_direction() const{
+			return direction.dir();
 		}
 		Point3 orgin() const{
-			return direction_ray.start;
+			return direction.start;
 		}
 
-		double distanceFromPoint(Point3 samplePoint) const{
+		double distance_from_point(Point3 samplePoint) const{
 			// Project the sample point onto the cone's central axis (ray)
-			Point3 axisProjection = direction_ray.project(samplePoint);
+			Point3 axisProjection = direction.project(samplePoint);
 
 			// Compute the perpendicular distance from the sample point to the cone's axis.
 			double distanceToAxis = dist(samplePoint, axisProjection);
 
 			// Determine how far along the axis (from the vertex) the projection lies.
-			double distanceAlongAxis = dist(direction_ray.start, axisProjection);
+			double distanceAlongAxis = dist(direction.start, axisProjection);
 
 			// At a distance 'distanceAlongAxis' along the axis, the cone's expected radius is:
 			//     expectedRadius = slope * distanceAlongAxis.
@@ -204,14 +209,14 @@ namespace geometry {
 		}
 	};
 
-	inline bool  boxes_intersect(geometry::Box p1, geometry::Box p2)
+	inline bool boxes_intersect(geo::Box p1, geo::Box p2)
 	{
 		return (p1 - p2).contains_orgin();
 					
 	}
 	inline 	stn::Option<v3::Vec3> collide_box(Box p1, Box p2)
 	{
-		if (!geometry::boxes_intersect(p1, p2)) {
+		if (!geo::boxes_intersect(p1, p2)) {
 			return stn::None;
 
 		}

@@ -22,9 +22,9 @@ namespace collision {
 
 	};
 	
-	bool boxCollidesWithEntity(geometry::Box blk, HitQuery query);
+	bool boxCollidesWithEntity(geo::Box blk, HitQuery query);
 
-	bool aabbCollidesWithEntity(Collider* blk, HitQuery query);
+	bool aabbCollidesWithEntity(Collider& blk, HitQuery query);
 	voxtra::WorldRayCollision raycastall(ray nray, HitQuery query, voxtra::GridTraverseMode travmode = voxtra::countnormal);
 
 	voxtra::WorldRayCollision raycastentity(ray nray,HitQuery query);

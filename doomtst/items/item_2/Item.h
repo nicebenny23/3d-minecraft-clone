@@ -1,22 +1,24 @@
-#include "../game/ecs/game_object.h"
-#include <string>
-#pragma once
+#include "item_type.h"
+#include "item_type.h"
+namespace items {
 
-namespace item_name {
-	//represents the type of item an item is
+
+
+
+
+
+
+
 	struct item :ecs::component {
-		size_t id;
-		enum class item_use_type {
-			tool,
-			block
-
-		};
+		item_id id;
+		item(item_id Id,item_use_type item_ty):id(Id),type(item_ty){
+		}
 		item_use_type type;
 		bool can_give(item& other, size_t cnt);
 		size_t get_count();
 		size_t get_max();
 	};
-	//bidirectional
+
 	bool can_interact(const item& itm1, const item& itm2) {
 		return itm1.id == itm2.id && itm1.type == itm2.type;
 	}
@@ -24,31 +26,30 @@ namespace item_name {
 
 
 	}
-	item& get_item(ecs::obj object) {
+	inline item& get_item(ecs::obj object) {
 		item* itm = object.get_component_ptr<item>();
 		if (itm == nullptr) {
 			throw std::logic_error("Error:tried to get item component but it did not exist");
 		}
 		return *itm;
 	}
-	item& get_item(ecs::component& comp) {
-		item* itm = comp.owner().get_component_ptr<item>();
-		if (itm == nullptr) {
-			throw std::logic_error("Error:tried to get item component but it did not exist");
-		}
-		return *itm;
-	}
-
 	void ensure_interactable(item& itm1, item& itm2) {
 		if (itm1.id != itm2.id) {
 			std::string msg =
 				"Invariant Broken: differing item types cannot interact ('" +
-				std::to_string(itm1.id) + "' and '" + std::to_string(itm2.id) + "').";
+				std::to_string(itm1.id.id) + "' and '" + std::to_string(itm2.id.id) + "').";
 		};
 	}
 
 
-
+	struct item_usage {
+		ecs::entity item;
+		size_t count;
+	};
+	struct item_gain {
+		ecs::entity item;
+		size_t count;
+	};
 
 
 
@@ -112,14 +113,14 @@ namespace item_name {
 			other_item.amt += count;
 			amt -= count;
 		}
-		//returns an item_stack of size count;
+
 		item& split(size_t count) {
 			if (!can_give(amt)) {
 				throw std::logic_error("Split error: trying to split " + std::to_string(count) +
 					" items from a stack with only " + std::to_string(amt) + " items.");
 			}
 			ecs::obj new_item = owner().world().spawn_empty();
-			make_item(new_item, get_item(owner()).id);
+			make_item(new_item, get_item(owner()).id.id);
 			pass(new_item.get_component<item_stack>(), count);
 			return get_item(new_item);
 		}
@@ -151,12 +152,10 @@ namespace item_name {
 			return remaining == max_durability;
 		}
 
-		// How much durability has been lost (damage taken)
 		size_t damage_taken() const {
 			return max_durability - remaining;
 		}
 
-		// Use (damage) the item by 1 point
 		void use() {
 			if (is_broken()) {
 				throw std::logic_error("Item already broken, cannot damage further.");
@@ -168,4 +167,21 @@ namespace item_name {
 		size_t remaining;
 	};
 
+	struct ItemSpawner {
+		item_id id;
+		size_t base_amount;
+		
+		void apply(ecs::obj& entity) {
+			item_traits traits = entity.world().ensure_resource<item_type_register>().from_id(id);
+			if (traits.use_type==item_use_type::block) {
+				entity.add_component<item_stack>(base_amount);
+			}
+			else {
+				entity.add_component<item_durability>(base_amount);
+			}
+			entity.add_component<item>(id,traits.use_type);
+		}
+	};
+
+	
 }

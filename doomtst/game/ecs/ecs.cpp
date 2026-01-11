@@ -7,7 +7,7 @@ namespace ecs {
 		//adds to both
 		entity new_entity = entities.allocate_entity();
 		archetypes.add_to_empty(new_entity);
-		return obj(new_entity, this);
+		return obj(new_entity, *this);
 	}
 	
 }

@@ -9,7 +9,7 @@ bool item_name::item::can_give(item& other, size_t cnt)
 
 	}
 	
-	if (type != item_type::block)
+	if (type != item_use_type::block)
 	{
 		return false;
 	}
@@ -19,7 +19,7 @@ bool item_name::item::can_give(item& other, size_t cnt)
 
 size_t item_name::item::get_count()
 {
-	if (type==item_type::tool)
+	if (type==item_use_type::tool)
 	{
 		return owner().get_component<item_durability>().durability();
 	}
@@ -31,7 +31,7 @@ size_t item_name::item::get_count()
 
 size_t item_name::item::get_max()
 {
-	if (type == item_type::tool)
+	if (type == item_use_type::tool)
 	{
 		return owner().get_component<item_durability>().max_dur();
 	}

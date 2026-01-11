@@ -19,23 +19,17 @@ namespace userinput {
 		bool held;
 		bool released;
 		bool pressed;
-		bool xorheld(){
-
-			return held && !released;
-		}
-     		
 		inputkey() {
 
 			held = false;
 			pressed = false;
 			released = false;
-	     	
+
 		}
 
 		void update(int action);
 	};
-	struct  InputManager
-	{
+	struct  InputManager {
 		stn::array<inputkey> keylist;
 
 
@@ -61,5 +55,5 @@ namespace userinput {
 }
 
 
- // !userinp
+// !userinp
 

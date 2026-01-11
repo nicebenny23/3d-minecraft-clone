@@ -14,7 +14,7 @@ namespace v2 {
 		constexpr  Coord2(int X, int Y) noexcept;
 		Coord2();
 		void operator=(const Coord2& p1);
-		bool operator==(const Coord2& p1);
+		bool operator==(const Coord2& p1) const;
 		bool operator!=(const Coord2& p1);
 		Coord2& operator+=(const Coord2& p1);
 		Coord2 operator+(const Coord2& p1) const;
@@ -24,7 +24,7 @@ namespace v2 {
 
 		Coord2 operator*(int scale) const;
 		Coord2& operator*=(int scale);
-		bool operator==(const Vec2& p1);
+		bool operator==(const Vec2& p1) const;
 		Vec2 operator+(const Vec2& p1) const;
 		Vec2 operator-(const Vec2& p1) const;
 	
@@ -57,7 +57,7 @@ namespace v2 {
 
 	}
 
-	inline bool Coord2::operator==(const Coord2& p1)
+	inline bool Coord2::operator==(const Coord2& p1) const
 	{
 		return 	(p1.x ==x &&p1.y == y);
 	}
@@ -158,7 +158,7 @@ namespace v2 {
 		Vec2 operator/(double scale) const;
 
 		Vec2& operator/=(double scale);
-		bool operator==(const Coord2& p1);
+		bool operator==(const Coord2& p1) const;
 		double x;
 		double y;
 		void operator= (const Coord2 & p1) ;
@@ -338,7 +338,7 @@ namespace v2 {
 
 	}
 
-	inline bool Vec2::operator==(const Coord2& p1)
+	inline bool Vec2::operator==(const Coord2& p1) const
 	{
 		return (p1.x == x && p1.y == y);
 	}
@@ -348,7 +348,7 @@ namespace v2 {
 
 
 	
-	inline bool Coord2::operator==(const Vec2& p1)
+	inline bool Coord2::operator==(const Vec2& p1)const
 	{
 		return (p1.x == x && p1.y == y );
 	}

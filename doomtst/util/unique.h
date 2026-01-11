@@ -15,17 +15,17 @@ namespace stn {
 	std::is_same_v<Tag, construct_derived<typename Tag::type>>;
 	template<typename T>
 	struct box {
-		
+
 		using element_type = T;
-		template<typename... Args> 
+		template<typename... Args>
 			requires std::constructible_from<T, Args&&...>
 		explicit box(Args&&... args) : ptr(new T(std::forward<Args>(args)...)) {
 		}
 
-		template<ConstructDerivedTagType Tag, typename... Args> 
+		template<ConstructDerivedTagType Tag, typename... Args>
 			requires std::derived_from<typename Tag::type, T>&&
 		std::constructible_from<typename Tag::type, Args&&...>
-			explicit box(Tag /*tag*/, Args&&... args)
+			explicit box(Tag, Args&&... args)
 			: ptr(new typename Tag::type(std::forward<Args>(args)...)) {
 		}
 
@@ -33,7 +33,7 @@ namespace stn {
 
 		box() requires std::default_initializable<T> : ptr(new T()) {
 		}
-		box(box&& other) noexcept{
+		box(box&& other) noexcept {
 			ptr = other.ptr;
 			other.ptr = nullptr;
 		}
@@ -59,7 +59,7 @@ namespace stn {
 		}
 
 		template<typename U> requires std::derived_from<U, T>
-		box<U> dynamic_downcast() && noexcept{
+		box<U> dynamic_downcast() && noexcept {
 			box<U> other(dynamic_cast<U*>(ptr));
 			if (other) {
 				ptr = nullptr;
@@ -116,13 +116,6 @@ namespace stn {
 		const T* get() const {
 			return ptr;
 		}
-		T& operator[](std::size_t index) requires std::is_array_v<T> {
-			return ptr[index];
-		}
-		const T& operator[](std::size_t index) const  requires std::is_array_v<T> {
-			return ptr[index];
-		}
-
 		T* unbox() noexcept {
 			T* temp = ptr;
 			ptr = nullptr;
@@ -160,11 +153,6 @@ namespace stn {
 
 	};
 	template<typename T>
-	void swap(box<T>& lhs, box<T>& rhs) noexcept {
-		lhs.swap(rhs);
-	}
-	
-	template<typename T>
 	struct is_box : std::false_type {
 	};
 
@@ -172,8 +160,12 @@ namespace stn {
 	struct is_box<box<T>> : std::true_type {
 	};
 	template<typename T>
-	concept BoxType =is_box<T>::value;
+	concept BoxType = is_box<T>::value;
+}
 
-
-	
+namespace std {
+	template<typename T>
+	void swap(stn::box<T>& lhs, stn::box<T>& rhs) noexcept {
+		lhs.swap(rhs);
+	}
 }

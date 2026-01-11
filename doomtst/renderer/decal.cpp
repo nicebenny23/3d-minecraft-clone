@@ -16,7 +16,7 @@ void decal::set_handle(const char* texloc, const char* texture) {
 		handle.set_layout(vertice::vertex().push<float, 3>().push<float, 2>());
 
 	}
-	handle.set_uniform(uniforms::uniform(CtxName::ctx.Ecs->load_asset_emplaced<TexturePath>(texloc, texture).unwrap(), "tex"));
+	handle.set_uniform(renderer::uniform(CtxName::ctx.Ecs->load_asset_emplaced<renderer::TexturePath>(texloc, texture).unwrap(), "tex"));
 
 }
 void decal::create_mesh() {

@@ -108,7 +108,7 @@ void particleemiter::renderparticles()
 		{
 			//CtxName::ctx.Ren->CurrentShader().SetVector3f(particlearray[i].get_component<ecs::transform_comp>().transform.position.glm(), "offset");
 		//	CtxName::ctx.Ren->CurrentShader().SetVector3f(particlearray[i].get_component<ecs::transform_comp>().transform.scale.glm(), "scale");
-			CtxName::ctx.Ren->Render(&ParticleMesh);
+			CtxName::ctx.Ren->Render(ParticleMesh);
 		}
 	}
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -122,7 +122,7 @@ void initbaseparticle(ecs::obj newent) {
 	newent.get_component<ecs::transform_comp>().transform.scale = blockscale / 22;
 	
 }
-particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) (ecs::obj),Texture2D* newtex)
+particleemiter::particleemiter(float spawntime,float lifetime, void (*initfunc) (ecs::obj), renderer::Texture2D* newtex)
 {
 	tex = newtex;
 	

@@ -114,7 +114,7 @@ namespace stn {
 		}
 		[[nodiscard]] T flatten() const requires OptionType<T>{
 			if (!has_value) {
-				return None;
+				return T(None);
 			}
 
 			return value.get<T>();
@@ -281,6 +281,13 @@ namespace stn {
 			if (is_some_and(std::forward<Pred>(pred))) {
 				has_value = false;
 				return Option<T>(std::move(value.get<T>()));
+			}
+			return stn::None;
+		}
+
+		Option<T> retain(this auto&& self, bool should_keep){
+			if (should_keep&&has_value) {
+				return Option<T>(std::forward<decltype(self)>(self).value.get<T>());
 			}
 			return stn::None;
 		}

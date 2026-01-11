@@ -4,58 +4,51 @@
 #include "../debugger/debug.h"
 namespace userinput {
 	//([0-width],[0,height])
-	void InputManager::endupdate(){
+	void InputManager::endupdate() {
 		mouseposdt = v2::Vec2(0, 0);
-		for (int i = 0; i < keylist.length(); i++)
-		{
+		for (int i = 0; i < keylist.length(); i++) {
 			keylist[i].pressed = false;
 			keylist[i].released = false;
 		}
-		
+
 	}
 
-	inputkey InputManager::mouseleft()
-	{
+	inputkey InputManager::mouseleft() {
 		return keylist[Mouse_leftindex];
 	}
 
-	inputkey InputManager::mouseright()
-	{
+	inputkey InputManager::mouseright() {
 		return keylist[Mouse_rightindex];
 	}
 
-	 InputManager::InputManager()
-	{
+	InputManager::InputManager() {
 
 		mousepos = v2::Vec2(0, 0);
 		mouseposdt = v2::Vec2(0, 0);
 
-		keylist = stn::array<inputkey>(GLFW_KEY_LAST+ Extra_keys);
+		keylist = stn::array<inputkey>(GLFW_KEY_LAST + Extra_keys);
 		keylist.reach(GLFW_KEY_LAST + Extra_keys);
 	}
 	void InputManager::updatekey(int code, int action) {
 
-		if (code< keylist.length())
-		{
+		if (code < keylist.length()) {
 			keylist[code].update(action);
 
-			
+
 		}
-		else
-		{
-				Assert("error code");
+		else {
+			Assert("error code");
 		}
 	}
 
 
-	
-	
+
+
 	int InputManager::convertchartoglfwkey(const int key) {
-		if ('a' <= key&&key<='z')
-		{
+		if ('a' <= key && key <= 'z') {
 			return key - 32;
 		}
-	
+
 		return key;
 
 	}
@@ -64,17 +57,14 @@ namespace userinput {
 		return keylist[convertchartoglfwkey(key)];
 	}
 
-	void inputkey::update(int action)
-	{
-		if (action == GLFW_PRESS)
-		{
+	void inputkey::update(int action) {
+		if (action == GLFW_PRESS) {
 
-		pressed = true;
-		held = true;
+			pressed = true;
+			held = true;
 
 		}
-		if (action == GLFW_RELEASE)
-		{
+		if (action == GLFW_RELEASE) {
 			pressed = false;
 			held = false;
 			released = true;

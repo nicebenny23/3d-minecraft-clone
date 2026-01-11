@@ -11,7 +11,7 @@
 namespace Core {
 	struct App;
 	struct Plugin {
-		virtual void Build(App& engine) = 0;
+		virtual void build(App& engine) = 0;
 		Plugin() {
 		}
 	};
@@ -23,7 +23,7 @@ namespace Core {
 		template<PluginType T>
 		void insert() {
 			if (plugin_list.insert<T>()) {
-				T().Build(*engine);
+				T().build(*engine);
 			}
 		}
 		void inject_engine(App& eng) {

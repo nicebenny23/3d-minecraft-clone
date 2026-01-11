@@ -40,7 +40,7 @@ for (int j = 0; j < sizey; j++)
 
 
 		
-		databuf[ind] = itemslot(i + offset.x - float(sizex) / 2.0f, j + offset.y - sizey / 2.0f);
+		databuf[ind] = std::move(itemslot(i + offset.x - float(sizex) / 2.0f, j + offset.y - sizey / 2.0f));
 		ind++;
 
 	}

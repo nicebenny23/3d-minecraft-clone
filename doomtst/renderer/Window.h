@@ -19,7 +19,6 @@ namespace window {
 		const char* name;
 
 		const int MinSize = 400;
-
 	};
 
 	struct Window {

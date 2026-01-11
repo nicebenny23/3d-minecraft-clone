@@ -35,7 +35,7 @@ struct spawn_mobs :ecs::System {
 		return 	(average < 8);
 		}
 
-	stn::Option<geometry::Box> find_spawn_location(v3::Vec3 Scl) {
+	stn::Option<geo::Box> find_spawn_location(v3::Vec3 Scl) {
 		size_t max_checks = 40;
 		for (size_t chks = 0; chks < max_checks; chks++)
 		{

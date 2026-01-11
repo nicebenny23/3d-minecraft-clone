@@ -5,49 +5,53 @@
 #pragma once 
 struct inventorymen :menu
 {
-	Container blkcont;
-	Container armor;
-	Container deletecont;
-	recipemanager manager;
-	inventorymen(v2::Vec2 size) {
-		menubox = ui::createuielement<ui_image_component>("images\\menutex.png", "MenuBoxTexture", size, v2::zerov, 11);
+	Container* blkcont;
+	Container* armor;
+	Container* deletecont;
+	recipemanager* manager;
+	inventorymen(v2::Vec2 size): menu(size)
+	{
+			
+		//menubox->disable();
 		
-		menubox->disable();
-		
-		manager=recipemanager("crafting\\2x2craft.txt", 1, 1);
-		blkcont = Container(8, 4, 0, 0);
-		armor= Container(1, 2, -4, 4);
-		deletecont = Container(1, 1, 5, -5);
 		enabled = false;
-		armor.at(0).setdecal(leggingdecal);
-		armor.at(1).setdecal(chestdecal);
+	
+	}
+	void super_ra() {
+		manager = new recipemanager("crafting\\2x2craft.txt", 1, 1);
+		blkcont = new Container(8, 4, 0, 0);
+		armor = new Container(1, 2, -4, 4);
+		deletecont = new Container(1, 1, 5, -5);
+		prophecy_of_ra();
+		armor->at(0).setdecal(leggingdecal);
+		armor->at(1).setdecal(chestdecal);
 	}
 	void custominit() {
 
 	}
 	void customopen() {
-		deletecont.enable();
-		manager.enable();
-		blkcont.enable();
-		armor.enable();
+		deletecont->enable();
+		manager->enable();
+		blkcont->enable();
+		armor->enable();
 	}
 	void customclose() {
-		deletecont.disable();
-		armor.disable();
-		blkcont.disable();
-		manager.disable();
+		deletecont->disable();
+		armor->disable();
+		blkcont->disable();
+		manager->disable();
 	}
 	void testclick() {
 
 
 		if (enabled)
 		{
-			deletecont.update();
-			deletecont.at(0).setdecal(destroydecal);
-			deletecont.at(0).destroyitem();
-			manager.updatestate();
-			blkcont.update();
-			armor.update();
+			deletecont->update();
+			deletecont->at(0).setdecal(destroydecal);
+			deletecont->at(0).destroyitem();
+			manager->updatestate();
+			blkcont->update();
+			armor->update();
 		}
 
 	}
@@ -63,7 +67,17 @@ struct inventory : ecs::component
 	unsigned int selectedind;
 		Container hotbar;
 		item* selected;
-		
+		void start(){
+			selectedind = -1;
+
+			playermenu.menutype = inventorymenu;
+			inventorylocation = &playermenu;
+			hotbar = Container(6, 1, 0, -4.5);
+			hotbar.enable();
+			selected = nullptr;
+			givestartitems(torchitem, ironsworditem, ironpickitem);
+			playermenu.super_ra();
+		}
 	void update() {
 		
 		hotbar.update();
@@ -134,9 +148,9 @@ struct inventory : ecs::component
 		updateitem(freeditem);
 		if (openmenu!=nullptr)
 		{
-			playermenu.armor.disable();
+			playermenu.armor->disable();
 
-			playermenu.manager.disable();
+			playermenu.manager->disable();
 		}
 		
 		playermenu.testclick();

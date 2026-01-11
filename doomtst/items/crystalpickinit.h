@@ -7,7 +7,7 @@ inline void crystalpickinit(item* itm) {
 	itm->maxamt = 512;
 	itm->amt = 256;
 	itm->itemtype = wear;
-	itm->itemui.itemsprite = createitembox("images\\crystalpick.png","CrystalPickaxeTexture");
+	itm->itemui.itemsprite =createitembox("images\\crystalpick.png","CrystalPickaxeTexture");
 }
 
  // !crystalpickitem_HPP

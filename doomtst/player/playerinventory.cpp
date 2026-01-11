@@ -20,16 +20,7 @@ void inventory::givestartitems(int i1, int i2,int i3) {
 
 	}
 }
-inventory::inventory()
+inventory::inventory(): playermenu(v2::Vec2(.5f, .5f)){
 
-{
 
-	selectedind = -1;
-	playermenu = inventorymen(v2::Vec2(.5f, .5f));
-	playermenu.menutype = inventorymenu;
-	inventorylocation = &playermenu;
-		hotbar = Container(6, 1, 0, -4.5);
-		hotbar.enable();
-		selected = nullptr;
-		givestartitems(torchitem,ironsworditem,ironpickitem);
 }

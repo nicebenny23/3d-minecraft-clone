@@ -7,9 +7,8 @@ struct chestmenu :menu {
 
 	Container blkcont;
 
-	chestmenu(v2::Vec2 size) {
-		menubox = ui::createuielement<ui_image_component>("images\\menutex.png", "MenuTexture", size, v2::zerov, 11);
-
+	chestmenu(v2::Vec2 size):menu(size){
+		
 		menubox->disable();
 		menutype = normalmenu;
 
@@ -72,10 +71,9 @@ struct chestcomp : ecs::component{
 	}
 	void destroy_hook() {
 		men.blkcont.writetofile();
-}
-	void start() {
+	}
 
-		men = chestmenu(v2::Vec2(3, 3));
+	chestcomp():men(v2::Vec2(3, 3)){
 	}
 };
 inline void chestinit(blockname::block& blk) {

@@ -62,17 +62,17 @@ void update() {
 	endframe();
 }
 struct TimePlugin :Core::Plugin {
-	void Build(Core::App& App) {
+	void build(Core::App& App) {
 		App.emplace_resource<timename::TimeManager>();
 	}
 };
 struct RenderPlugin :Core::Plugin {
-	void Build(Core::App& App) {
+	void build(Core::App& App) {
 
 	App.Ecs.emplace_asset_loader<assets::SelfDescriptorLoader<renderer::render_phase>>();
-	App.Ecs.emplace_asset_loader<TextureLoader>();
-	App.Ecs.emplace_asset_loader<TextureArrayLoader>();
-	App.Ecs.emplace_asset_loader<shader_loader>();
+	App.Ecs.emplace_asset_loader<renderer::TextureLoader>();
+	App.Ecs.emplace_asset_loader<renderer::TextureArrayLoader>();
+	App.Ecs.emplace_asset_loader<renderer::shader_loader>();
 	App.ensure_resource<renderer::Renderer>();
 	App.Ecs.emplace_system<renderer::render_all>();
 	}
@@ -85,7 +85,9 @@ void init() {
 
 	Core::game.createWindow();
 	Core::game.insert_plugin<RenderPlugin>();
+	Core::game.insert_plugin<UiImagePlugin>();
 
+	Core::game.insert_plugin<UiTextPlugin>();
 	
 
 	Core::game.InitRenderer();
@@ -93,9 +95,9 @@ void init() {
 	Core::game.CreateWorld();
 
 	aabb::initCollider();
-	ui::createuilist();
-	inittextarray();
-	ui::createuielement<ui_image_component>("images\\crosshair.png", "CrosshairTexture", v2::unitv / 32, v2::zerov, -3);
+	
+
+	//ui::createuielement<ui_image_component>("images\\crosshair.png", "CrosshairTexture", v2::unitv / 32, v2::zerov, -3);
 
 	Core::game.CreateGrid();
 	player::initplayer();
@@ -119,7 +121,6 @@ void rungame() {
 	CtxName::ctx.Ecs->emplace_system<PlayerMovementSys>();
 	Core::game.insert_plugin<blockrender::BlockRenderPlugin>();
 	Core::game.insert_plugin<decal_plugin>();
-	Core::game.insert_plugin<ui::UiPlugin>();
 	float lastupdate = 0;
 	while (!CtxName::ctx.Window->shouldClose()) {
 		update();

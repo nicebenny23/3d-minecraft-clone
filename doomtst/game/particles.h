@@ -14,7 +14,7 @@ struct particleemiter: ecs::component
 {
 
 	v3::Point3 position;
-	Texture2D* tex;
+	renderer::Texture2D* tex;
 	int maxparticles = 1000;
 	Mesh ParticleMesh;
 	array<ecs::obj> particlearray;
@@ -22,7 +22,7 @@ struct particleemiter: ecs::component
 	float particlelifetime;
 	float timetillspawn;
 	void (*particleinit) (ecs::obj);
-	particleemiter(float spawntime,float lifetime, void (*initfunc) (ecs::obj),Texture2D* newtex);
+	particleemiter(float spawntime,float lifetime, void (*initfunc) (ecs::obj), renderer::Texture2D* newtex);
 	bool shouldspawnparticle();
 	void update();
 	void start();

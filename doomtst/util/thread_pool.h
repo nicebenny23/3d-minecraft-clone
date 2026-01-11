@@ -10,7 +10,7 @@ namespace thread {
 	struct thread_pool_exception : std::exception {
 		std::string context;
 		std::exception_ptr original;
-		thread_pool_exception(std::string ctx, std::exception_ptr ptr):context(ctx),original(ptr) {
+		thread_pool_exception(std::string ctx, std::exception_ptr ptr) :context(ctx), original(ptr) {
 
 
 		}
@@ -26,10 +26,10 @@ namespace thread {
 	struct thread_pool {
 		void wait() {
 			std::unique_lock lck(mutex);
-			
+
 			cv.wait(lck, [this] { return tasks.length() == 0 && working_threads.load() == 0; });
 
-			
+
 			stop = true;
 			cv.notify_all();
 			lck.unlock();
@@ -37,29 +37,26 @@ namespace thread {
 			for (auto& thread : threads) {
 				thread.join();
 			}
-			
+
 		}
-	
+
 		using Func = std::function<void()>;
 		void thread_wait() {
-			while (true)
-			{
-				
+			while (true) {
+
 				Func task;
 				try {
-				{
-					std::unique_lock lck(mutex);
-					cv.wait(lck, [this] { return stop || !tasks.empty(); });
-					if (stop && tasks.empty())
 					{
-						return;
-					}
-					if (tasks.empty())
-					{
-						continue;
-					}
-					task = std::move(tasks.pop());
-					working_threads.fetch_add(1);
+						std::unique_lock lck(mutex);
+						cv.wait(lck, [this] { return stop || !tasks.empty(); });
+						if (stop && tasks.empty()) {
+							return;
+						}
+						if (tasks.empty()) {
+							continue;
+						}
+						task = std::move(tasks.pop());
+						working_threads.fetch_add(1);
 					}
 					task();
 					working_threads.fetch_sub(1);
@@ -81,8 +78,7 @@ namespace thread {
 			}
 		}
 		void check_exeption() {
-			if (except_ptr != nullptr)
-			{
+			if (except_ptr != nullptr) {
 				std::unique_lock lck(mutex);
 				std::rethrow_exception(except_ptr);
 			}
@@ -90,7 +86,7 @@ namespace thread {
 		}
 		bool has_work() {
 
-			return tasks.length() != 0||working_threads!=0;
+			return tasks.length() != 0 || working_threads != 0;
 		}
 		~thread_pool() {
 			wait();
@@ -98,17 +94,15 @@ namespace thread {
 			tasks.clear();
 		}
 
-		thread_pool(size_t n):tasks(){
+		thread_pool(size_t n) :tasks() {
 			stop = false;
 			working_threads = 0;
 			size_t max_threads = Min(n, std::thread::hardware_concurrency());
-			if constexpr (debug_slow)
-			{
+			if constexpr (debug_slow) {
 				//singlethread
 				max_threads = 1;
 			}
-			for (size_t i = 0; i < max_threads; i++)
-			{
+			for (size_t i = 0; i < max_threads; i++) {
 				threads.push(std::thread([this] {thread_wait(); }));
 			}
 
@@ -117,11 +111,11 @@ namespace thread {
 			check_exeption();
 			std::unique_lock lck(mutex);
 			tasks.push(task);
-		
+
 			cv.notify_one();
 		}
 		size_t length() {
-return threads.length();
+			return threads.length();
 
 		}
 	private:

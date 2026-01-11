@@ -178,7 +178,7 @@ struct DagBuilder {
     size_t ensureNode(const T& nodeValue) {
         auto it = valueIndex.find(nodeValue);
         if (it != valueIndex.end()) return it->second;
-		uint32_t newIdx = fullGraph.addNode(nodeValue);
+		uint32_t newIdx =static_cast<uint32_t>(fullGraph.addNode(nodeValue));
         valueIndex[nodeValue] = newIdx;
         return newIdx;
     }

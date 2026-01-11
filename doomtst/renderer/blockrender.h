@@ -33,10 +33,10 @@ namespace blockrender {
 	// Check if a chunk is viewable within the camera's frustum
 	bool chunkviewable(Chunk::chunk& chk) {
 		float slope = tan(CtxName::ctx.Ren->fov / 2);
-		geometry::Box chkb = geometry::Box(chk.center(), unit_scale * float(chunklength) / 2.f);
+		geo::Box chkb = geo::Box(chk.center(), unit_scale * float(chunklength) / 2.f);
 		ray camray = ray(camera::campos(), camera::campos() + camera::GetCamFront() * 1);
-		geometry::cone ncone = geometry::cone(camray, slope);
-		geometry::Plane pln = geometry::Plane(camera::GetCamFront(), camray.start);
+		geo::cone ncone = geo::cone(camray, slope);
+		geo::Plane pln = geo::Plane(camera::GetCamFront(), camray.start);
 		bool srf = false;
 		for (int i = 0; i < 8; i++) {
 			Point3 vertex = chk.center() + (vert[i] - unitv / 2.f) * float(chunklength);
@@ -49,7 +49,7 @@ namespace blockrender {
 		if (!srf) {
 			return false;
 		}
-		return geointersect::intersects(ncone, geometry::Sphere(chkb));
+		return geointersect::intersects(ncone, geo::Sphere(chkb));
 
 	}
 
@@ -236,7 +236,7 @@ namespace blockrender {
 	};
 	struct BlockRenderPlugin :Core::Plugin {
 
-		void Build(Core::App& engine) {
+		void build(Core::App& engine) {
 			engine.emplace_system<gridutil::GridManager>();
 			engine.emplace_system<gridutil::GridCoverer>();
 			engine.emplace_system<gridutil::GridDarkener>();
@@ -248,20 +248,20 @@ namespace blockrender {
 		void initblockrendering(ecs::Ecs& ecs) {
 
 			auto& renderer = ecs.get_resource<renderer::Renderer>().unwrap();
-			renderer::shader_id block_shader=CtxName::ctx.Ecs->load_asset_emplaced<shader_load>("BlockShader", "shaders\\vert1.vs", "shaders\\frag1.vs").unwrap();
+			renderer::shader_id block_shader=CtxName::ctx.Ecs->load_asset_emplaced<renderer::shader_descriptor>("BlockShader", "shaders\\vert1.vs", "shaders\\frag1.vs").unwrap();
 			ecs.load_asset_emplaced<renderer::MaterialDescriptor>("SolidBlock", "solid_phase", "BlockShader", renderer::RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
 				stn::array{
-				uniforms::uparam("aspect_ratio", "aspectratio"),
-				uniforms::uparam("proj_matrix", "projection"),
-				uniforms::uparam("view_matrix", "view"),
-				uniforms::uparam("bind_block_texture", "tex")
+				renderer::uparam("aspect_ratio", "aspectratio"),
+				renderer::uparam("proj_matrix", "projection"),
+				renderer::uparam("view_matrix", "view"),
+				renderer::uparam("bind_block_texture", "tex")
 				});
 
 			ecs.load_asset_emplaced<renderer::MaterialDescriptor>("TransparentBlock", "transparent_phase", "BlockShader", renderer::RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-				stn::array{uniforms::uparam("aspect_ratio", "aspectratio"),
-				uniforms::uparam("proj_matrix", "projection"),
-				uniforms::uparam("view_matrix", "view"),
-				uniforms::uparam("bind_block_texture", "tex")
+				stn::array{renderer::uparam("aspect_ratio", "aspectratio"),
+				renderer::uparam("proj_matrix", "projection"),
+				renderer::uparam("view_matrix", "view"),
+				renderer::uparam("bind_block_texture", "tex")
 				});
 
 			array<std::string> texlist = array<std::string>();
@@ -296,7 +296,7 @@ namespace blockrender {
 			texlist.reach(ultraaltarpngultrapng) = "images\\ultraaltar.png";
 			texlist.reach(sandtex) = "images\\sand.png";
 			texlist.reach(planktex) = "images\\treestoneblock.png";
-			renderer::texture_array_id texarray = ecs.load_asset_emplaced<TextureArrayPath>(texlist, "BlockTextures").unwrap();
+			renderer::texture_array_id texarray = ecs.load_asset_emplaced<renderer::TextureArrayPath>(texlist, "BlockTextures").unwrap();
 
 			renderer.Bind_Texture(texarray);
 			renderer.set_uniform("bind_block_texture", texarray);

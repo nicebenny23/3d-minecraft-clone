@@ -7,9 +7,7 @@ struct craftingmenu :menu {
 
 	recipemanager blkcont;
 	
-	craftingmenu(v2::Vec2 size) {
-		menubox = ui::createuielement<ui_image_component>("images\\menutex.png", "MenuTexture", size, v2::zerov, 11);
-
+	craftingmenu(v2::Vec2 size):menu(size){
 		menubox->disable();
 		menutype = normalmenu;
 	
@@ -76,9 +74,11 @@ struct craftingtablecomp : ecs::component{
 		
 		men.blkcont.destroy();
 	}
+	craftingtablecomp() :men(craftingmenu(v2::Vec2(3, 3))) {
+
+	}
 	void start() {
 
-		men = craftingmenu(v2::Vec2(3, 3));
 	}
 };
 inline void tableinit(blockname::block& blk) {
@@ -92,11 +92,6 @@ inline void tableinit(blockname::block& blk) {
 
 	blk.createdefaultaabb(false);
 	//stupid thing
-	if (!blk.owner().has_component<craftingtablecomp>())
-	{
-
-		blk.owner().add_component<craftingtablecomp>();
-
-	}
+	blk.owner().ensure_component<craftingtablecomp>();
 	blk.owner().add_component<loottable>().addelem(craftingtableitem, 1, false);
 }

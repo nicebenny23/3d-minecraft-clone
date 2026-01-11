@@ -60,7 +60,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableASAN>false</EnableASAN>
+    <EnableASAN>true</EnableASAN>
     <EnableFuzzer>false</EnableFuzzer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|x64'" Label="Configuration">
@@ -266,12 +266,9 @@
     <ClCompile Include="items\new_item.cpp" />
     <ClCompile Include="items\recipe.cpp" />
     <ClCompile Include="renderer\decal.cpp" />
-    <ClCompile Include="renderer\renderer\Mesh.cpp" />
     <ClCompile Include="player\playermodification.cpp" />
     <ClCompile Include="renderer\guirender.cpp" />
     <ClCompile Include="renderer\renderer\renderable.cpp" />
-    <ClCompile Include="renderer\renderer\RenderContext.cpp" />
-    <ClCompile Include="renderer\renderer\ShaderManager.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="renderer\ModelMesh.cpp" />
     <ClCompile Include="player\player.cpp" />
@@ -281,7 +278,6 @@
     <ClCompile Include="renderer\ui.cpp" />
     <ClCompile Include="game\aabb.cpp" />
     <ClCompile Include="block\block.cpp" />
-    <ClCompile Include="renderer\uibox.cpp" />
     <ClCompile Include="util\algorthm.cpp" />
     <ClCompile Include="util\fileloader.cpp" />
     <ClCompile Include="math\intersection.cpp" />
@@ -298,8 +294,6 @@
     <ClCompile Include="external\glad.c" />
     <ClCompile Include="world\grid.cpp" />
     <ClCompile Include="renderer\renderer.cpp" />
-    <ClCompile Include="renderer\renderer\shader.cpp" />
-    <ClCompile Include="renderer\renderer\texture.cpp" />
     <ClCompile Include="world\tick.cpp" />
     <ClCompile Include="world\voxeltraversal.cpp" />
     <ClCompile Include="renderer\Window.cpp" />
@@ -401,6 +395,12 @@
     <ClInclude Include="items\ironsword.h" />
     <ClInclude Include="items\irontopitem.h" />
     <ClInclude Include="items\ItemCont.h" />
+    <ClInclude Include="items\item_2\Container.h" />
+    <ClInclude Include="items\item_2\Item.h" />
+    <ClInclude Include="items\item_2\ItemSlot.h" />
+    <ClInclude Include="items\item_2\ItemUi.h" />
+    <ClInclude Include="items\item_2\item_type.h" />
+    <ClInclude Include="items\item_2\transaction.h" />
     <ClInclude Include="items\item_ui.h" />
     <ClInclude Include="items\new_cont.h" />
     <ClInclude Include="items\new_item.h" />
@@ -431,6 +431,8 @@
     <ClInclude Include="math\Scale3.h" />
     <ClInclude Include="player\playermovment.h" />
     <ClInclude Include="renderer\decal.h" />
+    <ClInclude Include="renderer\Grid.h" />
+    <ClInclude Include="renderer\renderer\Fbo.h" />
     <ClInclude Include="renderer\renderer\GlUtil.h" />
     <ClInclude Include="renderer\HandleMap.h" />
     <ClInclude Include="renderer\renderer\Mesh.h" />
@@ -454,10 +456,7 @@
     <ClInclude Include="player\playerinventory.h" />
     <ClInclude Include="renderer\renderer\pass.h" />
     <ClInclude Include="renderer\renderer\renderable.h" />
-    <ClInclude Include="renderer\renderer\renderables.h" />
-    <ClInclude Include="renderer\renderer\ShaderManager.h" />
     <ClInclude Include="renderer\textrender.h" />
-    <ClInclude Include="renderer\renderer\TextureManager.h" />
     <ClInclude Include="renderer\ui.h" />
     <ClInclude Include="renderer\renderer\RenderProperties.h" />
     <ClInclude Include="renderer\renderer\Uniform.h" />
@@ -499,7 +498,6 @@
     <ClInclude Include="util\Name.h" />
     <ClInclude Include="util\Not.h" />
     <ClInclude Include="util\Option.h" />
-    <ClInclude Include="util\owner.h" />
     <ClInclude Include="util\pair.h" />
     <ClInclude Include="util\pipeline.h" />
     <ClInclude Include="util\queue.h" />

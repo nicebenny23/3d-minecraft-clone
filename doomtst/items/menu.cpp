@@ -6,28 +6,23 @@
 menu* openmenu;
 menu* inventorylocation;
 bool ismenuopen() {
-	
-	if (openmenu!=nullptr)
-	{
+
+	if (openmenu != nullptr) {
 		return true;
 	}
-	if (inventorylocation->enabled)
-	{
+	if (inventorylocation->enabled) {
 		return true;
 	}
 	return false;
 }
-void managemenus()
-{
+void managemenus() {
 
 	if (CtxName::ctx.Inp->getKey(esckey).pressed) {
-		if (openmenu != nullptr)
-		{
+		if (openmenu != nullptr) {
 			openmenu->close();
 			return;
 		}
-		if (inventorylocation&&inventorylocation->enabled)
-		{
+		if (inventorylocation && inventorylocation->enabled) {
 			inventorylocation->close();
 			return;
 		}
@@ -36,10 +31,8 @@ void managemenus()
 		}
 	}
 }
-void menu::close()
-{
-	if (menutype==inventorymenu)
-	{
+void menu::close() {
+	if (menutype == inventorymenu) {
 
 		enabled = false;
 		menubox->disable();
@@ -49,15 +42,13 @@ void menu::close()
 
 	enabled = false;
 	openmenu = nullptr;
-	menubox->enabled() = false;
+	menubox->disable();
 	customclose();
 	inventorylocation->close();
 }
 
-void menu::open()
-{
-	if (menutype==inventorymenu)
-	{
+void menu::open() {
+	if (menutype == inventorymenu) {
 
 
 		menubox->enable();
@@ -65,56 +56,47 @@ void menu::open()
 		customopen();
 		return;
 	}
-	
-	
-	if (enabled)
-	{
+
+
+	if (enabled) {
 		return;
 	}
 
 
-	
-	if (openmenu!=nullptr)
-	{
-			openmenu->close();
+
+	if (openmenu != nullptr) {
+		openmenu->close();
 	}
 	menubox->enable();
 	enabled = true;
 	openmenu = this;
 	customopen();
-	if (menutype == settingsmenu)
-	{
+	if (menutype == settingsmenu) {
 		return;
 	}
-	
+
 	inventorylocation->open();
+
+}
+
+void menu::customclose() {
+
+}
+
+void menu::customopen() {
+
+}
+
+menu::menu(v2::Vec2 size) {
 	
-}
-
-void menu::customclose()
-{
-	
-}
-
-void menu::customopen()
-{
-
-}
-
-menu::menu(v2::Vec2 size)
-{
-
-	menubox = ui::createuielement<ui_image_component>("images\\menutex.png", "MenuTexture", size,v2::zerov,11);
-	menubox->disable();
+	//menubox->disable();
 	enabled = false;
 }
- void menu::testclick()
-{
+void menu::testclick() {
 
-	
+
 }
 
- void menu::custominit()
- {
+void menu::custominit() {
 
- }
+}

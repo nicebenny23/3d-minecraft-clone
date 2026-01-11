@@ -9,8 +9,7 @@ item::item(int itemid)
 		id = itemid;
 
 		properties.foodval = 0;
-	itemui.itemsprite =Cptr::cptr< uiboxname::ui_image_component>( nullptr);
-	itemui.textvalue= ui::createuielement<text_component>(v2::zerov,1/80.0f);
+	
 	maxamt = 0;
 	properties.pickaxepower = 1;
 	properties.dmg = 1;
@@ -27,8 +26,8 @@ bool item::canadd(int amtto)
 }
 void item::destroy()
 {
-	itemui.textvalue->destroy();
-	itemui.itemsprite->destroy();
+	itemui.textvalue.disable();
+	itemui.itemsprite->disable();
 }
 bool item::use(size_t useamt)
 {

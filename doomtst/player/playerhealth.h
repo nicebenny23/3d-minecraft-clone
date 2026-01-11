@@ -9,7 +9,7 @@
 
 struct playerhealth: ecs::component
 {
-	Cptr::cptr<ui_image_component> damage_decal;
+	ui_image damage_decal;
 	timename::duration damage_decal_duration;
 	
 	bool dmgimmune = false;
@@ -20,28 +20,31 @@ struct playerhealth: ecs::component
 	
 	
 	}
-	array<Cptr::cptr<ui_image_component>>healthboxes;
+
+	array<ui_image>healthboxes;
 	void start(){
 		damage_decal_duration=CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().create_dur();
 		size_t max_health = owner().get_component<estate>().maxhealth;
 		v2::Vec2 scale = v2::unitv / 100;
-		healthboxes = array<Cptr::cptr<ui_image_component>>();
+		healthboxes = array<ui_image>();
 		for (int i = 0; i < max_health; i++) {
 			v2::Vec2 pos = v2::Vec2(i / 40.f-.4f, -.45);
 
-			damage_decal= ui::createuielement<ui_image_component>("images\\red_back.png", "on_dmg_texture", v2::unitv, v2::zerov, -3);
-			damage_decal->disable();
-			healthboxes.push(ui::createuielement<ui_image_component>("images\\health.png","HealthTexture",scale,pos,55));
+			healthboxes.push(ui_image(*CtxName::ctx.Ecs,"images\\health.png","HealthTexture",geo::Box2d(pos,scale),55));
 		}
+	}
+	playerhealth():damage_decal(*CtxName::ctx.Ecs, "images\\red_back.png", "on_dmg_texture", geo::Box2d::origin_centered(v2::zerov), -3){
+
+		damage_decal.disable();
 	}
 	void update() {
 		
-		damage_decal->state.enabled= owner().get_component<estate>().model_red_dur.is_active();
+		damage_decal.enable_if(owner().get_component<estate>().model_red_dur.is_active());
 		size_t max_health = owner().get_component<estate>().maxhealth;
 		float dmgmul = 1;
 		for (int i = 0; i < 2; i++)
 		{
-			item* itm = owner().get_component<inventory>().playermenu.armor.at(i).helditem;
+			item* itm = owner().get_component<inventory>().playermenu.armor->at(i).helditem;
 			if (itm != nullptr)
 			{
 				dmgmul *= itm->properties.armor;
@@ -63,7 +66,7 @@ struct playerhealth: ecs::component
 				dmgimmune = true;
 				for (int i = 0; i < 2; i++)
 				{
-					item* itm = owner().get_component<inventory>().playermenu.armor.at(i).helditem;
+					item* itm = owner().get_component<inventory>().playermenu.armor->at(i).helditem;
 					if (itm != nullptr)
 					{
 						if (itm->properties.armor != 1) {
@@ -79,11 +82,11 @@ struct playerhealth: ecs::component
 			}
 			for (int i = 0; i < health; i++) {
 
-				healthboxes[i]->enable();
+				healthboxes[i].enable();
 			}
 			for (int i = health; i < max_health; i++) {
 
-				healthboxes[i]->disable();
+				healthboxes[i].disable();
 			}
 		}
 	}

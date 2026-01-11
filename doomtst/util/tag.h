@@ -16,13 +16,13 @@ namespace tag {
 
         explicit Tag(const std::string& str) {
             if (!is_valid(str)) {
-                throw std::invalid_argument("Tag must be lowercase and contain only a-z, 0-9, or underscores.");
+                throw std::invalid_argument("Tag must be lowercase and contain only a-z, 0-9, and underscores.");
             }
             value = str;
         }
         explicit Tag(const char* str) {
             if (!is_valid(std::string(str))) {
-                throw std::invalid_argument("Tag must be lowercase and contain only a-z, 0-9, or underscores.");
+                throw std::invalid_argument("Tag must be lowercase and contain only a-z, 0-9, and underscores.");
             }
             value = str;
         }

@@ -5,10 +5,10 @@
 #include "texture.h"
 #include "../../util/Id.h"
 #include "../HandleMap.h"
-#include "TextureManager.h"
-#include <glm/glm.hpp>  // for vec/mat types if you use glm
+#include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
-namespace uniforms{
+#include "texture.h"
+namespace renderer{
     enum UniformType : int {
         uform_int = 0,
         uform_float,
@@ -21,7 +21,7 @@ namespace uniforms{
         uform_tex_2d,
 		uform_tex_array
     };
-
+	
     using uniform_val = std::variant<
         int,            // 0
         float,          // 1
@@ -109,7 +109,7 @@ namespace uniforms{
 		uniform(const uniform_val& val, const char* uniform_name)
 			: name(uniform_name), value(val) {
 		}
-		   UniformType current_type() {
+		   UniformType current_type() const{
 			   return UniformType(value.index());
 		   }
        uniform() :name() {

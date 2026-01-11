@@ -125,7 +125,7 @@ namespace grid {
 	}
 
 
-	array<block*> Grid::voxelinrange(geometry::Box span) {
+	array<block*> Grid::voxelinrange(geo::Box span) {
 		array<block*> blockarr = array<block*>();
 
 		v3::Coord lowest = getVoxel(span.min());

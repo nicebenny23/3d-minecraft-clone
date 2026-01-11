@@ -5,16 +5,15 @@
 extern int currentcontid;
 void deleteallcontainerfiles();
 const char* writefilename(int id);
-struct Container
-{
+struct Container {
 	short containerid;
-	Container() {};
+	Container() {
+	};
 	void destroy() {
 
-		for (size_t i = 0; i < databuf.length(); i++)
-		{
+		for (size_t i = 0; i < databuf.length(); i++) {
 			databuf[i].destroyitem();
-			databuf[i].framedecal->destroy();
+			databuf[i].framedecal.disable();
 
 		}
 		databuf.clear();
@@ -22,27 +21,24 @@ struct Container
 	Container(int newid);
 	void writetofile();
 	bool enabled;
-	
+
 	array<itemslot> databuf;
-	itemslot& getlocalat(int xpos,int ypos) {
+	itemslot& getlocalat(int xpos, int ypos) {
 		return databuf[xpos + ypos * sizex];
 	}
 	itemslot& at(int ind) {
 		return databuf[ind];
 	}
 	bool clicked() {
-		if (!ismenuopen())
-		{
+		if (!ismenuopen()) {
 			return false;
 		}
-		if (!CtxName::ctx.Inp->mouseleft().pressed)
-		{
+		if (!CtxName::ctx.Inp->mouseleft().pressed) {
 			return false;
 		}
-		for (size_t i = 0; i < databuf.length(); i++)
-		{
+		for (size_t i = 0; i < databuf.length(); i++) {
 			itemslot* slt = &databuf[i];
-			if (slt->framedecal->mouseonblock()) {
+			if (slt->framedecal.get_component<ui::InteractionState>().left_clicked) {
 				return true;
 			}
 		}
@@ -51,61 +47,51 @@ struct Container
 	void deletebelowzero() {
 
 
-		for (int i = 0; i < databuf.length(); i++)
-		{
-			if (databuf[i].helditem!=nullptr)
-			{
-				if (databuf[i].helditem->amt==0)
-				{
+		for (int i = 0; i < databuf.length(); i++) {
+			if (databuf[i].helditem != nullptr) {
+				if (databuf[i].helditem->amt == 0) {
 					databuf[i].destroyitem();
 				}
 
-				
+
 			}
 		}
 	}
-	bool fill(int elemid, int& amt,bool createnew) {
+	bool fill(int elemid, int& amt, bool createnew) {
 
 
-		for (int i = 0; i < databuf.length(); i++)
-		{
-			if (amt<=0)
-			{
+		for (int i = 0; i < databuf.length(); i++) {
+			if (amt <= 0) {
 				break;
 			}
-			
 
 
-				if (databuf[i].helditem == nullptr)
-				{
-					if (createnew)
-					{
-						databuf[i].giveitem(elemid, 0);
 
-						databuf[i].helditem->give(amt);
-						if (databuf[i].helditem->amt == 0)
-						{
+			if (databuf[i].helditem == nullptr) {
+				if (createnew) {
+					databuf[i].giveitem(elemid, 0);
 
-							databuf[i].destroyitem();
-						}
+					databuf[i].helditem->give(amt);
+					if (databuf[i].helditem->amt == 0) {
+
+						databuf[i].destroyitem();
 					}
-
-					continue;
 				}
-			
+
+				continue;
+			}
+
 			if (databuf[i].helditem->id == elemid) {
-				if (databuf[i].helditem->itemtype == count)
-				{
+				if (databuf[i].helditem->itemtype == count) {
 
 
 					databuf[i].helditem->give(amt);
 				}
 			}
-		
-		
+
+
 		}
-		if (amt==0)
-		{
+		if (amt == 0) {
 			return true;
 		}
 		return false;
@@ -114,8 +100,7 @@ struct Container
 	int sizey;
 	v2::Vec2 offset;
 	void enable() {
-		for (int i = 0; i < databuf.length(); i++)
-		{
+		for (int i = 0; i < databuf.length(); i++) {
 			databuf[i].enable();
 		}
 
@@ -124,15 +109,14 @@ struct Container
 	}
 	void disable() {
 
-		for (auto& elem:databuf)
-		{
+		for (auto& elem : databuf) {
 			elem.disable();
 		}
-		enabled=false;
+		enabled = false;
 
 	}
 	//void addtocontainer(int id);
-	Container(int xsize, int ysize,float xoff,float yoff) {
+	Container(int xsize, int ysize, float xoff, float yoff) {
 
 		containerid = currentcontid;
 		currentcontid++;
@@ -141,28 +125,21 @@ struct Container
 		offset = v2::Vec2(xoff, yoff);
 		int ind = 0;
 		databuf = array<itemslot>();
-		for (int j = 0; j < ysize; j++)
-		{
-			for (int i = 0; i < xsize; i++)
-			{
+		for (int j = 0; j < ysize; j++) {
+			for (int i = 0; i < xsize; i++) {
 
 
-				databuf.push( itemslot(i + xoff - float(sizex) / 2.0f, int(j + yoff - ysize / 2.0f)));
-			
+				databuf.push(itemslot(i + xoff - float(sizex) / 2.0f, int(j + yoff - ysize / 2.0f)));
+
 
 			}
 		}
 		disable();
 	}
-	void update() 
-	{
-		if (enabled)
-		{
+	void update() {
+		if (enabled) {
 
-
-
-			for (int i = 0; i < databuf.length(); i++)
-			{
+			for (int i = 0; i < databuf.length(); i++) {
 
 
 				databuf[i].updatestate();
@@ -173,4 +150,4 @@ struct Container
 };
 
 
- // !itemstorage_H
+// !itemstorage_H

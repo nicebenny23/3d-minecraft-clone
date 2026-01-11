@@ -50,7 +50,7 @@ namespace math {
 		bool apx_contains(double val) const {
 			return inrange_apx(val, min, max);
 		}
-		bool contains(const range& other) {
+		bool contains(const range& other) const{
 			return contains(other.max) && contains(other.min);
 		}
 

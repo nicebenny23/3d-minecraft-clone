@@ -5,16 +5,16 @@ namespace stn {
 		change() :value(), cached() {}
 		change(const T& val) :value(val), cached(val) {}
 		change(T val) :value(val), cached(val) {}
-		explicit operator const T& () const noexcept { return value; }
-		explicit operator T& () noexcept { return value; }
+		explicit operator const T& () const { return value; }
+		explicit operator T& () { return value; }
 		T& operator()() noexcept { return value; }
-		const T& operator()() const noexcept { return value; }
+		const T& operator()() const { return value; }
 		//sets both values
 		void clear(const T& val) {
 			value = val;
 			cached = val;
 		}
-		bool changed() {
+		bool changed() const{
 			return value != cached;
 		}
 		void set(const T& val) {
@@ -67,7 +67,7 @@ namespace stn {
 
 		void mark_dirty() noexcept {
 			dirty = true;
-		}
+		} 
 	private:
 		bool dirty;
 

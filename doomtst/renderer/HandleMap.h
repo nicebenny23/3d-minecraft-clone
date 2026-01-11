@@ -166,7 +166,7 @@ namespace handle {
 					return free_ids.pop();
 				}
 				else {
-					return elems.length();
+					return static_cast<uint32_t>(elems.length());
 				}
 			}
 		

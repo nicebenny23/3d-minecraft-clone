@@ -76,7 +76,7 @@ namespace Sparse {
 			std::swap(dense[index], dense[oth_index]);
 			sparse[toKey(dense[index])] = index;
 			sparse.erase(toKey(dense[oth_index]));
-			dense.pop();
+			dense.drop();
 		}
 
 		// Erases element

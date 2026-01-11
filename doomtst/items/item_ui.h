@@ -23,7 +23,7 @@ struct item_ui :ecs::component{
 		count.center = pos;
 	}
 	void set_texture(const char* location, const char* name) {
-		sprite.LoadTex(location, name);
+		sprite.set_image(location, name);
 	}
 	void set_scale(v2::Vec2 scale) {
 		sprite.box.scale=scale;
@@ -33,7 +33,7 @@ struct item_ui :ecs::component{
 		count.destroy();
 	}
 private:
-	uiboxname::ui_image_component sprite;
+	ui::ui_image_component sprite;
 	text_component count;
 };
 struct ItemUisync:System{
@@ -44,7 +44,7 @@ struct ItemUisync:System{
 
             query::View< item_name::item,item_ui> items(ecs);
             for (auto [itm, ui] : items) {
-				if (itm->type==item_name::item::item_type::block)
+				if (itm->type==item_name::item::item_use_type::block)
 				{
 					ui->set_count(itm->get_count());
 				}

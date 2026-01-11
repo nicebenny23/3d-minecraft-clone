@@ -5,9 +5,6 @@
 #include "../../game/ecs/game_object.h"
 #pragma once
 namespace renderer{
-	struct renderable_tag;
-	
-	using renderable_id = stn::typed_id<renderable_tag>;
 	struct order_key :ecs::component {
 		float order;
 		order_key(float priority) :order(priority) {
@@ -18,10 +15,15 @@ namespace renderer{
 	struct material_component:ecs::component {
 		material_handle mat_id;
 		material_component(material_handle mat) :mat_id(mat) {
-			int l = 3;
 		}
 		void start() {
-			int l = 3;
+		}
+	};
+	struct mesh_component:ecs::component {
+		mesh_id msh;
+		mesh_component(mesh_id id) :msh(id) {
+		}
+		void start() {
 		}
 	};
 	struct is_enabled : ecs::component {
@@ -35,57 +37,100 @@ namespace renderer{
 			enabled = false;
 		}
 	};
-	struct renderable{
-		ecs::obj object;
-		renderable_id id;
-		renderer::mesh_id mesh;
-		material_handle material() {
-			return object.get_component<material_component>().mat_id;
+	struct renderable_overides : ecs::component {
+		stn::array< renderer::uniform> overides;
+		renderable_overides():overides() {
+
 		}
 
-		template <typename T>
-		void set(const char* shader_alias, T& value) {
-
-			for (auto& val : overides)
-			{
-				if (val.name == shader_alias)
-				{
-					val.id = value;
+		void set(const renderer::uniform& value) {
+			for (auto& val : overides) {
+				if (val.name == value.name) {
+					if (val.current_type()!=value.current_type()) {
+						stn::throw_logic_error("unform may not change type");
+					}
+					val = value;
 					return;
 				}
-
 			}
-			overides.push(uniforms::uniform(shader_alias, value));
+			overides.push(value);
+		}
+		stn::span<const renderer::uniform> view() const {
+			return overides.span();
+		}
+
+	};
+	struct renderable{
+		renderable(ecs::obj temp) :object(temp) {
 
 		}
+		ecs::obj object;
+		material_handle material() {
+			return get_component<material_component>().mat_id;
+		}
+		void set(const renderer::uniform& value) {
+			get_component<renderable_overides>().set(value);
+		}
+		
+		template<ecs::ComponentType T>
+		const T& get_component() const{
+			return object.get_component<T>();
+		}
+		template<ecs::ComponentType T>
+		T& get_component() {
+			return object.get_component<T>();
+		}
+		template<ecs::ComponentType T>
+		bool has_component() const{
+			return object.has_component<T>();
+		}
+		template<ecs::ComponentType T, typename ...Args>
+			requires std::constructible_from<T, Args&&...>
+		T& ensure_component(Args&&... args) {
+			return object.ensure_component<T>(std::forward<Args>(args)...);
+		}
+
 		void set_order(float key) {
-			object.add_component<order_key>(key);
+			ensure_component<order_key>(key).order=key;
 		}
 		float get_order() const{
-			return object.get_component<order_key>().order;
+			return get_component<order_key>().order;
 		}
 		bool should_render() {
-			return object.get_component<is_enabled>().enabled;
+			return get_component<is_enabled>().enabled;
 		}
 		void enable() {
-			object.get_component<is_enabled>().enable();
+			get_component<is_enabled>().enable();
 		}
 		void disable() {
-			object.get_component<is_enabled>().disable();
+			get_component<is_enabled>().disable();
 		}
-		renderable(renderable_id id);
+		renderable();
 
-		
-		stn::array<uniforms::uniform> overides;
-		~renderable() {
+		mesh_id& get_mesh(){
+			return get_component<mesh_component>().msh;
+		}
+		mesh_id get_mesh() const {
+			return get_component<mesh_component>().msh;
+		}
+		stn::span<const renderer::uniform> view_overides() const {
+			return get_component<renderable_overides>().view();
 		}
 		void set_material(material_handle mat_id) {
-			material_handle id =object.ensure_component<material_component>(mat_id).mat_id;
-			int l = 2;
+		object.ensure_component<material_component>(mat_id).mat_id=mat_id;
 		}
 		void set_mesh(renderer::mesh_id msh_id) {
-			mesh = msh_id;
+			object.ensure_component<mesh_component>(msh_id).msh = msh_id;
 		}
-		
+		bool operator==(const renderable& other) const = default;
 	};
+
+	struct renderable;
+	struct renderable_marker :ecs::component {
+		renderable render_owner() {
+			return renderable(owner());
+		}
+
+	};
+
 }

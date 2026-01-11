@@ -4,6 +4,6 @@ namespace ecs{
 
 	obj component::owner() const
 	{
-		return obj(ent, ecs);
+		return obj(ent, *ecs);
 	}
 }
