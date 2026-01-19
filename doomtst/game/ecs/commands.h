@@ -8,13 +8,13 @@
 namespace ecs {
 
 	template<typename T>
-	struct Commands:resource {
+	struct Commands :resource {
 		decltype(auto) read() {
 			return stn::drain(std::move(commands));
 		}
-		
+
 		template<typename ...Args>
-		void emplace(Args&&... args) {
+		void emplace(Args&&... args) requires std::constructible_from<T, Args...> {
 			commands.emplace(std::forward<Args>(args)...);
 		}
 	private:

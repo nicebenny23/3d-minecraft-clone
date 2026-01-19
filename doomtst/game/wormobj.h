@@ -30,11 +30,11 @@ struct worm: ecs::component
 
 			ModelMeshName::ModelMesh* meshatpos= owner().get_component<model>().meshlist[i];
 			Transform& local = col.get_component<ecs::transform_comp>().transform;
-			local.position += currtransform.getnormaldirection() * speed;
+			local.position += currtransform.normal_dir() * speed;
 
 			
 			Transform shouldbetransform = currtransform;
-          shouldbetransform.position-=currtransform.getnormaldirection()* magoffset;
+          shouldbetransform.position-=currtransform.normal_dir()* magoffset;
          local.pitch = lerpfloat(local.pitch, shouldbetransform.pitch, lerpv);
          local.yaw = lerpfloat(local.yaw, shouldbetransform.yaw, lerpv);
 		 local.position = lerp(local.position, shouldbetransform.position, lerpv);

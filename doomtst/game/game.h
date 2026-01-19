@@ -10,6 +10,7 @@
 #include "../util/userinput.h"
 #include "../world/chunk.h"
 #include "../game/objecthelper.h"
+#include "../items/menu.h"
 #include "../world/grid.h"
 #include "../renderer/blockrender.h"
 #include "../world/managegrid.h"
@@ -44,7 +45,7 @@ void startframe() {
 
 	Core::game.ensure_resource<timename::TimeManager>().calcfps();
 	tick::trytick();
-	managemenus();
+
 
 }
 
@@ -85,9 +86,13 @@ void init() {
 
 	Core::game.createWindow();
 	Core::game.insert_plugin<RenderPlugin>();
-	Core::game.insert_plugin<UiImagePlugin>();
+	Core::game.insert_plugin<ui::UiImagePlugin>();
 
-	Core::game.insert_plugin<UiTextPlugin>();
+	Core::game.insert_plugin<ui::MenuPlugin>();
+	Core::game.insert_plugin<items::TransactionPlugin >();
+	Core::game.insert_plugin<items::register_core_items>();
+	Core::game.insert_plugin<items::ItemUiPlugin>();
+	Core::game.insert_plugin<ui::UiTextPlugin>();
 	
 
 	Core::game.InitRenderer();

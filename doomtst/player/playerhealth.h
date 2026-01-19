@@ -3,13 +3,14 @@
 #include "../renderer/uibox.h"
 #include "../game/ecs/game_object.h"
 #include <conio.h>
+#include "../items/block_definitions.h"
 #include "../game/entitystate.h"
 #include "playerinventory.h"
 #include "../util/cached.h"
 
 struct playerhealth: ecs::component
 {
-	ui_image damage_decal;
+	ui::ui_image damage_decal;
 	timename::duration damage_decal_duration;
 	
 	bool dmgimmune = false;
@@ -21,16 +22,16 @@ struct playerhealth: ecs::component
 	
 	}
 
-	array<ui_image>healthboxes;
+	array<ui::ui_image>healthboxes;
 	void start(){
 		damage_decal_duration=CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().create_dur();
 		size_t max_health = owner().get_component<estate>().maxhealth;
 		v2::Vec2 scale = v2::unitv / 100;
-		healthboxes = array<ui_image>();
+		healthboxes = array<ui::ui_image>();
 		for (int i = 0; i < max_health; i++) {
 			v2::Vec2 pos = v2::Vec2(i / 40.f-.4f, -.45);
 
-			healthboxes.push(ui_image(*CtxName::ctx.Ecs,"images\\health.png","HealthTexture",geo::Box2d(pos,scale),55));
+			healthboxes.push(ui::ui_image(*CtxName::ctx.Ecs,"images\\health.png","HealthTexture",geo::Box2d(pos,scale),55));
 		}
 	}
 	playerhealth():damage_decal(*CtxName::ctx.Ecs, "images\\red_back.png", "on_dmg_texture", geo::Box2d::origin_centered(v2::zerov), -3){
@@ -44,11 +45,8 @@ struct playerhealth: ecs::component
 		float dmgmul = 1;
 		for (int i = 0; i < 2; i++)
 		{
-			item* itm = owner().get_component<inventory>().playermenu.armor->at(i).helditem;
-			if (itm != nullptr)
-			{
-				dmgmul *= itm->properties.armor;
-			}
+			// items::item_stack& itm = owner().get_component<inventory>().playermenu.armor->at(i).helditem;
+			
 		}
 		owner().get_component<estate>().damagemultiplyer = dmgmul;
 		int health = owner().get_component<estate>().health;
@@ -61,22 +59,6 @@ struct playerhealth: ecs::component
 		}
 		if (owner().get_component<estate>().invincablilitymax != owner().get_component<estate>().timetilldmg)
 		{
-			if (!dmgimmune) {
-
-				dmgimmune = true;
-				for (int i = 0; i < 2; i++)
-				{
-					item* itm = owner().get_component<inventory>().playermenu.armor->at(i).helditem;
-					if (itm != nullptr)
-					{
-						if (itm->properties.armor != 1) {
-							itm->amt -= 1;
-						}
-					}
-
-				}
-			}
-			else
 			{
 				dmgimmune = false;
 			}

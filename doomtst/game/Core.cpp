@@ -6,45 +6,38 @@ namespace Core {
 
    
     App game; 
-    // Error callback: Logs GLFW errors.
     void errorCallback(int /*error*/, const char* description)
     {
         Assert(description);
     }
 
-    // Framebuffer size callback: Updates viewport and global dimensions.
-    void framebufferSizeCallback(GLFWwindow* window, int newWidth, int newHeight)
+     void framebufferSizeCallback(GLFWwindow* window, int newWidth, int newHeight)
     {
         glViewport(0, 0, newWidth, newHeight);
         game.Window.width = newWidth;
         game.Window.height = newHeight;
     }
 
-    // Key callback: Forwards key events to the user input module.
     void keyCallback(GLFWwindow* /*window*/, int key, int /*scancode*/, int action, int /*mods*/)
     {
-        game.Inp.updatekey(key, action);
+		game.ensure_resource<userinput::InputManager>().update_key(key, action);
     }
 
-    // Mouse button callback: Processes only primary mouse buttons (0 and 1).
     void mouseButtonCallback(GLFWwindow* /*window*/, int button, int action, int /*mods*/)
     {
         if (button < 2)
         {
-            game.Inp.updatekey(GLFW_KEY_LAST + button, action);
+			game.ensure_resource<userinput::InputManager>().update_key(GLFW_KEY_LAST + button, action);
         }
     }
 
-    // Cursor position callback: Calculates movement delta and updates normalized mouse position.
     void cursorPositionCallback(GLFWwindow* /*window*/, double xpos, double ypos)
     {
-        v2::Vec2 newPos(static_cast<float>(xpos), static_cast<float>(ypos));
-        game.Inp.mouseposdt = newPos - game.Inp.mousepos;
-        game.Inp.mousepos = newPos;
-        game.Inp.normedmousepos = CtxName::ctx.Window->Center(newPos);
-    }
-    // Registers GLFW callbacks.
-
+        v2::Vec2 new_mouse_position(CtxName::ctx.Window->FitToAspectRatio(v2::Vec2(xpos,ypos)));
+		userinput::InputManager& manager = game.ensure_resource<userinput::InputManager>();
+		manager.mouse_position_dt = new_mouse_position - manager.mouse_position;
+		manager.mouse_position = new_mouse_position;
+		    }
 
 
     void App::ConnectToContext()
@@ -76,7 +69,7 @@ namespace Core {
 
     void App::InitInput() {
   
-        ctx->Inp = &Inp;   
+		ctx->Inp=&Ecs.insert_resource<userinput::InputManager>(); 
     }
     void App::InitOC()
     {

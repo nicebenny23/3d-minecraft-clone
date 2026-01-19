@@ -9,7 +9,7 @@ namespace math {
 				std::swap(min, max);
 			}
 		}
-		range operator+(const range& oth) {
+		range operator+(const range& oth)const {
 			return range(min + oth.min, max + oth.max);
 		}
 		range& operator+=(const range& oth) {
@@ -17,7 +17,7 @@ namespace math {
 			max += oth.max;
 			return *this;
 		}
-		range operator*(double scale) {
+		range operator*(double scale) const{
 			if (scale < 0) {
 				return range(max * scale, min * scale);
 			}
@@ -38,6 +38,7 @@ namespace math {
 
 			return max - min;
 		}
+
 		double lower() const {
 			return min;
 		}

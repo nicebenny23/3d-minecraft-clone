@@ -49,5 +49,5 @@ inline void sandinit(blockname::block& blk) {
     blk.createdefaultaabb();
     blk.owner().add_component<sandfall>();
     
-     blk.owner().add_component<loottable>().addelem(sanditem,1, false);
+     blk.owner().add_component<loottable>().addelem("sand", 1, false);
 }

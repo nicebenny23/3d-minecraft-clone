@@ -5,83 +5,73 @@
 #include "../game/objecthelper.h"
 #include "../world/voxeltraversal.h"
 #include "playerinventory.h"
-#include "../items/itemutil.h"
 
 
-struct playerplace : ecs::component
-{
+struct playerplace : ecs::component {
 	int curplaceid;
 	voxtra::WorldRayCollision Hit;
-	item* select;
+	stn::Option<ecs::obj> select;
 
 
 	float timeuntilbreak;
 	void start() {
-		select = nullptr;
 		curplaceid = 0;
 	}
 	bool caninteract() {
 
-		if (select == nullptr)
-		{
+		if (!select) {
 			return false;
 		}
 
 
-		if (!Hit)
-		{
+		if (!Hit) {
 			return false;
 		}
 		voxtra::RayWorldHit closest = Hit.unwrap();
-		if (!closest.owner().has_component<blockname::block>())
-		{
+		if (!closest.owner().has_component<blockname::block>()) {
 			return false;
 		}
-		if (!inrange(closest.Hit.dist, -1, interactmaxrange))
-		{
+		if (!inrange(closest.Hit.dist, -1, interactmaxrange)) {
 			return false;
 		}
 		return true;
 	}
 	void placeblock() {
-		ray cameraray = ray(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.position +owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * 7);
-		block* plamentblock = voxtra::findprevblock(cameraray,voxtra::countsolid);
-		if (plamentblock==nullptr)
-		{
+		ray cameraray = ray(owner().get_component<ecs::transform_comp>().transform.position, owner().get_component<ecs::transform_comp>().transform.position + owner().get_component<ecs::transform_comp>().transform.normal_dir() * 7);
+		block* plamentblock = voxtra::findprevblock(cameraray, voxtra::countsolid);
+		if (plamentblock == nullptr) {
 			return;
 		}
 		//this must be kept because it can somtimers bug out do to presosion errors;
-	
-			if (plamentblock->attributes.solid)
-			{
-				return;
-			}
-		
-		
-		if (!Hit)
-		{
+
+		if (plamentblock->attributes.solid) {
+			return;
+		}
+
+
+		if (!Hit) {
 			return;
 		}
 		voxtra::RayWorldHit closest = Hit.unwrap();
 		Dir::Dir3d dir = Dir::Align(closest.collider.globalbox().center - plamentblock->center());
-	
+
 		int blockdirection = Dir::max2ddirection(camera::campos() - closest.Hit.intersectionpoint);
 
 		plamentblock->mesh.direction = Dir::Dir2d(blockdirection);
 		plamentblock->mesh.attachdir = dir;
 		Box newblockbox = Box(plamentblock->center(), blockscale);
 		newblockbox.scale *= .95;
-		bool collides = collision::boxCollidesWithEntity(newblockbox,collision::HitQuery());
-		if (!collides)
-		{
-			int placeid = blockidfromitemid(select);
-			if (placeid==-1)
-			{
-				return;
+		bool collides = collision::boxCollidesWithEntity(newblockbox, collision::HitQuery());
+		if (!collides) {
+
+			stn::Option<blockname::id> blk = world().get_resource<items::item_type_register>().unwrap().from_id(select.unwrap().get_component<items::item_stack>().contained_id()).blk_id;
+
+			if (blk&& select.unwrap().get_component<items::item_stack>().can_remove(1)) {
+				gridutil::set_block(plamentblock->pos, blk.unwrap());
+
+				select.unwrap().get_component<items::item_stack>().remove(1);
+
 			}
-			gridutil::set_block(plamentblock->pos, placeid);
-	
-			select->use(1);
 		}
 
 
@@ -91,43 +81,28 @@ struct playerplace : ecs::component
 
 
 	void update() {
-
-		if (ismenuopen())
-		{
-			return;
-		}
-		select = owner().get_component<inventory>().selected;
-	
-		ray cameraray = ray(owner().get_component<ecs::transform_comp>().transform.position, owner().get_component<ecs::transform_comp>().transform.position + owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * 7);
+		select = owner().get_component<inventory>().selected_object();
+		ray cameraray = ray(owner().get_component<ecs::transform_comp>().transform.position, owner().get_component<ecs::transform_comp>().transform.position + owner().get_component<ecs::transform_comp>().transform.normal_dir() * 7);
 		Hit = collision::raycastall(cameraray, collision::HitQuery(owner()));
-		if (!caninteract())
-		{
+		if (!caninteract()) {
 			return;
 		}
 
 
 
-	
 
-		if (CtxName::ctx.Inp->mouseright().pressed)
-		{
-			
-				if (blockidfromitemid(select) != -1)
-				{
-					if (select->canuse(1))
-					{
 
-						placeblock();
-					}
+		if (CtxName::ctx.Inp->right_mouse().pressed) {
 
-				}
+
+			placeblock();
 		}
 
 	}
 
 
 
-	
+
 };
 namespace ecs {
 	template<>

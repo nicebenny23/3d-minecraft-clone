@@ -1,161 +1,199 @@
-
-#include "../block/block.h"
-#include "../renderer/textrender.h"
-#include "../game/Core.h"
-#include "../game/GameContext.h"
-#include "../renderer/uibox.h"
-
-#pragma once 
-inline ui::ui_image* createitembox(const char* boxname,const char* TextureName) {
-
-	return new ui::ui_image(*CtxName::ctx.Ecs, boxname, TextureName , geo::Box2d::origin_centered(v2::unitv / 40.f), 100.f);
-}
-enum itemid {
-
-	nullitemid = 0,
-	stoneitem = 1,
-	plankitem = 2,
-	crystalitem =3,
-	metalroditem=4,
-	torchitem = 5,
-	sworditem =6,
-	pickitemid = 7,
-	craftingtableitem=8,
-	crystalpickitemid=9,
-	simplerock=10,
-	slimeballitem= 11,
-	crystaltorchitem=12,
-	mossitem=13,
-	ropeitem=14,
-	chestitem=15,
-	furnaceitem=16,
-	ironoreitem=17,
-	ironitem=18,
-	ironpickitem=19,
-	ironsworditem=20,
-	crystaldaggeritem=21,
-	irontop=22,
-	ironbottom=23,
-	crystaltop=24,
-	crystalbottom=25,
-	treestoneitem=26,
-	altaritem=27,
-	obsidianitem=28,
-	sanditem=29,
-	glassitem=30,
-	glassbottleitem=31,
-	lavabottleitem=32,
-	playertpsword=33,
-	slimewanditem=34,
-};
-enum itemstate {
-	beingheld = 0,
-	ininventoryblock = 1,
-
-};
-enum itemprop
-{
-	wear=0,
-	count=1
-};
-
-struct item
-{
-	int state;
-	int id;
-	int maxamt;
-	int amt;
-	void setviewable(bool isviewable) {
-
-		if (isviewable) {
-			itemui.textvalue.enable();
-		}
-		else {
-			itemui.textvalue.disable();
-		}
-	}
-	item(int itemid);
-	item(int itemid,int amt);
-	
-	
+#include "item_type.h"
+#pragma once
+namespace items {
 
 
-	struct itemproperties {
-		float pickaxepower;
-		float foodval;
-		int onuse;
-		int dmg;
-		float armor;
-		bool placeable;
-		itemproperties() {
-			onuse = -1;
-			pickaxepower = 0;
-			foodval = 0;
-			dmg = 1;
-			armor = 1;
-			placeable = false;
-		}
+
+	struct item_entry {
 		
+		item_entry(item_id Id, size_t cnt) :id(Id), count(cnt){
+
+		}
+
+		bool empty() const {
+			return count == 0;
+		}
+		item_id id;
+		size_t  count;
 	};
 
-	struct  itemuistruct
-	{
-		ui::ui_text textvalue;
-		ui::ui_image* itemsprite;
-		itemuistruct():itemsprite(nullptr),
-		textvalue(*CtxName::ctx.Ecs,geo::Box2d::origin_centered(v2::unitv*1 / 80.0f),67){
+	inline bool can_interact(const item_entry& itm1, const item_entry& itm2) {
+		return itm1.id == itm2.id;
+	}
+
+
+	inline void assert_interactable(const item_entry& itm1, const item_entry& itm2) {
+		if (!can_interact(itm1, itm2)) {
+			stn::throw_logic_error("Invariant Broken : differing item types {} and {} cannot interact", itm1.id, itm2.id);
+		};
+	}
+
+	struct item_stack :ecs::component {
+	
+		size_t get_count();
+		size_t get_max();
+
+		item_stack(item_entry entry,size_t max_items) :entry(entry), capacity_constraint(max_items) {
+			if (capacity_constraint<=entry.count) {
+				stn::throw_logic_error("trying to initilize an item stack with {} out of a max of {} items",entry.count,max_items);
+			}
+		};
+		item_entry contained_entry() const {
+			return entry;
+		}
+		item_id contained_id() const {
+			return entry.id;
+		}
+
+		size_t count() const {
+			return entry.count;
+		}
+		bool empty() const {
+			return entry.empty();
+		}
+		bool full() const {
+			return count() == capacity_constraint;
+		}
+		size_t rem_capacity() const {
+			return capacity_constraint - entry.count;
+		}
+		bool can_fit(size_t count) const {
+			return count <= rem_capacity();
+		}
+		bool can_fit(item_entry ent) const {
+			return can_interact(ent,entry)&&can_fit(ent.count);
+		}
+		bool can_remove(size_t count) const {
+			return count <= entry.count;
+		}
+		size_t max_fit(const item_entry& oth) const {
+			if (!can_interact(entry, oth)) {
+				return 0;
+			}
+			return rem_capacity();
+		}
+		size_t max_fit(const item_stack& oth) const {
+			return max_fit(oth.entry);
+		}
+		void add(size_t count) {
+			if (!can_fit(count)) {
+				stn::throw_logic_error("Add error: attempting to add {} items to stack with {} items, exceeding its capacity of {} items", count, entry.count, capacity_constraint);
+			}
+			entry.count += count;
+		}
+		void remove(size_t count) {
+			if (!can_remove(count)) {
+				stn::throw_logic_error("Add error: attempting to add {} items to stack with {} items, exceeding its capacity of {} items", count, entry.count, capacity_constraint);
+			}
+			entry.count -= count;
+		}
+
+		bool can_give_to(const item_stack& other_item, size_t amt) const {
+			return other_item.can_fit(amt) && can_remove(amt) && can_interact(entry, other_item.entry);
 
 		}
+		bool can_transfer(const item_stack& other_item) const {
+			return can_give_to(other_item, count());
+
+		}
+
+		void transfer(item_stack& other_item) {
+			give(other_item, entry.count);
+		}
+		void give(item_stack& other_item, size_t count) {
+
+			if (!can_remove(count)) {
+				stn::throw_logic_error("Transfer error: trying to transfer {} items from a stack with only {} items.", count, entry.count);
+			}
+
+			assert_interactable(entry,other_item.entry);
+			if (other_item.rem_capacity() < count) {
+				throw std::logic_error("Unable to transfer more items overflow its capacity");
+			}
+			other_item.entry.count += count;
+			entry.count-= count;
+		}
+
+	private:	
+		item_entry entry;
+		size_t capacity_constraint;
 	};
 
-	itemproperties properties;
 
-	
-	itemprop itemtype;
-
-	itemuistruct itemui;
-
-	void updateui() {
-		if (state==beingheld)
-		{
-			//adjust for apwect ratio 
-			itemui.itemsprite->set_center(CtxName::ctx.Window->FitToAspectRatio(CtxName::ctx.Inp->mousepos));
+	struct item_durability : ecs::component {
+		explicit item_durability(size_t cap) : remaining(cap), max_durability(cap) {
 		}
-		double text_offset_ideal = .01f;
-		itemui.textvalue.set_center(itemui.itemsprite->bounds().center -v2::unitv*text_offset_ideal);
-		itemui.textvalue.format("{}", amt);
-		if (itemtype==wear)
-		{
-			int textamt = round((amt *5)/ maxamt);
-			itemui.textvalue.format("{}", textamt);
+
+		size_t max_dur() const {
+			return max_durability;
 		}
-		
+		size_t durability() const {
+			return remaining;
+		}
+
+		bool is_broken() const {
+			return remaining == 0;
+		}
+		bool can_use() const {
+			return remaining != 0;
+		}
+		bool is_full() const {
+			return remaining == max_durability;
+		}
+
+		size_t damage_taken() const {
+			return max_durability - remaining;
+		}
+
+		void use() {
+			if (is_broken()) {
+				throw std::logic_error("Item already broken, cannot damage further.");
+			}
+			--remaining;
+		}
+	private:
+		size_t max_durability;
+		size_t remaining;
+	};
+	inline bool can_remove(const item_stack& from, const item_stack& to, size_t amount) {
+		return from.owner().get_component<item_stack>().can_give_to(to.owner().get_component<item_stack>(), amount);
 	}
-	bool canadd(int amtto);
-	void destroy();
-	bool use(size_t useamt);
-	bool canuse(size_t useamt);
-	void give(int& givenamt);
-	void maxoutthis(item* itm);
-};
-extern item* freeditem;
 
-inline void updateitem(item*& itm) {
-	if (itm == nullptr)
-	{
-		return;
+	inline bool can_transfer(const item_stack& from, const item_stack& to) {
+		return can_remove(from, to, from.owner().get_component<item_stack>().count());
 	}
+	struct ItemSpawner:ecs::Recipe{
+		item_entry entry;
+		ItemSpawner(item_entry initial_state) :entry(initial_state) {
+		}
+		void apply(ecs::obj& entity) {
+			item_traits traits = entity.world().ensure_resource<item_type_register>().from_id(entry.id);
+			if (traits.use_type == item_use_type::block) {
+				entity.add_component<item_stack>(entry,64);
+			}
+			else {
+				entity.add_component<item_stack>(entry,1);
+			}
+		}
+	};
+	//clears all empty items
+	struct ItemClear :ecs::System {
+		void run(ecs::Ecs& world) {
+			ecs::View<item_stack> stack_query(world);
+			for (const auto& [slot] : stack_query) {
+				if (slot.count() == 0) {
+					slot.owner().destroy();
+				}
+			}
+			ecs::View<item_durability> dur_query(world);
+			for (const auto& [slot] : dur_query) {
+				if (slot.is_broken() == 0) {
+					slot.owner().destroy();
+				}
+			}
 
-		itm->updateui();
-		if (itm->maxamt < itm->amt)
-		{
-			itm->amt = itm->maxamt;
 		}
-		if (itm->amt <= 0) {
-			itm->destroy();
-			itm = nullptr;
-		}
-	
+
+	};
 
 }
- // !item_HPP

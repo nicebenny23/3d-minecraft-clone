@@ -10,6 +10,6 @@ inline void plankinit(blockname::block& blk) {
 	blk.mesh.box.scale = blockname::blockscale;
 	blk.createdefaultaabb();
 	blk.mininglevel = 1.5f;
-	blk.owner().add_component<loottable>().addelem(plankitem, 1, false);
+	blk.owner().add_component<loottable>().addelem("plank", 1, false);
 	blk.createdefaultaabb(false);
 }

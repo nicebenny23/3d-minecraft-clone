@@ -16,7 +16,7 @@ struct CameraComp : ecs::component
 		//utype = ecs::updaterender;
 	}
 	
-	Transform CamTransform;
+	math::Transform CamTransform;
 	void start() {
 		CamTransform = owner().get_component<ecs::transform_comp>().transform;
 	

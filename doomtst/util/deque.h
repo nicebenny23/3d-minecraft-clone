@@ -97,7 +97,7 @@ namespace stn {
 			len++;
 
 		}
-		template<typename ...Args> requires std::constructible_from<T, Args&&...>
+		template<typename ...Args> requires std::constructible_from<T, Args...>
 		void emplace_back(Args&&... args)
 		{
 			if (full()) {

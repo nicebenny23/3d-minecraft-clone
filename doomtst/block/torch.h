@@ -14,5 +14,5 @@ inline void torchinit(blockname::block& blk) {
 	blk.mininglevel = 1;
 	blk.minedfastwithpick = true;
 	blk.owner().add_component<loottable>();
-	blk.owner().get_component<loottable>().addelem(torchitem, 1);
+	blk.owner().get_component<loottable>().addelem("moss", 1);
 }

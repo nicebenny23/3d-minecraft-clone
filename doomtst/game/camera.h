@@ -1,6 +1,6 @@
 #pragma once 
 #include "../util/userinput.h"
-#include "../game/transform.h"
+#include "../math/transform.h"
 #include "../math/vector3.h"
 #include "../renderer/renderer.h"
 namespace camera {
@@ -8,7 +8,7 @@ namespace camera {
 	v3::Vec3 GetCamFront();
 	v3::Vec3 GetCamUp();
 	v3::Vec3 GetCamRight();
-	Transform GetCam();
+	math::Transform GetCam();
 v3::Point3 campos();
 
 }

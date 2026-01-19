@@ -1,26 +1,8 @@
 #pragma once
 #include "playerinventory.h"
-void inventory::givestartitems(int i1, int i2,int i3) {
-	if (i1!=0)
-	{
-
-		hotbar.at(0).giveitem(i1,10);
-
-	}
-	if (i2 != 0)
-	{
-
-		hotbar.at(1).giveitem(i2, 100);
-
-	}
-	if (i3 != 0)
-	{
-
-		hotbar.at(2).giveitem(i3, 100);
-
-	}
-}
-inventory::inventory(): playermenu(v2::Vec2(.5f, .5f)){
-
-
+void inventory::givestartitems(std::string items) {
+	int dropamt = 1;
+	items::item_id id = world().get_resource<items::item_type_register>().unwrap().from_name(items);
+	items::item_entry entry = items::item_entry(id, 10);
+	items::stage_transaction_emplaced<items::give_container_entry>(world(), entry, hotbar.get_component < items::container>());
 }

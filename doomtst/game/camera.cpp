@@ -9,17 +9,17 @@ namespace camera {
 	
 	v3::Vec3 GetCamFront()
 	{
-		return GetCam().getnormaldirection();;
+		return GetCam().normal_dir();;
 	}
 	v3::Vec3 GetCamUp()
 	{
-		return GetCam().getupdirection();
+		return GetCam().up_dir();
 	}
 	v3::Vec3 GetCamRight()
 	{
-		return GetCam().getrightdirection();
+		return GetCam().right_dir();
 	}
-	Transform GetCam()
+	math::Transform GetCam()
 	{
 		CameraComp* cam = player::goblin.get_component_ptr<CameraComp>();
 		if (cam == nullptr) {

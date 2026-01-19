@@ -5,6 +5,7 @@
 #include <cstdarg>
 #include <string>
 #include <iostream>
+#include "data_format.h"
 #include <filesystem>
 #include <direct.h>
 #include <stdexcept>
@@ -22,7 +23,7 @@ inline fs::path createUniqueNamedFolder(const fs::path& basePath, const std::str
 	fs::path folderPath;
 
 	do {
-		folderPath = basePath / (baseName+std::to_string(folderNumber));
+		folderPath = basePath / (baseName + std::to_string(folderNumber));
 		folderNumber++;
 	} while (fs::exists(folderPath));
 
@@ -34,7 +35,7 @@ inline void createFolder(const fs::path& basePath, const std::string& baseName) 
 		fs::create_directories(basePath);
 	}
 
-	fs::create_directories(basePath/baseName);
+	fs::create_directories(basePath / baseName);
 
 }
 inline fs::path getWindowsHomeDir() {
@@ -44,109 +45,168 @@ inline fs::path getWindowsHomeDir() {
 	if (homeDrive && homePath) {
 		return fs::path(std::string(homeDrive) + std::string(homePath));
 	}
-
-	// Fallback: try USERPROFILE env var (usually full home path)
 	const char* userProfile = std::getenv("USERPROFILE");
 	if (userProfile) {
 		return fs::path(userProfile);
 	}
 
 	throw std::logic_error("Could not find home directory");
+
+}
+inline void deletefile(const char* name) {
+	if (remove(name) != 0) {
+		throw std::runtime_error("error deleting file");
+	}
+}
+
+inline bool fileexists(std::string name) {
+
+	FILE* file = fopen(name.c_str(), "r");
+	if (file) {
+		fclose(file);
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+namespace stn {
+	struct FileMode {
+		bool writeable;
+		bool readable;
 	
-}
+		FileMode(bool can_write, bool can_read) :writeable(can_write), readable(can_read) {
 
-bool fileexists(std::string name);
+		}
 
+		const char* file_opener() const {
+			if (!readable && !writeable) throw std::runtime_error("FileMode must be readable or writeable");
 
-enum mode {
-	filewrite,
-	fileread,
-	fileappend,
-};
+			if (readable && writeable) {
+				return "r+";
+			}
+			else if (writeable) {
+				return "w";
+			}
+			else if (readable) {
+				return "r";
+			}
+		}
+	};
+	enum class SeekOrigin {
+		Begin,
+		Current,
+		End
+	};
 
-inline bool canread(mode type) {
-	return (type == fileread);
-}
+	struct file_handle {
+		FileMode file_options;
+		FILE* fp;
+		long offset;
 
-inline bool canwrite(mode type) {
-	return (type == filewrite);
-}
+		long getsize() {
 
-inline bool canappend(mode type) {
-	return (type == fileappend);
-}
+			long sizeval;
+			seek_end();
+			sizeval = ftell(fp);
+			seek(SeekOrigin::Begin,0);
+			return sizeval;
+		}
+		void seek(SeekOrigin origin, long offset) {
+			int whence = 0;
+			switch (origin) {
+			case SeekOrigin::Begin:   whence = SEEK_SET; break;
+			case SeekOrigin::Current: whence = SEEK_CUR; break;
+			case SeekOrigin::End:     whence = SEEK_END; break;
+			}
 
-struct safefile {
-	mode optype;
-	FILE* fp;
-	long size;
-	long offset;
-
-	long getsize();
-	void movetoend();
-	template<typename... Args>
-	void fscanf(size_t expectedargs, const char* format, Args&&... args) {
+			if (fseek(fp, offset, whence) != 0) {
+				throw std::runtime_error("Failed to seek in file");
+			}
+		}
+		void seek_end() {
+			seek(SeekOrigin::End, 0);
+		}
+		template<typename... Args>
+		void fscanf(size_t expectedargs, const char* format, Args&&... args) {
 			int result = std::fscanf(fp, format, std::forward<Args>(args)...);
 			if (result != static_cast<int>(expectedargs)) {
 				throw std::runtime_error("Unexpected number of matched arguments in fscanf");
 			}
-		
-	}
-	safefile(const char* filepath, mode openmode);
-	safefile(std::string filepath, mode openmode);
 
-	safefile(const safefile&) = delete;
-	safefile& operator=(const safefile&) = delete;
-	safefile(safefile&& other) noexcept
-		: optype(other.optype), fp(other.fp), size(other.size), offset(other.offset) {
-		other.fp = nullptr;
-	}
-	void close();
-	~safefile() {
-		close();
-	}
-	void go(unsigned int byteoffset);
+		}
 
-	template <typename T>
-	void write(stn::span<T> span)
-	{
-		if (canwrite(optype) || canappend(optype))
-		{
-			size_t amount_written = fwrite(span.data(), sizeof(T), span.length(), fp);
-			if (amount_written != span.length())
-			{
-				stn::throw_logic_error("attempted to write to a file but only {} out of {} elements were written", amount_written, span.length());
+		file_handle(std::string filepath, FileMode open_mode) :file_options(open_mode), fp(fopen(filepath.c_str(), open_mode.file_opener())) {
+			if (!fp) {
+				debug("Failed to open file");
+				throw std::runtime_error(filepath);
 			}
 		}
-		else
-		{
-			throw std::runtime_error("can't write to a file that was not initialized in writing mode");
-		}
-	}
 
-	template <typename T>
-	T* read(size_t count)
-	{
-		if (canread(optype))
-		{
-			T* newarr = new T[count];
-			size_t read = fread(newarr, sizeof(T), count, fp);
-			if (read != count)
-			{
+		file_handle(const file_handle&) = delete;
+		file_handle& operator=(const file_handle&) = delete;
+		file_handle(file_handle&& other) noexcept
+			: file_options(other.file_options), fp(other.fp), offset(other.offset) {
+			other.fp = nullptr;
+		}
+		void close() {
+			if (fp != nullptr) {
+				fclose(fp);
+				fp = nullptr;
+			}
+		}
+		~file_handle() {
+			close();
+		}
+
+		template <typename T>
+		void write(stn::span<const T> span) {
+			if (file_options.writeable) {
+				size_t amount_written = fwrite(span.data(), sizeof(T), span.length(), fp);
+				if (amount_written != span.length()) {
+					stn::throw_logic_error("attempted to write to a file but only {} out of {} elements were written", amount_written, span.length());
+				}
+			}
+			else {
+				throw std::runtime_error("can't write to a file that was not initialized in writing mode");
+			}
+		}
+
+
+		template <typename T>
+		stn::array<T> read(size_t count) {
+			if (!file_options.readable) {
+				throw std::runtime_error("can't read a file that was not initialized in reading mode");
+			}
+			stn::array<T> newarr = stn::array<T>(count);
+			size_t read = fread(newarr.data(), sizeof(T), count, fp);
+			if (read != count) {
 				stn::throw_logic_error("attempted to read a file but only {} out of {} elements were read", read, count);
 			}
 			return newarr;
 		}
-		else
-		{
-			throw std::runtime_error("can't read a file that was not initialized in reading mode");
+		void write_bytes(stn::span<const std::byte> span) {
+			if (file_options.writeable) {
+				size_t amount_written = fwrite(span.data(), sizeof(std::byte), span.length(), fp);
+				if (amount_written != span.length()) {
+					stn::throw_logic_error("attempted to write to a file but only {} out of {} elements were written", amount_written, span.length());
+				}
+			}
+			else {
+				throw std::runtime_error("can't write to a file that was not initialized in writing mode");
+			}
 		}
-	}
-};
+		stn::array<std::byte> read_bytes(size_t count) {
+			if (!file_options.readable) {
+				throw std::runtime_error("can't read a file that was not initialized in reading mode");
+			}
+			stn::array<std::byte> newarr = stn::array<std::byte>(count);
+			size_t read = fread(newarr.data(), sizeof(std::byte), count, fp);
+			if (read != count) {
+				stn::throw_logic_error("attempted to read a file but only {} out of {} elements were read", read, count);
+			}
+			return newarr;
+		}
+	};
 
-inline void deletefile(const char* name) {
-	if (remove(name) != 0)
-	{
-		throw std::runtime_error("error deleting file");
-	}
 }

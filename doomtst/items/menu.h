@@ -1,37 +1,70 @@
-#include "../renderer/uibox.h"
+#pragma once
+#include "recipe_transactions.h"
+namespace ui {
+	struct close_menu {
+		close_menu() {
 
+		};
+	};
 
-using namespace ui;
-using namespace stn;
-#pragma once 
-enum type {
-	inventorymenu=1,
-	normalmenu=2,
-	settingsmenu=3,
-};
-bool ismenuopen();
-struct menu
-{
-	
-	void close();
-	void(*closeinven);
-	ui_image* menubox;
-		type menutype;
+	struct menu_component :ecs::component {
 		
-	bool enabled;
-	void open();
-	virtual void customclose();
-	//just for now while we have to deal with this horrific abstraction
-	void prophecy_of_ra() {
-		menubox = new ui_image(*CtxName::ctx.Ecs, "images\\menutex.png", "MenuTexture", geo::Box2d::origin_centered(v2::unitv / 2), 11);
-	}
-	virtual void customopen();
-	menu(v2::Vec2 size);
-	virtual void testclick();
-	virtual void custominit();
-};
-;
-extern menu* openmenu;
-extern menu* inventorylocation;
-void managemenus();
- // ! menu_HPP
+	};
+
+	struct open_menu {
+		open_menu(menu_component& menu_comp):menu_ent(menu_comp.owner()){
+
+		}
+		ecs::obj menu_ent;
+	};
+	struct MenuState :ecs::resource {
+		bool menu_open() const{
+			return open_menu.is_some();
+		}
+		MenuState() = default;
+		stn::Option<ecs::obj> open_menu;
+	};
+
+	struct MenuEnabler:ecs::System {
+		void run(ecs::Ecs& world) {
+			MenuState& state=world.ensure_resource<MenuState>();
+
+			if (world.get_resource<userinput::InputManager>().unwrap().getKey(userinput::escape_key).pressed) {
+				world.write_command<close_menu>(close_menu());
+			}
+
+			for (open_menu menu : world.read_commands<open_menu>()) {
+				
+				menu.menu_ent.get_component<ui::ui_enabled>().enable();
+				state.open_menu = menu.menu_ent;
+				return;
+			}
+			for (close_menu menu:world.read_commands<close_menu>() ) {
+				if (state.menu_open()) {
+					state.open_menu.unwrap().get_component<ui::ui_enabled>().disable();
+					state.open_menu = stn::None;
+					return;
+				}
+				else {
+					//close app or somthing;
+				}
+			}
+
+
+		}
+		
+	
+	};
+	struct MenuPlugin :Core::Plugin{
+		void build(Core::App& app) {
+			app.ensure_resource< MenuState>();
+			app.emplace_system<MenuEnabler>();
+		  }
+	};
+
+
+
+
+
+
+}

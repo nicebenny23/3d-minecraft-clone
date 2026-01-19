@@ -3,23 +3,23 @@
 #define NOMINMAX
 #endif
 #include <Windows.h>
+#include "../game/ecs/ecs.h"
 #include "dynamicarray.h"
 #include "../math/vector2.h"
 #include <glm/glm.hpp>
 #pragma once 
-#define esckey GLFW_KEY_ESCAPE
-#define shiftkey GLFW_KEY_LEFT_SHIFT
-
-#define Mouse_leftindex GLFW_KEY_LAST+ GLFW_MOUSE_BUTTON_LEFT
-#define Mouse_rightindex GLFW_KEY_LAST + GLFW_MOUSE_BUTTON_RIGHT
-#define Extra_keys 2
 namespace userinput {
 
-	struct inputkey {
+	constexpr size_t mouse_left_index = GLFW_KEY_LAST + GLFW_MOUSE_BUTTON_LEFT;
+	constexpr size_t mouse_right_index = GLFW_KEY_LAST + GLFW_MOUSE_BUTTON_RIGHT;
+	constexpr size_t extra_keys=2;
+	constexpr size_t escape_key = GLFW_KEY_ESCAPE;
+	constexpr size_t shift_key = GLFW_KEY_LEFT_SHIFT;
+	struct InputKey {
 		bool held;
 		bool released;
 		bool pressed;
-		inputkey() {
+		InputKey() {
 
 			held = false;
 			pressed = false;
@@ -27,27 +27,71 @@ namespace userinput {
 
 		}
 
-		void update(int action);
+		void update(int action) {
+			if (action == GLFW_PRESS) {
+
+				pressed = true;
+				held = true;
+
+			}
+			if (action == GLFW_RELEASE) {
+				pressed = false;
+				held = false;
+				released = true;
+			}
+
+		}
 	};
-	struct  InputManager {
-		stn::array<inputkey> keylist;
+	inline int convertchartoglfwkey(const int key) {
+		if ('a' <= key && key <= 'z') {
+			return key - 32;
+		}
+
+		return key;
 
 
-		v2::Vec2 mouseposdt;
-		v2::Vec2 mousepos;
-		v2::Vec2 normedmousepos;
-		inputkey mouseleft();
+	}
+	struct  InputManager :ecs::resource {
+		stn::array<InputKey> keys;
+		v2::Vec2 mouse_position_dt;
+		v2::Vec2 mouse_position;
+		InputKey left_mouse() {
+			return keys[mouse_left_index];
+		}
 
-		inputkey mouseright();
+		InputKey right_mouse() {
+			return keys[mouse_right_index];
+		}
 
-		InputManager();
+		InputManager() {
+			mouse_position = v2::Vec2(0, 0);
+			mouse_position_dt = v2::Vec2(0, 0);
+			keys = stn::array<InputKey>(GLFW_KEY_LAST + extra_keys);
+			keys.reach(GLFW_KEY_LAST + extra_keys);
+		}
 
-		void updatekey(int code, int pressedorrelesed);
-		void endupdate();
+		void update_key(int code, int action) {
+			if (keys.contains_index(code)) {
+				keys[code].update(action);
+			}
+			else {
+				stn::throw_logic_error("key code {} has not been mapped", code);
+			}
+		}
+		void endupdate() {
+			mouse_position_dt = v2::Vec2(0, 0);
+			for (int i = 0; i < keys.length(); i++) {
+				keys[i].pressed = false;
+				keys[i].released = false;
+			}
 
-		int convertchartoglfwkey(const int key);
+		}
 
-		inputkey getKey(const size_t key);
+
+
+		InputKey getKey(const size_t key) {
+			return keys[convertchartoglfwkey(key)];
+		}
 
 	};
 

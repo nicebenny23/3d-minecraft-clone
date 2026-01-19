@@ -1,153 +1,77 @@
-#include "../math/vector2.h"
-#include "itemslot.h"
-#include "menu.h"
-#pragma once 
-extern int currentcontid;
-void deleteallcontainerfiles();
-const char* writefilename(int id);
-struct Container {
-	short containerid;
-	Container() {
+#include "ItemSlot.h"
+#include "SlotUi.h"
+#pragma once
+namespace items {
+	struct container :ecs::component {
+		stn::array <ecs::object_handle> slots;
+		v2::Coord2 size;
+		container(v2::Coord2 Size) :size(Size){
+		}
+		void start() {
+		
+		}
+		ecs::object_handle& operator[](container_index ind) {
+			if (!ind.fits_in(size)) {
+				stn::throw_logic_error("index {} does not fit into size {}", ind.coord, size);
+			}
+			return slots[ind.x() * size.y + ind.y()];
+		}
+		const ecs::object_handle& operator[](container_index ind) const {
+			if (!ind.fits_in(size)) {
+				stn::throw_logic_error("index {} does not fit into size {}", ind.coord, size);
+			}
+			return slots[ind.x() * size.y + ind.y()];
+		}
+		const bool contains(container_index ind) const {
+			return ind.fits_in(size);
+		}
+		using iterator = decltype(slots)::iterator;
+		iterator begin() {
+			return slots.begin();
+		}
+		iterator end() {
+			return slots.end();
+		}
+		using const_iterator = decltype(slots)::const_iterator;
+		const_iterator begin() const {
+			return slots.begin();
+		}
+		const_iterator end() const {
+			return slots.end();
+		}
+		
 	};
-	void destroy() {
-
-		for (size_t i = 0; i < databuf.length(); i++) {
-			databuf[i].destroyitem();
-			databuf[i].framedecal.disable();
+	struct container_recipe :ecs::Recipe {
+		v2::Coord2 min_position;
+		v2::Coord2 offset;
+		container_recipe(v2::Coord2 min, v2::Coord2 off):min_position(min),offset(off){
 
 		}
-		databuf.clear();
-	}
-	Container(int newid);
-	void writetofile();
-	bool enabled;
+		void apply(ecs::obj& ent) {
+			ui::ui_spawner(geo::Box2d(v2::zerov, v2::unitv), 1000).apply(ent);
+			
+			container& cont= ent.add_component< container>(offset);
 
-	array<itemslot> databuf;
-	itemslot& getlocalat(int xpos, int ypos) {
-		return databuf[xpos + ypos * sizex];
-	}
-	itemslot& at(int ind) {
-		return databuf[ind];
-	}
-	bool clicked() {
-		if (!ismenuopen()) {
-			return false;
-		}
-		if (!CtxName::ctx.Inp->mouseleft().pressed) {
-			return false;
-		}
-		for (size_t i = 0; i < databuf.length(); i++) {
-			itemslot* slt = &databuf[i];
-			if (slt->framedecal.get_component<ui::InteractionState>().left_clicked) {
-				return true;
-			}
-		}
-		return false;
-	}
-	void deletebelowzero() {
-
-
-		for (int i = 0; i < databuf.length(); i++) {
-			if (databuf[i].helditem != nullptr) {
-				if (databuf[i].helditem->amt == 0) {
-					databuf[i].destroyitem();
-				}
-
-
-			}
-		}
-	}
-	bool fill(int elemid, int& amt, bool createnew) {
-
-
-		for (int i = 0; i < databuf.length(); i++) {
-			if (amt <= 0) {
-				break;
-			}
-
-
-
-			if (databuf[i].helditem == nullptr) {
-				if (createnew) {
-					databuf[i].giveitem(elemid, 0);
-
-					databuf[i].helditem->give(amt);
-					if (databuf[i].helditem->amt == 0) {
-
-						databuf[i].destroyitem();
-					}
-				}
-
-				continue;
-			}
-
-			if (databuf[i].helditem->id == elemid) {
-				if (databuf[i].helditem->itemtype == count) {
-
-
-					databuf[i].helditem->give(amt);
+			for (size_t x = 0; x < offset.x; x++) {
+				for (size_t y = 0; y < offset.y; y++) {
+					v2::Coord2 pos = v2::Coord2(x, y);
+					cont.slots.emplace<ecs::object_handle>(std::move(ecs::spawn(ent.world(), GriddedItemSlotUiSpawner(container_index(x, y), pos + min_position))));
+					ent.add_child(cont.slots.last().get());
 				}
 			}
-
+		}
+	};
+	struct floating_container_recipe :ecs::Recipe {
+		
+		floating_container_recipe(){
 
 		}
-		if (amt == 0) {
-			return true;
+		void apply(ecs::obj& ent) {
+			ui::ui_spawner(geo::Box2d(v2::zerov, v2::unitv), 1000).apply(ent);
+			container& cont = ent.add_component< container>(v2::Coord2(1,1));
+
+			cont.slots.emplace<ecs::object_handle>(std::move(ecs::spawn(ent.world(), FloatingItemSlotUiSpawner(container_index(0,0), v2::zerov))));
+			ent.add_child(cont.slots.last().get());
 		}
-		return false;
-	}
-	int sizex;
-	int sizey;
-	v2::Vec2 offset;
-	void enable() {
-		for (int i = 0; i < databuf.length(); i++) {
-			databuf[i].enable();
-		}
-
-		enabled = true;
-
-	}
-	void disable() {
-
-		for (auto& elem : databuf) {
-			elem.disable();
-		}
-		enabled = false;
-
-	}
-	//void addtocontainer(int id);
-	Container(int xsize, int ysize, float xoff, float yoff) {
-
-		containerid = currentcontid;
-		currentcontid++;
-		sizex = xsize;
-		sizey = ysize;
-		offset = v2::Vec2(xoff, yoff);
-		int ind = 0;
-		databuf = array<itemslot>();
-		for (int j = 0; j < ysize; j++) {
-			for (int i = 0; i < xsize; i++) {
-
-
-				databuf.push(itemslot(i + xoff - float(sizex) / 2.0f, int(j + yoff - ysize / 2.0f)));
-
-
-			}
-		}
-		disable();
-	}
-	void update() {
-		if (enabled) {
-
-			for (int i = 0; i < databuf.length(); i++) {
-
-
-				databuf[i].updatestate();
-			}
-
-		}
-	}
-};
-
-
-// !itemstorage_H
+	};
+}

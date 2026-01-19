@@ -107,7 +107,6 @@ stn::Option<Vec3> colideentandblock(Collider& entity, block& tocollide, bool is_
 
 void distributeforce(ecs::obj p1, ecs::obj p2, Vec3 force) {
 
-	colideentandblock(p1.get_component<Collider>(), p2.get_component<block>(), false);
 	float totalforcemag = 0;
 	float e1mass = 0;
 	float e2mass = 0;
@@ -124,8 +123,6 @@ void distributeforce(ecs::obj p1, ecs::obj p2, Vec3 force) {
 	if (e2mass == 0) {
 		moveobj(force * -1.0, p1);
 		moveobj(force, p1);
-
-		colideentandblock(p1.get_component<Collider>(), p2.get_component<block>(), false);
 		moveobj(force, p1);
 		return;
 	}
@@ -140,15 +137,19 @@ void distributeforce(ecs::obj p1, ecs::obj p2, Vec3 force) {
 void collision::handleduelentitycollisions() {
 	for (Collider* Collider1 : Colliderlist) {
 		for (Collider* Collider2 : Colliderlist) {
-			Option<v3::Vec3> force = aabb::collideaabb(*Collider1, *Collider2);
-			if (force.is_none()) {
-				continue;
+			if (Collider1 != Collider2) {
+
+
+				Option<v3::Vec3> force = aabb::collideaabb(*Collider1, *Collider2);
+				if (force.is_none()) {
+					continue;
+				}
+				propagatecollisionmessage(Collider1->owner(), Collider2->owner());
+				if (Collider1->effector || Collider2->effector) {
+					continue;
+				}
+				distributeforce(Collider1->owner(), Collider2->owner(), force.unwrap());
 			}
-			propagatecollisionmessage(Collider1->owner(), Collider2->owner());
-			if (Collider1->effector || Collider2->effector) {
-				continue;
-			}
-			distributeforce(Collider1->owner(), Collider2->owner(), force.unwrap());
 		}
 	}
 }
@@ -173,13 +174,13 @@ voxtra::WorldRayCollision collision::raycastall(ray nray, HitQuery query, voxtra
 void collision::handleCollisionWithGrid(Collider& entity, bool is_trigger) {
 	geo::Box entity_box = entity.globalbox();
 	array<block*> blklist = CtxName::ctx.Grid->voxelinrange(entity_box);
-	Vec3 minforce = zerov;
+	stn::Option<Vec3> minforce ;
 	block* minblock = nullptr;
 
 	for (int ind = 0; ind < blklist.length(); ind++) {
 
 		stn::Option<Vec3> force = colideentandblock(entity, *blklist[ind], is_trigger);
-		if (force&&force.unwrap().length() > minforce.length() || minforce.length() == 0) {
+		if (minforce.map_member<&v3::Vec3::length>()< force.map_member<&v3::Vec3::length>()) {
 			minblock = blklist[ind];
 			minforce = force.unwrap();
 		}
@@ -187,7 +188,7 @@ void collision::handleCollisionWithGrid(Collider& entity, bool is_trigger) {
 	if (minblock != nullptr) {
 		if (!entity.effector) {
 
-			distributeforce(entity.owner(), minblock->owner(), minforce);
+			distributeforce(entity.owner(), minblock->owner(), minforce.unwrap());
 
 		}
 	}

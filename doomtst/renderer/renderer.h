@@ -57,18 +57,18 @@ namespace renderer {
 			}
 
 		}
-		void add_indices(std::initializer_list<std::uint32_t> indice_list) {
+		template<typename Range> requires convertible_range<Range, std::uint32_t>
+		void add_indices(const Range& indice_list) {
 			indices.append(indice_list);
 		}
 		void add_index(std::uint32_t index) {
 			indices.push(index);
 		}
-		void add_indices_offset_from(std::initializer_list<std::uint32_t> indice_list, std::uint32_t offset) {
+		template<typename Range> requires convertible_range<Range,std::uint32_t>
+		void add_indices_offset_from(const Range& indice_list, std::uint32_t offset) {
 			for (auto i : indice_list) {
 				indices.push(i + offset);
 			}
-		}
-		explicit MeshData() :generate_trivial(indice_mode::generate_indices), points(), indices(), layout() {
 		}
 		mesh_id mesh;
 		indice_mode generate_trivial;
@@ -120,6 +120,10 @@ namespace renderer {
 		Renderer* renderer;
 
 	};
+
+	struct remove_render_object {
+		ecs::obj object;
+	};
 	struct Renderer : ecs::resource {
 
 		Renderer();
@@ -153,10 +157,7 @@ namespace renderer {
 			return RenderableHandle(renderable(), this);
 		}
 		void remove(renderable ren) {
-			if (ren.get_mesh().bounded()) {
-				meshes.remove(ren.get_mesh());
-				ren.object.destroy();
-			}
+			ren.object.world().write_command(remove_render_object(ren.object));
 		}
 
 		void set_uniform(renderable rend, const renderer::uniform& value) {
@@ -196,8 +197,6 @@ namespace renderer {
 			return MeshData(id.get_mesh(), meshes[id.get_mesh()].Voa.attributes, is_trivial);
 		}
 		void fill_mesh(MeshData& data) {
-
-			data.mesh.assert_bounded("mesh must be bounded to be filled");
 			Option<Mesh&> mabye_mesh = meshes.get(data.mesh);
 			if (!mabye_mesh) {
 				return;
@@ -216,18 +215,19 @@ namespace renderer {
 			mesh.length = data.indices.length();
 		}
 
+		MeshRegistry meshes;
 		float fov;
 	private:
 
 		//ensures a mesh exists
 		mesh_id insert_mesh(renderer::renderable id) {
 
-			if (!id.has_component<mesh_component>() || id.get_component<mesh_component>().msh.unbounded()) {
+			if (!id.has_component<mesh_component>() || id.get_component<mesh_component>().msh.is_none()) {
 				id.set_mesh(meshes.create());
+	
 			}
 			return id.get_mesh();
 		}
-		MeshRegistry meshes;
 
 	};
 
@@ -236,8 +236,7 @@ namespace renderer {
 		stn::array<ecs::obj> phase_elements;
 		void sort() {
 			if (pass->should_sort) {
-				phase_elements | stn::sort([this](ecs::obj p1, ecs::obj p2) {
-					return p1.get_component<order_key>().order > p2.get_component<order_key>().order; });
+				phase_elements | stn::sort([this](ecs::obj p1) {return p1.get_component<order_key>().order; });
 			}
 		}
 		std::string_view name() const {
@@ -275,13 +274,18 @@ namespace renderer {
 			for (render_pass& pass : passes) {
 				pass.sort();
 			}
-			passes | stn::sort([](const render_pass& a, const render_pass& b) {
-				return a.pass->priority < b.pass->priority;
-				});
+			passes | stn::sort([](const render_pass& a) {return a.pass->priority;});
 			for (render_pass& pass : passes) {
 				for (ecs::obj id : pass.phase_elements) {
 					ren.render(renderable(id));
 				}
+			}
+			for (remove_render_object to_remove:world.read_commands<remove_render_object>()) {
+				mesh_component& mesh_comp = to_remove.object.get_component<mesh_component>();
+				if (mesh_comp.msh) {
+					ren.meshes.remove(mesh_comp.msh.unwrap());
+				}
+				mesh_comp.owner().destroy();
 			}
 		}
 	};

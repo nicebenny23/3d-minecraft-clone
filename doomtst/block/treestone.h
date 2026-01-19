@@ -14,7 +14,7 @@ inline void treestoneinit(blockname::block& blk) {
 	blk.mesh.box.scale = blockname::blockscale;
 
 	blk.createdefaultaabb(false);
-	blk.owner().add_component<loottable>().addelem(treestoneitem, 1);
+	blk.owner().add_component<loottable>().addelem("stone", 1);
 	blk.mininglevel = 3;
 	blk.minedfastwithpick = false;
 }

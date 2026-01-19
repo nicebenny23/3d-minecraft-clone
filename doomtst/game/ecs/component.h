@@ -40,6 +40,12 @@ namespace ecs {
 		Ecs& world() {
 			return *ecs;
 		}
+		const Ecs& world() const{
+			return *ecs;
+		}
+		entity owning_entity() const{
+			return ent;
+		}
 	private:
 		Ecs* ecs;
 		component_id comp_id;

@@ -5,7 +5,7 @@
 #include "../math/vector3.h"
 
  #include "../game/GameContext.h"
-#include "../game/transform.h"
+#include "../math/transform.h"
 #include "renderer.h"
 //fix
 using namespace stn;
@@ -29,7 +29,7 @@ namespace ModelMeshName {
 		Vec3 color;
 		ModelMesh();
 		void create_handle(const char* location, const char* name);
-		Transform transform;
+		math::Transform transform;
 		array<Point3> vertices;
 		array<unsigned int> vertexindices;
 		array<v2::Vec2> texcoords;

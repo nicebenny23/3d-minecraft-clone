@@ -3,6 +3,7 @@
 #include "vector2.h"
 #include <glm/glm.hpp>
 #include <string>
+#include "../util/exception.h"
 #include "Scale3.h"
 #pragma once
 
@@ -107,7 +108,7 @@ namespace v3 {
 			case 1: return y;
 			case 2: return z;
 			default:
-			throw std::invalid_argument(std::to_string(index) + " is not a valid index for a Vec3");
+			stn::throw_logic_error("{} is not a valid index for a Vec3",index);
 			}
 		}
 		double& operator[](size_t index) {
@@ -116,7 +117,7 @@ namespace v3 {
 			case 1: return y;
 			case 2: return z;
 			default:
-			throw std::invalid_argument(std::to_string(index) + " is not a valid index for a Vec3");
+			stn::throw_logic_error("{} is not a valid index for a Vec3", index);
 			}
 		}
 
@@ -447,12 +448,6 @@ namespace v3 {
 		return Point3(a.x - b.x, a.y - b.y, a.z - b.z);
 	}
 
-	// --- Cross-dependent definitions (both types now complete) ---
-
-
-
-
-	// FREE (non-member) binary ops between Vec3 and Coord
 
 	inline Coord::Coord(const Point3& p1) {
 		x = int(p1.x); y = int(p1.y); z = int(p1.z);

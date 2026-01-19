@@ -7,7 +7,7 @@ namespace stn {
     template<typename T>
     struct queue {
         template<typename ...Args>
-        void emplace(Args&&... args) {
+        void emplace(Args&&... args) requires std::constructible_from<T,Args...>{
             data.emplace_back(std::forward<Args>(args)...);
         }
 

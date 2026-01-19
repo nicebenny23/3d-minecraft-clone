@@ -7,7 +7,7 @@ struct rotatetwordsvel: ecs::component
 
 		Vec3 vel = owner().get_component<rigidbody>().velocity;
 		vel= normal(vel);
-		owner().get_component<ecs::transform_comp>().transform.OrientDir(vel);
+		owner().get_component<ecs::transform_comp>().transform.look_towards(vel);
 	}
 };
 

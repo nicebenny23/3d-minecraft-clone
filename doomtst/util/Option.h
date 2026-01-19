@@ -34,6 +34,7 @@ namespace stn {
 
 	template<typename T>
 	struct Option {
+		using value_type = T;
 		Option() noexcept : has_value(false), value() {
 		}
 		Option(Option::NoneType) noexcept : has_value(false), value() {
@@ -112,13 +113,13 @@ namespace stn {
 				return stn::None;
 			}
 		}
-		[[nodiscard]] T flatten() const requires OptionType<T>{
+		[[nodiscard]] T flatten() const requires OptionType<T> {
 			if (!has_value) {
 				return T(None);
 			}
 
 			return value.get<T>();
-			
+
 		}
 
 		Option& operator=(Option&& other) noexcept(std::is_nothrow_move_assignable_v<T>) {
@@ -215,6 +216,7 @@ namespace stn {
 			return true;
 		}
 
+
 		explicit operator bool() const noexcept {
 			return has_value;
 		}
@@ -285,8 +287,8 @@ namespace stn {
 			return stn::None;
 		}
 
-		Option<T> retain(this auto&& self, bool should_keep){
-			if (should_keep&&has_value) {
+		Option<T> retain(this auto&& self, bool should_keep) {
+			if (should_keep && self.has_value) {
 				return Option<T>(std::forward<decltype(self)>(self).value.get<T>());
 			}
 			return stn::None;
@@ -300,7 +302,7 @@ namespace stn {
 			return stn::None;
 		}
 		template<typename Func>
-		auto map(Func&& f) &-> Option< std::invoke_result_t<Func, T&>> requires std::invocable<Func, T&> && !std::is_void_v<std::invoke_result_t<Func, T&>>{
+		auto map(Func&& f) & ->Option< std::invoke_result_t<Func, T&>> requires std::invocable<Func, T&> && !std::is_void_v<std::invoke_result_t<Func, T&>>{
 			using U = std::invoke_result_t<Func, T&>;
 			if (has_value) {
 				return Option<U>(std::invoke(std::forward<Func>(f), value.get<T>()));
@@ -317,8 +319,27 @@ namespace stn {
 			return stn::None;
 
 		}
+		template<typename Self>
+		using forwarded_value_type_t = decltype(std::declval<Self>().value.get<T>());
+		template <auto Member,typename Self, typename... Args>
+		auto map_member(this Self&& self, Args&&... args) -> Option<std::invoke_result_t<decltype(Member), forwarded_value_type_t<Self>, Args...>>
+			requires std::is_member_function_pointer_v<decltype(Member)>&&
+		stn::nonvoid_invokable<decltype(Member), forwarded_value_type_t<Self>, Args...> {
+			if (!self.has_value) {
+				return stn::None;
+			}
+			using map_return = Option<std::invoke_result_t<decltype(Member), forwarded_value_type_t<Self>, Args...>>;
+			return map_return(std::invoke(Member, std::forward_like<Self>(self).value.get<T>(), std::forward<Args>(args)...));
+		}
+		template <typename Self, typename Member>
+		auto member(this Self&& self, Member m)
+			-> Option<std::remove_cvref_t<decltype(std::forward<Self>(self).value.get<T>().*m)>>
+			requires std::is_member_object_pointer_v<Member> {
+			if (!self.has_value) return stn::None;
 
-
+			using U = std::remove_cvref_t<decltype(std::forward<Self>(self).value.get<T>().*m)>;
+			return Option<U>(std::forward<Self>(self).value.get<T>().*m);
+		}
 		template<typename Func>
 		Option& then(Func&& f)&
 			requires std::invocable<Func, T&>&& std::is_void_v<std::invoke_result_t<Func, T&>> {
@@ -329,13 +350,13 @@ namespace stn {
 		}
 
 		template<typename Func>
-		Option then(Func&& f) && requires std::invocable<Func, T>&& std::is_void_v<std::invoke_result_t<Func, T&&>>{
+		Option then(Func&& f) && requires std::invocable<Func, T>&& std::is_void_v<std::invoke_result_t<Func, T&&>> {
 			if (has_value) {
 				std::invoke(std::forward<Func>(f), std::forward<T>(value.get<T>()));
 			}
 			return std::move(*this);
 		}
-		
+
 		template<typename Func> requires std::invocable<Func, const T&>&& OptionType<std::invoke_result_t<Func, const T&>>
 		auto and_then(Func&& f) const -> std::invoke_result_t<Func, const T&> {
 			if (has_value) {
@@ -360,7 +381,7 @@ namespace stn {
 	Option<T> Construct(Args&&... args) {
 		return Option<T>(T(std::forward<Args>(args)...));
 	}
-	
+
 	template<typename T>
 	std::partial_ordering partial_compare(const Option<T>& lhs, const Option<T>& rhs)
 		requires requires(const T& a, const T& b) {

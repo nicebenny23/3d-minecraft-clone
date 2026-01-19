@@ -1,5 +1,5 @@
 #pragma once
-#include "game_object.h"
+#include "ecs.h"
 #include "../../util/Option.h"
 #include "../../util/SparseSet.h"
 #include "../../util/pipeline.h"
@@ -48,7 +48,8 @@ namespace ecs {
 	};
 	template<RelationshipAccessor T,typename Tag>
 	struct Relationship : ecs::component {
-		
+		using Accessor = T;
+		using TagType= Tag;
 		using iterator = typename T::iterator;
 		using const_iterator = typename T::const_iterator;
 		using child_type = Target<T, Tag>;
@@ -88,152 +89,51 @@ namespace ecs {
 		}
 		void swap_children(Relationship& other) requires std::swappable<T>{
 			for (ecs::entity child : children_list) {
-				world().get_component<child_type>(child).parent_entity = other.owner();
+				world().get_component<child_type>(child).parent_entity = other.owning_entity();
 			}
-			for (ecs::obj child : other.children_list) {
-				child.get_component<child_type>().parent_entity = owner();
+			for (ecs::entity child : other.children_list) {
+				world().get_component<child_type>(child).parent_entity = owning_entity();
 			}
 			std::swap(children_list,other.children_list);
 
 		}
 
-		void add_child(ecs::obj child) {
-			if (child == owner()) {
+		void add_child(ecs::entity child) {
+			if (child == owning_entity()) {
 				throw std::logic_error("An object cannot be its own parent.");
 			}
-			stn::Option<child_type&> child_component = child.get_component_opt<child_type>();
+			stn::Option<child_type&> child_component = world().get_component_opt<child_type>(child);
 			if (child_component) {
 				ecs::entity& child_parent= child_component.unwrap().parent_entity;
 				world().get_component<Relationship<T, Tag>>(child_parent).remove_child(child);
-				child_parent =owner().inner();
+				child_parent = owning_entity();
 			}
 			else {
-				child.add_component<child_type>(owner().inner());
+				world().add_component<child_type>(owning_entity(),child);
 			}
-			children_list.add(child.inner());
+			children_list.add(child);
 		}
 
+		 void destroy_hook() override{
+			for (auto& obj : children_list) {
+				world().remove_object_unchecked(obj);
+			}
+		}
 	private:
 		
 		friend struct Target<T,Tag>;
-		void remove_child(const ecs::obj child) {
-			children_list.remove(child.inner());
+		void remove_child(ecs::entity child) {
+			children_list.remove(child);
 		}
 
-		void destroy_hook() {
-			for (auto& obj : children_list) {
-				ecs::obj(obj,world()).destroy();
-			}
-		}
 
 		T children_list;
 	};
-	
-	struct ParentArrayAdapter {
-		stn::array<ecs::entity> container;
 
-		using iterator = stn::array<ecs::entity>::iterator;
-		using const_iterator = stn::array<ecs::entity>::const_iterator;
-
-		void add(ecs::entity v) {
-			container.push(v);
-		}
-
-		void remove(ecs::entity value) {
-			for (size_t i = 0; i < container.length(); ++i) {
-				if (container[i] == value) {
-					container.swap_drop_unchecked(i);
-					return;
-				}
-			}
-		}
-
-		iterator begin() { return container.begin(); }
-		iterator end()   { return container.end(); }
-		const_iterator begin() const { return container.begin(); }
-		const_iterator end()   const { return container.end(); }
-	};
-	struct parent_child_tag {
-	};
-	using Parent = ecs::Relationship<ParentArrayAdapter, parent_child_tag >;
-	using Child = ecs::Target<ParentArrayAdapter, parent_child_tag>;
-
-	inline void add_child(ecs::obj parent, ecs::obj child) {
-		parent.ensure_component<Parent>().add_child(child);
-	}
-	struct HierarchyView {
-		ecs::obj entity;
-
-		HierarchyView(const ecs::obj e) : entity(e) {
-		}
-		ecs::obj operator*() {
-			return entity;
-		}
-		const ecs::obj operator*() const {
-			return entity;
-		}
-
-		ecs::obj* operator->() {
-			return &entity;
-		}
-		const ecs::obj* operator->() const {
-			return &entity;
-		}
-
-		bool has_children() {
-			Parent* prnt = entity.get_component_ptr<Parent>();
-			return prnt && !prnt->empty();
-		}
-		bool has_parent() {
-			return entity.has_component<Child>();
-		}
-		stn::Option<HierarchyView> parent() {
-			return entity.get_component_opt<Child>().map([&](Child& child) {return HierarchyView(ecs::obj(child.parent(), child.world())); });
-		}
-		stn::array<HierarchyView> children() {
-			if (!entity.has_component<Parent>()) return {};
-
-			stn::array<HierarchyView> view;
-			for (const auto& child : entity.get_component<Parent>().span()) {
-				view.push(HierarchyView(ecs::obj(child,entity.world())));
-			}
-			return view;
-		}
-		stn::span<ecs::entity> children_obj() {
-			if (!entity.has_component<Parent>()) return {};
-
-			return entity.get_component<Parent>().span();
-
-		}
-	};
 	template<RelationshipAccessor T,typename Tag>
-	void Target<T, Tag>::destroy_hook() {
-		world().get_component<parent_type>(parent_entity).remove_child(owner());
-	}
-	inline HierarchyView view(ecs::obj object) {
 
-		return HierarchyView(object);
+	void Target<T, Tag>::destroy_hook() {
+		world().get_component<parent_type>(parent_entity).remove_child(owning_entity());
 	}
-	inline bool has_children(ecs::obj entity) {
-		return view(entity).has_children();
-	}
-	inline bool has_parent(ecs::obj entity) {
-		return view(entity).has_parent();
-	}
-	inline stn::Option<ecs::obj> parent(ecs::obj entity) {
-		return view(entity).parent().map(std::function([](HierarchyView view) {return view.entity; }));
-	}
-	inline stn::span<ecs::entity> children(ecs::obj entity) {
-		return view(entity).children_obj();
-	}
-	inline void make_parent_of(ecs::obj parent, ecs::obj child) {
-		parent.ensure_component<Parent>().add_child(child);
-	}
-	//should make recip
-	template<RecipeType T, typename ...Args> requires std::constructible_from<T, Args&&...>
-	ecs::obj spawn_child(ecs::obj parent, Args&&... args) {
-		ecs::obj child=ecs::spawn_emplaced<T>(parent.world(), std::forward<Args>());
-		make_parent_of(parent, child);
-		return child;
-	}
+
 }

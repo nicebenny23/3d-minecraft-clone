@@ -17,7 +17,7 @@ void ModelMesh::setmodeluniform()
 ModelMesh::ModelMesh()
 {
 	color=unitv;
-	transform = Transform();
+	transform = math::Transform();
 }
 
 void ModelMeshName::ModelMesh::create_handle(const char* locaion,const char* name)
@@ -45,7 +45,7 @@ ModelMesh ModelMeshName::loadmesh(const char* location,const char* name, Vec3 po
 {
 	
 	ModelMesh newmesh = ModelMesh();
-	safefile meshfile = safefile(name, fileread);
+	file_handle meshfile = file_handle(name, FileMode(true,true));
 	newmesh.pos = position;
 	while (true)
 	{

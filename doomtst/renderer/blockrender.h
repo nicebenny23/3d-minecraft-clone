@@ -6,46 +6,28 @@
 #include "../math/intersection.h"
 #include "../game/GameContext.h"
 #include <mutex>
-
+#include "../math/meshes.h"
 #pragma once 
 namespace blockrender {
 	using namespace grid;
 
-	// Predefined vertices for a cube
-	const Vec3 vert[] = {
-		Vec3(0, 0, 0), // vertex 0
-		Vec3(1, 0, 0), // vertex 1
-		Vec3(1, 1, 0), // vertex 2
-		Vec3(0, 1, 0), // vertex 3
-		Vec3(0, 0, 1), // vertex 4
-		Vec3(1, 0, 1), // vertex 5
-		Vec3(1, 1, 1), // vertex 6
-		Vec3(0, 1, 1)  // vertex 7
-	};
+	
 
-	// UV coordinates for cube mapping
-	const float cubeuv[] = {
-		1, 0,
-		0, 0,
-		0, 1,
-		1, 1
-	};
-	// Check if a chunk is viewable within the camera's frustum
 	bool chunkviewable(Chunk::chunk& chk) {
 		float slope = tan(CtxName::ctx.Ren->fov / 2);
 		geo::Box chkb = geo::Box(chk.center(), unit_scale * float(chunklength) / 2.f);
-		ray camray = ray(camera::campos(), camera::campos() + camera::GetCamFront() * 1);
+		ray camray = ray::from_offset(camera::campos(), camera::GetCamFront());
 		geo::cone ncone = geo::cone(camray, slope);
 		geo::Plane pln = geo::Plane(camera::GetCamFront(), camray.start);
 		bool srf = false;
 		for (int i = 0; i < 8; i++) {
-			Point3 vertex = chk.center() + (vert[i] - unitv / 2.f) * float(chunklength);
+			Point3 vertex = chk.center() + (math::cube_mesh[i] - unitv / 2.f) * float(chunklength);
 			if (dot(vertex - camera::campos(), camera::GetCamFront()) > 0) {
 
 				srf = true;
 			}
 		}
-		//return true;
+
 		if (!srf) {
 			return false;
 		}
@@ -74,53 +56,36 @@ namespace blockrender {
 		break;
 		}
 
-		v2::Vec2 uvCoord = v2::Vec2(cubeuv[2 * ind], cubeuv[2 * ind + 1]);
+		v2::Vec2 uvCoord = math::square_mesh[ind] ;
 		v2::Vec2 ret = v2::unitv / 2 + offset * ((uvCoord - v2::unitv / 2) * -2);
 		return ret;
 	}
 
 	// Indices of unique vertices for each face of the cube
-	const int uniqueindices[] = {
-		5, 1, 2, 6,  // east (+x)
-		0, 4, 7, 3,  // west (-x)
-		2, 3, 7, 6,  // top (+y)
-		0, 1, 5, 4,  // bottom (-y)
-		4, 5, 6, 7,  // south (+z)
-		0, 1, 2, 3   // north (-z)
-	};
+
 
 	// Offset indices for the vertices in each face
-	const int indiceoffsetfrombaselocation[] = {
-		0, 1, 2, 0, 2, 3
-	};
+	
 
-	// Emit the vertices and indices for a single face of a block
 	void emitface(int face, const block& torender, renderer::MeshData& mesh) {
 		if (torender.mesh.faces[face].cover == cover_state::Uncovered) {
 			const int baselocation = mesh.length();
-			const int* uniqueInds = &uniqueindices[4 * face];
+			const int* uniqueInds = &math::cube_mesh_face_indices[4 * face];
 			Scale3 scale = torender.scale();
 			Point3 position = torender.center();
-
-			// Precompute texture number and lighting
 			const int textureNumber = torender.mesh[face].tex;
 			const float lightValue = torender.attributes.transparent ? torender.lightval.unwrap_or(1) : torender.mesh[face].light;
-
-
 			for (int j = 0; j < 4; j++) {
 				int uniqueind = uniqueInds[j];
-				Vec3 offsetfromcenter = (vert[uniqueind] - unitv / 2) * scale * 2;
+				Vec3 offsetfromcenter = (math::cube_mesh[uniqueind] - unitv / 2) * scale * 2;
 				Point3 offset = position + offsetfromcenter;
 
-				// Calculate UV coordinates
 				v2::Vec2 coords = facecoordtouv(&torender.mesh[face], j);
 
-				// Fill vertex data
 				mesh.add_point(offset, coords, textureNumber, lightValue);
 			}
-
 			for (int j = 0; j < 6; j++) {
-				mesh.add_index(baselocation + indiceoffsetfrombaselocation[j]);
+				mesh.add_index(baselocation + math::square_mesh_triangle_indices[j]);
 			}
 		}
 
@@ -186,8 +151,8 @@ namespace blockrender {
 		}
 	}
 
-	struct ChunkMesher :ecs::System {
-		ChunkMesher() {
+	struct ChunkPreMesher :ecs::System {
+		ChunkPreMesher() {
 
 		}
 
@@ -206,8 +171,8 @@ namespace blockrender {
 			thread_util::par_iter(world_grid.chunklist.begin(), world_grid.chunklist.end(), recompute_for, 4);
 		}
 	};
-	struct BlockRenderer :ecs::System {
-		BlockRenderer() {
+	struct ChunkRenderer :ecs::System {
+		ChunkRenderer() {
 		}
 		void run(ecs::Ecs& ecs) {
 			array<Chunk::chunk*> to_render = array<Chunk::chunk*>();
@@ -241,8 +206,8 @@ namespace blockrender {
 			engine.emplace_system<gridutil::GridCoverer>();
 			engine.emplace_system<gridutil::GridDarkener>();
 			engine.emplace_system<gridutil::GridLighter>();
-			engine.emplace_system<ChunkMesher>();
-			engine.emplace_system<BlockRenderer>();
+			engine.emplace_system<ChunkPreMesher>();
+			engine.emplace_system<ChunkRenderer>();
 			initblockrendering(engine.Ecs);
 		}
 		void initblockrendering(ecs::Ecs& ecs) {
@@ -283,13 +248,10 @@ namespace blockrender {
 			texlist.reach(lavatex) = "images\\lava.png";
 			texlist.reach(obsidiantex) = "images\\obb.png";
 			texlist.reach(chestfront) = "images\\chest.png";
-
 			texlist.reach(chestside) = "images\\chestsides.png";
 			texlist.reach(furnacefront) = "images\\furnacetop.png";
-
 			texlist.reach(furnaceside) = "images\\furnace.png";
 			texlist.reach(ironoretex) = "images\\ironore.png";
-
 			texlist.reach(furnacesideon) = "images\\furnaceon.png";
 			texlist.reach(furnacefronton) = "images\\furnacetopon.png";
 			texlist.reach(logtoppng) = "images\\log.png";
@@ -297,7 +259,6 @@ namespace blockrender {
 			texlist.reach(sandtex) = "images\\sand.png";
 			texlist.reach(planktex) = "images\\treestoneblock.png";
 			renderer::texture_array_id texarray = ecs.load_asset_emplaced<renderer::TextureArrayPath>(texlist, "BlockTextures").unwrap();
-
 			renderer.Bind_Texture(texarray);
 			renderer.set_uniform("bind_block_texture", texarray);
 		}

@@ -1,7 +1,6 @@
 #include "component.h"
 #pragma once
 namespace ecs {
-	struct Ecs;
 	struct ecs::obj;
 	struct Recipe{
 		virtual void apply(ecs::obj& object) = 0;
@@ -19,19 +18,7 @@ namespace ecs {
 
 	//did this 
 	template<typename T>
-	inline constexpr bool is_tuple_v = is_tuple<T>::value;
-	//who knows how this one works(not mine)
-	template<typename Tuple1, typename Tuple2>
-	concept SameTupleType =
-		is_tuple_v<Tuple1> && is_tuple_v<Tuple2> &&
-		std::tuple_size_v<Tuple1> == std::tuple_size_v<Tuple2> &&
-		[]<std::size_t... I>(std::index_sequence<I...>) {
-		return ((std::same_as<
-			std::tuple_element_t<I, Tuple1>,
-			std::tuple_element_t<I, Tuple2>
-		>) && ...);
-	}(std::make_index_sequence<std::tuple_size_v<Tuple1>>{});
-
+	concept TupleType = is_tuple<T>::value;
 	template<RecipeType... Recipes>
 	struct RecipeBuilder:Recipe {
 		std::tuple<Recipes...> recipes;
@@ -39,7 +26,7 @@ namespace ecs {
 
 		}  
 		template<typename... Rs>
-			requires SameTupleType<std::tuple<std::decay_t<Rs>...>, std::tuple<Recipes...>>
+			requires std::same_as<std::tuple<std::decay_t<Rs>...>, std::tuple<Recipes...>>
 		RecipeBuilder(Rs&&... rs) : recipes(std::forward<Rs>(rs)...) {
 		}
 		void apply(ecs::obj& object) {

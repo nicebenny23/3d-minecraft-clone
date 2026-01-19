@@ -8,7 +8,6 @@
 #include "../util/dynamicarray.h"
 #include "../debugger/debug.h"
 #include "playerinventory.h"
-#include "../items/itemutil.h"
 #include "../renderer/decal.h"
 #include "../util/cached.h"
 #include "../game/ecs/query.h"
@@ -37,7 +36,7 @@ void initbreakparticle(ecs::obj newent);
 
 struct playerbreak : ecs::component {
 	voxtra::WorldRayCollision closest;
-	stn::change <item*> pickaxe;
+	stn::change <stn::Option<ecs::obj>> pickaxe;
 
 	decal break_decal;
 	float break_start_time = 0.f;
@@ -80,10 +79,10 @@ struct playerbreak : ecs::component {
 
 	}
 	float curr_mining_power() {
-		if (pickaxe() == nullptr) {
+		if (!pickaxe()) {
 			return 1;
 		}
-		return pickaxe()->properties.pickaxepower;
+		return 1;
 
 	}
 	void engage_block(block* blk) {
@@ -91,20 +90,20 @@ struct playerbreak : ecs::component {
 			if (break_decal.handle) {
 				// break_decal.handle.disable();
 			}
-			pickaxe.clear(owner().get_component<inventory>().selected);
+			pickaxe.clear(owner().get_component<inventory>().selected().map(&component::owner));
 			currmining.clear(blk);
 			break_start_time = block_power(blk);
 			timeuntilbreak = break_start_time;
 
 		}
 		else {
-			pickaxe.set(owner().get_component<inventory>().selected);
+			pickaxe.set(owner().get_component<inventory>().selected().map(&component::owner));
 			currmining.set(blk);
 		}
 	}
 	void disengage_block() {
 		currmining.clear(nullptr);
-		pickaxe.clear(nullptr);
+		pickaxe.clear(stn::None);
 		if (break_decal.handle) {
 			break_decal.handle.disable();
 		}
@@ -116,7 +115,7 @@ struct playerbreak : ecs::component {
 	}
 	//returns current speed
 	bool ensure_engage() {
-		ray r= ray::from_offset(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * 7.f);
+		ray r= ray::from_offset(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.normal_dir() * 7.f);
 		closest = collision::raycastall(r, collision::HitQuery(owner()), voxtra::countsolid);
 		if (!closest) {
 			return false;
@@ -128,7 +127,7 @@ struct playerbreak : ecs::component {
 		if (!inrange(hit.dist(), interactminrange, interactmaxrange)) {
 			return false;
 		}
-		if (!CtxName::ctx.Inp->mouseleft().held) {
+		if (!CtxName::ctx.Inp->left_mouse().held) {
 			return false;
 		}
 		engage_block(hit.owner().get_component_ptr<block>());
@@ -167,7 +166,7 @@ struct playerbreak : ecs::component {
 		// Break when timer completes
 		if (timeuntilbreak <= 0.f) {
 			if (pickaxe()) {
-				pickaxe()->use(1);
+				pickaxe().unwrap().get_component_opt<items::item_durability>();
 			}
 			if (!currmining()->minedfastwithpick || currmining()->mininglevel <= curr_mining_power()) {
 				make_drop(broken->owner());

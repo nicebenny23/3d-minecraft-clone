@@ -10,7 +10,7 @@
 #include <cmath>
 
 #include "objecthelper.h"
-#include "transform.h"
+#include "../math/transform.h"
 
 namespace aabb {
 
@@ -26,7 +26,7 @@ namespace aabb {
 
 
 			if (owner().has_component<ecs::transform_comp>()) {
-				Transform transform = owner().get_component<ecs::transform_comp>().transform;
+				math::Transform transform = owner().get_component<ecs::transform_comp>().transform;
 
 				return geo::Box(box.center * transform.scale * 2 + v3::Vec3(transform.position.x, transform.position.y, transform.position.z), box.scale * transform.scale * 2);
 

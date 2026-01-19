@@ -6,360 +6,168 @@
 #include <Windows.h>
 
 #include <glm/glm.hpp>
+#include <format>
 namespace v2 {
 	struct Vec2;
-	struct Coord2
-	{
+	struct Coord2 {
 
-		constexpr  Coord2(int X, int Y) noexcept;
-		Coord2();
-		void operator=(const Coord2& p1);
-		bool operator==(const Coord2& p1) const;
-		bool operator!=(const Coord2& p1);
-		Coord2& operator+=(const Coord2& p1);
-		Coord2 operator+(const Coord2& p1) const;
+		constexpr Coord2(int X, int Y) noexcept : x(X), y(Y) {
+		}
+		constexpr Coord2() : x(0), y(0) {
+		}
+		bool operator==(const Coord2& p1) const {
+			return (p1.x == x && p1.y == y);
+		}
+		bool operator!=(const Coord2& p1) {
+			return(p1.x != x || p1.y != y);
+		}
+		Coord2& operator+=(const Coord2& p1) {
+			x += p1.x;
+			y += p1.y;
+			return *this;
+		}
+		Coord2 operator+(const Coord2& p1) const {
+			return Coord2(x + p1.x, y + p1.y);
+		}
 
-		Coord2& operator-=(const Coord2& p1);
-		Coord2 operator-(const Coord2& p1) const;
+		Coord2& operator-=(const Coord2& p1) {
+			x -= p1.x;
+			y -= p1.y;
+			return *this;
+		}
+		Coord2 operator-(const Coord2& p1) const {
+			return Coord2(x - p1.x, y - p1.y);
+		}
 
-		Coord2 operator*(int scale) const;
-		Coord2& operator*=(int scale);
+		Coord2 operator*(int scale) const {
+			return Coord2(x * scale, y * scale);
+		}
+		Coord2& operator*=(int scale) {
+			x *= scale;
+			y *= scale;
+			return *this;
+		}
 		bool operator==(const Vec2& p1) const;
 		Vec2 operator+(const Vec2& p1) const;
 		Vec2 operator-(const Vec2& p1) const;
-	
+
 		int x;
 		int y;
-
-
-
 	};
 
-	
+	struct Vec2 {
 
-	inline Coord2::Coord2() {
+		constexpr Vec2(double X, double Y) noexcept : x(X), y(Y) {
+		}
+		Vec2() = default;
+		Vec2(glm::vec2 glm) {
+			x = glm.x; y = glm.y;
+		}
+		explicit Vec2(Coord2 crd) {
+			x = crd.x; y = crd.y;
+		}
+		bool operator==(const Vec2& p1) const {
+			return (x == p1.x && p1.y == y);
+		}
 
+		bool operator!=(const Vec2& p1) const {
+			return !(*this == p1);
+		}
+		Vec2& operator+=(const Vec2& p1) {
+			x += p1.x;
+			y += p1.y;
+			return *this;
+		}
+		Vec2 operator+(const Vec2& p1) const {
+			return Vec2(x + p1.x, y + p1.y);
+		}
 
+		Vec2& operator-=(const Vec2& p1) {
+			x -= p1.x;
+			y -= p1.y;
+			return *this;
+		}
+		Vec2 operator-(const Vec2& p1) const {
+			return Vec2(x - p1.x, y - p1.y);
+		}
 
-		x = 0;
-		y = 0;
-	}
+		Vec2 operator*(double scale) const {
+			return Vec2(x * scale, y * scale);
+		}
 
+		Vec2& operator*=(double scale) {
+			x *= scale;
+			y *= scale;
+			return *this;
+		}
+		Vec2 operator/(double scale) const {
+			return Vec2(x / scale, y / scale);
+		}
 
-
-	
-
-	inline void Coord2::operator=(const Coord2& p1) {
-
-		x = p1.x;
-		y = p1.y;
-
-
-	}
-
-	inline bool Coord2::operator==(const Coord2& p1) const
-	{
-		return 	(p1.x ==x &&p1.y == y);
-	}
-
-
-
-
-	inline Coord2 Coord2::operator+(const Coord2& p1) const {
-
-
-		return Coord2(x + p1.x, y + p1.y);
-
-
-	}
-	inline Coord2& Coord2::operator+=(const Coord2& p1) {
-
-
-		x += p1.x;
-		y += p1.y;
-		return *this;
-
-	}
-
-
-
-
-
-	inline Coord2 Coord2::operator-(const Coord2& p1) const {
-
-
-		return Coord2(x - p1.x, y - p1.y);
-
-
-	}
-	inline Coord2& Coord2::operator-=(const Coord2& p1) {
-
-
-		x -= p1.x;
-		y -= p1.y;
-		return *this;
-
-	}
-
-	inline Coord2 Coord2::operator*(int scale) const {
-
-		return Coord2(x * scale, y * scale);
-
-
-
-	}
-
-	inline Coord2& Coord2::operator*=(int scale) {
-
-
-		x *= scale;
-		y *= scale;
-		return *this;
-
-	}
-
-	
-
-
-	inline constexpr Coord2::Coord2(int X, int Y)  noexcept {
-
-		x = X;
-		y = Y;
-	}
-
-	inline bool Coord2::operator!=(const Coord2& p1)
-	{
-		return(p1.x != x || p1.y != y);
-
-	}
-
-
-	struct Vec2
-	{
-
-		constexpr Vec2(double X, double Y) noexcept;
-		Vec2();
-		Vec2(glm::vec2 glm);
-		explicit Vec2(Coord2 crd);
-		void operator=(const Vec2& p1);
-		bool operator==(const Vec2& p1);
-		bool operator!=(const Vec2& p1);
-		Vec2& operator+=(const Vec2& p1);
-		Vec2 operator+(const Vec2& p1) const;
-
-		Vec2& operator-=(const Vec2& p1);
-		Vec2 operator-(const Vec2& p1) const;
-
-		Vec2 operator*(double scale) const;
-		
-		Vec2& operator*=(double scale);
-
-
-		Vec2 operator/(double scale) const;
-
-		Vec2& operator/=(double scale);
-		bool operator==(const Coord2& p1) const;
+		Vec2& operator/=(double scale) {
+			x /= scale;
+			y /= scale;
+			return *this;
+		}
+		bool operator==(const Coord2& p1) const {
+			return (p1.x == x && p1.y == y);
+		}
 		double x;
 		double y;
-		void operator= (const Coord2 & p1) ;
-		Vec2 operator*(Vec2 scale) const;
-
+		void operator= (const Coord2& p1) {
+			x = p1.x;
+			y = p1.y;
+		}
+		Vec2 operator*(Vec2 scale) const {
+			return Vec2(x * scale.x, y * scale.y);
+		}
 	};
 
 	const  Vec2 zerov = Vec2(0, 0);
 	const  Vec2 unitv = Vec2(1, 1);
-	inline Vec2::Vec2() {
 
-
-
-		x = 0;
-		y = 0;
+	inline Vec2 Coord2::operator+(const Vec2& p1) const {
+		return Vec2(p1.x + x, p1.y + y);
 	}
-	inline Vec2::Vec2(glm::vec2 glm) {
 
-
-
-		x = glm.x;
-		y = glm.y;
+	inline Vec2 Coord2::operator-(const Vec2& p1) const {
+		return Vec2(x - p1.x, y - p1.y);
 	}
-	inline Vec2::Vec2(Coord2 crd)
-	{
-		x = crd.x;
-		y = crd.y;
+
+	inline bool Coord2::operator==(const Vec2& p1) const {
+		return (p1.x == x && p1.y == y);
 	}
+
 	inline double dist(const Vec2& p, const Vec2& p1) {
-
 		return(sqrt((p.x - p1.x) * (p.x - p1.x) + (p.y - p1.y) * (p.y - p1.y)));
 	}
-	
-	
-
-	inline bool Vec2::operator==(const Vec2& p1)
-	{
-		return (p1.x == x && p1.y == y);
-
-	}
-
 
 	inline double len(const Vec2& p) {
-
 		return(sqrt(p.x * p.x + p.y * p.y));
 	}
 	inline Vec2 normal(Vec2 p) {
-		if (p == zerov)
-		{
+		if (p == zerov) {
 			return zerov;
- 		}
+		}
 		return(p / len(p));
 	}
-	
-	inline double dot(const Vec2& p, const Vec2& p1) {
 
+	inline double dot(const Vec2& p, const Vec2& p1) {
 		return (p.x * p1.x + p.y + p1.y);
 	}
 
-
 	inline Vec2 lerp(const Vec2& p, const Vec2& p1, double t) {
 		return p * (1 - t) + p1 * t;
-
-
 	}
 
 	inline double slope(const Vec2& p, const Vec2& p1) {
 		return (p1.y - p.y) / (p1.x - p.x);
-
-
 	}
-
-	inline void Vec2::operator=(const Vec2& p1) {
-
-		x = p1.x;
-		y = p1.y;
-
-
-	}
-
-
-
-
-	inline Vec2 Vec2::operator+(const Vec2& p1) const {
-
-
-		return Vec2(x + p1.x, y + p1.y);
-
-
-	}
-	inline Vec2& Vec2::operator+=(const Vec2& p1) {
-
-
-		x += p1.x;
-		y += p1.y;
-		return *this;
-
-	}
-
-
-
-
-
-	inline Vec2 Vec2::operator-(const Vec2& p1) const {
-
-
-		return Vec2(x - p1.x, y - p1.y);
-
-
-	}
-	inline Vec2& Vec2::operator-=(const Vec2& p1) {
-
-
-		x -= p1.x;
-		y -= p1.y;
-		return *this;
-
-	}
-
-	inline Vec2 Vec2::operator*(double scale) const {
-
-		return Vec2(x * scale, y * scale);
-
-
-
-	}
-	inline Vec2 Vec2::operator*(Vec2 scale) const {
-
-		return Vec2(x * scale.x, y * scale.y);
-
-
-
-	}
-	inline Vec2& Vec2::operator*=(double scale) {
-
-
-		x *= scale;
-		y *= scale;
-		return *this;
-
-	}
-
-	inline Vec2 Vec2::operator/(double scale) const {
-
-		return Vec2(x / scale, y / scale);
-	}
-
-	
-	inline Vec2& Vec2::operator/=(double scale) {
-
-
-		x /= scale;
-		y /= scale;
-		return *this;
-
-	}
-
-
-	
-	inline constexpr Vec2::Vec2(double X, double Y) noexcept{
-
-		x = X;
-		y = Y;
-	}
-
-	inline bool Vec2::operator!=(const Vec2& p1)
-	{
-		return(p1.x != x || p1.y != y);
-
-	}
-
-	//this section is for stuff defined in v2 incorerating iv2;
-	inline void Vec2::operator=(const Coord2& p1)  
-	{
-		x = p1.x;
-		y = p1.y;
-
-	}
-
-	inline bool Vec2::operator==(const Coord2& p1) const
-	{
-		return (p1.x == x && p1.y == y);
-	}
-	//this section is for stuff defined in iv3 incorperating a vector;
-
-
-
-
-	
-	inline bool Coord2::operator==(const Vec2& p1)const
-	{
-		return (p1.x == x && p1.y == y );
-	}
-	inline Vec2 Coord2::operator+(const Vec2& p1) const
-	{
-		return Vec2(p1.x + x, p1.y + y);
-	}
-
-	inline Vec2 Coord2::operator-(const Vec2& p1) const
-	{
-		return Vec2(x - p1.x, y - p1.y);
-	}
-
 }
+template <>
+struct std::formatter<v2::Coord2> : std::formatter<std::string> {
+	template <typename FormatContext>
+	auto format(const v2::Coord2& v, FormatContext& ctx) const {
+		return std::format_to(ctx.out(), "({}, {})", v.x, v.y);
+	}
+};

@@ -44,7 +44,7 @@ struct slimemove : ecs::component{
        
 
            owner().get_component<rigidbody>().velocity += v3::Vec3(normal(gotopos).x, 0, normal(gotopos).z) * CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
-               owner().get_component<ecs::transform_comp>().transform.OrientDir(v3::Vec3(gotopos.x,0, gotopos.z));
+               owner().get_component<ecs::transform_comp>().transform.look_towards(v3::Vec3(gotopos.x,0, gotopos.z));
               owner().get_component<ecs::transform_comp>().transform.yaw = 90 * round(owner().get_component<ecs::transform_comp>().transform.yaw/90);
                
            }
@@ -59,7 +59,7 @@ inline ecs::obj createslime(v3::Coord pos,bool type) {
   
         refmodel.add_component<model>().add("meshes\\cubetest.obj", "images\\slimetex.png");
     
-    refmodel.add_component<loottable>().addelem(slimeballitem, 1, false);
+    refmodel.add_component<loottable>().addelem("iron_item", 1, false);
  
     refmodel.add_component<estate>(10, true);
     refmodel.add_component<aabb::Collider>(v3::Point3(0,0,0), blockscale, true);

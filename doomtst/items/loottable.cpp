@@ -1,13 +1,10 @@
 #include "loottable.h"
 #include "../player/playerinventory.h"
 #include "../player/player.h"
-void lootelement::drop()
+void lootelement::drop(ecs::Ecs& world)
 {
 	int dropamt = maxamt;
-
-	player::goblin.get_component<inventory>().hotbar.fill(itemid, dropamt, false);
-	player::goblin.get_component<inventory>().playermenu.blkcont->fill(itemid, dropamt, false);
-
-	player::goblin.get_component<inventory>().hotbar.fill(itemid, dropamt, true);
-	player::goblin.get_component<inventory>().playermenu.blkcont->fill(itemid, dropamt, true);
+	items::item_id id= world.get_resource<items::item_type_register>().unwrap().from_name(item_name);
+	items::item_entry entry = items::item_entry(id, maxamt);
+	items::stage_transaction_emplaced<items::give_container_entry>(world,entry,player::goblin.get_component<inventory>().hotbar.get_component<items::container>());
 }

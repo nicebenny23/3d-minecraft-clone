@@ -289,7 +289,7 @@ namespace stn {
 				list.construct_at(len++, value);
 			}
 		}
-		template <std::ranges::forward_range Container>
+		template <convertible_range<T> Container>
 		void append(Container&& range) {
 			size_t otherlen = std::ranges::distance(range);
 			geometric_reserve(len + otherlen);

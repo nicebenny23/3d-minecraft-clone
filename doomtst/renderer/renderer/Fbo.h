@@ -28,8 +28,8 @@ namespace renderer {
 			Fbo fbo(0);
 			glGenFramebuffers(1, &fbo.id);
 			glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
-			int colorAttachmentIndex = 0;
-			std::vector<GLenum> drawBuffers;
+			int color_attachment_index = 0;
+			stn::array<GLenum> draw_buffers;
 			GLenum texTarget = (frame.samples > 1) ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
 
 			for (const FboTextureDescriptor& desc : frame.descriptors) {
@@ -39,8 +39,8 @@ namespace renderer {
 				switch (desc.type) {
 					case FboTextureDescriptor::Type::Color:
 					case FboTextureDescriptor::Type::Integer:
-					attachment = GL_COLOR_ATTACHMENT0 + colorAttachmentIndex++;
-					drawBuffers.push_back(attachment);
+					attachment = GL_COLOR_ATTACHMENT0 + color_attachment_index++;
+					draw_buffers.push(attachment);
 				break;
 
 					case FboTextureDescriptor::Type::Depth:
@@ -49,8 +49,8 @@ namespace renderer {
 				}
 				glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texTarget, tex->id, 0);
 			}
-			if (!drawBuffers.empty()) {
-				glDrawBuffers(static_cast<GLsizei>(drawBuffers.size()), drawBuffers.data());
+			if (!draw_buffers.empty()) {
+				glDrawBuffers(static_cast<GLsizei>(draw_buffers.length()), draw_buffers.data());
 			}
 			else {
 				glDrawBuffer(GL_NONE);

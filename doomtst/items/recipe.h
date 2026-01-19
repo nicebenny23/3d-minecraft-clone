@@ -1,107 +1,69 @@
-#include "../util/dynamicarray.h"
+#include "Item.h"
 #include "Container.h"
-#include "../util/fileloader.h"
-using namespace stn;
-#pragma once 
-struct iteminrecipe {
+#pragma once
+namespace items {
 
-	int id;
-	int amt;
-	iteminrecipe(int itemid, int itemamt) {
-		id = itemid;
-		amt = itemamt;
-    }
-	iteminrecipe() {
-		id = -1;
-		amt = -1;
-	}
-};
+	struct ItemRecipe {
+		v2::Coord2 size;
+		stn::array<stn::Option<item_entry>> item_list;
+		item_entry output;
 
-struct irecipe {
-	int xsize;
-	irecipe() {
-
-				xsize = -1;
-		ysize = -1;
-		
-	}
-	int ysize;
-	iteminrecipe itemcreated;
-	bool cancraft(Container* resourcecont,bool exact=false);
-	irecipe(const array<iteminrecipe>& itemarray,iteminrecipe created,int sizex,int sizey);
-
-	array<iteminrecipe> recipe;
-	};
-struct extrarecipeattributes {
-	bool isauto = false;
-	float timetillcraft;
-	float timetocraft;
-	extrarecipeattributes() {
-		timetillcraft = 0;
-		isauto = false;
-		timetocraft = 0;
-	}
-	extrarecipeattributes(bool doneauto, float craftingtime) {
-		timetillcraft = craftingtime;
-		isauto = doneauto;
-		timetocraft = craftingtime;
-	}
-};
-struct managerstate {
-	bool itemcreatedinside;
-	bool cancraft;
-	bool enabled;
-	bool craftedthisframe;
-	bool shouldmax;
-	iteminrecipe crafted;
-	managerstate() {
-		
-		cancraft = true;
-		enabled = false;
-		craftedthisframe = false;
-	}
-};
-enum autocraftstatetype
-{
-	crafted=0,
-	iscrafting=1,
-	notcrafting=2,
-};
-struct recipemanager {
-	int xsize;
-	int ysize;
-
-	managerstate state;
-	Container* newitemlocation;
-	Container* resourcecontainer;
-	extrarecipeattributes attributes;
-	void destroy();
-	void createcontainers();
-	void addrecipe(irecipe recipe);
-	void updatestate();
-	void autoupdate();
+		using iterator = decltype(item_list)::iterator;
+		using const_iterator = decltype(item_list)::const_iterator;
+		iterator begin() {
+			return item_list.begin();
+		}
+		iterator end() {
+			return item_list.end();
+		}
+		const_iterator begin() const{
+			return item_list.begin();
+		}
+		const_iterator end() const {
+			return item_list.end();
+		}
+		size_t nonempty_slot_count() const {
+			size_t count=0;
+			for (const stn::Option<item_entry>& slot: item_list) {
+				if (slot.is_some()) {
+					count++;
+				}
+			}
+			return count;
+		}
+	};  
 	
-	void preview(); 
-	void craft();
-	bool isitempreview();
-	int timecancraft();
-	autocraftstatetype autocraft();
-		irecipe* searchrecipe();
-	array<irecipe> recipelist;
-	irecipe* currecipe;
-	void save();
-	void enable();
-	void disable();
-	bool previewvalid();
-	unsigned int getcombinedid() {
-		return 256 * newitemlocation->containerid + resourcecontainer->containerid;
-	}
-	recipemanager(const char* filename, int sizex, int sizey);
-	recipemanager() {
-		currecipe = nullptr;
-		newitemlocation = nullptr;
-		resourcecontainer = nullptr;
-	}
+	
 
 
-};
+
+
+
+	struct ItemRecipes{ 
+		v2::Coord2 size;
+		stn::array<ItemRecipe> recipe_list;
+		ItemRecipes(){
+	
+		}
+		using iterator = decltype(recipe_list)::iterator;
+		using const_iterator = decltype(recipe_list)::const_iterator;
+		iterator begin() {
+			return recipe_list.begin();
+		}
+		iterator end() {
+			return recipe_list.end();
+		}
+		const_iterator begin() const {
+			return recipe_list.begin();
+		}
+		const_iterator end() const {
+			return recipe_list.end();
+		}
+	};
+	
+	struct RecipeBinder {
+		ecs::obj container_output;
+		ecs::obj container_input;
+		ItemRecipes list;
+	};
+}

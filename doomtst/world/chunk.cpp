@@ -67,24 +67,11 @@ void appendspecialbytelist(array<unsigned short>& bytelist, int index, block* bl
 		bytelist[chunksize + index] = getliq->liqval;
 
 	}
-	if (blk->owner().has_component<craftingtablecomp>()) {
-
-		bytelist[chunksize + index] = blk->owner().get_component<craftingtablecomp>().men.blkcont.getcombinedid();
-
-	}
-	if (blk->owner().has_component<chestcomp>()) {
-		bytelist[chunksize + index] = blk->owner().get_component<chestcomp>().men.blkcont.containerid;
-
-	}
-	if (blk->owner().has_component<furnacecomp>()) {
-		bytelist[chunksize + index] = blk->owner().get_component<furnacecomp>().men.blkcont.getcombinedid();
-
-	}
 }
 void Chunk::chunk::write() {
 
 
-	safefile file = safefile(getcorefilename(loc), filewrite);
+	file_handle file = file_handle(getcorefilename(loc), FileMode(true,true));
 	array<unsigned short> bytelist = array<unsigned short >();
 	for (int i = 0; i < chunksize; i++) {
 		size_t v1 = blockbuf[i].get_component<block>().id;

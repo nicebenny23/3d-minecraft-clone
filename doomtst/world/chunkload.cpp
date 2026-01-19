@@ -212,11 +212,11 @@ Chunk::chunk& ChunkLoader::AllocChunk(Coord location) {
 
 Chunk::chunk& ChunkLoader::LoadFromFile(Coord location) {
 
-	safefile file = safefile(Chunk::getcorefilename(location), fileread);
-	unsigned short* bytelist = file.read<unsigned short>(chunksize);
+	file_handle file = file_handle(Chunk::getcorefilename(location), FileMode(true,true));
+	stn::array<unsigned short> bytelist = file.read<unsigned short>(chunksize);
 
-	file.go(chunksize * 2);
-	unsigned short* randomproperties = file.read<unsigned short>(chunksize);
+	file.seek(SeekOrigin::Begin,chunksize * 2);
+	stn::array<unsigned short> randomproperties = file.read<unsigned short>(chunksize);
 	Chunk::chunk& newchunk = AllocChunk(location);
 	int i = 0;
 	for (int x = 0; x < chunkaxis; x++) {
@@ -242,41 +242,6 @@ Chunk::chunk& ChunkLoader::LoadFromFile(Coord location) {
 				if (newchunk.blockbuf[i].has_component<liquidprop>()) {
 					newchunk.blockbuf[i].get_component<liquidprop>().liqval = randomproperties[i];
 				}
-				if (newchunk.blockbuf[i].has_component<craftingtablecomp>()) {
-
-					newchunk.blockbuf[i].get_component<craftingtablecomp>().men.blkcont.destroy();
-					//we created a contaner so we are going back
-					currentcontid -= 2;
-					int resourceid = randomproperties[i] & 255;
-
-					int newloc = randomproperties[i] / 256.f;
-					newchunk.blockbuf[i].get_component<craftingtablecomp>().men.blkcont.resourcecontainer = new Container(resourceid);
-					newchunk.blockbuf[i].get_component<craftingtablecomp>().men.blkcont.newitemlocation = new Container(newloc);
-
-				}
-				if (newchunk.blockbuf[i].has_component<chestcomp>()) {
-
-					newchunk.blockbuf[i].get_component<chestcomp>().men.blkcont.destroy();
-					//we created a contaner so we are going back
-					currentcontid -= 1;
-					int resourceid = randomproperties[i] & 255;
-
-
-					newchunk.blockbuf[i].get_component<chestcomp>().men.blkcont = Container(resourceid);
-
-				}
-				if (newchunk.blockbuf[i].has_component<furnacecomp>()) {
-
-					newchunk.blockbuf[i].get_component<furnacecomp>().men.blkcont.destroy();
-					//we created a contaner so we are going back
-					currentcontid -= 2;
-					int resourceid = randomproperties[i] & 255;
-
-					int newloc = randomproperties[i] / 256.f;
-					newchunk.blockbuf[i].get_component<furnacecomp>().men.blkcont.resourcecontainer = new Container(resourceid);
-					newchunk.blockbuf[i].get_component<furnacecomp>().men.blkcont.newitemlocation = new Container(newloc);
-
-				}
 				//if (newchunk.blockbuf[i].has_component<>())
 
 				i++;
@@ -284,8 +249,6 @@ Chunk::chunk& ChunkLoader::LoadFromFile(Coord location) {
 		}
 	}
 
-
-	delete[] bytelist;
 	file.close();
 	return newchunk;
 

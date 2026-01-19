@@ -5,17 +5,14 @@
 #include "../math/vector2.h"
 #include "../math/geometry.h"
 #include "ui.h"
+
+#include "../math/meshes.h"
+#include "../game/ecs/unique_object.h"
 using namespace stn;
 using namespace geo;
 #pragma once
 namespace ui {
 
-	const v2::Vec2 cubeuv[] = {
-	v2::Vec2(0, 1),
-	v2::Vec2(1, 1),
-	v2::Vec2(0, 0),
-	v2::Vec2(1, 0)
-	};
 	struct set_image_cmd {
 		set_image_cmd(ecs::entity ui_ent, const renderer::TexturePath& texture_path) :path(texture_path), ui_entity(ui_ent) {}
 		renderer::TexturePath path;
@@ -82,10 +79,10 @@ namespace ui {
 			object.get_component<ui_image_component>().set_image(renderer::TexturePath(texloc, TextureName));
 		}
 		void add_child(const ecs::obj &child) {
-			object.ensure_component<ecs::Parent>().add_child(child);
+			object.get().add_child(child);
 		}
 		void make_child_of(ecs::obj& parent) {
-			parent.ensure_component<ecs::Parent>().add_child(object.get());
+			parent.add_child(object.get());
 		}
 		template<ecs::ComponentType T>
 		T& get_component() {
@@ -104,10 +101,10 @@ namespace ui {
 					img.tex_handle.set_material("Ui");
 					img.tex_handle.set_layout(vertice::vertex().push<float, 2>());
 					renderer::MeshData mesh = img.tex_handle.create_mesh();
-					mesh.add_indices({ 0,1,3,0,3,2 });
+					mesh.add_indices(math::square_mesh_triangle_indices);
 					array<float> databuf = array<float>();
 					for (int j = 0; j < 4; j++) {
-						mesh.add_point(cubeuv[j]);
+						mesh.add_point(math::square_mesh[j]);
 					}
 					img.tex_handle.fill(std::move(mesh));
 				}
@@ -117,6 +114,8 @@ namespace ui {
 			ecs::View<ui::ui_enabled, ui::ui_bounds, ui::ui_priority, ui_image_component> bounds_view(world);
 			for (auto&& [enabled, bounds,ui_priority, ui_image] : bounds_view) {
 				if (enabled.enabled()) {
+
+					ui_image.tex_handle.enable();
 					v2::Vec2 scale = bounds.global().center;
 					ui_image.tex_handle.set_order_key(ui_priority.priority);
 					ui_image.tex_handle.set_uniform(renderer::uniform(float(bounds.global().scale.x), "scale"));

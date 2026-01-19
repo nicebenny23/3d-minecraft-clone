@@ -9,25 +9,16 @@
 struct playerattackcomp: ecs::component
 {
 	void wearduribilty() {
-		item* select =owner().get_component<inventory>().selected;
-		if (select!=nullptr)
+		stn::Option<items::item_stack&> select =owner().get_component<inventory>().selected();
+		if (select)
 		{
-			if (select->itemtype == wear) {
-				select->amt -= 1;
+			if (select.unwrap().owner().has_component<items::item_durability>()) {
+				select.unwrap().owner().get_component<items::item_durability>().use();
 			}
 		}
 	}
 	int computeattackdmg() {
-		
-
-		item* select;
-		select = owner().get_component<inventory>().selected;
-		if (select == nullptr)
-		{
-			return 1;
-		}
-		
-		return select->properties.dmg;
+		return 1;
 	}
 
 	void update() {
@@ -46,7 +37,7 @@ struct playerattackcomp: ecs::component
 			return;
 		}
 		debug("sees"+std::to_string(CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt));
-		if (closest.collider.owner().has_component<estate>()&&CtxName::ctx.Inp->mouseleft().pressed)
+		if (closest.collider.owner().has_component<estate>()&&CtxName::ctx.Inp->left_mouse().pressed)
 		{
 			if (closest.owner().has_component<rigidbody>())
 			{

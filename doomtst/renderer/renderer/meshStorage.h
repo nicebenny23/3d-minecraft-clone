@@ -6,7 +6,7 @@
 
 namespace renderer {
 	struct mesh_id_tag;
-	using mesh_id = stn::default_id<mesh_id_tag>;
+	using mesh_id = stn::typed_id<mesh_id_tag>;
 	struct MeshRegistry {
 	
 		MeshRegistry(renderer::Context* context):ctx(context) {
@@ -20,12 +20,10 @@ namespace renderer {
 		Sparse::KeySet<Mesh> meshes;
 		stn::array<std::uint32_t> free;
 		void remove(mesh_id& handle) {
-			handle.assert_bounded("cannot remove an unbounded id");
-			uint32_t id = handle.get();
+			uint32_t id = handle.id;
 			ctx->destroy(meshes[id]);
-			meshes.erase_key(handle.get());
+			meshes.erase_key(handle.id);
 			free.push(id);
-			handle.reset();
 		}
 		mesh_id create() {
 			if (free.length()==0)
@@ -38,10 +36,10 @@ namespace renderer {
 			return mesh_id(id);
 		}
 		Mesh& operator[](mesh_id key) {
-			return meshes[key.get()];
+			return meshes[key.id];
 		}
 		Option<Mesh&> get(mesh_id key) {
-			return meshes.get(key.get());
+			return meshes.get(key.id);
 		}
 
 	};

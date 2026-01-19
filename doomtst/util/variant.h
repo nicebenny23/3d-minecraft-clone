@@ -190,11 +190,9 @@ namespace stn::variant {
 		template <typename Func, typename TypeList, typename... Args>
 		struct visitor_invocability_checker;
 
-		// Specialization for your TypeList::TypeList<Ts...> pattern
 		template <typename Func, typename... Ts, typename... Args>
 		struct visitor_invocability_checker<Func, TypeList::TypeList<Ts...>, Args...> {
 		private:
-			// Helper to check one type T
 			template <typename T>
 			static consteval void check_single() {
 

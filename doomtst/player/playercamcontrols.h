@@ -15,14 +15,14 @@ struct playercamcontrols : ecs::component
 	void update() {
 
 
-		if (!ismenuopen())
+		if (!world().ensure_resource<ui::MenuState>().menu_open())
 		{
 			CtxName::ctx.Window->DisableCursor();
 
-			double xoffset = CtxName::ctx.Inp->mouseposdt.x;
-			double yoffset = -CtxName::ctx.Inp->mouseposdt.y;
+			double xoffset = CtxName::ctx.Inp->mouse_position_dt.x;
+			double yoffset = CtxName::ctx.Inp->mouse_position_dt.y;
 
-			float sensitivity = 0.3;
+			float sensitivity = 30;
 
 			if (abs(xoffset) > 180)
 			{
@@ -45,7 +45,7 @@ struct playercamcontrols : ecs::component
 		{
 			CtxName::ctx.Window->EnableCursor();
 		}
-		ray cameraray = ray::from_offset(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.getnormaldirection() * interactmaxrange);
+		ray cameraray = ray::from_offset(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.normal_dir() * interactmaxrange);
 		voxtra::WorldRayCollision closest = collision::raycastall(cameraray, collision::HitQuery());
 		if (closest)
 		{

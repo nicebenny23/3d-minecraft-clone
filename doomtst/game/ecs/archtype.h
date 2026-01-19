@@ -158,13 +158,6 @@ namespace ecs {
 		Archetype& archetype_of(entity ent) {
 			return archetype_at(location_of(ent).id);
 		}
-		
-		void expandArchetype() {
-			for (auto& arch : archetypes) {
-				arch.moves.expand(arch.moves.length() + 1);
-			}
-		}
-		
 		void add_to_empty(entity new_spawn) {
 			locations[new_spawn.id()] = empty_archetype().add(new_spawn);
 		}

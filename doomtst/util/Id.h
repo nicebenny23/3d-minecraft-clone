@@ -1,6 +1,7 @@
 #pragma once
 #include "exception.h"
 #include <stdint.h>
+#include "data_format.h"
 #include <limits>
 namespace stn {
 	static constexpr uint32_t none_id = std::numeric_limits<uint32_t>::max();
@@ -96,5 +97,13 @@ template<typename T>
 struct std::hash<stn::typed_id<T>> {
 	size_t operator()(stn::typed_id<T> t) const noexcept {
 		return std::hash<uint32_t>{}(t.id);
+	}
+};
+
+template <typename T>
+struct std::formatter<stn::typed_id<T>> : std::formatter<std::string> {
+	template <typename FormatContext>
+	auto format(const stn::typed_id<T>& v, FormatContext& ctx) const {
+		return std::format_to(ctx.out(), "{}", v.id);
 	}
 };

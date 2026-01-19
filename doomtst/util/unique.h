@@ -16,7 +16,7 @@ namespace stn {
 	template<typename T>
 	struct box {
 
-		using element_type = T;
+		using value_type = T;
 		template<typename... Args>
 			requires std::constructible_from<T, Args&&...>
 		explicit box(Args&&... args) : ptr(new T(std::forward<Args>(args)...)) {
@@ -24,7 +24,8 @@ namespace stn {
 
 		template<ConstructDerivedTagType Tag, typename... Args>
 			requires std::derived_from<typename Tag::type, T>&&
-		std::constructible_from<typename Tag::type, Args&&...>
+		std::constructible_from<typename Tag::type, Args...>
+			&& std::has_virtual_destructor_v<T>
 			explicit box(Tag, Args&&... args)
 			: ptr(new typename Tag::type(std::forward<Args>(args)...)) {
 		}

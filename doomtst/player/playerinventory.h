@@ -1,164 +1,87 @@
-#include "../items/menu.h"
+#include "../items/container_transactions.h"
 #include "../game/ecs/game_object.h"
 #include "../util/userinput.h"
 #include "../items/recipe.h"
+#include "../items/menu.h"
 #pragma once 
-struct inventorymen :menu
-{
-	Container* blkcont;
-	Container* armor;
-	Container* deletecont;
-	recipemanager* manager;
-	inventorymen(v2::Vec2 size): menu(size)
-	{
-			
-		//menubox->disable();
-		
-		enabled = false;
-	
-	}
-	void super_ra() {
-		manager = new recipemanager("crafting\\2x2craft.txt", 1, 1);
-		blkcont = new Container(8, 4, 0, 0);
-		armor = new Container(1, 2, -4, 4);
-		deletecont = new Container(1, 1, 5, -5);
-		prophecy_of_ra();
-		armor->at(0).setdecal(leggingdecal);
-		armor->at(1).setdecal(chestdecal);
-	}
-	void custominit() {
+struct inventory_menu_component :ecs::Recipe {
+	inventory_menu_component() {
 
 	}
-	void customopen() {
-		deletecont->enable();
-		manager->enable();
-		blkcont->enable();
-		armor->enable();
+	void apply(ecs::obj& ent) {
+		ent.add_component<ui::menu_component>();
+		items::container_recipe(v2::Coord2(2, 3), v2::Coord2(6, 5)).apply(ent);
 	}
-	void customclose() {
-		deletecont->disable();
-		armor->disable();
-		blkcont->disable();
-		manager->disable();
-	}
-	void testclick() {
-
-
-		if (enabled)
-		{
-			deletecont->update();
-			deletecont->at(0).setdecal(destroydecal);
-			deletecont->at(0).destroyitem();
-			manager->updatestate();
-			blkcont->update();
-			armor->update();
-		}
-
-	}
-
-	inventorymen() = default;
 };
-struct inventory : ecs::component
-{
-	Container blkcont;
-	inventorymen playermenu;
-	void givestartitems(int i1, int i2,int i3);
-	inventory();
-	unsigned int selectedind;
-		Container hotbar;
-		item* selected;
-		void start(){
-			selectedind = -1;
 
-			playermenu.menutype = inventorymenu;
-			inventorylocation = &playermenu;
-			hotbar = Container(6, 1, 0, -4.5);
-			hotbar.enable();
-			selected = nullptr;
-			givestartitems(torchitem, ironsworditem, ironpickitem);
-			playermenu.super_ra();
+
+struct inventory : ecs::component {
+	void givestartitems(std::string items);
+	inventory() {
+
+
+	}
+
+	ecs::obj inventory_object;
+	ecs::obj hotbar;
+	stn::Option<items::container_index> selected_ind;
+	stn::Option<items::item_stack&> selected() {
+		if (selected_ind==stn::None) {
+			return stn::None;
 		}
+		return
+			hotbar.get_component<items::container>()[selected_ind.unwrap()]
+			.get_component<items::ElementSlot>()
+			.stack();
+	}
+	stn::Option<ecs::obj> selected_object() {
+		if (selected_ind == stn::None) {
+			return stn::None;
+		}
+		return hotbar.get_component<items::container>()[selected_ind.unwrap()]
+			.get_component<items::ElementSlot>()
+			.element();
+	}
+	void start() {
+		
+		hotbar = world().spawn_empty();
+
+		inventory_object= ecs::spawn(world(), inventory_menu_component());
+		hotbar=ecs::spawn(world(),items::container_recipe(v2::Coord2(0,0),v2::Coord2(6,1)));
+		givestartitems("plank");
+	}
 	void update() {
-		
-		hotbar.update();
-		if(CtxName::ctx.Inp->getKey('j').pressed) {
-			playermenu.close();
-		}
-		int prevselectedind = selectedind;
+
+
 		if (CtxName::ctx.Inp->getKey('e').pressed) {
-			playermenu.open();
+			world().write_command(ui::open_menu(inventory_object.get_component<ui::menu_component>()));
 		}
-		if (CtxName::ctx.Inp->getKey('1').pressed)
-		{
-			
-			selectedind = 0;
-		}
-		if (CtxName::ctx.Inp->getKey('2').pressed)
-		{
-			selectedind = 1;
-		}
-		if (CtxName::ctx.Inp->getKey('3').pressed)
-		{
+		if (CtxName::ctx.Inp->getKey('1').pressed) {
 
-			selectedind = 2;
-		}if (CtxName::ctx.Inp->getKey('4').pressed)
-		{
-			selectedind = 3;
+			selected_ind =items::container_index(0,0);
 		}
-		if (CtxName::ctx.Inp->getKey('5').pressed)
-		{
+		if (CtxName::ctx.Inp->getKey('2').pressed) {
 
-			selectedind = 4;
+			selected_ind = items::container_index(1, 0);
 		}
-		if (CtxName::ctx.Inp->getKey('6').pressed)
-		{
-			selectedind = 5;
+		if (CtxName::ctx.Inp->getKey('3').pressed) {
+
+			selected_ind = items::container_index(2, 0);
+		}if (CtxName::ctx.Inp->getKey('4').pressed) {
+
+			selected_ind = items::container_index(3, 0);
+		}
+		if (CtxName::ctx.Inp->getKey('5').pressed) {
+
+			selected_ind = items::container_index(4, 0);
+		}
+		if (CtxName::ctx.Inp->getKey('6').pressed) {
+			selected_ind = items::container_index(5, 0);
 
 		}
-		if (prevselectedind != selectedind)
-		{
-
-
-
-			if (prevselectedind != -1)
-			{
-				hotbar.at(prevselectedind).setdecal(normaldecal);
-			}
-			if (selectedind!=-1)
-			{
-
-				hotbar.at(selectedind).setdecal(importantdecal);
-
-			}
-		}
-		if (selectedind!=-1&&hotbar.at(selectedind).helditem!=nullptr)
-		{
-		
-			
-			selected = hotbar.at(selectedind).helditem;
-
-		
-		}
-		else
-		{
-			
-			selected = nullptr;
-		}
-		prevselectedind = selectedind;
-		updateitem(freeditem);
-		if (openmenu!=nullptr)
-		{
-			playermenu.armor->disable();
-
-			playermenu.manager->disable();
-		}
-		
-		playermenu.testclick();
-
-		
 	}
 };
 
 
 
- // !playerinventory_H
+// !playerinventory_H

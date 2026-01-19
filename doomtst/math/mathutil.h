@@ -126,7 +126,7 @@ inline stn::pair<int,int> extended_range(double x) {
 }
 //mod(x,m) that behaves intutiivlly (ex mod(-1,2)!=-1)
 __forceinline  int symmetric_mod(int x, int m) noexcept {
-	// Precondition: m > 0
+	
 	int r = x % m;              // r is in (−m, +m)
 
 	// If r is negative, shift it into [0, m) by adding m;

@@ -9,21 +9,15 @@
 #pragma once
 
 namespace ui {
-	const v2::Vec2 offset[] = {
-		v2::Vec2(-1,-1),
-		v2::Vec2(1, -1),
-		v2::Vec2(-1, 1),
-		v2::Vec2(1, 1),
-
-	};
+	
 	inline void write_letter(renderer::MeshData& mesh_data, geo::Box2d location, int letter) {
 
 		const size_t baselocation = mesh_data.length();
 		for (int j = 0; j < 4; j++) {
-			v2::Vec2 pointtoappend = location.scale * offset[j] + location.center;
-			mesh_data.add_point(pointtoappend, cubeuv[j], letter);
+			v2::Vec2 pointtoappend = location.scale * math::symetrical_square_mesh[j] + location.center;
+			mesh_data.add_point(pointtoappend, math::square_mesh[j], letter);
 		}
-		mesh_data.add_indices_offset_from({ 0,1,3,0,3,2 }, baselocation);
+		mesh_data.add_indices_offset_from(math::square_mesh_triangle_indices, baselocation);
 
 	}
 
@@ -89,7 +83,7 @@ namespace ui {
 		ui_spawner ui_spawn;
 
 		ui_text_spawner(geo::Box2d box, size_t priority) :ui_spawn(geo::Box2d(box.center, box.scale), priority){
-			int l3 =3 ;
+			
 		}
 		void apply(ecs::obj& object) {
 			ui_spawn.apply(object);

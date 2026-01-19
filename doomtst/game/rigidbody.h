@@ -172,7 +172,7 @@ struct rigidbody : ecs::component{
             }
         }
        // owner().get_component<ecs::transform_comp>().transform.position += velocity * deltaTime;
-        acceleration = Vec3(0, 0, 0);  // Reset acceleration after integration
+        acceleration = Vec3(0, 0, 0);  
     }
 
   

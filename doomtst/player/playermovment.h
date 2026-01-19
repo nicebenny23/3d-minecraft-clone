@@ -79,7 +79,7 @@ struct PlayerMovementSys : ecs::System
             if (body.inliquid)
             {
                 normalState = false;
-                float targetY = CtxName::ctx.Inp->getKey(shiftkey).held ? -10.0f
+                float targetY = CtxName::ctx.Inp->getKey(userinput::shift_key).held ? -10.0f
                     : CtxName::ctx.Inp->getKey(' ').held ? 10.0f
                     : 0.0f;
                 body.velocity.y = lerp(body.velocity.y, targetY, 0.1f);
@@ -88,7 +88,7 @@ struct PlayerMovementSys : ecs::System
             if (climb.onrope)
             {
                 normalState = false;
-                float targetY = CtxName::ctx.Inp->getKey(shiftkey).held ? -5.0f
+                float targetY = CtxName::ctx.Inp->getKey(userinput::shift_key).held ? -5.0f
                     : CtxName::ctx.Inp->getKey(' ').held ? 5.0f
                     : 0.0f;
                 body.velocity.y = lerp(body.velocity.y, targetY, 0.1f);
@@ -102,7 +102,7 @@ struct PlayerMovementSys : ecs::System
 
                 // slam: one-time hard downward thrust in mid-air
                 if (!body.isonground
-                    && CtxName::ctx.Inp->getKey(shiftkey).pressed
+                    && CtxName::ctx.Inp->getKey(userinput::shift_key).pressed
                     && !movement.slamUsed)
                 {
                     body.velocity.y = slamStrength;
@@ -119,7 +119,7 @@ struct PlayerMovementSys : ecs::System
                 }
                 // sneak-down on ground
                 else if (body.isonground
-                    && CtxName::ctx.Inp->getKey(shiftkey).held)
+                    && CtxName::ctx.Inp->getKey(userinput::shift_key).held)
                 {
                     body.velocity.y -= effSpeed;
                 }

@@ -45,7 +45,6 @@ namespace Core {
         void InitRenderer();
        CtxName::Context* ctx;
    
-        userinput::InputManager Inp;
         window::Window Window;
         renderer::Renderer* ren;
         World::world world;

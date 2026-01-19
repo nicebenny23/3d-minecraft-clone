@@ -10,7 +10,7 @@
 #include "spawner.h"
 namespace ecs {
 	struct Ecs {
-		Ecs(std::uint32_t total_entities) :entities(total_entities), archetypes(total_entities){
+		Ecs(std::uint32_t total_entities) :entities(total_entities), archetypes(total_entities) {
 			components.inject_ecs_instance(this);
 			ensure_resource<Systems>();
 			emplace_system<run_updates>();
@@ -49,13 +49,11 @@ namespace ecs {
 					.filter([](component_type* type) {return type->updates(); })
 					.into<stn::array>();
 
-				types | stn::sort([](component_type* a, component_type* b) {
-					return a->priority() > b->priority();
-					});
+				types | stn::sort([](component_type* a) {return a->priority();});
 
 				for (component_type* mgr : types) {
 					for (Archetype& archetype : stn::range(ecs.archetypes).filter([&](auto&& archetype) {return archetype.has_component(mgr->id()); })) {
-						// 1) Snapshot the count _once_
+						
 						uint32_t originalCount = archetype.count();
 						for (uint32_t i = 0; i < originalCount; ++i) {
 							mgr->unchecked_at(archetype[archetype_index(i)]).update();
@@ -95,24 +93,24 @@ namespace ecs {
 			return resources.clear();
 		}
 
-		
+
 		template<assets::LoadDescriptorType T>
 		stn::Option<assets::AssetHandle<assets::DescriptorAssetType<T>>> load_asset(const T& descriptor) {
 			return ensure_resource<assets::Assets>().load(descriptor);
 		}
-		
-		template<assets::LoadDescriptorType T,typename ...Args> requires std::constructible_from<T,Args&&...>
-		stn::Option<assets::AssetHandle<assets::DescriptorAssetType<T>>> load_asset_emplaced(Args&&... args ) {
+
+		template<assets::LoadDescriptorType T, typename ...Args> requires std::constructible_from<T, Args&&...>
+		stn::Option<assets::AssetHandle<assets::DescriptorAssetType<T>>> load_asset_emplaced(Args&&... args) {
 			return load_asset<T>(T(std::forward<Args>(args)...));
 		}
 
-		template<assets::LoaderType T, typename ...Args> 
+		template<assets::LoaderType T, typename ...Args>
 			requires std::constructible_from<T, Args&&...>
 		void emplace_asset_loader(Args&&... args) {
 			return ensure_resource<assets::Assets>().emplace_loader<T>(std::forward<Args>(args)...);
 		}
 
-		template<assets::AssetType T> 
+		template<assets::AssetType T>
 		stn::Option<assets::AssetHandle<T>> from_name(std::string name) {
 			return ensure_resource<assets::Assets>().from_name<T>(name);
 		}
@@ -130,30 +128,31 @@ namespace ecs {
 			return events<T>().make_reader();
 		}
 
-		
+
 		template<typename T>
 		Commands<T>& commands() {
 			return ensure_resource<Commands<T>>();
 		}
 		template<typename T>
 		void write_command(T&& command) {
-			commands<T>().emplace(std::forward<T>(command));
+			using Cmd = std::remove_cvref_t<T>;
+			commands<Cmd>().emplace(std::forward<T>(command));
 		}
-		template<typename T, typename ...Args> requires std::constructible_from<T,Args&&...>
-		void write_command(Args&&... args) {
+		template<typename T, typename ...Args> requires std::constructible_from<T, Args&&...>
+		void write_command_emplaced(Args&&... args) {
 			commands<T>().emplace(std::forward<Args>(args)...);
 		}
 		template<typename T>
 		decltype(auto) read_commands() {
 			return commands<T>().read();
 		}
-		
+
 		const Systems& systems() const {
 			return get_resource<Systems>().unwrap();
 		}
 
 		Systems& systems() {
-		return get_resource<Systems>().unwrap();
+			return get_resource<Systems>().unwrap();
 		}
 		template<SystemType Sys>
 		void insert_system(Sys& sys) {
@@ -190,7 +189,7 @@ namespace ecs {
 			return components.ensure<T>(object, std::forward<Args>(args)...)
 				.on_insert([this, object](T& component) {
 				archetypes.transfer_entity_to_flipped_index(object, components.get_id_unchecked<T>());
-				}).value;
+					}).value;
 		}
 		template<ComponentType T, typename ...Args>
 		T& add_component(entity object, Args&&... args)   requires std::constructible_from<T, Args&&...> {
@@ -199,15 +198,15 @@ namespace ecs {
 			archetypes.transfer_entity_to_flipped_index(object, components.insert_id<T>());
 			return component;
 		}
-		
+
 		bool has_component(entity ent, component_id id) const {
 			entities.assert_valid(ent);
 			return components.has_component(ent, id);
 		}
 
 		template<typename T>
-		bool has_component(entity object) {
-			return has_component(object, components.insert_id<T>());
+		bool has_component(entity object) const {
+			return components.get_id_opt<T>().is_some_and([&](component_id id) {return has_component(object, id); });
 		}
 		template<ComponentType... Components>
 		bool has_components(entity object) {
@@ -238,15 +237,15 @@ namespace ecs {
 			return stn::None;
 		}
 		template<ComponentType T>
-		stn::Option<const T&> get_component_opt(entity object) const{
+		stn::Option<const T&> get_component_opt(entity object) const {
 			if (entities.is_valid(object)) {
 				return stn::Option<const T&>(components.get_component_opt<T>(object));
 			}
 			return stn::None;
 		}
 		template<ComponentType... Components>
-		std::tuple<Components&...> get_tuple_unchecked(entity obj,const stn::span<const component_id>& indices) {
-			
+		std::tuple<Components&...> get_tuple_unchecked(entity obj, const stn::span<const component_id>& indices) {
+
 			return[&]<size_t... Is>(std::index_sequence<Is...>) {
 				return std::tuple<Components&...>{
 					components.unchecked_at(indices.unchecked_at(Is)).get_as_unchecked<Components>(obj)...
@@ -254,7 +253,7 @@ namespace ecs {
 			}(std::index_sequence_for<Components...>{});
 		}
 
-		
+
 		void remove_component_unchecked(entity object, component_id id) {
 
 			component_storage& pages = components.unchecked_at(id).storage();

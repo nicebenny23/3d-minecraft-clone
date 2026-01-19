@@ -20,9 +20,10 @@ namespace renderer{
 		}
 	};
 	struct mesh_component:ecs::component {
-		mesh_id msh;
+		stn::Option<mesh_id> msh;
 		mesh_component(mesh_id id) :msh(id) {
 		}
+
 		void start() {
 		}
 	};
@@ -108,10 +109,10 @@ namespace renderer{
 		renderable();
 
 		mesh_id& get_mesh(){
-			return get_component<mesh_component>().msh;
+			return get_component<mesh_component>().msh.expect("mesh must exist");
 		}
 		mesh_id get_mesh() const {
-			return get_component<mesh_component>().msh;
+			return get_component<mesh_component>().msh.expect("mesh must exist");
 		}
 		stn::span<const renderer::uniform> view_overides() const {
 			return get_component<renderable_overides>().view();

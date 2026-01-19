@@ -1,6 +1,5 @@
 #include "component.h"
 #include "game_object.h"
-"
 #pragma once
 namespace ecs {
 	

@@ -2,39 +2,32 @@
 #include "intersection.h"
 #include "interval.h"
 namespace geointersect {
-	boxRayCollision intersection(geo::Box box, ray fray)
-	{
+	boxRayCollision intersection(geo::Box box, ray fray) {
 		v3::Vec3 dir = fray.dir();
 
 		//not actually max
 
-		double min_max= std::numeric_limits<double>::infinity();
-		double max_min= -std::numeric_limits<double>::infinity();
-		for (int i = 0; i < 3; i++)
-		{
-			//potential closest hits on axis
-			double tst_val_1= box.center[i] - box.scale[i] - fray.start[i];
+		double min_max = std::numeric_limits<double>::infinity();
+		double max_min = -std::numeric_limits<double>::infinity();
+		for (int i = 0; i < 3; i++) {
+			double tst_val_1 = box.center[i] - box.scale[i] - fray.start[i];
 			double tst_val_2 = box.center[i] + box.scale[i] - fray.start[i];
-			if (apx(dir[i], 0))
-			{
-				if (math::range(tst_val_1,tst_val_2).apx_contains(0))
-				{
+			if (apx(dir[i], 0)) {
+				if (math::range(tst_val_1, tst_val_2).apx_contains(0)) {
 					continue;
 				}
 			}
 			tst_val_1 /= dir[i];
 			tst_val_2 /= dir[i];
-			min_max= Min(min_max, Max(tst_val_1, tst_val_2));
-			max_min =Max(max_min, Min(tst_val_1, tst_val_2));
+			min_max = Min(min_max, Max(tst_val_1, tst_val_2));
+			max_min = Max(max_min, Min(tst_val_1, tst_val_2));
 		}
-		
 
 
-		if (max_min< min_max||apx(max_min,min_max))
-		{
-			
-			if (0 < max_min||apx(max_min, 0))
-			{
+
+		if (max_min < min_max || apx(max_min, min_max)) {
+
+			if (0 < max_min || apx(max_min, 0)) {
 				return stn::Construct<RayHit>(fray, max_min);
 			}
 
@@ -45,8 +38,7 @@ namespace geointersect {
 
 
 	}
-	bool intersects(geo::cone cone, geo::Sphere sph)
-	{
+	bool intersects(geo::cone cone, geo::Sphere sph) {
 		return cone.distance_from_point(sph.center) <= sph.radius;
 
 	}

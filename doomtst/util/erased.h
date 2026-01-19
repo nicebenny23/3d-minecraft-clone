@@ -17,16 +17,20 @@ namespace stn {
             template<typename T>
             static constexpr bool is_member =TypeList::contains_v<type_list,T>;
 
-            
+			template<typename T>
+				requires(is_member<T>)
+			inline T&& get()&& {
+				return std::move(*get_ptr<T>());
+			}
             template<typename T>
                 requires(is_member<T>)
-           inline T& get() {
+           inline T& get()&{
                 return *get_ptr<T>();
             }
             
             template<typename T>
                 requires(is_member<T>)
-            inline const std::remove_reference_t<T>& get()  const {
+            inline const std::remove_reference_t<T>& get()  const&{
                 return *get_ptr<T>();
             }
             template<typename T>

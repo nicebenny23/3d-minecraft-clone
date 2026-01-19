@@ -6,6 +6,7 @@
 #include "../game/ecs/relationship.h"
 #include "../game/ecs/query.h"
 #include "../game/ecs/spawner.h"
+#include "../game/ecs/traversal.h"
 using namespace stn;
 namespace ui {
 
@@ -105,15 +106,18 @@ namespace ui {
 	};
 	struct ui_interaction_system :ecs::System {
 		void run(ecs::Ecs& world) {
-			v2::Vec2 pos = CtxName::ctx.Inp->mousepos;
-			bool has_clicked_left = CtxName::ctx.Inp->mouseleft().pressed;
-			bool has_clicked_right = CtxName::ctx.Inp->mouseright().pressed;
+			v2::Vec2 pos = CtxName::ctx.Inp->mouse_position;
+			bool has_clicked_left = CtxName::ctx.Inp->left_mouse().pressed;
+			bool has_clicked_right = CtxName::ctx.Inp->right_mouse().pressed;
 
 			ecs::View<ui_enabled, ui_bounds, InteractionState> bounds_view(world);
 			for (auto&& [enabled, bounds, ui_interaction] : bounds_view) {
 				bool cursor_touching = bounds.global().contains(pos) && enabled.enabled();
-				ui_interaction.left_clicked = cursor_touching && has_clicked_left;
-				ui_interaction.right_clicked = cursor_touching && has_clicked_right;
+				if (cursor_touching) {
+					ui_interaction.left_clicked = has_clicked_left;
+					ui_interaction.right_clicked =has_clicked_right;
+
+				}
 				ui_interaction.hovered = cursor_touching;
 			}
 		}
@@ -138,7 +142,7 @@ namespace ui {
 			stn::Option<ecs::obj> node = object.world().get_resource<base_ui_node>().
 				map([](base_ui_node node) {return node.base_node; });
 				if (node.is_some()) {
-					ecs::add_child(node.unwrap(), object);
+					node.unwrap().add_child(object);
 				}
 		}
 	};

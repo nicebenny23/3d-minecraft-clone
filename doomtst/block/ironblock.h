@@ -11,5 +11,5 @@ inline void ironinit(blockname::block& blk) {
 	blk.createdefaultaabb(false);
 	blk.mininglevel = 3;
 	blk.minedfastwithpick = true;
-	blk.owner().add_component<loottable>().addelem(ironoreitem, 1, false);
+	blk.owner().add_component<loottable>().addelem("iron", 1, false);
 }

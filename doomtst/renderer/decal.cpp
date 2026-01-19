@@ -1,13 +1,7 @@
 #include "decal.h"
 #include "../player/player.h"
+#include "../math/meshes.h"
 
-
-const v2::Vec2 cubeuv[] = {
-	v2::Vec2(0, 1),
-	v2::Vec2(1, 1),
-	v2::Vec2(0, 0),
-	v2::Vec2(1, 0)
-};
 void decal::set_handle(const char* texloc, const char* texture) {
 	if (!handle) {
 
@@ -22,13 +16,13 @@ void decal::set_handle(const char* texloc, const char* texture) {
 void decal::create_mesh() {
 	renderer::MeshData mesh = handle.create_mesh();
 	for (int i = 0; i < 4; i++) {
-		v2::Vec2 norm_uv = (cubeuv[i] - v2::Vec2(.5, .5)) * 2;
+		v2::Vec2 norm_uv = math::symetrical_square_mesh[i];
 		const double eps = .001;
 		//brings it above the surface
 		v3::Point3 point = normal * eps + center + tangent * norm_uv.x + bi_tangent * norm_uv.y;
-		mesh.add_point(point, cubeuv[i]);
+		mesh.add_point(point, math::square_mesh[i]);
 	}
-	mesh.add_indices({ 0,1,3,0,3,2 });
+	mesh.add_indices(math::square_mesh_triangle_indices);
 	handle.fill(std::move(mesh));
 	handle.set_order_key(dist(camera::GetCam().position, center));
 

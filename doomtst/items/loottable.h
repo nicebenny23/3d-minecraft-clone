@@ -1,6 +1,6 @@
 #include "../game/ecs/game_object.h"
 #include "../util/dynamicarray.h"
-
+#include"item_transactions.h"
 #include "../util/random.h"
 
 using namespace stn;
@@ -10,18 +10,14 @@ struct lootelement
 {
 	
 	
-	lootelement() {
-		itemid = 0;
-		maxamt = 0;
-	
-	}
-	unsigned char itemid;
+	lootelement() = default;
+	std::string item_name;
 	unsigned char maxamt;
-	void drop();
+	void drop(ecs::Ecs& world);
 	
 
-	lootelement(int itemid, float maxamt,bool happenrandom)
-		: itemid(itemid), maxamt(maxamt)
+	lootelement(std::string name, float maxamt,bool happenrandom)
+		: item_name(name), maxamt(maxamt)
 	{
 	
 	}
@@ -47,8 +43,8 @@ struct  loottable : ecs::component
 
 	};
 	array<lootelement> lootlist;
-	void addelem(int itemid, float maxamt,bool israndom=false) {
-		lootlist.push(lootelement(itemid, maxamt,israndom));
+	void addelem(std::string item_name, float maxamt,bool israndom=false) {
+		lootlist.push(lootelement(item_name, maxamt,israndom));
 	}
 	void destroy_hook() {
 		
@@ -57,7 +53,7 @@ struct  loottable : ecs::component
 		{
 			for (int i = 0; i < lootlist.length(); i++)
 			{
-				lootlist[i].drop();
+				lootlist[i].drop(world());
 			}
 		}
 	}
