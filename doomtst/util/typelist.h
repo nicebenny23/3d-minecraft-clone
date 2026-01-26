@@ -2,7 +2,7 @@
 
 #include <type_traits>
 #include <cstddef>
-
+#include "concepts.h"
 namespace TypeList {
 
     // --- TypeList container ---
@@ -21,7 +21,7 @@ namespace TypeList {
 
     };
     using None = TypeList<>;
-
+	
     // Helper: is_type_list trait
     template<typename T>
     struct is_type_list : std::false_type {};
@@ -31,6 +31,29 @@ namespace TypeList {
 
     template<typename T>
     inline constexpr bool is_type_list_v = is_type_list<T>::value;
+
+	template<typename T>
+	concept TypeListType = is_type_list_v<T>;
+
+	template<typename T>
+	struct type_list_to_tuple;
+	template<typename ...Args>
+	struct type_list_to_tuple < TypeList<Args...>> {
+		using type = std::tuple<Args...>;
+	};
+
+	template<TypeListType List>
+	using type_list_to_tuple_t = typename type_list_to_tuple<List>::type;
+	template<typename T>
+	struct type_list_from_tuple;
+	template<typename ...Args>
+	struct type_list_from_tuple <std::tuple<Args...>> {
+		using type = TypeList<Args...>;
+	};
+
+	//need to ensure it is tuple
+	template<typename List>
+	using type_list_from_tuple_t = typename type_list_from_tuple<List>::type;
     // --- Length ---
     template<typename List>
     struct length
@@ -85,16 +108,26 @@ namespace TypeList {
     };
 
 
-    // --- Prepend ---
     template<typename List, typename NewType>
     struct prepend {
         static_assert(is_type_list_v<List>, "prepend<T>: T must be a TypeList");
     };
 
-    template<typename... Types, typename NewType>
-    struct prepend<TypeList<Types...>, NewType> {
-        using type = TypeList<NewType, Types...>;
-    };
+	template<typename... Types, typename NewType>
+	struct prepend<TypeList<Types...>, NewType> {
+		using type = TypeList<NewType, Types...>;
+	};
+
+	template<typename List>
+	struct remove_first{
+	};
+	template<typename First, typename ... Rest>
+	struct remove_first<TypeList< First,Rest...>> {
+		using type = TypeList<Rest...>;
+	};
+
+	template<TypeListType List>
+	using remove_first_t =typename remove_first<List>::type;
 
     // --- At ---
     template<std::size_t I, typename List>

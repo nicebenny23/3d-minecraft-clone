@@ -1,39 +1,55 @@
 #pragma once
 #include <type_traits>
 #include <concepts>
+#include <vector>
 namespace stn {
 
-
+	//never use
+	struct construct_null_tag {
+	};
+	inline constexpr construct_null_tag construct_null= construct_null_tag();
 	template<typename D>
 	struct construct_derived {
 		using type = D;
 		constexpr construct_derived() = default;
 	};
+
 	template<typename Tag>
 	concept ConstructDerivedTagType =
 		requires { typename Tag::type; }&&
 	std::is_same_v<Tag, construct_derived<typename Tag::type>>;
+	template<ConstructDerivedTagType Tag>
+	using ConstructDerivedType = typename Tag::type;
 	template<typename T>
 	struct box {
-
+		
+		explicit box(T&& value) : ptr(new T(std::move(value))) {
+		}
+		template<ConstructDerivedTagType Tag>
+		requires std::derived_from<typename Tag::type, T>
+		&& stn::CompleteVirtual<T>
+			explicit box(Tag, Tag::Type&& U)
+			: ptr(new Tag::Type(std::move(U))) {
+		}
 		using value_type = T;
 		template<typename... Args>
-			requires std::constructible_from<T, Args&&...>
+		requires( (!std::same_as<box<T>,Args>&&...)
+		&& stn::RecursiveConstructible<T, Args&&...>)
 		explicit box(Args&&... args) : ptr(new T(std::forward<Args>(args)...)) {
 		}
-
+		//this should rarely be used and intentionally does not use nullptr.
+		explicit box(construct_null_tag tag) : ptr(nullptr) {
+		}
 		template<ConstructDerivedTagType Tag, typename... Args>
 			requires std::derived_from<typename Tag::type, T>&&
-		std::constructible_from<typename Tag::type, Args...>
-			&& std::has_virtual_destructor_v<T>
+		stn::RecursiveConstructible<typename Tag::type, Args...>
+			&& stn::CompleteVirtual<T>
 			explicit box(Tag, Args&&... args)
 			: ptr(new typename Tag::type(std::forward<Args>(args)...)) {
 		}
 
 
 
-		box() requires std::default_initializable<T> : ptr(new T()) {
-		}
 		box(box&& other) noexcept {
 			ptr = other.ptr;
 			other.ptr = nullptr;
@@ -122,7 +138,21 @@ namespace stn {
 			ptr = nullptr;
 			return temp;
 		}
-
+		template<ConstructDerivedTagType Tag>
+			requires std::derived_from<ConstructDerivedType<Tag>, T>&&
+		std::copy_constructible<ConstructDerivedType<Tag>>
+		box<T> clone_as() const
+		{
+			using U = ConstructDerivedType<Tag>;
+			const U* ptr_as_u= dynamic_cast<U>(ptr);   
+			if (ptr) {
+				return box<T>(new U(*ptr_as_u));
+			}
+			stn::throw_logic_error("ptr was not of U");
+		}
+		box<T> clone() const requires std::copy_constructible<T> {
+			return box<T>(new T(ptr));
+		}
 		void clear() {
 			if (ptr) {
 				if constexpr (std::is_array_v<T>) {
@@ -135,7 +165,7 @@ namespace stn {
 			}
 		}
 
-		~box() {
+		~box() noexcept{
 			clear();
 		}
 		void swap(box& other) noexcept {

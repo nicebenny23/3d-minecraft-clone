@@ -18,7 +18,7 @@ namespace v2 {
 		bool operator==(const Coord2& p1) const {
 			return (p1.x == x && p1.y == y);
 		}
-		bool operator!=(const Coord2& p1) {
+		bool operator!=(const Coord2& p1) const{
 			return(p1.x != x || p1.y != y);
 		}
 		Coord2& operator+=(const Coord2& p1) {

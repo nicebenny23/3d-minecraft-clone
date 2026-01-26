@@ -14,6 +14,6 @@ inline void crystaltorchinit(blockname::block& blk) {
 	blk.createdefaultaabb(false);
 	blk.mininglevel = .25f;
 	blk.minedfastwithpick = true;
-	blk.owner().add_component<loottable>();
-	blk.owner().get_component<loottable>().addelem("crystal torch", 1);
+	blk.owner().add_component<loot_table>();
+	blk.owner().get_component<loot_table>().add("crystal torch", 1);
 }

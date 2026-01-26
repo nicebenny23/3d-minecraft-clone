@@ -180,7 +180,7 @@ void collision::handleCollisionWithGrid(Collider& entity, bool is_trigger) {
 	for (int ind = 0; ind < blklist.length(); ind++) {
 
 		stn::Option<Vec3> force = colideentandblock(entity, *blklist[ind], is_trigger);
-		if (minforce.map_member<&v3::Vec3::length>()< force.map_member<&v3::Vec3::length>()) {
+		if (minforce.map_member(&v3::Vec3::length)< force.map_member(&v3::Vec3::length)) {
 			minblock = blklist[ind];
 			minforce = force.unwrap();
 		}

@@ -2,6 +2,9 @@
 #include "../items/recipe.h"
 #include "../items/menu.h"
 #include "../math/vector2.h"
+
+#include "../items/recipe_file.h"
+#include "../items/recipe_transactions.h"
 #pragma once 
 inline void tableinit(blockname::block& blk) {
 
@@ -13,7 +16,6 @@ inline void tableinit(blockname::block& blk) {
 	blk.mesh.box.scale = blockname::blockscale;
 
 	blk.createdefaultaabb(false);
-	//stupid thing
 	//blk.owner().ensure_component<craftingtablecomp>();
 //	blk.owner().add_component<loottable>().addelem(craftingtableitem, 1, false);
 }

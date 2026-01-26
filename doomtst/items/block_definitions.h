@@ -1,6 +1,7 @@
 #include "item_type.h"
 #include "cursor_slot.h"
 #include "Item.h"
+#include "crafting_table.h"
 #pragma once
 namespace items {
 	struct air_item :item_type {
@@ -256,6 +257,8 @@ namespace items {
 		void build(Core::App& app) {
 			app.emplace_system< ItemClear>();
 			item_type_register& item_register = app.ensure_resource<item_type_register>();
+			app.emplace_system< run_crafts>();
+			app.emplace_system<SyncDisplayIcon>();
 			item_register.register_item<items::air_item>();
 			item_register.register_item<items::altar_item>();
 			item_register.register_item<items::crafting_table_item>();

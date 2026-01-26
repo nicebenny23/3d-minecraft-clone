@@ -24,27 +24,46 @@ namespace items {
 
 
 	struct FloatingItemSlotUiSpawner:ecs::Recipe {
-		FloatingItemSlotUiSpawner(container_index index, v2::Vec2 inv_loc) :item_slot(index), inventory_location(inv_loc) {
+		FloatingItemSlotUiSpawner(v2::Vec2 inv_loc):inventory_location(inv_loc) {
 
 		}
-		ItemSlotSpawner item_slot;
 		v2::Vec2 inventory_location;
 		void apply(ecs::obj& entity) {
 
 			ui::ui_spawner(inventory_transform_floating(inventory_location), 0).apply(entity);
-			item_slot.apply(entity);
 		}
 	};
-	struct GriddedItemSlotUiSpawner:ecs::Recipe{
-		GriddedItemSlotUiSpawner(container_index index, v2::Coord2 inv_loc) :container(index), inventory_location(inv_loc) {
+
+	struct FloatingItemSlotSpawner :ecs::Recipe {
+		FloatingItemSlotSpawner(v2::Vec2 inv_loc) : inventory_location(inv_loc) {
 
 		}
-		container_index container;
-		v2::Coord2 inventory_location;
-		void apply(ecs::obj& entity){
-			ecs::obj item_decal = entity.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\blockholder.png", "3"), geo::Box2d(v2::zerov, v2::unitv), 20);
-			entity.ensure_component<ItemDecal>(item_decal);
-			FloatingItemSlotUiSpawner(container, inventory_center(inventory_location)).apply(entity);
+		v2::Vec2 inventory_location;
+		void apply(ecs::obj& entity) {
+			FloatingItemSlotUiSpawner(inventory_location).apply(entity);
+			ItemSlotSpawner().apply(entity);
 		}
 	};
+	struct GriddedItemSlotUISpawner :ecs::Recipe {
+		GriddedItemSlotUISpawner(v2::Coord2 inv_loc):inventory_location(inv_loc) {
+
+		}
+		v2::Coord2 inventory_location;
+		void apply(ecs::obj& entity) {
+			ecs::obj item_decal = entity.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\blockholder.png", "3"), geo::Box2d(v2::zerov, v2::unitv), 20);
+			entity.ensure_component<ItemDecal>(item_decal);
+			FloatingItemSlotUiSpawner(inventory_center(inventory_location)).apply(entity);
+		}
+	};
+	struct GriddedItemSlotSpawner:ecs::Recipe{
+		GriddedItemSlotSpawner(v2::Coord2 inv_loc): inventory_location(inv_loc) {
+
+		}
+		v2::Coord2 inventory_location;
+		void apply(ecs::obj& entity) {
+			GriddedItemSlotUISpawner(inventory_location).apply(entity);
+			ItemSlotSpawner().apply(entity);
+		}
+	};
+
 }

@@ -35,6 +35,8 @@ namespace ui {
 		}
 		void write() {
 			set_handle();
+
+			handle.enable();
 			double char_offset = 1.5f;
 			geo::Box2d bounds = owner().get_component<ui::ui_bounds>().global();
 			v2::Vec2 min = bounds.center - v2::Vec2(char_offset * word.length(), 1.f) * bounds.half_size();
@@ -70,7 +72,6 @@ namespace ui {
 			for (auto&& [enabled, bounds, ui_interaction, ui_text] : bounds_view) {
 				if (enabled.enabled()) {
 					ui_text.write();
-					
 				}
 				else {
 					ui_text.handle.disable();

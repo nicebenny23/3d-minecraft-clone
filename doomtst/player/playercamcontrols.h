@@ -22,7 +22,7 @@ struct playercamcontrols : ecs::component
 			double xoffset = CtxName::ctx.Inp->mouse_position_dt.x;
 			double yoffset = CtxName::ctx.Inp->mouse_position_dt.y;
 
-			float sensitivity = 30;
+			float sensitivity = 60;
 
 			if (abs(xoffset) > 180)
 			{

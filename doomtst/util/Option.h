@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <stdexcept>
 #include <concepts>
+#include "concepts.h"
 #include "erased.h"
 #include "traits.h"
 namespace stn {
@@ -107,7 +108,7 @@ namespace stn {
 		}
 		Option<std::remove_cvref_t<T>> const copied() requires std::is_reference_v<T>&& std::is_copy_constructible_v<std::remove_cvref_t<T>> {
 			if (has_value) {
-				return Option<std::remove_cvref_t<T>>{value.get<T>()};
+				return Option<std::remove_cvref_t<T>>(value.get<T>());
 			}
 			else {
 				return stn::None;
@@ -319,26 +320,30 @@ namespace stn {
 			return stn::None;
 
 		}
-		template<typename Self>
-		using forwarded_value_type_t = decltype(std::declval<Self>().value.get<T>());
-		template <auto Member,typename Self, typename... Args>
-		auto map_member(this Self&& self, Args&&... args) -> Option<std::invoke_result_t<decltype(Member), forwarded_value_type_t<Self>, Args...>>
-			requires std::is_member_function_pointer_v<decltype(Member)>&&
-		stn::nonvoid_invokable<decltype(Member), forwarded_value_type_t<Self>, Args...> {
-			if (!self.has_value) {
-				return stn::None;
-			}
-			using map_return = Option<std::invoke_result_t<decltype(Member), forwarded_value_type_t<Self>, Args...>>;
-			return map_return(std::invoke(Member, std::forward_like<Self>(self).value.get<T>(), std::forward<Args>(args)...));
+	
+		template<typename C, typename R> requires stn::decays_to<T, C>
+		stn::Option <R> map_member(R(C::* member)() const) const{
+			return map(member);
 		}
-		template <typename Self, typename Member>
-		auto member(this Self&& self, Member m)
-			-> Option<std::remove_cvref_t<decltype(std::forward<Self>(self).value.get<T>().*m)>>
-			requires std::is_member_object_pointer_v<Member> {
-			if (!self.has_value) return stn::None;
-
-			using U = std::remove_cvref_t<decltype(std::forward<Self>(self).value.get<T>().*m)>;
-			return Option<U>(std::forward<Self>(self).value.get<T>().*m);
+		template<typename C, typename R> requires stn::decays_to<T, C>
+		stn::Option<R> map_member(R(C::* member)())& {
+			return map(member);
+		}
+		template<typename C, typename R> requires stn::decays_to<T, C>
+		stn::Option<R> map_member(R(C::* member)())&& {
+			return map(member);
+		}
+		template<typename R, typename C> requires stn::decays_to<T,C>
+		stn::Option <const R&> member(R C::*member) const{
+			return map(member);
+		}
+		template<typename R, typename C>
+		stn::Option<R&> member(R C::* member) & requires stn::decays_to<T, C> {
+			return map(member);
+		}
+		template<typename R, typename C>
+		stn::Option<R> member(R C::* member)&& requires stn::decays_to<T, C> {
+			return map(member);
 		}
 		template<typename Func>
 		Option& then(Func&& f)&
@@ -422,8 +427,8 @@ namespace std {
 
 	template<typename T, typename CharT>
 	struct formatter<stn::Option<T>, CharT> : formatter<T, CharT> {
-		template<typename FormatContext>
-		auto format(const stn::Option<T>& opt, FormatContext& ctx) requires std::formattable<T, CharT> {
+		template<typename FormatContext> requires std::formattable<T, CharT>
+		auto format(const stn::Option<T>& opt, FormatContext& ctx) const{
 			return opt.match(
 				[&](const T& value) {
 					auto out = std::format_to(ctx.out(), "Some(");

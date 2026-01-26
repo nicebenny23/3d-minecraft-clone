@@ -3,68 +3,60 @@
 #include"item_transactions.h"
 #include "../util/random.h"
 
-using namespace stn;
 #pragma once 
 const float interacttimeneededfordrop = 1;
-struct lootelement
-{
-	
-	
-	lootelement() = default;
-	std::string item_name;
-	unsigned char maxamt;
-	void drop(ecs::Ecs& world);
-	
+struct loot_element {
 
-	lootelement(std::string name, float maxamt,bool happenrandom)
-		: item_name(name), maxamt(maxamt)
-	{
-	
+	items::item_entry to_entry(const ecs::Ecs& world) const{
+		
+		items::item_id id= world.get_resource<items::item_type_register>().unwrap().from_name(item_name);
+		return items::item_entry(id, amount);
 	}
-	~lootelement() = default;
-	
+	loot_element() = default;
+	std::string item_name;
+	size_t amount;
+	void drop(ecs::Ecs& world) const;
+	loot_element(std::string name, float maxamt)
+		: item_name(name), amount(maxamt) {
+
+	}
+
 };
-struct  loottable : ecs::component
-{
-	
+struct  loot_table : ecs::component {
+
 	bool should_drop;
-	loottable() {
+	loot_table() {
 
 		should_drop = false;
-		lootlist = array<lootelement>();
+		loot = stn::array<loot_element>();
 	}
 	void start() {
-		
-		
+
+
 	}
-	~loottable()
-	{
+	~loot_table() {
 
 
 	};
-	array<lootelement> lootlist;
-	void addelem(std::string item_name, float maxamt,bool israndom=false) {
-		lootlist.push(lootelement(item_name, maxamt,israndom));
+	stn::array<loot_element> loot;
+	void add(std::string item_name, float maxamt, bool israndom = false) {
+		loot.push(loot_element(item_name, maxamt));
 	}
 	void destroy_hook() {
-		
-	
-		if (should_drop)
-		{
-			for (int i = 0; i < lootlist.length(); i++)
-			{
-				lootlist[i].drop(world());
+		if (should_drop) {
+			for (const loot_element& element:loot) {
+				element.drop(world());
 			}
 		}
 	}
 };
 namespace ecs {
 	template<>
-	inline constexpr ComponentInfo ComponentTraits<loottable> = {
+	inline constexpr ComponentInfo ComponentTraits<loot_table> = {
 		.updates = false
 	};
 }
 
 
 
- // !loottable_HPP
+// !loottable_HPP

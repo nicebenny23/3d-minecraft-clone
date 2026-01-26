@@ -258,6 +258,7 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="items\loottable.cpp" />
+    <ClCompile Include="json\json.cpp" />
     <ClCompile Include="renderer\decal.cpp" />
     <ClCompile Include="player\playermodification.cpp" />
     <ClCompile Include="renderer\guirender.cpp" />
@@ -274,6 +275,7 @@
     <ClCompile Include="util\algorthm.cpp" />
     <ClCompile Include="util\fileloader.cpp" />
     <ClCompile Include="math\intersection.cpp" />
+    <ClCompile Include="json\json_value.cpp" />
     <ClCompile Include="util\random.cpp" />
     <ClCompile Include="game\time.cpp" />
     <ClCompile Include="util\stbiload.cpp" />
@@ -357,6 +359,8 @@
     <ClInclude Include="game\navigation.h" />
     <ClInclude Include="game\ecs\relationship.h" />
     <ClInclude Include="game\Settings.h" />
+    <ClInclude Include="items\crafting_table.h" />
+    <ClInclude Include="items\FakeItem.h" />
     <ClInclude Include="math\transform.h" />
     <ClInclude Include="game\wormobj.h" />
     <ClInclude Include="imgui\imconfig.h" />
@@ -473,6 +477,7 @@
     <ClInclude Include="util\bitset.h" />
     <ClInclude Include="util\bit_mask.h" />
     <ClInclude Include="util\cached.h" />
+    <ClInclude Include="util\concepts.h" />
     <ClInclude Include="util\counter.h" />
     <ClInclude Include="util\data_format.h" />
     <ClInclude Include="util\dependency.h" />
@@ -490,11 +495,13 @@
     <ClInclude Include="math\intersection.h" />
     <ClInclude Include="math\interval.h" />
     <ClInclude Include="util\Invoke.h" />
+    <ClInclude Include="json\json_value.h" />
     <ClInclude Include="util\layout.h" />
     <ClInclude Include="util\List.h" />
     <ClInclude Include="math\mathutil.h" />
     <ClInclude Include="util\memorypool.h" />
     <ClInclude Include="renderer\renderer\Vao.h" />
+    <ClInclude Include="json\json.h" />
     <ClInclude Include="util\mutex.h" />
     <ClInclude Include="util\Name.h" />
     <ClInclude Include="util\Not.h" />

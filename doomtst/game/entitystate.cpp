@@ -4,9 +4,9 @@
 #include "../items/loottable.h"
 void estate::remove()
 {
-	if (owner().has_component<loottable>())
+	if (owner().has_component<loot_table>())
 	{
-		owner().get_component<loottable>().should_drop = true;
+		owner().get_component<loot_table>().should_drop = true;
 	}
 
 	//if (!owner().has_component<ecs::StaticComponent>())

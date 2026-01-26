@@ -88,6 +88,12 @@ namespace ecs {
 			}
 			return false;
 		}
+		bool dead() const {
+			if (ecs) {
+				return !ecs->entities.is_valid(ent);
+			}
+			return true;
+		}
 		void add_child(ecs::obj child) {
 			ensure_component<Parent>().add_child(child.inner());
 		}

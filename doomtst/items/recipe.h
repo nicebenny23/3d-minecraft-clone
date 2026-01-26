@@ -7,7 +7,10 @@ namespace items {
 		v2::Coord2 size;
 		stn::array<stn::Option<item_entry>> item_list;
 		item_entry output;
+		ItemRecipe(v2::Coord2 grid_size, stn::array<stn::Option<item_entry>> input_entries, item_entry output_entry) :
+			size(grid_size), item_list(input_entries), output(output_entry) {
 
+		}
 		using iterator = decltype(item_list)::iterator;
 		using const_iterator = decltype(item_list)::const_iterator;
 		iterator begin() {
@@ -22,7 +25,7 @@ namespace items {
 		const_iterator end() const {
 			return item_list.end();
 		}
-		size_t nonempty_slot_count() const {
+		size_t nonempty_slots() const {
 			size_t count=0;
 			for (const stn::Option<item_entry>& slot: item_list) {
 				if (slot.is_some()) {
@@ -45,6 +48,9 @@ namespace items {
 		ItemRecipes(){
 	
 		}
+		ItemRecipes(const stn::array<ItemRecipe>& recipes):recipe_list(recipes),size(recipes.first().size) {
+
+		}
 		using iterator = decltype(recipe_list)::iterator;
 		using const_iterator = decltype(recipe_list)::const_iterator;
 		iterator begin() {
@@ -62,8 +68,11 @@ namespace items {
 	};
 	
 	struct RecipeBinder {
-		ecs::obj container_output;
-		ecs::obj container_input;
+		ecs::obj output;
+		ecs::obj input;
 		ItemRecipes list;
+		RecipeBinder(ecs::obj in, ecs::obj out, ItemRecipes list) :input(in), output(out), list(list) {
+
+		}
 	};
 }

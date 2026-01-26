@@ -11,6 +11,6 @@ inline void stoneinit(blockname::block& blk) {
 	blk.createdefaultaabb(false);
 	blk.mininglevel = 2;
 	blk.minedfastwithpick = true;
-	blk.owner().add_component<loottable>().addelem("moss", 1, false);
+	blk.owner().add_component<loot_table>().add("moss", 1, false);
 		
 }

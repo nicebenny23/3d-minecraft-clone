@@ -62,7 +62,6 @@ namespace items {
 		item_traits from_id(item_id id) const {
 			return trait_list[id.id];
 		}
-
 		template<ItemType T>
 		void register_item() {
 			item_traits traits = T().traits();

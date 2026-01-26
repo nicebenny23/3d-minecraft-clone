@@ -55,12 +55,33 @@ namespace items {
 			for (size_t x = 0; x < offset.x; x++) {
 				for (size_t y = 0; y < offset.y; y++) {
 					v2::Coord2 pos = v2::Coord2(x, y);
-					cont.slots.emplace<ecs::object_handle>(std::move(ecs::spawn(ent.world(), GriddedItemSlotUiSpawner(container_index(x, y), pos + min_position))));
+					cont.slots.emplace<ecs::object_handle>(std::move(ecs::spawn(ent.world(), GriddedItemSlotSpawner(pos + min_position))));
 					ent.add_child(cont.slots.last().get());
 				}
 			}
 		}
 	};
+	struct container_ui_recipe :ecs::Recipe {
+		v2::Coord2 min_position;
+		v2::Coord2 offset;
+		container_ui_recipe(v2::Coord2 min, v2::Coord2 off) :min_position(min), offset(off) {
+
+		}
+		void apply(ecs::obj& ent) {
+			ui::ui_spawner(geo::Box2d(v2::zerov, v2::unitv), 1000).apply(ent);
+
+			container& cont = ent.add_component< container>(offset);
+
+			for (size_t x = 0; x < offset.x; x++) {
+				for (size_t y = 0; y < offset.y; y++) {
+					v2::Coord2 pos = v2::Coord2(x, y);
+					cont.slots.emplace<ecs::object_handle>(std::move(ecs::spawn(ent.world(), GriddedItemSlotUISpawner(pos + min_position))));
+					ent.add_child(cont.slots.last().get());
+				}
+			}
+		}
+	};
+
 	struct floating_container_recipe :ecs::Recipe {
 		
 		floating_container_recipe(){
@@ -69,9 +90,9 @@ namespace items {
 		void apply(ecs::obj& ent) {
 			ui::ui_spawner(geo::Box2d(v2::zerov, v2::unitv), 1000).apply(ent);
 			container& cont = ent.add_component< container>(v2::Coord2(1,1));
-
-			cont.slots.emplace<ecs::object_handle>(std::move(ecs::spawn(ent.world(), FloatingItemSlotUiSpawner(container_index(0,0), v2::zerov))));
+			cont.slots.emplace<ecs::object_handle>(std::move(ecs::spawn(ent.world(), FloatingItemSlotSpawner(v2::zerov))));
 			ent.add_child(cont.slots.last().get());
 		}
 	};
+
 }

@@ -49,8 +49,8 @@ namespace ui {
 		}
 	};
 
-	struct ui_state_command {
-		ui_state_command(ecs::entity ent, bool enabled) :ent(ent), should_enable(enabled) {
+	struct SetUiEnabled {
+		SetUiEnabled(ecs::entity ent, bool enabled) :ent(ent), should_enable(enabled) {
 
 		}
 		bool should_enable;
@@ -75,7 +75,7 @@ namespace ui {
 			set_enabled(true);
 		}
 		void set_enabled(bool is_enabled) {
-			world().write_command(ui_state_command(owner().inner(), is_enabled));
+			world().write_command(SetUiEnabled(owner().inner(), is_enabled));
 		}
 		void set_enable_state(bool enabled) {
 			local_enabled = enabled;
@@ -97,7 +97,7 @@ namespace ui {
 
 	struct ui_enabler_system :ecs::System {
 		void run(ecs::Ecs& world) {
-			for (ui_state_command cmd:world.read_commands<ui_state_command>()) {
+			for (SetUiEnabled cmd:world.read_commands<SetUiEnabled>()) {
 				world.get_component<ui_enabled>(cmd.ent).set_enable_state(cmd.should_enable);
 			}
 
@@ -135,10 +135,10 @@ namespace ui {
 		ui_spawner(geo::Box2d box,size_t priority) :bounds(geo::Box2d(box.center,box.scale)), priority(priority){
 		}
 		void apply(ecs::obj& object) {
-			object.add_component<ui_bounds>(bounds);
-			object.add_component<ui_enabled>();
-			object.add_component<InteractionState>();
-			object.add_component<ui_priority>(priority);
+			object.ensure_component<ui_bounds>(bounds);
+			object.ensure_component<ui_enabled>();
+			object.ensure_component<InteractionState>();
+			object.ensure_component<ui_priority>(priority);
 			stn::Option<ecs::obj> node = object.world().get_resource<base_ui_node>().
 				map([](base_ui_node node) {return node.base_node; });
 				if (node.is_some()) {

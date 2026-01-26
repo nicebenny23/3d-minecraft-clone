@@ -45,7 +45,7 @@ ModelMesh ModelMeshName::loadmesh(const char* location,const char* name, Vec3 po
 {
 	
 	ModelMesh newmesh = ModelMesh();
-	file_handle meshfile = file_handle(name, FileMode(true,true));
+	file_handle meshfile = file_handle(std::string(name), FileMode(true,true));
 	newmesh.pos = position;
 	while (true)
 	{
@@ -58,13 +58,13 @@ ModelMesh ModelMeshName::loadmesh(const char* location,const char* name, Vec3 po
 		}
 		if (strcmp(header, "v") == 0) {
 			float c1 = 0, c2 = 0, c3 = 0;
-			meshfile.fscanf(3, "%f %f %f\n", &c1, &c2, &c3);
+			meshfile.fscanf("%f %f %f\n", &c1, &c2, &c3);
 			newmesh.vertices.push(Point3(c1,c2,c3));
 		}
 		if (strcmp(header, "vt") == 0) {
-			v2::Vec2 texcoord;
+			
 			float c1 = 0, c2 = 0;
-			meshfile.fscanf(2,"%f %f\n", &c1, &c2);
+			meshfile.fscanf("%f %f\n", &c1, &c2);
 		
 			newmesh.texcoords.push(v2::Vec2(c1,c2));
 		}
@@ -73,13 +73,9 @@ ModelMesh ModelMeshName::loadmesh(const char* location,const char* name, Vec3 po
 			unsigned int* vertexIndex, * uvIndex;
 			vertexIndex = new unsigned int[3];
 			uvIndex = new unsigned int[3];
-			 meshfile.fscanf(6,"%u/%u %u/%u %u/%u\n", &vertexIndex[0], &uvIndex[0], &vertexIndex[1], &uvIndex[1], &vertexIndex[2], &uvIndex[2]);
-			newmesh.vertexindices.push(vertexIndex[0]);
-			newmesh.vertexindices.push(vertexIndex[1]);
-			newmesh.vertexindices.push(vertexIndex[2]);
-			newmesh.texindices.push(uvIndex[0]);
-			newmesh.texindices.push(uvIndex[1]);
-			newmesh.texindices.push(uvIndex[2]);
+			 meshfile.fscanf("%u/%u %u/%u %u/%u\n", &vertexIndex[0], &uvIndex[0], &vertexIndex[1], &uvIndex[1], &vertexIndex[2], &uvIndex[2]);
+			 newmesh.vertexindices.push({ vertexIndex[0],vertexIndex[1],vertexIndex[2] });
+			 newmesh.texindices.push({ uvIndex[0],uvIndex[1],uvIndex[2] });
 			delete[] uvIndex;
 			delete[] vertexIndex;
 		}

@@ -33,19 +33,23 @@ namespace ui {
 		void set_image(const renderer::TexturePath& path) {
 			world().write_command(set_image_cmd(owner().inner(), path));
 		}
-		ui_image_component(const renderer::TexturePath& path) {
-		}
 	};
 	struct ui_image_spawner:ecs::Recipe {
 		ui_spawner ui_spawn;
-		renderer::TexturePath path;
-		ui_image_spawner(renderer::TexturePath path,geo::Box2d box, size_t priority) :ui_spawn(geo::Box2d(box.center, box.scale),priority), path(path){
+		stn::Option<renderer::TexturePath> path;
+		ui_image_spawner(renderer::TexturePath spawn_path,geo::Box2d box, size_t priority) :path(spawn_path),ui_spawn(geo::Box2d(box.center, box.scale),priority){
 			
+		}
+		ui_image_spawner(geo::Box2d box, size_t priority) :path(stn::None),ui_spawn(geo::Box2d(box.center, box.scale), priority){
+
 		}
 		void apply(ecs::obj& object) {
 			ui_spawn.apply(object);
-			object.add_component<ui_image_component>(path);
-			object.get_component<ui_image_component>().set_image(path);
+			object.add_component<ui_image_component>();
+			if (path) {
+				object.get_component<ui_image_component>().set_image(path.unwrap());
+
+			}
 		}
 	};
 	struct ui_image{
@@ -94,6 +98,9 @@ namespace ui {
 	struct prepare_ui_image :ecs::System {
 		void run(ecs::Ecs& world) {
 			for (const set_image_cmd& cmd:world.read_commands<set_image_cmd>()){
+				if (!world.contains(cmd.ui_entity)) {
+					continue;
+				}
 				ui_image_component& img= world.get_component<ui_image_component>(cmd.ui_entity);
 				if (!img.tex_handle) {
 				
@@ -113,16 +120,19 @@ namespace ui {
 
 			ecs::View<ui::ui_enabled, ui::ui_bounds, ui::ui_priority, ui_image_component> bounds_view(world);
 			for (auto&& [enabled, bounds,ui_priority, ui_image] : bounds_view) {
-				if (enabled.enabled()) {
 
-					ui_image.tex_handle.enable();
-					v2::Vec2 scale = bounds.global().center;
-					ui_image.tex_handle.set_order_key(ui_priority.priority);
-					ui_image.tex_handle.set_uniform(renderer::uniform(float(bounds.global().scale.x), "scale"));
-					ui_image.tex_handle.set_uniform(renderer::uniform(bounds.global().center, "center"));
-				}
-				else {
-					ui_image.tex_handle.disable();
+				if (ui_image.tex_handle) {
+					if (enabled.enabled()) {
+						ui_image.tex_handle.enable();
+						v2::Vec2 scale = bounds.global().center;
+						ui_image.tex_handle.set_order_key(ui_priority.priority);
+						ui_image.tex_handle.set_uniform(renderer::uniform(float(bounds.global().scale.x), "scale"));
+						ui_image.tex_handle.set_uniform(renderer::uniform(bounds.global().center, "center"));
+
+					}
+					else {
+						ui_image.tex_handle.disable();
+					}
 				}
 			}
 		}

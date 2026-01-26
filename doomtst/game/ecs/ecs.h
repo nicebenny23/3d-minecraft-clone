@@ -139,7 +139,7 @@ namespace ecs {
 			commands<Cmd>().emplace(std::forward<T>(command));
 		}
 		template<typename T, typename ...Args> requires std::constructible_from<T, Args&&...>
-		void write_command_emplaced(Args&&... args) {
+		void emplace_command(Args&&... args) {
 			commands<T>().emplace(std::forward<Args>(args)...);
 		}
 		template<typename T>

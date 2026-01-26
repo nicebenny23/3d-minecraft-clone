@@ -3,41 +3,43 @@
 #pragma once
 namespace items {
 
-	struct MakeItemSlot :Plan {
+	struct SetItemSlot {
 		ecs::obj slot;
 		item_entry entry;
-		MakeItemSlot(item_entry new_entry, ecs::obj item_slot) :entry(new_entry), slot(item_slot) {
-			int l = 1;
+		SetItemSlot(ecs::obj item_slot,item_entry new_entry) :entry(new_entry), slot(item_slot) {
 		}
 		void apply(ecs::Ecs& world) {
 			ElementSlot& element_slot=slot.get_component<ElementSlot>();
-			if (element_slot.occupied()) {
-				stn::throw_logic_error("slot not validated");
+			if (element_slot.empty()) {
+				element_slot.current_item = slot.spawn_child<DisplayedItemSpawner>(entry);
 			}
-			element_slot.current_item=slot.spawn_child<ItemUiSpawner>(entry);
+			else {
+				element_slot.element().unwrap().get_component<item_stack>().set(entry);
+			}
 		}
 	};
-	struct AddToSlot :Plan {
+
+	struct AddToSlotPlan {
 		ecs::obj slot;
 		item_entry entry;
-		AddToSlot(item_entry new_entry, ecs::obj item_slot) :entry(new_entry), slot(item_slot) {
-			int l = 3;
+		AddToSlotPlan(ecs::obj item_slot, item_entry new_entry) :entry(new_entry), slot(item_slot) {
 		}
 		void apply(ecs::Ecs& world) {
 
 			if (slot.get_component<ElementSlot>().empty()) {
-				MakeItemSlot(entry, slot).apply(world);
-
+				SetItemSlot(slot, entry).apply(world);
 			}
-			item_stack& stack = slot.get_component<ElementSlot>().element().expect("item should exist").get_component<item_stack>();
-			if (!can_interact(stack.contained_entry(), entry)) {
-				stn::throw_logic_error("AddToSlot was not validated");
+			else {
+				item_stack& stack = slot.get_component<ElementSlot>().element().expect("item should exist").get_component<item_stack>();
+				if (!item_entry::can_interact(stack.contained_entry(), entry)) {
+					stn::throw_logic_error("AddToSlot was not validated");
+				}
+				stack.add(entry.count);
 			}
-			stack.add(entry.count);
 		}
 	};
 
-	struct TakeFromSlot :Plan {
+	struct TakeFromSlot {
 		ecs::obj slot;
 		item_entry entry;
 		TakeFromSlot(item_entry new_entry, ecs::obj item_slot) :entry(new_entry), slot(item_slot) {
@@ -45,14 +47,14 @@ namespace items {
 		void apply(ecs::Ecs& world) {
 
 			item_stack& stack = slot.get_component<ElementSlot>().element().expect("slot must not be empty").get_component<item_stack>();
-			if (!can_interact(stack.contained_entry(), entry)) {
+			if (!item_entry::can_interact(stack.contained_entry(), entry)) {
 				stn::throw_logic_error("AddToSlot was not validated");
 			}
 			stack.remove(entry.count);
 		}
 	};
 
-	struct GiveToSlot :Plan {
+	struct GiveToSlot {
 		//element slot
 		ecs::obj from_slot;
 		//element slot
@@ -69,7 +71,7 @@ namespace items {
 
 			ecs::obj to_entity = to_slot.get_component<ElementSlot>().element().unwrap_or_else([&] {
 				item_id id = item_entity.get_component<item_stack>().contained_id();
-				MakeItemSlot(item_entry(id, count), to_slot).apply(world);
+				SetItemSlot( to_slot, item_entry(id, count)).apply(world);
 				return to_slot.get_component<ElementSlot>().element().unwrap();
 				});
 			give_stack_plan(item_entity, to_entity, count).apply(world);
@@ -77,80 +79,50 @@ namespace items {
 	};
 
 
-	struct AddSlot {
-		//element slot
-
-		ecs::obj to_slot;
-		item_entry amount;
-	
-		AddSlot(ElementSlot& to, item_entry cnt) :to_slot(to.owner()), amount(cnt) {
-		}
-		stn::Option<AddToSlot> plan(ecs::Ecs& world) {
-			stn::Option<ecs::obj> element = to_slot.get_component<ElementSlot>().element();
+	inline stn::Option<AddToSlotPlan> AddToSlot(ElementSlot& to, item_entry amount) {
+			stn::Option<ecs::obj> element = to.element();
 			if (element) {
 				if (!element.unwrap().get_component<item_stack>().can_fit(amount)) {
 					return stn::None;
 				}
 			}
-			return AddToSlot(amount,to_slot);
+			return AddToSlotPlan(to.owner(), amount);
 		}
-	};
+	
 
-	struct give_slot_some {
-		//element slot
-		ecs::obj from;
-		//element slot
-		ecs::obj to;
-		size_t count;
-		give_slot_some(ElementSlot& from_slot, ElementSlot& to_slot, size_t amount) :from(from_slot.owner()), to(to_slot.owner()), count(amount) {
-
-		}
-		stn::Option<GiveToSlot> plan(const ecs::Ecs& world) {
-			ElementSlot& from_slot = from.get_component<ElementSlot>();
-
-			ElementSlot& to_slot = from.get_component<ElementSlot>();
+		inline stn::Option<GiveToSlot> give_slot_all(ElementSlot& from_slot, ElementSlot& to_slot, size_t amount) {
 			if (from_slot.empty()) {
 				return stn::None;
 			}
-			const item_stack& stack = from_slot.element().unwrap().get_component<item_stack>();
-			size_t stack_count = stack.count();
-			if (stack_count < count) {
+			const item_stack& from_stack = from_slot.element().unwrap().get_component<item_stack>();
+			size_t from_stack_count = from_stack.count();
+			if (from_stack_count < amount) {
 				return stn::None;
 			}
 			stn::Option<ecs::obj> mabye_slot = to_slot.element();
 			if (!mabye_slot) {
-				return GiveToSlot(from_slot, to_slot, count);
+				return GiveToSlot(from_slot, to_slot, amount);
 			}
 			const item_stack& other = mabye_slot.unwrap().get_component<item_stack>();
-			if (can_interact(other.contained_entry(), stack.contained_entry())) {
-				return GiveToSlot(from_slot, to_slot, other.rem_capacity());
+			if (other.can_fit(item_entry(from_stack.contained_id(),amount))) {
+				return GiveToSlot(from_slot, to_slot,amount );
 			}
 			return stn::None;
 		}
-	};
-
-	struct transfer_slot_some {
+	
+	inline stn::Option<GiveToSlot> transfer_slot_all(ElementSlot& from_slot, ElementSlot& to_slot){
+		return from_slot.element().and_then([&](ecs::obj item_entity) {
+			return give_slot_all(from_slot, to_slot, item_entity.get_component<item_stack>().count());
+			});
+	}
+	struct swap_slot_plan{
 		//element slot
 		ecs::obj from;
 		//element slot
 		ecs::obj to;
-		transfer_slot_some(ElementSlot& from_slot, ElementSlot& to_slot, size_t amount) :from(from_slot.owner()), to(to_slot.owner()) {
+		swap_slot_plan(ecs::obj from_obj, ecs::obj to_obj) :from(from_obj), to(to_obj) {
 
 		}
-		stn::Option<GiveToSlot> plan(const ecs::Ecs& world) {
-			ElementSlot& from_slot = from.get_component<ElementSlot>();
-			return from_slot.element().and_then([&](ecs::obj item_entity) {
-				return give_slot_some(from_slot, to.get_component<ElementSlot>(), item_entity.get_component<item_stack>().count()).plan(world);
-				});
-		}
-	};
-
-	struct swap_slot_plan {
-		//element slot
-		ecs::obj from;
-		//element slot
-		ecs::obj to;
-
 		void apply(ecs::Ecs& world) {
 			stn::Option<ecs::obj> to_child = to.get_component <ElementSlot>().element();
 			stn::Option<ecs::obj> from_child = from.get_component <ElementSlot>().element();
@@ -168,16 +140,7 @@ namespace items {
 			}
 		}
 	};
-	struct swap_slot {
-		//element slot
-		ecs::obj from;
-		//element slot
-		ecs::obj to;
-		swap_slot(ElementSlot& from_slot, ElementSlot& to_slot) :from(from_slot.owner()), to(to_slot.owner()) {
-
-		}
-		stn::Option<swap_slot_plan> plan(const ecs::Ecs& world) {
-			return swap_slot_plan(to, from);
-		}
-	};
+	inline swap_slot_plan swap_slot(ElementSlot& from_slot, ElementSlot& to_slot) {
+		return swap_slot_plan(from_slot.owner(), to_slot.owner());
+	}
 }

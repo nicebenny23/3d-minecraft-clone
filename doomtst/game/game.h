@@ -1,36 +1,20 @@
-#include "../game/camera.h"
-#include "../renderer/ModelMesh.h"
-#include <iostream>
-#include <cmath>
 #include "../renderer/renderer.h"
 #include "../renderer/Window.h"
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include "../util/userinput.h"
-#include "../world/chunk.h"
-#include "../game/objecthelper.h"
 #include "../items/menu.h"
-#include "../world/grid.h"
 #include "../renderer/blockrender.h"
-#include "../world/managegrid.h"
-#include "../game/time.h"
 #include "../game/collision.h"
-#include "../util/fileloader.h"
 #include "../player/player.h"
-#include "../game/navigation.h"
-#include "../renderer/grandrenderer.h"
-#include "../world/noise.h"
 #include "../world/tick.h"
 #include "../block/liquid.h"
-#include "../debugger/console.h"
-#include "../items/menu.h"
 #include "Core.h"
 #include "rigidbody.h"
 #include "../player/playermovment.h"
 
-#include "../game/entity.h"
 #include "../entities/entityspawner.h"
+#include "../renderer/decal.h"
+
 #pragma once 
 
 void endframe() {
@@ -89,7 +73,6 @@ void init() {
 	Core::game.insert_plugin<ui::UiImagePlugin>();
 
 	Core::game.insert_plugin<ui::MenuPlugin>();
-	Core::game.insert_plugin<items::TransactionPlugin >();
 	Core::game.insert_plugin<items::register_core_items>();
 	Core::game.insert_plugin<items::ItemUiPlugin>();
 	Core::game.insert_plugin<ui::UiTextPlugin>();

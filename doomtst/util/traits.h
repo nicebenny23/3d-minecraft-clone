@@ -25,17 +25,44 @@ namespace stn {
 	template<typename Func, typename ...Args>
 	concept nonvoid_invokable = std::invocable<Func, Args&&...> && !std::is_void_v<std::invoke_result_t<Func, Args&&...>>;
 	template<typename>
-	struct member_function_traits;
+	struct function_traits;
 	template<typename C, typename R, typename... Args>
-	struct member_function_traits<R(C::*)(Args...)> {
+	struct function_traits<R(C::*)(Args...)> {
 		using return_type = R;
 		using args = std::tuple<Args...>;
 	};
 	template<typename C, typename R, typename... Args>
-	struct member_function_traits<R(C::*)(Args...) const> {
+	struct function_traits<R(C::*)(Args...) const> {
 		using return_type = R;
 		using args = std::tuple<Args...>;
 	};
+	template<typename R, typename... Args>
+	struct function_traits<R(Args...)> {
+		using return_type = R;
+		using args = std::tuple<Args...>;
+	};
+	template<typename R, typename... Args>
+	struct function_traits<R(*)(Args...)>
+		: function_traits<R(Args...)> {
+	};
+	template<typename T>
+	concept HasFunctionTraits= requires {
+		typename function_traits<T>::return_type;
+		typename function_traits<T>::args;
+	};
+	
+
+	template<HasFunctionTraits T,std::size_t N>
+	using arg_at_t = std::tuple_element_t<N, typename function_traits<T>::args>;
+
+	template<HasFunctionTraits T>
+	using arguments_t = typename function_traits<T>::args;
+
+	template<HasFunctionTraits T>
+	using result_type_t = typename function_traits<T>::return_type;
+
+
+
 	template<typename Range, typename ElementType>
 	concept convertible_range = std::ranges::range<Range> && std::convertible_to<std::ranges::range_value_t<Range>, ElementType>;
 

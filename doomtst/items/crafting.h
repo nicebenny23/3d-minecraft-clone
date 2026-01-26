@@ -2,6 +2,8 @@
 #include "container_transactions.h"
 #include "menu.h"
 #include "../math/vector2.h"
+#include "recipe_file.h"
+#include "crafting_table.h"
 #pragma once
 
 namespace items {
@@ -12,7 +14,16 @@ namespace items {
 		}
 
 	};
-	struct craftingtablecomp : ecs::component {
+	struct make_crafting_table: ecs::Recipe {
+		make_crafting_table(ecs::obj input, ecs::obj output) :input_container(input), output_slot(output) {
 
+		}
+		void apply(ecs::obj& entity) {
+			ItemRecipes recipes = json::parse_json_from_path(recipe_booklet_from_path,std::filesystem::path("crafting\\2x2craft.txt"),entity.world());
+			entity.add_component<crafter>(RecipeBinder(input_container, output_slot, recipes));
+		}
+
+		ecs::obj input_container;
+		ecs::obj output_slot;
 	};
 };

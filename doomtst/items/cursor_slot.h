@@ -2,6 +2,7 @@
 #include "SlotUi.h"
 #include "Container.h"
 #include "slot_transactions.h"
+#include "crafting_table.h"
 #pragma once
 namespace items {
 
@@ -20,13 +21,23 @@ namespace items {
 			ecs::obj cursor_obj = world.get_resource<cursor_container>().unwrap().primary_slot();
 			ElementSlot& cursor_slot=cursor_obj.get_component<ElementSlot>();
 			cursor_obj.get_component<ui::ui_bounds>().local.center = world.ensure_resource<userinput::InputManager>().mouse_position;
-			for (auto&& [item_decal,container_slot,interaction_state] : ecs::View<ItemDecal,ElementSlot,ui::InteractionState>(world)) {
+			for (auto&& [item_decal,interaction_state] : ecs::View<ItemDecal,ui::InteractionState>(world)) {
 				if (interaction_state.left_clicked) {
-					if (container_slot.occupied()|| cursor_slot.occupied()) {
-						swap_slot(cursor_slot, container_slot).plan(world).unwrap().apply(world);
-						return;
-
-					}	
+					if (item_decal.owner().has_component<crafting_slot_tag>()) {
+						crafter& crafter_comp = item_decal.owner().get_component<crafting_slot_tag>().crafter.get_component<crafter>();
+						auto auto_val=build_recipe_from_booklet(crafter_comp.binder.list, crafter_comp.binder.input.get_component<container>(), cursor_slot);
+						
+						if (auto_val) {
+							auto_val.unwrap().apply(world);
+						}
+					}
+					else {
+						items::ElementSlot& container_slot = item_decal.owner().get_component<items::ElementSlot>();
+						if (container_slot.occupied() || cursor_slot.occupied()) {
+							swap_slot(cursor_slot, container_slot).apply(world);
+							return;
+						}
+					}
 				}
 			}
 		}

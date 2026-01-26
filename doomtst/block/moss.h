@@ -11,7 +11,7 @@ inline void mossinit(blockname::block& blk) {
 	blk.mininglevel = 1;
 	blk.mesh.box.scale = blockname::blockscale;
 	blk.createdefaultaabb();
-	blk.owner().add_component<loottable>().addelem("moss", 1, true);
+	blk.owner().add_component<loot_table>().add("moss", 1, true);
 
 	blk.minedfastwithpick = false;
 }

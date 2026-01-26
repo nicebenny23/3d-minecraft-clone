@@ -13,5 +13,5 @@ inline void crystalinit(blockname::block& blk) {
 	blk.createdefaultaabb(false);
 	blk.mininglevel = 3;
 	blk.minedfastwithpick = true;
-	blk.owner().add_component<loottable>().addelem("crystal", 2, true);
+	blk.owner().add_component<loot_table>().add("crystal", 2, true);
 }

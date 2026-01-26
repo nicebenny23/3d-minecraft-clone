@@ -22,17 +22,12 @@ namespace items {
 			return x() <= element_size.x && y() <= element_size.y;
 		}
 	};
-	struct SlotIndex :ecs::component {
-		container_index index;
-		SlotIndex(container_index ind) :index(ind) {
-		}
-	};
 	struct ElementSlot :ecs::component {
 		stn::Option<ecs::weak_object> current_item;
 		bool occupied() const{
 			return current_item.is_some_and(&ecs::weak_object::alive);
 		}
-		bool empty() {
+		bool empty() const{
 			return !occupied();
 		}
 		ElementSlot() {
@@ -44,8 +39,19 @@ namespace items {
 		void reset_element() {
 			current_item = stn::None;
 		}
-
-		Option<ecs::obj> element() {
+		void clear() {
+			if (occupied()) {
+				element().unwrap().destroy();
+			}
+			current_item = stn::None;
+		}
+		Option<ecs::obj> element(){
+			if (occupied()) {
+				return current_item.unwrap().get();
+			}
+			return stn::None;
+		}
+		Option<const ecs::obj> element() const{
 			if (occupied()) {
 				return current_item.unwrap().get();
 			}
@@ -58,14 +64,15 @@ namespace items {
 			}
 			return element().unwrap().get_component<item_stack>();
 		}
+		Option<item_entry> entry() {
+			return stack().map_member(&item_stack::contained_entry);
+		}
 	};
 	struct ItemSlotSpawner :ecs::Recipe {
-		ItemSlotSpawner(container_index spawn_index) :index(spawn_index) {
+		ItemSlotSpawner(){
 
 		}
-		container_index index;
 		void apply(ecs::obj& entity) {
-			entity.add_component<SlotIndex>(index);
 			entity.add_component<ElementSlot>();
 		}
 	};

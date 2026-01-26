@@ -74,22 +74,21 @@ namespace stn {
 	struct FileMode {
 		bool writeable;
 		bool readable;
-	
-		FileMode(bool can_write, bool can_read) :writeable(can_write), readable(can_read) {
+		bool binary;
+		FileMode(bool can_write, bool can_read,bool is_binary=true) :writeable(can_write), readable(can_read),binary(is_binary) {
 
 		}
 
 		const char* file_opener() const {
 			if (!readable && !writeable) throw std::runtime_error("FileMode must be readable or writeable");
-
 			if (readable && writeable) {
-				return "r+";
+				return binary ? "r+b" : "r+";
 			}
-			else if (writeable) {
-				return "w";
+			if (writeable) {
+				return binary ? "wb" : "w";
 			}
-			else if (readable) {
-				return "r";
+			if (readable) {
+				return binary ? "rb" : "r";
 			}
 		}
 	};
@@ -104,13 +103,14 @@ namespace stn {
 		FILE* fp;
 		long offset;
 
-		long getsize() {
-
-			long sizeval;
+		size_t size() {
 			seek_end();
-			sizeval = ftell(fp);
-			seek(SeekOrigin::Begin,0);
-			return sizeval;
+			auto pos = std::ftell(fp);
+			if (pos < 0) {
+				stn::throw_logic_error("ftell failed with {}",pos);
+			}
+			seek(SeekOrigin::Begin, 0);
+			return static_cast<std::uint64_t>(pos);
 		}
 		void seek(SeekOrigin origin, long offset) {
 			int whence = 0;
@@ -128,19 +128,20 @@ namespace stn {
 			seek(SeekOrigin::End, 0);
 		}
 		template<typename... Args>
-		void fscanf(size_t expectedargs, const char* format, Args&&... args) {
+		void fscanf(const char* format, Args&&... args) {
 			int result = std::fscanf(fp, format, std::forward<Args>(args)...);
-			if (result != static_cast<int>(expectedargs)) {
+			if (result != static_cast<int>(sizeof...(Args))) {
 				throw std::runtime_error("Unexpected number of matched arguments in fscanf");
 			}
 
 		}
-
-		file_handle(std::string filepath, FileMode open_mode) :file_options(open_mode), fp(fopen(filepath.c_str(), open_mode.file_opener())) {
+		file_handle(std::string filepath, FileMode open_mode) :file_options(open_mode), fp(fopen(filepath.c_str(), open_mode.file_opener())),offset(0) {
 			if (!fp) {
-				debug("Failed to open file");
 				throw std::runtime_error(filepath);
 			}
+		}
+		file_handle(std::filesystem::path file_path, FileMode open_mode) :file_handle(file_path.string(), open_mode) {
+
 		}
 
 		file_handle(const file_handle&) = delete;
@@ -206,6 +207,19 @@ namespace stn {
 				stn::throw_logic_error("attempted to read a file but only {} out of {} elements were read", read, count);
 			}
 			return newarr;
+		}
+		std::string read_text(){ 
+			if (file_options.binary) {
+				stn::throw_logic_error("cannot read text from a binary file");
+			}
+			size_t file_size = size();
+			seek(SeekOrigin::Begin, 0);
+			std::string result;
+			int ch;
+			while ((ch = std::fgetc(fp)) != EOF) {
+				result.push_back(static_cast<char>(ch));
+			}
+			return result;
 		}
 	};
 

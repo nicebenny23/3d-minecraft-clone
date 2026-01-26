@@ -10,8 +10,8 @@
 
 void playerbreak::make_drop(ecs::obj Hit)
 {
-	if (Hit.has_component<loottable>())
+	if (Hit.has_component<loot_table>())
 	{
-		Hit.get_component<loottable>().should_drop = true;
+		Hit.get_component<loot_table>().should_drop = true;
 	}
 }

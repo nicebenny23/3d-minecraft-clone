@@ -13,6 +13,6 @@ inline void torchinit(blockname::block& blk) {
 	blk.createdefaultaabb(false);
 	blk.mininglevel = 1;
 	blk.minedfastwithpick = true;
-	blk.owner().add_component<loottable>();
-	blk.owner().get_component<loottable>().addelem("moss", 1);
+	blk.owner().add_component<loot_table>();
+	blk.owner().get_component<loot_table>().add("moss", 1);
 }

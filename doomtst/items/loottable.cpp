@@ -1,10 +1,10 @@
 #include "loottable.h"
 #include "../player/playerinventory.h"
 #include "../player/player.h"
-void lootelement::drop(ecs::Ecs& world)
+void loot_element::drop(ecs::Ecs& world) const
 {
-	int dropamt = maxamt;
-	items::item_id id= world.get_resource<items::item_type_register>().unwrap().from_name(item_name);
-	items::item_entry entry = items::item_entry(id, maxamt);
-	items::stage_transaction_emplaced<items::give_container_entry>(world,entry,player::goblin.get_component<inventory>().hotbar.get_component<items::container>());
+	stn::Option<items::AddToSlotPlan> slot=items::give_container_entry(to_entry(world), player::goblin.get_component<inventory>().hotbar.get_component<items::container>());
+	if (slot) {
+	slot.unwrap().apply(world);
+	}
 }

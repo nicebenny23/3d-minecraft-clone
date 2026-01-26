@@ -3,6 +3,7 @@
 #include "../util/userinput.h"
 #include "../items/recipe.h"
 #include "../items/menu.h"
+#include "../items/crafting.h"
 #pragma once 
 struct inventory_menu_component :ecs::Recipe {
 	inventory_menu_component() {
@@ -22,6 +23,7 @@ struct inventory : ecs::component {
 
 	}
 
+	ecs::obj input;
 	ecs::obj inventory_object;
 	ecs::obj hotbar;
 	stn::Option<items::container_index> selected_ind;
@@ -45,9 +47,14 @@ struct inventory : ecs::component {
 	void start() {
 		
 		hotbar = world().spawn_empty();
-
+		ecs::obj input=ecs::spawn(world(), items::container_recipe(v2::Coord2(0, 7), v2::Coord2(1, 1)));
+		
 		inventory_object= ecs::spawn(world(), inventory_menu_component());
 		hotbar=ecs::spawn(world(),items::container_recipe(v2::Coord2(0,0),v2::Coord2(6,1)));
+		ecs::obj display = ecs::spawn(world(), items::DisplaySlot(v2::Coord2(3, 7)));
+
+		ecs::obj own=owner();
+		items::make_crafting_table(input,display).apply(own);
 		givestartitems("plank");
 	}
 	void update() {
