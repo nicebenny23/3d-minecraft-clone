@@ -45,7 +45,7 @@ ModelMesh ModelMeshName::loadmesh(const char* location,const char* name, Vec3 po
 {
 	
 	ModelMesh newmesh = ModelMesh();
-	file_handle meshfile = file_handle(std::string(name), FileMode(true,true));
+	file_handle meshfile = file_handle(std::string(name), stn::FileMode::Read);
 	newmesh.pos = position;
 	while (true)
 	{

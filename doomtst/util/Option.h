@@ -74,7 +74,16 @@ namespace stn {
 
 			}
 		}
+		Option& operator=(const T& other) requires(std::copy_constructible<T>&& std::is_copy_assignable_v<T>) {
+			if (has_value) {
+				value.clear<T>();
+			}
+			has_value = true;
 
+			value.construct<T>(other);
+
+			return *this;
+		}
 		Option& operator=(const Option& other) requires std::copy_constructible<T> {
 			if (this != &other) {
 				//non_null_reset
@@ -320,9 +329,9 @@ namespace stn {
 			return stn::None;
 
 		}
-	
+
 		template<typename C, typename R> requires stn::decays_to<T, C>
-		stn::Option <R> map_member(R(C::* member)() const) const{
+		stn::Option <R> map_member(R(C::* member)() const) const {
 			return map(member);
 		}
 		template<typename C, typename R> requires stn::decays_to<T, C>
@@ -333,17 +342,17 @@ namespace stn {
 		stn::Option<R> map_member(R(C::* member)())&& {
 			return map(member);
 		}
-		template<typename R, typename C> requires stn::decays_to<T,C>
-		stn::Option <const R&> member(R C::*member) const{
+		template<typename R, typename C> requires stn::decays_to<T, C>
+		stn::Option <const R&> member(R C::* member) const {
 			return map(member);
 		}
 		template<typename R, typename C>
-		stn::Option<R&> member(R C::* member) & requires stn::decays_to<T, C> {
+		stn::Option<R&> member(R C::* member)& requires stn::decays_to<T, C> {
 			return map(member);
 		}
 		template<typename R, typename C>
-		stn::Option<R> member(R C::* member)&& requires stn::decays_to<T, C> {
-			return map(member);
+		stn::Option<R> member(R C::* member) && requires stn::decays_to<T, C> {
+			return map(member).copied();
 		}
 		template<typename Func>
 		Option& then(Func&& f)&
@@ -351,7 +360,7 @@ namespace stn {
 			if (has_value) {
 				std::invoke(std::forward<Func>(f), value.get<T>());
 			}
-			return *this; // return lvalue
+			return *this;
 		}
 
 		template<typename Func>
@@ -383,7 +392,7 @@ namespace stn {
 	};
 
 	template<typename T, typename... Args>
-	Option<T> Construct(Args&&... args) {
+	Option<T> MakeOption(Args&&... args) {
 		return Option<T>(T(std::forward<Args>(args)...));
 	}
 
@@ -398,7 +407,7 @@ namespace stn {
 		if (!lhs.is_some() && !rhs.is_some()) return std::partial_ordering::equivalent;
 		if (!lhs.is_some()) return std::partial_ordering::less;
 		if (!rhs.is_some()) return std::partial_ordering::greater;
-		return lhs.unwrap() <=> rhs.unwrap(); // defer to T’s partial ordering
+		return lhs.unwrap() <=> rhs.unwrap();
 	}
 	template<typename T>
 	bool operator<(const Option<T>& lhs, const Option<T>& rhs) {
@@ -428,7 +437,7 @@ namespace std {
 	template<typename T, typename CharT>
 	struct formatter<stn::Option<T>, CharT> : formatter<T, CharT> {
 		template<typename FormatContext> requires std::formattable<T, CharT>
-		auto format(const stn::Option<T>& opt, FormatContext& ctx) const{
+		auto format(const stn::Option<T>& opt, FormatContext& ctx) const {
 			return opt.match(
 				[&](const T& value) {
 					auto out = std::format_to(ctx.out(), "Some(");

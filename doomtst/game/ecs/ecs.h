@@ -1,5 +1,4 @@
 #pragma once
-#include "component.h"
 #include "resources.h"
 #include "ecs_commands.h"
 #include "System.h"
@@ -8,9 +7,10 @@
 #include "archtype.h"
 #include "../../assets/Assets.h"
 #include "spawner.h"
+#include "ComponentType.h"
 namespace ecs {
 	struct Ecs {
-		Ecs(std::uint32_t total_entities) :entities(total_entities), archetypes(total_entities) {
+		Ecs(size_t total_entities) :entities(total_entities), archetypes(total_entities) {
 			components.inject_ecs_instance(this);
 			ensure_resource<Systems>();
 			emplace_system<run_updates>();
@@ -120,8 +120,12 @@ namespace ecs {
 			return ensure_resource<Events<T>>();
 		}
 		template<typename T, typename ...Args>
-		void write_event(Args&&... args) requires std::constructible_from<T, Args&&...> {
+		void emplace_event(Args&&... args) requires std::constructible_from<T, Args&&...> {
 			return events<T>().write(std::forward<Args>(args)...);
+		}
+		template<typename T>
+		void write_event(const T& value) {
+			return events<T>().write(value);
 		}
 		template<typename T>
 		EventReader<T> make_reader() {
@@ -154,12 +158,12 @@ namespace ecs {
 		Systems& systems() {
 			return get_resource<Systems>().unwrap();
 		}
-		template<SystemType Sys>
-		void insert_system(Sys& sys) {
-			systems().insert(sys);
+		template<SystemType T>
+		void emplace_system() requires std::constructible_from<T,Ecs&>{
+			systems().emplace<T>(*this);
 		}
 		template<SystemType T, typename...Args>
-		void emplace_system(Args&&... args) {
+		void emplace_system(Args&&... args)	requires std::constructible_from<T,Args&&...> {
 			systems().emplace<T>(std::forward<Args>(args)...);
 		}
 		void run_systems() {
@@ -253,17 +257,25 @@ namespace ecs {
 			}(std::index_sequence_for<Components...>{});
 		}
 
+		stn::array<component_type*> component_types_for(const stn::span<const component_id>& indices) {
+			stn::array<component_type*> types;
+			for (component_id id:indices) {
+				types.push(&components[id]);
+			}
+			return types;
+		}
 
 		void remove_component_unchecked(entity object, component_id id) {
 
-			component_storage& pages = components.unchecked_at(id).storage();
-			pages.remove_at_unchecked(object);
+			components.unchecked_at(id).storage_erased().remove_at_unchecked(object);
+			
 			archetypes.transfer_entity_to_flipped_index(object, id);
 		}
 		void remove_object_unchecked(entity object) {
 			stn::span<const component_id> cached = archetypes.archetype_of(object).view_cached();
 			for (component_id id : cached) {
-				components.unchecked_at(id).storage().remove_at_unchecked(object);
+				components.unchecked_at(id).storage_erased().remove_at_unchecked(object);
+
 			}
 
 			//removes from both at the same time

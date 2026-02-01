@@ -1,49 +1,34 @@
 #include "../block/block.h"
 #include "../util/cached.h"
+#include "chunk_mesh.h"
 #pragma once 
-constexpr int chunklength = 16;
-constexpr int chunkaxis =int(chunklength/blocksize);
-constexpr int chunksize = chunkaxis*chunkaxis*chunkaxis;
-using namespace blockname;
+using namespace blocks;
 namespace Chunk {
 
-	struct chunk;
-	struct chunkmesh
-	{
-		chunkmesh(chunk& cnk) :recreate_mesh(false),owner(cnk){
-		};
-		
-
-		renderer::RenderableHandle SolidGeo;
-		renderer::RenderableHandle TransparentGeo;
-		void genbufs();
-	
-		stn::dirty_flag recreate_mesh;
-		chunk& owner;
-		array<face> faces;
-		
-		void sort_faces();
-		void destroy();
-	};
+	constexpr size_t chunkaxis = size_t(chunklength / blocksize);
+	constexpr size_t chunksize = chunkaxis * chunkaxis * chunkaxis;
 	std::string getcorefilename(Coord pos);
 	size_t indexfrompos(Coord pos);
-	struct chunk
+	
+	struct chunk:ecs::component
 	{
-		bool init;
 		Coord loc;
-		stn::box<chunkmesh> mesh;
 		bool modified;
 		void write();
-		chunk();
-		
+		chunk(v3::Coord location) :modified(false), loc(location), block_list(chunksize) {
+
+		}
 		Point3 center() const {
 			return (loc+ unitv /2.f)*chunklength;
 		}
-		ecs::obj& operator[](size_t index);
-		stn::array<ecs::obj> blockbuf;
+		ecs::obj& operator[](size_t index) {
+			return block_list[index];
+		}
+		const ecs::obj& operator[](size_t index) const{
+			return block_list[index];
+		}
+		stn::array<ecs::obj> block_list;
 		void destroy();
-	
-
 	};
 
 }

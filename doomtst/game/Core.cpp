@@ -57,12 +57,12 @@ namespace Core {
         Window.SetErrorCallBack(errorCallback);
         
         ctx->Window = &Window;
-        guirender::initgui();
+       
     }
 
     void App::CreateGrid()
     {
-		Grid=&Ecs.insert_resource<grid::Grid>(1, ctx);
+		Grid=&Ecs.insert_resource<grid::Grid>(2);
         
         ctx->Grid = Grid;
     }

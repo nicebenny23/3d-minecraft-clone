@@ -91,7 +91,7 @@ namespace ecs {
 	private:
 		EventRange create_range(const EventReader& reader) {
 			if (current_readers.contains(reader.id)) {
-				stn::throw_logic_error("You may not Read from Events with the same reader id {} while it is currently being read", reader.id.id);
+				stn::throw_logic_error("You may not Read from Events with the same reader block_id {} while it is currently being read", reader.id.id);
 			}
 			current_readers.push(reader.id);
 			return EventRange(*this, reader.id);

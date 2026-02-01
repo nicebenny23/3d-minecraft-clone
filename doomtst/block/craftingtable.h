@@ -6,14 +6,12 @@
 #include "../items/recipe_file.h"
 #include "../items/recipe_transactions.h"
 #pragma once 
-inline void tableinit(blockname::block& blk) {
+inline void tableinit(blocks::block& blk) {
 
-	blk.mesh.setfaces(craftingtableside, craftingtableside, craftingtabletop, craftingtableside, craftingtableside, craftingtableside);
+	blk.mesh.set_face_textures(craftingtableside, craftingtableside, craftingtabletop, craftingtableside, craftingtableside, craftingtableside);
 	blk.attributes.solid = true;
-	blk.attributes.transparent = false;
-	blk.emitedlight = 0;
 	blk.mininglevel = 1;
-	blk.mesh.box.scale = blockname::blockscale;
+	blk.mesh.box.scale = blocks::blockscale;
 
 	blk.createdefaultaabb(false);
 	//blk.owner().ensure_component<craftingtablecomp>();

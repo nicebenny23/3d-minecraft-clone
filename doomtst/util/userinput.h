@@ -42,7 +42,7 @@ namespace userinput {
 
 		}
 	};
-	inline int convertchartoglfwkey(const int key) {
+	inline int convertchartoglfwkey(size_t key) {
 		if ('a' <= key && key <= 'z') {
 			return key - 32;
 		}

@@ -2,12 +2,11 @@
 #include "liquid.h"
 #ifndef water_HPP
 #define water_HPP
-inline void waterinit(blockname::block& blk) {
-	blk.mesh.setfaces(watertex,watertex,watertex,watertex,watertex,watertex);
+inline void waterinit(blocks::block& blk) {
+	blk.mesh.set_face_textures(watertex,watertex,watertex,watertex,watertex,watertex);
 	blk.attributes.solid = false;
-	blk.attributes.transparent = true;
-	blk.emitedlight = 0;
-	blk.mesh.box.scale = blockname::blockscale;
+	blk.mesh.transparent = true;
+	blk.mesh.box.scale = blocks::blockscale;
 	blk.owner().add_component<liquidprop>(15);
 	blk.createdefaultaabb(true);
 

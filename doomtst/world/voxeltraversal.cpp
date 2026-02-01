@@ -1,6 +1,6 @@
 #pragma once
 #include "voxeltraversal.h"
-using namespace blockname;
+using namespace blocks;
 using	 namespace voxtra;
 using namespace grid;
 //by implementing inner search loop acuracy scales quadraticlly

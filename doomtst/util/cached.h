@@ -2,19 +2,30 @@
 namespace stn {
 	template <typename T>
 	struct change {
-		change() :value(), cached() {}
-		change(const T& val) :value(val), cached(val) {}
-		change(T val) :value(val), cached(val) {}
-		explicit operator const T& () const { return value; }
-		explicit operator T& () { return value; }
-		T& operator()() noexcept { return value; }
-		const T& operator()() const { return value; }
+		change() :value(), cached() {
+		}
+		change(const T& val) :value(val), cached(val) {
+		}
+		change(T val) :value(val), cached(val) {
+		}
+		explicit operator const T& () const {
+			return value;
+		}
+		explicit operator T& () {
+			return value;
+		}
+		T& operator()() noexcept {
+			return value;
+		}
+		const T& operator()() const {
+			return value;
+		}
 		//sets both values
 		void clear(const T& val) {
 			value = val;
 			cached = val;
 		}
-		bool changed() const{
+		bool changed() const {
 			return value != cached;
 		}
 		void set(const T& val) {
@@ -43,33 +54,61 @@ namespace stn {
 		dirty_flag& operator=(const dirty_flag&) = delete;
 		dirty_flag& operator=(dirty_flag&&) = delete;
 		dirty_flag(dirty_flag&& other) noexcept
-			: dirty(other.dirty) {
-			other.dirty = false;
+			: dirty(other.is_dirty()) {
+			other.mark_clean();
 		}
-		
+
 		//returns if it has cleaned
 		template<typename Func>
 		bool clean(Func&& func) {
-			if (dirty) {
+			if (dirty.exchange(false, std::memory_order_acquire)) {
 				func();
-				dirty = false;
+				mark_clean();
 				return true;
 			}
 			return false;
 		}
-		
+
 		explicit operator bool() const noexcept {
-			return dirty;
+			return is_dirty();
 		}
 		bool is_dirty() const noexcept {
-			return dirty;
+			return dirty.load(std::memory_order_relaxed);
 		}
 
 		void mark_dirty() noexcept {
-			dirty = true;
-		} 
+			dirty.store(true, std::memory_order_relaxed);
+		}
 	private:
-		bool dirty;
+		void mark_clean() noexcept {
+			dirty.store(false, std::memory_order_relaxed);
+		}
+		std::atomic_bool dirty;
+
+	};
+	template<typename T>
+	struct dirty_value {
+		T value;
+		dirty_flag* flag;
+		const T* operator->() const {
+			return &value;
+		}
+		const T& operator*() const {
+			return value;
+		}
+		dirty_value& operator=(const T& new_value) {
+			if (new_value != value) {
+				value = new_value;
+				flag->mark_dirty();
+			}
+
+		}
+		bool operator==(const T& other) const{
+			return value == other;
+		}
+		dirty_value(const T& v, dirty_flag& f)
+			: value(v), flag(&f) {
+		}
 
 	};
 }

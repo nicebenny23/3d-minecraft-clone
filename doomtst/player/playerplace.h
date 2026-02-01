@@ -28,7 +28,7 @@ struct playerplace : ecs::component {
 			return false;
 		}
 		voxtra::RayWorldHit closest = Hit.unwrap();
-		if (!closest.owner().has_component<blockname::block>()) {
+		if (!closest.owner().has_component<blocks::block>()) {
 			return false;
 		}
 		if (!inrange(closest.Hit.dist, -1, interactmaxrange)) {
@@ -64,10 +64,10 @@ struct playerplace : ecs::component {
 		bool collides = collision::boxCollidesWithEntity(newblockbox, collision::HitQuery());
 		if (!collides) {
 
-			stn::Option<blockname::id> blk = world().get_resource<items::item_type_register>().unwrap().from_id(select.unwrap().get_component<items::item_stack>().contained_id()).blk_id;
+			stn::Option<blocks::block_id> blk = world().get_resource<items::item_types>().unwrap().from_id(select.unwrap().get_component<items::item_stack>().contained_id()).blk_id;
 
 			if (blk&& select.unwrap().get_component<items::item_stack>().can_remove(1)) {
-				gridutil::set_block(plamentblock->pos, blk.unwrap());
+				gridutil::set_block(world(),plamentblock->pos, blk.unwrap());
 
 				select.unwrap().get_component<items::item_stack>().remove(1);
 

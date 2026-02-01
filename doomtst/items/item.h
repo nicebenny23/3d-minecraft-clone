@@ -7,79 +7,77 @@ namespace items {
 
 	struct item_entry {
 		
-		item_entry(item_id Id, size_t cnt) :id(Id), count(cnt){
-
-		}
-		item_entry(item_id Id, size_t cnt,size_t capacity) :id(Id), count(cnt),capacity_constraint(capacity){
-
+		item_entry(item_id Id, size_t cnt,const item_types& types) :id(Id), count(cnt){
+			if (types.capacity_for(id)<cnt) {
+				stn::throw_logic_error("size overweights {} capacity of {}",count,types.capacity_for(id));
+			}
 
 		}
 
 		item_id id;
 		size_t  count;
-
-		stn::Option<size_t> capacity_constraint;
-		size_t effective_capacity() const {
-			return capacity_constraint.unwrap_or(std::numeric_limits<size_t>().max());
+		
+		size_t effective_capacity(const item_types& types) const {
+			return types.capacity_for(id);
 		}
 	
 		bool empty() const {
 			return count==0;
 		}
-		bool full() const {
-			return count == capacity_constraint;
+		bool full(const item_types& types) const {
+			return count == types.capacity_for(id);
 		}
-		size_t rem_capacity() const {
-			return effective_capacity() - count;
+		size_t rem_capacity(const item_types& types) const {
+			return effective_capacity(types) - count;
 		}
-		bool can_fit(size_t fit_count) const {
-			return fit_count <= rem_capacity();
+		bool can_fit(size_t fit_count, const item_types& types) const {
+			return fit_count <= rem_capacity(types);
 		}
-		bool can_fit(item_entry ent) const {
-			return can_interact(ent, *this) && can_fit(ent.count);
+		bool can_fit(item_entry ent, const item_types& types) const {
+			return can_interact(ent, *this) && can_fit(ent.count, types);
 		}
-		bool can_remove(size_t remove_count) const {
+		bool can_remove(size_t remove_count, const item_types& types) const {
 			return  remove_count <= count;
 		}
-		size_t max_fit(const item_entry& oth) const {
+		size_t max_fit(const item_entry& oth, const item_types& types) const {
 			if (!can_interact(*this, oth)) {
 				return 0;
 			}
-			return rem_capacity();
+			return rem_capacity(types);
 		}
-		void add(size_t add_count) {
-			if (!can_fit(add_count)) {
-				stn::throw_logic_error("Add error: attempting to add {} items to stack with {} items, exceeding its capacity of {} items", count, add_count, capacity_constraint);
+		void add(size_t add_count,const item_types& types) {
+			if (!can_fit(add_count,types)) {
+				stn::throw_logic_error("Add error: attempting to add {} items to stack with {} items, exceeding its capacity of {} items", count, add_count, effective_capacity(types));
 			}
 			count += add_count;
 		}
-		void remove(size_t remove_count) {
-			if (!can_remove(remove_count)) {
-				stn::throw_logic_error("Add error: attempting to add {} items to stack with {} items, exceeding its capacity of {} items", count, count, capacity_constraint);
+		void remove(size_t remove_count, const item_types& types) {
+			if (!can_remove(remove_count,types)) {
+				stn::throw_logic_error("Add error: attempting to add {} items to stack with {} items, exceeding its capacity of {} items", count, count, effective_capacity(types));
 			}
 			count -= remove_count;
 		}
 
-		bool can_give_to(const item_entry& other_item, size_t amt) const {
-			return other_item.can_fit(amt) && can_remove(amt) && can_interact(*this, other_item);
+		bool can_give_to(const item_entry& other_item, size_t amt, const item_types& types) const {
+			return other_item.can_fit(amt, types) && can_remove(amt, types) && can_interact(*this, other_item);
 
 		}
-		bool can_transfer(const item_entry& other_item) const {
-			return can_give_to(other_item, count);
+		bool can_transfer(const item_entry& other_item, const item_types& types) const {
+			return can_give_to(other_item, count,types);
 
 		}
 
-		void transfer(item_entry& other_item) {
-			give(other_item, count);
+		void transfer(item_entry& other_item, const item_types& types) {
+			give(other_item, count,types);
 		}
-		void give(item_entry& other_item, size_t give_count) {
+		void give(item_entry& other_item, size_t give_count, const item_types& types) {
 
-			if (!can_remove(count)) {
+			if (!can_remove(count, types)) {
 				stn::throw_logic_error("Transfer error: trying to transfer {} items from a stack with only {} items.", give_count, count);
 			}
 
 			assert_interactable(*this, other_item);
-			if (other_item.rem_capacity() < give_count) {
+			if (other_item.rem_capacity(types) < give_count) {
 				throw std::logic_error("Unable to transfer more items overflow its capacity");
 			}
 			other_item.count += give_count;
@@ -110,7 +108,9 @@ namespace items {
 		item_id contained_id() const {
 			return entry.id;
 		}
-
+		const item_types& types() const{
+			return world().get_resource<item_types>().expect("item types must exist");
+		}
 		size_t count() const {
 			return entry.count;
 		}
@@ -118,22 +118,22 @@ namespace items {
 			return entry.empty();
 		}
 		bool full() const {
-			return entry.full();
+			return entry.full(types());
 		}
 		size_t rem_capacity() const {
-			return entry.rem_capacity();
+			return entry.rem_capacity(types());
 		}
 		bool can_fit(size_t count) const {
-			return entry.can_fit(count);
+			return entry.can_fit(count,types());
 		}
 		bool can_fit(item_entry ent) const {
-			return entry.can_fit(ent);
+			return entry.can_fit(ent, types());
 		}
 		bool can_remove(size_t count) const {
 			return count <= entry.count;
 		}
 		size_t max_fit(const item_entry& oth) const {
-			return entry.max_fit(oth);
+			return entry.max_fit(oth, types());
 		}
 		size_t max_fit(const item_stack& oth) const {
 			return max_fit(oth.entry);
@@ -142,26 +142,26 @@ namespace items {
 			entry = new_entry;
 		}
 		void add(size_t count) {
-			entry.add(count);
+			entry.add(count, types());
 		}
 		void remove(size_t count) {
-			entry.remove(count);
+			entry.remove(count, types());
 		}
 
 		bool can_give_to(const item_stack& other_item, size_t amt) const {
-			return entry.can_give_to(other_item.entry, amt);
+			return entry.can_give_to(other_item.entry, amt, types());
 
 		}
 		bool can_transfer(const item_stack& other_item) const {
-			return entry.can_transfer(other_item.entry);
+			return entry.can_transfer(other_item.entry, types());
 
 		}
 
 		void transfer(item_stack& other_item) {
-			entry.transfer(other_item.entry);
+			entry.transfer(other_item.entry, types());
 		}
 		void give(item_stack& other_item, size_t count) {
-			entry.give(other_item.entry, count);
+			entry.give(other_item.entry, count, types());
 		}
 
 	private:	
@@ -216,8 +216,7 @@ namespace items {
 		ItemSpawner(item_entry initial_state) :entry(initial_state) {
 		}
 		void apply(ecs::obj& entity) {
-			item_traits traits = entity.world().ensure_resource<item_type_register>().from_id(entry.id);
-
+			item_traits traits = entity.world().ensure_resource<item_types>().from_id(entry.id);
 				entity.ensure_component<item_stack>(entry).set(entry);
 			
 		}

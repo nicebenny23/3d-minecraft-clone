@@ -71,7 +71,7 @@ namespace items {
 
 			ecs::obj to_entity = to_slot.get_component<ElementSlot>().element().unwrap_or_else([&] {
 				item_id id = item_entity.get_component<item_stack>().contained_id();
-				SetItemSlot( to_slot, item_entry(id, count)).apply(world);
+				SetItemSlot( to_slot, item_entry(id, 0,world.ensure_resource<item_types>())).apply(world);
 				return to_slot.get_component<ElementSlot>().element().unwrap();
 				});
 			give_stack_plan(item_entity, to_entity, count).apply(world);
@@ -90,30 +90,30 @@ namespace items {
 		}
 	
 
-		inline stn::Option<GiveToSlot> give_slot_all(ElementSlot& from_slot, ElementSlot& to_slot, size_t amount) {
+		inline stn::Option<GiveToSlot> give_slot_some(ElementSlot& from_slot, ElementSlot& to_slot, size_t amount) {
 			if (from_slot.empty()) {
 				return stn::None;
 			}
 			const item_stack& from_stack = from_slot.element().unwrap().get_component<item_stack>();
-			size_t from_stack_count = from_stack.count();
-			if (from_stack_count < amount) {
-				return stn::None;
-			}
+			amount = stn::Min(amount,from_stack.count());
+			
 			stn::Option<ecs::obj> mabye_slot = to_slot.element();
 			if (!mabye_slot) {
 				return GiveToSlot(from_slot, to_slot, amount);
 			}
 			const item_stack& other = mabye_slot.unwrap().get_component<item_stack>();
-			if (other.can_fit(item_entry(from_stack.contained_id(),amount))) {
+			amount =stn::Min(amount,other.max_fit(from_stack));
+			if (amount!=0) {
 				return GiveToSlot(from_slot, to_slot,amount );
 			}
 			return stn::None;
 		}
 	
-	inline stn::Option<GiveToSlot> transfer_slot_all(ElementSlot& from_slot, ElementSlot& to_slot){
-		return from_slot.element().and_then([&](ecs::obj item_entity) {
-			return give_slot_all(from_slot, to_slot, item_entity.get_component<item_stack>().count());
-			});
+	inline stn::Option<GiveToSlot> transfer_slot_some(ElementSlot& to_slot,ElementSlot& from_slot){
+		if (from_slot.occupied()) {
+			return give_slot_some(from_slot,to_slot,from_slot.entry().unwrap().count);
+		}
+		return stn::None;
 	}
 	struct swap_slot_plan{
 		//element slot

@@ -63,14 +63,14 @@ namespace stn {
 		typed_id<T> as_id() const { 
 			if (unbounded())
 			{
-				throw std::logic_error("an unbounded id cannot be transformed into an id");
+				throw std::logic_error("an unbounded block_id cannot be transformed into an block_id");
 			}
 			return typed_id<T>(id);
 		}
 		 uint32_t get() const {
 			if (unbounded())
 			{
-				throw std::logic_error("an unbounded id has no value");
+				throw std::logic_error("an unbounded block_id has no value");
 			}
 			return id;
 		}

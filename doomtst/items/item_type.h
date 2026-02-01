@@ -4,6 +4,7 @@
 #include "../renderer/uibox.h"
 #include "../renderer/textrender.h"
 #include "../block/block.h"
+#include "../util/String.h"
 #pragma once
 namespace items {
 	enum class item_use_type {
@@ -19,7 +20,7 @@ namespace items {
 		float damage = 0;
 		float food=0;
 		float pickaxe_speed = 0;
-		stn::Option <blockname::id> blk_id = stn::None;
+		stn::Option <blocks::block_id> blk_id = stn::None;
 		bool operator==(const item_traits& other) const = default;
 		item_traits(std::string_view name,item_use_type use,renderer::TexturePath image,float dmg,float protection,float food_value,float pick)
 			: item_name(name),
@@ -32,7 +33,7 @@ namespace items {
 			blk_id(stn::None) {
 		}
 
-		item_traits(std::string_view name, renderer::TexturePath image, stn::Option<blockname::id> block_id)
+		item_traits(std::string_view name, renderer::TexturePath image, stn::Option<blocks::block_id> block_id)
 			: item_name(name),
 			use_type(item_use_type::block),
 			image_path(std::move(image)),
@@ -51,16 +52,21 @@ namespace items {
 	//this will be removed later once we get it to work well
 	template<typename T>
 	concept ItemType = std::derived_from<T, item_type>&& std::is_default_constructible_v<T>;
-	struct item_type_register :ecs::resource {
-		item_type_register() = default;
-		item_id from_name(std::string name) const {
-			if (!ids.contains(name)) {
-				stn::throw_invalid_argument("items does not contain name {}", name);
+	struct item_types :ecs::resource {
+		item_types() = default;
+		template<std::convertible_to<std::string_view> T>
+		item_id from_name(const T& name) const {
+			auto iter = ids.find<T>(name);
+			if (iter == ids.end()) {
+				stn::throw_invalid_argument("items does not contain name {}", static_cast<std::string_view>(name));
 			}
-			return ids.at(name);
+			return iter->second;
 		}
 		item_traits from_id(item_id id) const {
 			return trait_list[id.id];
+		}
+		size_t capacity_for(item_id id) const{
+			return 64;
 		}
 		template<ItemType T>
 		void register_item() {
@@ -78,7 +84,7 @@ namespace items {
 
 	private:
 		stn::array<item_traits> trait_list;
-		std::unordered_map<std::string, item_id> ids;
+		std::unordered_map<std::string, item_id, stn::StringHasher,std::equal_to<>> ids;
 	};
 
 

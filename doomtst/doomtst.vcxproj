@@ -60,7 +60,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
-    <EnableASAN>true</EnableASAN>
+    <EnableASAN>false</EnableASAN>
     <EnableFuzzer>false</EnableFuzzer>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|x64'" Label="Configuration">
@@ -236,7 +236,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="block\blockinit.cpp" />
     <ClCompile Include="block\liquid.cpp" />
     <ClCompile Include="debugger\console.cpp" />
     <ClCompile Include="debugger\debug.cpp" />
@@ -281,13 +280,13 @@
     <ClCompile Include="util\stbiload.cpp" />
     <ClCompile Include="util\userinput.cpp" />
     <ClCompile Include="world\chunkload.cpp" />
-    <ClCompile Include="world\managegrid.cpp" />
     <ClCompile Include="game\camera.cpp" />
     <ClCompile Include="world\chunk.cpp" />
     <ClCompile Include="game\collision.cpp" />
     <ClCompile Include="external\glad.c" />
     <ClCompile Include="world\grid.cpp" />
     <ClCompile Include="renderer\renderer.cpp" />
+    <ClCompile Include="world\managegrid.cpp" />
     <ClCompile Include="world\tick.cpp" />
     <ClCompile Include="world\voxeltraversal.cpp" />
     <ClCompile Include="renderer\Window.cpp" />
@@ -299,25 +298,16 @@
     <ClInclude Include="block\air.h" />
     <ClInclude Include="block\altar.h" />
     <ClInclude Include="block\blockinit.h" />
-    <ClInclude Include="block\chest.h" />
+    <ClInclude Include="block\block_mesh.h" />
+    <ClInclude Include="block\block_registry.h" />
     <ClInclude Include="block\craftingtable.h" />
-    <ClInclude Include="block\crystalore.h" />
-    <ClInclude Include="block\crystaltorch.h" />
-    <ClInclude Include="block\furnaceblock.h" />
-    <ClInclude Include="block\ironblock.h" />
     <ClInclude Include="block\plank.h" />
-    <ClInclude Include="block\sand.h" />
     <ClInclude Include="block\treestone.h" />
-    <ClInclude Include="block\glass.h" />
-    <ClInclude Include="block\lava.h" />
     <ClInclude Include="block\moss.h" />
     <ClInclude Include="block\liquid.h" />
-    <ClInclude Include="block\obisidian.h" />
-    <ClInclude Include="block\ropeblock.h" />
     <ClInclude Include="block\stone.h" />
     <ClInclude Include="block\torch.h" />
     <ClInclude Include="block\water.h" />
-    <ClInclude Include="block\wood.h" />
     <ClInclude Include="debugger\console.h" />
     <ClInclude Include="debugger\debug.h" />
     <ClInclude Include="entities\antifreezeboss.h" />
@@ -331,6 +321,7 @@
     <ClInclude Include="game\Commands.h" />
     <ClInclude Include="game\ecs\archtype.h" />
     <ClInclude Include="game\ecs\commands.h" />
+    <ClInclude Include="game\ecs\ComponentType.h" />
     <ClInclude Include="game\ecs\component_pages.h" />
     <ClInclude Include="game\ecs\ecs_commands.h" />
     <ClInclude Include="game\ecs\component.h" />
@@ -349,7 +340,6 @@
     <ClInclude Include="game\ecs\traversal.h" />
     <ClInclude Include="game\ecs\unique_object.h" />
     <ClInclude Include="game\ecs\weak_object.h" />
-    <ClInclude Include="game\ecs\World.h" />
     <ClInclude Include="game\entity.h" />
     <ClInclude Include="game\entityutil.h" />
     <ClInclude Include="game\Event.h" />
@@ -518,7 +508,7 @@
     <ClInclude Include="util\stack.h" />
     <ClInclude Include="math\stats.h" />
     <ClInclude Include="util\stbiload.h" />
-    <ClInclude Include="util\StringFile.h" />
+    <ClInclude Include="util\String.h" />
     <ClInclude Include="util\tag.h" />
     <ClInclude Include="tests\test.h" />
     <ClInclude Include="util\thread_pool.h" />
@@ -537,6 +527,8 @@
     <ClInclude Include="math\vector3.h" />
     <ClInclude Include="world\bicube_array.h" />
     <ClInclude Include="world\chunkload.h" />
+    <ClInclude Include="world\chunk_mesh.h" />
+    <ClInclude Include="world\Lighter.h" />
     <ClInclude Include="world\managegrid.h" />
     <ClInclude Include="block\block.h" />
     <ClInclude Include="renderer\blockrender.h" />

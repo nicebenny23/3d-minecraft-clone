@@ -14,7 +14,7 @@
 
 #include "../entities/entityspawner.h"
 #include "../renderer/decal.h"
-
+#include "../renderer/guirender.h"
 #pragma once 
 
 void endframe() {
@@ -101,6 +101,11 @@ void endgame() {
 	glfwTerminate();
 
 }
+struct PlayerInventoryPlugin :Core::Plugin {
+	void build(Core::App& world) {
+		world.emplace_system<player::LoadHotbarSlots>();
+	}
+};
 void rungame() {
 	init();
 
@@ -108,7 +113,10 @@ void rungame() {
 	CtxName::ctx.Ecs->emplace_system<spawn_mobs>();
 	CtxName::ctx.Ecs->emplace_system<PlayerMovementSys>();
 	Core::game.insert_plugin<blockrender::BlockRenderPlugin>();
+
+	Core::game.insert_plugin<PlayerInventoryPlugin>();
 	Core::game.insert_plugin<decal_plugin>();
+	Core::game.insert_plugin<guirender::ConsolePlugin>();
 	float lastupdate = 0;
 	while (!CtxName::ctx.Window->shouldClose()) {
 		update();

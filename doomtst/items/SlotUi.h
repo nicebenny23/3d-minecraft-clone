@@ -12,12 +12,15 @@ namespace items {
 		return v2::Vec2(xval, yval);
 	}
 	
-	struct ItemDecal :ecs::component {
-		ItemDecal(ecs::obj decal) :item_decal_object(decal) {
+	struct ItemSlotDecal :ecs::component {
+		ItemSlotDecal(ecs::obj decal) :item_decal_object(decal) {
 
 		}
 		void set_decal(renderer::TexturePath Path) {
 			item_decal_object.get_component<ui::ui_image_component>().set_image(Path);
+		}
+		void reset_decal() {
+			set_decal(renderer::TexturePath("images\\blockholder.png", "item_decal_original"));
 		}
 		ecs::obj item_decal_object;
 	};
@@ -50,8 +53,8 @@ namespace items {
 		}
 		v2::Coord2 inventory_location;
 		void apply(ecs::obj& entity) {
-			ecs::obj item_decal = entity.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\blockholder.png", "3"), geo::Box2d(v2::zerov, v2::unitv), 20);
-			entity.ensure_component<ItemDecal>(item_decal);
+			ecs::obj item_decal = entity.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\blockholder.png", "item_decal_original"), geo::Box2d(v2::zerov, v2::unitv), 20);
+			entity.ensure_component<ItemSlotDecal>(item_decal);
 			FloatingItemSlotUiSpawner(inventory_center(inventory_location)).apply(entity);
 		}
 	};

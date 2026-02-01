@@ -1,16 +1,15 @@
 #include "block.h"
 #pragma once 
-inline void stoneinit(blockname::block& blk) {
-	blk.mesh.setfaces(stonetex, stonetex, stonetex, stonetex, stonetex, stonetex);
+inline void stoneinit(blocks::block& blk) {
+	blk.mesh.set_face_textures(stonetex, stonetex, stonetex, stonetex, stonetex, stonetex);
 
 	blk.attributes.solid = true;
-	blk.attributes.transparent = false;
-	blk.emitedlight = 0;
-	blk.mesh.box.scale = blockname::blockscale;
+	blk.mesh.box.scale = blocks::blockscale;
 
 	blk.createdefaultaabb(false);
 	blk.mininglevel = 2;
 	blk.minedfastwithpick = true;
-	blk.owner().add_component<loot_table>().add("moss", 1, false);
+	constexpr stn::HashedString hashed("moss");
+	blk.owner().add_component<loot_table>().add(hashed, 1, false);
 		
 }

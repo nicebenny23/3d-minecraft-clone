@@ -1,7 +1,22 @@
 [
-{"size":{"x":1,"y":1},
-  
-"input":[{"id":"plank","count":1}],
-"output":{"id":"moss","count":3}
-}
+  {
+    "size": {"x": 2, "y": 2},
+    "input": [
+      {"id": "plank", "count": 1},
+      {"id": "plank", "count": 1},
+      {"id": "plank", "count": 1},
+      {"id": "plank", "count": 1}
+    ],
+    "output": {"id": "moss", "count": 3}
+  },
+  {
+    "size": {"x": 2, "y": 2},
+    "input": [
+      {"id": "plank", "count": 1},
+      {"id": "plank", "count": 1},
+      {"id": "plank", "count": 1},
+      null
+    ],
+    "output": {"id": "moss", "count": 3}
+  }
 ]

@@ -17,7 +17,7 @@ namespace renderer {
 		}
 		GLint uniformlocation(const char* name) const {
 			if (id == 0) {
-				throw std::logic_error("invalid id");
+				throw std::logic_error("invalid block_id");
 			}
 			GLint location = glGetUniformLocation(id, name);
 			if (location == -1) {

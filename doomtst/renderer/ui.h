@@ -7,22 +7,30 @@
 #include "../game/ecs/query.h"
 #include "../game/ecs/spawner.h"
 #include "../game/ecs/traversal.h"
+
 using namespace stn;
 namespace ui {
 
-	struct ui_priority :ecs::component {
+	struct UiPriority :ecs::component {
 		size_t priority;
-		ui_priority(size_t predecence):priority(predecence){
+		UiPriority(size_t predecence) :priority(predecence) {
 
 		}
-		size_t set_priority(size_t predecence){
+		size_t set_priority(size_t predecence) {
 			priority = predecence;
 		}
 	};
+	struct ComputedPriority :ecs::component {
+		size_t priority;
+		ComputedPriority(size_t predecence) :priority(predecence) {
 
-	struct ui_bounds :ecs::component {
+		}
+	};
+
+
+	struct UiBounds :ecs::component {
 		geo::Box2d local;
-		ui_bounds(geo::Box2d local_bounds) :local(local_bounds) {
+		UiBounds(geo::Box2d local_bounds) :local(local_bounds) {
 		};
 		v2::Vec2 local_center() const {
 			return local.center;
@@ -32,9 +40,9 @@ namespace ui {
 		}
 		geo::Box2d global() const {
 			if (ecs::has_parent(owner())) {
-				geo::Box2d owner_box = ecs::parent(owner()).unwrap().get_component<ui_bounds>().global();
+				geo::Box2d owner_box = ecs::parent(owner()).unwrap().get_component<UiBounds>().global();
 				v2::Vec2 owner_scale = owner_box.scale;
-				return geo::Box2d(owner_box.center + owner_scale*local_center(), owner_scale*local_scale());
+				return geo::Box2d(owner_box.center + owner_scale * local_center(), owner_scale * local_scale());
 			}
 			else {
 				return local;
@@ -57,14 +65,14 @@ namespace ui {
 		ecs::entity ent;
 	};
 
-	struct ui_enabled :ecs::component {
+	struct UiEnabled :ecs::component {
 		bool enabled() {
 			if (ecs::has_parent(owner())) {
-				return local_enabled && ecs::parent(owner()).unwrap().get_component<ui_enabled>().enabled();
+				return local_enabled && ecs::parent(owner()).unwrap().get_component<UiEnabled>().enabled();
 			}
 			return local_enabled;
 		}
-		ui_enabled() :local_enabled(true) {
+		UiEnabled() :local_enabled(true) {
 		};
 		bool local_enabled;
 		void disable() {
@@ -82,9 +90,9 @@ namespace ui {
 		}
 	};
 
-	
-	
-	
+
+
+
 	struct InteractionState :ecs::component {
 		bool hovered;
 		bool right_clicked;
@@ -95,63 +103,90 @@ namespace ui {
 
 
 
-	struct ui_enabler_system :ecs::System {
+	struct UiEnablerSystem :ecs::System {
 		void run(ecs::Ecs& world) {
-			for (SetUiEnabled cmd:world.read_commands<SetUiEnabled>()) {
-				world.get_component<ui_enabled>(cmd.ent).set_enable_state(cmd.should_enable);
+			for (SetUiEnabled cmd : world.read_commands<SetUiEnabled>()) {
+				if (world.contains(cmd.ent)) {
+					world.get_component<UiEnabled>(cmd.ent).set_enable_state(cmd.should_enable);
+				}
 			}
 
 
 		}
 	};
-	struct ui_interaction_system :ecs::System {
+	struct UiInteractionSystem :ecs::System {
 		void run(ecs::Ecs& world) {
 			v2::Vec2 pos = CtxName::ctx.Inp->mouse_position;
 			bool has_clicked_left = CtxName::ctx.Inp->left_mouse().pressed;
 			bool has_clicked_right = CtxName::ctx.Inp->right_mouse().pressed;
 
-			ecs::View<ui_enabled, ui_bounds, InteractionState> bounds_view(world);
+			ecs::View<UiEnabled, UiBounds, InteractionState> bounds_view(world);
 			for (auto&& [enabled, bounds, ui_interaction] : bounds_view) {
 				bool cursor_touching = bounds.global().contains(pos) && enabled.enabled();
 				if (cursor_touching) {
 					ui_interaction.left_clicked = has_clicked_left;
-					ui_interaction.right_clicked =has_clicked_right;
+					ui_interaction.right_clicked = has_clicked_right;
 
 				}
 				ui_interaction.hovered = cursor_touching;
 			}
 		}
 	};
-	struct base_ui_node :ecs::resource {
+	struct BaseUiNode :ecs::resource {
 		ecs::obj base_node;
-		base_ui_node(ecs::obj base):base_node(base) {
-			
+		BaseUiNode(ecs::obj base) :base_node(base) {
+
 		}
 	};
+	struct ComputePrioritySystem :ecs::System {
 
+		void run(ecs::Ecs& world) {
+			size_t current_assignment = 0;
+			stn::stack<ecs::obj> ui_nodes;
+			ui_nodes.push(world.get_resource<BaseUiNode>().expect("ui node must be initialized").base_node);
+			while (!ui_nodes.empty()) {
+				ecs::obj next = ui_nodes.pop();
+				next.ensure_component<ComputedPriority>(current_assignment).priority = current_assignment++;
+				stn::array<ecs::obj> children;
+				for (ecs::entity ent : ecs::HierarchyView(next).children_entities()) {
+					children.push(ecs::obj(ent, world));
+				}
+				children | stn::sort([](ecs::obj object)->int {return object.get_component<UiPriority>().priority; });
+				//so children who are later are pushed last
+				children.reverse_in_place();
+				ui_nodes.push(children);
+			}
+		}
+
+	};
 	struct ui_spawner :ecs::Recipe {
 		geo::Box2d bounds;
 		size_t priority;
-		ui_spawner(geo::Box2d box,size_t priority) :bounds(geo::Box2d(box.center,box.scale)), priority(priority){
+		ui_spawner(geo::Box2d box, size_t priority) :bounds(geo::Box2d(box.center, box.scale)), priority(priority) {
 		}
 		void apply(ecs::obj& object) {
-			object.ensure_component<ui_bounds>(bounds);
-			object.ensure_component<ui_enabled>();
+			object.ensure_component<UiBounds>(bounds);
+			object.ensure_component<UiEnabled>();
 			object.ensure_component<InteractionState>();
-			object.ensure_component<ui_priority>(priority);
-			stn::Option<ecs::obj> node = object.world().get_resource<base_ui_node>().
-				map([](base_ui_node node) {return node.base_node; });
-				if (node.is_some()) {
-					node.unwrap().add_child(object);
-				}
+			object.ensure_component<UiPriority>(priority);
+			object.ensure_component<ComputedPriority>(0);
+				
+			object
+			.world()
+			.get_resource<BaseUiNode>()
+			.member(&BaseUiNode::base_node)
+			.then([object](ecs::obj&& node) {node.add_child(object); });
+	
 		}
 	};
-	struct UiPlugin:Core::Plugin {
+	struct UiPlugin :Core::Plugin {
 		void build(Core::App& app) {
-			app.emplace_system< ui_enabler_system>();
-			app.emplace_system< ui_interaction_system>();
+			app.emplace_system< UiEnablerSystem>();
+			app.emplace_system< UiInteractionSystem>();
+
+			app.emplace_system< ComputePrioritySystem>();
 			ecs::obj entity = ecs::spawn_emplaced<ui_spawner>(app.Ecs, geo::Box2d::origin_centered(v2::unitv), 2);
-			app.emplace_resource<base_ui_node>(entity);
+			app.emplace_resource<BaseUiNode>(entity);
 		}
 
 	};

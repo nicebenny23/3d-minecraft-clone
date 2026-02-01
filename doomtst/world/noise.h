@@ -38,12 +38,12 @@ struct noise_parameters {
 	}
 };
 
-inline double dotGridGradient(int x, int y, int z, double xd, double yd, double zd) {
+inline double dot_grid_gradient(int x, int y, int z, double xd, double yd, double zd) {
 	Vec3 pos = random::spherical(x, y, z);
 	return xd * pos.x + yd * pos.y + zd * pos.z;
 }
 
-inline double interpolatenoisemap(double x, double y, double z) {
+inline double interpolate_noise_map(double x, double y, double z) {
 	int x0 = FastFloor(x);
 	int y0 = FastFloor(y);
 	int z0 = FastFloor(z);
@@ -66,22 +66,22 @@ inline double interpolatenoisemap(double x, double y, double z) {
 	int y1 = y0 + PrimeY;
 	int z1 = z0 + PrimeZ;
 	double n0, n1, ix0, ix1, value1, value2;
-	n0 = dotGridGradient(x0, y0, z0, xd0, yd0, zd0);
+	n0 = dot_grid_gradient(x0, y0, z0, xd0, yd0, zd0);
 
-	n1 = dotGridGradient(x1, y0, z0, xd1, yd0, zd0);
+	n1 = dot_grid_gradient(x1, y0, z0, xd1, yd0, zd0);
 	ix0 = lerp(n0, n1, xs);
 
-	n0 = dotGridGradient(x0, y1, z0, xd0, yd1, zd0);
-	n1 = dotGridGradient(x1, y1, z0, xd1, yd1, zd0);
+	n0 = dot_grid_gradient(x0, y1, z0, xd0, yd1, zd0);
+	n1 = dot_grid_gradient(x1, y1, z0, xd1, yd1, zd0);
 	ix1 = lerp(n0, n1, xs);
 
 	value1 = lerp(ix0, ix1, ys);
-	n0 = dotGridGradient(x0, y0, z1, xd0, yd0, zd1);
-	n1 = dotGridGradient(x1, y0, z1, xd1, yd0, zd1);
+	n0 = dot_grid_gradient(x0, y0, z1, xd0, yd0, zd1);
+	n1 = dot_grid_gradient(x1, y0, z1, xd1, yd0, zd1);
 	ix0 = lerp(n0, n1, xs);
 
-	n0 = dotGridGradient(x0, y1, z1, xd0, yd1, zd1);
-	n1 = dotGridGradient(x1, y1, z1, xd1, yd1, zd1);
+	n0 = dot_grid_gradient(x0, y1, z1, xd0, yd1, zd1);
+	n1 = dot_grid_gradient(x1, y1, z1, xd1, yd1, zd1);
 	ix1 = lerp(n0, n1, xs);
 
 	value2 = lerp(ix0, ix1, ys);
@@ -97,7 +97,7 @@ inline double perlin_for(Point3 point, noise_parameters params) {
 	double scale = params.starting_frequency;
 	for (int i = 0; i < params.octaves; i++) {
 		Point3 testpoint = point * scale;
-		noise_value+=intensity * interpolatenoisemap(testpoint.x, testpoint.y, testpoint.z);
+		noise_value+=intensity * interpolate_noise_map(testpoint.x, testpoint.y, testpoint.z);
 		maxintensity += intensity;
 		scale *= params.frequency_factor;
 		intensity *= params.amplification_factor;
@@ -105,9 +105,9 @@ inline double perlin_for(Point3 point, noise_parameters params) {
 	return noise_value / maxintensity;
 }
 
-struct noisemap {
+struct NoiseMap {
 	
-	noisemap(noise_parameters noise_properties) :properties(noise_properties) {
+	NoiseMap(noise_parameters noise_properties) :properties(noise_properties) {
 		array<double> distribution = array<double>();
 		for (int i = 0; i < properties.histogram_sample_count; i++) {
 			distribution.push(perlin_for(properties.uniform_point(i), properties));

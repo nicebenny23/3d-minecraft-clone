@@ -7,7 +7,6 @@
 #include <cstring>
 #include "span.h"
 #include "Option.h"
-#include "array_storage.h"
 #include "pipeline.h"
 #include <chrono>
 #include <algorithm>
@@ -63,10 +62,14 @@ namespace stn {
 		}
 
 		constexpr T* data() {
-			return list.data();
+			return ptr;
+		}
+
+		constexpr const T* c_data() const {
+			return ptr;
 		}
 		constexpr const T* data() const {
-			return list.data();
+			return ptr;
 		}
 
 		stn::span<T> span() {
@@ -90,11 +93,11 @@ namespace stn {
 		}
 
 		[[nodiscard]] T& unchecked_at(size_t index) {
-			return list[index];
+			return ptr[index];
 		}
 
 		[[nodiscard]] const T& unchecked_at(size_t index) const {
-			return list[index];
+			return ptr[index];
 		}
 
 		[[nodiscard]] T& operator[](size_t index) {
@@ -102,7 +105,7 @@ namespace stn {
 			if (len <= index) {
 				throw_range_exception("Index {} is out of bounds: cannot access element in array of len {}", index, length());
 			}
-			return list[index];
+			return ptr[index];
 		}
 
 		[[nodiscard]] const T& operator[](size_t index) const {
@@ -110,17 +113,17 @@ namespace stn {
 			if (len <= index) {
 				throw_range_exception("Index {} is out of bounds: cannot access element in array of len {}", index, length());
 			}
-			return list[index];
+			return ptr[index];
 		}
 		[[nodiscard]] Option<T&> get(size_t index) {
 			if (contains_index(index)) {
-				return stn::Option<T&>(list[index]);
+				return stn::Option<T&>(ptr[index]);
 			}
 			return None;
 		}
 		[[nodiscard]] Option<const T&> get(size_t index) const {
 			if (contains_index(index)) {
-				return stn::Option<const T&>(list[index]);
+				return stn::Option<const T&>(ptr[index]);
 			}
 			return None;
 		}
@@ -138,7 +141,7 @@ namespace stn {
 			if (len <= index) {
 				geometric_expand(index + 1);
 			}
-			return list[index];
+			return ptr[index];
 		}
 
 		[[nodiscard]] T& reach(size_t index, const T& value)requires(is_copyable) {
@@ -146,48 +149,48 @@ namespace stn {
 			if (len <= index) {
 				geometric_expand(index + 1, value);
 			}
-			return list[index];
+			return ptr[index];
 		}
 
 		[[nodiscard]] T& first() {
 			if (empty()) {
 				throw std::logic_error("Cannot access the first element of an empty array");
 			}
-			return list[0];
+			return ptr[0];
 		}
 
 		[[nodiscard]] const T& first() const {
 			if (empty()) {
 				throw std::logic_error("Cannot access the first element of an empty array");
 			}
-			return list[0];
+			return ptr[0];
 		}
 
 		[[nodiscard]] T& last() {
 			if (empty()) {
 				throw std::logic_error("Cannot access the last element of an empty array");
 			}
-			return list[len - 1];
+			return ptr[len - 1];
 		}
 
 		[[nodiscard]] const T& last() const {
 			if (empty()) {
 				throw std::logic_error("Cannot access the last element of an empty array");
 			}
-			return list[len - 1];
+			return ptr[len - 1];
 		}
 
 		// for_each using C++20 ranges
 		template <std::ranges::forward_range Range, typename Func>
 		void for_each(Func&& fn) {
 			for (size_t i = 0; i < len; i++) {
-				fn(list[i]);
+				fn(ptr[i]);
 			}
 		}
 
 		Option<size_t> find(const T& value) const requires std::equality_comparable<T> {
 			for (size_t i = 0; i < len; i++) {
-				if (list[i] == value) {
+				if (ptr[i] == value) {
 					return Option<size_t>(i);
 				}
 			}
@@ -199,11 +202,11 @@ namespace stn {
 		}
 
 		//returns a refrence to the first element it finds satifying a predicate: or none if it finds no such element.
-		
+
 		template<std::predicate<const T> Pred>
 		Option<size_t> index_such_that(Pred&& pred) const {
 			for (size_t i = 0; i < len; i++) {
-				if (pred(list[i])) {
+				if (pred(ptr[i])) {
 					return i;
 				}
 			}
@@ -212,8 +215,8 @@ namespace stn {
 		template<std::predicate<T> Pred>
 		Option<T&> such_that(Pred&& pred) {
 			for (size_t i = 0; i < len; i++) {
-				if (pred(list[i])) {
-					return list[i];
+				if (pred(ptr[i])) {
+					return ptr[i];
 				}
 			}
 			return None;
@@ -222,8 +225,8 @@ namespace stn {
 		template<std::predicate<const T> Pred>
 		Option<const T&> such_that(Pred&& pred) const {
 			for (size_t i = 0; i < len; i++) {
-				if (pred(list[i])) {
-					return list[i];
+				if (pred(ptr[i])) {
+					return ptr[i];
 				}
 			}
 			return None;
@@ -272,21 +275,21 @@ namespace stn {
 		T& emplace(Args&&... args) {
 			geometric_reserve(len + 1);
 			size_t last_index = len++;
-			list.construct_at(last_index, std::forward<Args>(args)...);
-			return list[last_index];
+			construct_at(last_index, std::forward<Args>(args)...);
+			return ptr[last_index];
 		}
 
 		template<typename U>
 		void push(U&& value) requires std::constructible_from<T, U&&> {
 			geometric_reserve(len + 1);
-			list.construct_at(len++, std::forward<U>(value));
+			construct_at(len++, std::forward<U>(value));
 		}
 
 		template<typename U>
 		void push(std::initializer_list<U> ilist) requires std::convertible_to<U, T> {
 			geometric_reserve(len + ilist.size());
 			for (auto&& value : ilist) {
-				list.construct_at(len++, value);
+				construct_at(len++, value);
 			}
 		}
 		template <convertible_range<T> Container>
@@ -296,13 +299,13 @@ namespace stn {
 			if constexpr (std::ranges::contiguous_range<Container>) {
 
 				if (use_mem_ops()) {
-					std::memmove(&list[len], std::data(range), otherlen * sizeof(T));
+					std::memmove(&ptr[len], std::data(range), otherlen * sizeof(T));
 					len += otherlen;
 					return;
 				}
 			}
 			for (const T& value : range) {
-				list.construct_at((len++), std::forward<decltype(value)>(value));
+				construct_at((len++), std::forward<decltype(value)>(value));
 			};
 		}
 
@@ -317,26 +320,26 @@ namespace stn {
 
 			if (use_mem_ops()) {
 				if (index != len) {
-					std::memmove(&list[index + 1], &list[index], (len - index) * sizeof(T));
+					std::memmove(&ptr[index + 1], &ptr[index], (len - index) * sizeof(T));
 				}
-				list.construct_at(index, std::forward<Args>(args)...);
+				construct_at(index, std::forward<Args>(args)...);
 			}
 			else {
 				if (index != len) {
 					//we do not have to shif over in this case
-					list.construct_at(len, std::move(list[len - 1]));
+					construct_at(len, std::move(ptr[len - 1]));
 					for (size_t i = len - 1; i > index; --i) {
 						//we shift backwords
-						list[i] = std::move(list[i - 1]);
+						ptr[i] = std::move(ptr[i - 1]);
 					}
-					list.destruct_at(index);
+					destruct_at(index);
 
 				}
-				list.construct_at(index, std::forward<Args>(args)...);
+				construct_at(index, std::forward<Args>(args)...);
 			}
 
 			++len;
-			return list[index];
+			return ptr[index];
 		}
 
 		//inserts an element at an index
@@ -351,8 +354,8 @@ namespace stn {
 				throw std::logic_error("Cannot pop from empty array");
 			}
 			//subtracts first to get the last element;
-			T res = std::move(list[(--len)]);
-			list.destruct_at(len);
+			T res = std::move(ptr[(--len)]);
+			destruct_at(len);
 			return res;
 		}
 		//removes the last element
@@ -360,18 +363,19 @@ namespace stn {
 			if (empty()) {
 				throw std::logic_error("Cannot drop from empty array");
 			}
-			list.destruct_at(--len);
+			destruct_at(--len);
 		}
 		void swap_drop(size_t index) {
 			if (!contains_index(index)) {
 				throw_range_exception("swap_drop failed: index {} out of bounds (len {})", index, len);
 			}
-			list[index] = std::move(list[--len]); // move last element to 'hole'
-			list.destruct_at(len); // clear old last element
+			ptr[index] = std::move(ptr[--len]); // move last element to hole
+			// clear old last element
+			destruct_at(len);
 		}
 		void swap_drop_unchecked(size_t index) {
-			list[index] = std::move(list[--len]); // move last element to 'hole'
-			list.destruct_at(len); // clear old last element
+			ptr[index] = std::move(ptr[--len]); // move last element to 'hole'
+			destruct_at(len); // clear old last element
 		}
 		// Delete an element at the given index, shifting others.
 		void remove_at(size_t index) {
@@ -383,15 +387,15 @@ namespace stn {
 
 			if (use_mem_ops()) {
 				if (index < len) {
-					std::memmove(&list[index], &list[index + 1], (len - index) * sizeof(T));
+					std::memmove(&ptr[index], &ptr[index + 1], (len - index) * sizeof(T));
 				}
 			}
 			else {
 				for (size_t i = index; i < len; ++i) {
-					list[i] = std::move(list[i + 1]);
+					ptr[i] = std::move(ptr[i + 1]);
 				}
 			}
-			list.destruct_at(len);
+			destruct_at(len);
 		}
 
 		[[nodiscard]] bool operator==(const array& other) const requires std::equality_comparable<T> {
@@ -399,7 +403,7 @@ namespace stn {
 				return false;
 			}
 			for (size_t i = 0; i < len; i++) {
-				if (other.list[i] != list[i]) {
+				if (other.ptr[i] != ptr[i]) {
 					return false;
 				}
 			}
@@ -412,57 +416,45 @@ namespace stn {
 		void swap(array& other) {
 			std::swap(len, other.len);
 			std::swap(capacity, other.capacity);
-			list.swap(other.list);
+			std::swap(ptr, other.ptr);
 		}
 
 
-		constexpr array() noexcept :len(0), capacity(0), list() {
+		constexpr array() noexcept :len(0), capacity(0), ptr() {
 		}
 
-		array(size_t length, const T& default_value)  requires (is_copyable) {
-			len = 0;
-			capacity = 0;
+		array(size_t length, const T& default_value) requires (is_copyable) :array(){
 			geometric_expand(length, default_value);
 		}
-		array(size_t length)  requires(is_default) {
-			capacity = 0;
-			len = 0;
-			geometric_expand(length);
+		array(size_t length) requires(is_default) : array() {
+			expand(length);
 		}
 
 		// Copy constructor.
-		explicit array(const array& arr) requires (is_copyable) {
-			len = 0;
-			capacity = 0;
+		explicit array(const array& arr)requires (is_copyable) : array() {
 			reserve(arr.len);
 			len = arr.len;
 			//copy optimization
 
-			if (use_mem_ops()) {
-				list.mem_copy_from(arr.list, arr.len);
-			}
-			else {
-				for (size_t i = 0; i < len; i++) {
-					list.construct_at(i, arr.list[i]);
-				}
-			}
+			unsafe_copy_data(arr);
+
 		}
 		array& operator=(const array& other) requires(is_copyable) {
 			reserve(other.len);
 			if (use_mem_ops()) {
 
-				list.mem_copy_from(other.list, other.len);
+				unsafe_copy_data(other);
 			}
 			else {
 				size_t elements_to_move = std::min(len, other.len);
 				for (size_t i = 0; i < elements_to_move; i++) {
-					list.expand_at(i, other.list[i]);
+					expand_at(i, other.ptr[i]);
 				}
 				for (size_t i = elements_to_move; i < other.len; i++) {
-					list.construct_at(i, other.list[i]);
+					construct_at(i, other.ptr[i]);
 				}
 				for (size_t i = other.len; i < len; i++) {
-					list.destruct_at(i);
+					destruct_at(i);
 				}
 			}
 			len = other.len;
@@ -471,7 +463,8 @@ namespace stn {
 		array(array&& other) noexcept {
 			len = other.len;
 			capacity = other.capacity;
-			list = std::move(other.list);
+			ptr = std::move(other.ptr);
+			other.ptr = nullptr;
 			other.len = 0;
 			other.capacity = 0;
 
@@ -480,7 +473,8 @@ namespace stn {
 			clear();
 			len = other.len;
 			capacity = other.capacity;
-			list = std::move(other.list);
+			ptr = std::move(other.ptr);
+			other.ptr = nullptr;
 			other.len = 0;
 			other.capacity = 0;
 			return *this;
@@ -489,7 +483,7 @@ namespace stn {
 
 		template<std::forward_iterator InputIt>
 			requires std::constructible_from<T, typename std::iterator_traits<InputIt>::value_type>
-		explicit array(InputIt first, InputIt last) : len(0), capacity(0), list() {
+		explicit array(InputIt first, InputIt last) : len(0), capacity(0), ptr() {
 			// Count elements if possible
 			size_t length = std::distance(first, last);
 			if (length != 0) {
@@ -498,7 +492,7 @@ namespace stn {
 				size_t i = 0;
 				for (; first != last; ++first, ++i) {
 					// move if possible, otherwise copy
-					list.construct_at(i, std::forward<decltype(*first)>(*first));
+					construct_at(i, std::forward<decltype(*first)>(*first));
 				}
 
 				len = length;
@@ -512,15 +506,22 @@ namespace stn {
 		template<typename U> requires std::convertible_to<U, T>
 		array(std::initializer_list<U> ilist) : array(ilist.begin(), ilist.end()) {
 		}
-
+		void reverse_in_place() {
+			for (size_t i = 0; i < len / 2; i++) {
+				std::swap(ptr[i], ptr[len - 1 - i]);
+			}
+		}
 		void clear() {
 			if (capacity != 0) {
 				if constexpr (!std::is_trivially_destructible_v<T>) {
 					for (size_t i = 0; i < len; i++) {
-						list.destruct_at(i);
+						destruct_at(i);
 					}
 				}
-				list.clear();
+
+				free(ptr);
+				ptr = nullptr;
+
 				len = 0;
 				capacity = 0;
 			}
@@ -631,7 +632,7 @@ namespace stn {
 			if (len < size) {
 				reserve(size);
 				for (size_t i = len; i < size; i++) {
-					list.construct_at(i, value);
+					construct_at(i, value);
 				}
 				len = size;
 			}
@@ -641,7 +642,7 @@ namespace stn {
 			if (len < size) {
 				reserve(size);
 				for (size_t i = len; i < size; i++) {
-					list.construct_at(i, T());
+					construct_at(i, T());
 				}
 				len = size;
 			}
@@ -654,7 +655,7 @@ namespace stn {
 			}
 			if (len < new_size) {
 				for (size_t i = len; i < new_size; i++) {
-					list.construct_at(i, T());
+					construct_at(i, T());
 				}
 				len = new_size;
 			}
@@ -666,7 +667,7 @@ namespace stn {
 			}
 			if (len < new_size) {
 				for (size_t i = len; i < new_size; i++) {
-					list.construct_at(i, value);
+					construct_at(i, value);
 				}
 				len = new_size;
 			}
@@ -688,12 +689,79 @@ namespace stn {
 			if (new_size > max_size) {
 				throw_range_exception("Requested reserve size {} exceeds maximum allowed {}", new_size, max_size);
 			}
-			list.size_to(len, capacity, new_size);
+			T* newlist;
+
+			if constexpr (std::is_trivially_copyable_v<T>) {
+				if constexpr (std::is_trivially_default_constructible_v<T>) {
+					if (capacity == 0) {
+
+						newlist = (T*)std::calloc(new_size, sizeof(T));
+					}
+					else {
+						newlist = (T*)realloc((void*)ptr, sizeof(T) * new_size);
+						std::memset(newlist + capacity, 0, (new_size - capacity) * sizeof(T));
+
+					}
+
+				}
+				else {
+					if (capacity == 0) {
+						newlist = (T*)malloc(sizeof(T) * new_size);
+					}
+					else {
+						newlist = (T*)realloc((void*)ptr, sizeof(T) * new_size);
+					}
+
+				}
+
+			}
+			else {
+				newlist = static_cast<T*>(malloc(sizeof(T) * new_size));
+
+				for (size_t i = 0; i < len; ++i) {
+					new (newlist + i) T(std::move(ptr[i]));
+					destruct_at(i);
+				}
+
+				if (ptr) {
+					std::free(ptr);
+				}
+			}
+			ptr = newlist;
 			capacity = new_size;
 		}
 
+
 	private:
-		array_storage::array_storage<T> list;
+		template<typename ...Args>
+		void construct_at(size_t index, Args&&... args) {
+			new (ptr + index) T(std::forward<Args>(args)...);
+		}
+		void expand_at(size_t index, const T& value) {
+			ptr[index] = value;
+
+		}
+		void expand_at(size_t index, T&& value) {
+			ptr[index] = std::move(value);
+
+		}
+		void destruct_at(size_t index) {
+			if constexpr (!std::is_trivially_destructible_v<T>) {
+				ptr[index].~T();
+			}
+		}
+		void unsafe_copy_data(const array& other) {
+			if constexpr (std::is_trivially_copyable_v<T>) {
+				std::memcpy(ptr, other.ptr, sizeof(T) * other.len);
+			}
+			else {
+				for (size_t i = 0; i < other.len; ++i) {
+					construct_at(i, other[i]);
+				}
+			}
+		}
+
+		T* ptr;
 		size_t len;
 		size_t capacity;
 		inline constexpr bool use_mem_ops() const {

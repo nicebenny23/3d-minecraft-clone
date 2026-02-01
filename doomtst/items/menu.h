@@ -35,13 +35,13 @@ namespace ui {
 
 			for (open_menu menu : world.read_commands<open_menu>()) {
 				
-				menu.menu_ent.get_component<ui::ui_enabled>().enable();
+				menu.menu_ent.get_component<ui::UiEnabled>().enable();
 				state.open_menu = menu.menu_ent;
 				return;
 			}
 			for (close_menu menu:world.read_commands<close_menu>() ) {
 				if (state.menu_open()) {
-					state.open_menu.unwrap().get_component<ui::ui_enabled>().disable();
+					state.open_menu.unwrap().get_component<ui::UiEnabled>().disable();
 					state.open_menu = stn::None;
 					return;
 				}

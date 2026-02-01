@@ -76,12 +76,12 @@ struct collision_event {
 	}
 };
 void propagatecollisionmessage(ecs::obj o1, ecs::obj o2) {
-	o1.world().write_event<collision_event>(o1, o2);
-	o2.world().write_event<collision_event>(o2, o1);
+	o1.world().emplace_event<collision_event>(o1, o2);
+	o2.world().emplace_event<collision_event>(o2, o1);
 }
 void moveobj(v3::Vec3 force, ecs::obj object) {
 
-	if (object.has_component<blockname::block>()) {
+	if (object.has_component<blocks::block>()) {
 		Assert("block rigidbodies not supported yet");
 	}
 	else {

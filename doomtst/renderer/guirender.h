@@ -5,7 +5,7 @@
 #include "../imgui/imgui_impl_opengl3.h"
 #include "../imgui/imgui_impl_glfw.h"
 #include "../game/ecs/ecs.h"
-
+#include "../game/Core.h"
 namespace guirender{
 
 	void initgui();
@@ -24,6 +24,12 @@ namespace guirender{
 			// 7. Render UI
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		}
+	};
+	struct ConsolePlugin :Core::Plugin {
+		void build(Core::App& app) {
+			initgui();
+			app.emplace_system<GuiSystem>();
 		}
 	};
 }

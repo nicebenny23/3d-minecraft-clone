@@ -50,12 +50,12 @@ namespace items {
 			for (auto&& [icon] : ecs::View<ItemIcon>(world)) {
 
 				if (!icon.displayed_id) {
-					icon.image_component.get_component<ui::ui_enabled>().disable();
+					icon.image_component.get_component<ui::UiEnabled>().disable();
 					continue;
 				}
-				item_traits traits = world.get_resource<item_type_register>().expect("item_type_registry must exist for items to exist")
+				item_traits traits = world.get_resource<item_types>().expect("item_type_registry must exist for items to exist")
 				.from_id(icon.displayed_id.unwrap());
-				icon.image_component.get_component<ui::ui_enabled>().enable();
+				icon.image_component.get_component<ui::UiEnabled>().enable();
 				icon.image_component.get_component<ui::ui_image_component>().set_image(traits.image_path);
 			}
 		}
@@ -65,10 +65,10 @@ namespace items {
 
 			for (auto&& [count] : ecs::View<ItemCountDisplay>(world)) {
 				if (!count.count) {
-					count.text_component.get_component<ui::ui_enabled>().disable();
+					count.text_component.get_component<ui::UiEnabled>().disable();
 					continue;
 				}
-				count.text_component.get_component<ui::ui_enabled>().enable();
+				count.text_component.get_component<ui::UiEnabled>().enable();
 				count.text_component.get_component<ui::text_component>().format("{}",count.count.unwrap());
 			}
 		}

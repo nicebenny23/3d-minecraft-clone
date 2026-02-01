@@ -20,11 +20,17 @@ namespace ecs {
 		if (end_index < start_index) {
 			stn::throw_invalid_argument("end index {} may not be greater than start index", end_index, start_index);
 		}
-		archetype_index index = start_index;
+		//dont use archetype_index for debug mode speed
+		size_t index = start_index.index;
 		stn::span<const component_id> indices= view.view_indices();
 		Ecs& world=view.world();
-		while (index != end_index) {
-			query(world.get_tuple_unchecked<Components...>(arch.elems.unchecked_at(index.index), indices));
+		stn::array<component_type*> comp_types = world.component_types_for(indices);
+		while (index!= end_index.index) {
+			query([&]<size_t... Is>(std::index_sequence<Is...>) {
+				return std::tuple<Components&...>{
+					comp_types.unchecked_at(Is)->get_as_unchecked<Components>(arch.elems.unchecked_at(index))...
+				};
+			}(std::index_sequence_for<Components...>{}));
 			index++;
 		}
 	}

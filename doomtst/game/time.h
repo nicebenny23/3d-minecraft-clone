@@ -102,7 +102,7 @@ namespace timename {
 			{
 				throw std::logic_error("cant use unitilized duration");
 			}
-			return Max(0, end-tm->now());
+			return stn::Max(0, end-tm->now());
 		}
 		void disable() {
 			active = false;

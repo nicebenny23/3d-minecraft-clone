@@ -1,11 +1,8 @@
 #pragma once
 #include "../renderer/Window.h"
 #include "../world/grid.h"
-#include "../util/userinput.h"
 #include "GameContext.h"
-#include "entity.h"
 #include "../renderer/renderer.h"
-#include "../renderer/guirender.h"
 #include "../world/world.h"
 //start of the application
 namespace Core {
@@ -64,11 +61,11 @@ namespace Core {
 		return Ecs.ensure_resource<T>();
 		}
 		template<ecs::SystemType T, typename ...Args>
-		void emplace_system(Args&&... args) requires std::constructible_from<T, Args&&...> {
+		void emplace_system(Args&&... args) requires std::constructible_from<T, Args&&...>||(std::constructible_from<T, ecs::Ecs&>) {
 			Ecs.emplace_system<T>(std::forward<Args>(args)...);
 		}
 
-		App():Ecs(2<<18) {
+		App():Ecs(size_t(1)<<23) {
 			plugin_list.inject_engine(*this);
 		}
         ecs::Ecs Ecs;

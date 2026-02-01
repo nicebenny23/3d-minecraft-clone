@@ -186,23 +186,11 @@ struct RigidbodySystem :ecs::System {
 
         ecs::View< ecs::transform_comp, rigidbody> rigids(ecs);
         for (auto [pos,body] : rigids) {
-            if (isnan(body.velocity.x))
-            {
-                int l = 2;
-            }
             body.oldvelocity = body.velocity;
             body.calculateonground();
             body.calculateonceil();
-            if (isnan(body.velocity.x))
-            {
-                int l = 2;
-            }
             body.apply_forces();
             body.integrate();
-            if (isnan(body.velocity.x))
-            {
-                int l = 2;
-            }
          //   pos->transform.position = Coord(0, 0, 0); 
         }
 

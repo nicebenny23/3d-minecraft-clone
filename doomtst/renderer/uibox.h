@@ -58,25 +58,25 @@ namespace ui {
 
 		ecs::object_handle object;
 		void enable_if(bool should_enable) {
-			object.get_component<ui_enabled>().set_enabled(should_enable);	
+			object.get_component<UiEnabled>().set_enabled(should_enable);	
 		}
 		bool enabled() {
-		return 	object.get_component<ui_enabled>().enabled();
+		return 	object.get_component<UiEnabled>().enabled();
 		}
 		void enable() {
-			object.ensure_component<ui_enabled>().enable();
+			object.ensure_component<UiEnabled>().enable();
 		}
 		void disable() {
-			object.ensure_component<ui_enabled>().disable();
+			object.ensure_component<UiEnabled>().disable();
 		}
 		Box2d bounds() const {
-			return object.get_component<ui::ui_bounds>().global();
+			return object.get_component<ui::UiBounds>().global();
 		}
 		void set_bounds(Box2d bounds) {
-			object.get_component<ui::ui_bounds>().local = bounds;
+			object.get_component<ui::UiBounds>().local = bounds;
 		}
 		void set_center(v2::Vec2 center) {
-			object.get_component<ui::ui_bounds>().local.center = center;
+			object.get_component<ui::UiBounds>().local.center = center;
 		}
 
 		void set_image(const char* texloc, const char* TextureName) {
@@ -118,14 +118,14 @@ namespace ui {
 				img.tex_handle.set_uniform(renderer::uniform(CtxName::ctx.Ecs->load_asset(cmd.path).unwrap(), "tex"));
 			}
 
-			ecs::View<ui::ui_enabled, ui::ui_bounds, ui::ui_priority, ui_image_component> bounds_view(world);
-			for (auto&& [enabled, bounds,ui_priority, ui_image] : bounds_view) {
+			ecs::View<ui::UiEnabled, ui::UiBounds, ui::ComputedPriority, ui_image_component> bounds_view(world);
+			for (auto&& [enabled, bounds,UiPriority, ui_image] : bounds_view) {
 
 				if (ui_image.tex_handle) {
 					if (enabled.enabled()) {
 						ui_image.tex_handle.enable();
 						v2::Vec2 scale = bounds.global().center;
-						ui_image.tex_handle.set_order_key(ui_priority.priority);
+						ui_image.tex_handle.set_order_key(UiPriority.priority);
 						ui_image.tex_handle.set_uniform(renderer::uniform(float(bounds.global().scale.x), "scale"));
 						ui_image.tex_handle.set_uniform(renderer::uniform(bounds.global().center, "center"));
 

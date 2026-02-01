@@ -33,6 +33,9 @@ namespace stn {
 		void push(T&& val) {
 			list.push(std::move(val));
 		}
+		void push(const stn::array<T>& val) {
+			list.append(val);
+		}
 	private:
 		stn::array<T> list;
 

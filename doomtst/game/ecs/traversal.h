@@ -5,7 +5,7 @@ namespace ecs {
 	struct HierarchyView {
 		ecs::obj entity;
 
-		HierarchyView(const ecs::obj e) : entity(e) {
+		HierarchyView(ecs::obj e) : entity(e) {
 		}
 		ecs::obj operator*() {
 			return entity;
@@ -40,7 +40,7 @@ namespace ecs {
 			}
 			return view;
 		}
-		stn::span<ecs::entity> children_obj() {
+		stn::span<ecs::entity> children_entities() {
 			if (!entity.has_component<Parent>()) return {};
 
 			return entity.get_component<Parent>().span();
@@ -61,6 +61,6 @@ namespace ecs {
 		return view(entity).parent().map(std::function([](HierarchyView view) {return view.entity; }));
 	}
 	inline stn::span<ecs::entity> children(ecs::obj entity) {
-		return view(entity).children_obj();
+		return view(entity).children_entities();
 	}
 }

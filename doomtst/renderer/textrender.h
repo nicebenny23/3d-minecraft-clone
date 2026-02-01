@@ -33,24 +33,7 @@ namespace ui {
 		}
 		text_component() :word("") {
 		}
-		void write() {
-			set_handle();
-
-			handle.enable();
-			double char_offset = 1.5f;
-			geo::Box2d bounds = owner().get_component<ui::ui_bounds>().global();
-			v2::Vec2 min = bounds.center - v2::Vec2(char_offset * word.length(), 1.f) * bounds.half_size();
-			v2::Vec2 boxoffset = v2::Vec2(char_offset, 1) * bounds.half_size();
-			v2::Vec2 increse = v2::Vec2(char_offset, 0) * bounds.scale;
-			geo::Box2d charlocation = geo::Box2d(min + boxoffset, bounds.scale);
-			renderer::MeshData mesh_data = handle.create_mesh();
-			for (int i = 0; i < word.length(); i++) {
-				write_letter(mesh_data, charlocation, int(word[i] - '0'));
-				charlocation.center += increse;
-			}
-			handle.fill(std::move(mesh_data));
-			handle.set_order_key(owner().get_component<ui_priority>().priority);
-		}
+	
 		renderer::RenderableHandle handle;
 		std::string word;
 		template<typename... Args>
@@ -68,10 +51,24 @@ namespace ui {
 	struct UiTextMesher:ecs::System{
 		void run(ecs::Ecs& world) {
 
-			ecs::View<ui::ui_enabled, ui::ui_bounds, ui::InteractionState, text_component> bounds_view(world);
+			ecs::View<ui::UiEnabled, ui::UiBounds, ui::InteractionState, text_component> bounds_view(world);
 			for (auto&& [enabled, bounds, ui_interaction, ui_text] : bounds_view) {
 				if (enabled.enabled()) {
-					ui_text.write();
+					ui_text.set_handle();
+					ui_text.handle.enable();
+					double char_offset = 1.5f;
+					geo::Box2d bounds = ui_text.owner().get_component<ui::UiBounds>().global();
+					v2::Vec2 min = bounds.center - v2::Vec2(char_offset * ui_text.word.length(), 1.f) * bounds.half_size();
+					v2::Vec2 boxoffset = v2::Vec2(char_offset, 1) * bounds.half_size();
+					v2::Vec2 increse = v2::Vec2(char_offset, 0) * bounds.scale;
+					geo::Box2d charlocation = geo::Box2d(min + boxoffset, bounds.scale);
+					renderer::MeshData mesh_data = ui_text.handle.create_mesh();
+					for (int i = 0; i < ui_text.word.length(); i++) {
+						write_letter(mesh_data, charlocation, int(ui_text.word[i] - '0'));
+						charlocation.center += increse;
+					}
+					ui_text.handle.fill(std::move(mesh_data));
+					ui_text.handle.set_order_key(ui_text.owner().get_component<ComputedPriority>().priority);
 				}
 				else {
 					ui_text.handle.disable();
@@ -114,22 +111,22 @@ namespace ui {
 			object.get_component<text_component>().format(fmt, std::forward<Args>(args)...);
 		}
 		v2::Vec2 center() {
-			object.get_component<ui::ui_bounds>().center();
+			object.get_component<ui::UiBounds>().center();
 		}
 		geo::Box2d bounds() {
-			return object.get_component<ui::ui_bounds>().global();
+			return object.get_component<ui::UiBounds>().global();
 		}
 		void set_center(v2::Vec2 pos) {
-			object.get_component<ui::ui_bounds>().local.center = pos;
+			object.get_component<ui::UiBounds>().local.center = pos;
 		}
 		void set_bounds(geo::Box2d bounds) {
-			object.get_component<ui::ui_bounds>().local = bounds;
+			object.get_component<ui::UiBounds>().local = bounds;
 		}
 		void enable() {
-			object.get_component<ui::ui_enabled>().enable();
+			object.get_component<ui::UiEnabled>().enable();
 		}
 		void disable() {
-			object.get_component<ui::ui_enabled>().disable();
+			object.get_component<ui::UiEnabled>().disable();
 		}
 	};
 

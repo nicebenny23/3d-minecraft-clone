@@ -36,5 +36,8 @@ namespace thread_util {
 
         }
     }
-
+	template<std::ranges::range Rng, typename Func>
+	void par_iter_rng(Rng& range, Func func, size_t threads) {
+		par_iter(range.begin(), range.end(), func, threads);
+	}
 }

@@ -41,15 +41,15 @@ struct liquidprop : ecs::component {
 			return;
 		}
 		Coord newpos = face.to_coord() + owner().get_component<block>().pos;
-		blockname::block* blk = CtxName::ctx.Grid->getBlock(newpos);
+		blocks::block* blk = CtxName::ctx.Grid->getBlock(newpos);
 		if (blk == nullptr) {
 			return;
 		}
 
 		//instert for what dor==3 was
 
-		if (blk->id != minecraftair) {
-			if (blk->id == owner().id()) {
+		if (blk->block_id != minecraftair) {
+			//if (blk->block_id == owner()) {
 				if (liqval > 1) {
 
 
@@ -58,15 +58,12 @@ struct liquidprop : ecs::component {
 						blk->owner().get_component<liquidprop>().liqval += 1;
 						liqval -= 1;
 					}
-				}
+			//}
 			}
 
 
 
-			if (blk->id == minecrafttorch) {
-				gridutil::set_block(newpos, minecraftair);
-			}
-
+		
 
 			return;
 
@@ -74,7 +71,7 @@ struct liquidprop : ecs::component {
 		}
 
 		Coord pos = blk->pos;
-		gridutil::set_block(pos, owner().get_component<blockname::block>().id);
+		gridutil::set_block(world(), pos, owner().get_component<blocks::block>().block_id);
 		blk = (CtxName::ctx.GridRef().getBlock(pos));
 
 		if (!blk->owner().has_component<liquidprop>()) {
@@ -102,7 +99,7 @@ struct liquidprop : ecs::component {
 			}
 		}
 		if (liqval <= 0) {
-			gridutil::set_block(owner().get_component<blockname::block>().pos, minecraftair);
+			gridutil::set_block(world(),owner().get_component<blocks::block>().pos, minecraftair);
 		}
 
 	}

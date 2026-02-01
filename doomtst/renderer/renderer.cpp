@@ -38,7 +38,7 @@ namespace renderer {
 		CtxName::ctx.Ecs->load_asset(render_phase(0, false, "solid_phase"));
 		CtxName::ctx.Ecs->load_asset(render_phase(1, true, "transparent_phase"));
 
-		CtxName::ctx.Ecs->load_asset_emplaced<MaterialDescriptor>("Ui", "ui_phase", "UiShader", RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+		CtxName::ctx.Ecs->load_asset_emplaced<MaterialDescriptor>("Ui", "ui_phase", "UiShader", RenderProperties(false, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
 			stn::array{ renderer::uparam("aspect_ratio", "aspectratio") }
 		);
 		renderer::shader_id model_shader = CtxName::ctx.Ecs->load_asset_emplaced<renderer::shader_descriptor>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
@@ -125,10 +125,12 @@ namespace renderer {
 	}
 
 	void RenderableHandle::destroy() {
+		if (renderer) {
 
-		renderer->remove(id.unwrap());
-		renderer = nullptr;
-		id = None;
+			renderer->remove(id.unwrap());
+			renderer = nullptr;
+			id = None;
+		}
 	}
 
 	MeshData RenderableHandle::create_mesh(indice_mode auto_ind) {

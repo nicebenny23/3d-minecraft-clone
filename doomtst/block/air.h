@@ -1,19 +1,21 @@
 #include "block.h"
+#include "block_registry.h"
 #pragma once 
 //makes a block air
-inline void setdefault(blockname::block& blk) {
+inline void setdefault(blocks::block& blk) {
 	blk.attributes.solid = false;
-	blk.attributes.transparent = true;
-	blk.emitedlight = 0;
-	blk.id = minecraftair;
-	blk.mesh.setfaces(0, 0, 0, 0, 0, 0);
+	blk.block_id = minecraftair;
+	blk.mesh.set_face_textures(treestonetex, treestonetex, treestonetex, treestonetex, treestonetex, treestonetex);
 	blk.mesh.box.center = blk.center();
 
 
 	blk.minedfastwithpick = false;
 	blk.mininglevel = 0;
-	blk.lightval = 0;
+	blk.light_passing_through = 0;
 }
+struct air_block :BlockType {
 
+
+};
 
 // !wood_HPP

@@ -58,7 +58,7 @@ namespace GlUtil {
 			// Add any other types you need to support
 		default:
 			// Handle unexpected type or assert here
-			stn::throw_logic_error("Unknown type in VertexAttribute with id {}",Type);
+			stn::throw_logic_error("Unknown type in VertexAttribute with block_id {}",Type);
 			break;
 		}
 

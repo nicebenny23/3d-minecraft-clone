@@ -121,7 +121,7 @@ struct playerbreak : ecs::component {
 			return false;
 		}
 		auto hit = closest.unwrap();
-		if (!hit.owner().has_component<blockname::block>()) {
+		if (!hit.owner().has_component<blocks::block>()) {
 			return false;
 		}
 		if (!inrange(hit.dist(), interactminrange, interactmaxrange)) {
@@ -171,7 +171,7 @@ struct playerbreak : ecs::component {
 			if (!currmining()->minedfastwithpick || currmining()->mininglevel <= curr_mining_power()) {
 				make_drop(broken->owner());
 			}
-			gridutil::set_block(broken->pos, minecraftair);
+			gridutil::set_block(world(),broken->pos, minecraftair);
 			disengage_block();
 
 		}

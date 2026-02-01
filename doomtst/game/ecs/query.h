@@ -9,6 +9,23 @@
 #include "../../util/Span.h"
 namespace ecs {
 	// Views iterate over entities containing the specified Components.
+	template<typename T>
+	concept QueryFilter = requires(T t,const Archetype& archetype) {
+		{
+			T::filter(archetype)
+		} -> std::convertible_to<bool>;
+	};
+	template<typename T>
+	concept QueryMap = requires(T t, Ecs& World,ecs::entity ent) {
+		{
+			T::map(World,ent)
+		};
+	};
+
+	template<typename T>
+	concept QueryFilterMap = QueryMap<T> && QueryFilter<T>;
+
+
 	template<typename... Components>
 	struct View {
 		Ecs& world() {
@@ -22,8 +39,6 @@ namespace ecs {
 		}
 		struct Iterator {
 			View& owner;
-			//actual location
-
 			size_t archetype_list_index;
 			archetype_index arch_index;
 			Iterator(View& vw, size_t list_index ,archetype_index arch_ind)

@@ -73,7 +73,8 @@ namespace ecs {
 			indexer.clear();
 			resource_list.clear();
 		}
+		
 
-
+		
 	};
 }

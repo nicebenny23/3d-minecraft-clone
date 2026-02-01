@@ -97,7 +97,7 @@ namespace thread {
 		thread_pool(size_t n) :tasks() {
 			stop = false;
 			working_threads = 0;
-			size_t max_threads = Min(n, std::thread::hardware_concurrency());
+			size_t max_threads = stn::Min(n, std::thread::hardware_concurrency());
 			if constexpr (debug_slow) {
 				//singlethread
 				max_threads = 1;

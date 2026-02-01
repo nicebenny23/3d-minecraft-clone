@@ -65,33 +65,31 @@ inline  double sigmoid(double v1) {
 
 	return	1.0f/ (1.0f+ exp(-v1));
 }
-
-template<typename T1, typename T2, typename... Ts>
-constexpr auto Max(T1 a, T2 b, Ts... rest) -> typename std::common_type<T1, T2, Ts...>::type
-{
-	using Common = typename std::common_type<T1, T2, Ts...>::type;
-	const Common max_ab = (a < b) ? static_cast<Common>(b) : static_cast<Common>(a);
-	if constexpr (sizeof...(Ts) == 0) {
-		return max_ab;
+namespace stn {
+	template<typename T1, typename T2, typename... Ts>
+	constexpr auto Max(T1 a, T2 b, Ts... rest) -> typename std::common_type<T1, T2, Ts...>::type {
+		using Common = typename std::common_type<T1, T2, Ts...>::type;
+		const Common max_ab = (a < b) ? static_cast<Common>(b) : static_cast<Common>(a);
+		if constexpr (sizeof...(Ts) == 0) {
+			return max_ab;
+		}
+		else {
+			return Max(max_ab, static_cast<Common>(rest)...);
+		}
 	}
-	else {
-		return Max(max_ab, static_cast<Common>(rest)...);
+
+	template<typename T1, typename T2, typename... Ts>
+	constexpr auto Min(T1 a, T2 b, Ts... rest) -> typename std::common_type<T1, T2, Ts...>::type {
+		using Common = typename std::common_type<T1, T2, Ts...>::type;
+		const Common min_ab = (a < b) ? static_cast<Common>(a) : static_cast<Common>(b);
+		if constexpr (sizeof...(Ts) == 0) {
+			return min_ab;
+		}
+		else {
+			return Min(min_ab, static_cast<Common>(rest)...);
+		}
 	}
 }
-
-template<typename T1, typename T2, typename... Ts>
-constexpr auto Min(T1 a, T2 b, Ts... rest)-> typename std::common_type<T1, T2, Ts...>::type
-{
-	using Common = typename std::common_type<T1, T2, Ts...>::type;
-	const Common min_ab = (a < b) ? static_cast<Common>(a) : static_cast<Common>(b);
-	if constexpr (sizeof...(Ts) == 0) {
-		return min_ab;
-	}
-	else {
-		return Min(min_ab, static_cast<Common>(rest)...);
-	}
-}
-
 inline int next_boundary(double x, bool positiveDirection) {
 	int i = static_cast<int>(std::floor(x));
 

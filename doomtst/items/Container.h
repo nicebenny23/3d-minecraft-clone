@@ -88,7 +88,7 @@ namespace items {
 
 		}
 		void apply(ecs::obj& ent) {
-			ui::ui_spawner(geo::Box2d(v2::zerov, v2::unitv), 1000).apply(ent);
+			ui::ui_spawner(geo::Box2d(v2::zerov, v2::unitv), 10000).apply(ent);
 			container& cont = ent.add_component< container>(v2::Coord2(1,1));
 			cont.slots.emplace<ecs::object_handle>(std::move(ecs::spawn(ent.world(), FloatingItemSlotSpawner(v2::zerov))));
 			ent.add_child(cont.slots.last().get());

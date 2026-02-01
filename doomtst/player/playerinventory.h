@@ -14,10 +14,20 @@ struct inventory_menu_component :ecs::Recipe {
 		items::container_recipe(v2::Coord2(2, 3), v2::Coord2(6, 5)).apply(ent);
 	}
 };
+struct HotbarSlot:ecs::component{
+
+};
 
 
 struct inventory : ecs::component {
-	void givestartitems(std::string items);
+	void givestartitems(std::string items) {
+		items::item_id id = world().get_resource<items::item_types>().unwrap().from_name(items);
+		items::item_entry entry = items::item_entry(id, 10, world().ensure_resource<items::item_types>());
+		stn::Option<items::AddToSlotPlan> plan = items::give_container_entry(entry, hotbar.get_component < items::container>());
+		if (plan) {
+			plan.unwrap().apply(world());
+		}
+	}
 	inventory() {
 
 
@@ -28,7 +38,7 @@ struct inventory : ecs::component {
 	ecs::obj hotbar;
 	stn::Option<items::container_index> selected_ind;
 	stn::Option<items::item_stack&> selected() {
-		if (selected_ind==stn::None) {
+		if (selected_ind == stn::None) {
 			return stn::None;
 		}
 		return
@@ -45,16 +55,19 @@ struct inventory : ecs::component {
 			.element();
 	}
 	void start() {
-		
-		hotbar = world().spawn_empty();
-		ecs::obj input=ecs::spawn(world(), items::container_recipe(v2::Coord2(0, 7), v2::Coord2(1, 1)));
-		
-		inventory_object= ecs::spawn(world(), inventory_menu_component());
-		hotbar=ecs::spawn(world(),items::container_recipe(v2::Coord2(0,0),v2::Coord2(6,1)));
-		ecs::obj display = ecs::spawn(world(), items::DisplaySlot(v2::Coord2(3, 7)));
 
-		ecs::obj own=owner();
-		items::make_crafting_table(input,display).apply(own);
+		hotbar = world().spawn_empty();
+		ecs::obj input = ecs::spawn(world(), items::container_recipe(v2::Coord2(0, 6), v2::Coord2(2, 2)));
+
+		inventory_object = ecs::spawn(world(), inventory_menu_component());
+		hotbar = ecs::spawn(world(), items::container_recipe(v2::Coord2(-1, -3), v2::Coord2(6, 1)));
+		for (ecs::object_handle& handle : hotbar.get_component<items::container>()) {
+			handle.add_component< HotbarSlot>();
+		}
+		ecs::obj display = ecs::spawn(world(), items::DisplaySlot(v2::Coord2(4, 8)));
+
+		ecs::obj own = owner();
+		items::make_crafting_table(input, display).apply(own);
 		givestartitems("plank");
 	}
 	void update() {
@@ -65,7 +78,7 @@ struct inventory : ecs::component {
 		}
 		if (CtxName::ctx.Inp->getKey('1').pressed) {
 
-			selected_ind =items::container_index(0,0);
+			selected_ind = items::container_index(0, 0);
 		}
 		if (CtxName::ctx.Inp->getKey('2').pressed) {
 
@@ -87,8 +100,44 @@ struct inventory : ecs::component {
 
 		}
 	}
-};
 
+};
+namespace player {
+	struct HotbarCommands :ecs::System {
+		void run(ecs::Ecs& world) {
+			for (auto&& [inventory_slot] : ecs::View<inventory>(world)) {
+				stn::Option<items::container_index> index = inventory_slot.selected_ind;
+				items::container& hotbar_container = inventory_slot.hotbar.get_component<items::container>();
+				for (ecs::object_handle& handle : hotbar_container) {
+					handle.get_component<items::ItemSlotDecal>().reset_decal();
+				}
+				if (index) {
+					hotbar_container[index.unwrap()].get_component<items::ItemSlotDecal>().set_decal(
+						renderer::TexturePath("images\\importantblockholder.png", "important_block_holder")
+					);
+				}
+			}
+		}
+	};
+
+	struct LoadHotbarSlots :ecs::System {
+		void run(ecs::Ecs& world) {
+			for (auto&& [inventory_slot] : ecs::View<inventory>(world)) {
+				stn::Option<items::container_index> index = inventory_slot.selected_ind;
+				items::container& hotbar_container = inventory_slot.hotbar.get_component<items::container>();
+				for (ecs::object_handle& handle : hotbar_container) {
+					handle.get_component<items::ItemSlotDecal>().reset_decal();
+				}
+				if (index) {
+					hotbar_container[index.unwrap()].get_component<items::ItemSlotDecal>().set_decal(
+						renderer::TexturePath("images\\importantblockholder.png", "important_block_holder")
+					);
+				}
+			}
+		}
+	};
+
+}
 
 
 // !playerinventory_H

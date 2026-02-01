@@ -250,19 +250,21 @@ namespace renderer {
 	struct render_all :ecs::System {
 		void run(ecs::Ecs& world) {
 			Renderer& ren = world.get_resource<Renderer>().unwrap();
-
 			for (MeshData& mesh : world.read_commands<MeshData>()) {
+
 				ren.fill_mesh(mesh);
 			}
 
 			std::unordered_map<phase_handle, render_pass> pass_map;
-
+			size_t cnt = 0;
+			
 			ecs::View<material_component, order_key, is_enabled> renderable_iter(world);
 			for (auto&& [mat, order, should_render] : renderable_iter) {
 				if (should_render.enabled) {
 					phase_handle pass = mat.mat_id->pass;
 					pass_map.try_emplace(pass, render_pass(pass));
 					pass_map.at(pass).phase_elements.emplace(mat.owner());
+					cnt++;
 				}
 
 			}

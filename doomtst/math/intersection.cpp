@@ -19,8 +19,8 @@ namespace geointersect {
 			}
 			tst_val_1 /= dir[i];
 			tst_val_2 /= dir[i];
-			min_max = Min(min_max, Max(tst_val_1, tst_val_2));
-			max_min = Max(max_min, Min(tst_val_1, tst_val_2));
+			min_max =stn::Min(min_max, stn::Max(tst_val_1, tst_val_2));
+			max_min = stn::Max(max_min, stn::Min(tst_val_1, tst_val_2));
 		}
 
 
@@ -28,7 +28,7 @@ namespace geointersect {
 		if (max_min < min_max || apx(max_min, min_max)) {
 
 			if (0 < max_min || apx(max_min, 0)) {
-				return stn::Construct<RayHit>(fray, max_min);
+				return stn::MakeOption<RayHit>(fray, max_min);
 			}
 
 		}

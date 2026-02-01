@@ -30,7 +30,7 @@ namespace ecs {
 
 	};
 	struct Entities {
-		Entities(std::uint32_t count) :entity_list(count) {
+		Entities(size_t count) :entity_list(count) {
 
 			for (std::uint32_t i = 0; i < count; i++) {
 				free_ids.push(i);
@@ -54,7 +54,7 @@ namespace ecs {
 		void assert_valid(entity entity) const{
 			if (!is_valid(entity))
 			{
-				stn::throw_logic_error("refrence to entity with id {} is a member of outdated generation {} of {}", entity.id(), entity.generation(), entity_list[entity.id()].gen_count);
+				stn::throw_logic_error("refrence to entity with block_id {} is a member of outdated generation {} of {}", entity.id(), entity.generation(), entity_list[entity.id()].gen_count);
 			}
 		}
 		const entity_metadata& at(entity entity) const{

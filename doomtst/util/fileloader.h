@@ -70,28 +70,57 @@ inline bool fileexists(std::string name) {
 		return false;
 	}
 }
+
 namespace stn {
-	struct FileMode {
-		bool writeable;
-		bool readable;
-		bool binary;
-		FileMode(bool can_write, bool can_read,bool is_binary=true) :writeable(can_write), readable(can_read),binary(is_binary) {
+	enum class FileMode {
+		Write,
+		Read,
+		ReadWrite,
+		WriteBinary,
+		ReadBinary,
+		ReadWriteBinary
 
-		}
-
-		const char* file_opener() const {
-			if (!readable && !writeable) throw std::runtime_error("FileMode must be readable or writeable");
-			if (readable && writeable) {
-				return binary ? "r+b" : "r+";
-			}
-			if (writeable) {
-				return binary ? "wb" : "w";
-			}
-			if (readable) {
-				return binary ? "rb" : "r";
-			}
-		}
 	};
+
+	inline bool is_readable(FileMode mode) {
+		switch (mode) {
+		case FileMode::Write:
+		case FileMode::WriteBinary:
+		return false;
+		default:
+		return true;
+		}
+	}
+
+	inline bool is_writeable(FileMode mode) {
+		switch (mode) {
+		case FileMode::Read:
+		case FileMode::ReadBinary:
+		return false;
+		default:
+		return true;
+		}
+	}
+	inline bool is_binary(FileMode mode) {
+		switch (mode) {
+		case FileMode::ReadBinary:
+		case FileMode::WriteBinary:
+		case FileMode::ReadWriteBinary:
+		return true;
+		default:
+		return false;
+		}
+	}
+	inline const char* file_opener(FileMode mode) {
+		switch (mode) {
+		case FileMode::Read:        return "r";
+		case FileMode::Write:       return "w";
+		case FileMode::ReadWrite:   return "w+";
+		case FileMode::ReadBinary:       return "rb";
+		case FileMode::WriteBinary:      return "wb";
+		case FileMode::ReadWriteBinary:  return "w+b";
+		}
+	}
 	enum class SeekOrigin {
 		Begin,
 		Current,
@@ -102,25 +131,33 @@ namespace stn {
 		FileMode file_options;
 		FILE* fp;
 		long offset;
-
+		bool readable() const{
+			return is_readable(file_options);
+		}
+		bool writeable() const {
+			return is_writeable(file_options);
+		}
+		bool binary() const {
+			return is_binary(file_options);
+		}
 		size_t size() {
 			seek_end();
 			auto pos = std::ftell(fp);
 			if (pos < 0) {
-				stn::throw_logic_error("ftell failed with {}",pos);
+				stn::throw_logic_error("ftell failed with {}", pos);
 			}
 			seek(SeekOrigin::Begin, 0);
 			return static_cast<std::uint64_t>(pos);
 		}
 		void seek(SeekOrigin origin, long offset) {
-			int whence = 0;
+			int loc_type = 0;
 			switch (origin) {
-			case SeekOrigin::Begin:   whence = SEEK_SET; break;
-			case SeekOrigin::Current: whence = SEEK_CUR; break;
-			case SeekOrigin::End:     whence = SEEK_END; break;
+			case SeekOrigin::Begin:   loc_type = SEEK_SET; break;
+			case SeekOrigin::Current: loc_type= SEEK_CUR; break;
+			case SeekOrigin::End:     loc_type = SEEK_END; break;
 			}
 
-			if (fseek(fp, offset, whence) != 0) {
+			if (fseek(fp, offset, loc_type) != 0) {
 				throw std::runtime_error("Failed to seek in file");
 			}
 		}
@@ -135,7 +172,7 @@ namespace stn {
 			}
 
 		}
-		file_handle(std::string filepath, FileMode open_mode) :file_options(open_mode), fp(fopen(filepath.c_str(), open_mode.file_opener())),offset(0) {
+		file_handle(std::string filepath, FileMode open_mode) :file_options(open_mode), fp(fopen(filepath.c_str(), file_opener(open_mode))), offset(0) {
 			if (!fp) {
 				throw std::runtime_error(filepath);
 			}
@@ -162,7 +199,7 @@ namespace stn {
 
 		template <typename T>
 		void write(stn::span<const T> span) {
-			if (file_options.writeable) {
+			if (writeable()) {
 				size_t amount_written = fwrite(span.data(), sizeof(T), span.length(), fp);
 				if (amount_written != span.length()) {
 					stn::throw_logic_error("attempted to write to a file but only {} out of {} elements were written", amount_written, span.length());
@@ -176,7 +213,7 @@ namespace stn {
 
 		template <typename T>
 		stn::array<T> read(size_t count) {
-			if (!file_options.readable) {
+			if (!readable()) {
 				throw std::runtime_error("can't read a file that was not initialized in reading mode");
 			}
 			stn::array<T> newarr = stn::array<T>(count);
@@ -187,7 +224,7 @@ namespace stn {
 			return newarr;
 		}
 		void write_bytes(stn::span<const std::byte> span) {
-			if (file_options.writeable) {
+			if (readable()) {
 				size_t amount_written = fwrite(span.data(), sizeof(std::byte), span.length(), fp);
 				if (amount_written != span.length()) {
 					stn::throw_logic_error("attempted to write to a file but only {} out of {} elements were written", amount_written, span.length());
@@ -198,7 +235,7 @@ namespace stn {
 			}
 		}
 		stn::array<std::byte> read_bytes(size_t count) {
-			if (!file_options.readable) {
+			if (!readable()) {
 				throw std::runtime_error("can't read a file that was not initialized in reading mode");
 			}
 			stn::array<std::byte> newarr = stn::array<std::byte>(count);
@@ -208,8 +245,8 @@ namespace stn {
 			}
 			return newarr;
 		}
-		std::string read_text(){ 
-			if (file_options.binary) {
+		std::string read_text() {
+			if (binary()) {
 				stn::throw_logic_error("cannot read text from a binary file");
 			}
 			size_t file_size = size();

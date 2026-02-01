@@ -1,22 +1,15 @@
 #include "managegrid.h"
 #include "../block/blockinit.h"
-
-void gridutil::GridManager::set_block(Coord loc, int blockid, grid::Grid& grid) {
-	block* location = CtxName::ctx.Grid->getBlock(loc);
+void gridutil::GridManager::set_block(Coord loc, block_id blockid, grid::Grid& grid, ecs::Ecs& world) {
+	block* location = grid.getBlock(loc);
 	if (location != nullptr) {
-		int prevemit = CtxName::ctx.Grid->getBlock(loc)->emitedlight;
-		CtxName::ctx.Grid->GetChunk(loc)->modified = true;
-		set_air(location->owner());
-		location = CtxName::ctx.Grid->getBlock(loc);
-		location->id = blockid;
-		blkinitname::blockinit(*location);
-		
-		blockchangecoverupdate(*CtxName::ctx.Ecs,location);
-		if (0 != location->emitedlight) {
-			CtxName::ctx.Ecs->write_command(partial_relight_command(*CtxName::ctx.Grid, loc));
-		}
-		CtxName::ctx.Ecs->write_command(partial_reshade_command(*CtxName::ctx.Grid, loc));
-		sendrecreatemsg(grid);
-	}
+		grid.GetChunk(loc)->modified = true;
+		dislocate_from_grid(location->owner(), blockid);
 
+		blockchangecoverupdate(world, location);
+		if (location->owner().has_component<block_emmision>()) {
+			world.write_command(grid::SpreadLightCommand());
+		}
+		world.write_command(grid::partial_reshade_command(grid, loc));
+	}
 }

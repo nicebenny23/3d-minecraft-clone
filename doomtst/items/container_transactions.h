@@ -34,7 +34,7 @@ namespace items {
 		stn::array<GiveToSlot> filled_slots;
 		for (ecs::object_handle& to_handle : recieving_container) {
 			if (to_handle.has_component<ElementSlot>()) {
-				stn::Option<GiveToSlot> slot_plan = give_slot_all(to_handle.get_component<ElementSlot>(), from_slot, remaining_amount);
+				stn::Option<GiveToSlot> slot_plan = give_slot_some(to_handle.get_component<ElementSlot>(), from_slot, remaining_amount);
 				if (slot_plan) {
 					if (slot_plan.unwrap().will_initialize()) {
 						if (!unfilled_slot) {

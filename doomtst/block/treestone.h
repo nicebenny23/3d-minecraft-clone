@@ -5,13 +5,11 @@
 #include "../items/item.h"
 
 
-inline void treestoneinit(blockname::block& blk) {
+inline void treestoneinit(blocks::block& blk) {
 
-	blk.mesh.setfaces( treestonetex,treestonetex,logtoppng,logtoppng,treestonetex,treestonetex);
+	blk.mesh.set_face_textures( treestonetex,treestonetex,logtoppng,logtoppng,treestonetex,treestonetex);
 	blk.attributes.solid = true;
-	blk.attributes.transparent = false;
-	blk.emitedlight = 0;
-	blk.mesh.box.scale = blockname::blockscale;
+	blk.mesh.box.scale = blocks::blockscale;
 
 	blk.createdefaultaabb(false);
 	blk.owner().add_component<loot_table>().add("stone", 1);

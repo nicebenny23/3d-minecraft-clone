@@ -33,6 +33,12 @@ namespace items {
 		ElementSlot() {
 
 		}
+		bool can_interact(const ElementSlot& other) const{
+			if (other.occupied()&&occupied()) {
+				return item_entry::can_interact(other.entry().unwrap(),entry().unwrap());
+			}
+			return false;
+		}
 		void set_element(ecs::obj elem) {
 			current_item = ecs::weak_object(elem);
 		}
@@ -57,14 +63,19 @@ namespace items {
 			}
 			return stn::None;
 		}
-
+		Option<const item_stack&> stack() const{
+			if (empty()) {
+				return stn::None;
+			}
+			return element().unwrap().get_component<item_stack>();
+		}
 		Option<item_stack&> stack() {
 			if (empty()) {
 				return stn::None;
 			}
 			return element().unwrap().get_component<item_stack>();
 		}
-		Option<item_entry> entry() {
+		Option<item_entry> entry() const{
 			return stack().map_member(&item_stack::contained_entry);
 		}
 	};

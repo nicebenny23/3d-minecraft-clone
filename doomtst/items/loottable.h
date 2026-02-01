@@ -7,17 +7,11 @@
 const float interacttimeneededfordrop = 1;
 struct loot_element {
 
-	items::item_entry to_entry(const ecs::Ecs& world) const{
-		
-		items::item_id id= world.get_resource<items::item_type_register>().unwrap().from_name(item_name);
-		return items::item_entry(id, amount);
-	}
-	loot_element() = default;
-	std::string item_name;
-	size_t amount;
+
+	items::item_entry entry;
+
 	void drop(ecs::Ecs& world) const;
-	loot_element(std::string name, float maxamt)
-		: item_name(name), amount(maxamt) {
+	loot_element(items::item_entry item_entry):entry(item_entry){
 
 	}
 
@@ -25,10 +19,7 @@ struct loot_element {
 struct  loot_table : ecs::component {
 
 	bool should_drop;
-	loot_table() {
-
-		should_drop = false;
-		loot = stn::array<loot_element>();
+	loot_table():should_drop(false),loot(){
 	}
 	void start() {
 
@@ -39,9 +30,14 @@ struct  loot_table : ecs::component {
 
 	};
 	stn::array<loot_element> loot;
-	void add(std::string item_name, float maxamt, bool israndom = false) {
-		loot.push(loot_element(item_name, maxamt));
+	void add(stn::HashedString item_name, size_t maxamt, bool israndom = false) {
+		items::item_types& types = world().ensure_resource<items::item_types>();
+		loot.push(loot_element(items::item_entry(types.from_name(item_name), maxamt, types)));
 	}
+	void add(std::string_view item_name, size_t maxamt, bool israndom = false) {
+		add(stn::HashedString(item_name),maxamt,israndom);
+	}
+
 	void destroy_hook() {
 		if (should_drop) {
 			for (const loot_element& element:loot) {

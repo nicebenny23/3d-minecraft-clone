@@ -33,7 +33,7 @@ namespace items {
 			return item_traits(
 				"iron_ore",
 				renderer::TexturePath("images\\ironore.png", "IronOreTexture"),
-				blockname::id::minecraftironore
+				blocks::block_id::minecraftironore
 			);
 		}
 	};
@@ -239,7 +239,7 @@ namespace items {
 			return item_traits(
 				"plank",
 				renderer::TexturePath("images\\treestoneblock.png", "PlankTexture"),
-				blockname::minecrafttreestone
+				blocks::minecrafttreestone
 			);
 		}
 	};
@@ -249,15 +249,16 @@ namespace items {
 			return item_traits(
 				"stone",
 				renderer::TexturePath("images\\stone.png", "StoneTexture"),
-				blockname::minecraftstone
+				blocks::minecraftstone
 			);
 		}
 	};
 	struct register_core_items :Core::Plugin {
 		void build(Core::App& app) {
 			app.emplace_system< ItemClear>();
-			item_type_register& item_register = app.ensure_resource<item_type_register>();
+			item_types& item_register = app.ensure_resource<item_types>();
 			app.emplace_system< run_crafts>();
+			app.emplace_system< cursor_crafter>();
 			app.emplace_system<SyncDisplayIcon>();
 			item_register.register_item<items::air_item>();
 			item_register.register_item<items::altar_item>();

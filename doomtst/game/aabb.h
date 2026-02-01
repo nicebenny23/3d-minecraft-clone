@@ -32,9 +32,9 @@ namespace aabb {
 
 
 			}
-			if (owner().has_component<blockname::block>()) {
-				blockname::block& blk = owner().get_component<blockname::block>();
-				Scale3 scale = blk.mesh.box.scale / blockname::blockscale;
+			if (owner().has_component<blocks::block>()) {
+				blocks::block& blk = owner().get_component<blocks::block>();
+				Scale3 scale = box.scale / blocks::blockscale;
 				Point3 pos = blk.center();
 				return geo::Box(box.center * scale + v3::Vec3(pos.x, pos.y, pos.z), box.scale * scale);
 

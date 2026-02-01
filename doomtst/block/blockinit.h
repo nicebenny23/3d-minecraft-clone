@@ -1,95 +1,35 @@
 #include "block.h"	
-#include "air.h"
-#include "treestone.h"
-#include "moss.h"
-#include "stone.h"
-#include "glass.h"
-#include "water.h"
-#include "crystalore.h"
-#include "torch.h"
-#include "wood.h"
-#include "craftingtable.h"
-#include "ropeblock.h"
-#include "crystaltorch.h"
-#include "lava.h"
-#include "obisidian.h"
-#include "chest.h"
-#include "furnaceblock.h"
-#include "ironblock.h"
-#include "altar.h"
-#include "plank.h"
-#include "sand.h"
-//provides utility functions for blocks
-using namespace blockname;
+#include "block_registry.h"
+
 #pragma once  
-namespace blkinitname {
+namespace blocks {
 
-	inline void blockinit(block& blk) {
-		///blk->bstate.broken = false;
-		switch (blk.id) {
-		case minecraftair:
-		setdefault(blk);
-		break;
-		case minecrafttreestone:
-		treestoneinit(blk);
-		break;
-		case minecraftmoss:
-		mossinit(blk);
-		break;
-		case minecraftstone:
-		stoneinit(blk);
-		break;
-		case minecraftglass:
-		glassinit(blk);
-		break;
-		case minecraftwater:
-		waterinit(blk);
-		break;
-		case minecraftcrystal:
-		crystalinit(blk);
-		break;
-		case minecrafttorch:
-		torchinit(blk);
-		break;
-		case minecraftsand:
-		sandinit(blk);
-		break;
-		case minecraftcraftingtable:
-		tableinit(blk);
-		break;
-		case minecraftcrystaltorch:
-		crystaltorchinit(blk);
-		break;
-		case minecraftrope:
-		ropeinit(blk);
-		break;
-		case minecraftlava:
-		lavainit(blk);
-		break;
-		case minecraftobsidian:
-		obsidianinit(blk);
-		break;
-		case minecraftchest:
-		chestinit(blk);
-		break;
-		case minecraftfurnace:
-		furnaceinit(blk);
-		break;
-		case minecraftironore:
-		ironinit(blk);
-		break;
-		case minecraftaltar:
-		altarinit(blk);
-		break;
-		case minecraftplank:
-		plankinit(blk);
-		break;
+
+	struct GenerateBlock :ecs::Recipe {
+		blocks::block_id id;
+		v3::Coord loc;
+		Dir::Dir2d face;
+		Dir::Dir3d direction;
+		Chunk::chunkmesh& mesh;
+		GenerateBlock(Chunk::chunkmesh& block_chunk_mesh,blocks::block_id blkid, v3::Coord location, Dir::Dir2d face_to_attach, Dir::Dir3d direction_to_attach)
+			:mesh(block_chunk_mesh), id(blkid), loc(location), face(face_to_attach), direction(direction_to_attach) {
+
 		}
+		void apply(ecs::obj& object) {
+			block& blk = object.add_component<block>(mesh,loc, id, direction, face);
 
-	}
-	inline void genblock(block& blk, int blkid, Coord location, byte attachface, byte direction) {
-		blk.create(location, blkid, Dir::Dir3d(attachface), Dir::Dir2d(direction));
-		blkinitname::blockinit(blk);
-	}
+			BlockRegistry& registry = object.world().ensure_resource<BlockRegistry>();
+			BlockTraits& traits=registry.traits[static_cast<size_t>(id)];
+			if (traits.emmited_light!=0) {
+				object.add_component<block_emmision>(traits.emmited_light);
+			}
+			if (traits.solid) {
+				object.add_component<Collider>(traits.prefab.size,false,traits.solid);
+			}
+			
+			//blk.mesh.set_face_textures()
+			registry.types[static_cast<size_t>(id)]->apply(object);
+		}
+	};
 
 }

@@ -29,7 +29,7 @@ namespace grid {
 			return shifts;		
 	}
 
-	constexpr int shift = powof2< chunkaxis>();
+	constexpr int shift = powof2< Chunk::chunkaxis>();
 	Coord Grid::chunkfromblockpos(Coord pos) {
 		return  Coord(pos.x >> shift, pos.y >> shift, pos.z >> shift);
 	}
@@ -43,7 +43,7 @@ namespace grid {
 	}
 
 	Coord Grid::get_chunk(Point3 pos) {
-		return  Coord(std::floor(pos.x / chunkaxis), std::floor(pos.y / chunkaxis), std::floor(pos.z / chunkaxis));
+		return  Coord(std::floor(pos.x / Chunk::chunkaxis), std::floor(pos.y / Chunk::chunkaxis), std::floor(pos.z / Chunk::chunkaxis));
 	}
 
 	//
@@ -53,17 +53,17 @@ namespace grid {
 
 	}
 	int Grid::chunkIndex(Coord Chunk) {
-		return localChunkIndex(Chunk + Coord(rad, rad, rad)-gridpos);
+		return localChunkIndex(Chunk + Coord(rad, rad, rad)-grid_pos);
 	}
 
 	//gets the voxel at a place in world space
 
-	bool Grid::ChunkLoaded(Coord loc) {
+	bool Grid::chunk_loaded(Coord loc) {
 		return(GetChunk(loc) != nullptr);
 	}
 
-	bool Grid::containsChunk(Coord loc) const {
-		loc -= gridpos;
+	bool Grid::contains_chunk_location(Coord loc) const {
+		loc -= grid_pos;
 		return (abs(loc.x) <= rad && abs(loc.y) <= rad && abs(loc.z) <= rad);
 
 	}
@@ -73,7 +73,7 @@ namespace grid {
 	Chunk::chunk* Grid::GetChunk(Coord pos) {
 		Coord chnk = chunkfromblockpos(pos);
 
-		if (containsChunk(chnk)) {
+		if (contains_chunk_location(chnk)) {
 			return chunklist.unchecked_at(chunkIndex(chnk));
 		}
 		return nullptr;
@@ -81,7 +81,7 @@ namespace grid {
 	stn::Option<Chunk::chunk&> Grid::get_chunk(Coord pos) {
 		Coord chnk = chunkfromblockpos(pos);
 
-		if (containsChunk(chnk)) {
+		if (contains_chunk_location(chnk)) {
 			Chunk::chunk* cnk_ptr= chunklist.unchecked_at(chunkIndex(chnk));
 			if (cnk_ptr) {
 				return *cnk_ptr;
@@ -93,12 +93,12 @@ namespace grid {
 
 	Option<ecs::obj&> Grid::get_object(const v3::Coord pos) 
 	{
-		return get_chunk(pos).map([&](Chunk::chunk& chnk)->ecs::obj&{return chnk.blockbuf.unchecked_at(Chunk::indexfrompos(pos)); });
+		return get_chunk(pos).map([&](Chunk::chunk& chnk)->ecs::obj&{return chnk.block_list.unchecked_at(Chunk::indexfrompos(pos)); });
 	}
 
 
 	Option<block&> Grid::get_block(const v3::Coord pos) {
-		return get_object(pos).map([&](ecs::obj& object)->block&{return object.get_component_unchecked<block>(); });
+		return get_object(pos).map_member(&ecs::obj::get_component_unchecked<block>);
 	}
 
 	block* Grid::getBlock(const v3::Coord pos) {
@@ -110,15 +110,12 @@ namespace grid {
 		return nullptr;
 	}
 
-	bool Grid::containsChunkIndex(int index) const {
-		return 0 <= index && index < totalChunks;
-	}
 
 	ecs::obj* Grid::getObject(const v3::Coord pos) {
 		
 		Chunk::chunk* chnk = GetChunk(pos);
 		if (chnk) {
-			return &chnk->blockbuf.unchecked_at(Chunk::indexfrompos(pos));
+			return &chnk->block_list.unchecked_at(Chunk::indexfrompos(pos));
 		}
 		return nullptr;
 
@@ -151,14 +148,14 @@ namespace grid {
 	//7,8,9   
 	//4,5,6
 	//1,2,3 x
-	void Grid::load() {
+	void Grid::load(ecs::Ecs& world) {
 		stn::array<Chunk::chunk*> newchunklist = stn::array<Chunk::chunk*>(totalChunks, nullptr);
-		int indexdxchange = localChunkIndex(griddt);
+		int indexdxchange = localChunkIndex(grid_dt);
 		for (int ind = 0; ind < totalChunks; ind++) {
-			bool ChunkLoaded = chunklist[ind] != nullptr;
+			bool chunk_loaded = chunklist[ind] != nullptr;
 			//sadley need the 2 things in an and to clear it up
-			if (ChunkLoaded) {
-				if (ChunkLoaded && containsChunk(chunklist[ind]->loc)) {
+			if (chunk_loaded) {
+				if (chunk_loaded && contains_chunk_location(chunklist[ind]->loc)) {
 					newchunklist[ind - indexdxchange] = chunklist[ind];
 				}
 				else {
@@ -174,7 +171,9 @@ namespace grid {
 				for (int i = 0; i < dim_axis; i++) {
 					if (newchunklist[ind] == nullptr) {
 						if (debug_slow || !has_loaded_chunk) {
-							newchunklist[ind] = &loader.LoadChunk(Coord(i, j, k) + gridpos - Coord(rad, rad, rad));
+							v3::Coord spawn_pos = v3::Coord(i, j, k) + grid_pos - v3::Coord(rad, rad, rad);
+							newchunklist[ind]=&ecs::spawn_emplaced<Chunk::CreateChunk>(world,spawn_pos).get_component<Chunk::chunk>();
+
 							has_loaded_chunk = true;
 						}
 					}
@@ -188,9 +187,9 @@ namespace grid {
 	void	Grid::updateborders() {
 		Point3 pos = camera::campos();
 		pos = get_chunk(pos);
-		griddt = Coord(pos) - gridpos;
+		grid_dt = Coord(pos) - grid_pos;
 
-		gridpos = Coord(pos);
+		grid_pos = Coord(pos);
 	}
 	void Grid::destroy() {
 
@@ -199,16 +198,14 @@ namespace grid {
 		}
 
 	}
-	Grid::Grid(int axis, CtxName::Context* Context) :rad(axis), dim_axis(2 * axis + 1) {
+	Grid::Grid(int axis) :rad(axis), dim_axis(2 * axis + 1) {
 		totalChunks = dim_axis * dim_axis * dim_axis;
-		ctx = Context;
-		Context->Grid = this;
-		loader.Init(ctx);
-		gridpos = ZeroCoord;
-		griddt = ZeroCoord;
+		
+		grid_pos = ZeroCoord;
+		grid_dt = ZeroCoord;
 		chunklist = stn::array<Chunk::chunk*>(totalChunks, nullptr);
 	}
 	bool Grid::haschanged() {
-		return(griddt != ZeroCoord) || (has_loaded_chunk) || (griddt != ZeroCoord && debug_slow);
+		return(grid_dt != ZeroCoord) || (has_loaded_chunk) || (grid_dt != ZeroCoord && debug_slow);
 	}
 }

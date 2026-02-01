@@ -9,13 +9,13 @@ namespace items {
 
 	inline 	item_entry item_entry_from_json(const json::Value& item,ecs::Ecs& world) {
 
-		item_type_register& item_register = world.ensure_resource<item_type_register>();
-			std::string item_name = item.get_subobject_as<std::string>("id").expect("item id should exist");
+		item_types& item_register = world.ensure_resource<item_types>();
+			std::string item_name = item.get_subobject_as<std::string>("id").expect("item block_id should exist");
 			size_t count = item.get_subobject("count")
 		.expect("item count should exist")
 		.as_unsigned()
 		.expect("item count should not be negitive");
-		return item_entry(item_register.from_name(item_name), count);
+		return item_entry(item_register.from_name(item_name), count,world.ensure_resource<item_types>());
 	}
 
 	inline stn::Option<item_entry> mabye_item_entry_from_json(const json::Value& item, ecs::Ecs& world) {

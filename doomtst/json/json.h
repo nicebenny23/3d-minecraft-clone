@@ -3,7 +3,7 @@
 namespace json {
 	Value parse_json(std::string_view view);
 inline Value parse_for_file(const std::filesystem::path& path) {
-	std::string json_text= stn::file_handle(path,stn::FileMode(false,true,false)).read_text();
+	std::string json_text= stn::file_handle(path,stn::FileMode::Read).read_text();
 	return parse_json(std::string_view(json_text));
 }
 	template<typename T>

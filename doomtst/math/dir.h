@@ -42,6 +42,13 @@ namespace Dir {
 			}
 			return static_cast<char>(dir);
 		}
+		constexpr char inv_ind() const {
+			if (dir == Ind3d::None) {
+				throw std::logic_error("Invalid dir");
+
+			}
+			return static_cast<char>(dir)^1;
+		}
 		constexpr size_t axis_index() const {
 			if (dir == Ind3d::None) {
 				throw std::logic_error("Invalid dir");
@@ -54,7 +61,7 @@ namespace Dir {
 			if (dir == Ind3d::None) {
 				throw std::invalid_argument("Attempted to access invalid direction ");
 			}
-			return Dir3d(static_cast<Ind3d>(static_cast<char>(dir) ^ 1)); // Swaps 0↔1, 2↔3, 4↔5
+			return Dir3d(static_cast<Ind3d>(static_cast<char>(dir) ^ 1)); // Swaps 0,1, 2,3, 4,5
 		}
 
 		// Convert to vector
@@ -119,7 +126,7 @@ namespace Dir {
 	inline Dir3d Align(v3::Vec3 point) {
 
 
-		double max = Max(abs(point.x), abs(point.y), abs(point.z));
+		double max = stn::Max(abs(point.x), abs(point.y), abs(point.z));
 		int ind = 0;
 		if (abs(point.x) == max) {
 			ind = ((1 - sign(point.x)) / 2);
@@ -136,7 +143,7 @@ namespace Dir {
 	inline int max2ddirection(v3::Vec3 point) {
 
 
-		double max = Max(abs(point.x), abs(point.z));
+		double max = stn::Max(abs(point.x), abs(point.z));
 		if (abs(point.x) == max) {
 			return (1 - sign(point.x)) / 2;
 		}
@@ -228,7 +235,7 @@ namespace Dir {
 	static constexpr stn::List<Dir2d, 4> Directions2d = { right2d, left2d, up2d, down2d };
 
 	inline Dir2d Align2d(v2::Vec2 point) {
-		double max_val = Max(abs(point.x), abs(point.y));
+		double max_val = stn::Max(abs(point.x), abs(point.y));
 		int ind = 0;
 
 		if (abs(point.x) == max_val) {

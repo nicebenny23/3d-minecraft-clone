@@ -62,7 +62,7 @@ struct PlayerMovementSys : ecs::System
             if (body.isonground)
             {
 				if (!body.owner().has_component<playerclimb>()) {
-					int l=1;
+				
 				}
                 movement.slamUsed = false;
                 movement.lastGroundedTime = now;
@@ -123,9 +123,14 @@ struct PlayerMovementSys : ecs::System
                 {
                     body.velocity.y -= effSpeed;
                 }
-					//body.owner().get_component<ecs::transform_comp>().transform.position += Vec3(3, 0, 0);
+				if (ecs.ensure_resource<userinput::InputManager>().getKey('z').held) {
+					body.owner().get_component<ecs::transform_comp>().transform.position.y = 4;
+				}
+					if (ecs.ensure_resource<userinput::InputManager>().getKey('f').held) {
+					body.owner().get_component<ecs::transform_comp>().transform.position += Vec3(3, 0, 0);
 				
-			
+				}
+					
                 
             }
         }
