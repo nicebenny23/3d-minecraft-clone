@@ -57,19 +57,19 @@ namespace ecs {
 	template<typename T>
 	inline constexpr ComponentInfo ComponentTraits{};
 	struct IComponentIndexer {
-		virtual	bool has(entity ent) const = 0;
-		virtual	component& unchecked_at(entity entity) = 0;
-		virtual	const component& unchecked_at(entity entity) const = 0;
+		virtual	bool has(entity_id ent) const = 0;
+		virtual	component& unchecked_at(entity_id entity) = 0;
+		virtual	const component& unchecked_at(entity_id entity) const = 0;
 		template<typename T>
-		T& get_as_unchecked(entity e) {
+		T& get_as_unchecked(entity_id e) {
 			return static_cast<T&>(unchecked_at(e));
 		}
 		template<typename T>
-		const T& get_as_unchecked(entity e) const {
+		const T& get_as_unchecked(entity_id e) const {
 			return static_cast<const T&>(unchecked_at(e));
 		}
-		virtual void remove_at_unchecked(entity ent) = 0;
-		void remove_at(entity ent) {
+		virtual void remove_at_unchecked(entity_id ent) = 0;
+		void remove_at(entity_id ent) {
 			if (has(ent)) {
 				throw std::logic_error("emplace<T> cannot overwrite an existing component");
 			}
@@ -91,39 +91,39 @@ namespace ecs {
 			: pages(std::move(other.pages)) {
 		}
 
-		bool has(entity ent) const override {
-			return pages.contains(ent.id());
+		bool has(entity_id ent) const override {
+			return pages.contains(ent.id);
 		}
 
 
-		T& unchecked_at(entity entity)	override {
-			return pages.unchecked_at(entity.id());
+		T& unchecked_at(entity_id entity)	override {
+			return pages.unchecked_at(entity.id);
 		}
-		const T& unchecked_at(entity entity) const override {
-			return pages.unchecked_at(entity.id());
+		const T& unchecked_at(entity_id entity) const override {
+			return pages.unchecked_at(entity.id);
 		}
 
 
 		template<typename... Args>
-		T& emplace_unchecked(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
-			return pages.insert_at_unchecked(ent.id(), std::forward<Args>(args)...);
+		T& emplace_unchecked(entity_id ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
+			return pages.insert_at_unchecked(ent.id, std::forward<Args>(args)...);
 		}
 		template<typename...Args>
-		T& emplace(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
+		T& emplace(entity_id ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
 
-			return pages.insert_at(ent.id(), std::forward<Args>(args)...);
+			return pages.insert_at(ent.id, std::forward<Args>(args)...);
 		}
 		template<typename...Args>
-		stn::insertion<T&> insert(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
+		stn::insertion<T&> insert(entity_id ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
 			if (has(ent)) {
-				return stn::insertion<T&>(pages[ent.id()], false);
+				return stn::insertion<T&>(pages[ent.id], false);
 			}
 			return stn::insertion<T&>(emplace_unchecked(ent, std::forward<Args>(args)...), true);
 		}
 
-		void remove_at_unchecked(entity ent) override {
-			static_cast<component&>(pages[ent.id()]).destroy_hook();
-			pages.remove_at_unchecked(ent.id());
+		void remove_at_unchecked(entity_id ent) override {
+			static_cast<component&>(pages[ent.id]).destroy_hook();
+			pages.remove_at_unchecked(ent.id);
 		}
 
 	private:

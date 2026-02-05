@@ -35,12 +35,12 @@ struct liquidprop : ecs::component {
 			collidedwith->get_component<rigidbody>().velocity *= 1 - CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt * 5;
 		}
 	}
-	void updateinface(Dir::Dir3d face) {
+	void updateinface(math::Direction3d face) {
 
 		if (liqval <= 1) {
 			return;
 		}
-		Coord newpos = face.to_coord() + owner().get_component<block>().pos;
+		Coord newpos = face.coord() + owner().get_component<block>().pos;
 		blocks::block* blk = CtxName::ctx.Grid->getBlock(newpos);
 		if (blk == nullptr) {
 			return;
@@ -48,7 +48,7 @@ struct liquidprop : ecs::component {
 
 		//instert for what dor==3 was
 
-		if (blk->block_id != minecraftair) {
+		if (blk->id != minecraftair) {
 			//if (blk->block_id == owner()) {
 				if (liqval > 1) {
 
@@ -71,7 +71,7 @@ struct liquidprop : ecs::component {
 		}
 
 		Coord pos = blk->pos;
-		gridutil::set_block(world(), pos, owner().get_component<blocks::block>().block_id);
+		grid::set_block(world(), pos, owner().get_component<blocks::block>().id);
 		blk = (CtxName::ctx.GridRef().getBlock(pos));
 
 		if (!blk->owner().has_component<liquidprop>()) {
@@ -82,7 +82,7 @@ struct liquidprop : ecs::component {
 		liqval -= 1;
 
 
-		blk->mesh.attachdir = Dir::up3d;
+		blk->mesh.attached_direction = math::up_3d;
 
 	}
 
@@ -91,15 +91,15 @@ struct liquidprop : ecs::component {
 		if (.4 < diffusetime) {
 			diffusetime = 0;
 
-			for (auto dir : Dir::Directions3d) {
-				if (dir != Dir::up3d) {
+			for (auto dir : math::Directions3d) {
+				if (dir != math::up_3d) {
 
 					updateinface(dir);
 				}
 			}
 		}
 		if (liqval <= 0) {
-			gridutil::set_block(world(),owner().get_component<blocks::block>().pos, minecraftair);
+			grid::set_block(world(),owner().get_component<blocks::block>().pos, minecraftair);
 		}
 
 	}

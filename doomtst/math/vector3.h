@@ -275,7 +275,9 @@ namespace v3 {
 		int y;
 		int z;
 	};
-
+	inline size_t manhattan_distance(const Coord& p, const Coord& p1) {
+		return abs(p.x-p1.x)+ abs(p.y- p1.y) + abs(p.z - p1.z);
+	}
 	inline constexpr Coord RightCoord{ 1,  0,  0 };
 	inline constexpr Coord LeftCoord{ -1,  0,  0 };
 	inline constexpr Coord UpCoord{ 0,  1,  0 };
@@ -353,10 +355,10 @@ namespace v3 {
 			return Point3(x / inv_scale.x, y / inv_scale.y, z / inv_scale.z);
 		}
 
-		Point3 operator*(float scale) const {
+		Point3 operator*(double scale) const {
 			return Point3(x * scale, y * scale, z*scale);
 		}
-		Point3 operator/(float scale) const {
+		Point3 operator/(double scale) const {
 			if (scale==0) {
 				throw std::logic_error("Unable to divide a Vec3 by zero");
 			}

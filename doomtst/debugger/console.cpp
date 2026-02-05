@@ -47,14 +47,35 @@ namespace console {
                 std::string text_for_look = player::goblin.get_component<playerplace>().Hit
 					.filter([&](const voxtra::RayWorldHit& blk) {return blk.owner().exists(); })
 					.filter([](const voxtra::RayWorldHit& blk) {return blk.owner().has_component<block>(); })
-                    .map([&](const voxtra::RayWorldHit& blk) {return std::format("looking at {}", blk.owner().get_component<block>().pos); })
+                    .map([&](const voxtra::RayWorldHit& blk) {
+					block& blck = blk.owner().get_component<block>();
+					
+					return std::format("looking at block with center {} with id {} ", blck.center(), size_t(blck.id)); })
                     .unwrap_or("not looking at a block");
                 
                 ImGui::Text(text_for_look.c_str());
-                ImGui::EndChild();
+				ImGui::Text(std::format("loaded chunks{}", CtxName::ctx.Grid->chunks_loaded()).c_str());
+				ImGui::EndChild();
 
                 ImGui::EndTabItem(); 
             }
+
+			if (ImGui::BeginTabItem("Entity Viewer")) {
+
+				ImGui::InputScalar("Entity ID", ImGuiDataType_U32, &input_id);
+
+				ecs::entity_id entity(input_id);
+				if (CtxName::ctx.Ecs) {
+					auto types = CtxName::ctx.Ecs->component_types_for(entity);
+
+					for (const auto& type : types) {
+						ImGui::Text("%s", type->component_type_id().name().data());
+					}
+				}
+
+				ImGui::EndTabItem();
+			}
+		
 
             if (ImGui::BeginTabItem("Search")) {
                 filter_.Draw("Filter");

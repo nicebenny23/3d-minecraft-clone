@@ -82,7 +82,7 @@ namespace ecs {
 				{
 					stn::throw_logic_error("Cannot dereference iterator: reached end of View");
 				}
-				entity ent= owner.ecs.archetypes.archetype_at(owner.archetypes.unchecked_at(archetype_list_index))[arch_index];
+				entity_id ent= owner.ecs.archetypes.archetype_at(owner.archetypes.unchecked_at(archetype_list_index))[arch_index];
 				return owner.ecs.get_tuple_unchecked<Components...>(ent, owner.view_indices());
 			}
 

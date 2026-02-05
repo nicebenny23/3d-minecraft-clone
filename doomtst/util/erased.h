@@ -53,8 +53,8 @@ namespace stn {
 
             // Specialization for reference types
             template<typename T>
-                requires(is_member<T>&& std::is_reference_v<T>)
-            inline void construct(std::remove_reference_t<T>& ref) {
+                requires(is_member<T>&& std::is_reference_v<T>&& std::is_lvalue_reference_v<T>)
+            inline void construct(T ref) {
                 //set underlying ptr to ref;
                 using raw_T = std::remove_reference_t<T>;
                 *reinterpret_cast<raw_T**>(&storage)= &ref;

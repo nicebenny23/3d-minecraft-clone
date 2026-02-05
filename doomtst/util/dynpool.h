@@ -187,7 +187,7 @@ namespace stn {
 		template<typename U>
 		flux_token<U> downcast() requires std::derived_from<U, T> {
 			if (ptr) {
-				if (id_unchecked() != stn::type_id::make_type_id<U>()) {
+				if (id_unchecked() != stn::make_type_id<U>()) {
 					stn::throw_range_exception("Cannot downcast flux_token of type {} to {}", get_flux().stored_type_info->name(), typeid(U).name());
 				}
 			}
@@ -243,7 +243,7 @@ namespace stn {
 	struct flux {
 		//constructs from a derived class
 		template<typename T>
-		flux(std::type_identity<T> identity) : object_id(stn::type_id::make_type_id<T>()) {
+		flux(std::type_identity<T> identity) : object_id(stn::make_type_id<T>()) {
 			destructor = [](void* ptr) {
 				((T*)(ptr))->~T();
 				};
@@ -329,7 +329,7 @@ namespace stn {
 		template<typename U, typename ...Args>
 		flux_token<U> emplace(Args&&...args)  requires std::constructible_from<U, Args&&...> {
 
-			if (stn::type_id::make_type_id<U>() != object_id) {
+			if (stn::make_type_id<U>() != object_id) {
 				stn::throw_range_exception("cannot emplace object of type {} in pool of type {} ", typeid(U).name(), stored_type_info->name());
 			}
 			return emplace_unchecked<U>(std::forward<Args>(args)...);

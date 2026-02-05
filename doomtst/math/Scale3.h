@@ -25,7 +25,18 @@ namespace v3 {
 		Scale3 operator-() const {
 			return Scale3(-x, -y, -z);
 		}
-
+		Scale3 shrunk(double size) const {
+			return Scale3(x - size, y - size, z - size);
+		}
+		Scale3 expanded(double size) const {
+			return Scale3(x+size, y+size, z+size);
+		}
+		Scale3 shrunk(Scale3 size) const {
+			return Scale3(x - size.x, y - size.x, z - size.z);
+		}
+		Scale3 expanded(Scale3 size) const {
+			return Scale3(x + size.x, y + size.y, z + size.z);
+		}
 		constexpr Scale3 operator*(double scale) const {
 			return Scale3(x * scale, y * scale, z * scale);
 		}
@@ -38,19 +49,18 @@ namespace v3 {
 		Scale3 operator*(const Scale3& scale) const {
 			return Scale3(x * scale.x, y * scale.y, z * scale.z);
 		}
-
 		Scale3& operator*=(const Scale3& scale) {
 			*this = *this * scale;
 			return *this;
 		}
-		Scale3 operator/(double scale) const {
+		constexpr Scale3 operator/(double scale) const {
 			if (scale == 0) {
 				throw std::logic_error("Unable to divide a Scale3 by zero");
 			}
 			return Scale3(x / scale, y / scale, z / scale);
 		}
 
-		Scale3& operator/=(double scale) {
+		constexpr Scale3& operator/=(double scale) {
 			if (scale == 0) {
 				throw std::logic_error("Unable to divide a Scale3 by zero");
 			}

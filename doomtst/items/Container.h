@@ -52,8 +52,8 @@ namespace items {
 			
 			container& cont= ent.add_component< container>(offset);
 
-			for (size_t x = 0; x < offset.x; x++) {
-				for (size_t y = 0; y < offset.y; y++) {
+			for (int x = 0; x < offset.x; x++) {
+				for (int y = 0; y < offset.y; y++) {
 					v2::Coord2 pos = v2::Coord2(x, y);
 					cont.slots.emplace<ecs::object_handle>(std::move(ecs::spawn(ent.world(), GriddedItemSlotSpawner(pos + min_position))));
 					ent.add_child(cont.slots.last().get());
@@ -72,8 +72,8 @@ namespace items {
 
 			container& cont = ent.add_component< container>(offset);
 
-			for (size_t x = 0; x < offset.x; x++) {
-				for (size_t y = 0; y < offset.y; y++) {
+			for (int x = 0; x < offset.x; x++) {
+				for (int y = 0; y < offset.y; y++) {
 					v2::Coord2 pos = v2::Coord2(x, y);
 					cont.slots.emplace<ecs::object_handle>(std::move(ecs::spawn(ent.world(), GriddedItemSlotUISpawner(pos + min_position))));
 					ent.add_child(cont.slots.last().get());

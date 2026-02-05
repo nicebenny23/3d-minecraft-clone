@@ -39,14 +39,12 @@ namespace stn {
 		&& stn::RecursiveConstructible<T, Args&&...>)
 		explicit box(Args&&... args) : ptr(new T(std::forward<Args>(args)...)) {
 		}
-		//this should rarely be used and intentionally does not use nullptr.
-		explicit box(construct_null_tag tag) : ptr(nullptr) {
-		}
+		
 		template<ConstructDerivedTagType Tag, typename... Args>
 			requires std::derived_from<typename Tag::type, T>&&
 		stn::RecursiveConstructible<typename Tag::type, Args...>
 			&& stn::CompleteVirtual<T>
-			explicit box(Tag, Args&&... args)
+			explicit box(Tag&&, Args&&... args)
 			: ptr(new typename Tag::type(std::forward<Args>(args)...)) {
 		}
 

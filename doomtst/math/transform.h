@@ -26,18 +26,18 @@ namespace math {
 	struct Transform {
 		Transform() :yaw(90), pitch(0), scale(v3::unit_scale) {
 		}
-		Transform(v3::Point3 pos, float newyaw, float newpitch, v3::Scale3 newscale) {
+		Transform(v3::Point3 pos, double newyaw, double newpitch, v3::Scale3 newscale) {
 			position = pos;
 			yaw = newyaw;
 			pitch = newpitch;
 			scale = newscale;
 		}
 		v3::Point3 position;
-		float yaw;
-		float pitch;
+		double yaw;
+		double pitch;
 		v3::Scale3 scale;
 
-		void rotate(float ptch, float yw) {
+		void rotate(double ptch, double yw) {
 			pitch += ptch;
 			yaw += yw;
 		}

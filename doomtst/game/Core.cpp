@@ -62,9 +62,7 @@ namespace Core {
 
     void App::CreateGrid()
     {
-		Grid=&Ecs.insert_resource<grid::Grid>(2);
-        
-        ctx->Grid = Grid;
+		ctx->Grid=&Ecs.insert_resource<grid::Grid>(2);
     }
 
     void App::InitInput() {
@@ -85,8 +83,7 @@ namespace Core {
 
     void App::InitRenderer()
     {  
-		ren = &Ecs.get_resource<renderer::Renderer>().unwrap();
-        ctx->Ren = ren;
+		ctx->Ren = &Ecs.get_resource<renderer::Renderer>().unwrap();
     }
    
 }

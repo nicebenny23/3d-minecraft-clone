@@ -10,22 +10,7 @@ namespace blocks {
 		minecrafttreestone = 1,
 		minecraftmoss = 2,
 		minecraftstone = 3,
-
-		minecraftglass = 4,
-		minecraftwater = 5,
-		minecraftcrystal = 6,
-		minecrafttorch = 7,
-		minecraftsand = 8,
-		minecraftcraftingtable = 9,
-		minecraftcrystaltorch = 10,
-		minecraftrope = 11,
-		minecraftlava = 12,
-		minecraftobsidian = 13,
-		minecraftchest = 14,
-		minecraftfurnace = 15,
-		minecraftironore = 16,
-		minecraftaltar = 17,
-		minecraftplank = 18,
+		minecrafttorch = 4,
 	};
 	enum block_textures {
 		treestonetex = 0,
@@ -68,7 +53,7 @@ namespace blocks {
 
 
 		block_textures tex;
-		Dir::Dir3d facenum;
+		math::Direction3d face_direction;
 		bool uncomputed() const {
 			return cover == cover_state::Uncomputed;
 		}
@@ -78,35 +63,28 @@ namespace blocks {
 		bool covered() const {
 			return cover == cover_state::Covered;
 		}
-		face():cover(cover_state::Uncomputed),light(0){
-			
-			facenum = Dir::None3d;
-		}
+		
 		blockmesh* mesh;
-		void create(byte texval, Dir::Dir3d num, blockmesh* owner) {
-			facenum = Dir::Dir3d(num);
-			mesh = owner;
-			tex = block_textures(texval);
-		}
+		face(block_textures texval, math::Direction3d num, blockmesh* owner)
+		:face_direction(math::Direction3d(num)),mesh(owner),tex(texval),cover(cover_state::Uncomputed),light(0){}
 		inline Point3 center() const;
 		size_t get_light() const{
 			return light;
 		}
 
 		void set_cover(cover_state new_state);
-		void set_light(size_t value);
+		void set_light(std::uint8_t  value);
 	private:
 		cover_state cover;
 		std::uint8_t light;
 	};
 
 	struct blockmesh {
-		Dir::Dir2d direction;
-		Dir::Dir3d attachdir;
+		math::Direction2d direction;
+		math::Direction3d attached_direction;
 		v3::Point3 center() const {
 			return box.center;
 		}
-
 		Scale3 scale() const {
 			return box.scale;
 		}
@@ -120,89 +98,54 @@ namespace blocks {
 		bool invisible() const {
 			return box.scale.x==0;
 		}
-		blockmesh(dirty_flag& d_flag,v3::Coord position, Scale3 blkscale) :
-			flag(d_flag), box(position + unitv / 2, blkscale), mesh_location(position) {
-			direction = Dir::up2d;
-			attachdir = Dir::front3d;
-			box.scale = blkscale;
+		blockmesh(const stn::List<block_textures,6>& textures,dirty_flag& d_flag,v3::Coord position, Scale3 blkscale,math::Direction3d attachment_direction,math::Direction2d facing_direction) :
+			flag(d_flag), box(position + unitv / 2, blkscale), mesh_location(position),transparent(false),faces([&](size_t index) { 
+				return face(textures[index],math::Direction3d(math::DirectionIndex3d(index)), this);
+			}), attached_direction(attachment_direction),direction(facing_direction)
+		{
+
+			box.center -= attached_direction.vec()*box.scale.shrunk(.5f);
 		}
-		
 		geo::Box box;
-		block_id render_id;
 		Coord mesh_location;
-		face faces[6];
+		stn::List<face,6> faces;
 		face& operator[](size_t index) {
-			if (6 <= index) {
-				stn::throw_logic_error("invalid face index {}", index);
-			}
 			return faces[index];
 		}
-
 		const face& operator[](size_t index) const {
-			if (6 <= index) {
-				stn::throw_logic_error("invalid face index {}", index);
-			}
 			return faces[index];
 		}
 
-
-		void attachindirection() {
-			Point3 maxpos = center() + (attachdir.to_vec() * box.scale);
-			Point3 blkpos = attachdir.to_vec() * 1 / 2 + center();
-			box.center += blkpos - maxpos;
+		face& operator[](math::AxisIndex3d index) {
+			return faces.unchecked_at(static_cast<size_t>(index));
+		}
+		const face& operator[](math::AxisIndex3d index) const{
+			return faces.unchecked_at(static_cast<size_t>(index));
+		}
+		using iterator = decltype(faces)::iterator;
+		iterator begin() {
+			return faces.begin();
+		}
+		iterator end() {
+			return faces.end();
 		}
 
 
-		void set_face_textures(block_textures leftface, block_textures rightface, block_textures upface, block_textures downface, block_textures frontface, block_textures backface) {
-
-			faces[2].create(upface, Dir::Ind3d::Up, this);
-			faces[3].create(downface, Dir::Ind3d::Down, this);
-
-			switch (Dir::Ind2d(direction.ind())) {
-
-			case Dir::Ind2d::Left://west
-			faces[0].create(frontface, Dir::Ind3d::Right, this);
-			faces[1].create(backface, Dir::Ind3d::Left, this);
-			faces[4].create(rightface, Dir::Ind3d::Front, this);
-			faces[5].create(leftface, Dir::Ind3d::Back, this);
-			break;
-			case  Dir::Ind2d::Right://east
-			faces[0].create(backface, Dir::Ind3d::Right, this);
-			faces[1].create(frontface, Dir::Ind3d::Left, this);
-			faces[4].create(leftface, Dir::Ind3d::Front, this);
-			faces[5].create(rightface, Dir::Ind3d::Back, this);
-			break;
-			case Dir::Ind2d::Up://block faces fowards
-			faces[0].create(leftface, Dir::Ind3d::Right, this);
-			faces[1].create(rightface, Dir::Ind3d::Left, this);
-			faces[4].create(frontface, Dir::Ind3d::Front, this);
-			faces[5].create(backface, Dir::Ind3d::Back, this);
-			break;
-			case Dir::Ind2d::Down://block faces backwords
-			faces[0].create(rightface, Dir::Ind3d::Right, this);
-			faces[1].create(leftface, Dir::Ind3d::Left, this);
-			faces[4].create(backface, Dir::Ind3d::Front, this);
-			faces[5].create(frontface, Dir::Ind3d::Back, this);
-			break;
-
-			}
-
-		};
-
+		
+	
 		bool transparent;
-	private:
 		friend struct face;
 		dirty_flag& flag;
 
 	};
 	inline v3::Point3 face::center() const {
-		return facenum.to_vec() * mesh->box.scale + mesh->box.center;
+		return face_direction.vec() * mesh->box.scale + mesh->box.center;
 	}
 	inline void face::set_cover(cover_state new_state) {
 		mesh->flag.mark_dirty();
 		cover=new_state;
 	}
-	inline void face::set_light(size_t value) {
+	inline void face::set_light(std::uint8_t value) {
 		mesh->flag.mark_dirty();
 		light = value;
 	}

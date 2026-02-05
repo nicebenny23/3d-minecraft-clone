@@ -1,8 +1,6 @@
 #pragma once
 #include "../renderer/Window.h"
-#include "../world/grid.h"
 #include "GameContext.h"
-#include "../renderer/renderer.h"
 #include "../world/world.h"
 //start of the application
 namespace Core {
@@ -43,9 +41,7 @@ namespace Core {
        CtxName::Context* ctx;
    
         window::Window Window;
-        renderer::Renderer* ren;
         World::world world;
-        grid::Grid* Grid;
 		Plugins plugin_list;
 		template<PluginType T>
 		void insert_plugin() {
@@ -65,7 +61,7 @@ namespace Core {
 			Ecs.emplace_system<T>(std::forward<Args>(args)...);
 		}
 
-		App():Ecs(size_t(1)<<23) {
+		App():Ecs(size_t(1)<<21) {
 			plugin_list.inject_engine(*this);
 		}
         ecs::Ecs Ecs;

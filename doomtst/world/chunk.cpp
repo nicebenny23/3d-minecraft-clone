@@ -12,25 +12,10 @@
 #include "../game/GameContext.h"
 
 
-//must be a valid index
-size_t Chunk::indexfrompos(Coord pos) {
 
-	int x = symmetric_mod(pos.x, chunkaxis);
-	int y = symmetric_mod(pos.y, chunkaxis);
-	int z = symmetric_mod(pos.z, chunkaxis);
-	return	chunkaxis * chunkaxis * x + chunkaxis * y + z;
-}
+std::string  Chunk::getcorefilename(ChunkLocation pos) {
 
-
-
-
-
-
-
-
-std::string  Chunk::getcorefilename(Coord pos) {
-
-	std::string m = std::format("Chunk{}", pos);
+	std::string m = std::format("Chunk{}", pos.position);
 	std::filesystem::path path = CtxName::ctx.wrld->get_path();
 	path = path / "Chunks" / m;  // assign the combined path back
 	return 	path.string();
@@ -42,12 +27,12 @@ void appendspecialbytelist(array<unsigned short>& bytelist, int index, block* bl
 void Chunk::chunk::write() {
 
 
-	file_handle file = file_handle(getcorefilename(loc), FileMode::ReadWriteBinary);
+	file_handle file = file_handle(getcorefilename(location.position), FileMode::ReadWriteBinary);
 	array<unsigned short> bytelist = array<unsigned short >();
 	for (int i = 0; i < chunksize; i++) {
-		size_t v1 = block_list[i].get_component<block>().block_id;
-		size_t dir = block_list[i].get_component<block>().mesh.direction.ind();
-		size_t attach = (block_list[i].get_component<block>().mesh.attachdir.ind());
+		size_t v1 = static_cast<size_t>(block_list[i].get_component<block>().id);
+		size_t dir = block_list[i].get_component<block>().mesh.direction.index();
+		size_t attach = (block_list[i].get_component<block>().mesh.attached_direction.index());
 
 		size_t v2 = dir | attach << 3;
 		size_t fin = v1 | (v2 << 8);
@@ -75,6 +60,5 @@ void Chunk::chunk::destroy() {
 	for (int i = 0; i < chunksize; i++) {
 		std::move(block_list[i]).destroy();
 	}
-	
 	block_list.clear();
 }

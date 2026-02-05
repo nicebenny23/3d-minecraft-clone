@@ -9,11 +9,7 @@ namespace Chunk {
 	struct chunkmesh :ecs::component {
 		chunkmesh() :recreate_mesh(true) {
 		};
-
-
-		renderer::RenderableHandle SolidGeo;
-		renderer::RenderableHandle TransparentGeo;
-		void genbufs() {
+		void start() {
 			renderer::Renderer& ren = world().get_resource<renderer::Renderer>().expect("renderer must exist");
 			SolidGeo = ren.gen_renderable();
 			SolidGeo.set_material("SolidBlock");
@@ -21,8 +17,11 @@ namespace Chunk {
 			TransparentGeo = ren.gen_renderable();
 			TransparentGeo.set_material("TransparentBlock");
 			TransparentGeo.set_layout(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
-
 		}
+
+		renderer::RenderableHandle SolidGeo;
+		renderer::RenderableHandle TransparentGeo;
+
 		stn::dirty_flag recreate_mesh;
 		v3::Coord loc;
 
@@ -36,7 +35,7 @@ namespace Chunk {
 				return  v3::dist2(b.center(), camera::campos()) < v3::dist2(a.center(), camera::campos());
 				});
 		}
-		void destroy() {
+		void destroy_hook() {
 			SolidGeo.destroy();
 			TransparentGeo.destroy();
 			faces.clear();

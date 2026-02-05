@@ -74,7 +74,8 @@ namespace stn {
 
 			}
 		}
-		Option& operator=(const T& other) requires(std::copy_constructible<T>&& std::is_copy_assignable_v<T>) {
+		template<typename U>
+		Option& operator=(const U& other) requires(std::constructible_from<T, U>) {
 			if (has_value) {
 				value.clear<T>();
 			}

@@ -13,22 +13,21 @@
 #include "../game/ecs/query.h"
 
 // Picks the face of the block that the point lies closest to
-inline Dir::Dir3d closest_face(v3::Point3 pos, block* blk) {
+inline math::Direction3d closest_face(v3::Point3 pos, block* blk) {
 	Vec3 offset_pos = pos - blk->center();
-	Dir::Dir3d best = Dir::up3d;
-	for (auto d : Dir::Directions3d) {
-		if (dot(d.to_vec(), offset_pos) > dot(best.to_vec(), offset_pos)) best = d;
+	math::Direction3d best = math::up_3d;
+	for (auto d : math::Directions3d) {
+		if (dot(d.vec(), offset_pos) > dot(best.vec(), offset_pos)) best = d;
 	}
 	return best;
 }
 
 // Returns two orthogonal axes on the block face plane
-inline stn::pair<v3::Vec3, v3::Vec3> get_flat_frame(Dir::Dir3d dir) {
-	switch (dir.axis_index()) {
-	case 0: return { v3::Vec3(0,0,1), v3::Vec3(0,1,0) };
-	case 1: return { v3::Vec3(1,0,0), v3::Vec3(0,0,1) };
-	case 2: return { v3::Vec3(1,0,0), v3::Vec3(0,1,0)};
-	default: throw std::logic_error("Invalid direction");
+inline stn::pair<v3::Vec3, v3::Vec3> get_flat_frame(math::Direction3d dir) {
+	switch (dir.axis()) {
+	case math::AxisIndex3d::Right: return { v3::Vec3(0,0,1), v3::Vec3(0,1,0) };
+	case math::AxisIndex3d::Up: return { v3::Vec3(1,0,0), v3::Vec3(0,0,1) };
+	case math::AxisIndex3d::Front: return { v3::Vec3(1,0,0), v3::Vec3(0,1,0)};
 	}
 }
 
@@ -61,10 +60,10 @@ struct playerbreak : ecs::component {
 		break_decal.set_handle(name.c_str(), handle.c_str());
 		break_decal.handle.enable();
 		auto hit = closest.unwrap().Hit.intersectionpoint;
-		Dir::Dir3d fd = closest_face(hit, currmining());
-		auto& f = currmining()->mesh[fd.ind()];
+		math::Direction3d fd = closest_face(hit, currmining());
+		auto& f = currmining()->mesh[fd.index()];
 		break_decal.center = f.center();
-		break_decal.normal = fd.to_vec();
+		break_decal.normal = fd.vec();
 		auto [b, t] = get_flat_frame(fd);
 		break_decal.bi_tangent = b * 0.5f;
 		break_decal.tangent = t * 0.5f;
@@ -132,7 +131,7 @@ struct playerbreak : ecs::component {
 		}
 		engage_block(hit.owner().get_component_ptr<block>());
 		if (engaged()) {
-			if (currmining.changed() || pickaxe.changed()) {
+			if (currmining.changed() ) {
 				return false;
 			}
 		}
@@ -171,7 +170,7 @@ struct playerbreak : ecs::component {
 			if (!currmining()->minedfastwithpick || currmining()->mininglevel <= curr_mining_power()) {
 				make_drop(broken->owner());
 			}
-			gridutil::set_block(world(),broken->pos, minecraftair);
+			grid::set_block(world(),broken->pos, minecraftair);
 			disengage_block();
 
 		}

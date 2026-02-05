@@ -25,13 +25,10 @@ namespace console {
 
         static Console& Instance();
 
-        // Log a simple message
         void Log(LogLevel level, std::string&& message);
 
-        // Clear all entries
         void Clear();
 
-        // Render the console UI (call each frame)
         void Render();
 
         // Disable copy
@@ -45,12 +42,13 @@ namespace console {
         std::array<LogEntry, MaxEntries> buffer_;
         std::atomic<int> head_{ 0 };  
         std::atomic<int> count_{ 0 };     // Number of valid entries
-        ImGuiTextFilter filter_;        // For filtering displayed lines
+        ImGuiTextFilter filter_;
+		uint32_t input_id = 0;
+		// For filtering displayed lines
     };
 
-} // namespace console
+} 
 
-// Macros for logging with file/line info and formatting
 template<typename... Args>
 inline void debug(Args&&... args) {
     std::stringstream ss;

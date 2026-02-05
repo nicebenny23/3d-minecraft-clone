@@ -36,7 +36,7 @@ namespace ecs {
 		object_handle(obj o) : owned(o) {
 		}
 
-		size_t id() const {
+		entity_id id() const {
 			return owned.id();
 		}
 		size_t generation() const {

@@ -42,8 +42,9 @@ namespace window {
 		const GLFWvidmode* mode = glfwGetVideoMode(MonPtr);
 		width = mode->width;
 		height = mode->height;
-
+	
 		WinPtr = glfwCreateWindow(width, height, state.name, nullptr, nullptr);
+		
 		if (WinPtr == nullptr) {
 			glfwTerminate();
 			Assert("Window creation failed: WinPtr is null");

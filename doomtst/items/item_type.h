@@ -62,6 +62,10 @@ namespace items {
 			}
 			return iter->second;
 		}
+		template<ItemType T>
+		item_id from_type() const {
+			return type_id_map.at<T>().expect("item should be initialized");
+		}
 		item_traits from_id(item_id id) const {
 			return trait_list[id.id];
 		}
@@ -78,11 +82,11 @@ namespace items {
 			}
 			ids.emplace(traits.item_name, ids.size());
 			trait_list.push(traits);
-			
-
+			type_id_map.set<T>(item_id(trait_list.last_index()));
 		}
-
+		
 	private:
+		stn::type_map<item_id> type_id_map;
 		stn::array<item_traits> trait_list;
 		std::unordered_map<std::string, item_id, stn::StringHasher,std::equal_to<>> ids;
 	};

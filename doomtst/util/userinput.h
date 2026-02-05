@@ -42,7 +42,7 @@ namespace userinput {
 
 		}
 	};
-	inline int convertchartoglfwkey(size_t key) {
+	inline size_t convertchartoglfwkey(size_t key) {
 		if ('a' <= key && key <= 'z') {
 			return key - 32;
 		}
@@ -67,7 +67,6 @@ namespace userinput {
 			mouse_position = v2::Vec2(0, 0);
 			mouse_position_dt = v2::Vec2(0, 0);
 			keys = stn::array<InputKey>(GLFW_KEY_LAST + extra_keys);
-			keys.reach(GLFW_KEY_LAST + extra_keys);
 		}
 
 		void update_key(int code, int action) {

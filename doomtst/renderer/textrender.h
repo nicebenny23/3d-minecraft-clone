@@ -12,7 +12,7 @@ namespace ui {
 	
 	inline void write_letter(renderer::MeshData& mesh_data, geo::Box2d location, int letter) {
 
-		const size_t baselocation = mesh_data.length();
+		const std::uint32_t baselocation = static_cast<size_t>(mesh_data.length());
 		for (int j = 0; j < 4; j++) {
 			v2::Vec2 pointtoappend = location.scale * math::symetrical_square_mesh[j] + location.center;
 			mesh_data.add_point(pointtoappend, math::square_mesh[j], letter);

@@ -15,7 +15,8 @@ struct playerclimb: ecs::component
 		if (collidedwith->has_component<blocks::block>())
 		{
 			blocks::block* potrope =collidedwith->get_component_ptr<blocks::block>();
-			if (potrope->block_id==minecraftrope)
+	//used too be potrope->block_id==minecraftrope
+			if (false)
 			{
 				onrope = true;
 				owner().get_component<rigidbody>().gravityscale= 0;

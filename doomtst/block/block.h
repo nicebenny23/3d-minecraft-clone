@@ -12,71 +12,66 @@
 #include "../math/vector3.h"
 #include "block_mesh.h"
 #include "../world/chunk_mesh.h"
+#include "block_registry.h"
 #pragma once 
 constexpr double blocksize = 1.f;
 
-using namespace v3; 
+using namespace v3;
 constexpr float unitaxis = 1.0f / 2.00005f;
-constexpr v3::Scale3 unitscale = unit_scale*unitaxis;
+constexpr v3::Scale3 unitscale = unit_scale * unitaxis;
 namespace blocks {
 	const double block_axis_scale = unitaxis * blocksize;
 	const v3::Scale3 blockscale = v3::Scale3(block_axis_scale);
 
-	
-		
 
-	struct blockatt
-	{
+
+
+	struct blockatt {
 		bool solid;
 		blockatt() {
 			solid = true;
 		}
 	};
-	struct block_emmision:ecs::component {
+	struct block_emmision :ecs::component {
 		block_emmision(size_t emmited_light) :emmision(emmited_light) {
 
 		}
 		size_t emmision;
 
 	};
-	struct block: ecs::component
-	{
-
+	struct block : ecs::component {
 		blockmesh mesh;
-
 		v3::Coord pos;
+		//based on if it is computed
 		stn::Option<size_t> light_passing_through;
-		char block_id;
-
-		
-	
+		block_id id;
 		face& operator[](size_t index) {
 			return mesh[index];
 		}
 		blockatt attributes;
 		char mininglevel;
 		bool minedfastwithpick;
-		Point3 center() const{
+		Point3 center() const {
 			return mesh.box.center;
 		}
 
-		Scale3 scale() const{
+		Scale3 scale() const {
 			return mesh.box.scale;
 		}
 		geo::Box bounds() const {
 			return mesh.box;
 		}
 
-		block(Chunk::chunkmesh& chunk_mesh,v3::Coord location, blocks::block_id blockid, Dir::Dir3d blkattachface, Dir::Dir2d blkdirection):mesh(chunk_mesh.recreate_mesh,location,  blockscale){
+		block(const BlockMeshTraits& traits, Chunk::chunkmesh& chunk_mesh, v3::Coord location, blocks::block_id blockid, math::Direction3d attachment_face, math::Direction2d block_direction,bool is_solid,SolidBlockTraits sb_traits) 
+			:mesh(traits.faces, chunk_mesh.recreate_mesh, location, traits.size, attachment_face, block_direction) {
 			mininglevel = 0;
-			block_id = blockid;
+			id = blockid;
+			mininglevel = static_cast<char>(sb_traits.time_to_mine);
 			pos = location;
-			attributes.solid = true;
-			mesh.direction = blkdirection;
-			mesh.attachdir = blkattachface;
+			attributes.solid = is_solid;
 		};
-		  void createdefaultaabb(bool effector=false);
-		
+		void createdefaultaabb(bool effector = false);
+
 	};
 
 }
@@ -87,6 +82,6 @@ namespace ecs {
 //if you have a\
 
 
-	
+
 
  // !block_H

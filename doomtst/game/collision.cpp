@@ -100,7 +100,7 @@ stn::Option<Vec3> colideentandblock(Collider& entity, block& tocollide, bool is_
 		return stn::None;
 	}
 	if (is_trigger) {
-		propagatecollisionmessage(entity.owner(), tocollide.owner());
+propagatecollisionmessage(entity.owner(), tocollide.owner());
 	}
 	return force.retain(!blockcol.effector&&!entity.effector);
 }

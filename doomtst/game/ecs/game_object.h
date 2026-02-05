@@ -12,7 +12,7 @@ namespace ecs {
 	};
 	struct obj {
 
-		size_t id() const {
+		entity_id id() const {
 			return ent.id();
 		}
 		size_t generation() const {
@@ -21,7 +21,7 @@ namespace ecs {
 		entity inner() const {
 			return ent;
 		}
-		obj() :ent(0,0), ecs(nullptr) {};
+		obj() :ent(entity_id(0),0), ecs(nullptr) {};
 		obj(entity inner, Ecs& ecs) :ecs(&ecs), ent(inner) {}
 		bool operator ==(const obj& other) const{
 			return ent == other.ent&&ecs==other.ecs;
@@ -84,13 +84,13 @@ namespace ecs {
 		}
 		bool exists() const{
 			if (ecs) {
-				return ecs->entities.is_valid(ent);
+				return ecs->contains(ent);
 			}
 			return false;
 		}
 		bool dead() const {
 			if (ecs) {
-				return !ecs->entities.is_valid(ent);
+				return !ecs->contains(ent);
 			}
 			return true;
 		}

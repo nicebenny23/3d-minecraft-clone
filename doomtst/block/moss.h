@@ -1,17 +1,16 @@
 #include "block.h"
+#include "block_registry.h"
 #include "../items/loottable.h"
 #pragma once 
-inline void mossinit(blocks::block& blk) {
-	blk.mesh.set_face_textures(mosstex, mosstex, mosstex, mosstex, mosstex, mosstex);
+namespace blocks {
+	struct MossBlock :BlockType  {
+		void apply(ecs::obj& block) override {
+			block.add_component<items::loot_table>().add("moss", 1);
+		}
+	};
+	template<>
+	inline constexpr BlockTraits BlockInfo<MossBlock> = BlockTraits(
+		BlockMeshTraits(v3::unit_scale,false,mosstex,mosstex,mosstex,mosstex,mosstex,mosstex)
+	);
 
-	blk.attributes.solid = true;
-	blk.attributes.transparent = false;
-	blk.emited_light = 0;
-	blk.minedfastwithpick = 1;
-	blk.mininglevel = 1;
-	blk.mesh.box.scale = blocks::blockscale;
-	blk.createdefaultaabb();
-	blk.owner().add_component<loot_table>().add("moss", 1, true);
-
-	blk.minedfastwithpick = false;
 }

@@ -12,7 +12,7 @@ namespace random {
 
 	bool randombool();
 	void randomcoord(unsigned int& seed);
-	extern stn::array<v3::Vec3> seededdirections;
+	extern stn::array<v3::Vec3> seeded_directions;
 
 int Hash(int seed, int xPrimed, int yPrimed, int zPrimed);
 
@@ -21,7 +21,7 @@ int Hash(int seed, int xPrimed, int yPrimed, int zPrimed);
 		int hash = Hash(seed, x, y, z);
 		hash ^= hash >> 15;
 		hash &= MAXSHORT - 1;
-		return seededdirections.unchecked_at(hash);
+		return seeded_directions.unchecked_at(hash);
 
 	}
 	void initrandom();

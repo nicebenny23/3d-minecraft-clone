@@ -30,7 +30,7 @@ namespace ecs {
 		}
 		//returns the total number of active events
 		event_count active_events() const {
-			return event_count(queue.length());
+			return event_count(static_cast<std::uint32_t>(queue.length()));
 		}
 		//returns whether it is being read from
 		bool being_read_from() const {

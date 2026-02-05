@@ -8,10 +8,9 @@
 #include "span.h"
 #include "Option.h"
 #include "pipeline.h"
-#include <chrono>
+
 #include <algorithm>
 #include "index.h"
-#include "../debugger/console.h"
 namespace stn {
 	// Resizing function that doubles the size of the array when needed.
 	// If the length is 0, it initializes to a default size of 2.
@@ -127,7 +126,18 @@ namespace stn {
 			}
 			return None;
 		}
-
+		[[nodiscard]] T get_flat(size_t index) requires stn::OptionType<T>{
+			if (contains_index(index)) {
+				return ptr[index];
+			}
+			return stn::None;
+		} 
+		const [[nodiscard]] T get_flat(size_t index) const requires stn::OptionType<T> {
+			if (index<len) {
+				return ptr[index];
+			}
+			return stn::None;
+		}
 		[[nodiscard]] T& operator[](typed_index<T> index) {
 			return (*this)[index.index];
 		}
@@ -153,28 +163,28 @@ namespace stn {
 		}
 
 		[[nodiscard]] T& first() {
-			if (empty()) {
+			if (len == 0) {
 				throw std::logic_error("Cannot access the first element of an empty array");
 			}
 			return ptr[0];
 		}
 
 		[[nodiscard]] const T& first() const {
-			if (empty()) {
+			if (len == 0) {
 				throw std::logic_error("Cannot access the first element of an empty array");
 			}
 			return ptr[0];
 		}
 
 		[[nodiscard]] T& last() {
-			if (empty()) {
+			if (len==0) {
 				throw std::logic_error("Cannot access the last element of an empty array");
 			}
 			return ptr[len - 1];
 		}
 
 		[[nodiscard]] const T& last() const {
-			if (empty()) {
+			if (len == 0) {
 				throw std::logic_error("Cannot access the last element of an empty array");
 			}
 			return ptr[len - 1];
@@ -284,6 +294,12 @@ namespace stn {
 			geometric_reserve(len + 1);
 			construct_at(len++, std::forward<U>(value));
 		}
+		template<typename U>
+		size_t push_index(U&& value) requires std::constructible_from<T, U&&> {
+			geometric_reserve(len + 1);
+			construct_at(len, std::forward<U>(value));
+			return len++;
+		}
 
 		template<typename U>
 		void push(std::initializer_list<U> ilist) requires std::convertible_to<U, T> {
@@ -369,13 +385,12 @@ namespace stn {
 			if (!contains_index(index)) {
 				throw_range_exception("swap_drop failed: index {} out of bounds (len {})", index, len);
 			}
-			ptr[index] = std::move(ptr[--len]); // move last element to hole
-			// clear old last element
+			ptr[index] = std::move(ptr[--len]); 
 			destruct_at(len);
 		}
 		void swap_drop_unchecked(size_t index) {
-			ptr[index] = std::move(ptr[--len]); // move last element to 'hole'
-			destruct_at(len); // clear old last element
+			ptr[index] = std::move(ptr[--len]);
+			destruct_at(len); 	
 		}
 		// Delete an element at the given index, shifting others.
 		void remove_at(size_t index) {
@@ -499,7 +514,8 @@ namespace stn {
 			}
 		}
 
-		template<std::ranges::forward_range Range>
+		template<std::ranges::forward_range Range> 
+			requires std::constructible_from<T, std::ranges::range_value_t<InputIt>>
 		explicit array(Range&& Rng) : array(Rng.begin(), Rng.end()) {
 		}
 
@@ -685,7 +701,7 @@ namespace stn {
 				return;
 			}
 			// arbitrary safety margin to prevent overflow errors 
-			constexpr size_t max_size = 2 << 30;
+			constexpr size_t max_size = size_t(1) << 30;
 			if (new_size > max_size) {
 				throw_range_exception("Requested reserve size {} exceeds maximum allowed {}", new_size, max_size);
 			}
@@ -770,7 +786,7 @@ namespace stn {
 				return len * sizeof(T) >= mem_oper_mul;
 			}
 			else {
-				return false; // compile-time eliminated branch
+				return false; 
 			}
 		}
 

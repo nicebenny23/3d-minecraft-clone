@@ -1,4 +1,4 @@
-
+#include <assert.h>
 #include "../../util/dynamicarray.h"
 #include "../../util/bitset.h"
 #pragma once

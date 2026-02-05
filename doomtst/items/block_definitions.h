@@ -11,12 +11,12 @@ namespace items {
 	};
 	struct altar_item :item_type {
 		item_traits traits() const {
-			return item_traits("altar", renderer::TexturePath("images\\crystalaltarside.png", "CrystalAltarSideTexture"), minecraftaltar);
+			return item_traits("altar", renderer::TexturePath("images\\crystalaltarside.png", "CrystalAltarSideTexture"), minecraftstone);
 		}
 	};
 	struct crafting_table_item :item_type {
 		item_traits traits() const {
-			return item_traits("crafting_table", renderer::TexturePath("images\\craftingtabletop.png", "CraftingTableTopTexture"), minecraftcraftingtable);
+			return item_traits("crafting_table", renderer::TexturePath("images\\craftingtabletop.png", "CraftingTableTopTexture"), minecraftstone);
 		}
 	}; struct glass_bottle_item : item_type {
 		item_traits traits() const {
@@ -27,13 +27,21 @@ namespace items {
 			);
 		}
 	};
-
+	struct torch_item : item_type {
+		item_traits traits() const {
+			return item_traits(
+				"torch",
+				renderer::TexturePath("images\\torch.png", "TorchTexture"),
+				blocks::block_id::minecrafttorch
+			);
+		}
+	};
 	struct iron_ore_item : item_type {
 		item_traits traits() const {
 			return item_traits(
 				"iron_ore",
 				renderer::TexturePath("images\\ironore.png", "IronOreTexture"),
-				blocks::block_id::minecraftironore
+				blocks::block_id::minecraftstone
 			);
 		}
 	};
@@ -287,6 +295,7 @@ namespace items {
 			item_register.register_item<items::rock_item>();
 			item_register.register_item<items::sword_item>();
 
+			item_register.register_item<torch_item>();
 			app.insert_plugin<items::CursorContainerPlugin>();
 			item_register.register_item<items::final_sword_item>();
 		}

@@ -15,11 +15,11 @@ float appdist(const navnode& a, const navnode& b) {
 array<navnode> getneighborsdefault( navnode& node) {
     
     array<navnode> neighbors= array<navnode>();
-    for (auto dir: Dir::Directions3d) {
-        if (dir==Dir::down3d||dir==Dir::up3d) {
+    for (auto dir: math::Directions3d) {
+        if (dir==math::down_3d||dir==math::up_3d) {
             continue;
         }
-        Coord point= Coord(dir.to_coord() + node.pos);
+        Coord point= Coord(dir.coord() + node.pos);
 
         v3::Point3 center = point + unitv / 2;
         v3::Scale3 scale = blockscale * v3::Scale3(1.1, .9f, 1.1);

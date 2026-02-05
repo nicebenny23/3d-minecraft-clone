@@ -8,7 +8,7 @@ namespace items {
 	struct container_index {
 		v2::Coord2 coord;
 		bool operator==(const container_index& other) const = default;
-		container_index(size_t x, size_t y) :coord(x, y) {
+		container_index(size_t x, size_t y) :coord(static_cast<int>(x), static_cast<int>(y)) {
 
 		}
 

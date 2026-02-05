@@ -17,13 +17,8 @@
 #include "../util/Option.h"
 #include "../util/queue.h"
 #include "../math/vector3.h"
+#include "../util/reference.h"
 namespace grid {
-	struct light_at {
-		light_at(Coord pos, size_t light_value) :position(pos), light(light_value) {
-		}
-		Coord position;
-		size_t light;
-	};
 
 	struct partial_reshade_command {
 		grid::Grid* grid;
@@ -50,13 +45,13 @@ namespace grid {
 			while (!darkening_queue.empty()) {
 				shade_at shade = darkening_queue.pop();
 				block& blk = *grid.getBlock(shade.position);
-				for (auto dir : Dir::Directions3d) {
-					Coord look_position = shade.position + dir.to_coord();
+				for (auto dir : math::Directions3d) {
+					Coord look_position = shade.position + dir.coord();
 					block* blocklight = grid.getBlock(look_position);
 					if (blocklight == nullptr) {
 						continue;
 					}
-					if (blocklight->mesh.invisible()) {
+					if (blocklight->mesh.is_transparent()) {
 						if (blocklight->light_passing_through) {
 							blocklight->light_passing_through = stn::None;
 							if (shade.shade != 0) {
@@ -65,7 +60,7 @@ namespace grid {
 						}
 					}
 					else {
-						(*blocklight)[dir.inv_ind()].set_light(0);
+						(*blocklight)[dir.inverse_index()].set_light(0);
 					}
 
 				}
@@ -77,6 +72,7 @@ namespace grid {
 
 
 	};
+
 	struct GridLighter :ecs::System {
 		ecs::EventReader<Chunk::chunk_loaded> chunk_loads;
 		GridLighter(ecs::Ecs& world) :chunk_loads(world.make_reader<Chunk::chunk_loaded>()) {
@@ -84,37 +80,38 @@ namespace grid {
 
 		void run(ecs::Ecs& world) {
 			grid::Grid& grid = world.get_resource<grid::Grid>().unwrap();
-			stn::queue<light_at> lightening_queue;
+			stn::queue<stn::non_null<block>> lightening_queue;
 			ecs::View<block_emmision, block> light_view(world);
 			for (const auto& [light, block_component] : light_view) {
-				lightening_queue.emplace(block_component.pos, light.emmision);
-			}
-			while (!lightening_queue.empty()) {
-				light_at light = lightening_queue.pop();
-				block* blk_m = grid.getBlock(light.position);
-				if (!blk_m) {
-					//because blocks that are currenntlly being deleted 
-					continue;
+				if (block_component.light_passing_through.is_none()) {
+					block_component.light_passing_through = light.emmision;
 				}
-				block& blk = *blk_m;
+				//we set each  face to its light level
+				for (face& fc : block_component.mesh) {
+					fc.set_light(light.emmision);
+				}
+				lightening_queue.emplace(block_component);
+			}
+
+			while (!lightening_queue.empty()) {
+				block& blk = *lightening_queue.pop();
 				size_t light_value = blk.light_passing_through.unwrap();
-				for (auto dir : Dir::Directions3d) {
+				for (auto dir : math::Directions3d) {
 
-					Coord look_position = light.position + dir.to_coord();
+					Coord look_position = blk.pos + dir.coord();
 					block* blocklight = grid.getBlock(look_position);
-
 					if (blocklight == nullptr) {
 						continue;
 					}
-					if (blocklight->mesh.invisible()) {
+					if (blocklight->mesh.is_transparent()) {
 						if (blocklight->light_passing_through.is_none_or([light_value](std::uint8_t light) {return light < light_value - 1; })) {
 							blocklight->light_passing_through = light_value - 1;
 							if (blocklight->light_passing_through != 0) {
-								lightening_queue.emplace(look_position, blocklight->light_passing_through.unwrap());
+								lightening_queue.emplace(*blocklight);
 							}
 						}
 					}
-					(*blocklight)[dir.inv_ind()].set_light(light_value);
+					(*blocklight)[dir.inverse_index()].set_light(light_value);
 				}
 			}
 		}

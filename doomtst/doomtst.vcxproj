@@ -176,6 +176,7 @@
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -272,14 +273,11 @@
     <ClCompile Include="game\aabb.cpp" />
     <ClCompile Include="block\block.cpp" />
     <ClCompile Include="util\algorthm.cpp" />
-    <ClCompile Include="util\fileloader.cpp" />
     <ClCompile Include="math\intersection.cpp" />
     <ClCompile Include="json\json_value.cpp" />
     <ClCompile Include="util\random.cpp" />
     <ClCompile Include="game\time.cpp" />
     <ClCompile Include="util\stbiload.cpp" />
-    <ClCompile Include="util\userinput.cpp" />
-    <ClCompile Include="world\chunkload.cpp" />
     <ClCompile Include="game\camera.cpp" />
     <ClCompile Include="world\chunk.cpp" />
     <ClCompile Include="game\collision.cpp" />
@@ -302,6 +300,7 @@
     <ClInclude Include="block\block_registry.h" />
     <ClInclude Include="block\craftingtable.h" />
     <ClInclude Include="block\plank.h" />
+    <ClInclude Include="block\register_default_blocks.h" />
     <ClInclude Include="block\treestone.h" />
     <ClInclude Include="block\moss.h" />
     <ClInclude Include="block\liquid.h" />
@@ -463,7 +462,6 @@
     <ClInclude Include="renderer\uibox.h" />
     <ClInclude Include="tests\ecs_tests.h" />
     <ClInclude Include="util\algorthm.h" />
-    <ClInclude Include="util\array_storage.h" />
     <ClInclude Include="util\bitset.h" />
     <ClInclude Include="util\bit_mask.h" />
     <ClInclude Include="util\cached.h" />
@@ -480,6 +478,7 @@
     <ClInclude Include="util\fileloader.h" />
     <ClInclude Include="util\filter_argument.h" />
     <ClInclude Include="math\geometry.h" />
+    <ClInclude Include="util\funtion.h" />
     <ClInclude Include="util\Id.h" />
     <ClInclude Include="util\index.h" />
     <ClInclude Include="math\intersection.h" />
@@ -501,6 +500,7 @@
     <ClInclude Include="util\queue.h" />
     <ClInclude Include="util\random.h" />
     <ClInclude Include="math\ray.h" />
+    <ClInclude Include="util\reference.h" />
     <ClInclude Include="util\robinHood.h" />
     <ClInclude Include="util\sharedptr.h" />
     <ClInclude Include="util\Span.h" />
@@ -547,7 +547,7 @@
     <ClInclude Include="world\voxeltraversal.h" />
     <ClInclude Include="renderer\Window.h" />
     <ClInclude Include="world\world.h" />
-    <ClInclude Include="world\worldintersection.h" />
+    <ClInclude Include="world\WorldCoverer.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

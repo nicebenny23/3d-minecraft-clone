@@ -180,7 +180,7 @@ namespace renderer{
 		stn::Option <Texture2D> BoundTexture2d;
 		stn::Option <TextureArray> BoundTextureArray;
 		stn::Option<Fbo> bound_frame;
-		stn::Option <Mesh&> bound_mesh;
+		stn::Option <Mesh> bound_mesh;
 
 
 	};

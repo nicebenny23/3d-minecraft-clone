@@ -32,7 +32,7 @@ namespace assets {
 		// required to allow copy constructablity
 		virtual stn::box<ILoadDescriptor> clone() const = 0;
 	};
-	//implmentation of a load descriptor for a specific type
+	//Forwards load descriptor messages for a specific type
 	template<LoadDescriptorType T>
 	struct ConcreteDescriptor : ILoadDescriptor {
 		T description;
@@ -43,7 +43,7 @@ namespace assets {
 		template<typename ...Args>
 		ConcreteDescriptor(Args&&... args) requires std::constructible_from<T, Args&&...>
 			: description(std::forward<Args>(args)...)
-			, id(stn::type_id::make_type_id<T>()) {
+			, id(stn::make_type_id<T>()) {
 		}
 		std::string_view name() const override {
 			return stn::name(description);

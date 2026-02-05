@@ -25,15 +25,19 @@ namespace ecs {
 		}
 		void clear() {
 			gen_count++;
-
+			is_alive = false;
 		}
+		void mark_alive() {
+			is_alive = true;
+		}
+		bool is_alive;
 
 	};
 	struct Entities {
 		Entities(size_t count) :entity_list(count) {
 
 			for (std::uint32_t i = 0; i < count; i++) {
-				free_ids.push(i);
+				free_ids.push(entity_id(i));
 			}
 		}
 
@@ -43,28 +47,42 @@ namespace ecs {
 		const entity_metadata& operator[](size_t index)	const{
 			return entity_list[index];
 		}
-		bool is_valid(entity entity) const{
-
-			return entity.generation() == entity_list[entity.id()].gen_count;
+		bool contains(entity entity) const{
+			return entity.generation() == entity_list[entity.id().id].gen_count;
+		}
+		bool contains(entity_id entity) const {
+			return entity_list.contains_index(entity.id)&&entity_list[entity.id].is_alive;
 		}
 		//for more expressive 
+		entity_metadata& at(entity_id entity) {
+			return entity_list[entity.id];
+		}
+		const entity_metadata& at(entity_id entity) const {
+			return entity_list[entity.id];
+		}
 		entity_metadata& at(entity entity) {
-			return entity_list[entity.id()];
+			return entity_list[entity.id().id];
+		}
+		const entity_metadata& at(entity entity) const {
+			return entity_list[entity.id().id];
 		}
 		void assert_valid(entity entity) const{
-			if (!is_valid(entity))
+			if (!contains(entity))
 			{
-				stn::throw_logic_error("refrence to entity with block_id {} is a member of outdated generation {} of {}", entity.id(), entity.generation(), entity_list[entity.id()].gen_count);
+				stn::throw_logic_error("refrence to entity with block_id {} is a member of outdated generation {} of {}", entity.id(), entity.generation(), entity_list[entity.id().id].gen_count);
 			}
 		}
-		const entity_metadata& at(entity entity) const{
-			return entity_list[entity.id()];
+		entity_metadata& operator[](entity_id entity) {
+			return at(entity);
+		}
+		const entity_metadata& operator[](entity_id entity) const {
+			return at(entity);
 		}
 		entity_metadata& operator[](entity entity) {
-			return at(entity);
+			return at(entity.id());
 		}
 		const entity_metadata& operator[](entity entity) const {
-			return at(entity);
+			return at(entity.id());
 		}
 		
 		size_t length() const{
@@ -74,16 +92,17 @@ namespace ecs {
 			return entity_list.empty();
 		}
 		entity allocate_entity() {
-			std::uint32_t id= free_ids.pop();
-			return entity(id, entity_list[id].gen_count);
+			entity_id id= free_ids.pop();
+			at(id).mark_alive();
+			return entity(id, entity_list[id.id].gen_count);
 		}
 		void remove_entity(entity entity) {
-			at(entity).clear();
+			at(entity.id()).clear();
 			free_ids.push(entity.id());
 		}
 	private:
 
-		stn::array<uint32_t> free_ids;
+		stn::array<entity_id> free_ids;
 		stn::array<entity_metadata> entity_list;
 	};
 }

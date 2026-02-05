@@ -1,6 +1,6 @@
 #include "managegrid.h"
 #include "../block/blockinit.h"
-void gridutil::GridManager::set_block(Coord loc, block_id blockid, grid::Grid& grid, ecs::Ecs& world) {
+void grid::GridManager::set_block(Coord loc, block_id blockid, grid::Grid& grid, ecs::Ecs& world) {
 	block* location = grid.getBlock(loc);
 	if (location != nullptr) {
 		grid.GetChunk(loc)->modified = true;

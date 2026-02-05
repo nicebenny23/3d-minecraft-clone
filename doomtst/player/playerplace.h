@@ -38,45 +38,34 @@ struct playerplace : ecs::component {
 	}
 	void placeblock() {
 		ray cameraray = ray(owner().get_component<ecs::transform_comp>().transform.position, owner().get_component<ecs::transform_comp>().transform.position + owner().get_component<ecs::transform_comp>().transform.normal_dir() * 7);
-		block* plamentblock = voxtra::findprevblock(cameraray, voxtra::countsolid);
-		if (plamentblock == nullptr) {
+		block* block_to_replace = voxtra::findprevblock(cameraray, voxtra::countsolid);
+		if (block_to_replace == nullptr) {
 			return;
 		}
-		//this must be kept because it can somtimers bug out do to presosion errors;
-
-		if (plamentblock->attributes.solid) {
+		if (block_to_replace->attributes.solid) {
 			return;
 		}
-
-
 		if (!Hit) {
 			return;
 		}
 		voxtra::RayWorldHit closest = Hit.unwrap();
-		Dir::Dir3d dir = Dir::Align(closest.collider.globalbox().center - plamentblock->center());
-
-		int blockdirection = Dir::max2ddirection(camera::campos() - closest.Hit.intersectionpoint);
-
-		plamentblock->mesh.direction = Dir::Dir2d(blockdirection);
-		plamentblock->mesh.attachdir = dir;
-		Box newblockbox = Box(plamentblock->center(), blockscale);
+		math::Direction3d dir = math::Align(closest.collider.globalbox().center - block_to_replace->center());
+		block_to_replace->mesh.direction = math::max_2d_direction(camera::campos() - closest.Hit.intersectionpoint);
+		block_to_replace->mesh.attached_direction = dir;
+		Box newblockbox = Box(block_to_replace->center(), blockscale);
 		newblockbox.scale *= .95;
 		bool collides = collision::boxCollidesWithEntity(newblockbox, collision::HitQuery());
 		if (!collides) {
 
 			stn::Option<blocks::block_id> blk = world().get_resource<items::item_types>().unwrap().from_id(select.unwrap().get_component<items::item_stack>().contained_id()).blk_id;
 
-			if (blk&& select.unwrap().get_component<items::item_stack>().can_remove(1)) {
-				gridutil::set_block(world(),plamentblock->pos, blk.unwrap());
+			if (blk && select.unwrap().get_component<items::item_stack>().can_remove(1)) {
+				grid::set_block(world(), block_to_replace->pos, blk.unwrap());
 
 				select.unwrap().get_component<items::item_stack>().remove(1);
 
 			}
 		}
-
-
-
-
 	}
 
 

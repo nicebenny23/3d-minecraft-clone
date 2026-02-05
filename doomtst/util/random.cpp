@@ -30,7 +30,7 @@ namespace random {
 
 		return random() * max;
 	}
-	stn::array<v3::Vec3> seededdirections;
+	stn::array<v3::Vec3> seeded_directions;
 
 	void InitRandomDirections() {
 		const int startingseed = 5;
@@ -40,7 +40,7 @@ namespace random {
 			randomcoord(noiseval);
 		}
 
-		seededdirections = stn::array<v3::Vec3>();
+		seeded_directions = stn::array<v3::Vec3>();
 		for (int i = 0; i < USHRT_MAX; i++) {
 
 			v3::Vec3 PointOnCircle;
@@ -62,7 +62,7 @@ namespace random {
 				PointOnCircle -= v3::unitv / 2;
 				PointOnCircle * 2;
 			} while (mag2(PointOnCircle) > 1);
-			seededdirections.push(normal(PointOnCircle));
+			seeded_directions.push(normal(PointOnCircle));
 		}
 	}
 	int Hash(int seed, int xPrimed, int yPrimed, int zPrimed) {

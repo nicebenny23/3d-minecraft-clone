@@ -13,7 +13,7 @@ namespace Chunk {
 		open_stone = 2,
 
 	};
-	inline biometype get_biome(float biome) {
+	inline biometype get_biome(double biome) {
 
 		if (math::range(0, 1).contains(biome)) {
 			return normalbiome;
@@ -44,21 +44,21 @@ namespace Chunk {
 		}
 		return minecrafttreestone;
 	}
-	inline stn::Option< blocks::block_id> chaotic_overide(float chaotic, biometype biome) {
+	inline stn::Option< blocks::block_id> chaotic_overide(double chaotic, biometype biome) {
 		if (math::range(0.009, .01f).contains(chaotic) && biome == normalbiome) {
-			return minecraftcrystal;
+			return minecraftstone;
 		}
 		if (math::range(.01f, .03f).contains(chaotic)) {
 			return get_secondary_block(biome);
 		}
 		if (math::range(.398, .4f).contains(chaotic) && biome == normalbiome) {
-			return minecraftironore;
+			return minecraftstone;
 		}
 		return stn::None;
 	}
-	inline blocks::block_id idfromnoise(float biome, float chaotic, float cave_carve, float cave_carve2, float should_cave) {
+	inline blocks::block_id idfromnoise(double biome, double chaotic, double cave_carve, double cave_carve2, double should_cave) {
 
-		const float offset = .3f;
+		const double offset = .3f;
 		biometype biome_type = get_biome(biome);
 		blocks::block_id main_block = get_default_block(biome_type);
 
@@ -82,7 +82,7 @@ namespace Chunk {
 		}
 		return neid;
 	}
-	inline blocks::block_id generatechunkvalfromnoise(Point3 pos, NoiseMap& map, NoiseMap& crazy, NoiseMap& slow) {
+	inline blocks::block_id generatechunkvalfromnoise(Point3 pos, math::NoiseMap& map, math::NoiseMap& crazy, math::NoiseMap& slow) {
 		if (generateflat) {
 			if (0 < pos.y) {
 				return minecraftair;
@@ -91,17 +91,11 @@ namespace Chunk {
 		}
 		Point3 scaled_pos = pos * blocksize;
 
-		Coord localpos;
-		localpos.x = symmetric_mod(scaled_pos.x, Chunk::chunkaxis);
-
-		localpos.y = symmetric_mod(scaled_pos.y, Chunk::chunkaxis);
-
-		localpos.z = symmetric_mod(scaled_pos.z, Chunk::chunkaxis);
-		float carve1 = map(scaled_pos + Vec3(0, scaled_pos.y, 0));
-		float carve2 = map(scaled_pos + Coord(0, 103, 40));
-		float biome = slow(scaled_pos + Coord(893, 103, 40));
-		float cave_region = slow(scaled_pos + Coord(893, 103, 40));
-		float random_n = crazy(scaled_pos + Coord(101, 300, 33));
+		double carve1 = map(scaled_pos + Vec3(0, scaled_pos.y, 0));
+		double carve2 = map(scaled_pos + Coord(0, 103, 40));
+		double biome = slow(scaled_pos + Coord(893, 103, 40));
+		double cave_region = slow(scaled_pos + Coord(893, 103, 40));
+		double random_n = crazy(scaled_pos + Coord(101, 300, 33));
 
 		return idfromnoise(biome, random_n, carve1, carve2, cave_region);
 
@@ -123,10 +117,10 @@ namespace Chunk {
 	};
 
 	struct idmap {
-		NoiseMap slow;
-		NoiseMap map;
-		NoiseMap middle_map;
-		NoiseMap crazy;
+		math::NoiseMap slow;
+		math::NoiseMap map;
+		math::NoiseMap middle_map;
+		math::NoiseMap crazy;
 		array<idblock> ids;
 		Coord loc;
 		blocks::block_id id_at(Coord pos) {
@@ -143,7 +137,7 @@ namespace Chunk {
 			return minecraftair;
 
 		}
-		void iterate(size_t x, std::mutex& mtx) {
+		void iterate(int x, std::mutex& mtx) {
 			int ind = Chunk::chunkaxis * Chunk::chunkaxis * x;
 			for (int y = 0; y < Chunk::chunkaxis; y++) {
 				for (int z = 0; z < Chunk::chunkaxis; z++) {
@@ -159,75 +153,67 @@ namespace Chunk {
 
 		}
 		idmap(Coord location) :
-			slow(noise_parameters(1, 1, .005, 1.2)),
-			map(noise_parameters(3, .6, .02, 1.2)),
-			crazy(noise_parameters(4, 1., .005, 1.2)),
-			middle_map(noise_parameters(2, 1, .005, 1.2)) {
+			slow(math::noise_parameters(1, 1, .005, 1.2)),
+			map(math::noise_parameters(3, .6, .02, 1.2)),
+			crazy(math::noise_parameters(4, 1., .005, 1.2)),
+			middle_map(math::noise_parameters(2, 1, .005, 1.2)) {
 
-			array<size_t> x_index_list;
-			for (auto i = 0; i < Chunk::chunkaxis; i++) {
+			array<int> x_index_list;
+			for (size_t i = 0; i < Chunk::chunkaxis; i++) {
 				x_index_list.push(i);
 			}
 
 			loc = location;
 			ids = array<idblock>();
 			std::mutex lck;
-			auto func = [&lck, this](size_t x) {iterate(x, lck); };
+			auto func = [&lck, this](int x) {iterate(x, lck); };
 			thread_util::par_iter(x_index_list.begin(), x_index_list.end(), func, 4);
 
 
 		}
-		void clear() {
-			map.clear();
-			crazy.clear();
-			slow.clear();
-			middle_map.clear();
-		}
+		
 
 	};
 
 	struct CreateEmptyChunk :ecs::Recipe {
-		CreateEmptyChunk(v3::Coord chunk_spawn_location) :spawn_location(chunk_spawn_location) {
+		CreateEmptyChunk(ChunkLocation chunk_spawn_location) :spawn_location(chunk_spawn_location) {
 
 		}
 		void apply(ecs::obj& chunk_object) {
 			Chunk::chunk& newchunk = chunk_object.add_component<Chunk::chunk>(spawn_location);
 			chunk_object.add_component<Chunk::chunkmesh>();
-			for (int i = 0; i < Chunk::chunksize; i++) {
-				newchunk.block_list[i] = chunk_object.world().spawn_empty();
-			}
 		}
-		v3::Coord spawn_location;
+		ChunkLocation spawn_location;
 	};
 
 	struct LoadFromNoise {
-		v3::Coord location;
-		LoadFromNoise(v3::Coord chunk_location) :location(chunk_location) {
+		ChunkLocation location;
+		LoadFromNoise(ChunkLocation chunk_location) :location(chunk_location) {
 		}
 
 		void apply(ecs::obj& chunk_object) {
 			CreateEmptyChunk(location).apply(chunk_object);
 			Chunk::chunk& newchunk = chunk_object.get_component<Chunk::chunk>();
-			idmap statemap = idmap(location);
+			Chunk::chunkmesh& mesh = chunk_object.get_component<Chunk::chunkmesh>();
+			idmap statemap = idmap(location.position);
 			size_t ind = 0;
 			for (int x = 0; x < Chunk::chunkaxis; x++) {
 				for (int y = 0; y < Chunk::chunkaxis; y++) {
 					for (int z = 0; z < Chunk::chunkaxis; z++) {
 						Coord pos = statemap.ids[ind].pos;
 						blocks::block_id block_id = statemap.ids[ind].block_id;
-						GenerateBlock(chunk_object.get_component<Chunk::chunkmesh>(),block_id, pos, Dir::Dir2d(Dir::up2d), Dir::Dir3d(Dir::up3d)).apply(newchunk.block_list[ind]);
+						newchunk.block_list[ind]=GenerateBlock(mesh,block_id, pos, math::Direction2d(math::up2d), math::Direction3d(math::up_3d)).spawn(chunk_object.world());
 						ind++;
 					}
 				}
 			}
-			statemap.clear();
 		}
 
 
 	};
 	struct LoadChunkFromFile :ecs::Recipe {
-		v3::Coord location;
-		LoadChunkFromFile(v3::Coord chunk_location) :location(chunk_location) {
+		ChunkLocation location;
+		LoadChunkFromFile(ChunkLocation chunk_location) :location(chunk_location) {
 		}
 		void apply(ecs::obj& chunk_object) {
 			stn::file_handle file = stn::file_handle(Chunk::getcorefilename(location), stn::FileMode::ReadBinary);
@@ -237,21 +223,18 @@ namespace Chunk {
 			stn::array<unsigned short> randomproperties = file.read<unsigned short>(Chunk::chunksize);
 			CreateEmptyChunk(location).apply(chunk_object);
 			Chunk::chunk& newchunk = chunk_object.get_component<Chunk::chunk>();
-			int i = 0;
+			size_t ind = 0;
 			for (int x = 0; x < Chunk::chunkaxis; x++) {
 				for (int y = 0; y < Chunk::chunkaxis; y++) {
 					for (int z = 0; z < Chunk::chunkaxis; z++) {
-						Coord blockpos = Coord(x, y, z) + location * Chunk::chunkaxis;
+						Coord pos = Coord(x, y, z) + location.position* Chunk::chunkaxis;
+						blocks::block_id blockid = static_cast<blocks::block_id>(bytelist[ind] & unsigned char(255));
+						byte dirprop = bytelist[ind] >> unsigned char(8);
+						math::Direction3d mesh_attach_direction = math::Direction3d(math::DirectionIndex3d(dirprop >> unsigned char(3)));
+						math::Direction2d mesh_face = math::Direction2d(math::DirectionIndex2d(dirprop & unsigned char(7)));
+						newchunk.block_list[ind] = GenerateBlock(chunk_object.get_component<Chunk::chunkmesh>(), blockid, pos, math::Direction2d(math::up2d), math::Direction3d(math::up_3d)).spawn(chunk_object.world());
 
-						blocks::block_id blockid = static_cast<blocks::block_id>(bytelist[i] & unsigned char(255));
-						byte dirprop = bytelist[i] >> unsigned char(8);
-
-
-						Dir::Dir3d mesh_attach_direction = Dir::Dir3d(dirprop >> unsigned char(3));
-						Dir::Dir2d mesh_face = Dir::Dir2d(dirprop & unsigned char(7));
-
-						GenerateBlock(chunk_object.get_component<Chunk::chunkmesh>(), blockid, blockpos, mesh_face, mesh_attach_direction).apply(newchunk.block_list[i]);
-						i++;
+						ind++;
 					}
 				}
 			}
@@ -259,21 +242,23 @@ namespace Chunk {
 
 	};
 	struct chunk_loaded {
-		chunk_loaded(v3::Coord loaded_position) :pos(loaded_position) {
+		chunk_loaded(Chunk::ChunkLocation loaded_position) :pos(loaded_position) {
 
 		}
-		v3::Coord pos;
+		Chunk::ChunkLocation pos;
 	};
 	struct CreateChunk:ecs::Recipe {
-		v3::Coord location;
-		CreateChunk(v3::Coord chunk_location):location(chunk_location) {
+		ChunkLocation location;
+		CreateChunk(ChunkLocation chunk_location):location(chunk_location) {
 
 		}
 		void apply(ecs::obj& object) {
 			if (fileexists(Chunk::getcorefilename(location))) {
 				LoadChunkFromFile(location).apply(object);
 			}
-			LoadFromNoise(location).apply(object);
+			else {
+				LoadFromNoise(location).apply(object);
+			}
 			object.world().write_event(chunk_loaded(location));
 		}
 

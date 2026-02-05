@@ -2,14 +2,9 @@
 #include "../math/vector3.h"
 #include "../game/ecs/game_object.h"
 #include "../util/dynamicarray.h"
-#include "../math/ray.h"
 #include "../math/geometry.h"
-#include "../util/random.h"
 #include "../block/block.h"
 #include "../util/SparseSet.h"
-#include <cmath>
-
-#include "objecthelper.h"
 #include "../math/transform.h"
 
 namespace aabb {
@@ -34,7 +29,7 @@ namespace aabb {
 			}
 			if (owner().has_component<blocks::block>()) {
 				blocks::block& blk = owner().get_component<blocks::block>();
-				Scale3 scale = box.scale / blocks::blockscale;
+				Scale3 scale = box.scale /  blocks::blockscale;
 				Point3 pos = blk.center();
 				return geo::Box(box.center * scale + v3::Vec3(pos.x, pos.y, pos.z), box.scale * scale);
 
@@ -49,7 +44,7 @@ namespace aabb {
 		bool in_list;
 
 		Collider() = default;
-		Collider(const v3::Point3& objcenter, const v3::Scale3& objscale, bool appendtolist, bool iseffector = false);
+		Collider(v3::Point3 objcenter, v3::Scale3 objscale, bool appendtolist, bool iseffector = false);
 		~Collider() = default;
 
 

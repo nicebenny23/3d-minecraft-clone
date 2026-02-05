@@ -12,6 +12,7 @@
 #include "rigidbody.h"
 #include "../player/playermovment.h"
 
+#include "../block/register_default_blocks.h"
 #include "../entities/entityspawner.h"
 #include "../renderer/decal.h"
 #include "../renderer/guirender.h"
@@ -108,12 +109,12 @@ struct PlayerInventoryPlugin :Core::Plugin {
 };
 void rungame() {
 	init();
-
+	
 	CtxName::ctx.Ecs->emplace_system<RigidbodySystem>();
 	CtxName::ctx.Ecs->emplace_system<spawn_mobs>();
 	CtxName::ctx.Ecs->emplace_system<PlayerMovementSys>();
 	Core::game.insert_plugin<blockrender::BlockRenderPlugin>();
-
+	blocks::register_blocks(Core::game.Ecs);
 	Core::game.insert_plugin<PlayerInventoryPlugin>();
 	Core::game.insert_plugin<decal_plugin>();
 	Core::game.insert_plugin<guirender::ConsolePlugin>();
