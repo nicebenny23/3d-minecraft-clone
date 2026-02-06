@@ -486,6 +486,7 @@
     <ClInclude Include="util\Invoke.h" />
     <ClInclude Include="json\json_value.h" />
     <ClInclude Include="util\layout.h" />
+    <ClInclude Include="util\lifetime.h" />
     <ClInclude Include="util\List.h" />
     <ClInclude Include="math\mathutil.h" />
     <ClInclude Include="util\memorypool.h" />

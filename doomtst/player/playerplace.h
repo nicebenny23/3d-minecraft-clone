@@ -81,7 +81,7 @@ struct playerplace : ecs::component {
 
 
 
-		if (CtxName::ctx.Inp->right_mouse().pressed) {
+		if (world().get_resource<userinput::InputManager>().unwrap().right_mouse().pressed) {
 
 
 			placeblock();

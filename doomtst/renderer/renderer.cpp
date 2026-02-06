@@ -28,41 +28,12 @@ namespace renderer {
 
 
 
-	Renderer::Renderer() :uniform_manager() {
-
-		fov = 90;
-		setprojmatrix(90, .21f, 100);
-		CtxName::ctx.Ecs->emplace_asset_loader<MaterialManager>(uniform_manager);
-		renderer::shader_id ui_shader = CtxName::ctx.Ecs->load_asset_emplaced<renderer::shader_descriptor>("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs").unwrap();
-		CtxName::ctx.Ecs->load_asset(render_phase(12, true, "ui_phase"));
-		CtxName::ctx.Ecs->load_asset(render_phase(0, false, "solid_phase"));
-		CtxName::ctx.Ecs->load_asset(render_phase(1, true, "transparent_phase"));
-
-		CtxName::ctx.Ecs->load_asset_emplaced<MaterialDescriptor>("Ui", "ui_phase", "UiShader", RenderProperties(false, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-			stn::array{ renderer::uparam("aspect_ratio", "aspectratio") }
-		);
-		renderer::shader_id model_shader = CtxName::ctx.Ecs->load_asset_emplaced<renderer::shader_descriptor>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
-		CtxName::ctx.Ecs->load_asset_emplaced<MaterialDescriptor>("Model", "solid_phase", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-			stn::array<renderer::UniformParam>{
-			renderer::uparam("aspect_ratio", "aspectratio"),
-			renderer::uparam("proj_matrix", "projection"),
-			renderer::uparam("view_matrix", "view")
-			}
-		);
-		renderer::shader_id particle_shader = CtxName::ctx.Ecs->load_asset_emplaced<renderer::shader_descriptor>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
-
-		CtxName::ctx.Ecs->load_asset_emplaced<renderer::shader_descriptor>("ParticleShader", "shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
-		//xName::ctx.Ecs->load_asset_emplaced<MaterialDescriptor>("Particle", "solid_phase", particle_shader, RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-		set_uniform("aspect_ratio", CtxName::ctx.Window->AspectRatio());
-		meshes = MeshRegistry(&context);
-	}
-
 	void Renderer::setprojmatrix(float newfov, float nearclipplane, float farclipplane) {
 		set_uniform("proj_matrix", glm::perspective(glm::radians(newfov), float(4 / 3.f), nearclipplane, farclipplane));
 	}
 
 	void Renderer::set_material(renderable id, std::string name) {
-	id.set_material(CtxName::ctx.Ecs->from_name<Material>(name).expect("material should exist"));
+	id.set_material(world.from_name<Material>(name).expect("material should exist"));
 	}
 
 	void Renderer::bind_material(material_handle material) {
@@ -84,7 +55,7 @@ namespace renderer {
 
 	void Renderer::Clear() {
 
-		set_uniform("aspect_ratio", CtxName::ctx.Window->AspectRatio());
+		set_uniform("aspect_ratio", world.get_resource<window::Window>().unwrap().AspectRatio());
 		glClearColor(0, 0, 0, 0.0f);
 		glDepthMask(GL_TRUE);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

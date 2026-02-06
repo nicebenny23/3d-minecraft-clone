@@ -16,27 +16,16 @@ namespace CtxName {
 
 			return *Grid;
 		}
-		window::Window& WinRef() {
-
-			return *Window;
-		}
-	
+		
 		Context() {
 
-			Inp = nullptr;
-			Window = nullptr;
 			Grid = nullptr;
 			Ecs = nullptr;
 			wrld = nullptr;
 		}
 		World::world* wrld;
-		userinput::InputManager* Inp;
-		window::Window* Window;
-	
 		ecs::Ecs* Ecs;
 
-		renderer::Renderer* Ren;
-		
 		grid::Grid* Grid;
 		
 	};

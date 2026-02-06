@@ -19,14 +19,14 @@ namespace stn {
 	struct type_map;
 	// Global counter for assigning unique type IDs
 	struct type_id_chart {
-		stn::Option<stn::function_ref<bool(const void*, const void*)>> equals;
-		stn::Option<stn::function_ref<std::size_t(const void*)>> hash;
-		stn::Option < stn::function_ref<void(void*, const void*)>> copy_assign;
-		stn::Option < stn::function_ref< void(void*, void*)>> move_assign;
-		stn::Option < stn::function_ref<void(void*, const void*)>> copy_construct;
-		stn::Option < stn::function_ref< void(void*, void*)>> move_construct;
-		stn::Option<stn::function_ref<void(void*)>> default_construct;
-		stn::Option<stn::function_ref<void(void*)>> destroy;
+		stn::Option<stn::Stateless<bool(const void*, const void*)>> equals;
+		stn::Option<stn::Stateless<std::size_t(const void*)>> hash;
+		stn::Option < stn::Stateless<void(void*, const void*)>> copy_assign;
+		stn::Option < stn::Stateless< void(void*, void*)>> move_assign;
+		stn::Option < stn::Stateless<void(void*, const void*)>> copy_construct;
+		stn::Option < stn::Stateless< void(void*, void*)>> move_construct;
+		stn::Option<stn::Stateless<void(void*)>> default_construct;
+		stn::Option<stn::Stateless<void(void*)>> destroy;
 		stn::memory::layout layout;
 
 		std::string name;
@@ -108,33 +108,33 @@ namespace stn {
 			return functions().layout;
 		}
 
-		stn::Option<stn::function_ref<bool(const void*, const void*)>> equals() const {
+		stn::Option<stn::Stateless<bool(const void*, const void*)>> equals() const {
 			return functions().equals;
 		}
 
-		stn::Option<stn::function_ref<std::size_t(const void*)>> hash() const {
+		stn::Option<stn::Stateless<std::size_t(const void*)>> hash() const {
 			return functions().hash;
 		}
 
-		stn::Option<stn::function_ref<void(void*, const void*)>> copy_construct() const {
+		stn::Option<stn::Stateless<void(void*, const void*)>> copy_construct() const {
 			return functions().copy_construct;
 		}
 
-		stn::Option<stn::function_ref<void(void*)>> default_constructor() const {
+		stn::Option<stn::Stateless<void(void*)>> default_constructor() const {
 			return functions().default_construct;
 		}
-		stn::Option<stn::function_ref<void(void*, void*)>> move_construct() const {
+		stn::Option<stn::Stateless<void(void*, void*)>> move_construct() const {
 			return functions().move_construct;
 		}
 
-		stn::Option<stn::function_ref<void(void*, const void*)>> copy_assign() const {
+		stn::Option<stn::Stateless<void(void*, const void*)>> copy_assign() const {
 			return functions().copy_assign;
 		}
 
-		stn::Option<stn::function_ref<void(void*, void*)>> move_assign() const {
+		stn::Option<stn::Stateless<void(void*, void*)>> move_assign() const {
 			return functions().move_assign;
 		}
-		stn::Option<stn::function_ref<void(void*)>> destroy() const {
+		stn::Option<stn::Stateless<void(void*)>> destroy() const {
 			return functions().destroy;
 		}
 		std::string_view name() const {

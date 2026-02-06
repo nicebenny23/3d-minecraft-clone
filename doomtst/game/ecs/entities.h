@@ -48,7 +48,7 @@ namespace ecs {
 			return entity_list[index];
 		}
 		bool contains(entity entity) const{
-			return entity.generation() == entity_list[entity.id().id].gen_count;
+			return entity_list.contains_index(entity.id().id)&&entity.generation() == entity_list.unchecked_at(entity.id().id).gen_count;
 		}
 		bool contains(entity_id entity) const {
 			return entity_list.contains_index(entity.id)&&entity_list[entity.id].is_alive;

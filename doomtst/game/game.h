@@ -19,11 +19,11 @@
 #pragma once 
 
 void endframe() {
-	CtxName::ctx.Inp->endupdate();
+	Core::game.Ecs.get_resource<userinput::InputManager>().unwrap().endupdate();
 	updateltick();
-	CtxName::ctx.Window->SwapBuffers();
+	Core::game.Ecs.get_resource<window::Window>().unwrap().SwapBuffers();
 	glfwPollEvents();
-	CtxName::ctx.Ren->Clear();
+	Core::game.Ecs.get_resource<renderer::Renderer>().unwrap().Clear();
 }
 void startframe() {
 
@@ -59,7 +59,7 @@ struct RenderPlugin :Core::Plugin {
 	App.Ecs.emplace_asset_loader<renderer::TextureLoader>();
 	App.Ecs.emplace_asset_loader<renderer::TextureArrayLoader>();
 	App.Ecs.emplace_asset_loader<renderer::shader_loader>();
-	App.ensure_resource<renderer::Renderer>();
+	App.Ecs.insert_resource<renderer::Renderer>();
 	App.Ecs.emplace_system<renderer::render_all>();
 	}
 };
@@ -91,7 +91,6 @@ void init() {
 	Core::game.CreateGrid();
 	player::initplayer();
 	
-	CtxName::ctx.Inp->endupdate();
 
 	glfwSwapInterval(0);
 }
@@ -116,10 +115,10 @@ void rungame() {
 	Core::game.insert_plugin<blockrender::BlockRenderPlugin>();
 	blocks::register_blocks(Core::game.Ecs);
 	Core::game.insert_plugin<PlayerInventoryPlugin>();
-	Core::game.insert_plugin<decal_plugin>();
+	Core::game.insert_plugin<decals::decal_plugin>();
 	Core::game.insert_plugin<guirender::ConsolePlugin>();
 	float lastupdate = 0;
-	while (!CtxName::ctx.Window->shouldClose()) {
+	while (!Core::game.Ecs.get_resource<window::Window>().unwrap().shouldClose()) {
 		update();
 	}
 	endgame();

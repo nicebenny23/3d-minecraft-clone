@@ -1,7 +1,11 @@
 #pragma once
 #include <stdexcept>
 #include <concepts>
+#include "Option.h"
 namespace stn {
+	template<typename T>
+	struct rc_ptr;
+
 	template <typename T>
 	struct rc {
 
@@ -31,7 +35,7 @@ namespace stn {
 		rc<U> upcast() requires std::derived_from<T, U> {
 			(*count)++;
 			return rc<U>(ptr, count);
-		
+
 		}
 		template<typename U>
 		rc<U> downcast_unchecked() requires std::derived_from<U, T> {
@@ -48,10 +52,10 @@ namespace stn {
 		T* operator->() {
 			return ptr;
 		}
-		const T* operator->() const{
+		const T* operator->() const {
 			return ptr;
 		}
-		
+
 		std::size_t use_count() const noexcept {
 			return *count;
 		}
@@ -62,12 +66,17 @@ namespace stn {
 				delete count;
 			}
 		}
+		static stn::Option<rc<T>> from_rc_ptr(const rc_ptr<T>& rp);
 	private:
 		T* ptr;
 		size_t* count;
+		template<typename U>
+		friend struct rc_ptr;
 		rc(T* ptr, size_t* cnt) :ptr(ptr), count(cnt) {
 
 		}
+	
+		
 	};
 	template <typename T>
 	struct rc_ptr {
@@ -81,7 +90,7 @@ namespace stn {
 		rc_ptr(Args&&... args)
 			: count(new size_t(1)), ptr(new T(std::forward<Args>(args)...)) {
 		}
-		
+
 		std::size_t use_count() const noexcept {
 			return count ? *count : 0;
 		}
@@ -93,7 +102,7 @@ namespace stn {
 			inc();
 		}
 		rc_ptr& operator=(const rc_ptr<T>& other) {
-			if (ptr!=other.ptr) {
+			if (ptr != other.ptr) {
 				dec();
 				ptr = other.ptr;
 				count = other.count;
@@ -143,10 +152,6 @@ namespace stn {
 			return ptr;
 		}
 
-	
-
-		
-		
 		void clear() {
 			dec();
 			ptr = nullptr;
@@ -154,6 +159,16 @@ namespace stn {
 		}
 		~rc_ptr() {
 			dec();
+		}
+
+		T* get_ptr() const noexcept {
+			return ptr;
+		}
+		size_t* get_count_ptr() const noexcept {
+			return count;
+		}
+		rc_ptr(const rc<T>& r):count(r.count),ptr(r.ptr) {
+			++(*r.count);
 		}
 	private:
 		void inc() {
@@ -172,6 +187,17 @@ namespace stn {
 		rc_ptr(T* ptr, size_t* cnt) :ptr(ptr), count(cnt) {
 
 		}
+		template<typename U>
+		friend struct rc;
 	};
+
+	template<typename T>
+	inline stn::Option<rc<T>> rc<T>::from_rc_ptr(const rc_ptr<T>& rp) {
+		if (!rp) {
+			return stn::None;
+		}
+		(*rp.count)++;
+		return rc<T>(rp.ptr, rp.count);
+	}
 
 }

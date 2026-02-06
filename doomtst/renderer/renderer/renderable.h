@@ -61,6 +61,21 @@ namespace renderer{
 		}
 
 	};
+
+	struct renderable_marker :ecs::component {
+	
+
+	};
+	struct renderable_recipe :ecs::Recipe {
+		void apply(ecs::obj& object) {
+			object.add_component<is_enabled>();
+			object.add_component<order_key>(0);
+			object.add_component<renderable_marker>();
+			object.add_component<renderable_overides>();
+		}
+
+	};
+	//todo remove
 	struct renderable{
 		renderable(ecs::obj temp) :object(temp) {
 
@@ -106,7 +121,7 @@ namespace renderer{
 		void disable() {
 			get_component<is_enabled>().disable();
 		}
-		renderable();
+	
 
 		mesh_id& get_mesh(){
 			return get_component<mesh_component>().msh.expect("mesh must exist");
@@ -126,12 +141,6 @@ namespace renderer{
 		bool operator==(const renderable& other) const = default;
 	};
 
-	struct renderable;
-	struct renderable_marker :ecs::component {
-		renderable render_owner() {
-			return renderable(owner());
-		}
-
-	};
+	
 
 }

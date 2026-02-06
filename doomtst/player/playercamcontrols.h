@@ -17,10 +17,12 @@ struct playercamcontrols : ecs::component
 
 		if (!world().ensure_resource<ui::MenuState>().menu_open())
 		{
-			CtxName::ctx.Window->DisableCursor();
 
-			double xoffset = CtxName::ctx.Inp->mouse_position_dt.x;
-			double yoffset = CtxName::ctx.Inp->mouse_position_dt.y;
+			world().get_resource<window::Window>().unwrap().DisableCursor();
+
+			userinput::InputManager& man = world().ensure_resource<userinput::InputManager>();
+			double xoffset = man.mouse_position_dt.x;
+			double yoffset = man.mouse_position_dt.y;
 
 			float sensitivity = 60;
 
@@ -43,7 +45,7 @@ struct playercamcontrols : ecs::component
 		}
 		else
 		{
-			CtxName::ctx.Window->EnableCursor();
+			Core::game.Ecs.get_resource<window::Window>().unwrap().EnableCursor();
 		}
 		ray cameraray = ray::from_offset(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.normal_dir() * interactmaxrange);
 		voxtra::WorldRayCollision closest = collision::raycastall(cameraray, collision::HitQuery());

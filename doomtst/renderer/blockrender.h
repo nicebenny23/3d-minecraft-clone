@@ -14,7 +14,7 @@ namespace blockrender {
 
 
 	inline bool chunk_viewable(Chunk::chunk& chk) {
-		float slope = tan(CtxName::ctx.Ren->fov / 2);
+		float slope = tan(chk.world().get_resource<renderer::Renderer>().unwrap().fov / 2);
 		geo::Box chkb = chk.span();
 		ray camray = ray::from_offset(camera::campos(), camera::GetCamFront());
 		geo::cone ncone = geo::cone(camray, slope);
@@ -189,7 +189,7 @@ namespace blockrender {
 		void initblockrendering(ecs::Ecs& ecs) {
 
 			auto& renderer = ecs.get_resource<renderer::Renderer>().unwrap();
-			renderer::shader_id block_shader = CtxName::ctx.Ecs->load_asset_emplaced<renderer::shader_descriptor>("BlockShader", "shaders\\vert1.vs", "shaders\\frag1.vs").unwrap();
+			renderer::shader_id block_shader = ecs.load_asset_emplaced<renderer::shader_descriptor>("BlockShader", "shaders\\vert1.vs", "shaders\\frag1.vs").unwrap();
 			ecs.load_asset_emplaced<renderer::MaterialDescriptor>("SolidBlock", "solid_phase", "BlockShader", renderer::RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
 				stn::array{
 				renderer::uparam("aspect_ratio", "aspectratio"),

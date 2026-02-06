@@ -37,12 +37,13 @@ struct playerbreak : ecs::component {
 	voxtra::WorldRayCollision closest;
 	stn::change <stn::Option<ecs::obj>> pickaxe;
 
-	decal break_decal;
+	ecs::obj break_decal;
 	float break_start_time = 0.f;
 	float timeuntilbreak = 0.f;
 	stn::change<block*> currmining;
 
 	void start() override {
+		break_decal = ecs::spawn_emplaced<decals::DecalSpawner>(world(), v3::Point3(0, 0, 0));
 		currmining();
 		currmining.clear(nullptr);
 	//	CtxName::ctx.Ren->Textures.LoadTexture("images\\menutex.png", "MenuTexture");
@@ -55,20 +56,21 @@ struct playerbreak : ecs::component {
 			"images\\block_break_1.png","images\\block_break_2.png",
 			"images\\block_break_3.png","images\\block_break_4.png",
 			"images\\block_break_5.png","images\\block_break_6.png" };
-		std::string name = tex[phase];
+		std::string path = tex[phase];
 		std::string handle = "block_break_" + std::to_string(phase);
-		break_decal.set_handle(name.c_str(), handle.c_str());
-		break_decal.handle.enable();
+		world().emplace_command<decals::DecalReimageCommand>(break_decal,renderer::TexturePath(path, handle));
+		decals::decal_component& decal = break_decal.get_component<decals::decal_component>();
+		decal.enable();
 		auto hit = closest.unwrap().Hit.intersectionpoint;
 		math::Direction3d fd = closest_face(hit, currmining());
 		auto& f = currmining()->mesh[fd.index()];
-		break_decal.center = f.center();
-		break_decal.normal = fd.vec();
+		decal.center=f.center();
+		decal.normal=fd.vec();
 		auto [b, t] = get_flat_frame(fd);
-		break_decal.bi_tangent = b * 0.5f;
-		break_decal.tangent = t * 0.5f;
-		break_decal.create_mesh();
-		break_decal.render();
+		decal.bi_tangent=(b * 0.5f);
+		decal.tangent=(t * 0.5f);
+
+		
 	}
 
 	playerbreak() {
@@ -86,9 +88,7 @@ struct playerbreak : ecs::component {
 	}
 	void engage_block(block* blk) {
 		if (!engaged()) {
-			if (break_decal.handle) {
-				// break_decal.handle.disable();
-			}
+				break_decal.get_component<decals::decal_component>().enable();
 			pickaxe.clear(owner().get_component<inventory>().selected().map(&component::owner));
 			currmining.clear(blk);
 			break_start_time = block_power(blk);
@@ -103,9 +103,8 @@ struct playerbreak : ecs::component {
 	void disengage_block() {
 		currmining.clear(nullptr);
 		pickaxe.clear(stn::None);
-		if (break_decal.handle) {
-			break_decal.handle.disable();
-		}
+
+		break_decal.get_component<decals::decal_component>().disable();
 		timeuntilbreak = -1;
 
 	}
@@ -126,7 +125,7 @@ struct playerbreak : ecs::component {
 		if (!inrange(hit.dist(), interactminrange, interactmaxrange)) {
 			return false;
 		}
-		if (!CtxName::ctx.Inp->left_mouse().held) {
+		if (!world().ensure_resource<userinput::InputManager>().left_mouse().held) {
 			return false;
 		}
 		engage_block(hit.owner().get_component_ptr<block>());

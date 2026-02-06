@@ -13,7 +13,7 @@ namespace items {
 	}
 	
 	struct ItemSlotDecal :ecs::component {
-		ItemSlotDecal(ecs::obj decal) :item_decal_object(decal) {
+		ItemSlotDecal(ecs::obj decal_component) :item_decal_object(decal_component) {
 
 		}
 		void set_decal(renderer::TexturePath Path) {

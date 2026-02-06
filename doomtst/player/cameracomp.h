@@ -25,8 +25,7 @@ struct CameraComp : ecs::component
 		owner().get_component<ecs::transform_comp>().transform.yaw=wrap_angle(owner().get_component<ecs::transform_comp>().transform.yaw);
 
 		owner().get_component<ecs::transform_comp>().transform.pitch = wrap_to_range(owner().get_component<ecs::transform_comp>().transform.pitch,-90,90);
-		CtxName::ctx.Ren->set_uniform("view_matrix", LookAt(owner().get_component<ecs::transform_comp>().transform));
-		
+		world().get_resource<renderer::Renderer>().unwrap().set_uniform("view_matrix", LookAt(owner().get_component<ecs::transform_comp>().transform));
 		CamTransform = owner().get_component<ecs::transform_comp>().transform;
 
 	}

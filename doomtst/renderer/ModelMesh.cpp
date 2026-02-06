@@ -20,12 +20,12 @@ ModelMesh::ModelMesh()
 	transform = math::Transform();
 }
 
-void ModelMeshName::ModelMesh::create_handle(const char* locaion,const char* name)
+void ModelMeshName::ModelMesh::create_handle(const char* locaion,const char* name,ecs::Ecs& world)
 {
-handle=CtxName::ctx.Ren->gen_renderable(); 
+handle= world.get_resource<renderer::Renderer>().unwrap().gen_renderable();
 handle.set_layout(vertice::vertex().push<float, 3>().push<float, 2>());
 handle.set_material("Model");
-handle.set_uniform(renderer::uniform( CtxName::ctx.Ecs->load_asset_emplaced<renderer::TexturePath>(locaion, name).unwrap(), "tex"));
+handle.set_uniform(renderer::uniform(world.load_asset_emplaced<renderer::TexturePath>(locaion, name).unwrap(), "tex"));
 }
 
 Point3 ModelMesh::nthvertex(size_t i)
@@ -82,7 +82,7 @@ ModelMesh ModelMeshName::loadmesh(const char* location,const char* name, Vec3 po
 
 		delete[] header;
 	}
-	newmesh.create_handle(location,name);
+	newmesh.create_handle(location,name,*CtxName::ctx.Ecs);
 
 	return newmesh;
 }

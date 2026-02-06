@@ -75,7 +75,7 @@ void particleemiter::start()
 
 void particleemiter::renderparticles()
 {
-	CtxName::ctx.Ren->context.bind(*tex);
+///	CtxName::ctx.Ren->context.bind(*tex);
 	
 
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE); 

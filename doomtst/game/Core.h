@@ -40,7 +40,6 @@ namespace Core {
         void InitRenderer();
        CtxName::Context* ctx;
    
-        window::Window Window;
         World::world world;
 		Plugins plugin_list;
 		template<PluginType T>

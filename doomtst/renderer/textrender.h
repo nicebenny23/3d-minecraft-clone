@@ -25,7 +25,7 @@ namespace ui {
 
 		void set_handle() {
 			if (!handle) {
-				handle = CtxName::ctx.Ren->gen_renderable();
+				handle = world().get_resource < renderer::Renderer>().unwrap().gen_renderable();
 				handle.set_material("Text");
 				handle.set_layout(vertice::vertex().push<float, 2>().push<float, 3>());
 
@@ -149,7 +149,7 @@ namespace ui {
 
 			renderer::texture_array_id textarray = world.load_asset_emplaced<renderer::TextureArrayPath>(texlist, std::string("Letters")).unwrap();
 			app.emplace_system<UiTextMesher>();
-			world.ensure_resource<renderer::Renderer>().set_uniform("letters", textarray);
+			world.insert_resource<renderer::Renderer>().set_uniform("letters", textarray);
 			world.load_asset_emplaced<renderer::shader_descriptor>("TextShader", "shaders\\textvertex.vs", "shaders\\textfragment.vs").unwrap();
 			world.load_asset_emplaced<renderer::MaterialDescriptor>("Text", "ui_phase", "TextShader", renderer::RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
 				stn::array{

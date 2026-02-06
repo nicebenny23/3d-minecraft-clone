@@ -38,7 +38,7 @@ struct PlayerMovementSys : ecs::System
 
         for (auto [body, movement, climb] : view)
         {
-
+			userinput::InputManager& man=body.world().ensure_resource<userinput::InputManager>();
 
             if (isnan(body.owner().get_component<rigidbody>().velocity.x))
             {
@@ -54,10 +54,10 @@ struct PlayerMovementSys : ecs::System
             Vec3 forward = normal({ camera::GetCamFront().x, 0, camera::GetCamFront().z });
             Vec3 right = normal({ camera::GetCamRight().x,   0, camera::GetCamRight().z });
 
-            if (CtxName::ctx.Inp->getKey('w').held) body.velocity += forward * effSpeed;
-            if (CtxName::ctx.Inp->getKey('s').held) body.velocity -= forward * effSpeed;
-            if (CtxName::ctx.Inp->getKey('d').held) body.velocity += right * effSpeed;
-            if (CtxName::ctx.Inp->getKey('a').held) body.velocity -= right * effSpeed;
+            if (man.getKey('w').held) body.velocity += forward * effSpeed;
+            if (man.getKey('s').held) body.velocity -= forward * effSpeed;
+            if (man.getKey('d').held) body.velocity += right * effSpeed;
+            if (man.getKey('a').held) body.velocity -= right * effSpeed;
 
             if (body.isonground)
             {
@@ -70,7 +70,7 @@ struct PlayerMovementSys : ecs::System
             }
 
             // — stamp jumpBufferTime on press —
-            if (CtxName::ctx.Inp->getKey(' ').pressed)
+            if (man.getKey(' ').pressed)
                 movement.jumpBufferTime = now;
 
             // — liquid / rope vertical smoothing (unchanged) —
@@ -79,8 +79,8 @@ struct PlayerMovementSys : ecs::System
             if (body.inliquid)
             {
                 normalState = false;
-                float targetY = CtxName::ctx.Inp->getKey(userinput::shift_key).held ? -10.0f
-                    : CtxName::ctx.Inp->getKey(' ').held ? 10.0f
+                float targetY = man.getKey(userinput::shift_key).held ? -10.0f
+                    : man.getKey(' ').held ? 10.0f
                     : 0.0f;
                 body.velocity.y = lerp(body.velocity.y, targetY, 0.1f);
             }
@@ -88,8 +88,8 @@ struct PlayerMovementSys : ecs::System
             if (climb.onrope)
             {
                 normalState = false;
-                float targetY = CtxName::ctx.Inp->getKey(userinput::shift_key).held ? -5.0f
-                    : CtxName::ctx.Inp->getKey(' ').held ? 5.0f
+                float targetY = man.getKey(userinput::shift_key).held ? -5.0f
+                    : man.getKey(' ').held ? 5.0f
                     : 0.0f;
                 body.velocity.y = lerp(body.velocity.y, targetY, 0.1f);
             }
@@ -102,7 +102,7 @@ struct PlayerMovementSys : ecs::System
 
                 // slam: one-time hard downward thrust in mid-air
                 if (!body.isonground
-                    && CtxName::ctx.Inp->getKey(userinput::shift_key).pressed
+                    && man.getKey(userinput::shift_key).pressed
                     && !movement.slamUsed)
                 {
                     body.velocity.y = slamStrength;
@@ -119,15 +119,15 @@ struct PlayerMovementSys : ecs::System
                 }
                 // sneak-down on ground
                 else if (body.isonground
-                    && CtxName::ctx.Inp->getKey(userinput::shift_key).held)
+                    && man.getKey(userinput::shift_key).held)
                 {
                     body.velocity.y -= effSpeed;
                 }
-				if (ecs.ensure_resource<userinput::InputManager>().getKey('z').held) {
+				if (man.getKey('z').held) {
 					body.owner().get_component<ecs::transform_comp>().transform.position.y = 4;
 				}
-					if (ecs.ensure_resource<userinput::InputManager>().getKey('f').held) {
-					body.owner().get_component<ecs::transform_comp>().transform.position += Vec3(3, 0, 0);
+					if (man.getKey('f').held) {
+					body.owner().get_component<ecs::transform_comp>().transform.position += Vec3(16, 0, 0);
 				
 				}
 					

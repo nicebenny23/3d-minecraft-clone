@@ -104,7 +104,7 @@ namespace ui {
 				ui_image_component& img= world.get_component<ui_image_component>(cmd.ui_entity);
 				if (!img.tex_handle) {
 				
-					img.tex_handle = CtxName::ctx.Ren->gen_renderable();
+					img.tex_handle = world.get_resource<renderer::Renderer>().unwrap().gen_renderable();
 					img.tex_handle.set_material("Ui");
 					img.tex_handle.set_layout(vertice::vertex().push<float, 2>());
 					renderer::MeshData mesh = img.tex_handle.create_mesh();

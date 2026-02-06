@@ -116,9 +116,10 @@ namespace ui {
 	};
 	struct UiInteractionSystem :ecs::System {
 		void run(ecs::Ecs& world) {
-			v2::Vec2 pos = CtxName::ctx.Inp->mouse_position;
-			bool has_clicked_left = CtxName::ctx.Inp->left_mouse().pressed;
-			bool has_clicked_right = CtxName::ctx.Inp->right_mouse().pressed;
+			userinput::InputManager& man = world.ensure_resource<userinput::InputManager>();
+			v2::Vec2 pos = man.mouse_position;
+			bool has_clicked_left = man.left_mouse().pressed;
+			bool has_clicked_right = man.right_mouse().pressed;
 
 			ecs::View<UiEnabled, UiBounds, InteractionState> bounds_view(world);
 			for (auto&& [enabled, bounds, ui_interaction] : bounds_view) {

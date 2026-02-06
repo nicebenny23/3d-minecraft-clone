@@ -72,30 +72,30 @@ struct inventory : ecs::component {
 	}
 	void update() {
 
-
-		if (CtxName::ctx.Inp->getKey('e').pressed) {
+		userinput::InputManager& input=world().ensure_resource<userinput::InputManager>();
+		if (input.getKey('e').pressed) {
 			world().write_command(ui::open_menu(inventory_object.get_component<ui::menu_component>()));
 		}
-		if (CtxName::ctx.Inp->getKey('1').pressed) {
+		if (input.getKey('1').pressed) {
 
 			selected_ind = items::container_index(0, 0);
 		}
-		if (CtxName::ctx.Inp->getKey('2').pressed) {
+		if (input.getKey('2').pressed) {
 
 			selected_ind = items::container_index(1, 0);
 		}
-		if (CtxName::ctx.Inp->getKey('3').pressed) {
+		if (input.getKey('3').pressed) {
 
 			selected_ind = items::container_index(2, 0);
-		}if (CtxName::ctx.Inp->getKey('4').pressed) {
+		}if (input.getKey('4').pressed) {
 
 			selected_ind = items::container_index(3, 0);
 		}
-		if (CtxName::ctx.Inp->getKey('5').pressed) {
+		if (input.getKey('5').pressed) {
 
 			selected_ind = items::container_index(4, 0);
 		}
-		if (CtxName::ctx.Inp->getKey('6').pressed) {
+		if (input.getKey('6').pressed) {
 			selected_ind = items::container_index(5, 0);
 
 		}

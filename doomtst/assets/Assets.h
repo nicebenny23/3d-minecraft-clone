@@ -1,4 +1,5 @@
 #include "Loader.h"
+#include "../util/lifetime.h"
 #pragma once
 namespace assets {
 	
@@ -9,8 +10,8 @@ namespace assets {
 
 		AssetHandle() = delete;
 
-		AssetHandle(asset_id id, Assets* assets)
-			: id(id), AssetManager(assets) {
+		AssetHandle(asset_id id, stn::lifetime_source<Assets>& assets)
+			: id(id), AssetManager(assets.view()) {
 			inc();
 		}
 
@@ -19,7 +20,9 @@ namespace assets {
 			inc();
 		}
 		bool operator==(const AssetHandle& other) const noexcept {
-			return id == other.id && AssetManager == other.AssetManager;
+			return id == other.id 
+				//&& AssetManager == other.AssetManager
+				;
 		}
 
 		bool operator!=(const AssetHandle& other) const noexcept {
@@ -37,17 +40,17 @@ namespace assets {
 		}
 
 		const T& operator*() const {
-			return (*AssetManager)[id].asset.ref_as_unchecked<T>();
+			return (*AssetManager).unwrap()[id].asset.ref_as_unchecked<T>();
 		}
 		T& operator*() {
-			return (*AssetManager)[id].asset.ref_as_unchecked<T>();
+			return (*AssetManager).unwrap()[id].asset.ref_as_unchecked<T>();
 		}
 
 		const T* operator->() const {
-			return (*AssetManager)[id].asset.get_as_unchecked<T>();
+			return (*AssetManager).unwrap()[id].asset.get_as_unchecked<T>();
 		}
 		T* operator->() {
-			return (*AssetManager)[id].asset.get_as_unchecked<T>();
+			return (*AssetManager).unwrap()[id].asset.get_as_unchecked<T>();
 		}
 
 		~AssetHandle() {
@@ -59,12 +62,14 @@ namespace assets {
 	private:
 
 		asset_id id;
-		Assets* AssetManager;
+		stn::lifetime_tracker<Assets> AssetManager;
 		void dec() {
-			AssetManager->dec(id);
+			if (AssetManager.alive()) {
+				(*AssetManager).unwrap().dec(id);
+			}
 		}
 		void inc() {
-			AssetManager->inc(id);
+			(*AssetManager).unwrap().inc(id);
 		}
 	};
 	struct Assets :ecs::resource {
@@ -83,9 +88,12 @@ namespace assets {
 				});
 			if (id) {
 				map.element_of(id.unwrap());
-				return AssetHandle<DescriptorAssetType<T>>(id.unwrap(), this);
+				return AssetHandle<DescriptorAssetType<T>>(id.unwrap(), us);
 			}
 			return stn::None;
+		}
+		Assets() :us(*this){
+
 		}
 		template<LoadDescriptorType T, typename ...Args>
 		AssetHandle<DescriptorAssetType<T>>  load_emplace(Args&&...args)
@@ -101,7 +109,7 @@ namespace assets {
 			if (!map.element_of(it->second).asset.is<T>()) {
 				return stn::None;
 			}
-			return AssetHandle<T>(it->second, this);
+			return AssetHandle<T>(it->second, us);
 		}
 		template<LoaderType U, typename ...Args> requires std::constructible_from<U, Args&&...>
 		void emplace_loader(Args&&... args) {
@@ -140,6 +148,8 @@ namespace assets {
 		Loaders loaders;
 		handle::HandleMap< BoxedLoadDescriptor, AssetSlot, asset_id> map;
 		std::unordered_map<std::string, asset_id> names;
+
+		stn::lifetime_source<Assets> us;
 	};
 	//use this for things that benifit from an asset registry naming but do not need an external loader
 	template<typename T> requires AssetType<T>&&LoadDescriptorType<T>&& std::same_as<DescriptorAssetType<T>,T>

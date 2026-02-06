@@ -78,13 +78,17 @@ namespace ecs {
 		stn::Option<const T&> get_resource() const {
 			return resources.get<T>();
 		}
+		template<ResourceType T>
+		T& insert_resource() requires std::constructible_from<T, ecs::Ecs&> {
+			return insert_resource<T>(*this);
+		}
 		template<ResourceType T, typename ...Args>
 		T& insert_resource(Args&&... args) requires std::constructible_from<T, Args&&...> {
 			return resources.insert<T>(std::forward<Args>(args)...);
 		}
 		template<ResourceType T>
-		T& ensure_resource() {
-			return resources.ensure<T>();
+		T& ensure_resource() requires std::is_default_constructible_v<T> {
+			return insert_resource<T>();
 		}
 		template<ResourceType T>
 		void remove_resource() {

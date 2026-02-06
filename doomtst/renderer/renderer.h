@@ -126,7 +126,36 @@ namespace renderer {
 	};
 	struct Renderer : ecs::resource {
 
-		Renderer();
+
+		Renderer(ecs::Ecs& spawn_world) :world(spawn_world),uniform_manager() {
+
+			fov = 90;
+			setprojmatrix(90, .21f, 100);
+			world.emplace_asset_loader<MaterialManager>(uniform_manager);
+			renderer::shader_id ui_shader = world.load_asset_emplaced<renderer::shader_descriptor>("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs").unwrap();
+			world.load_asset(render_phase(12, true, "ui_phase"));
+			world.load_asset(render_phase(0, false, "solid_phase"));
+			world.load_asset(render_phase(1, true, "transparent_phase"));
+
+			world.load_asset_emplaced<MaterialDescriptor>("Ui", "ui_phase", "UiShader", RenderProperties(false, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+				stn::array{ renderer::uparam("aspect_ratio", "aspectratio") }
+			);
+			renderer::shader_id model_shader = world.load_asset_emplaced<renderer::shader_descriptor>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
+			world.load_asset_emplaced<MaterialDescriptor>("Model", "solid_phase", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+				stn::array<renderer::UniformParam>{
+				renderer::uparam("aspect_ratio", "aspectratio"),
+					renderer::uparam("proj_matrix", "projection"),
+					renderer::uparam("view_matrix", "view")
+			}
+			);
+			renderer::shader_id particle_shader = world.load_asset_emplaced<renderer::shader_descriptor>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
+
+			world.load_asset_emplaced<renderer::shader_descriptor>("ParticleShader", "shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
+			//xName::ctx.Ecs->load_asset_emplaced<MaterialDescriptor>("Particle", "solid_phase", particle_shader, RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+			set_uniform("aspect_ratio", world.get_resource<window::Window>().unwrap().AspectRatio());
+			meshes = MeshRegistry(&context);
+		}
+
 
 		void bind_material(material_handle material);
 
@@ -154,7 +183,7 @@ namespace renderer {
 		void set_material(renderable id, std::string name);
 
 		RenderableHandle gen_renderable() {
-			return RenderableHandle(renderable(), this);
+			return RenderableHandle(ecs::spawn_emplaced<renderable_recipe>(world), this);
 		}
 		void remove(renderable ren) {
 			ren.object.world().write_command(remove_render_object(ren.object));
@@ -218,7 +247,7 @@ namespace renderer {
 		MeshRegistry meshes;
 		float fov;
 	private:
-
+		ecs::Ecs& world;
 		//ensures a mesh exists
 		mesh_id insert_mesh(renderer::renderable id) {
 

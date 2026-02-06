@@ -14,8 +14,8 @@ namespace Core {
      void framebufferSizeCallback(GLFWwindow* window, int newWidth, int newHeight)
     {
         glViewport(0, 0, newWidth, newHeight);
-        game.Window.width = newWidth;
-        game.Window.height = newHeight;
+        game.ensure_resource<window::Window>().width = newWidth;
+		game.ensure_resource<window::Window>().height = newHeight;
     }
 
     void keyCallback(GLFWwindow* /*window*/, int key, int /*scancode*/, int action, int /*mods*/)
@@ -33,7 +33,7 @@ namespace Core {
 
     void cursorPositionCallback(GLFWwindow* /*window*/, double xpos, double ypos)
     {
-        v2::Vec2 new_mouse_position(CtxName::ctx.Window->FitToAspectRatio(v2::Vec2(xpos,ypos)));
+        v2::Vec2 new_mouse_position(game.Ecs.get_resource<window::Window>().unwrap().FitToAspectRatio(v2::Vec2(xpos,ypos)));
 		userinput::InputManager& manager = game.ensure_resource<userinput::InputManager>();
 		manager.mouse_position_dt = new_mouse_position - manager.mouse_position;
 		manager.mouse_position = new_mouse_position;
@@ -48,15 +48,14 @@ namespace Core {
     void App::createWindow()
     {
         InitInput();
-        new (&Window) window::Window("Benny Render 3d", "images\\crystaloreenhanced.png");
-      
-        Window.setCursorCallback(cursorPositionCallback);
-        Window.SetFrameBufferCallback(framebufferSizeCallback);
-        Window.SetMouseCallback(mouseButtonCallback);
-        Window.SetKeyCallback(keyCallback);
-        Window.SetErrorCallBack(errorCallback);
+
+		window::Window& window=ctx->Ecs->insert_resource<window::Window>("Benny Render 3d", "images\\crystaloreenhanced.png");
+		window.setCursorCallback(cursorPositionCallback);
+		window.SetFrameBufferCallback(framebufferSizeCallback);
+		window.SetMouseCallback(mouseButtonCallback);
+		window.SetKeyCallback(keyCallback);
+		window.SetErrorCallBack(errorCallback);
         
-        ctx->Window = &Window;
        
     }
 
@@ -67,7 +66,6 @@ namespace Core {
 
     void App::InitInput() {
   
-		ctx->Inp=&Ecs.insert_resource<userinput::InputManager>(); 
     }
     void App::InitOC()
     {
@@ -83,7 +81,7 @@ namespace Core {
 
     void App::InitRenderer()
     {  
-		ctx->Ren = &Ecs.get_resource<renderer::Renderer>().unwrap();
+		
     }
    
 }

@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 #include "../math/vector2.h"
 #include "../util/stbiload.h"
+#include "../game/ecs/resources.h"
 
 namespace CtxName {
 	struct Context;
@@ -21,7 +22,7 @@ namespace window {
 		const int MinSize = 400;
 	};
 
-	struct Window {
+	struct Window:ecs::resource {
 		GLFWwindow* WinPtr = nullptr;
 		GLFWmonitor* MonPtr = nullptr;
 		int width = 0;

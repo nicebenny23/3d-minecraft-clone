@@ -28,7 +28,7 @@ namespace ModelMeshName {
 		stn::Id tex;
 		Vec3 color;
 		ModelMesh();
-		void create_handle(const char* location, const char* name);
+		void create_handle(const char* location, const char* name,ecs::Ecs& world);
 		math::Transform transform;
 		array<Point3> vertices;
 		array<unsigned int> vertexindices;

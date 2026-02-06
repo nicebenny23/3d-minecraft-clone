@@ -31,9 +31,10 @@ struct playerhealth: ecs::component
 		for (int i = 0; i < max_health; i++) {
 			v2::Vec2 pos = v2::Vec2(i / 40.f-.4f, -.45);
 
-			healthboxes.push(ui::ui_image(*CtxName::ctx.Ecs,"images\\health.png","HealthTexture",geo::Box2d(pos,scale),55));
+			healthboxes.push(ui::ui_image(world(), "images\\health.png", "HealthTexture", geo::Box2d(pos, scale), 55));
 		}
 	}
+	
 	playerhealth():damage_decal(*CtxName::ctx.Ecs, "images\\red_back.png", "on_dmg_texture", geo::Box2d::origin_centered(v2::zerov), -3){
 
 		damage_decal.disable();
