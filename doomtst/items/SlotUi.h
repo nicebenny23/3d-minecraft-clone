@@ -33,7 +33,7 @@ namespace items {
 		v2::Vec2 inventory_location;
 		void apply(ecs::obj& entity) {
 
-			ui::ui_spawner(inventory_transform_floating(inventory_location), 0).apply(entity);
+			ui::UiSpawner(inventory_transform_floating(inventory_location), 0).apply(entity);
 		}
 	};
 

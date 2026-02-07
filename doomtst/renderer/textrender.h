@@ -78,7 +78,7 @@ namespace ui {
 	};
 
 	struct ui_text_spawner :ecs::Recipe {
-		ui_spawner ui_spawn;
+		UiSpawner ui_spawn;
 
 		ui_text_spawner(geo::Box2d box, size_t priority) :ui_spawn(geo::Box2d(box.center, box.scale), priority){
 			

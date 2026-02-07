@@ -15,9 +15,9 @@ inline ecs::obj spawndagger(v3::Point3 pos,v3::Vec3 velocity,float gravscale=.4f
 	ecs::obj refmodel = CtxName::ctx.Ecs->spawn_empty();
 	refmodel.add_component<ecs::transform_comp>(pos);
   refmodel.add_component<model>().add("objs\\crystaldagger.obj", "images\\crystaldagger.png");
-   
-    refmodel.add_component<aabb::Collider>(Point3(0,0,0), blockscale / 2, true);
 
+  aabb::DynamicColliderRecipe(geo::Box(v3::Point3(0, 0, 0), blockscale / 2)).apply(refmodel);
+    
     refmodel.add_component<dmgonhit<estate>>(3,  7);
     //refmodel.add_component<destroyonhit<>>();
     refmodel.add_component<rigidbody>().velocity=velocity;

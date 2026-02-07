@@ -114,7 +114,7 @@ struct playerbreak : ecs::component {
 	//returns current speed
 	bool ensure_engage() {
 		ray r= ray::from_offset(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.normal_dir() * 7.f);
-		closest = collision::raycast(r, collision::HitQuery(owner()), voxtra::countsolid);
+		closest = collision::raycast(r, collision::HitQuery(owner()), voxtra::GridTraverseMode::countsolid);
 		if (!closest) {
 			return false;
 		}
@@ -122,7 +122,8 @@ struct playerbreak : ecs::component {
 		if (!hit.owner().has_component<blocks::block>()) {
 			return false;
 		}
-		if (!inrange(hit.dist(), interactminrange, interactmaxrange)) {
+		constexpr float max_dist=7;
+		if (!inrange(hit.dist(), 0, max_dist)) {
 			return false;
 		}
 		if (!world().ensure_resource<userinput::InputManager>().left_mouse().held) {

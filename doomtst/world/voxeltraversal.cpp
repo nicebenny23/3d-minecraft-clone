@@ -6,12 +6,12 @@ using namespace grid;
 //by implementing inner search loop acuracy scales quadraticlly
 //aproxomate voxel traversel algorthm,the accuracy scales linearly with time complexity,
 bool counttablevoxel(block& blk, GridTraverseMode trav) {
-	if ((trav == countsolid || trav == countnormal) && !blk.attributes.solid) {
+	if ((trav == GridTraverseMode::countsolid || trav == GridTraverseMode::countnormal) && !blk.attributes.solid) {
 		return false;
 
 	}
 	if (blk.owner().get_component<aabb::Collider>().effector) {
-		return trav != countnormal;
+		return trav != GridTraverseMode::countnormal;
 	}
 	return true;
 }

@@ -57,7 +57,21 @@ namespace stn {
 		Option(T& val) requires (std::is_reference_v <T>) : has_value(true), value() {
 			value.construct<T>(val);
 		}
-
+		template<typename U>
+			requires (std::same_as<T, const U>&&std::copy_constructible<U>)
+			Option(const Option<U>& other)
+			: has_value(other.is_some()), value() {
+			if (has_value) {
+				value.construct<T>(other.value.template get<U>());
+			}
+		}
+		template<typename U> requires (std::same_as<T, const U&>)
+			Option(Option<U&>&& other) noexcept
+			: has_value(other.is_some()), value() {
+			if (has_value) {
+				value.construct<T>(other.value.template get<U&>());
+			}
+		}
 		Option(const Option& other) requires std::copy_constructible<T>
 			: has_value(other.has_value), value() {
 			if (has_value) {
@@ -305,10 +319,11 @@ namespace stn {
 			return stn::None;
 		}
 		template<typename Func>
-		auto map(Func&& f) const -> Option< std::invoke_result_t<Func, const T&>> requires std::invocable<Func, const T&> && !std::is_void_v<std::invoke_result_t<Func, const T&>>{
+		auto map(Func&& f) const& ->Option< std::invoke_result_t<Func, const T&>> requires std::invocable<Func, const T&> && !std::is_void_v<std::invoke_result_t<Func, const T&>>{
 			using U = std::invoke_result_t<Func, const T&>;
 			if (has_value) {
-				return Option<U>(std::invoke(std::forward<Func>(f), value.get<T>()));
+				auto&& result = std::invoke(std::forward<Func>(f), value.get<T>());
+				return Option<U>(std::forward<decltype(result)>(result));
 			}
 			return stn::None;
 		}
@@ -344,16 +359,20 @@ namespace stn {
 			return map(member);
 		}
 		template<typename R, typename C> requires stn::decays_to<T, C>
-		stn::Option <const R&> member(R C::* member) const {
+		stn::Option <const R&> member_ref(R C::* member) const& {
 			return map(member);
 		}
 		template<typename R, typename C>
-		stn::Option<R&> member(R C::* member)& requires stn::decays_to<T, C> {
+		stn::Option<R&> member_ref(R C::* member)& requires stn::decays_to<T, C> {
 			return map(member);
 		}
 		template<typename R, typename C>
-		stn::Option<R> copy_member(R C::* member)& requires stn::decays_to<T, C> {
-			return map(member);
+		stn::Option<R> member(R C::* member) const& requires stn::decays_to<T, C> {
+			return map(member).copied();
+		}
+		template<typename R, typename C>
+		stn::Option<R> member(R C::* member)& requires stn::decays_to<T, C> {
+			return map(member).copied();
 		}
 		template<typename R, typename C>
 		stn::Option<R> member(R C::* member) && requires stn::decays_to<T, C> {
@@ -392,6 +411,9 @@ namespace stn {
 			return stn::None;
 		}
 	private:
+
+		template<typename U>
+		friend struct Option;
 		bool has_value;
 		stn::erasure::erased<T> value;
 	};
@@ -434,6 +456,30 @@ namespace stn {
 	bool operator>=(const Option<T>& lhs, const Option<T>& rhs) {
 		auto cmp = partial_compare(lhs, rhs);
 		return cmp == std::partial_ordering::greater || cmp == std::partial_ordering::equivalent;
+	}
+	template<typename T>
+	concept PartiallyComparable = requires(T a, T b) {
+		{
+			a <=> b
+		} -> std::convertible_to<std::partial_ordering>;
+	};
+
+	template<typename T,typename Func> requires 
+	std::invocable<Func&&,const T&>&&
+	PartiallyComparable<std::invoke_result_t<Func&&,const T&>>
+	stn::Option<T> min_some_on_map(const stn::Option<T>& first, const stn::Option<T>& second, Func&& fn) {
+		if (first.is_none()) {
+			return second;
+		}
+		if (second.is_none()) {
+			return first;
+		}
+		decltype(auto) first_key= std::invoke(std::forward<Func>(fn),first.unwrap_unchecked());
+		decltype(auto) second_key= std::invoke(std::forward<Func>(fn),second.unwrap_unchecked());
+		if (first_key<second_key) {
+			return first;
+		}
+		return second;
 	}
 }
 #include <format>

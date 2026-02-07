@@ -70,7 +70,6 @@ namespace blocks {
 			pos = location;
 			attributes.solid = is_solid;
 		};
-		void createdefaultaabb(bool effector = false);
 
 	};
 

@@ -8,7 +8,8 @@
 namespace ecs {
 
 
-
+	// Invariant: Child C has parent P in its parent iterator iff
+	// P has C in its child iterator.
 	template<typename T>
 	concept RelationshipAccessor =
 		std::is_default_constructible_v<T>&&

@@ -117,7 +117,7 @@ void particleemiter::renderparticles()
 }
 void initbaseparticle(ecs::obj newent) {
 	newent.get_component<ecs::transform_comp>().transform.position += Vec3(random::random(), 1, random::random()) / 10;
-	newent.add_component<aabb::Collider>(newent.get_component<ecs::transform_comp>().transform.position, unit_scale / 9, true);
+//	newent.add_component<aabb::Collider>(newent.get_component<ecs::transform_comp>().transform.position, unit_scale / 9, true);
 	newent.add_component<rigidbody>(1, .1).velocity = Vec3(random::random(), 1, random::random()) * 2;
 	newent.get_component<ecs::transform_comp>().transform.scale = blockscale / 22;
 	

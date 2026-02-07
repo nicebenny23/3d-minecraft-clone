@@ -62,7 +62,7 @@ inline ecs::obj createslime(v3::Coord pos,bool type) {
     refmodel.add_component<items::loot_table>().add("iron_item", 1);
  
     refmodel.add_component<estate>(10, true);
-    refmodel.add_component<aabb::Collider>(v3::Point3(0,0,0), blockscale, true);
+	aabb::DynamicColliderRecipe(geo::Box(v3::Point3(0, 0, 0), blockscale)).apply(refmodel);
     float dmg = 3;
     if (type == true) {
         dmg = 5;

@@ -35,7 +35,7 @@ namespace ui {
 		}
 	};
 	struct ui_image_spawner:ecs::Recipe {
-		ui_spawner ui_spawn;
+		UiSpawner ui_spawn;
 		stn::Option<renderer::TexturePath> path;
 		ui_image_spawner(renderer::TexturePath spawn_path,geo::Box2d box, size_t priority) :path(spawn_path),ui_spawn(geo::Box2d(box.center, box.scale),priority){
 			

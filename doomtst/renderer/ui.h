@@ -7,22 +7,20 @@
 #include "../game/ecs/query.h"
 #include "../game/ecs/spawner.h"
 #include "../game/ecs/traversal.h"
-
-using namespace stn;
 namespace ui {
 
 	struct UiPriority :ecs::component {
 		size_t priority;
-		UiPriority(size_t predecence) :priority(predecence) {
+		UiPriority(size_t precedence) :priority(precedence) {
 
 		}
-		size_t set_priority(size_t predecence) {
-			priority = predecence;
+		void set_priority(size_t precedence) {
+			priority = precedence;
 		}
 	};
 	struct ComputedPriority :ecs::component {
 		size_t priority;
-		ComputedPriority(size_t predecence) :priority(predecence) {
+		ComputedPriority(size_t precedence) :priority(precedence) {
 
 		}
 	};
@@ -139,9 +137,11 @@ namespace ui {
 
 		}
 	};
+	
 	struct ComputePrioritySystem :ecs::System {
-
+		
 		void run(ecs::Ecs& world) {
+			//runs a bfs
 			size_t current_assignment = 0;
 			stn::stack<ecs::obj> ui_nodes;
 			ui_nodes.push(world.get_resource<BaseUiNode>().expect("ui node must be initialized").base_node);
@@ -160,10 +160,10 @@ namespace ui {
 		}
 
 	};
-	struct ui_spawner :ecs::Recipe {
+	struct UiSpawner :ecs::Recipe {
 		geo::Box2d bounds;
 		size_t priority;
-		ui_spawner(geo::Box2d box, size_t priority) :bounds(geo::Box2d(box.center, box.scale)), priority(priority) {
+		UiSpawner(geo::Box2d box, size_t priority) :bounds(geo::Box2d(box.center, box.scale)), priority(priority) {
 		}
 		void apply(ecs::obj& object) {
 			object.ensure_component<UiBounds>(bounds);
@@ -176,7 +176,7 @@ namespace ui {
 			.world()
 			.get_resource<BaseUiNode>()
 			.member(&BaseUiNode::base_node)
-			.then([object](ecs::obj&& node) {node.add_child(object); });
+			.then([object](ecs::obj node) {node.add_child(object); });
 	
 		}
 	};
@@ -186,7 +186,7 @@ namespace ui {
 			app.emplace_system< UiInteractionSystem>();
 
 			app.emplace_system< ComputePrioritySystem>();
-			ecs::obj entity = ecs::spawn_emplaced<ui_spawner>(app.Ecs, geo::Box2d::origin_centered(v2::unitv), 2);
+			ecs::obj entity = ecs::spawn_emplaced<UiSpawner>(app.Ecs, geo::Box2d::origin_centered(v2::unitv), 2);
 			app.emplace_resource<BaseUiNode>(entity);
 		}
 

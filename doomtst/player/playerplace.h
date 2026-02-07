@@ -31,14 +31,16 @@ struct playerplace : ecs::component {
 		if (!closest.owner().has_component<blocks::block>()) {
 			return false;
 		}
-		if (!inrange(closest.Hit.dist, -1, interactmaxrange)) {
+		double max_interact_range = 7;
+
+		if (!inrange(closest.Hit.dist, -1, max_interact_range)) {
 			return false;
 		}
 		return true;
 	}
 	void placeblock() {
 		ray cameraray = ray(owner().get_component<ecs::transform_comp>().transform.position, owner().get_component<ecs::transform_comp>().transform.position + owner().get_component<ecs::transform_comp>().transform.normal_dir() * 7);
-		block* block_to_replace = voxtra::findprevblock(cameraray, voxtra::countsolid);
+		block* block_to_replace = voxtra::findprevblock(cameraray, voxtra::GridTraverseMode::countsolid);
 		if (block_to_replace == nullptr) {
 			return;
 		}
@@ -54,7 +56,7 @@ struct playerplace : ecs::component {
 		block_to_replace->mesh.attached_direction = dir;
 		Box newblockbox = Box(block_to_replace->center(), blockscale);
 		newblockbox.scale *= .95;
-		bool collides = collision::boxcast_dynamic(newblockbox, collision::HitQuery());
+		bool collides = collision::boxcast_dynamic(newblockbox, collision::HitQuery(world()));
 		if (!collides) {
 
 			stn::Option<blocks::block_id> blk = world().get_resource<items::item_types>().unwrap().from_id(select.unwrap().get_component<items::item_stack>().contained_id()).blk_id;

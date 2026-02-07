@@ -9,7 +9,7 @@
 #include "ecs/query.h"
 #include "../util/pipeline.h"
 #include "../util/tag.h"
-#include "../game/collision.h"
+#include "casts.h"
 #include "ecs/query.h"
 using namespace v3;
 #pragma once 
@@ -142,7 +142,7 @@ struct rigidbody : ecs::component{
                 v3::Point3 curr_pos = owner().get_component<ecs::transform_comp>().transform.position;
                 v3::Point3 new_pos = curr_pos + v3::Vec3(velocity[i]/mini_steps, i) * deltaTime;
                 int sgn = sign(velocity[i]);
-                double scale_in_dir = owner().get_component<Collider>().global_box().scale[i];
+                double scale_in_dir = owner().get_component<aabb::Collider>().global_box().scale[i];
                 v3::Vec3 max_dir_rel = Vec3(sgn * scale_in_dir, i);
                 ray dir_ray(owner().get_component<ecs::transform_comp>().transform.position + max_dir_rel, max_dir_rel + new_pos);
                   voxtra::WorldRayCollision coll = collision::raycast(dir_ray, collision::HitQuery(owner()));

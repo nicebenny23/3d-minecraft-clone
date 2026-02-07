@@ -25,7 +25,8 @@ void player::initplayer()
 	goblin.get_component<ecs::transform_comp>().transform.scale = unit_scale/ 2;
 
 	goblin.add_component<inventory>();
-	goblin.add_component<Collider>(v3::Point3(0,0,0), unit_scale / 2.3f, true, false);
+
+	aabb::DynamicColliderRecipe(geo::Box(v3::Point3(0, 0, 0), unit_scale / 2.3f)).apply(goblin);
 	goblin.add_component<rigidbody>(playerfric);
 
 	goblin.add_component<playereat>();

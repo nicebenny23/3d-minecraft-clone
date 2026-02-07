@@ -34,17 +34,9 @@ void startframe() {
 
 }
 
-void updateworld() {
-	collision::update();
-	CtxName::ctx.Ecs->run_systems();
-
-
-}
 void update() {
-
 	startframe();
-
-	updateworld();
+	CtxName::ctx.Ecs->run_systems();
 	endframe();
 }
 struct TimePlugin :Core::Plugin {
@@ -77,7 +69,8 @@ void init() {
 	Core::game.insert_plugin<items::register_core_items>();
 	Core::game.insert_plugin<items::ItemUiPlugin>();
 	Core::game.insert_plugin<ui::UiTextPlugin>();
-	
+	Core::game.insert_plugin<collision::CollsionPlugin>();
+
 
 	Core::game.InitRenderer();
 	random::initrandom();

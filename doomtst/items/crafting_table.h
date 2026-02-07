@@ -24,7 +24,7 @@ namespace items {
 		stn::Option<ItemRecipe> wanted;
 		void set_state() {
 			stn::Option<ItemRecipe> recipe = best_booklet_recipe(binder.list, binder.input.get_component<container>(), stn::None);
-			binder.output.get_component<display_item>().display = recipe.member(&ItemRecipe::output).copied();
+			binder.output.get_component<display_item>().display = recipe.member_ref(&ItemRecipe::output).copied();
 
 		}
 	};

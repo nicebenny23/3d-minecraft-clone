@@ -114,7 +114,7 @@
     <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\opengl\lib;C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\lib\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)x64</OutDir>
-    <IntDir>R:\</IntDir>
+    <IntDir>$(SolutionDir)inter</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|x64'">
     <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
@@ -315,6 +315,7 @@
     <ClInclude Include="entities\rotatetovelocity.h" />
     <ClInclude Include="entities\slime.h" />
     <ClInclude Include="entities\wisp.h" />
+    <ClInclude Include="game\casts.h" />
     <ClInclude Include="game\Commands.h" />
     <ClInclude Include="game\ecs\archtype.h" />
     <ClInclude Include="game\ecs\commands.h" />

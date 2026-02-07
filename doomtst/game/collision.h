@@ -3,6 +3,8 @@
 #include "../world/grid.h"
 #include "../world/voxeltraversal.h"
 #include "../util/Option.h"
+#include "rigidbody.h"
+#include "Core.h"
 using namespace aabb;
 #pragma once 
 namespace collision {
@@ -30,26 +32,28 @@ namespace collision {
 		collision_event(ecs::obj o1, ecs::obj o2) :source(o1), target(o2) {
 		}
 	};
-	void write_collision_event(ecs::obj o1, ecs::obj o2) {
+	inline void write_collision_event(ecs::obj o1, ecs::obj o2) {
 		o1.world().emplace_event<collision_event>(o1, o2);
 		o2.world().emplace_event<collision_event>(o2, o1);
 	}
 
-	void distribute_collision_force(ecs::obj p1, ecs::obj p2, Vec3 force) {
-		float p1_mass = p1.get_component_opt<rigidbody>().member(&rigidbody::mass).unwrap_or(0);
-		float p2_mass = p2.get_component_opt<rigidbody>().member(&rigidbody::mass).unwrap_or(0);
-		float total_mass = p1_mass + p2_mass;
+	inline void distribute_collision_force(ecs::obj p1, ecs::obj p2, Vec3 force) {
+		stn::Option<float> p1_mass = p1.get_component_opt<rigidbody>().member(&rigidbody::mass);
+		stn::Option<float> p2_mass = p2.get_component_opt<rigidbody>().member(&rigidbody::mass);
+		double total_mass = p1_mass.unwrap_or(0) + p2_mass.unwrap_or(0);
+		
 		if (p1_mass) {
-			v3::Vec3 p1_force = force * p2_mass / total_mass;
+			v3::Vec3 p1_force = force * p2_mass.unwrap_or(total_mass)/ total_mass;
+
 			p1.get_component<ecs::transform_comp>().transform.position += p1_force;
 		}
 		if (p2_mass) {
-			v3::Vec3 p2_force = -force * p1_mass / total_mass;
+			v3::Vec3 p2_force = -force * p1_mass.unwrap_or(total_mass) / total_mass;
 			p2.get_component<ecs::transform_comp>().transform.position += p2_force;
 		}
 	}
 
-	stn::Option<Vec3> colide_dynamic_static(Collider& dynamic_collider, Collider& static_collider, bool is_trigger) {
+	inline stn::Option<Vec3> colide_dynamic_static(Collider& dynamic_collider, Collider& static_collider, bool is_trigger) {
 		Option<Vec3> force = aabb::collide_aabb(dynamic_collider, static_collider);
 		if (!force) {
 			return stn::None;
@@ -61,17 +65,6 @@ namespace collision {
 	}
 
 
-	struct HitQuery {
-		stn::Option<ecs::obj> orgin;
-		explicit HitQuery(ecs::Ecs& ecs) :orgin(stn::None), world(ecs) {
-		}
-		ecs::Ecs& world;
-		explicit HitQuery(const ecs::obj& orgin_obj) : orgin(orgin_obj), world(orgin.unwrap().world()) {
-		}
-		bool matches(Collider& collider) {
-			return collider.owner() == orgin;
-		}
-	};
 
 
 	struct DynamicCollisionSystem :ecs::System {
@@ -102,21 +95,21 @@ namespace collision {
 				for (auto&& [dynamic_tag, collider] : colliders) {
 					geo::Box entity_box = collider.global_box();
 					array<stn::non_null<block>> blocks = collider.world().get_resource<grid::Grid>().unwrap().voxel_in_range(entity_box);
-					stn::Option<Vec3> min_force;
-					stn::Option<block&> min_block;
+					stn::Option<Vec3> max_force;
+					stn::Option<block&> max_block;
 					for (stn::non_null<block> block : blocks) {
 						stn::Option<Collider&> aabb = block->owner().get_component_opt<Collider>();
 						if (!aabb) {
 							continue;
 						}
 						stn::Option<Vec3> force = colide_dynamic_static(collider, aabb.unwrap(), iters==0);
-						if (min_force.map_member(&v3::Vec3::length) < force.map_member(&v3::Vec3::length)) {
-							min_block = *block;
-							min_force = force.unwrap();
+						if (max_force.map_member(&v3::Vec3::length) < force.map_member(&v3::Vec3::length)) {
+							max_block = *block;
+							max_force = force.unwrap();
 						}
 					}
-					if (min_block && !collider.effector) {
-						distribute_collision_force(collider.owner(), min_block.unwrap().owner(), min_force.unwrap());
+					if (max_block && !collider.effector) {
+						distribute_collision_force(collider.owner(), max_block.unwrap().owner(), max_force.unwrap());
 					}
 				}
 			}
@@ -128,7 +121,13 @@ namespace collision {
 		size_t iterations = 0;
 	};
 
+	struct CollsionPlugin :Core::Plugin {
+		void build(Core::App& app) {
+			app.emplace_system< StaticCollsionSystem>(5);
+			app.emplace_system<DynamicCollisionSystem>();
 
+		}
+	};
 
 
 	
@@ -147,30 +146,4 @@ namespace collision {
 		return false;
 	}
 
-	voxtra::WorldRayCollision raycast_dynamic(ray search_ray, HitQuery query) {
-		ecs::View<Collider, DynamicCollider> colliders(query.world);
-		voxtra::WorldRayCollision closest = stn::None;
-		for (auto [collider, dynamic_tag] : colliders) {
-			if (query.matches(collider)) {
-				continue;
-			}
-			if (search_ray.point_lies_in_sphere(collider.global_box().center)) {
-				geointersect::boxRayCollision blkinter = geointersect::intersection(collider.global_box(), search_ray);
-				stn::Option<float> test_dist = blkinter.copy_member(&geointersect::RayHit::dist);
-				stn::Option<float> current_dist = closest.member(&voxtra::RayWorldHit::Hit).member(&geointersect::RayHit::dist);
-				if (test_dist < current_dist) {
-					closest = voxtra::RayWorldHit(blkinter.unwrap(), collider);
-				}
-			}
-		}
-		return closest;
-	}
-	voxtra::WorldRayCollision raycast(ray nray, HitQuery query, voxtra::GridTraverseMode travmode) {
-		voxtra::WorldRayCollision closest_on_grid = voxtra::travvox(nray, travmode);
-		voxtra::WorldRayCollision closest_entity = raycast_dynamic(nray, query);
-		if (closest_on_grid.map_member(&voxtra::RayWorldHit::dist) < closest_entity.map_member(&voxtra::RayWorldHit::dist)) {
-			return closest_on_grid;
-		}
-		return closest_entity;
-	}
 }

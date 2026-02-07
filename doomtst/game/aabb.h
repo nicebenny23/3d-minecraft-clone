@@ -32,22 +32,34 @@ namespace aabb {
 		v3::Point3 center() const {
 			return global_box().center;
 		}
-		Collider(geo::Box aabb, bool iseffector = false):box(aabb),effector(iseffector){
+		Collider(geo::Box aabb, bool iseffector = false) :box(aabb), effector(iseffector) {
 
 		}
 	};
-	struct DynamicCollider:ecs::component {
+	struct DynamicCollider :ecs::component {
 
 
 
 	};
+	struct DynamicColliderRecipe :ecs::Recipe {
+		bool effector;
+		geo::Box box;
+		DynamicColliderRecipe(geo::Box aabb, bool is_effector = false) :effector(is_effector), box(aabb) {
 
-	bool  box_intersects_aabb(geo::Box p1, Collider& p2) {
+		}
+		void apply(ecs::obj& object) override {
+			object.add_component<DynamicCollider>();
+			object.add_component<Collider>(box, effector);
+
+		}
+	};
+
+	inline	bool  box_intersects_aabb(geo::Box p1, Collider& p2) {
 		return geo::boxes_intersect(p1, p2.global_box());
 	}
 
 	//cannot consify until global box is const
-	Option<v3::Vec3> collide_aabb(Collider& p1, Collider& p2) {
+	inline Option<v3::Vec3> collide_aabb(Collider& p1, Collider& p2) {
 		return geo::collide_box(p1.global_box(), p2.global_box());
 
 	}

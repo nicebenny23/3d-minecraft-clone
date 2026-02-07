@@ -69,7 +69,7 @@ namespace ecs {
 		void assert_valid(entity entity) const{
 			if (!contains(entity))
 			{
-				stn::throw_logic_error("refrence to entity with block_id {} is a member of outdated generation {} of {}", entity.id(), entity.generation(), entity_list[entity.id().id].gen_count);
+				stn::throw_logic_error("refrence to entity with block_id {} is a member_ref of outdated generation {} of {}", entity.id(), entity.generation(), entity_list[entity.id().id].gen_count);
 			}
 		}
 		entity_metadata& operator[](entity_id entity) {

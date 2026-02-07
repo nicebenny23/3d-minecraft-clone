@@ -400,7 +400,6 @@ namespace v3 {
 		double z;
 	};
 
-	// utilities that don't require cross-definitions:
 
 	inline double dist2(const Point3& p, const Point3& p1) {
 		return mag2(p1 - p);

@@ -23,11 +23,11 @@ namespace items {
 			void run(ecs::Ecs& world) {
 
 				for (auto&& [icon, item] : ecs::View<ItemIcon, display_item>(world)) {
-					icon.displayed_id = item.display.member(&item_entry::id).copied();
+					icon.displayed_id = item.display.member_ref(&item_entry::id).copied();
 				}
 
 				for (auto&& [count, item] : ecs::View<ItemCountDisplay, display_item>(world)) {
-					count.count= item.display.member(&item_entry::count).copied();
+					count.count= item.display.member_ref(&item_entry::count).copied();
 				}
 			}
 	};

@@ -31,7 +31,7 @@ namespace items {
 			ecs::obj text= entity.spawn_child<ui::ui_text_spawner>(geo::Box2d::Box2d(v2::Vec2(.5f,.5f),v2::Vec2(.5f,.5f)), 30);
 			entity.ensure_component<ItemIcon>(image);
 			entity.ensure_component<ItemCountDisplay>(text);
-			ui::ui_spawner(geo::Box2d::origin_centered(v2::Vec2(item_size, item_size)), 20).apply(entity);
+			ui::UiSpawner(geo::Box2d::origin_centered(v2::Vec2(item_size, item_size)), 20).apply(entity);
 		}
 	};
 	struct DisplayedItemSpawner :ecs::Recipe {
