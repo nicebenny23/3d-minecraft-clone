@@ -46,7 +46,7 @@ namespace ui {
 					return;
 				}
 				else {
-					//close app or somthing;
+					world.emplace_command<Core::CloseGameCommand>();
 				}
 			}
 

@@ -139,25 +139,21 @@ namespace grid {
 	}
 
 
-	array<block*> Grid::voxelinrange(geo::Box span) {
-		array<block*> blockarr = array<block*>();
-
+	array<stn::non_null<block>> Grid::voxel_in_range(geo::Box span) {
+		array<stn::non_null<block>> blocks;
 		v3::Coord lowest = getVoxel(span.min());
 		v3::Coord highest = getVoxel(span.max());
-
 		for (int x = lowest.x; x <= highest.x; x++) {
 			for (int y = lowest.y; y <= highest.y; y++) {
 				for (int z = lowest.z; z <= highest.z; z++) {
-					block* blk = getBlock(Coord(x, y, z));
-					if (blk != nullptr) {
-						blockarr.push(blk);
+					stn::Option<block&> blk = get_block(Coord(x, y, z));
+					if (blk) {
+						blocks.emplace(blk.unwrap());
 					}
 				}
-
 			}
-
 		}
-		return blockarr;
+		return blocks;
 	}
 
 	//order of storage for chunks & location-2loadamnt+1 is width and height

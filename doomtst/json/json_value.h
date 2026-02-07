@@ -25,6 +25,9 @@ namespace json {
 		size_t length() const{
 			return array.length();
 		}
+		void push(const Value& val) {
+
+		}
 		stn::array<stn::box<Value>> array;
 	};
 	struct Object {
@@ -34,10 +37,10 @@ namespace json {
 
 		using iterator = std::map<std::string, stn::box<Value>>::const_iterator;
 
-		iterator begin() {
+		iterator begin() const{
 			return map.begin();
 		}
-		iterator end() {
+		iterator end() const {
 			return map.end();
 		}
 

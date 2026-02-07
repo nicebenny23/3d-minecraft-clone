@@ -45,7 +45,7 @@ namespace grid {
 		Option<block&> get_block(const v3::Coord pos);
 		block* getBlock(const v3::Coord pos);
 		ecs::obj* getObject(const v3::Coord pos);
-		array<block*> voxelinrange(geo::Box span);
+		array<stn::non_null<block>> voxel_in_range(geo::Box span);
 
 		size_t chunks_loaded() {
 			return chunklist.pipe().count([](Chunk::chunk* ptr) {return ptr != nullptr; });

@@ -55,22 +55,18 @@ struct rigidbody : ecs::component{
     bool inliquid;
     float  gravityscale;
     float friction;
+
     void calculateonground() {
 
         inliquid = false;
-        Point3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position - Vec3(0, boundingbox->globalbox().scale.y + .01, 0);
-        geo::Box checkbox = geo::Box(boxcenter, Scale3(boundingbox->globalbox().scale.x, .005, boundingbox->globalbox().scale.z*.9f) * .92);
-        isonground = (voxtra::Boxcollwithgrid(checkbox ));
+        Point3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position - Vec3(0, boundingbox->global_box().scale.y + .01, 0);
+        geo::Box checkbox = geo::Box(boxcenter, Scale3(boundingbox->global_box().scale.x, .005, boundingbox->global_box().scale.z*.9f) * .92);
+        isonground = voxtra::Boxcollwithgrid(checkbox);
     }
     void calculateonceil() {
-		Point3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position + Vec3(0, boundingbox->globalbox().scale.y + .01, 0);
-        geo::Box checkbox = geo::Box(boxcenter, Scale3(boundingbox->globalbox().scale.x, .005, boundingbox->globalbox().scale.z) * .9);
-        isonceil = (voxtra::Boxcollwithgrid(checkbox));
-        if (isonceil)
-        {
-            int l = 2;
-        }
-
+		Point3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position + Vec3(0, boundingbox->global_box().scale.y + .01, 0);
+        geo::Box checkbox = geo::Box(boxcenter, Scale3(boundingbox->global_box().scale.x, .005, boundingbox->global_box().scale.z) * .9);
+        isonceil = voxtra::Boxcollwithgrid(checkbox);
     }
     // Constructor
     rigidbody() : velocity(zerov), oldvelocity(zerov), acceleration(zerov), boundingbox(nullptr) {
@@ -146,17 +142,10 @@ struct rigidbody : ecs::component{
                 v3::Point3 curr_pos = owner().get_component<ecs::transform_comp>().transform.position;
                 v3::Point3 new_pos = curr_pos + v3::Vec3(velocity[i]/mini_steps, i) * deltaTime;
                 int sgn = sign(velocity[i]);
-                double scale_in_dir = owner().get_component<Collider>().globalbox().scale[i];
+                double scale_in_dir = owner().get_component<Collider>().global_box().scale[i];
                 v3::Vec3 max_dir_rel = Vec3(sgn * scale_in_dir, i);
                 ray dir_ray(owner().get_component<ecs::transform_comp>().transform.position + max_dir_rel, max_dir_rel + new_pos);
-
-                if (1.435<curr_pos.y)
-                {
-                    if (new_pos.y < 1.435) {
-                        int l = 5;
-                    }
-                }
-                  voxtra::WorldRayCollision coll = collision::raycastall(dir_ray, collision::HitQuery(owner()));
+                  voxtra::WorldRayCollision coll = collision::raycast(dir_ray, collision::HitQuery(owner()));
                 if (!coll)
                 {
                     //we can move completly
@@ -175,7 +164,6 @@ struct rigidbody : ecs::component{
         acceleration = Vec3(0, 0, 0);  
     }
 
-  
 };
 struct RigidbodySystem :ecs::System {
 

@@ -20,7 +20,9 @@ struct ray
 	v3::Vec3 dir() const {
 		return diff() / length();
 	}
-
+	bool point_lies_in_sphere(v3::Point3 pnt)	const {
+		return v3::dist(start, pnt) < length();
+	}
 	double length() const {
 		return dist(start, end);
 	}

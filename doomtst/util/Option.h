@@ -352,6 +352,10 @@ namespace stn {
 			return map(member);
 		}
 		template<typename R, typename C>
+		stn::Option<R> copy_member(R C::* member)& requires stn::decays_to<T, C> {
+			return map(member);
+		}
+		template<typename R, typename C>
 		stn::Option<R> member(R C::* member) && requires stn::decays_to<T, C> {
 			return map(member).copied();
 		}

@@ -29,7 +29,7 @@ namespace voxtra {
 		}
 	};
 	using WorldRayCollision = stn::Option<RayWorldHit>;
-	enum GridTraverseMode {
+	enum class GridTraverseMode {
 		countnormal = 0,
 		countall = 1,
 		countsolid = 2,
@@ -38,8 +38,8 @@ namespace voxtra {
 
 
 	bool Boxcollwithgrid(geo::Box Box);
-	WorldRayCollision travvox(ray nray, GridTraverseMode trav = countnormal);
-	block* findprevblock(ray nray, GridTraverseMode trav = countnormal);
+	WorldRayCollision travvox(ray nray, GridTraverseMode trav = GridTraverseMode::countnormal);
+	block* findprevblock(ray nray, GridTraverseMode trav = GridTraverseMode::countnormal);
 
 	inline stn::Option<geo::Box> findemptyspace(v3::Scale3 scale) {
 		size_t max_tst = 40;

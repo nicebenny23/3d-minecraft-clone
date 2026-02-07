@@ -35,7 +35,8 @@ namespace stn {
 
     };
     template<typename F, typename Sig>
-    constexpr bool has_exact_overload() {
-        return stn::select_overload_t<Sig>().template has_functor_overload<F>();
+	constexpr bool has_exact_overload() {
+		return stn::select_overload_t<Sig>().template has_functor_overload<F>();
 
+	}
 }

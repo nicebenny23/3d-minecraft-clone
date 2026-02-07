@@ -28,6 +28,11 @@ namespace Core {
 	private:
 		App* engine;
 	};
+	struct CloseGameCommand {
+
+	};
+	
+
     struct App
     {
 
@@ -67,7 +72,26 @@ namespace Core {
 		
     };
     extern App game;
-    
+	struct GameState :ecs::resource {
+		GameState() :should_close(false) {
+
+		}
+		bool should_close;
+	};
+	struct GameCloser :ecs::System {
+		void run(ecs::Ecs& world) {
+			for (CloseGameCommand cmd : world.read_commands<CloseGameCommand>()) {
+				world.get_resource<GameState>().unwrap().should_close = true;
+			}
+		}
+
+	};
+	struct GamePlugin :Core::Plugin {
+		void build(App& app) {
+			app.ensure_resource < GameState>();
+			app.emplace_system< GameCloser>();
+		}
+	};
 }
 
 

@@ -16,8 +16,8 @@ namespace stn {
 			return *ptr;
 		};
 		non_null() = delete;
-		void rebind(T& value) noexcept {
-			ptr = &value;
+		void assign_value(const T& value) noexcept {
+			*ptr = value;
 		}
 		non_null(T& value) :ptr(&value) {
 

@@ -48,7 +48,7 @@ struct playercamcontrols : ecs::component
 			Core::game.Ecs.get_resource<window::Window>().unwrap().EnableCursor();
 		}
 		ray cameraray = ray::from_offset(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.normal_dir() * interactmaxrange);
-		voxtra::WorldRayCollision closest = collision::raycastall(cameraray, collision::HitQuery());
+		voxtra::WorldRayCollision closest = collision::raycast(cameraray, collision::HitQuery());
 		if (closest)
 		{
 			owner().world().write_event<camera_event>(closest.unwrap().owner());

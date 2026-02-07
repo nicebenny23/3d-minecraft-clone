@@ -28,7 +28,7 @@ namespace blocks {
 				object.add_component<block_emmision>(traits.emmited_light);
 			}
 			if (traits.solid) {
-				object.add_component<aabb::Collider>(v3::Point3(0,0,0), traits.mesh.size, false, !traits.solid);
+				object.add_component<aabb::Collider>(geo::Box(v3::Point3(0,0,0), traits.mesh.size),!traits.solid);
 			}
 			if (traits.mesh.transparent) {
 				blk.mesh.transparent = true;

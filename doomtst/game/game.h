@@ -83,9 +83,6 @@ void init() {
 	random::initrandom();
 	Core::game.CreateWorld();
 
-	aabb::initCollider();
-	
-
 	//ui::createuielement<ui_image_component>("images\\crosshair.png", "CrosshairTexture", v2::unitv / 32, v2::zerov, -3);
 
 	Core::game.CreateGrid();
@@ -118,7 +115,7 @@ void rungame() {
 	Core::game.insert_plugin<decals::decal_plugin>();
 	Core::game.insert_plugin<guirender::ConsolePlugin>();
 	float lastupdate = 0;
-	while (!Core::game.Ecs.get_resource<window::Window>().unwrap().shouldClose()) {
+	while (!Core::game.Ecs.get_resource<Core::GameState>().unwrap().should_close) {
 		update();
 	}
 	endgame();

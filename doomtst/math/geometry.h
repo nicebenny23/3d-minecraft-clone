@@ -7,11 +7,27 @@
 using namespace v3;
 
 namespace geo {
+	struct LocalBox {
+		Vec3 center;
+		Scale3 scale;
 
-	
+
+		LocalBox(Vec3 cent, Scale3 scl) : center(cent), scale(scl) {
+		}
+		bool contains_orgin() const {
+			if (abs(-center.x) <= scale.x) {
+				if (abs(-center.y) <= scale.y) {
+					if (abs(-center.z) <= scale.z) {
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+	};
 	struct Box {
 		Point3 center;
-		//scale is not divided by 2
 		Scale3 scale;
 	
 		Box(Point3 cent, Scale3 scl) : center(cent), scale(scl) {}
@@ -22,21 +38,7 @@ namespace geo {
 		Point3 min() const {
 			return center-Vec3(scale);
 		}
-		bool contains_orgin() const
-		{
-			if (abs(-center.x) <= scale.x)
-			{
-				if (abs(-center.y) <= scale.y)
-				{
-					if (abs(-center.z) <= scale.z)
-					{
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
+	
 		bool contains(Point3 pos) const
 		{
 			Vec3 shifted= center-pos;
@@ -53,6 +55,7 @@ namespace geo {
 			return false;
 		}
 
+		
 		bool contains_box(Box b) const{
 		Vec3 sub= b.center-center;
 			if (abs(sub.x)+b.scale.x<scale.x)
@@ -73,16 +76,21 @@ namespace geo {
 			return scale / 2;
 		}
 		// Minkowski difference operator
-		Box operator-(const Box& other) const {
+		LocalBox operator-(const Box& other) const {
 			//minkoski diffrence changes affinity
-			Vec3 sub=center - other.center;
-			return Box(Point3(sub.x,sub.y,sub.z), Scale3(scale.x+other.scale.x,scale.y+other.scale.y,scale.z+other.scale.z));
+			return LocalBox(center - other.center, scale.expanded(other.scale));
 		}
 		Box translate(Vec3 translation_vector) const{
 			return Box(center + translation_vector, scale);
 		}
 		Box scale_from_center(float dialation) const{
 			return Box(center , scale* dialation);
+		}
+		Box transform(LocalBox local_transform) const {
+			return Box(local_transform.center*scale+center, local_transform.scale * scale);
+		}
+		Box transform(Box other_transform) const {
+			return Box(center.offset_local(other_transform.center * scale), other_transform.scale * scale*2);
 		}
 		bool rayintersects(ray fray);
 	};

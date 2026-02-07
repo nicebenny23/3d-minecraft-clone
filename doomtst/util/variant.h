@@ -10,18 +10,19 @@
 #include <utility>
 #pragma once
 
-struct mono {
-	bool operator==(const mono& oth) const {
-		return true;
-	}
-	bool operator!=(const mono& oth) const {
-		return false;
-	}
-	mono() = default;
+namespace stn {
 
-	mono(const mono& oth) = default;
-};
-namespace stn::variant {
+	struct mono {
+		bool operator==(const mono& oth) const {
+			return true;
+		}
+		bool operator!=(const mono& oth) const {
+			return false;
+		}
+		mono() = default;
+
+		mono(const mono& oth) = default;
+	};
 	//optimized to a switch
 	//must have one argument othewise it tries to implicitly form the template paramater
 	template <std::size_t N, typename Func, typename... Args>
@@ -31,12 +32,10 @@ namespace stn::variant {
 		if (index == lower) {
 			return func.template operator() < lower > (std::forward<Args>(args)...);
 		}
-		else if constexpr (lower != 0)
-		{
+		else if constexpr (lower != 0) {
 			return switch_index<lower>(index, std::forward<Func>(func), std::forward<Args>(args)...);
 		}
-		else
-		{
+		else {
 			throw std::logic_error("Index Out of range");
 		}
 	}
@@ -44,7 +43,8 @@ namespace stn::variant {
 	template<typename T>
 	struct typed {
 		T&& value;
-		explicit typed(T&& v) : value(std::forward<T>(v)) {}
+		explicit typed(T&& v) : value(std::forward<T>(v)) {
+		}
 		typed& operator=(const typed& other) {
 			value = other.value;
 			return *this;
@@ -69,7 +69,8 @@ namespace stn::variant {
 
 		}
 	}; template <typename T>
-		struct is_equality_comparable : std::bool_constant<std::equality_comparable<T>> {};
+		struct is_equality_comparable : std::bool_constant<std::equality_comparable<T>> {
+	};
 	template<typename ...types>
 	struct variant {
 
@@ -84,12 +85,12 @@ namespace stn::variant {
 		template<typename T>
 		static constexpr bool is_member = TypeList::contains_v<type_list, T>;
 		template<typename T>
-		static consteval char index_of() {
+		consteval char index_of() {
 
 			static_assert(TypeList::contains_v<type_list, T>, "Type T is not in this TypeList");
 			return TypeList::find_v<type_list, T>;
 		}
-		static consteval bool valid_index(size_t index) {
+		consteval bool valid_index(size_t index) {
 			return index < variants;
 		}
 
@@ -118,8 +119,7 @@ namespace stn::variant {
 
 		bool operator==(const variant& other) const requires(TypeList::all_satisfy_v<type_list, is_equality_comparable>) {
 
-			if (index != other.index)
-			{
+			if (index != other.index) {
 				return false;
 			}
 			return	(other).match([](const auto& value, const auto& us) {
@@ -144,8 +144,7 @@ namespace stn::variant {
 				clear();
 				storage.construct<T>(std::forward<T>(value.value));
 			}
-			else
-			{
+			else {
 				storage.set(std::forward<T>(value.value));
 			}
 			index = index_of<T>();
@@ -159,8 +158,7 @@ namespace stn::variant {
 				clear();
 				storage.construct<T>(std::forward<T>(value));
 			}
-			else
-			{
+			else {
 				storage.set(std::forward<T>(value));
 			}
 			index = index_of<T>();
@@ -169,16 +167,14 @@ namespace stn::variant {
 		template <typename T>
 		T& get() requires is_member<T> {
 
-			if (index != index_of<T>())
-			{
+			if (index != index_of<T>()) {
 				throw std::logic_error("Attempted to get an inactive element of a variant");
 			}
 			return storage.template get<T>();
 		}
 		template <typename T>
 		const T& get() const requires is_member<T> {
-			if (index != index_of<T>())
-			{
+			if (index != index_of<T>()) {
 				throw std::logic_error("Attempted to get an inactive element of a variant");
 			}
 			return storage.template get<T>();
@@ -230,7 +226,7 @@ namespace stn::variant {
 			}
 
 			template <size_t I>
-			decltype(auto) operator()() requires valid_index(I) {
+			decltype(auto) operator()() requires(valid_index(I)) {
 				return call_with_args<I>(std::make_index_sequence<sizeof...(Args)>{});
 			}
 
@@ -241,7 +237,7 @@ namespace stn::variant {
 			}
 
 			template <size_t I>
-			decltype(auto) operator()()  const  requires valid_index(I) {
+			decltype(auto) operator()()  const  requires(valid_index(I)) {
 				return call_with_args<I>(std::make_index_sequence<sizeof...(Args)>{});
 			}
 		};
@@ -286,7 +282,7 @@ namespace stn::variant {
 				using T = std::decay_t<decltype(value)>;
 				storage.template clear<T>();
 				});
-			
+
 
 		}
 		erasure::erased<types...> storage;

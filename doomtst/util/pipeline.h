@@ -341,8 +341,6 @@ namespace stn {
 		}
 	};
 
-	// ---------------- FilterView ----------------
-	//predicate checked in the .method
 	template<Range Source, typename Pred>
 	struct FilterView {
 		using stored_t = stored_range_t<Source>;
@@ -593,7 +591,6 @@ namespace stn {
 		}
 	};
 
-	// Adaptor
 	struct SortAdaptor {
 		constexpr auto operator()() const {
 			return [](auto&& r) {

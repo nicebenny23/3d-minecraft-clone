@@ -8,7 +8,6 @@
 #include "../math/vector2.h"
 #include "../util/stbiload.h"
 #include "../game/ecs/resources.h"
-
 namespace CtxName {
 	struct Context;
 
@@ -63,15 +62,10 @@ namespace window {
 		v2::Vec2 FitToAspectRatio(v2::Vec2 pos);
 
 
-		bool shouldClose() {
-			return glfwWindowShouldClose(WinPtr);
-		}
-	private:
 		void LoadGlad();
 		void InitGLFW();
 	};
-
-
+	
 	// Returns the current window aspect ratio.
 
 

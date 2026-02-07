@@ -8,9 +8,7 @@
 #pragma once
 
 namespace v3 {
-
-	struct Vec3; // forward
-
+	//todo transfer from vector being a point in local space
 	struct Vec3 {
 		Vec3() : x(0), y(0), z(0) {
 		}
@@ -347,7 +345,7 @@ namespace v3 {
 		Point3 operator*(const Scale3& scale) const {
 			return Point3(x * scale.x, y * scale.y, z*scale.z);
 		}
-
+		//todo rename to change_space
 		Point3 operator/(const Scale3& inv_scale) const {
 			if (inv_scale.x == 0 || inv_scale.y == 0 || inv_scale.z == 0) {
 				throw std::logic_error("Unable to divide a Vec3 by zero");
@@ -383,7 +381,10 @@ namespace v3 {
 			throw std::invalid_argument(std::to_string(index) + " is not a valid index for a Point3 ");
 			}
 		}
-
+		//this can somtimes be semanticcly usful
+		inline Point3 offset_local(const Point3& local) const{
+			return Point3(x + local.x, y + local.y, z + local.z);
+		}
 		Point3(double value, size_t index) {
 			x = 0;
 			y = 0;
@@ -425,6 +426,7 @@ namespace v3 {
 	inline Point3 lerp(const Point3& p, const Point3& p1, double t) {
 		return Point3(p.x*t+p1.x*(1-t), p.y * t + p1.y * (1 - t), p.z * t + p1.z * (1 - t));
 	}
+	
 	inline Point3 operator+(const Vec3& a, const Point3& b) {
 		return Point3(a.x + b.x, a.y + b.y, a.z + b.z);
 	}

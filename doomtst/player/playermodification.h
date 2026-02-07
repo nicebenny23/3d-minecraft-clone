@@ -114,7 +114,7 @@ struct playerbreak : ecs::component {
 	//returns current speed
 	bool ensure_engage() {
 		ray r= ray::from_offset(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.normal_dir() * 7.f);
-		closest = collision::raycastall(r, collision::HitQuery(owner()), voxtra::countsolid);
+		closest = collision::raycast(r, collision::HitQuery(owner()), voxtra::countsolid);
 		if (!closest) {
 			return false;
 		}

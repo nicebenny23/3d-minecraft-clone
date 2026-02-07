@@ -70,6 +70,7 @@ namespace Core {
     void App::InitOC()
     {
         ctx->Ecs = &Ecs;
+		insert_plugin<GamePlugin>();
     }
 
     void App::CreateWorld()

@@ -1,4 +1,5 @@
 #include "json.h"
+#include "../util/variant.h"
 #pragma once
 namespace json {
 
@@ -187,7 +188,7 @@ namespace json {
 			return parse_string(view);
 		}
 		default:
-		if (view.starts_with("true") || view.starts_with("false")||view.starts_with("null")) {
+		if (view.starts_with("true") || view.starts_with("false") || view.starts_with("null")) {
 			return parse_literal(view);
 		}
 		return parse_number(view);
@@ -202,4 +203,67 @@ namespace json {
 
 	}
 
-}
+
+
+
+
+
+
+	void write_json_impl(const Value& val, std::string& context) {
+		stn::visitor json_writer([&context](const std::string& buffer) {
+			context += '"';
+			context += buffer;
+			context += '"';
+			},
+			[&context](stn::NoneType value) {
+				context += "none";
+			},
+			[&context](bool value) {
+				context += value ? "true" : "false";
+			},
+			[&context](double value) {
+				context += std::to_string(value);
+			},
+			[&context](std::int64_t value) {
+				context += std::to_string(value);
+			},
+			[&context](const Object& value) {
+				context += "{\n";
+				bool should_comma = false;
+				for (const auto& elem : value) {
+					if (should_comma) {
+						context += ",";
+					}
+					should_comma = true;
+					context += '"';
+					context += elem.first;
+					context += '"';
+					context += ":";
+					write_json_impl(*elem.second, context);
+					context += "\n";
+				}
+				context += "}\n";
+			},
+			[&context](const Array& arr) {
+				context += "\n[";
+				bool should_comma = false;
+				for (const stn::box<Value>& elem : arr) {
+					if (should_comma) {
+						context += ",";
+					}
+					should_comma = true;
+					write_json_impl(*elem, context);
+					context += "\n";
+				}
+				context += "]\n";
+			});
+		std::visit(json_writer, val.value);
+	}
+	std::string to_string(const Value& v) {
+		std::string out;
+		write_json_impl(v, out);
+		return out;
+
+	}
+
+};

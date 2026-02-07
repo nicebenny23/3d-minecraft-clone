@@ -270,7 +270,6 @@
     <ClCompile Include="renderer\model.cpp" />
     <ClCompile Include="renderer\textrender.cpp" />
     <ClCompile Include="renderer\ui.cpp" />
-    <ClCompile Include="game\aabb.cpp" />
     <ClCompile Include="block\block.cpp" />
     <ClCompile Include="util\algorthm.cpp" />
     <ClCompile Include="math\intersection.cpp" />
@@ -280,7 +279,6 @@
     <ClCompile Include="util\stbiload.cpp" />
     <ClCompile Include="game\camera.cpp" />
     <ClCompile Include="world\chunk.cpp" />
-    <ClCompile Include="game\collision.cpp" />
     <ClCompile Include="external\glad.c" />
     <ClCompile Include="world\grid.cpp" />
     <ClCompile Include="renderer\renderer.cpp" />
