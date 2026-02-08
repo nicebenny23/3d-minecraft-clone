@@ -152,7 +152,7 @@ namespace renderer {
 
 			world.load_asset_emplaced<renderer::shader_descriptor>("ParticleShader", "shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
 			//xName::ctx.Ecs->load_asset_emplaced<MaterialDescriptor>("Particle", "solid_phase", particle_shader, RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-			set_uniform("aspect_ratio", world.get_resource<window::Window>().unwrap().AspectRatio());
+			set_uniform("aspect_ratio", world.get_resource<window::Window>().AspectRatio());
 			meshes = MeshRegistry(&context);
 		}
 
@@ -173,7 +173,9 @@ namespace renderer {
 			uniform_manager.set(name, renderer::uniform_val{ std::in_place_type<val_type>, val });
 
 		}
-		void apply_uniform(const renderer::uniform_val& val, const std::string& location_in_shader);
+		void apply_uniform(renderer::uniform& uniform) {
+			context.set_uniform(uniform);
+		}
 
 		void Clear();
 
@@ -206,7 +208,7 @@ namespace renderer {
 
 			bind_material(mat_id);
 			for (auto& uniform : ren.view_overides()) {
-				apply_uniform(uniform.value, uniform.name);
+				apply_uniform(uniform);
 			}
 			Render(meshes[mesh_id]);
 
@@ -278,12 +280,11 @@ namespace renderer {
 	};
 	struct render_all :ecs::System {
 		void run(ecs::Ecs& world) {
-			Renderer& ren = world.get_resource<Renderer>().unwrap();
+			Renderer& ren = world.get_resource<Renderer>();
 			for (MeshData& mesh : world.read_commands<MeshData>()) {
 
 				ren.fill_mesh(mesh);
 			}
-
 			std::unordered_map<phase_handle, render_pass> pass_map;
 			size_t cnt = 0;
 			

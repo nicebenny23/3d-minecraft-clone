@@ -37,17 +37,17 @@ namespace grid {
 		}
 		//removes a block from the grid whilst still keeping it in the work
 		void dislocate_from_grid(ecs::obj blk, block_id new_id) {
+			grid::Grid& grid = blk.world().get_resource<grid::Grid>();
 			auto& blk_comp = blk.get_component<block>();
 			auto position = blk_comp.pos;
-			ecs::obj& to_flip = *CtxName::ctx.Grid->getObject(position);
-			to_flip = GenerateBlock(CtxName::ctx.Grid->GetChunk(position)->owner().get_component<Chunk::chunkmesh>(), new_id, position, blk_comp.mesh.direction, blk_comp.mesh.attached_direction).spawn(blk.world());
+			ecs::obj& to_flip = *grid.getObject(position);
+			to_flip = GenerateBlock(grid.GetChunk(position)->owner().get_component<Chunk::chunkmesh>(), new_id, position, blk_comp.mesh.direction, blk_comp.mesh.attached_direction).spawn(blk.world());
 			blk.destroy();
-
 		}
 
 
 
-		void blockchangecoverupdate(ecs::Ecs& world, blocks::block* location) {
+		void block_change_cover_update(ecs::Ecs& world, blocks::block* location) {
 			world.write_command<cover_block_command>(cover_block_command(location->pos));
 			for (math::Direction3d block_dir : math::Directions3d) {
 
@@ -63,7 +63,7 @@ namespace grid {
 
 
 		void run(ecs::Ecs& world) {
-			grid::Grid& grid = world.get_resource<grid::Grid>().unwrap();
+			grid::Grid& grid = world.get_resource<grid::Grid>();
 			for (set_block_command& cmd : world.read_commands<set_block_command>()) {
 				set_block(cmd.pos, cmd.id, grid, world);
 			}

@@ -8,38 +8,50 @@ namespace ui {
 	};
 
 	struct menu_component :ecs::component {
-		
+
 	};
 
 	struct open_menu {
-		open_menu(menu_component& menu_comp):menu_ent(menu_comp.owner()){
+		open_menu(menu_component& menu_comp) :menu_ent(menu_comp.owner()) {
 
 		}
 		ecs::obj menu_ent;
 	};
+	struct MenuRecipe :ecs::Recipe {
+		MenuRecipe(){
+			
+		}
+		void apply(ecs::obj& object) {
+			object.add_component<menu_component>();
+			UiSpawner(geo::Box2d(v2::zerov, v2::unitv), 1).apply(object);
+		}
+	};
 	struct MenuState :ecs::resource {
-		bool menu_open() const{
+		bool menu_open() const {
 			return open_menu.is_some();
+		}
+		bool no_menu_open() const {
+			return open_menu.is_none();
 		}
 		MenuState() = default;
 		stn::Option<ecs::obj> open_menu;
 	};
 
-	struct MenuEnabler:ecs::System {
+	struct MenuEnabler :ecs::System {
 		void run(ecs::Ecs& world) {
-			MenuState& state=world.ensure_resource<MenuState>();
+			MenuState& state = world.ensure_resource<MenuState>();
 
-			if (world.get_resource<userinput::InputManager>().unwrap().getKey(userinput::escape_key).pressed) {
+			if (world.get_resource<userinput::InputManager>().getKey(userinput::escape_key).pressed) {
 				world.write_command<close_menu>(close_menu());
 			}
 
 			for (open_menu menu : world.read_commands<open_menu>()) {
-				
+
 				menu.menu_ent.get_component<ui::UiEnabled>().enable();
 				state.open_menu = menu.menu_ent;
 				return;
 			}
-			for (close_menu menu:world.read_commands<close_menu>() ) {
+			for (close_menu menu : world.read_commands<close_menu>()) {
 				if (state.menu_open()) {
 					state.open_menu.unwrap().get_component<ui::UiEnabled>().disable();
 					state.open_menu = stn::None;
@@ -49,22 +61,13 @@ namespace ui {
 					world.emplace_command<Core::CloseGameCommand>();
 				}
 			}
-
-
 		}
-		
-	
 	};
-	struct MenuPlugin :Core::Plugin{
+	struct MenuPlugin :Core::Plugin {
 		void build(Core::App& app) {
 			app.ensure_resource< MenuState>();
 			app.emplace_system<MenuEnabler>();
-		  }
+		}
 	};
-
-
-
-
-
 
 }

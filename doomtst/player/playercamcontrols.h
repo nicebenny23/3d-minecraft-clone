@@ -18,7 +18,7 @@ struct playercamcontrols : ecs::component
 		if (!world().ensure_resource<ui::MenuState>().menu_open())
 		{
 
-			world().get_resource<window::Window>().unwrap().DisableCursor();
+			world().get_resource<window::Window>().DisableCursor();
 
 			userinput::InputManager& man = world().ensure_resource<userinput::InputManager>();
 			double xoffset = man.mouse_position_dt.x;
@@ -45,7 +45,7 @@ struct playercamcontrols : ecs::component
 		}
 		else
 		{
-			Core::game.Ecs.get_resource<window::Window>().unwrap().EnableCursor();
+			Core::game.Ecs.get_resource<window::Window>().EnableCursor();
 		}
 		double max_interact_range = 5;
 		ray cameraray = ray::from_offset(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.normal_dir() * max_interact_range);

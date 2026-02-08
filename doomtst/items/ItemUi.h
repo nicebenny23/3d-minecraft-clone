@@ -53,7 +53,7 @@ namespace items {
 					icon.image_component.get_component<ui::UiEnabled>().disable();
 					continue;
 				}
-				item_traits traits = world.get_resource<item_types>().expect("item_type_registry must exist for items to exist")
+				item_traits traits = world.get_resource<item_types>()
 				.from_id(icon.displayed_id.unwrap());
 				icon.image_component.get_component<ui::UiEnabled>().enable();
 				icon.image_component.get_component<ui::ui_image_component>().set_image(traits.image_path);

@@ -49,8 +49,6 @@ namespace blocks {
 			return mesh[index];
 		}
 		blockatt attributes;
-		char mininglevel;
-		bool minedfastwithpick;
 		Point3 center() const {
 			return mesh.box.center;
 		}
@@ -61,12 +59,12 @@ namespace blocks {
 		geo::Box bounds() const {
 			return mesh.box;
 		}
-
-		block(const BlockMeshTraits& traits, Chunk::chunkmesh& chunk_mesh, v3::Coord location, blocks::block_id blockid, math::Direction3d attachment_face, math::Direction2d block_direction,bool is_solid,SolidBlockTraits sb_traits) 
+		const BlockType& type() const{
+			return world().get_resource<BlockRegistry>().type_for(id);
+		}
+		block(const BlockMeshTraits& traits, Chunk::chunkmesh& chunk_mesh, v3::Coord location, blocks::block_id blockid, math::Direction3d attachment_face, math::Direction2d block_direction,bool is_solid) 
 			:mesh(traits.faces, chunk_mesh.recreate_mesh, location, traits.size, attachment_face, block_direction) {
-			mininglevel = 0;
 			id = blockid;
-			mininglevel = static_cast<char>(sb_traits.time_to_mine);
 			pos = location;
 			attributes.solid = is_solid;
 		};

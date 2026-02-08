@@ -14,7 +14,7 @@ namespace blockrender {
 
 
 	inline bool chunk_viewable(Chunk::chunk& chk) {
-		float slope = tan(chk.world().get_resource<renderer::Renderer>().unwrap().fov / 2);
+		float slope = tan(chk.world().get_resource<renderer::Renderer>().fov / 2);
 		geo::Box chkb = chk.span();
 		ray camray = ray::from_offset(camera::campos(), camera::GetCamFront());
 		geo::cone ncone = geo::cone(camray, slope);
@@ -150,7 +150,7 @@ namespace blockrender {
 		}
 
 		void run(ecs::Ecs& ecs) {
-			grid::Grid& world_grid = ecs.get_resource<grid::Grid>().unwrap();
+			grid::Grid& world_grid = ecs.get_resource<grid::Grid>();
 			std::mutex fill_mutex;
 			auto recompute_for = [&fill_mutex](Chunk::chunk* item) {
 				if (item) {
@@ -166,7 +166,7 @@ namespace blockrender {
 		}
 		void run(ecs::Ecs& ecs) {
 			array<ecs::obj> to_render = array<ecs::obj>();
-			Grid& grid = ecs.get_resource<grid::Grid>().unwrap();
+			Grid& grid = ecs.get_resource<grid::Grid>();
 			for (int i = 0; i < grid.totalChunks; i++) {
 				if (grid[i] && chunk_viewable(*grid[i])) {
 					renderchunk(grid[i]->owner().get_component<Chunk::chunkmesh>());
@@ -188,7 +188,7 @@ namespace blockrender {
 		}
 		void initblockrendering(ecs::Ecs& ecs) {
 
-			auto& renderer = ecs.get_resource<renderer::Renderer>().unwrap();
+			auto& renderer = ecs.get_resource<renderer::Renderer>();
 			renderer::shader_id block_shader = ecs.load_asset_emplaced<renderer::shader_descriptor>("BlockShader", "shaders\\vert1.vs", "shaders\\frag1.vs").unwrap();
 			ecs.load_asset_emplaced<renderer::MaterialDescriptor>("SolidBlock", "solid_phase", "BlockShader", renderer::RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
 				stn::array{

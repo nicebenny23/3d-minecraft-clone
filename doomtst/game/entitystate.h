@@ -8,13 +8,12 @@
 struct entityeffects {
 	float timetilllavaover;
 
-};                 
+};
 
-struct estate : ecs::component
-{
-	
+struct estate : ecs::component {
+
 	entityeffects effects;
-	timename::duration model_red_dur;
+	timename::Duration model_red_dur;
 	bool inliquid;
 	bool takesfalldmg;
 	int health;
@@ -26,38 +25,31 @@ struct estate : ecs::component
 	float invincablilitymax;
 	float timetilldmg;
 	void update() {
-		if (model_red_dur.state()==timename::duration_state::ending)
-		{
-			if (owner().has_component<model>())
-			{
-				for (ModelMeshName::ModelMesh& msh : owner().get_component<model>())
-				{
+		if (model_red_dur.state() == timename::DurationState::ending) {
+			if (owner().has_component<model>()) {
+				for (ModelMeshName::ModelMesh& msh : owner().get_component<model>()) {
 					msh.color = Vec3(1, 1, 1);
 				}
 			}
 		}
 		timetilldmg -= CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
-		if (owner().has_component<rigidbody>())
-		{
+		if (owner().has_component<rigidbody>()) {
 			testfalldamage();
 			prevonground = owner().get_component<rigidbody>().isonground;
 		}
-		
+
 	}
 	void testfalldamage() {
-		if (takesfalldmg)
-		{
+		if (takesfalldmg) {
 
 
 
-			if (owner().get_component<rigidbody>().isonground && !prevonground)
-			{
+			if (owner().get_component<rigidbody>().isonground && !prevonground) {
 				float ypos = owner().get_component<ecs::transform_comp>().transform.position.y;
 
-				if (owner().get_component<rigidbody>().velocity.y < -5)
-				{
+				if (owner().get_component<rigidbody>().velocity.y < -5) {
 
-					damage(static_cast<int>(- (owner().get_component<rigidbody>().oldvelocity.y / 44444)));
+					damage(static_cast<int>(-(owner().get_component<rigidbody>().oldvelocity.y / 44444)));
 
 				}
 
@@ -70,12 +62,12 @@ struct estate : ecs::component
 		}
 	}
 	void start() {
-		model_red_dur=CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().create_dur();
-	
+		model_red_dur = world().ensure_resource<timename::TimeManager>().current_time();
+
 		health = maxhealth;
 		lastongroundy = owner().get_component<ecs::transform_comp>().transform.position.y;
 	}
-	estate(int maxhp, bool falls){
+	estate(int maxhp, bool falls) {
 		maxhealth = maxhp;
 		health = maxhp;
 		damagemultiplyer = 1;
@@ -85,32 +77,27 @@ struct estate : ecs::component
 	void remove();
 	void damage(int dmg) {
 		dmg = static_cast<int>(dmg * damagemultiplyer);
-		if (dmg <= 0)
-		{
+		if (dmg <= 0) {
 			return;
 		}
-		if (timetilldmg < 0)
-		{
+		if (timetilldmg < 0) {
 
 			model_red_dur.set(.3f);
-			if (owner().has_component<model>())
-			{
+			if (owner().has_component<model>()) {
 
-				
-				for (ModelMeshName::ModelMesh& msh:owner().get_component<model>())
-				{
+
+				for (ModelMeshName::ModelMesh& msh : owner().get_component<model>()) {
 					msh.color = Vec3(1.0f, .3f, .3f);
 				}
 			}
 			timetilldmg = invincablilitymax;
 			health -= dmg;
-			if (health <= 0)
-			{
+			if (health <= 0) {
 				remove();
 
-				
-				
-				
+
+
+
 			}
 			health = clamp(health, 0, maxhealth);
 		}
@@ -118,12 +105,11 @@ struct estate : ecs::component
 
 	}
 	void heal(int healamt) {
-		if (healamt <= 0)
-		{
+		if (healamt <= 0) {
 			return;
 		}
 
-	timetilldmg = invincablilitymax;
+		timetilldmg = invincablilitymax;
 		health += healamt;
 
 		health = clamp(health, 0, maxhealth);
@@ -136,4 +122,4 @@ namespace ecs {
 		.priority = 11
 	};
 }
- // ! entitystate_HPP;
+// ! entitystate_HPP;

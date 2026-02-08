@@ -13,7 +13,7 @@ namespace ecs {
 			wanted = wanted.without(needed);
 
 		}
-		bool passes(component_ids ids) const {
+		bool passes(const component_ids& ids) const {
 			return ids.has(needed);
 		}
 	};

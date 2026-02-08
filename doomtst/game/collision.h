@@ -94,7 +94,7 @@ namespace collision {
 				ecs::View<DynamicCollider, Collider> colliders(world);
 				for (auto&& [dynamic_tag, collider] : colliders) {
 					geo::Box entity_box = collider.global_box();
-					array<stn::non_null<block>> blocks = collider.world().get_resource<grid::Grid>().unwrap().voxel_in_range(entity_box);
+					array<stn::non_null<block>> blocks = collider.world().get_resource<grid::Grid>().voxel_in_range(entity_box);
 					stn::Option<Vec3> max_force;
 					stn::Option<block&> max_block;
 					for (stn::non_null<block> block : blocks) {

@@ -99,7 +99,7 @@ namespace renderer{
 			glBindFramebuffer(GL_FRAMEBUFFER,0);
 			bound_frame = 0;
 		}
-		void set_uniform(renderer::uniform value) {
+		void set_uniform(renderer::uniform& value) {
 			GLint location = BoundShader.unwrap().uniformlocation(value.name.c_str());
 			switch (value.current_type()) {
 			case renderer::uform_int:

@@ -3,8 +3,6 @@
 using namespace blocks;
 using	 namespace voxtra;
 using namespace grid;
-//by implementing inner search loop acuracy scales quadraticlly
-//aproxomate voxel traversel algorthm,the accuracy scales linearly with time complexity,
 bool counttablevoxel(block& blk, GridTraverseMode trav) {
 	if ((trav == GridTraverseMode::countsolid || trav == GridTraverseMode::countnormal) && !blk.attributes.solid) {
 		return false;
@@ -16,18 +14,17 @@ bool counttablevoxel(block& blk, GridTraverseMode trav) {
 	return true;
 }
 
-bool voxtra::Boxcollwithgrid(geo::Box Box) {
+bool voxtra::boxcast_grid(geo::Box Box) {
 
 	array<stn::non_null<block>> BlocksInRange = CtxName::ctx.Grid->voxel_in_range(Box);
 
 	for (stn::non_null<block> PotentialCollision : BlocksInRange) {
-		aabb::Collider* Collider = PotentialCollision->owner().get_component_ptr<aabb::Collider>();
-		if (Collider != nullptr && PotentialCollision->attributes.solid && !Collider->effector) {
-			if (aabb::box_intersects_aabb(Box, *Collider)) {
+		stn::Option<aabb::Collider&> Collider = PotentialCollision->owner().get_component_opt<aabb::Collider>();
+		if (Collider && PotentialCollision->attributes.solid && !Collider.unwrap().effector) {
+			if (aabb::box_intersects_aabb(Box, Collider.unwrap())) {
 				return true;
 			}
 		}
-
 	}
 	return false;
 
@@ -62,9 +59,6 @@ voxtra::WorldRayCollision  voxtra::travvox(ray nray, GridTraverseMode trav) {
 		Boundry[i] = next_boundary(pos[i], sgns[i] == 1);
 	}
 	while (travel_dist <= ray_length) {
-
-
-
 		WorldRayCollision Collision = stn::None;
 		for (int x = extended_range(pos.x).first; x <= extended_range(pos.x).second; ++x) {
 			for (int y = extended_range(pos.y).first; y <= extended_range(pos.y).second; ++y) {

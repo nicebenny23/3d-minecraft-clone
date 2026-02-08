@@ -22,7 +22,7 @@ ModelMesh::ModelMesh()
 
 void ModelMeshName::ModelMesh::create_handle(const char* locaion,const char* name,ecs::Ecs& world)
 {
-handle= world.get_resource<renderer::Renderer>().unwrap().gen_renderable();
+handle= world.get_resource<renderer::Renderer>().gen_renderable();
 handle.set_layout(vertice::vertex().push<float, 3>().push<float, 2>());
 handle.set_material("Model");
 handle.set_uniform(renderer::uniform(world.load_asset_emplaced<renderer::TexturePath>(locaion, name).unwrap(), "tex"));

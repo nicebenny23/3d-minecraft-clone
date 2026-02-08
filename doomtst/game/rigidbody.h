@@ -26,10 +26,10 @@ struct rigid_force {
         bool val= CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now()<end_time.unwrap();
         return val;
     }
-    rigid_force(Vec3 frc, float duration,const tag::Tag& tg):force(frc), end_time(CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now()+duration), tag(tg) {
+    rigid_force(Vec3 frc, float Duration,const tag::Tag& tg):force(frc), end_time(CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now()+Duration), tag(tg) {
         
     }
-    rigid_force(Vec3 frc, float duration, const std::string& tg) :force(frc), end_time(CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now() + duration), tag(tg) {
+    rigid_force(Vec3 frc, float Duration, const std::string& tg) :force(frc), end_time(CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now() + Duration), tag(tg) {
 
     }
     rigid_force(Vec3 frc, const tag::Tag& tg) :force(frc), end_time(stn::None),tag(tg){
@@ -61,12 +61,12 @@ struct rigidbody : ecs::component{
         inliquid = false;
         Point3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position - Vec3(0, boundingbox->global_box().scale.y + .01, 0);
         geo::Box checkbox = geo::Box(boxcenter, Scale3(boundingbox->global_box().scale.x, .005, boundingbox->global_box().scale.z*.9f) * .92);
-        isonground = voxtra::Boxcollwithgrid(checkbox);
+        isonground = voxtra::boxcast_grid(checkbox);
     }
     void calculateonceil() {
 		Point3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position + Vec3(0, boundingbox->global_box().scale.y + .01, 0);
         geo::Box checkbox = geo::Box(boxcenter, Scale3(boundingbox->global_box().scale.x, .005, boundingbox->global_box().scale.z) * .9);
-        isonceil = voxtra::Boxcollwithgrid(checkbox);
+        isonceil = voxtra::boxcast_grid(checkbox);
     }
     // Constructor
     rigidbody() : velocity(zerov), oldvelocity(zerov), acceleration(zerov), boundingbox(nullptr) {
@@ -116,7 +116,7 @@ struct rigidbody : ecs::component{
     //should definitly clamp
     void integrate() {
       
-        double deltaTime = CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
+        double deltaTime = world().ensure_resource<timename::TimeManager>().dt;
         velocity += acceleration * deltaTime;
        
         if (isonground||isonceil)
@@ -132,7 +132,7 @@ struct rigidbody : ecs::component{
         }velocity.x *= clamp(1 - deltaTime*friction, 0.0, 1.0);  // Adjust damping factor to prevent excessive damping
 
         velocity.z *= clamp(1 - deltaTime * friction, 0.0, 1.0);  // Adjust damping factor to prevent excessive damping
-        size_t mini_steps = 10;
+        size_t mini_steps = 5;
         for (int j = 0; j < mini_steps; j++)
         {
 

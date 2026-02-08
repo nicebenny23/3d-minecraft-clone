@@ -17,11 +17,9 @@ inline double  interoplate_quintic(double t) {
 
 }
 
-//at zero val one is selected at one val2 is selected
-
-inline double lerp(double val, double val2, double selector)
+inline double lerp(double start, double end, double selector)
 {
-	return val2 * selector + val * (1 - selector);
+	return end*selector + start * (1 - selector);
 }
 
 inline double clamp(double val, double low, double high)

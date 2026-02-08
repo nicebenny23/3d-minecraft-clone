@@ -23,7 +23,7 @@ const int indices[]{
 
 void particleemiter::update()
 {
-	float dt = CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
+	float dt = world().ensure_resource<timename::TimeManager>().dt;
 	timetillspawn = Min(timetillspawn-dt,particlespawntime);
 	for (int i = 0; i < particlearray.length(); i++)
 	{
@@ -35,7 +35,7 @@ void particleemiter::update()
 			{
 
 
-				if (particlearray[i].get_component<particle>().endtime < CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now().value)
+				if (particlearray[i].get_component<particle>().endtime < world().ensure_resource<timename::TimeManager>().now().value)
 				{
 					std::move(particlearray[i]).destroy();
 				}

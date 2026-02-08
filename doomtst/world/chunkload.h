@@ -153,10 +153,10 @@ namespace Chunk {
 
 		}
 		idmap(Coord location) :
-			slow(math::noise_parameters(1, 1, .005, 1.2)),
-			map(math::noise_parameters(3, .6, .02, 1.2)),
-			crazy(math::noise_parameters(4, 1., .005, 1.2)),
-			middle_map(math::noise_parameters(2, 1, .005, 1.2)) {
+			slow(math::NoiseParameters(1, 1, .005, 1.2)),
+			map(math::NoiseParameters(3, .6, .02, 1.2)),
+			crazy(math::NoiseParameters(4, 1., .005, 1.2)),
+			middle_map(math::NoiseParameters(2, 1, .005, 1.2)) {
 
 			array<int> x_index_list;
 			for (size_t i = 0; i < Chunk::chunkaxis; i++) {
@@ -171,7 +171,7 @@ namespace Chunk {
 
 
 		}
-		
+
 
 	};
 
@@ -202,7 +202,7 @@ namespace Chunk {
 					for (int z = 0; z < Chunk::chunkaxis; z++) {
 						Coord pos = statemap.ids[ind].pos;
 						blocks::block_id block_id = statemap.ids[ind].block_id;
-						newchunk.block_list[ind]=GenerateBlock(mesh,block_id, pos, math::Direction2d(math::up2d), math::Direction3d(math::up_3d)).spawn(chunk_object.world());
+						newchunk.block_list[ind] = GenerateBlock(mesh, block_id, pos, math::Direction2d(math::up2d), math::Direction3d(math::up_3d)).spawn(chunk_object.world());
 						ind++;
 					}
 				}
@@ -227,7 +227,7 @@ namespace Chunk {
 			for (int x = 0; x < Chunk::chunkaxis; x++) {
 				for (int y = 0; y < Chunk::chunkaxis; y++) {
 					for (int z = 0; z < Chunk::chunkaxis; z++) {
-						Coord pos = Coord(x, y, z) + location.position* Chunk::chunkaxis;
+						Coord pos = Coord(x, y, z) + location.position * Chunk::chunkaxis;
 						blocks::block_id blockid = static_cast<blocks::block_id>(bytelist[ind] & unsigned char(255));
 						byte dirprop = bytelist[ind] >> unsigned char(8);
 						math::Direction3d mesh_attach_direction = math::Direction3d(math::DirectionIndex3d(dirprop >> unsigned char(3)));
@@ -247,9 +247,9 @@ namespace Chunk {
 		}
 		Chunk::ChunkLocation pos;
 	};
-	struct CreateChunk:ecs::Recipe {
+	struct CreateChunk :ecs::Recipe {
 		ChunkLocation location;
-		CreateChunk(ChunkLocation chunk_location):location(chunk_location) {
+		CreateChunk(ChunkLocation chunk_location) :location(chunk_location) {
 
 		}
 		void apply(ecs::obj& object) {
@@ -271,6 +271,6 @@ namespace Chunk {
 
 
 	};
-		
+
 
 }

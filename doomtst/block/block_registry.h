@@ -43,8 +43,6 @@ namespace blocks {
 	template<typename T>
 	inline constexpr BlockTraits BlockInfo{};
 	struct BlockRegistry :ecs::resource {
-		stn::array<stn::box<BlockType>> types;
-		stn::array<BlockTraits> traits;
 		stn::array<stn::Option<size_t>> to_id;
 		template<typename T>
 		void register_block(block_id id_for) {
@@ -55,9 +53,14 @@ namespace blocks {
 		BlockTraits& traits_for(block_id id) {
 			return traits[to_id[id].expect("block should exist")];
 		}
+		const BlockType& type_for(block_id id) const {
+			return *types[to_id[id].expect("block should exist")];
+		}
 		BlockType& type_for(block_id id) {
 			return *types[to_id[id].expect("block should exist")];
 		}
-
+		private:
+			stn::array<stn::box<BlockType>> types;
+			stn::array<BlockTraits> traits;
 	};
 };

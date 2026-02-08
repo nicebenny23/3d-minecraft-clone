@@ -25,7 +25,7 @@ namespace ui {
 
 		void set_handle() {
 			if (!handle) {
-				handle = world().get_resource < renderer::Renderer>().unwrap().gen_renderable();
+				handle = world().get_resource<renderer::Renderer>().gen_renderable();
 				handle.set_material("Text");
 				handle.set_layout(vertice::vertex().push<float, 2>().push<float, 3>());
 

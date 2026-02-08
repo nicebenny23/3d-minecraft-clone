@@ -101,12 +101,17 @@ namespace renderer{
            return std::get<T>(value);
        }
 	   
+	   template< typename T>
+	 const T& get() const{
+		   return std::get<T>(value);
+	   }
+
        template<typename T>
            uniform(const T& val, const char* uniform_name)
            : name(uniform_name), value(std::in_place_type<T>, val) {
        }
 
-		uniform(const uniform_val& val, const char* uniform_name)
+		uniform(const uniform_val& val, const std::string& uniform_name)
 			: name(uniform_name), value(val) {
 		}
 		   UniformType current_type() const{

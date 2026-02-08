@@ -2,7 +2,7 @@
 layout (location= 0 ) in vec2 texcord;
 
 
-uniform float scale;
+uniform vec2 scale;
 uniform vec2 center;
 uniform float aspectratio;
 out vec2 texcoord;

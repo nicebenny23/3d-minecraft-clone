@@ -50,21 +50,16 @@ struct liquidprop : ecs::component {
 
 		if (blk->id != minecraftair) {
 			//if (blk->block_id == owner()) {
-				if (liqval > 1) {
+			if (liqval > 1) {
 
 
-					if (blk->owner().get_component<liquidprop>().liqval < liqval) {
+				if (blk->owner().get_component<liquidprop>().liqval < liqval) {
 
-						blk->owner().get_component<liquidprop>().liqval += 1;
-						liqval -= 1;
-					}
-			//}
+					blk->owner().get_component<liquidprop>().liqval += 1;
+					liqval -= 1;
+				}
+				//}
 			}
-
-
-
-		
-
 			return;
 
 
@@ -72,7 +67,7 @@ struct liquidprop : ecs::component {
 
 		Coord pos = blk->pos;
 		grid::set_block(world(), pos, owner().get_component<blocks::block>().id);
-		blk = (CtxName::ctx.GridRef().getBlock(pos));
+		blk = world().get_resource<grid::Grid>().getBlock(pos);
 
 		if (!blk->owner().has_component<liquidprop>()) {
 			Assert("block must be inititated with liquid component");
@@ -87,7 +82,7 @@ struct liquidprop : ecs::component {
 	}
 
 	void update() {
-	//	diffusetime += tick::tickdt;
+		//	diffusetime += tick::tickdt;
 		if (.4 < diffusetime) {
 			diffusetime = 0;
 
@@ -99,7 +94,7 @@ struct liquidprop : ecs::component {
 			}
 		}
 		if (liqval <= 0) {
-			grid::set_block(world(),owner().get_component<blocks::block>().pos, minecraftair);
+			grid::set_block(world(), owner().get_component<blocks::block>().pos, minecraftair);
 		}
 
 	}

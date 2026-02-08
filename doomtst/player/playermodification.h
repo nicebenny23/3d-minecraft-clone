@@ -75,10 +75,7 @@ struct playerbreak : ecs::component {
 
 	playerbreak() {
 	};
-	float block_power(block* blk) {
-		return blk->mininglevel;
 
-	}
 	float curr_mining_power() {
 		if (!pickaxe()) {
 			return 1;
@@ -88,22 +85,24 @@ struct playerbreak : ecs::component {
 	}
 	void engage_block(block* blk) {
 		if (!engaged()) {
-				break_decal.get_component<decals::decal_component>().enable();
-			pickaxe.clear(owner().get_component<inventory>().selected().map(&component::owner));
+				
+			pickaxe.clear(owner().get_component<player::inventory>().selected().map(&component::owner));
 			currmining.clear(blk);
-			break_start_time = block_power(blk);
+			break_start_time = blk->type().mining_traits().time_to_mine;
 			timeuntilbreak = break_start_time;
 
 		}
 		else {
-			pickaxe.set(owner().get_component<inventory>().selected().map(&component::owner));
+			pickaxe.set(owner().get_component<player::inventory>().selected().map(&component::owner));
 			currmining.set(blk);
 		}
 	}
 	void disengage_block() {
 		currmining.clear(nullptr);
 		pickaxe.clear(stn::None);
-
+		if (engaged()) {
+			int l = 4;
+		}
 		break_decal.get_component<decals::decal_component>().disable();
 		timeuntilbreak = -1;
 
@@ -118,7 +117,7 @@ struct playerbreak : ecs::component {
 		if (!closest) {
 			return false;
 		}
-		auto hit = closest.unwrap();
+		voxtra::RayWorldHit hit = closest.unwrap();
 		if (!hit.owner().has_component<blocks::block>()) {
 			return false;
 		}
@@ -143,7 +142,7 @@ struct playerbreak : ecs::component {
 	void try_modify() {
 		if (ensure_engage()) {
 
-			timeuntilbreak -= curr_mining_power() * CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
+			timeuntilbreak -= curr_mining_power() * world().ensure_resource<timename::TimeManager>().dt;
 			// Show progress decal
 			float prog = (break_start_time - timeuntilbreak) / break_start_time;
 			size_t phase = clamp(size_t(prog * 7.f), 0, 6);
@@ -167,7 +166,7 @@ struct playerbreak : ecs::component {
 			if (pickaxe()) {
 				pickaxe().unwrap().get_component_opt<items::item_durability>();
 			}
-			if (!currmining()->minedfastwithpick || currmining()->mininglevel <= curr_mining_power()) {
+			if (currmining()->type().mining_traits().time_to_mine<= curr_mining_power()) {
 				make_drop(broken->owner());
 			}
 			grid::set_block(world(),broken->pos, minecraftair);

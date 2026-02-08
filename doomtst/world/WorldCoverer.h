@@ -69,12 +69,12 @@ namespace grid {
 		void compute_chunk_cover(ecs::obj chunk) {
 			Chunk::chunk& cnk = chunk.get_component<Chunk::chunk >();
 			for (ecs::obj blk : cnk.block_list) {
-				compute_mesh_cover(blk.get_component<block>().mesh, chunk.world().get_resource<Grid>().expect("grid should exist"));
+				compute_mesh_cover(blk.get_component<block>().mesh, chunk.world().get_resource<Grid>());
 			}
 		}
 
 		void run(ecs::Ecs& world) {
-			grid::Grid& grid = world.get_resource<grid::Grid>().unwrap();
+			grid::Grid& grid = world.get_resource<grid::Grid>();
 			for (cover_block_command& cmd : world.read_commands<cover_block_command>()) {
 				block* blk = grid.getBlock(cmd.block_location);
 				if (!blk) {
@@ -83,7 +83,7 @@ namespace grid {
 				for (face& fc : blk->mesh) {
 					fc.set_cover(cover_state::Uncomputed);
 				}
-				compute_mesh_cover(blk->mesh, world.get_resource<Grid>().expect("grid should exist"));
+				compute_mesh_cover(blk->mesh, world.get_resource<Grid>());
 			}
 
 			for (Chunk::chunk_loaded& cmd : event_key.read()) {

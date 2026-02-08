@@ -17,8 +17,8 @@ struct playermovement : ecs::component
     void start()
     {
         has_jumped = false;
-        lastGroundedTime = CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now();
-        jumpBufferTime = CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now() - 1.0f;
+        lastGroundedTime = world().ensure_resource<timename::TimeManager>().now();
+        jumpBufferTime = world().ensure_resource<timename::TimeManager>().now() - 1.0f;
         slamUsed = false;
     }
 };
@@ -38,14 +38,14 @@ struct PlayerMovementSys : ecs::System
 
         for (auto [body, movement, climb] : view)
         {
-			userinput::InputManager& man=body.world().ensure_resource<userinput::InputManager>();
+			userinput::InputManager& man=ecs.ensure_resource<userinput::InputManager>();
 
             if (isnan(body.owner().get_component<rigidbody>().velocity.x))
             {
                 int l = 2;
             }
-            float dt = CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
-            timename::time now = CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now();
+            float dt = ecs.ensure_resource<timename::TimeManager>().dt;
+            timename::time now = ecs.ensure_resource<timename::TimeManager>().now();
             // — horizontal movement unchanged —
             float slowdown = 2.0f;
             float speed = 16.0f;

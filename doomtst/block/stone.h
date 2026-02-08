@@ -7,7 +7,6 @@
 namespace blocks {
 	struct StoneBlock :BlockType {
 		void apply(ecs::obj& block) override {
-
 			block.add_component<items::loot_table>().add<items::stone_item>(1);
 		}
 		SolidBlockTraits mining_traits() const override {

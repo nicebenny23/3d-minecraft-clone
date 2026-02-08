@@ -9,7 +9,7 @@
 struct playerattackcomp: ecs::component
 {
 	void wearduribilty() {
-		stn::Option<items::item_stack&> select =owner().get_component<inventory>().selected();
+		stn::Option<items::item_stack&> select =owner().get_component<player::inventory>().selected();
 		if (select)
 		{
 			if (select.unwrap().owner().has_component<items::item_durability>()) {
@@ -36,8 +36,8 @@ struct playerattackcomp: ecs::component
 		{
 			return;
 		}
-		debug("sees"+std::to_string(CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt));
-		if (closest.collider.owner().has_component<estate>()&& world().get_resource<userinput::InputManager>().unwrap().left_mouse().pressed)
+		debug("sees"+std::to_string(world().ensure_resource<timename::TimeManager>().dt));
+		if (closest.collider.owner().has_component<estate>()&& world().get_resource<userinput::InputManager>().left_mouse().pressed)
 		{
 			if (closest.owner().has_component<rigidbody>())
 			{

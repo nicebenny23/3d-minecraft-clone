@@ -24,7 +24,7 @@ array<navnode> getneighborsdefault( navnode& node) {
         v3::Point3 center = point + unitv / 2;
         v3::Scale3 scale = blockscale * v3::Scale3(1.1, .9f, 1.1);
         geo::Box bx = geo::Box(center, scale);
-        if (!voxtra::Boxcollwithgrid(bx))
+        if (!voxtra::boxcast_grid(bx))
         {
             neighbors.push(navnode(point));
         }
@@ -161,7 +161,7 @@ return        array<navnode>();
 navigator::navigator(ecs::obj parentref, array<navnode>(*testfunc)(navnode& pos))
 {
     headed_index = 0;
-    path_creation_dur=CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().create_dur();
+    path_creation_dur=CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().current_time();
     goingtwords = parentref;
     testfunction = testfunc;
 }
@@ -192,13 +192,13 @@ Vec3 transformnormal(Vec3 pos, Vec3 scale)
 
 				Point3 center = Point3(xind, pos.y - 1, zind);
                 geo::Box posbx = geo::Box(center+unitv/2, blockscale);
-                if (!voxtra::Boxcollwithgrid(posbx))
+                if (!voxtra::boxcast_grid(posbx))
                 {
                     continue;
                 }
                 center += Vec3( 0,1,0);
                 posbx.center += Vec3(0, 1, 0);
-                if (voxtra::Boxcollwithgrid(posbx) == true)
+                if (voxtra::boxcast_grid(posbx) == true)
                 {
                     return Vec3(xind, pos.y, zind);
                 }
@@ -266,7 +266,7 @@ void navigator::update()
 
        
     }
-    if (path_creation_dur.state()!=timename::duration_state::active)
+    if (path_creation_dur.state()!=timename::DurationState::active)
     {
         calcpath();
         path_creation_dur.set(timetillupdatespeed);

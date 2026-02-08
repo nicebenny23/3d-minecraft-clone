@@ -39,23 +39,15 @@ namespace renderer {
 	void Renderer::bind_material(material_handle material) {
 		Material& mat = *material;
 		context.bind(*mat.shader);
-		for (const auto& elem : mat.handles) {
-			apply_uniform(uniform_manager.get(elem), elem.name);
+		for (auto& elem : mat.handles) {
+			renderer::uniform uniform_value(uniform_manager.get(elem), elem.name);
+			apply_uniform(uniform_value);
 		}
 		context.bind_properties(mat.prop);
 	}
-	void Renderer::apply_uniform(const renderer::uniform_val& val, const std::string& location_in_shader) {
-		context.set_uniform(renderer::uniform(val, location_in_shader.c_str()));
-	}
-
-
-
-
-
 
 	void Renderer::Clear() {
-
-		set_uniform("aspect_ratio", world.get_resource<window::Window>().unwrap().AspectRatio());
+		set_uniform("aspect_ratio", world.get_resource<window::Window>().AspectRatio());
 		glClearColor(0, 0, 0, 0.0f);
 		glDepthMask(GL_TRUE);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -72,7 +64,12 @@ namespace renderer {
 	}
 
 	void RenderableHandle::fill(MeshData&& new_mesh) {
-		CtxName::ctx.Ecs->write_command(std::move(new_mesh));
+		if (id) {
+			id.unwrap().object.world().write_command(std::move(new_mesh));
+		}
+		else {
+			stn::throw_logic_error("cannot fill uninitialized mesh");
+		}
 	}
 
 	void RenderableHandle::disable() {

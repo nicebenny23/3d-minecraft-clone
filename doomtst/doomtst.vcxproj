@@ -114,7 +114,6 @@
     <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\opengl\lib;C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\lib\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)x64</OutDir>
-    <IntDir>$(SolutionDir)inter</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|x64'">
     <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
@@ -283,7 +282,6 @@
     <ClCompile Include="world\grid.cpp" />
     <ClCompile Include="renderer\renderer.cpp" />
     <ClCompile Include="world\managegrid.cpp" />
-    <ClCompile Include="world\tick.cpp" />
     <ClCompile Include="world\voxeltraversal.cpp" />
     <ClCompile Include="renderer\Window.cpp" />
   </ItemGroup>
@@ -422,6 +420,7 @@
     <ClInclude Include="math\meshes.h" />
     <ClInclude Include="math\Scale3.h" />
     <ClInclude Include="player\playermovment.h" />
+    <ClInclude Include="renderer\color.h" />
     <ClInclude Include="renderer\decal.h" />
     <ClInclude Include="renderer\Grid.h" />
     <ClInclude Include="renderer\renderer\Fbo.h" />
@@ -543,7 +542,6 @@
     <ClInclude Include="external\stb_image.h" />
     <ClInclude Include="renderer\renderer\texture.h" />
     <ClInclude Include="renderer\renderer\vertexobject.h" />
-    <ClInclude Include="world\tick.h" />
     <ClInclude Include="world\voxeltraversal.h" />
     <ClInclude Include="renderer\Window.h" />
     <ClInclude Include="world\world.h" />

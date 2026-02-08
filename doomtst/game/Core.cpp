@@ -33,7 +33,7 @@ namespace Core {
 
     void cursorPositionCallback(GLFWwindow* /*window*/, double xpos, double ypos)
     {
-        v2::Vec2 new_mouse_position(game.Ecs.get_resource<window::Window>().unwrap().FitToAspectRatio(v2::Vec2(xpos,ypos)));
+        v2::Vec2 new_mouse_position(game.Ecs.get_resource<window::Window>().FitToAspectRatio(v2::Vec2(xpos,ypos)));
 		userinput::InputManager& manager = game.ensure_resource<userinput::InputManager>();
 		manager.mouse_position_dt = new_mouse_position - manager.mouse_position;
 		manager.mouse_position = new_mouse_position;

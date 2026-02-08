@@ -22,7 +22,7 @@ namespace blocks {
 			BlockTraits& traits=registry.traits_for(id);
 			
 			BlockType& block_type = registry.type_for(id); 
-			block& blk = world.spawn_with_component<block>(traits.mesh, mesh, loc, id, direction, face,traits.solid, block_type.mining_traits());
+			block& blk = world.spawn_with_component<block>(traits.mesh, mesh, loc, id, direction, face,traits.solid);
 			ecs::obj object = blk.owner();
 			if (traits.emmited_light!=0) {
 				object.add_component<block_emmision>(traits.emmited_light);

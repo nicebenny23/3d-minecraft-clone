@@ -59,7 +59,7 @@ struct playerplace : ecs::component {
 		bool collides = collision::boxcast_dynamic(newblockbox, collision::HitQuery(world()));
 		if (!collides) {
 
-			stn::Option<blocks::block_id> blk = world().get_resource<items::item_types>().unwrap().from_id(select.unwrap().get_component<items::item_stack>().contained_id()).blk_id;
+			stn::Option<blocks::block_id> blk = world().get_resource<items::item_types>().from_id(select.unwrap().get_component<items::item_stack>().contained_id()).blk_id;
 
 			if (blk && select.unwrap().get_component<items::item_stack>().can_remove(1)) {
 				grid::set_block(world(), block_to_replace->pos, blk.unwrap());
@@ -72,7 +72,7 @@ struct playerplace : ecs::component {
 
 
 	void update() {
-		select = owner().get_component<inventory>().selected_object();
+		select = owner().get_component<player::inventory>().selected_object();
 		ray cameraray = ray(owner().get_component<ecs::transform_comp>().transform.position, owner().get_component<ecs::transform_comp>().transform.position + owner().get_component<ecs::transform_comp>().transform.normal_dir() * 7);
 		Hit = collision::raycast(cameraray, collision::HitQuery(owner()));
 		if (!caninteract()) {
@@ -83,7 +83,7 @@ struct playerplace : ecs::component {
 
 
 
-		if (world().get_resource<userinput::InputManager>().unwrap().right_mouse().pressed) {
+		if (world().get_resource<userinput::InputManager>().right_mouse().pressed) {
 
 
 			placeblock();

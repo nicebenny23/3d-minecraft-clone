@@ -37,7 +37,7 @@ namespace voxtra {
 	};
 
 
-	bool Boxcollwithgrid(geo::Box Box);
+	bool boxcast_grid(geo::Box Box);
 	WorldRayCollision travvox(ray nray, GridTraverseMode trav = GridTraverseMode::countnormal);
 	block* findprevblock(ray nray, GridTraverseMode trav = GridTraverseMode::countnormal);
 
@@ -50,7 +50,7 @@ namespace voxtra {
 			double ranz = (random::random() - .5) * 2;
 			v3::Point3 test_pos = (Vec3(ranx, rany, ranz) * (2 * CtxName::ctx.Grid->rad + 1) / 2 + CtxName::ctx.Grid->grid_pos.position) * Chunk::chunkaxis;
 			geo::Box test_box = geo::Box(test_pos,scale);
-			if (!Boxcollwithgrid(test_box))
+			if (!boxcast_grid(test_box))
 			{
 				return stn::Option<geo::Box>(test_box);
 			}
@@ -71,7 +71,7 @@ namespace voxtra {
 			}
 			geo::Box ground_tst_box = geo::Box(test_box.unwrap().center - Vec3(0, scale.y, 0), v3::Scale3(scale.x, .1f, scale.z));;
 		
-			if (Boxcollwithgrid(ground_tst_box))
+			if (boxcast_grid(ground_tst_box))
 			{
 				return test_box;
 			}

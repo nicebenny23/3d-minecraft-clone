@@ -71,12 +71,20 @@ namespace ecs {
 
 
 		template<ResourceType T>
-		stn::Option<T&> get_resource() {
+		stn::Option<T&> get_resource_opt() {
 			return resources.get<T>();
 		}
 		template<ResourceType T>
-		stn::Option<const T&> get_resource() const {
+		stn::Option<const T&> get_resource_opt() const {
 			return resources.get<T>();
+		}
+		template<ResourceType T>
+		T& get_resource() {
+			return resources.get<T>().expect("resource must exist");
+		}
+		template<ResourceType T>
+		const T& get_resource() const {
+			return resources.get<T>().expect("resource must exist");
 		}
 		template<ResourceType T>
 		T& insert_resource() requires std::constructible_from<T, ecs::Ecs&> {
@@ -157,11 +165,11 @@ namespace ecs {
 		}
 
 		const Systems& systems() const {
-			return get_resource<Systems>().unwrap();
+			return get_resource<Systems>();
 		}
 
 		Systems& systems() {
-			return get_resource<Systems>().unwrap();
+			return get_resource<Systems>();
 		}
 		template<SystemType T>
 		void emplace_system() requires std::constructible_from<T,Ecs&>{

@@ -7,9 +7,9 @@
 #include "../math/mathutil.h"
 namespace math {
 
-	struct noise_parameters {
+	struct NoiseParameters {
 
-		noise_parameters(size_t octave_count, double frequency_multiplier, double initial_frequency, double amplification_multiplier) {
+		NoiseParameters(size_t octave_count, double frequency_multiplier, double initial_frequency, double amplification_multiplier) {
 			//400 is enough for all cases
 			histogram_sample_count = 400;
 			starting_frequency = initial_frequency;
@@ -87,7 +87,7 @@ namespace math {
 	}
 
 
-	inline double perlin_for(v3::Point3 point, const noise_parameters& params) {
+	inline double perlin_for(v3::Point3 point, const NoiseParameters& params) {
 		double noise_value = 0;
 		double maxintensity = 0;
 		double intensity = 1;
@@ -105,7 +105,7 @@ namespace math {
 
 	struct NoiseMap {
 
-		NoiseMap(noise_parameters noise_properties) :properties(noise_properties) {
+		NoiseMap(NoiseParameters noise_properties) :properties(noise_properties) {
 			array<double> distribution = array<double>();
 			for (int i = 0; i < properties.histogram_sample_count; i++) {
 				distribution.push(perlin_for(properties.uniform_point(i), properties));
@@ -119,7 +119,7 @@ namespace math {
 			return equalizer.apply_distribution(perlin_for(pos, properties));
 		}
 	private:
-		noise_parameters properties;
+		NoiseParameters properties;
 		statistics::HistogramEqualizer equalizer;
 	};
 }

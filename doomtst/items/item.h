@@ -109,7 +109,7 @@ namespace items {
 			return entry.id;
 		}
 		const item_types& types() const{
-			return world().get_resource<item_types>().expect("item types must exist");
+			return world().get_resource<item_types>();
 		}
 		size_t count() const {
 			return entry.count;

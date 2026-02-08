@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "../math/mathutil.h"
+#include "Core.h"
 #pragma once
 namespace timename {
 	struct time {
@@ -25,19 +26,19 @@ namespace timename {
 		double operator-(time offset) const { return (value - offset.value); }
 
 	};
-	struct duration;
+	struct Duration;
 	struct TimeManager:ecs::resource
 	{
 		double real_dt;
 
 		double dt;
 		double smooth_fps;
-		double ElapsedTime;
+		double elapsed_time;
 
 		TimeManager() {
 
 			dt = 0;
-			ElapsedTime = glfwGetTime();
+			elapsed_time = glfwGetTime();
 			real_dt = 1 / 60.f;
 			smooth_fps=0;
 			fps_counter = 0;
@@ -45,11 +46,11 @@ namespace timename {
 			
 		
 		
-		void calcfps() {
+		void calculate_fps() {
 
 			double CurrentTime= glfwGetTime();
-			 real_dt = CurrentTime - ElapsedTime;
-			ElapsedTime = CurrentTime;
+			 real_dt = CurrentTime - elapsed_time;
+			elapsed_time = CurrentTime;
 			
 
 			double fps = 1.f / real_dt;
@@ -67,40 +68,52 @@ namespace timename {
 
 			}
 		}
-		duration create_dur();
+		Duration current_time();
 
 		time now() {
-			return time(ElapsedTime);
+			return time(elapsed_time);
 		}
 		
 	private:
 		double fps_counter;
 		const int min_frames = 20;
 	};
+	struct FpsTimer :ecs::System {
 
-	enum class duration_state {
+		void run(ecs::Ecs& world) {
+			world.ensure_resource<TimeManager>().calculate_fps();
+		}
+
+	};
+	struct TimePlugin :Core::Plugin {
+		void build(Core::App& App) {
+			App.emplace_resource<timename::TimeManager>();
+			App.emplace_system<FpsTimer>();
+		}
+	};
+	enum class DurationState {
 		active=0,
 		ending=1,
 		inactive=2
 	};
-	struct duration {
-		duration() :tm(nullptr), active(false) {
+	struct Duration {
+		Duration() :tm(nullptr), active(false) {
 
 		}
-		duration(double wait, TimeManager* tman):tm(tman),active(true) {
-			set(wait);
+		Duration(double waiting_time, TimeManager* tman):tm(tman),active(true) {
+			set(waiting_time);
 		}
-		duration(TimeManager* tman) :tm(tman), active(false) {
+		Duration(TimeManager* tman) :tm(tman), active(false) {
 			
 		}
 		double remaining() {
 			if (!active)
 			{
-				throw std::logic_error("cannot compute the remaining time of a duration");
+				throw std::logic_error("cannot compute the remaining time of a Duration");
 			}
 			if (!tm)
 			{
-				throw std::logic_error("cant use unitilized duration");
+				throw std::logic_error("cant use unitilized Duration");
 			}
 			return stn::Max(0, end-tm->now());
 		}
@@ -110,12 +123,12 @@ namespace timename {
 		void set(double dur) {
 			if (dur<=0)
 			{
-				throw std::logic_error("duration must wasit for a positive number of time");
+				throw std::logic_error("Duration must wasit for a positive number of time");
 			}
 
 			if (!tm)
 			{
-				throw std::logic_error("cant use unitilized duration");
+				throw std::logic_error("cant use unitilized Duration");
 			}
 			end = tm->now() + dur;
 			active = true;
@@ -125,26 +138,26 @@ namespace timename {
 
 			if (!tm)
 			{
-				throw std::logic_error("cant use unitilized duration");
+				throw std::logic_error("cant use unitilized Duration");
 			}
 			return active;
 		}
-		duration_state state() {
+		DurationState state() {
 
 		if (!tm)
 		{
-			throw std::logic_error("cant use unitilized duration");
+			throw std::logic_error("cant use unitilized Duration");
 		}
 		if (!active)
 		{
-		return duration_state::inactive;
+		return DurationState::inactive;
 		}
 		if (tm->now()< end )
 		{
-		return duration_state::active;
+		return DurationState::active;
 		}
 		active = false;
-		return duration_state::ending;
+		return DurationState::ending;
 
 	}
 	private:

@@ -56,7 +56,7 @@ namespace renderer{
 			}
 			overides.push(value);
 		}
-		stn::span<const renderer::uniform> view() const {
+		stn::span<renderer::uniform> view() {
 			return overides.span();
 		}
 
@@ -129,7 +129,7 @@ namespace renderer{
 		mesh_id get_mesh() const {
 			return get_component<mesh_component>().msh.expect("mesh must exist");
 		}
-		stn::span<const renderer::uniform> view_overides() const {
+		stn::span<renderer::uniform> view_overides() {
 			return get_component<renderable_overides>().view();
 		}
 		void set_material(material_handle mat_id) {

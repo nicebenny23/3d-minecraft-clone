@@ -16,8 +16,8 @@ namespace stn {
             return id_bitset.contains_index(id.id) && id_bitset[id.id];
         }
         bool has(const ids& other) const {
-            return (id_bitset.ones_match(id_bitset | other.id_bitset));
-        }
+			return id_bitset.has_all_ones(other.id_bitset);
+		}
         bool has_none(const ids& other) const {
             return (id_bitset & other.id_bitset).empty();
         }

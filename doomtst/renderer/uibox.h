@@ -33,6 +33,7 @@ namespace ui {
 		void set_image(const renderer::TexturePath& path) {
 			world().write_command(set_image_cmd(owner().inner(), path));
 		}
+		
 	};
 	struct ui_image_spawner:ecs::Recipe {
 		UiSpawner ui_spawn;
@@ -55,7 +56,6 @@ namespace ui {
 	struct ui_image{
 		ui_image(ecs::Ecs& world,const char* texloc, const char* texture, geo::Box2d bounds, size_t prio) :object(ecs::spawn_emplaced<ui_image_spawner>(world,renderer::TexturePath(std::string(texloc),std::string(texture)),bounds,prio)){
 		}
-
 		ecs::object_handle object;
 		void enable_if(bool should_enable) {
 			object.get_component<UiEnabled>().set_enabled(should_enable);	
@@ -104,7 +104,7 @@ namespace ui {
 				ui_image_component& img= world.get_component<ui_image_component>(cmd.ui_entity);
 				if (!img.tex_handle) {
 				
-					img.tex_handle = world.get_resource<renderer::Renderer>().unwrap().gen_renderable();
+					img.tex_handle = world.get_resource<renderer::Renderer>().gen_renderable();
 					img.tex_handle.set_material("Ui");
 					img.tex_handle.set_layout(vertice::vertex().push<float, 2>());
 					renderer::MeshData mesh = img.tex_handle.create_mesh();
@@ -115,7 +115,7 @@ namespace ui {
 					}
 					img.tex_handle.fill(std::move(mesh));
 				}
-				img.tex_handle.set_uniform(renderer::uniform(CtxName::ctx.Ecs->load_asset(cmd.path).unwrap(), "tex"));
+				img.tex_handle.set_uniform(renderer::uniform(world.load_asset(cmd.path).unwrap(), "tex"));
 			}
 
 			ecs::View<ui::UiEnabled, ui::UiBounds, ui::ComputedPriority, ui_image_component> bounds_view(world);
@@ -126,7 +126,7 @@ namespace ui {
 						ui_image.tex_handle.enable();
 						v2::Vec2 scale = bounds.global().center;
 						ui_image.tex_handle.set_order_key(UiPriority.priority);
-						ui_image.tex_handle.set_uniform(renderer::uniform(float(bounds.global().scale.x), "scale"));
+						ui_image.tex_handle.set_uniform(renderer::uniform(bounds.global().scale, "scale"));
 						ui_image.tex_handle.set_uniform(renderer::uniform(bounds.global().center, "center"));
 
 					}

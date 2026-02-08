@@ -104,9 +104,9 @@ namespace ecs {
 		}
 
 		View(Ecs& world) :ecs(world), archetypes(), positions() {
-			component_ids bitlist = ecs.components.insert_ids<Components...>();
+			component_ids bit_list = ecs.components.insert_ids<Components...>();
 			positions =ecs.components.insert_id_list<Components...>();
-			archetypes = ecs.archetypes.archetypes_passing(ecs::archetype_predicate(component_ids(), bitlist)); 
+			archetypes = ecs.archetypes.archetypes_passing(ecs::archetype_predicate(component_ids(), bit_list)); 
 		}
 		
 		//returns the archetype at index in archetypes

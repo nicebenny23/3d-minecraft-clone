@@ -45,8 +45,6 @@ struct navnode {
         return gcost + hcost;
     }
 
-  
-
 };
 
 inline bool operator==(const navnode& nav1, const navnode& nav2) {
@@ -58,9 +56,8 @@ bool normaltestfunc(Coord  pos, int dir);
 struct navigator: ecs::component
 {
     navigator(ecs::obj parentref, array<navnode> (*testfunc)(navnode& pos));
-    bool isblockvalid;
     v3::Vec3 esize;
-    timename::duration path_creation_dur;
+    timename::Duration path_creation_dur;
     v3::Point3 headed();
     size_t headed_index;
     array<v3::Point3> headed_list;

@@ -12,12 +12,12 @@
 #include "playercamcontrols.h"
 #include "daggerthrow.h"
 #include "playertpsword.h"
-using namespace player;
 ecs::obj player::goblin;
 
 void player::initplayer()
 {
 
+	using namespace player;
 	float playerfric = 5;
 	goblin = CtxName::ctx.Ecs->spawn_empty();
 	goblin.add_component<ecs::transform_comp>(v3::Point3(0,2,0));

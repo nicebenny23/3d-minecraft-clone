@@ -48,9 +48,7 @@ namespace grid {
 
 	//
 	int Grid::localChunkIndex(Coord NormedChunk) {
-
 		return NormedChunk.x + NormedChunk.y * dim_axis + NormedChunk.z * dim_axis * dim_axis;
-
 	}
 	int Grid::chunkIndex(Chunk::ChunkLocation pos) {
 		return localChunkIndex(pos.position + Coord(rad, rad, rad) - grid_pos.position);
@@ -75,8 +73,6 @@ namespace grid {
 		return (abs(loc.x) <= rad && abs(loc.y) <= rad && abs(loc.z) <= rad);
 
 	}
-
-
 
 	Chunk::chunk* Grid::GetChunk(Coord pos) {
 		Coord chnk = chunkfromblockpos(pos);
@@ -156,17 +152,17 @@ namespace grid {
 		return blocks;
 	}
 
-	//order of storage for chunks & location-2loadamnt+1 is width and height
+	//order of storage for chunks
 	//z
 	//7,8,9   
 	//4,5,6
-	//1,2,3 x
+	//1,2,3-x
+	//pattern repeats in the y direction
 	void Grid::load(ecs::Ecs& world) {
 		stn::array<Chunk::chunk*> newchunklist = stn::array<Chunk::chunk*>(totalChunks, nullptr);
 
-		for (int ind = 0; ind < totalChunks; ind++) {
+		for (size_t ind = 0; ind < totalChunks; ind++) {
 			bool chunk_loaded = chunklist[ind] != nullptr;
-			//sadley need the 2 things in an and to clear it up
 			if (chunk_loaded) {
 				if (contains_chunk_location(chunklist[ind]->location)) {
 					newchunklist[chunkIndex(chunklist[ind]->location)] = chunklist[ind];
@@ -174,9 +170,6 @@ namespace grid {
 				else {
 					chunklist[ind]->destroy();
 				}
-			}
-			else {
-
 			}
 		}
 		stn::Option <Chunk::ChunkLocation> closest_unloaded_chunk;
@@ -203,7 +196,7 @@ namespace grid {
 		chunklist = std::move(newchunklist);
 	}
 
-	void	Grid::updateborders() {
+	void Grid::updateborders() {
 		Point3 pos = camera::campos();
 		pos = get_chunk(pos);
 		grid_pos = Chunk::ChunkLocation(Coord(pos));
@@ -211,7 +204,9 @@ namespace grid {
 	void Grid::destroy() {
 
 		for (int i = 0; i < totalChunks; i++) {
-			chunklist[i]->destroy();
+			if (chunklist[i]) {
+				chunklist[i]->destroy();
+			}
 		}
 
 	}

@@ -7,7 +7,7 @@ namespace blocks {
 	struct PlankBlock :BlockType {
 		void apply(ecs::obj& block) override {
 
-			constexpr stn::HashedString hashed("moss");
+			constexpr stn::HashedString hashed("plank");
 			block.add_component<items::loot_table>().add(hashed, 1);
 		}
 	};

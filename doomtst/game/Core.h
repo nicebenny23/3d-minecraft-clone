@@ -1,5 +1,4 @@
 #pragma once
-#include "../renderer/Window.h"
 #include "GameContext.h"
 #include "../world/world.h"
 //start of the application
@@ -81,7 +80,7 @@ namespace Core {
 	struct GameCloser :ecs::System {
 		void run(ecs::Ecs& world) {
 			for (CloseGameCommand cmd : world.read_commands<CloseGameCommand>()) {
-				world.get_resource<GameState>().unwrap().should_close = true;
+				world.get_resource<GameState>().should_close = true;
 			}
 		}
 

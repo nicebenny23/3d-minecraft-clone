@@ -26,9 +26,39 @@ namespace ui {
 	};
 
 
+	struct BaseUiNode :ecs::resource {
+		ecs::obj base_node;
+		BaseUiNode(ecs::obj base) :base_node(base) {
+
+		}
+	};
+	struct ComputePrioritySystem :ecs::System {
+
+		void run(ecs::Ecs& world) {
+			//runs a bfs
+			size_t current_assignment = 0;
+			stn::stack<ecs::obj> ui_nodes;
+			ui_nodes.push(world.get_resource<BaseUiNode>().base_node);
+			while (!ui_nodes.empty()) {
+				ecs::obj next = ui_nodes.pop();
+				next.ensure_component<ComputedPriority>(current_assignment).priority = current_assignment++;
+				stn::array<ecs::obj> children;
+				for (ecs::entity ent : ecs::HierarchyView(next).children_entities()) {
+					children.push(ecs::obj(ent, world));
+				}
+				children | stn::sort([](ecs::obj object)->int {return object.get_component<UiPriority>().priority; });
+				//so children who are later are pushed last
+				children.reverse_in_place();
+				ui_nodes.push(children);
+			}
+		}
+
+	};
+
 	struct UiBounds :ecs::component {
+		bool uses_global_bounds;
 		geo::Box2d local;
-		UiBounds(geo::Box2d local_bounds) :local(local_bounds) {
+		UiBounds(geo::Box2d local_bounds, bool global_bounds) :local(local_bounds),uses_global_bounds(global_bounds){
 		};
 		v2::Vec2 local_center() const {
 			return local.center;
@@ -37,8 +67,10 @@ namespace ui {
 			return local.scale;
 		}
 		geo::Box2d global() const {
-			if (ecs::has_parent(owner())) {
-				geo::Box2d owner_box = ecs::parent(owner()).unwrap().get_component<UiBounds>().global();
+			if (ecs::has_parent(owner())&& !uses_global_bounds) {
+				geo::Box2d owner_box = ecs::parent(owner()).unwrap().get_component_opt<UiBounds>()
+				.expect("all parented ui elements must have a parent ui element")
+				.global();
 				v2::Vec2 owner_scale = owner_box.scale;
 				return geo::Box2d(owner_box.center + owner_scale * local_center(), owner_scale * local_scale());
 			}
@@ -131,42 +163,15 @@ namespace ui {
 			}
 		}
 	};
-	struct BaseUiNode :ecs::resource {
-		ecs::obj base_node;
-		BaseUiNode(ecs::obj base) :base_node(base) {
-
-		}
-	};
-	
-	struct ComputePrioritySystem :ecs::System {
-		
-		void run(ecs::Ecs& world) {
-			//runs a bfs
-			size_t current_assignment = 0;
-			stn::stack<ecs::obj> ui_nodes;
-			ui_nodes.push(world.get_resource<BaseUiNode>().expect("ui node must be initialized").base_node);
-			while (!ui_nodes.empty()) {
-				ecs::obj next = ui_nodes.pop();
-				next.ensure_component<ComputedPriority>(current_assignment).priority = current_assignment++;
-				stn::array<ecs::obj> children;
-				for (ecs::entity ent : ecs::HierarchyView(next).children_entities()) {
-					children.push(ecs::obj(ent, world));
-				}
-				children | stn::sort([](ecs::obj object)->int {return object.get_component<UiPriority>().priority; });
-				//so children who are later are pushed last
-				children.reverse_in_place();
-				ui_nodes.push(children);
-			}
-		}
-
-	};
 	struct UiSpawner :ecs::Recipe {
 		geo::Box2d bounds;
 		size_t priority;
-		UiSpawner(geo::Box2d box, size_t priority) :bounds(geo::Box2d(box.center, box.scale)), priority(priority) {
+		bool bounds_type;
+		UiSpawner(geo::Box2d box, size_t priority,bool global_bounds=false) 
+		:bounds(geo::Box2d(box.center, box.scale)), priority(priority), bounds_type(global_bounds){
 		}
 		void apply(ecs::obj& object) {
-			object.ensure_component<UiBounds>(bounds);
+			object.ensure_component<UiBounds>(bounds, bounds_type);
 			object.ensure_component<UiEnabled>();
 			object.ensure_component<InteractionState>();
 			object.ensure_component<UiPriority>(priority);
@@ -174,7 +179,7 @@ namespace ui {
 				
 			object
 			.world()
-			.get_resource<BaseUiNode>()
+			.get_resource_opt<BaseUiNode>()
 			.member(&BaseUiNode::base_node)
 			.then([object](ecs::obj node) {node.add_child(object); });
 	
@@ -184,7 +189,6 @@ namespace ui {
 		void build(Core::App& app) {
 			app.emplace_system< UiEnablerSystem>();
 			app.emplace_system< UiInteractionSystem>();
-
 			app.emplace_system< ComputePrioritySystem>();
 			ecs::obj entity = ecs::spawn_emplaced<UiSpawner>(app.Ecs, geo::Box2d::origin_centered(v2::unitv), 2);
 			app.emplace_resource<BaseUiNode>(entity);

@@ -1,6 +1,6 @@
 #include "time.h"
 
-timename::duration timename::TimeManager::create_dur()
+timename::Duration timename::TimeManager::current_time()
 {
-    return duration(this);
+    return Duration(this);
 }

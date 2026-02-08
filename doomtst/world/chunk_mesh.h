@@ -10,7 +10,7 @@ namespace Chunk {
 		chunkmesh() :recreate_mesh(true) {
 		};
 		void start() {
-			renderer::Renderer& ren = world().get_resource<renderer::Renderer>().expect("renderer must exist");
+			renderer::Renderer& ren = world().get_resource<renderer::Renderer>();
 			SolidGeo = ren.gen_renderable();
 			SolidGeo.set_material("SolidBlock");
 			SolidGeo.set_layout(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());

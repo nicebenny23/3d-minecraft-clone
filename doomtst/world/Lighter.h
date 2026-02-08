@@ -34,7 +34,7 @@ namespace grid {
 	};
 	struct GridDarkener :ecs::System {
 		void run(ecs::Ecs& world) {
-			grid::Grid& grid = world.get_resource<grid::Grid>().unwrap();
+			grid::Grid& grid = world.get_resource<grid::Grid>();
 			stn::queue<shade_at> darkening_queue;
 			for (partial_reshade_command& cmd : world.read_commands<partial_reshade_command>()) {
 				block* blk = grid.getBlock(cmd.position);
@@ -79,7 +79,7 @@ namespace grid {
 		}
 
 		void run(ecs::Ecs& world) {
-			grid::Grid& grid = world.get_resource<grid::Grid>().unwrap();
+			grid::Grid& grid = world.get_resource<grid::Grid>();
 			stn::queue<stn::non_null<block>> lightening_queue;
 			ecs::View<block_emmision, block> light_view(world);
 			for (const auto& [light, block_component] : light_view) {

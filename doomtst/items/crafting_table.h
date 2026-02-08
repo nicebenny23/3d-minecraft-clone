@@ -1,6 +1,7 @@
 #include "recipe_transactions.h"
 #include "FakeItem.h"
 #include "cursor_slot.h"
+#include "menu.h"
 #pragma once
 namespace items {
 	struct crafting_slot_tag :ecs::component {
@@ -30,7 +31,10 @@ namespace items {
 	};
 	struct cursor_crafter :ecs::System {
 		void run(ecs::Ecs& world) {
-			ecs::obj cursor_obj = world.get_resource<items::cursor_container>().unwrap().primary_slot();
+			if (world.get_resource<ui::MenuState>().no_menu_open()) {
+				return;
+			}
+			ecs::obj cursor_obj = world.get_resource<items::cursor_container>().primary_slot();
 			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
 			cursor_obj.get_component<ui::UiBounds>().local.center = world.ensure_resource<userinput::InputManager>().mouse_position;
 			for (auto&& [item_decal, interaction_state, crafting_slot_tag] : ecs::View<ItemSlotDecal, ui::InteractionState, items::crafting_slot_tag>(world)) {

@@ -28,7 +28,7 @@ namespace stn {
 	}
 	struct bitset {
 		using uint64 = uint64_t;
-		stn::array<uint64> bitlist;
+		stn::array<uint64> bit_list;
 		size_t bits;
 		inline bool contains_index(size_t index) const {
 			return index < bits;
@@ -37,10 +37,10 @@ namespace stn {
 			return index < bits && unchecked_at(index);
 		}
 		bitset(size_t initial_zeros) noexcept :bits(initial_zeros) {
-			bitlist.expand(bits_to_words(initial_zeros));
+			bit_list.expand(bits_to_words(initial_zeros));
 		};
 
-		constexpr bitset() noexcept :bits(0), bitlist() {
+		constexpr bitset() noexcept :bits(0), bit_list() {
 		};
 
 		template<typename T>
@@ -57,16 +57,16 @@ namespace stn {
 			}
 		}
 
-		bitset(const bitset& oth) : bitlist(oth.bitlist), bits(oth.bits) {
+		bitset(const bitset& oth) : bit_list(oth.bit_list), bits(oth.bits) {
 		}
 
-		bitset(bitset&& oth) noexcept : bitlist(std::move(oth.bitlist)), bits(oth.bits) {
+		bitset(bitset&& oth) noexcept : bit_list(std::move(oth.bit_list)), bits(oth.bits) {
 			oth.bits = 0;
 		}
 
 		bitset& operator=(const bitset& oth) {
 			if (this != &oth) {
-				bitlist = oth.bitlist;
+				bit_list = oth.bit_list;
 				bits = oth.bits;
 			}
 			return *this;
@@ -77,13 +77,28 @@ namespace stn {
 			size_t numwords = bits_to_words(length);
 			uint64_t fill = state ? ~uint64_t(0) : 0;
 			for (size_t i = 0; i < numwords; ++i) {
-				bitlist[i] = fill;
+				bit_list[i] = fill;
 			}
 			mask_end();
 		}
+		bool has_all_ones(const bitset& oth) const noexcept {
+			size_t words_in_all = std::min(oth.bit_list.length(), bit_list.length());
+			for (size_t i = 0; i < words_in_all; i++) {
+				//we can safely do this due to our invarient that the ends are masked
+				if (oth.bit_list[i] & ~bit_list[i]) {
+					return false;
+				}
+			}
+			for (size_t i = words_in_all; i < oth.bit_list.length(); i++) {
+				if (oth.bit_list[i]) {
+					return false;
+				}
+			}
+			return true;
+		}
 		bitset& operator=(bitset&& oth) noexcept {
 			if (this != &oth) {
-				bitlist = std::move(oth.bitlist);
+				bit_list = std::move(oth.bit_list);
 				bits = oth.bits;
 			}
 			return *this;
@@ -105,17 +120,17 @@ namespace stn {
 		void expand(size_t new_bit_count) {
 			if (bits < new_bit_count) {
 				bits = new_bit_count;
-				bitlist.expand(bits_to_words(new_bit_count));
+				bit_list.expand(bits_to_words(new_bit_count));
 			}
 		}
 		void set_unchecked(size_t bit, bool value) {
 			size_t idx = calc_full_words(bit);
 			size_t off = calc_leftover_bits(bit);
 			if (value) {
-				bitlist.unchecked_at(idx) |= bit_at(off);
+				bit_list.unchecked_at(idx) |= bit_at(off);
 			}
 			else {
-				bitlist.unchecked_at(idx) &= ~(bit_at(off));
+				bit_list.unchecked_at(idx) &= ~(bit_at(off));
 			}
 		}
 		void set(size_t bit, bool value) {
@@ -125,10 +140,10 @@ namespace stn {
 			size_t idx = calc_full_words(bit);
 			size_t off = calc_leftover_bits(bit);
 			if (value) {
-				bitlist.unchecked_at(idx) |= bit_at(off);
+				bit_list.unchecked_at(idx) |= bit_at(off);
 			}
 			else {
-				bitlist.unchecked_at(idx) &= ~(bit_at(off));
+				bit_list.unchecked_at(idx) &= ~(bit_at(off));
 			}
 		}
 		void reaching_set(size_t bit, bool value) {
@@ -137,10 +152,10 @@ namespace stn {
 			size_t idx = calc_full_words(bit);
 			size_t off = calc_leftover_bits(bit);
 			if (value) {
-				bitlist.unchecked_at(idx) |= bit_at(off);
+				bit_list.unchecked_at(idx) |= bit_at(off);
 			}
 			else {
-				bitlist.unchecked_at(idx) &= ~(bit_at(off));
+				bit_list.unchecked_at(idx) &= ~(bit_at(off));
 			}
 		}
 
@@ -168,7 +183,7 @@ namespace stn {
 			}
 			size_t idx = calc_full_words(bit);
 			size_t off = calc_leftover_bits(bit);
-			bitlist[idx] ^= (bit_at(off));
+			bit_list[idx] ^= (bit_at(off));
 		}
 		void reaching_flip(size_t bit) {
 			if (!contains_index(bit)) {
@@ -176,11 +191,11 @@ namespace stn {
 			}
 			size_t idx = calc_full_words(bit);
 			size_t off = calc_leftover_bits(bit);
-			bitlist[idx] ^= (bit_at(off));
+			bit_list[idx] ^= (bit_at(off));
 		}
 
 		bool unchecked_at(size_t bit) const {
-			return (bitlist.unchecked_at(calc_full_words(bit)) >> calc_leftover_bits(bit)) & 1;
+			return (bit_list.unchecked_at(calc_full_words(bit)) >> calc_leftover_bits(bit)) & 1;
 		}
 		bool operator[](size_t bit) const {
 			if (!contains_index(bit)) {
@@ -188,17 +203,17 @@ namespace stn {
 			}
 			size_t word_index = calc_full_words(bit);
 			size_t bit_offset = calc_leftover_bits(bit);
-			return (bitlist[word_index] >> bit_offset) & 1;
+			return (bit_list[word_index] >> bit_offset) & 1;
 		}
 		bitset operator|(const bitset& oth) const {
-			size_t max_size = Max(bitlist.length(), oth.bitlist.length());
-			size_t min_size = Min(bitlist.length(), oth.bitlist.length());
+			size_t max_size = Max(bit_list.length(), oth.bit_list.length());
+			size_t min_size = Min(bit_list.length(), oth.bit_list.length());
 			bitset result(Max(bits, oth.bits));
 			for (size_t i = 0; i < min_size; i++) {
-				result.bitlist[i] = bitlist[i] | oth.bitlist[i];
+				result.bit_list[i] = bit_list[i] | oth.bit_list[i];
 			}
 			for (size_t i = min_size; i < max_size; i++) {
-				result.bitlist[i] = (bitlist.length() == max_size) ? bitlist[i] : oth.bitlist[i];
+				result.bit_list[i] = (bit_list.length() == max_size) ? bit_list[i] : oth.bit_list[i];
 			}
 			return result;
 		}
@@ -212,7 +227,7 @@ namespace stn {
 			bitset result(bits);
 			size_t full_words = calc_full_words(bits);
 			for (size_t i = 0; i < full_words; ++i) {
-				result.bitlist[i] = ~bitlist[i];
+				result.bit_list[i] = ~bit_list[i];
 			}
 
 			result.mask_end();
@@ -220,10 +235,10 @@ namespace stn {
 		}
 		//
 		bitset operator&(const bitset& oth) const {
-			size_t min_size = Min(bitlist.length(), oth.bitlist.length());
+			size_t min_size = Min(bit_list.length(), oth.bit_list.length());
 			bitset result(Min(bits, oth.bits));
 			for (size_t i = 0; i < min_size; i++) {
-				result.bitlist[i] = bitlist[i] & oth.bitlist[i];
+				result.bit_list[i] = bit_list[i] & oth.bit_list[i];
 			}
 			return result;
 		}
@@ -237,14 +252,14 @@ namespace stn {
 		}
 
 		bitset operator^(const bitset& oth) const {
-			size_t max_size = Max(bitlist.length(), oth.bitlist.length());
-			size_t min_size = Min(bitlist.length(), oth.bitlist.length());
+			size_t max_size = Max(bit_list.length(), oth.bit_list.length());
+			size_t min_size = Min(bit_list.length(), oth.bit_list.length());
 			bitset result(Max(bits, oth.bits));
 			for (size_t i = 0; i < min_size; i++) {
-				result.bitlist[i] = (bitlist[i] ^ oth.bitlist[i]);
+				result.bit_list[i] = (bit_list[i] ^ oth.bit_list[i]);
 			}
 			for (size_t i = min_size; i < max_size; i++) {
-				result.bitlist[i] = (bitlist.length() == max_size) ? bitlist[i] : oth.bitlist[i];
+				result.bit_list[i] = (bit_list.length() == max_size) ? bit_list[i] : oth.bit_list[i];
 			}
 
 			return result;
@@ -257,7 +272,7 @@ namespace stn {
 
 		bool operator==(const bitset& oth) = delete;
 		bool empty() {
-			for (std::uint64_t word : bitlist) {
+			for (std::uint64_t word : bit_list) {
 				if (word != 0) {
 					return false;
 				}
@@ -267,27 +282,27 @@ namespace stn {
 		bool operator!=(const bitset& oth) = delete;
 		size_t popcount() const {
 			size_t cnt = 0;
-			for (std::uint64_t word : bitlist) {
+			for (std::uint64_t word : bit_list) {
 				cnt += std::popcount(word);
 			}
 			return cnt;
 		}
 		bool ones_match(const bitset& oth) const {
-			size_t min_size = Min(oth.bitlist.length(), bitlist.length());
+			size_t min_size = Min(oth.bit_list.length(), bit_list.length());
 
 			for (size_t i = 0; i < min_size; i++) {
-				if (bitlist[i] != oth.bitlist[i]) {
+				if (bit_list[i] != oth.bit_list[i]) {
 					return false;
 				}
 			}
-			for (size_t i = min_size; i < bitlist.length(); i++) {
-				if (bitlist[i] != 0) {
+			for (size_t i = min_size; i < bit_list.length(); i++) {
+				if (bit_list[i] != 0) {
 					return false;
 				}
 			}
 
-			for (size_t i = min_size; i < oth.bitlist.length(); i++) {
-				if (oth.bitlist[i] != 0) {
+			for (size_t i = min_size; i < oth.bit_list.length(); i++) {
+				if (oth.bit_list[i] != 0) {
 					return false;
 				}
 			}
@@ -301,15 +316,15 @@ namespace stn {
 			return this->matches(oth) != 0;
 		}
 		void clear() {
-			bitlist.clear();
+			bit_list.clear();
 			bits = 0;
 		}
 	private:
 		//trims the unused bits
 		void mask_end() {
 			size_t leftover = calc_leftover_bits(bits);
-			if (leftover != 0 && !bitlist.empty()) {
-				bitlist.last() &= make_mask(leftover);
+			if (leftover != 0 && !bit_list.empty()) {
+				bit_list.last() &= make_mask(leftover);
 			}
 		}
 

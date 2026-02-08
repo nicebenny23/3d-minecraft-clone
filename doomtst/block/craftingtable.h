@@ -2,18 +2,25 @@
 #include "../items/recipe.h"
 #include "../items/menu.h"
 #include "../math/vector2.h"
-
+#include "block.h"
+#include "block_registry.h"
+#include "../items/loottable.h"
 #include "../items/recipe_file.h"
 #include "../items/recipe_transactions.h"
 #pragma once 
-inline void tableinit(blocks::block& blk) {
+namespace blocks {
 
-	blk.mesh.set_face_textures(craftingtableside, craftingtableside, craftingtabletop, craftingtableside, craftingtableside, craftingtableside);
-	blk.attributes.solid = true;
-	blk.mininglevel = 1;
-	blk.mesh.box.scale = blocks::blockscale;
+	struct CraftingTableRecipe :ecs::Recipe {
 
-	blk.createdefaultaabb(false);
-	//blk.owner().ensure_component<craftingtablecomp>();
-//	blk.owner().add_component<loottable>().addelem(craftingtableitem, 1, false);
+	};
+	struct CraftingTableBlock:BlockType {
+		void apply(ecs::obj& block) override {
+			block.add_component<items::loot_table>().add("moss", 1);
+		}
+	};
+	template<>
+	inline constexpr BlockTraits BlockInfo<CraftingTableBlock> = BlockTraits(
+		BlockMeshTraits(v3::unit_scale, false, craftingtableside, craftingtableside, mosstex, mosstex, craftingtableside, craftingtableside)
+	);
+
 }

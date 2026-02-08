@@ -11,7 +11,7 @@
 struct playerhealth: ecs::component
 {
 	ui::ui_image damage_decal;
-	timename::duration damage_decal_duration;
+	timename::Duration damage_decal_duration;
 	
 	bool dmgimmune = false;
 	void killplayer() {
@@ -24,7 +24,7 @@ struct playerhealth: ecs::component
 
 	array<ui::ui_image>healthboxes;
 	void start(){
-		damage_decal_duration=CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().create_dur();
+		damage_decal_duration=world().ensure_resource<timename::TimeManager>().current_time();
 		size_t max_health = owner().get_component<estate>().maxhealth;
 		v2::Vec2 scale = v2::unitv / 100;
 		healthboxes = array<ui::ui_image>();

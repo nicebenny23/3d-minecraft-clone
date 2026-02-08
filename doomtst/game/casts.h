@@ -16,8 +16,6 @@ namespace collision {
 		}
 	};
 
-
-
 	inline voxtra::WorldRayCollision raycast_dynamic(ray search_ray, HitQuery query) {
 		ecs::View<aabb::Collider, aabb::DynamicCollider> colliders(query.world);
 		voxtra::WorldRayCollision closest = stn::None;

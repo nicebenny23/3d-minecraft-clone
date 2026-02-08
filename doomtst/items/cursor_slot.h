@@ -2,6 +2,7 @@
 #include "SlotUi.h"
 #include "Container.h"
 #include "slot_transactions.h"
+#include "menu.h"
 #pragma once
 namespace items {
 
@@ -18,8 +19,10 @@ namespace items {
 
 	struct cursor_swapper :ecs::System {
 		void run(ecs::Ecs& world) {
-
-			ecs::obj cursor_obj = world.get_resource<cursor_container>().unwrap().primary_slot();
+			if (world.get_resource<ui::MenuState>().no_menu_open()) {
+				return;
+			}
+			ecs::obj cursor_obj = world.get_resource<cursor_container>().primary_slot();
 			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
 			cursor_obj.get_component<ui::UiBounds>().local.center = world.ensure_resource<userinput::InputManager>().mouse_position;
 			for (auto&& [item_decal, interaction_state, container_slot] : ecs::View<ItemSlotDecal, ui::InteractionState, items::ElementSlot>(world)) {
@@ -56,7 +59,7 @@ namespace items {
 	struct cursor_spreader :ecs::System {
 		void run(ecs::Ecs& world) {
 
-			ecs::obj cursor_obj = world.get_resource<cursor_container>().unwrap().primary_slot();
+			ecs::obj cursor_obj = world.get_resource<cursor_container>().primary_slot();
 			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
 			cursor_obj.get_component<ui::UiBounds>().local.center = world.ensure_resource<userinput::InputManager>().mouse_position;
 			for (auto&& [item_decal, interaction_state, container_slot] : ecs::View<ItemSlotDecal, ui::InteractionState, items::ElementSlot>(world)) {
@@ -69,7 +72,7 @@ namespace items {
 				//implies container_slot is nonempty;
 				if (cursor_slot.empty()) {
 
-					auto give_cursor_half = give_slot_some(container_slot, cursor_slot, container_slot.entry().unwrap().count/2);
+					auto give_cursor_half = give_slot_some(container_slot, cursor_slot, container_slot.entry().unwrap().count / 2);
 					if (give_cursor_half) {
 						give_cursor_half.unwrap().apply(world);
 					}
@@ -86,6 +89,22 @@ namespace items {
 			}
 		}
 	};
+	struct cursor_highlighter :ecs::System {
+		void run(ecs::Ecs& world) {
+
+			ecs::obj cursor_obj = world.get_resource<cursor_container>().primary_slot();
+			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
+			for (auto&& [item_decal, interaction_state] : ecs::View<ItemSlotDecal, ui::InteractionState>(world)) {
+				if (interaction_state.hovered) {
+		//should cause issues with other decals
+					item_decal.set_decal(renderer::TexturePath("images\\importantblockholder.png", "important_block_holder"));
+				}
+				else {
+					item_decal.reset_decal();
+				}
+			}
+		}
+	};
 
 
 
@@ -94,7 +113,7 @@ namespace items {
 			ecs::obj cursor_entity = ecs::spawn(app.Ecs, floating_container_recipe());
 			app.emplace_system<cursor_swapper>();
 			app.emplace_system<cursor_spreader>();
-
+			app.emplace_system<cursor_highlighter>();
 			app.emplace_resource<cursor_container>(cursor_entity.get_component<container>());
 		}
 	};
