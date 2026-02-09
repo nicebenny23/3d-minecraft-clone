@@ -18,10 +18,9 @@ namespace blocks {
 		}
 		//it cannot be a recipe due to its optimizations mechanics
 		ecs::obj spawn(ecs::Ecs& world) {
-			BlockRegistry& registry =world.ensure_resource<BlockRegistry>();
+			BlockRegistry& registry =world.insert_resource<BlockRegistry>();
 			BlockTraits& traits=registry.traits_for(id);
-			
-			BlockType& block_type = registry.type_for(id); 
+			; 
 			block& blk = world.spawn_with_component<block>(traits.mesh, mesh, loc, id, direction, face,traits.solid);
 			ecs::obj object = blk.owner();
 			if (traits.emmited_light!=0) {
@@ -33,8 +32,9 @@ namespace blocks {
 			if (traits.mesh.transparent) {
 				blk.mesh.transparent = true;
 			}
-			block_type.apply(object);
-			return blk.owner();
+
+			registry.apply(object,id);
+				return blk.owner();
 		}
 	};
 

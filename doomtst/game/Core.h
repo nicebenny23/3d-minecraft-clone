@@ -57,7 +57,7 @@ namespace Core {
 		}
 		template<ecs::ResourceType T>
 		T& ensure_resource() {
-		return Ecs.ensure_resource<T>();
+		return Ecs.insert_resource<T>();
 		}
 		template<ecs::SystemType T, typename ...Args>
 		void emplace_system(Args&&... args) requires std::constructible_from<T, Args&&...>||(std::constructible_from<T, ecs::Ecs&>) {

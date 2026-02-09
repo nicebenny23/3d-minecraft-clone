@@ -48,8 +48,9 @@ struct liquidprop : ecs::component {
 
 		//instert for what dor==3 was
 
-		if (blk->id != minecraftair) {
+		//if (blk->id != minecraftair) {
 			//if (blk->block_id == owner()) {
+		{	
 			if (liqval > 1) {
 
 
@@ -94,7 +95,7 @@ struct liquidprop : ecs::component {
 			}
 		}
 		if (liqval <= 0) {
-			grid::set_block(world(), owner().get_component<blocks::block>().pos, minecraftair);
+		//	grid::set_block(world(), owner().get_component<blocks::block>().pos, minecraftair);
 		}
 
 	}

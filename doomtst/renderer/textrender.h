@@ -71,7 +71,9 @@ namespace ui {
 					ui_text.handle.set_order_key(ui_text.owner().get_component<ComputedPriority>().priority);
 				}
 				else {
-					ui_text.handle.disable();
+					if (ui_text.handle) {
+						ui_text.handle.disable();
+					}
 				}
 			}
 		}

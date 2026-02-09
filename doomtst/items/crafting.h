@@ -15,7 +15,7 @@ namespace items {
 		}
 		void apply(ecs::obj& entity) {
 			json::Value booklet= json::parse_for_file(path);
-			ItemRecipes recipes = recipe_booklet_from_path(booklet,entity.world());
+			ItemRecipes recipes = recipe_booklet_from_path(input_container.get_component<container>().size, booklet, entity.world());
 			entity.add_component<crafter>(RecipeBinder(input_container, output_slot, recipes));
 		}
 		std::filesystem::path path;

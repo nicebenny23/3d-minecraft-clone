@@ -4,14 +4,9 @@
 #include "../math/geometry.h"
 #include "../util/cached.h"
 namespace blocks {
+	struct block_tag;
 
-	enum  block_id {
-		minecraftair = 0,
-		minecrafttreestone = 1,
-		minecraftmoss = 2,
-		minecraftstone = 3,
-		minecrafttorch = 4,
-	};
+	using block_id = stn::typed_id<block_tag>;
 	enum block_textures {
 		treestonetex = 0,
 		grasstex = 1,
@@ -98,7 +93,7 @@ namespace blocks {
 		bool invisible() const {
 			return box.scale.x==0;
 		}
-		blockmesh(const stn::List<block_textures,6>& textures,dirty_flag& d_flag,v3::Coord position, Scale3 blkscale,math::Direction3d attachment_direction,math::Direction2d facing_direction) :
+		blockmesh(const stn::List<block_textures,6>& textures,stn::dirty_flag& d_flag,v3::Coord position, Scale3 blkscale,math::Direction3d attachment_direction,math::Direction2d facing_direction) :
 			flag(d_flag), box(position + unitv / 2, blkscale), mesh_location(position),transparent(false),faces([&](size_t index) { 
 				return face(textures[index],math::Direction3d(math::DirectionIndex3d(index)), this);
 			}), attached_direction(attachment_direction),direction(facing_direction)
@@ -129,13 +124,9 @@ namespace blocks {
 		iterator end() {
 			return faces.end();
 		}
-
-
-		
-	
 		bool transparent;
 		friend struct face;
-		dirty_flag& flag;
+		stn::dirty_flag& flag;
 
 	};
 	inline v3::Point3 face::center() const {

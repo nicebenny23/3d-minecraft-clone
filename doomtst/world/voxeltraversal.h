@@ -39,7 +39,7 @@ namespace voxtra {
 
 	bool boxcast_grid(geo::Box Box);
 	WorldRayCollision travvox(ray nray, GridTraverseMode trav = GridTraverseMode::countnormal);
-	block* findprevblock(ray nray, GridTraverseMode trav = GridTraverseMode::countnormal);
+	stn::Option<block&> findprevblock(ray ray, grid::Grid& grid, GridTraverseMode trav = GridTraverseMode::countnormal);
 
 	inline stn::Option<geo::Box> findemptyspace(v3::Scale3 scale) {
 		size_t max_tst = 40;

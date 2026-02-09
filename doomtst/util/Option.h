@@ -21,16 +21,8 @@ namespace stn {
 	template<typename T>
 	struct Option;
 
-	template<typename>
-	struct is_option_t : std::false_type {
-	};
-
 	template<typename T>
-	struct is_option_t<Option<T>> : std::true_type {
-	};
-	template<typename T>
-	concept OptionType =
-		is_option_t<std::remove_cvref_t<T>>::value;
+	concept OptionType =stn::TypeInstantiationOf<T,Option>;
 
 
 	template<typename T>
@@ -245,6 +237,7 @@ namespace stn {
 		explicit operator bool() const noexcept {
 			return has_value;
 		}
+
 		T& expect(const char* Msg = "Expected Option to have a value") {
 			if (!has_value) {
 				throw std::logic_error(std::string("Option error: ") + Msg);

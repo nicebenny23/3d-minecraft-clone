@@ -11,7 +11,7 @@ namespace items {
 			if (cell.fits_in(size)) {
 				return item_list[cell.index_in(size)];
 			}
-			stn::throw_logic_error("cell {} out of range in {}", cell, size);
+			stn::throw_logic_error("cell {} out of range in {}", cell.coord , size);
 		}
 		ItemRecipe(v2::Coord2 grid_size, stn::array<stn::Option<item_entry>> input_entries, item_entry output_entry) :
 			size(grid_size), item_list(input_entries), output(output_entry) {
@@ -43,7 +43,7 @@ namespace items {
 	};
 
 
-	stn::array<ItemRecipe> spread_out(ItemRecipe recipe,v2::Coord2 spread_size) {
+	inline stn::array<ItemRecipe> spread_out(ItemRecipe recipe,v2::Coord2 spread_size) {
 
 		if (spread_size.x < recipe.size.x || spread_size.y < recipe.size.y) {
 			stn::throw_logic_error("cannot spread out to {} from {}", recipe.size, spread_size);
@@ -53,7 +53,7 @@ namespace items {
 		for (int x = 0; x <= positions.x; x++) {
 			for (int y = 0; y <= positions.y; y++) {
 				v2::Coord2 shift_offset = v2::Coord2(x, y);
-				stn::array < stn::Option<item_entry>> entries;
+				stn::array < stn::Option<item_entry>> entries(spread_size.x*spread_size.y);
 				for (int container_y = 0; container_y < recipe.size.y; container_y++) {
 					for (int container_x = 0; container_x < recipe.size.x; container_x++) {
 						

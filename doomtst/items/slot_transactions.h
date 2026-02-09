@@ -1,5 +1,6 @@
 #include "ItemSlot.h"
 #include "item_transactions.h"
+#include "FakeItem.h"
 #pragma once
 namespace items {
 
@@ -11,7 +12,7 @@ namespace items {
 		void apply(ecs::Ecs& world) {
 			ElementSlot& element_slot=slot.get_component<ElementSlot>();
 			if (element_slot.empty()) {
-				element_slot.current_item = slot.spawn_child<DisplayedItemSpawner>(entry);
+				element_slot.current_item = slot.spawn_child<ItemSpawner>(entry);
 			}
 			else {
 				element_slot.element().unwrap().get_component<item_stack>().set(entry);
@@ -71,7 +72,7 @@ namespace items {
 
 			ecs::obj to_entity = to_slot.get_component<ElementSlot>().element().unwrap_or_else([&] {
 				item_id id = item_entity.get_component<item_stack>().contained_id();
-				SetItemSlot( to_slot, item_entry(id, 0,world.ensure_resource<item_types>())).apply(world);
+				SetItemSlot( to_slot, item_entry(id, 0,world.insert_resource<item_types>())).apply(world);
 				return to_slot.get_component<ElementSlot>().element().unwrap();
 				});
 			give_stack_plan(item_entity, to_entity, count).apply(world);

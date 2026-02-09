@@ -44,7 +44,9 @@ namespace ui {
 				next.ensure_component<ComputedPriority>(current_assignment).priority = current_assignment++;
 				stn::array<ecs::obj> children;
 				for (ecs::entity ent : ecs::HierarchyView(next).children_entities()) {
-					children.push(ecs::obj(ent, world));
+					if (world.has_component<UiPriority>(ent)) {
+						children.push(ecs::obj(ent, world));
+					}
 				}
 				children | stn::sort([](ecs::obj object)->int {return object.get_component<UiPriority>().priority; });
 				//so children who are later are pushed last

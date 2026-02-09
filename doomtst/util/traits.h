@@ -65,5 +65,14 @@ namespace stn {
 
 	template<typename Range, typename ElementType>
 	concept convertible_range = std::ranges::range<Range> && std::convertible_to<std::ranges::range_value_t<Range>, ElementType>;
+	
+	template <typename T, template <typename...> class Template>
+	struct is_type_instantiation_of : std::false_type {
+	};
 
+	template <template <typename...> class Template, typename... Args>
+	struct is_type_instantiation_of<Template<Args...>, Template> : std::true_type {
+	};
+	template <typename T, template <typename...> class Template>
+	concept TypeInstantiationOf = is_type_instantiation_of<T, Template>::value;
 }

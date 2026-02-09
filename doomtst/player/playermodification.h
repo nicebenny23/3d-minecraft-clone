@@ -88,7 +88,7 @@ struct playerbreak : ecs::component {
 				
 			pickaxe.clear(owner().get_component<player::inventory>().selected().map(&component::owner));
 			currmining.clear(blk);
-			break_start_time = blk->type().mining_traits().time_to_mine;
+			break_start_time = blk->info().solid_traits.time_to_mine;
 			timeuntilbreak = break_start_time;
 
 		}
@@ -166,10 +166,10 @@ struct playerbreak : ecs::component {
 			if (pickaxe()) {
 				pickaxe().unwrap().get_component_opt<items::item_durability>();
 			}
-			if (currmining()->type().mining_traits().time_to_mine<= curr_mining_power()) {
+			if (currmining()->info().solid_traits.time_to_mine<= curr_mining_power()) {
 				make_drop(broken->owner());
 			}
-			grid::set_block(world(),broken->pos, minecraftair);
+			grid::set_block(world(),broken->pos, broken->registry().get_id<AirBlock>());
 			disengage_block();
 
 		}

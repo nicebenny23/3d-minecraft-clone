@@ -801,6 +801,8 @@ namespace stn {
 	array(std::initializer_list<T>) -> array<T>;
 	template<std::ranges::forward_range Range>
 	array(Range&& r) -> array<std::ranges::range_value_t<Range>>;
+	template<typename T>
+	concept ArrayType = TypeInstantiationOf<T, array>;
 }
 #include <format>
 #include <concepts>

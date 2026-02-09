@@ -114,12 +114,12 @@ voxtra::WorldRayCollision  voxtra::travvox(ray nray, GridTraverseMode trav) {
 }
 
 //goes to the next block and then goes backwords
-block* voxtra::findprevblock(ray nray, GridTraverseMode trav) {
-	WorldRayCollision Intersection = travvox(nray, trav);
+stn::Option<block&> voxtra::findprevblock(ray ray,grid::Grid& grid, GridTraverseMode trav) {
+	WorldRayCollision Intersection = travvox(ray, trav);
 	if (!Intersection) {
-		return nullptr;
+		return stn::None;
 	}
 	float BackMag = 1 / 1000.f;
-	Point3 BackProp = Intersection.unwrap().intersection() - nray.dir() * BackMag;
-	return	(CtxName::ctx.Grid->getBlock(CtxName::ctx.Grid->getVoxel(BackProp)));
+	Point3 BackProp = ray.pointAt(Intersection.unwrap().dist()-BackMag);
+	return	grid.get_block(grid.getVoxel(BackProp));
 }

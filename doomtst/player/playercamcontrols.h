@@ -52,7 +52,7 @@ struct playercamcontrols : ecs::component
 		voxtra::WorldRayCollision closest = collision::raycast(cameraray, collision::HitQuery(world()));
 		if (closest)
 		{
-			owner().world().write_event<camera_event>(closest.unwrap().owner());
+			world().write_event<camera_event>(closest.unwrap().owner());
 		}
 
 	}

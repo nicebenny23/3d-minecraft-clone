@@ -1,8 +1,7 @@
 #include "../game/ecs/game_object.h"
 #include "../util/dynamicarray.h"
-#include"item_transactions.h"
-#include "../util/random.h"
-
+#include "item_type.h"
+#include "Item.h"
 #pragma once 
 namespace items {
 	const float interacttimeneededfordrop = 1;
@@ -33,12 +32,12 @@ namespace items {
 		stn::array<loot_element> loot;
 		template<ItemType T>
 			void add(size_t maxamt) {
-			items::item_types& types = world().ensure_resource<items::item_types>();
+			items::item_types& types = world().insert_resource<items::item_types>();
 			loot.push(loot_element(items::item_entry(types.from_type<T>(), maxamt, types)));
 		}
 		void add(std::string_view item_name, size_t maxamt) {
 
-			items::item_types& types = world().ensure_resource<items::item_types>();
+			items::item_types& types = world().insert_resource<items::item_types>();
 			loot.push(loot_element(items::item_entry(types.from_name(item_name), maxamt, types)));
 		}
 

@@ -1,10 +1,8 @@
 #include "../game/ecs/game_object.h"
 #include <string>
-#include "../game/ecs/relationship.h"
-#include "../renderer/uibox.h"
-#include "../renderer/textrender.h"
-#include "../block/block.h"
 #include "../util/String.h"
+#include "../block/block_registry.h"
+#include "../renderer/renderer.h"
 #pragma once
 namespace items {
 	enum class item_use_type {
@@ -32,20 +30,28 @@ namespace items {
 			food(food_value),
 			blk_id(stn::None) {
 		}
-
-		item_traits(std::string_view name, renderer::TexturePath image, stn::Option<blocks::block_id> block_id)
+		item_traits(std::string_view name, renderer::TexturePath image,blocks::block_id blk_id)
 			: item_name(name),
 			use_type(item_use_type::block),
 			image_path(std::move(image)),
 			armor(0),
 			damage(0.0f),
 			pickaxe_speed(0),
-			blk_id(block_id) {
+			blk_id(blk_id) {
+		}
+		item_traits(std::string_view name, renderer::TexturePath image)
+			: item_name(name),
+			use_type(item_use_type::block),
+			image_path(std::move(image)),
+			armor(0),
+			damage(0.0f),
+			pickaxe_speed(0),
+			blk_id(stn::None) {
 		}
 	};
 
 	struct item_type {
-		virtual item_traits traits() const = 0;
+		virtual item_traits traits(const ecs::Ecs& world) const = 0;
 	};
 	using item_id = stn::typed_id<item_type>;
 
@@ -53,7 +59,9 @@ namespace items {
 	template<typename T>
 	concept ItemType = std::derived_from<T, item_type>&& std::is_default_constructible_v<T>;
 	struct item_types :ecs::resource {
-		item_types() = default;
+		item_types(const ecs::Ecs& Ecs) :world(Ecs) {
+
+		}
 		template<std::convertible_to<std::string_view> T>
 		item_id from_name(const T& name) const {
 			auto iter = ids.find<T>(name);
@@ -74,7 +82,7 @@ namespace items {
 		}
 		template<ItemType T>
 		void register_item() {
-			item_traits traits = T().traits();
+			item_traits traits = T().traits(world);
 			if (trait_list.contains(traits)) {
 				if (traits != from_id(from_name(traits.item_name))) {
 					stn::throw_logic_error("items already contains a diffrent item_type with the same name as {}", traits.item_name);
@@ -86,6 +94,7 @@ namespace items {
 		}
 		
 	private:
+		const ecs::Ecs& world;
 		stn::type_map<item_id> type_id_map;
 		stn::array<item_traits> trait_list;
 		std::unordered_map<std::string, item_id, stn::StringHasher,std::equal_to<>> ids;

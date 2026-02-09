@@ -345,6 +345,7 @@
     <ClInclude Include="game\navigation.h" />
     <ClInclude Include="game\ecs\relationship.h" />
     <ClInclude Include="game\Settings.h" />
+    <ClInclude Include="items\container_ui.h" />
     <ClInclude Include="items\crafting_table.h" />
     <ClInclude Include="items\FakeItem.h" />
     <ClInclude Include="math\transform.h" />

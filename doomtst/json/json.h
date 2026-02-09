@@ -24,6 +24,29 @@ namespace json {
 		}
 		T parser;
 	};
+	template<Parser T> requires stn::ArrayType<ParserResult<T>>
+	struct ComposeArray {
+		ParserResult<T> operator()(const Value& value) {
+			using R = ParserResult<T>;
+			R recipes=R();
+			const json::Array& arr = value.extract<json::Array>().expect("must be an array of recipes to parse as an array");
+			for (const stn::box<json::Value>& val : arr) {
+				recipes.append(parser(*val));
+			}
+			return recipes;
+		}
+
+		ComposeArray(T&& parse) :parser(std::move(parse)) {
+
+		}
+		ComposeArray(T& parse) :parser(parse) {
+
+		}
+		T parser;
+	};
+
+	std::string to_string(const Value& v);
+
 	template<Parser T>
 	struct ParseArray {
 		stn::array<ParserResult<T>> operator()(const Value& value) {

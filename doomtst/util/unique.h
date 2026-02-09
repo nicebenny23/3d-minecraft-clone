@@ -3,6 +3,7 @@
 #include <concepts>
 #include <vector>
 #include "concepts.h"
+#include "traits.h"
 #include "exception.h"
 namespace stn {
 
@@ -184,14 +185,7 @@ namespace stn {
 
 	};
 	template<typename T>
-	struct is_box : std::false_type {
-	};
-
-	template<typename T>
-	struct is_box<box<T>> : std::true_type {
-	};
-	template<typename T>
-	concept BoxType = is_box<T>::value;
+	concept BoxType = stn::TypeInstantiationOf<T,box>;
 }
 
 namespace std {

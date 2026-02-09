@@ -2,80 +2,56 @@
 #include "cursor_slot.h"
 #include "Item.h"
 #include "crafting_table.h"
+#include "../block/plank.h"
+#include "../block/air.h"
+#include "../block/torch.h"
+#include "../block/moss.h"
 #pragma once
 namespace items {
-	struct air_item :item_type {
-		item_traits traits() const {
-			return item_traits("air", renderer::TexturePath("images\\airtex.png", "AirTexture"), minecraftair);
-		}
-	};
-	struct altar_item :item_type {
-		item_traits traits() const {
-			return item_traits("altar", renderer::TexturePath("images\\crystalaltarside.png", "CrystalAltarSideTexture"), minecraftstone);
-		}
-	};
-	struct crafting_table_item :item_type {
-		item_traits traits() const {
-			return item_traits("crafting_table", renderer::TexturePath("images\\craftingtabletop.png", "CraftingTableTopTexture"), minecraftstone);
-		}
-	}; struct glass_bottle_item : item_type {
-		item_traits traits() const {
+ struct glass_bottle_item : item_type {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"glass_bottle",
-				renderer::TexturePath("images\\glassbottle.png", "GlassBottleTexture"),
-				stn::None
+				renderer::TexturePath("images\\glassbottle.png", "GlassBottleTexture")
 			);
 		}
 	};
-	struct torch_item : item_type {
-		item_traits traits() const {
-			return item_traits(
-				"torch",
-				renderer::TexturePath("images\\torch.png", "TorchTexture"),
-				blocks::block_id::minecrafttorch
-			);
-		}
-	};
+
 	struct iron_ore_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"iron_ore",
-				renderer::TexturePath("images\\ironore.png", "IronOreTexture"),
-				blocks::block_id::minecraftstone
+				renderer::TexturePath("images\\ironore.png", "IronOreTexture")
 			);
 		}
 	};
 
 	struct iron_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"iron",
-				renderer::TexturePath("images\\iron.png", "IronTexture"),
-				stn::None
+				renderer::TexturePath("images\\iron.png", "IronTexture")
 			);
 		}
 	};
-
 	struct metal_rod_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"metal_rod",
-				renderer::TexturePath("images\\metalrod.png", "MetalRodTexture"),
-				stn::None
+				renderer::TexturePath("images\\metalrod.png", "MetalRodTexture")
 			);
 		}
 	};
 
 	struct moss_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"moss",
-				renderer::TexturePath("images\\mossitem.png", "MossItemTexture"),
-				stn::None
+				renderer::TexturePath("images\\mossitem.png", "MossItemTexture")
 			);
 		}
 	}; struct crystal_bottom_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			// Uses the old initcrystalbottomitem values
 			return item_traits(
 				"crystal_bottom",
@@ -90,7 +66,7 @@ namespace items {
 	};
 
 	struct crystal_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"crystal",
 				item_use_type::block,
@@ -104,7 +80,7 @@ namespace items {
 	};
 
 	struct crystal_pick_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"crystal_pick",
 				item_use_type::tool,
@@ -118,7 +94,7 @@ namespace items {
 	};
 
 	struct crystal_top_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"crystal_top",
 				item_use_type::tool,
@@ -132,7 +108,7 @@ namespace items {
 	};
 
 	struct iron_bottom_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"iron_bottom",
 				item_use_type::tool,
@@ -146,7 +122,7 @@ namespace items {
 	};
 
 	struct iron_pick_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"iron_pick",
 				item_use_type::tool,
@@ -160,7 +136,7 @@ namespace items {
 	};
 
 	struct iron_sword_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"iron_sword",
 				item_use_type::tool,
@@ -174,7 +150,7 @@ namespace items {
 	};
 
 	struct iron_top_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"iron_top",
 				item_use_type::tool,
@@ -188,7 +164,7 @@ namespace items {
 	};
 
 	struct lava_pick_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"lava_pick",
 				item_use_type::tool,
@@ -202,7 +178,7 @@ namespace items {
 	};
 
 	struct rock_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"rock",
 				item_use_type::tool,
@@ -216,7 +192,7 @@ namespace items {
 	};
 
 	struct sword_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"sword",
 				item_use_type::tool,
@@ -230,7 +206,7 @@ namespace items {
 	};
 
 	struct final_sword_item : item_type {
-		item_traits traits() const {
+		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"final_sword",
 				item_use_type::tool,
@@ -242,35 +218,23 @@ namespace items {
 			);
 		}
 	};
-	struct plank_item : item_type {
-		item_traits traits() const {
-			return item_traits(
-				"plank",
-				renderer::TexturePath("images\\treestoneblock.png", "PlankTexture"),
-				blocks::minecrafttreestone
-			);
-		}
-	};
 
-	struct stone_item : item_type {
-		item_traits traits() const {
-			return item_traits(
-				"stone",
-				renderer::TexturePath("images\\stone.png", "StoneTexture"),
-				blocks::minecraftstone
-			);
-		}
-	};
+
 	struct register_core_items :Core::Plugin {
 		void build(Core::App& app) {
+			BlockRegistry& registry = app.ensure_resource<BlockRegistry>();
+			registry.insert_id<PlankBlock>();
+			registry.insert_id<MossBlock>();
+			registry.insert_id<TorchBlock>();
+			registry.insert_id<StoneBlock>();
+			registry.insert_id<AirBlock>();
+
 			app.emplace_system< ItemClear>();
 			item_types& item_register = app.ensure_resource<item_types>();
 			app.emplace_system< run_crafts>();
 			app.emplace_system< cursor_crafter>();
 			app.emplace_system<SyncDisplayIcon>();
 			item_register.register_item<items::air_item>();
-			item_register.register_item<items::altar_item>();
-			item_register.register_item<items::crafting_table_item>();
 			item_register.register_item<items::glass_bottle_item>();
 			item_register.register_item<items::iron_ore_item>();
 			item_register.register_item<items::iron_item>();

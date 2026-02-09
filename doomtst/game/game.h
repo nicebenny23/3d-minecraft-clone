@@ -75,7 +75,6 @@ void rungame() {
 	Core::game.Ecs.emplace_system<spawn_mobs>();
 	Core::game.Ecs.emplace_system<PlayerMovementSys>();
 	Core::game.insert_plugin<blockrender::BlockRenderPlugin>();
-	blocks::register_blocks(Core::game.Ecs);
 	Core::game.insert_plugin<PlayerInventoryPlugin>();
 	Core::game.insert_plugin<decals::decal_plugin>();
 	Core::game.insert_plugin<guirender::ConsolePlugin>();

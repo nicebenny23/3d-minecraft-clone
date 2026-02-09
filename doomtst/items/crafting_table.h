@@ -25,7 +25,7 @@ namespace items {
 		stn::Option<ItemRecipe> wanted;
 		void set_state() {
 			stn::Option<ItemRecipe> recipe = best_booklet_recipe(binder.list, binder.input.get_component<container>(), stn::None);
-			binder.output.get_component<display_item>().display = recipe.member_ref(&ItemRecipe::output).copied();
+		//	binder.output.get_component<DisplayItem>().display = recipe.member_ref(&ItemRecipe::output).copied();
 
 		}
 	};
@@ -36,7 +36,7 @@ namespace items {
 			}
 			ecs::obj cursor_obj = world.get_resource<items::cursor_container>().primary_slot();
 			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
-			cursor_obj.get_component<ui::UiBounds>().local.center = world.ensure_resource<userinput::InputManager>().mouse_position;
+	//		cursor_obj.get_component<ui::UiBounds>().local.center = world.ensure_resource<userinput::InputManager>().mouse_position;
 			for (auto&& [item_decal, interaction_state, crafting_slot_tag] : ecs::View<ItemSlotDecal, ui::InteractionState, items::crafting_slot_tag>(world)) {
 				if (interaction_state.left_clicked) {
 					crafter& crafter_comp = crafting_slot_tag.crafter.get_component<crafter>();

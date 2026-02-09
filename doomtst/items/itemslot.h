@@ -11,7 +11,11 @@ namespace items {
 		container_index(size_t x, size_t y) :coord(static_cast<int>(x), static_cast<int>(y)) {
 
 		}
-
+		container_index(v2::Coord2 location):coord(location) {
+			if (location.x<0||location.y<0) {
+				stn::throw_logic_error("container index {} may not be negitive", location);
+			}
+		}
 		size_t x() const{
 			return coord.x;
 		}
@@ -20,6 +24,12 @@ namespace items {
 		}
 		bool fits_in(v2::Coord2 element_size) const{
 			return x() <= element_size.x && y() <= element_size.y;
+		}
+		size_t index_in(v2::Coord2 element_size) const {
+			if (!fits_in(element_size)) {
+				stn::throw_length_error("cell {} does not fit in size {}", coord, element_size);
+			}
+			return x()+element_size.x*y();
 		}
 	};
 	struct ElementSlot :ecs::component {

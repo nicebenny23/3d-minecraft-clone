@@ -216,7 +216,7 @@ namespace items {
 		ItemSpawner(item_entry initial_state) :entry(initial_state) {
 		}
 		void apply(ecs::obj& entity) {
-			item_traits traits = entity.world().ensure_resource<item_types>().from_id(entry.id);
+			item_traits traits = entity.world().insert_resource<item_types>().from_id(entry.id);
 				entity.ensure_component<item_stack>(entry).set(entry);
 			
 		}

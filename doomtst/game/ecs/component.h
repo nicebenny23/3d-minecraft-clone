@@ -23,6 +23,9 @@ namespace ecs {
 		obj owner() const;
 		component() :ecs(nullptr) {
 		}
+		component(const component& other) :ecs(other.ecs), ent() {
+
+		}
 		virtual ~component() = default;
 
 		virtual void start() {

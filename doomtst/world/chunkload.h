@@ -5,6 +5,8 @@
 #include "../util/fileloader.h"
 #include <mutex>
 #include "../util/thread_split.h"
+#include "../block/stone.h"
+#include "../block/air.h"
 #pragma once 
 namespace Chunk {
 	enum biometype {
@@ -13,6 +15,7 @@ namespace Chunk {
 		open_stone = 2,
 
 	};
+	/*
 	inline biometype get_biome(double biome) {
 
 		if (math::range(0, 1).contains(biome)) {
@@ -82,12 +85,14 @@ namespace Chunk {
 		}
 		return neid;
 	}
-	inline blocks::block_id generatechunkvalfromnoise(Point3 pos, math::NoiseMap& map, math::NoiseMap& crazy, math::NoiseMap& slow) {
+
+	*/
+	inline blocks::block_id generatechunkvalfromnoise(Point3 pos, math::NoiseMap& map, math::NoiseMap& crazy, math::NoiseMap& slow,const BlockRegistry& registry) {
 		if (generateflat) {
 			if (0 < pos.y) {
-				return minecraftair;
+				return registry.get_id<blocks::AirBlock>();
 			}
-			return minecraftstone;
+			return registry.get_id<blocks::StoneBlock>();
 		}
 		Point3 scaled_pos = pos * blocksize;
 
@@ -96,8 +101,8 @@ namespace Chunk {
 		double biome = slow(scaled_pos + Coord(893, 103, 40));
 		double cave_region = slow(scaled_pos + Coord(893, 103, 40));
 		double random_n = crazy(scaled_pos + Coord(101, 300, 33));
-
-		return idfromnoise(biome, random_n, carve1, carve2, cave_region);
+		stn::throw_logic_error("need to make a better generation system");
+		//return idfromnoise(biome, random_n, carve1, carve2, cave_region);
 
 
 
@@ -106,12 +111,10 @@ namespace Chunk {
 
 		blocks::block_id block_id;
 		Coord pos;
-		idblock(blocks::block_id blkid, Coord loc) {
-			block_id = blkid;
+		idblock(blocks::block_id blkid, Coord loc):block_id(blkid){
 			pos = loc;
 		}
-		idblock() {
-			block_id = minecraftair;
+		idblock(blocks::block_id id): block_id(id){
 			pos = ZeroCoord;
 		}
 	};
@@ -123,6 +126,7 @@ namespace Chunk {
 		math::NoiseMap crazy;
 		array<idblock> ids;
 		Coord loc;
+		const BlockRegistry& registry;
 		blocks::block_id id_at(Coord pos) {
 
 			pos -= loc * Chunk::chunkaxis;
@@ -134,7 +138,7 @@ namespace Chunk {
 					}
 				}
 			}
-			return minecraftair;
+			return registry.get_id<blocks::AirBlock>();
 
 		}
 		void iterate(int x, std::mutex& mtx) {
@@ -143,20 +147,20 @@ namespace Chunk {
 				for (int z = 0; z < Chunk::chunkaxis; z++) {
 					Coord idpos = loc * Chunk::chunkaxis + Coord(x, y, z);
 
-					blocks::block_id neid = generatechunkvalfromnoise(idpos, map, crazy, slow);
+					blocks::block_id neid = generatechunkvalfromnoise(idpos, map, crazy, slow, registry);
 					mtx.lock();
-					ids.reach(ind) = idblock(neid, idpos);
+					ids[ind] = idblock(neid, idpos);
 					mtx.unlock();
 					ind++;
 				}
 			}
 
 		}
-		idmap(Coord location) :
+		idmap(Coord location,const BlockRegistry& block_registry) :
 			slow(math::NoiseParameters(1, 1, .005, 1.2)),
 			map(math::NoiseParameters(3, .6, .02, 1.2)),
 			crazy(math::NoiseParameters(4, 1., .005, 1.2)),
-			middle_map(math::NoiseParameters(2, 1, .005, 1.2)) {
+			middle_map(math::NoiseParameters(2, 1, .005, 1.2)),registry(block_registry){
 
 			array<int> x_index_list;
 			for (size_t i = 0; i < Chunk::chunkaxis; i++) {
@@ -164,7 +168,7 @@ namespace Chunk {
 			}
 
 			loc = location;
-			ids = array<idblock>();
+			ids = array<idblock>(4096,idblock(registry.get_id<AirBlock>()));
 			std::mutex lck;
 			auto func = [&lck, this](int x) {iterate(x, lck); };
 			thread_util::par_iter(x_index_list.begin(), x_index_list.end(), func, 4);
@@ -195,7 +199,7 @@ namespace Chunk {
 			CreateEmptyChunk(location).apply(chunk_object);
 			Chunk::chunk& newchunk = chunk_object.get_component<Chunk::chunk>();
 			Chunk::chunkmesh& mesh = chunk_object.get_component<Chunk::chunkmesh>();
-			idmap statemap = idmap(location.position);
+			idmap statemap = idmap(location.position,chunk_object.world().get_resource<BlockRegistry>());
 			size_t ind = 0;
 			for (int x = 0; x < Chunk::chunkaxis; x++) {
 				for (int y = 0; y < Chunk::chunkaxis; y++) {

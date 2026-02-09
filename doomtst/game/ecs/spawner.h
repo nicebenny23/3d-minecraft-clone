@@ -5,7 +5,7 @@ namespace ecs {
 	struct Recipe{
 		virtual void apply(ecs::obj& object) = 0;
 	};
-
+	
 	template<typename T>
 	concept RecipeType = std::derived_from<T, Recipe>;
 	template<typename T>

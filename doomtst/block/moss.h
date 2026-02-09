@@ -7,6 +7,9 @@ namespace blocks {
 		void apply(ecs::obj& block) override {
 			block.add_component<items::loot_table>().add("moss", 1);
 		}
+		std::string name() const {
+			return std::string("moss");
+		}
 	};
 	template<>
 	inline constexpr BlockTraits BlockInfo<MossBlock> = BlockTraits(

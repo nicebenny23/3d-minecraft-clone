@@ -1,6 +1,8 @@
 
 #pragma once
 #include "Item.h"
+#include "../renderer/textrender.h"
+#include "../game/ecs/weak_object.h"
 
 namespace items {
 	constexpr float item_size=.8f;
@@ -34,16 +36,11 @@ namespace items {
 			ui::UiSpawner(geo::Box2d::origin_centered(v2::Vec2(item_size, item_size)), 20).apply(entity);
 		}
 	};
-	struct DisplayedItemSpawner :ecs::Recipe {
-		item_entry base;
-		DisplayedItemSpawner(item_entry spawn_entry) :base(spawn_entry) {
-
-		}
-		void apply(ecs::obj& entity) {
-			ItemSpawner(base).apply(entity);
-			ItemUiSpawner().apply(entity);
-		}
+	struct DisplayItem :ecs::component {
+		stn::Option<item_entry> display;
 	};
+
+	
 	struct ItemIconSetter :ecs::System {
 		void run(ecs::Ecs& world) {
 			
@@ -76,13 +73,27 @@ namespace items {
 	struct SyncItemStackUi:ecs::System {
 
 		void run(ecs::Ecs& world) {
-
-			for (auto&& [icon, item] : ecs::View<ItemIcon, item_stack>(world)) {
-				icon.displayed_id = item.contained_id();
+			for (auto&& [display] : ecs::View<DisplayItem>(world)) {
+				if (display.display&&display.display.unwrap().count==0) {
+					display.display=stn::None;
+				}
+			}
+			for (auto&& [icon, display] : ecs::View<ItemIcon, DisplayItem>(world)) {
+				if (display.display) {
+					icon.displayed_id = display.display.unwrap().id;
+				}
+				else {
+					icon.image_component.get_component<ui::UiEnabled>().disable();
+				}
 			}
 	
-			for (auto&& [count, item] : ecs::View<ItemCountDisplay, item_stack>(world)) {
-				count.count = item.count();
+			for (auto&& [count, display] : ecs::View<ItemCountDisplay, DisplayItem>(world)) {
+				if (display.display) {
+					count.count= display.display.unwrap().count;
+				}
+				else {
+					count.text_component.get_component<ui::UiEnabled>().disable();
+				}
 			}
 		}
 	};

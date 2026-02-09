@@ -10,17 +10,17 @@ namespace items {
 		ParseItemEntry(ecs::Ecs& ecs) :world(ecs) {
 		}
 		item_entry operator()(const json::Value& item) {
-			item_types& item_register = world.ensure_resource<item_types>();
+			item_types& item_register = world.insert_resource<item_types>();
 			std::string item_name = item.get_subobject_as<std::string>("id").expect("item block_id should exist");
 			size_t count = item.get_subobject("count")
 				.expect("item count should exist")
 				.as_unsigned()
 				.expect("item count should not be negitive");
-			return item_entry(item_register.from_name(item_name), count, world.ensure_resource<item_types>());
+			return item_entry(item_register.from_name(item_name), count, item_register);
 		}
 	};
 	struct ItemRecipeFromJson {
-		ItemRecipe operator()(const json::Value& value) {
+		stn::array<ItemRecipe> operator()(const json::Value& value) {
 			const json::Object& obj = value.extract<json::Object>().expect("json must be an object");
 			v2::Coord2 coord = ParseVector2(obj.get("size").expect("size must exist in a recipe"));
 			const json::Array& arr = value.get_subobject_as<json::Array>("input").expect("recipe must have an input");
@@ -33,15 +33,14 @@ namespace items {
 				crafting_list.push(json::ParseOption(item_parser)(*item));
 			}
 			item_entry output = item_parser(obj.get("output").expect("recipe must have an output"));
-			return ItemRecipe(coord, std::move(crafting_list), output);
+			return spread_out(ItemRecipe(coord, std::move(crafting_list), output),size);
 		}
 		ecs::Ecs& world;
-		ItemRecipeFromJson(ecs::Ecs& ecs) :world(ecs) {
+		ItemRecipeFromJson(ecs::Ecs& ecs,v2::Coord2 expand_to) :world(ecs),size(expand_to){
 		}
 		v2::Coord2 size;
 	};
-	inline ItemRecipes recipe_booklet_from_path(const json::Value& value, ecs::Ecs& world) {
-		
-		return ItemRecipes(json::ParseArray<ItemRecipeFromJson>(ItemRecipeFromJson(world))(value));
+	inline ItemRecipes recipe_booklet_from_path(v2::Coord2 size,const json::Value& value, ecs::Ecs& world) {
+		return ItemRecipes(json::ComposeArray<ItemRecipeFromJson>(ItemRecipeFromJson(world,size))(value));
 	}
 }

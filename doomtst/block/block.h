@@ -59,12 +59,15 @@ namespace blocks {
 		geo::Box bounds() const {
 			return mesh.box;
 		}
-		const BlockType& type() const{
-			return world().get_resource<BlockRegistry>().type_for(id);
+		const BlockRegistry& registry() const {
+			return world().get_resource<BlockRegistry>();
+		}
+		const CatchedBlock& info() const{
+			return registry().block_for(id);
 		}
 		block(const BlockMeshTraits& traits, Chunk::chunkmesh& chunk_mesh, v3::Coord location, blocks::block_id blockid, math::Direction3d attachment_face, math::Direction2d block_direction,bool is_solid) 
-			:mesh(traits.faces, chunk_mesh.recreate_mesh, location, traits.size, attachment_face, block_direction) {
-			id = blockid;
+			:mesh(traits.faces, chunk_mesh.recreate_mesh, location, traits.size, attachment_face, block_direction),
+			id(blockid){
 			pos = location;
 			attributes.solid = is_solid;
 		};
