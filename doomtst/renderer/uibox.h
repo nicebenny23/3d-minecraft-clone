@@ -64,10 +64,10 @@ namespace ui {
 		return 	object.get_component<UiEnabled>().enabled();
 		}
 		void enable() {
-			object.ensure_component<UiEnabled>().enable();
+			object.set_emplace_component<UiEnabled>().enable();
 		}
 		void disable() {
-			object.ensure_component<UiEnabled>().disable();
+			object.set_emplace_component<UiEnabled>().disable();
 		}
 		Box2d bounds() const {
 			return object.get_component<ui::UiBounds>().global();
@@ -118,7 +118,7 @@ namespace ui {
 				img.tex_handle.set_uniform(renderer::uniform(world.load_asset(cmd.path).unwrap(), "tex"));
 			}
 
-			ecs::View<ui::UiEnabled, ui::UiBounds, ui::ComputedPriority, ui_image_component> bounds_view(world);
+			ecs::View<ui::UiEnabled, ui::UiBounds, ui::ComputedStyle, ui_image_component> bounds_view(world);
 			for (auto&& [enabled, bounds,UiPriority, ui_image] : bounds_view) {
 
 				if (ui_image.tex_handle) {

@@ -267,7 +267,6 @@
     <ClCompile Include="player\player.cpp" />
     <ClCompile Include="player\playerinventory.cpp" />
     <ClCompile Include="renderer\model.cpp" />
-    <ClCompile Include="renderer\textrender.cpp" />
     <ClCompile Include="renderer\ui.cpp" />
     <ClCompile Include="block\block.cpp" />
     <ClCompile Include="util\algorthm.cpp" />
@@ -467,7 +466,6 @@
     <ClInclude Include="util\concepts.h" />
     <ClInclude Include="util\counter.h" />
     <ClInclude Include="util\data_format.h" />
-    <ClInclude Include="util\dependency.h" />
     <ClInclude Include="util\deque.h" />
     <ClInclude Include="math\dir.h" />
     <ClInclude Include="util\dynamicarray.h" />
@@ -515,6 +513,7 @@
     <ClInclude Include="util\thread_split.h" />
     <ClInclude Include="game\time.h" />
     <ClInclude Include="util\topo_sort.h" />
+    <ClInclude Include="util\tuple.h" />
     <ClInclude Include="util\typelist.h" />
     <ClInclude Include="util\traits.h" />
     <ClInclude Include="util\type_graph.h" />

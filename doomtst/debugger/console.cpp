@@ -41,9 +41,9 @@ namespace console {
 
 				Point3 pos = player::goblin.get_component<ecs::transform_comp>().transform.position;
                 ImGui::Text(std::format("position: {}", pos).c_str());
-
+				grid::Grid& grid = CtxName::ctx.Ecs->get_resource<grid::Grid>();
                 ImGui::Text(std::format("yaw:{:.3f},pitch:{:.3f}", player::goblin.get_component<CameraComp>().CamTransform.yaw, player::goblin.get_component<CameraComp>().CamTransform.pitch).c_str());
-                ImGui::Text(std::format("Chunk: {}", CtxName::ctx.Grid->chunkfromblockpos(Coord(pos))).c_str());
+                ImGui::Text(std::format("Chunk: {}", grid.chunkfromblockpos(Coord(pos))).c_str());
                 std::string text_for_look = player::goblin.get_component<playerplace>().Hit
 					.filter([&](const voxtra::RayWorldHit& blk) {return blk.owner().exists(); })
 					.filter([](const voxtra::RayWorldHit& blk) {return blk.owner().has_component<block>(); })
@@ -54,7 +54,7 @@ namespace console {
                     .unwrap_or("not looking at a block");
                 
                 ImGui::Text(text_for_look.c_str());
-				ImGui::Text(std::format("loaded chunks{}", CtxName::ctx.Grid->chunks_loaded()).c_str());
+				ImGui::Text(std::format("loaded chunks{}", grid.chunks_loaded()).c_str());
 				ImGui::EndChild();
 
                 ImGui::EndTabItem(); 

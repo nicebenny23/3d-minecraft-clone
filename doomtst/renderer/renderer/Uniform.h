@@ -8,117 +8,77 @@
 #include <glm/glm.hpp>
 #include <GLFW/glfw3.h>
 #include "texture.h"
-namespace renderer{
-    enum UniformType : int {
-        uform_int = 0,
-        uform_float,
-        uform_gluint,
-        uform_vec2,
-        uform_vec3,
-        uform_vec4,
-        uform_mat3,
-        uform_mat4,
-        uform_tex_2d,
-		uform_tex_array
-    };
-	
-    using uniform_val = std::variant<
-        int,            // 0
-        float,          // 1
-        GLuint,         // 2  
-        v2::Vec2,      // 3
-        v3::Vec3,      // 4
-        glm::vec4,      // 5
-        glm::mat3,      // 6
-        glm::mat4,      // 7
-        assets::AssetHandle<Texture2D>,//8
-		assets::AssetHandle<TextureArray>//9
+namespace renderer {
+
+	using uniform_value = std::variant<
+		int,            
+		float,          
+		GLuint,           
+		v2::Vec2,      
+		v3::Vec3,      
+		glm::vec4,      
+		glm::mat3,      
+		glm::mat4,      
+		assets::AssetHandle<Texture2D>,
+		assets::AssetHandle<TextureArray>
 	>;
 
-    struct uniform_ref {
-        stn::Id id;
-		std::string name;
-        uniform_ref(stn::Id ind, std::string uniform_name) :id(ind), name(uniform_name) {
-            
 
-        }
-        uniform_ref():name() {
 
-        }
-   };
-
-	struct UniformParam {
+	struct UniformRefrence {
 		std::string uniform_name;
 		std::string shader_alias;
-		bool operator==(const UniformParam& other) const = default;
-		UniformParam(std::string uniform, std::string alias)
-			: uniform_name(std::move(uniform)), shader_alias(std::move(alias)) {
+		bool operator==(const UniformRefrence& other) const = default;
+		UniformRefrence(std::string_view uniform, std::string_view alias)
+			: uniform_name(uniform), shader_alias(alias) {
 		}
-		UniformParam(const char* uniform, const char* alias)
+		UniformRefrence(const char* uniform, const char* alias)
 			: uniform_name(std::move(uniform)), shader_alias(std::move(alias)) {
 		}
 	};
-    struct UniformManager {
-        
-        handle::HandleMap< std::string,uniform_val> name_uniform_map;
-        void set(std::string name,const uniform_val& value) {
-            name_uniform_map.insert(name, value);
-        }
-        
 
-        stn::Id handle_of(std::string name) {
-            
-                return name_uniform_map.reserve(name);
 
-        }
-        const uniform_val& get(const uniform_ref& handle) const {
-           
-            return name_uniform_map.element_of(handle.id);
+	   
+	struct UniformRegistry {
 
-        }
-		uniform_ref from_param(const UniformParam& param) {
+		handle::HandleMap< std::string, uniform_value> name_uniform_map;
+		void set(std::string name, const uniform_value& value) {
+			name_uniform_map.insert(name, value);
+		}
 
-			return uniform_ref(handle_of(param.uniform_name),param.shader_alias);
+		const uniform_value& get(const UniformRefrence& handle) const {
+
+			return name_uniform_map.element_of(handle.uniform_name);
 
 		}
-        template< typename T>
-        T& get(const uniform_ref handle) {
-            return std::get<T>(get(handle));
-        }
-    }; 
-    
 
-	inline UniformParam uparam(std::string uniform_name, std::string shader_alias) {
-		return UniformParam{ std::move(uniform_name), std::move(shader_alias) };
-	} 
-	
+	};
+
+
 	struct uniform {
-       uniform_val value;
-       std::string name;
-       
-       template< typename T>
-       T& get() {
-           return std::get<T>(value);
-       }
-	   
-	   template< typename T>
-	 const T& get() const{
-		   return std::get<T>(value);
-	   }
+		uniform_value value;
+		std::string name;
 
-       template<typename T>
-           uniform(const T& val, const char* uniform_name)
-           : name(uniform_name), value(std::in_place_type<T>, val) {
-       }
+		template< typename T>
+		T& get() {
+			return std::get<T>(value);
+		}
 
-		uniform(const uniform_val& val, const std::string& uniform_name)
+		template< typename T>
+		const T& get() const {
+			return std::get<T>(value);
+		}
+
+		template<typename T>
+		uniform(const T& val, const char* uniform_name)
+			: name(uniform_name), value(std::in_place_type<T>, val) {
+		}
+
+		uniform(const uniform_value& val, const std::string& uniform_name)
 			: name(uniform_name), value(val) {
 		}
-		   UniformType current_type() const{
-			   return UniformType(value.index());
-		   }
-       uniform() :name() {
+		uniform() :name() {
 
-       }
-   };
+		}
+	};
 }

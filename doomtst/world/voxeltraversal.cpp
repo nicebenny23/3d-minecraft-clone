@@ -16,11 +16,10 @@ bool counttablevoxel(block& blk, GridTraverseMode trav) {
 
 bool voxtra::boxcast_grid(geo::Box Box) {
 
-	array<stn::non_null<block>> BlocksInRange = CtxName::ctx.Grid->voxel_in_range(Box);
-
-	for (stn::non_null<block> PotentialCollision : BlocksInRange) {
-		stn::Option<aabb::Collider&> Collider = PotentialCollision->owner().get_component_opt<aabb::Collider>();
-		if (Collider && PotentialCollision->attributes.solid && !Collider.unwrap().effector) {
+	array<ecs::obj> blocks_in_range = CtxName::ctx.Ecs->get_resource<grid::Grid>().voxel_in_range(Box);
+	for (ecs::obj PotentialCollision : blocks_in_range) {
+		stn::Option<aabb::Collider&> Collider = PotentialCollision.get_component_opt<aabb::Collider>();
+		if (Collider && PotentialCollision.get_component<blocks::block>().attributes.solid && !Collider.unwrap().effector) {
 			if (aabb::box_intersects_aabb(Box, Collider.unwrap())) {
 				return true;
 			}
@@ -53,7 +52,7 @@ voxtra::WorldRayCollision  voxtra::travvox(ray nray, GridTraverseMode trav) {
 	}
 	v3::Point3 pos = nray.start - (norm_ray * 1e-6);
 
-	Coord curvox = CtxName::ctx.Grid->getVoxel(pos);
+	Coord curvox = CtxName::ctx.Ecs->get_resource<grid::Grid>().getVoxel(pos);
 	Coord Boundry;
 	for (size_t i = 0; i < 3; i++) {
 		Boundry[i] = next_boundary(pos[i], sgns[i] == 1);
@@ -63,7 +62,7 @@ voxtra::WorldRayCollision  voxtra::travvox(ray nray, GridTraverseMode trav) {
 		for (int x = extended_range(pos.x).first; x <= extended_range(pos.x).second; ++x) {
 			for (int y = extended_range(pos.y).first; y <= extended_range(pos.y).second; ++y) {
 				for (int z = extended_range(pos.z).first; z <= extended_range(pos.z).second; ++z) {
-					block* blk = CtxName::ctx.Grid->getBlock(Coord(x, y, z));
+					block* blk = CtxName::ctx.Ecs->get_resource<grid::Grid>().getBlock(Coord(x, y, z));
 					if (blk == nullptr) {
 						continue;
 					}

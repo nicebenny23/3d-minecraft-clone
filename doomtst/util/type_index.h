@@ -80,15 +80,25 @@ namespace stn {
 			return c;
 		}
 	};
+	inline uint32_t& global_type_counter() {
+		static uint32_t counter = 0;
+		return counter;
+	}
 
-	inline uint32_t global_type_counter{ 0 };
-	inline stn::array<type_id_chart> global_type_charts;
-	inline std::mutex type_registry_mutex;
+	inline stn::array<type_id_chart>& global_type_charts() {
+		static stn::array<type_id_chart> charts;
+		return charts;
+	}
+
+	inline std::mutex& type_registry_mutex() {
+		static std::mutex m;
+		return m;
+	}
 	template<typename T>
 	uint32_t register_type() {
-			std::lock_guard lock(type_registry_mutex);
-			uint32_t id = global_type_counter++;
-			global_type_charts.push(type_id_chart::make< T >());
+			std::lock_guard lock(type_registry_mutex());
+			uint32_t id = global_type_counter()++;
+			global_type_charts().push(type_id_chart::make< T >());
 			return id;
 	}
 
@@ -101,7 +111,7 @@ namespace stn {
 			return id != other.id;
 		}
 		const type_id_chart& functions() const {
-			return global_type_charts.unchecked_at(id);
+			return global_type_charts().unchecked_at(id);
 		}
 
 		stn::memory::layout layout() const {
@@ -154,17 +164,15 @@ namespace stn {
 		
 		uint32_t id;
 	};
+
+	template<typename T>
+	inline const uint32_t typeIndex = register_type<T>();
 	template<typename T>
 	type_id make_type_id() {
-		return type_id(typeIndex<T>());
+		return type_id(typeIndex<T>);
 	}
-
 	// Retrieve a unique ID for type T
-	template<typename T>
-	uint32_t typeIndex() {
-		static const uint32_t id = register_type<T>();
-		return id;
-	}
+
 
 
 	template<typename id_type = stn::Id>
@@ -182,7 +190,7 @@ namespace stn {
 		template<typename T>
 		stn::insertion<id_type> insert() {
 
-			uint32_t& dense_id = sparse_map.reach(typeIndex<T>(), invalid);
+			uint32_t& dense_id = sparse_map.reach(typeIndex<T>, invalid);
 			if (dense_id == invalid) {
 				dense_id = next_index++;
 				return stn::insertion(id_type(dense_id), true);
@@ -192,12 +200,12 @@ namespace stn {
 		}
 		template<typename T>
 		id_type get_unchecked() const {
-			return id_type(sparse_map.unchecked_at(typeIndex<T>()));
+			return id_type(sparse_map.unchecked_at(typeIndex<T>));
 		}
 		template<typename T>
 		id_type get() const {
 
-			uint32_t dense_id = sparse_map[typeIndex<T>()];
+			uint32_t dense_id = sparse_map[typeIndex<T>];
 			if (dense_id == invalid) {
 				throw std::logic_error(std::string("Id of" + std::string(typeid(T).name()) + "has not been created"));
 			}
@@ -225,7 +233,7 @@ namespace stn {
 		template<typename T>
 		stn::Option<id_type> get_opt() const {
 
-			uint32_t id = typeIndex<T>();
+			uint32_t id = typeIndex<T>;
 			if (!sparse_map.contains_index(id)) {
 				return stn::None;
 			}
@@ -237,7 +245,7 @@ namespace stn {
 		}
 		template<typename T>
 		bool contains() const {
-			uint32_t id = typeIndex<T>();
+			uint32_t id = typeIndex<T>;
 			return id < sparse_map.length() && sparse_map[id] != invalid;
 		}
 
@@ -295,12 +303,12 @@ namespace stn {
 		
 		template<typename U>
 		void set(const T& value) {
-			sparse_map.reach(typeIndex<U>()) = value;
+			sparse_map.reach(typeIndex<U>) = value;
 		}
 
 		template<typename U>
 		stn::Option<T> remove() {
-			size_t index = typeIndex<U>();
+			size_t index = typeIndex<U>;
 			if (sparse_map.contains_index(index)) {
 				sparse_map[index] = stn::None;
 			}
@@ -308,12 +316,12 @@ namespace stn {
 
 		template<typename U>
 		bool contains() const {
-			return sparse_map.get_flat(typeIndex<U>()).has_value;
+			return sparse_map.get_flat(typeIndex<U>).has_value;
 		}
 
 		template<typename U>
 		stn::Option<T> at() const {
-			return sparse_map.get_flat(typeIndex<U>());
+			return sparse_map.get_flat(typeIndex<U>);
 		}
 		
 	};

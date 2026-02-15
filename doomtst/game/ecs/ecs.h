@@ -8,6 +8,7 @@
 #include "../../assets/Assets.h"
 #include "spawner.h"
 #include "ComponentType.h"
+#include "../../util/tuple.h"
 #include "../../util/reference.h"
 namespace ecs {
 	struct Ecs {
@@ -19,7 +20,6 @@ namespace ecs {
 		}
 
 		struct delete_objects :System {
-			using DependencyTag = Depends::dependency_last;
 			delete_objects() {
 			};
 
@@ -205,9 +205,8 @@ namespace ecs {
 			return entities.contains(ent);
 		}
 		template<ComponentType T, typename ...Args>
-		T& ensure_component(entity object, Args&&... args)   requires std::constructible_from<T, Args&&...> {
-			entities.assert_valid(object);
-			return components.ensure<T>(object, std::forward<Args>(args)...)
+		T& set_component(entity object, Args&&... args)   requires std::constructible_from<T, Args&&...> {
+			return components.set<T>(object, std::forward<Args>(args)...)
 				.on_insert([this, object](T& component) {
 				archetypes.transfer_entity_to_flipped_index(object.id(), components.get_id_unchecked<T>());
 				}).value;
@@ -216,15 +215,19 @@ namespace ecs {
 		T& add_component(entity object, Args&&... args)   requires std::constructible_from<T, Args&&...> {
 			entities.assert_valid(object);
 			component_id id = components.insert_id<T>();
-			archetypes.transfer_entity_to_flipped_index(object.id(), id);
-			return components.unchecked_at(id).emplace<T>(object, std::forward<Args>(args)...);
+			return components
+			.unchecked_at(id)
+			.emplace<T>(object, std::forward<Args>(args)...)
+			.on_insert([&](T& component) {
+					archetypes.transfer_entity_to_flipped_index(object.id(), id);
+				}).value;
 		}
 		template<ComponentType T, typename ...Args>
 		T& spawn_with_component(Args&&... args)   requires std::constructible_from<T, Args&&...> {
 			entity new_entity = entities.allocate_entity();
 			component_id spawn_id = components.insert_id<T>();
 			archetypes.spawn_at(new_entity.id(), spawn_id);
-			return components.unchecked_at(spawn_id).emplace<T>(new_entity, std::forward<Args>(args)...);
+			return components.unchecked_at(spawn_id).emplace<T>(new_entity, std::forward<Args>(args)...).value;
 		}
 
 		
@@ -273,10 +276,10 @@ namespace ecs {
 			return stn::None;
 		}
 		template<ComponentType... Components>
-		std::tuple<Components&...> get_tuple_unchecked(entity_id obj, const stn::span<const component_id>& indices) {
+		stn::TupleSet<Components&...> get_tuple_unchecked(entity_id obj, const stn::span<const component_id>& indices) {
 
 			return[&]<size_t... Is>(std::index_sequence<Is...>) {
-				return std::tuple<Components&...>{
+				return stn::TupleSet<Components&...>{
 					components.unchecked_at(indices.unchecked_at(Is)).get_as_unchecked<Components>(obj)...
 				};
 			}(std::index_sequence_for<Components...>{});

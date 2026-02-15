@@ -22,7 +22,7 @@ inline ecs::obj spawndagger(v3::Point3 pos,v3::Vec3 velocity,float gravscale=.4f
     //refmodel.add_component<destroyonhit<>>();
     refmodel.add_component<rigidbody>().velocity=velocity;
   
-    refmodel.add_component<rotatetwordsvel>();
+    refmodel.add_component<rotate_to_velocity>();
 
     refmodel.get_component<rigidbody>().gravityscale=gravscale;
     refmodel.get_component<rigidbody>().friction = .7f *gravscale/ .4f  ;

@@ -72,8 +72,8 @@ namespace ecs {
 			return ecs->add_component<T>(ent, std::forward<Args>(args)...);
 		}
 		template<ComponentType T, typename ...Args > requires std::constructible_from<T, Args&&...>
-		T& ensure_component(Args&&... args) {
-			return ecs->ensure_component<T>(ent, std::forward<Args>(args)...);
+		T& set_emplace_component(Args&&... args) {
+			return ecs->set_component<T>(ent, std::forward<Args>(args)...);
 		}
 		void destroy() {
 			ecs->write_command(DestroyEntity(ent));
@@ -95,7 +95,7 @@ namespace ecs {
 			return true;
 		}
 		void add_child(ecs::obj child) {
-			ensure_component<Parent>().add_child(child.inner());
+			add_component<Parent>().add_child(child.inner());
 		}
 		template<RecipeType T, typename ...Args> requires std::constructible_from<T, Args&&...>
 		ecs::obj spawn_child(Args&&... args);

@@ -31,9 +31,9 @@ namespace ui {
 
 			}
 		}
-		text_component() :word("") {
+		text_component() :word(""),text_color(colors::Blue) {
 		}
-	
+		colors::Color text_color;
 		renderer::RenderableHandle handle;
 		std::string word;
 		template<typename... Args>
@@ -52,7 +52,7 @@ namespace ui {
 		void run(ecs::Ecs& world) {
 
 			ecs::View<ui::UiEnabled, ui::UiBounds, ui::InteractionState, text_component> bounds_view(world);
-			for (auto&& [enabled, bounds, ui_interaction, ui_text] : bounds_view) {
+			for (auto [enabled, bounds, ui_interaction, ui_text] : bounds_view) {
 				if (enabled.enabled()) {
 					ui_text.set_handle();
 					ui_text.handle.enable();
@@ -67,8 +67,9 @@ namespace ui {
 						write_letter(mesh_data, charlocation, int(ui_text.word[i] - '0'));
 						charlocation.center += increse;
 					}
+					ui_text.handle.set_color(ui_text.text_color);
 					ui_text.handle.fill(std::move(mesh_data));
-					ui_text.handle.set_order_key(ui_text.owner().get_component<ComputedPriority>().priority);
+					ui_text.handle.set_order_key(ui_text.owner().get_component<ComputedStyle>().priority);
 				}
 				else {
 					if (ui_text.handle) {
@@ -136,27 +137,24 @@ namespace ui {
 	struct UiTextPlugin :Core::Plugin {
 		void build(Core::App& app) {
 			app.insert_plugin<UiPlugin>();
-			array<std::string> texlist = array<std::string>(10);
-			texlist[0] = "bitmaptext\\zeroimg.png";
-			texlist[1] = "bitmaptext\\oneimg.png";
-			texlist[2] = "bitmaptext\\twoimg.png";
-			texlist[3] = "bitmaptext\\threeimg.png";
-			texlist[4] = "bitmaptext\\fourimg.png";
-			texlist[5] = "bitmaptext\\fiveimg.png";
-			texlist[6] = "bitmaptext\\siximg.png";
-			texlist[7] = "bitmaptext\\sevenimg.png";
-			texlist[8] = "bitmaptext\\eightimg.png";
-			texlist[9] = "bitmaptext\\nineimg.png";
+			array<std::string> texlist = array<std::string>();
+			for (size_t i = 0; i < 10; i++) {
+				texlist.push(std::format("bitmaptext\\char_{}.png", i));
+			}
+			for (char i = 'A'; i <= 'Z';i++) {
+				texlist.push(std::format("bitmaptext\\char_{}.png", i));
+			}
+
 			ecs::Ecs& world = app.Ecs;
 
 			renderer::texture_array_id textarray = world.load_asset_emplaced<renderer::TextureArrayPath>(texlist, std::string("Letters")).unwrap();
 			app.emplace_system<UiTextMesher>();
-			world.insert_resource<renderer::Renderer>().set_uniform("letters", textarray);
+			world.get_resource<renderer::Renderer>().set_uniform("letters", textarray);
 			world.load_asset_emplaced<renderer::shader_descriptor>("TextShader", "shaders\\textvertex.vs", "shaders\\textfragment.vs").unwrap();
 			world.load_asset_emplaced<renderer::MaterialDescriptor>("Text", "ui_phase", "TextShader", renderer::RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
 				stn::array{
-				renderer::uparam("aspect_ratio", "aspectratio"),
-				renderer::uparam("letters", "tex")
+				renderer::UniformRefrence("aspect_ratio", "aspectratio"),
+				renderer::UniformRefrence("letters", "tex")
 			});
 
 		}

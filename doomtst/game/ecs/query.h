@@ -24,6 +24,8 @@ namespace ecs {
 
 	template<typename T>
 	concept QueryFilterMap = QueryMap<T> && QueryFilter<T>;
+	template<typename T>
+	concept QueryElement= QueryMap<T>||QueryFilter<T>;
 
 
 	template<typename... Components>

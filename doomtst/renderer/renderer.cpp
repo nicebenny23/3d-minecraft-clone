@@ -40,8 +40,7 @@ namespace renderer {
 		Material& mat = *material;
 		context.bind(*mat.shader);
 		for (auto& elem : mat.handles) {
-			renderer::uniform uniform_value(uniform_manager.get(elem), elem.name);
-			apply_uniform(uniform_value);
+			context.apply_uniform(uniform_manager.get(elem), std::string_view(elem.shader_alias));
 		}
 		context.bind_properties(mat.prop);
 	}

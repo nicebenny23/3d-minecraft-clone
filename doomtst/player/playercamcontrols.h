@@ -20,7 +20,7 @@ struct playercamcontrols : ecs::component
 
 			world().get_resource<window::Window>().DisableCursor();
 
-			userinput::InputManager& man = world().ensure_resource<userinput::InputManager>();
+			userinput::InputManager& man = world().get_resource<userinput::InputManager>();
 			double xoffset = man.mouse_position_dt.x;
 			double yoffset = man.mouse_position_dt.y;
 

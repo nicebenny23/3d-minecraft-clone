@@ -7,6 +7,9 @@
 #include "../game/ecs/query.h"
 #include "../game/ecs/spawner.h"
 #include "../game/ecs/traversal.h"
+#include "../util/stack.h"
+#include "../math/geometry.h"
+#include "../util/userinput.h"
 namespace ui {
 
 	struct UiPriority :ecs::component {
@@ -18,9 +21,9 @@ namespace ui {
 			priority = precedence;
 		}
 	};
-	struct ComputedPriority :ecs::component {
+	struct ComputedStyle :ecs::component {
 		size_t priority;
-		ComputedPriority(size_t precedence) :priority(precedence) {
+		ComputedStyle(size_t precedence) :priority(precedence) {
 
 		}
 	};
@@ -41,7 +44,7 @@ namespace ui {
 			ui_nodes.push(world.get_resource<BaseUiNode>().base_node);
 			while (!ui_nodes.empty()) {
 				ecs::obj next = ui_nodes.pop();
-				next.ensure_component<ComputedPriority>(current_assignment).priority = current_assignment++;
+				next.set_emplace_component<ComputedStyle>(current_assignment).priority = current_assignment++;
 				stn::array<ecs::obj> children;
 				for (ecs::entity ent : ecs::HierarchyView(next).children_entities()) {
 					if (world.has_component<UiPriority>(ent)) {
@@ -148,11 +151,13 @@ namespace ui {
 	};
 	struct UiInteractionSystem :ecs::System {
 		void run(ecs::Ecs& world) {
-			userinput::InputManager& man = world.ensure_resource<userinput::InputManager>();
+			userinput::InputManager& man = world.get_resource<userinput::InputManager>();
 			v2::Vec2 pos = man.mouse_position;
 			bool has_clicked_left = man.left_mouse().pressed;
 			bool has_clicked_right = man.right_mouse().pressed;
-
+			if (has_clicked_left) {
+				int l = 3;
+			}
 			ecs::View<UiEnabled, UiBounds, InteractionState> bounds_view(world);
 			for (auto&& [enabled, bounds, ui_interaction] : bounds_view) {
 				bool cursor_touching = bounds.global().contains(pos) && enabled.enabled();
@@ -173,11 +178,11 @@ namespace ui {
 		:bounds(geo::Box2d(box.center, box.scale)), priority(priority), bounds_type(global_bounds){
 		}
 		void apply(ecs::obj& object) {
-			object.ensure_component<UiBounds>(bounds, bounds_type);
-			object.ensure_component<UiEnabled>();
-			object.ensure_component<InteractionState>();
-			object.ensure_component<UiPriority>(priority);
-			object.ensure_component<ComputedPriority>(0);
+			object.add_component<UiBounds>(bounds, bounds_type);
+			object.add_component<UiEnabled>();
+			object.add_component<InteractionState>();
+			object.add_component<UiPriority>(priority);
+			object.add_component<ComputedStyle>(0);
 				
 			object
 			.world()

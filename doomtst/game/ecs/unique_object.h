@@ -88,8 +88,8 @@ namespace ecs {
 
 		template<ComponentType T, typename ...Args>
 			requires std::constructible_from<T, Args&&...>
-		T& ensure_component(Args&&... args) {
-			return owned.ensure_component<T>(std::forward<Args>(args)...);
+		T& set_emplace_component(Args&&... args) {
+			return owned.set_emplace_component<T>(std::forward<Args>(args)...);
 		}
 
 		Ecs& world() {

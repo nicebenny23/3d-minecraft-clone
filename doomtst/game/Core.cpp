@@ -1,8 +1,9 @@
 #pragma once
 #include "Core.h"
-namespace Core {
 #include <glad/glad.h>
 #include <iostream>
+#include "../util/userinput.h"
+namespace Core {
 
    
     App game; 
@@ -20,14 +21,14 @@ namespace Core {
 
     void keyCallback(GLFWwindow* /*window*/, int key, int /*scancode*/, int action, int /*mods*/)
     {
-		game.ensure_resource<userinput::InputManager>().update_key(key, action);
+		game.Ecs.get_resource<userinput::InputManager>().update_key(key, action);
     }
 
     void mouseButtonCallback(GLFWwindow* /*window*/, int button, int action, int /*mods*/)
     {
         if (button < 2)
         {
-			game.ensure_resource<userinput::InputManager>().update_key(GLFW_KEY_LAST + button, action);
+			game.Ecs.get_resource<userinput::InputManager>().update_key(GLFW_KEY_LAST + button, action);
         }
     }
 
@@ -47,8 +48,8 @@ namespace Core {
 
     void App::createWindow()
     {
-        InitInput();
 
+		CtxName::ctx.Ecs->insert_resource<userinput::InputManager>();
 		window::Window& window=ctx->Ecs->insert_resource<window::Window>("Benny Render 3d", "images\\crystaloreenhanced.png");
 		window.setCursorCallback(cursorPositionCallback);
 		window.SetFrameBufferCallback(framebufferSizeCallback);
@@ -59,14 +60,6 @@ namespace Core {
        
     }
 
-    void App::CreateGrid()
-    {
-		ctx->Grid=&Ecs.insert_resource<grid::Grid>(2);
-    }
-
-    void App::InitInput() {
-  
-    }
     void App::InitOC()
     {
         ctx->Ecs = &Ecs;
@@ -80,9 +73,5 @@ namespace Core {
         ctx->wrld = &world;
     }
 
-    void App::InitRenderer()
-    {  
-		
-    }
    
 }

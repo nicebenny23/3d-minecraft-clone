@@ -58,7 +58,7 @@ bool normaltestfunc(Coord pos, int dir)
 }
 
 array<navnode> astarpathfinding(navnode start, navnode goal, array<navnode> (*getconnected)(navnode& pos)) {
-    if (CtxName::ctx.Grid->GetChunk(goal.pos)==nullptr)
+    if (CtxName::ctx.Ecs->get_resource<grid::Grid>().GetChunk(goal.pos) == nullptr)
     {
 return        array<navnode>();
     }
@@ -212,9 +212,9 @@ Vec3 transformnormal(Vec3 pos, Vec3 scale)
 void navigator::calcpath()
 {
     
-    Coord currpos = CtxName::ctx.Grid->getVoxel( owner().get_component<ecs::transform_comp>().transform.position);
+    Coord currpos = CtxName::ctx.Ecs->get_resource<grid::Grid>().getVoxel( owner().get_component<ecs::transform_comp>().transform.position);
 
-	Point3 gotopos = CtxName::ctx.Grid->getVoxel(goingtwords.get_component<ecs::transform_comp>().transform.position);
+	Point3 gotopos = CtxName::ctx.Ecs->get_resource<grid::Grid>().getVoxel(goingtwords.get_component<ecs::transform_comp>().transform.position);
     array<navnode>  finding = astarpathfinding(navnode(currpos),navnode(Coord(gotopos)), testfunction);
     headed_list.clear();
     headed_index = 0;

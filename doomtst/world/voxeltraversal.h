@@ -48,7 +48,7 @@ namespace voxtra {
 			double ranx = (random::random() - .5) * 2;
 			double rany = (random::random() - .5) * 2;
 			double ranz = (random::random() - .5) * 2;
-			v3::Point3 test_pos = (Vec3(ranx, rany, ranz) * (2 * CtxName::ctx.Grid->rad + 1) / 2 + CtxName::ctx.Grid->grid_pos.position) * Chunk::chunkaxis;
+			v3::Point3 test_pos = (Vec3(ranx, rany, ranz) * (2 * CtxName::ctx.Ecs->get_resource<grid::Grid>().rad + 1) / 2 + CtxName::ctx.Ecs->get_resource<grid::Grid>().grid_pos.position) * Chunk::chunkaxis;
 			geo::Box test_box = geo::Box(test_pos,scale);
 			if (!boxcast_grid(test_box))
 			{

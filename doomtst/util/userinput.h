@@ -35,7 +35,6 @@ namespace userinput {
 
 			}
 			if (action == GLFW_RELEASE) {
-				pressed = false;
 				held = false;
 				released = true;
 			}
@@ -86,10 +85,8 @@ namespace userinput {
 
 		}
 
-
-
-		InputKey getKey(const size_t key) {
-			return keys[convertchartoglfwkey(key)];
+		InputKey key(const size_t key_index) {
+			return keys[convertchartoglfwkey(key_index)];
 		}
 
 	};

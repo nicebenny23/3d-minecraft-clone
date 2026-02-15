@@ -19,6 +19,33 @@ namespace stn {
 	concept CompleteVirtual = !CalledWhileIncomplete<T> && std::has_virtual_destructor_v<T>;
 
 
+
 	template<typename T,typename ...Args>
 	concept OneOf= (std::same_as<T,Args>||...);
+
+	template<typename...>
+	struct all_unique_impl :std::true_type {
+
+	};
+
+	template<typename Head,typename... Tail>
+	struct all_unique_impl<Head,Tail...> :std::bool_constant<
+	(!OneOf<Head, Tail...>&& all_unique_impl<Tail...>::value)> {
+
+	};
+	template<typename ...Args>
+	concept AllUnique = all_unique_impl<Args...>::value;
+
+	template <typename T, template <typename...> class Template>
+	struct is_type_instantiation_of : std::false_type {
+	};
+
+	template <template <typename...> class Template, typename... Args>
+	struct is_type_instantiation_of<Template<Args...>, Template> : std::true_type {
+	};
+	template <typename T, template <typename...> class Template>
+	concept TypeInstantiationOf = is_type_instantiation_of<T, Template>::value;
+
+	template<typename Func, typename ...Args>
+	concept nonvoid_invokable = std::invocable<Func, Args&&...> && !std::is_void_v<std::invoke_result_t<Func, Args&&...>>;
 }

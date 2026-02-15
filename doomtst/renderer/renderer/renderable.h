@@ -3,6 +3,10 @@
 #include "../../util/Id.h"
 #include "RenderProperties.h"
 #include "../../game/ecs/game_object.h"
+#include "../color.h"
+#include "../../game/ecs/ecs.h"
+#include "../../game/ecs/system.h"
+#include "../../game/ecs/query.h"
 #pragma once
 namespace renderer{
 	struct order_key :ecs::component {
@@ -17,6 +21,43 @@ namespace renderer{
 		material_component(material_handle mat) :mat_id(mat) {
 		}
 		void start() {
+		}
+	};
+	struct color_component :ecs::component {
+		colors::Color mesh_color;
+		color_component(colors::Color color) :mesh_color(color){
+		}
+
+	};
+	struct renderable_overides : ecs::component {
+		stn::array< renderer::uniform> overides;
+		renderable_overides() :overides() {
+
+		}
+
+		void set(const renderer::uniform& value) {
+			for (auto& val : overides) {
+				if (val.name == value.name) {
+					if (val.value.index() != value.value.index()) {
+						stn::throw_logic_error("unform may not change type");
+					}
+					val = value;
+					return;
+				}
+			}
+			overides.push(value);
+		}
+		stn::span<renderer::uniform> view() {
+			return overides.span();
+		}
+
+	};
+	struct ColorSetter:ecs::System{
+		void run(ecs::Ecs& world) override{
+			ecs::View<color_component,renderable_overides> renderable_iter(world);
+			for (auto&& [color, overrides] : renderable_iter) {
+				overrides.set(uniform(color.mesh_color.glm(), "color"));
+			}
 		}
 	};
 	struct mesh_component:ecs::component {
@@ -38,29 +79,7 @@ namespace renderer{
 			enabled = false;
 		}
 	};
-	struct renderable_overides : ecs::component {
-		stn::array< renderer::uniform> overides;
-		renderable_overides():overides() {
-
-		}
-
-		void set(const renderer::uniform& value) {
-			for (auto& val : overides) {
-				if (val.name == value.name) {
-					if (val.current_type()!=value.current_type()) {
-						stn::throw_logic_error("unform may not change type");
-					}
-					val = value;
-					return;
-				}
-			}
-			overides.push(value);
-		}
-		stn::span<renderer::uniform> view() {
-			return overides.span();
-		}
-
-	};
+	
 
 	struct renderable_marker :ecs::component {
 	
@@ -102,12 +121,12 @@ namespace renderer{
 		}
 		template<ecs::ComponentType T, typename ...Args>
 			requires std::constructible_from<T, Args&&...>
-		T& ensure_component(Args&&... args) {
-			return object.ensure_component<T>(std::forward<Args>(args)...);
+		T& set_emplace_component(Args&&... args) {
+			return object.set_emplace_component<T>(std::forward<Args>(args)...);
 		}
 
 		void set_order(float key) {
-			ensure_component<order_key>(key).order=key;
+			set_emplace_component<order_key>(key);
 		}
 		float get_order() const{
 			return get_component<order_key>().order;
@@ -133,10 +152,10 @@ namespace renderer{
 			return get_component<renderable_overides>().view();
 		}
 		void set_material(material_handle mat_id) {
-		object.ensure_component<material_component>(mat_id).mat_id=mat_id;
+			object.set_emplace_component<material_component>(mat_id);
 		}
 		void set_mesh(renderer::mesh_id msh_id) {
-			object.ensure_component<mesh_component>(msh_id).msh = msh_id;
+			object.set_emplace_component<mesh_component>(msh_id);
 		}
 		bool operator==(const renderable& other) const = default;
 	};

@@ -1,7 +1,7 @@
 #include "../game/objecthelper.h"
 #include "../game/rigidbody.h"
 #pragma once 
-struct rotatetwordsvel: ecs::component
+struct rotate_to_velocity: ecs::component
 {
 	void update() {
 

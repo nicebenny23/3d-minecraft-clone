@@ -12,7 +12,7 @@ namespace stn {
             using type_list = typename TypeList::TypeList<types...>;
             static constexpr stn::memory::layout layout = stn::memory::overlay_of<types...>;
             static constexpr size_t count() {
-                return TypeList::length_v<type_list>;
+                return type_list::length();
             }
             template<typename T>
             static constexpr bool is_member =TypeList::contains_v<type_list,T>;

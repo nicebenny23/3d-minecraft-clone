@@ -2,7 +2,6 @@
 #include "../../util/queue.h"
 #include "../../util/type_index.h"
 #include "../../util/dynpool.h"
-#include "../../util/dependency.h"
 #include "../../util/pipeline.h"
 #include "resources.h"
 namespace ecs {

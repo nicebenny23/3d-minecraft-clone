@@ -25,6 +25,9 @@ namespace ecs {
 				if (resource_for_t) {
 					return *resource_for_t;
 				}
+				else {
+					throw std::logic_error("deletion not supported yet");
+				}
 			}
 			//dont push as it is a bug if it pushes on insert
 			return resource_list.emplace(stn::construct_derived<T>(), std::forward<Args>(args)...).ref_as_unchecked<T>();

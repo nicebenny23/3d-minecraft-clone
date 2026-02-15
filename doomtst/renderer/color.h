@@ -1,6 +1,7 @@
 #include "../math/mathutil.h"
+
 #pragma once
-namespace Colors {
+namespace colors {
 	struct Color {
 		Color(double red, double green, double blue, double alpha) :r(red), g(green), b(blue), a(alpha) {
 
@@ -23,6 +24,9 @@ namespace Colors {
 		}
 		Color& operator*=(double v) {
 			*this = *this * v;
+		}
+		glm::vec4 glm() const {
+			return glm::vec4(r, g, b, a);
 		}
 	};
 

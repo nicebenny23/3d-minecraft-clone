@@ -16,6 +16,7 @@
 #include "../util/Id.h"
 #include "../game/ecs/query.h"
 #include "renderer/pass.h"
+#include "../game/Core.h"
 #include "../util/Name.h"
 using namespace buffer_object;
 //Fix
@@ -95,7 +96,11 @@ namespace renderer {
 		}
 
 		void set_material(const std::string& name);
-
+		void set_color(colors::Color color) {
+			if (id) {
+				id.unwrap().set_emplace_component<color_component>(color);
+			}
+		}
 		void set_layout(vertice::vertex layout);
 
 		void fill(MeshData&& new_mesh);
@@ -127,35 +132,7 @@ namespace renderer {
 	struct Renderer : ecs::resource {
 
 
-		Renderer(ecs::Ecs& spawn_world) :world(spawn_world),uniform_manager() {
-
-			fov = 90;
-			setprojmatrix(90, .21f, 100);
-			world.emplace_asset_loader<MaterialManager>(uniform_manager);
-			renderer::shader_id ui_shader = world.load_asset_emplaced<renderer::shader_descriptor>("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs").unwrap();
-			world.load_asset(render_phase(12, true, "ui_phase"));
-			world.load_asset(render_phase(0, false, "solid_phase"));
-			world.load_asset(render_phase(1, true, "transparent_phase"));
-
-			world.load_asset_emplaced<MaterialDescriptor>("Ui", "ui_phase", "UiShader", RenderProperties(false, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-				stn::array{ renderer::uparam("aspect_ratio", "aspectratio") }
-			);
-			renderer::shader_id model_shader = world.load_asset_emplaced<renderer::shader_descriptor>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
-			world.load_asset_emplaced<MaterialDescriptor>("Model", "solid_phase", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-				stn::array<renderer::UniformParam>{
-				renderer::uparam("aspect_ratio", "aspectratio"),
-					renderer::uparam("proj_matrix", "projection"),
-					renderer::uparam("view_matrix", "view")
-			}
-			);
-			renderer::shader_id particle_shader = world.load_asset_emplaced<renderer::shader_descriptor>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
-
-			world.load_asset_emplaced<renderer::shader_descriptor>("ParticleShader", "shaders\\particlevertex.vs", "shaders\\particlefragment.vs");
-			//xName::ctx.Ecs->load_asset_emplaced<MaterialDescriptor>("Particle", "solid_phase", particle_shader, RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-			set_uniform("aspect_ratio", world.get_resource<window::Window>().AspectRatio());
-			meshes = MeshRegistry(&context);
-		}
-
+	
 
 		void bind_material(material_handle material);
 
@@ -166,16 +143,14 @@ namespace renderer {
 			context.bind(*Handle);
 		}
 		renderer::Context context;
-		renderer::UniformManager uniform_manager;
+		renderer::UniformRegistry uniform_manager;
 		template<typename val_type>
 		void set_uniform(const char* name, const val_type& val) {
 
-			uniform_manager.set(name, renderer::uniform_val{ std::in_place_type<val_type>, val });
+			uniform_manager.set(name, renderer::uniform_value(std::in_place_type<val_type>, val ));
 
 		}
-		void apply_uniform(renderer::uniform& uniform) {
-			context.set_uniform(uniform);
-		}
+		
 
 		void Clear();
 
@@ -208,7 +183,7 @@ namespace renderer {
 
 			bind_material(mat_id);
 			for (auto& uniform : ren.view_overides()) {
-				apply_uniform(uniform);
+				context.apply_uniform(uniform.value,uniform.name);
 			}
 			Render(meshes[mesh_id]);
 
@@ -248,6 +223,12 @@ namespace renderer {
 
 		MeshRegistry meshes;
 		float fov;
+		Renderer(ecs::Ecs& spawn_world,float initial_fov) :world(spawn_world), uniform_manager(),fov(initial_fov){
+			meshes = MeshRegistry(&context);
+			setprojmatrix(90, .21f, 100);
+			set_uniform("aspect_ratio", world.get_resource<window::Window>().AspectRatio());
+		}
+
 	private:
 		ecs::Ecs& world;
 		//ensures a mesh exists
@@ -287,9 +268,9 @@ namespace renderer {
 			}
 			std::unordered_map<phase_handle, render_pass> pass_map;
 			size_t cnt = 0;
-			
+
 			ecs::View<material_component, order_key, is_enabled> renderable_iter(world);
-			for (auto&& [mat, order, should_render] : renderable_iter) {
+			for (auto [mat, order, should_render] : renderable_iter) {
 				if (should_render.enabled) {
 					phase_handle pass = mat.mat_id->pass;
 					pass_map.try_emplace(pass, render_pass(pass));
@@ -306,13 +287,13 @@ namespace renderer {
 			for (render_pass& pass : passes) {
 				pass.sort();
 			}
-			passes | stn::sort([](const render_pass& a) {return a.pass->priority;});
+			passes | stn::sort([](const render_pass& a) {return a.pass->priority; });
 			for (render_pass& pass : passes) {
 				for (ecs::obj id : pass.phase_elements) {
 					ren.render(renderable(id));
 				}
 			}
-			for (remove_render_object to_remove:world.read_commands<remove_render_object>()) {
+			for (remove_render_object to_remove : world.read_commands<remove_render_object>()) {
 				mesh_component& mesh_comp = to_remove.object.get_component<mesh_component>();
 				if (mesh_comp.msh) {
 					ren.meshes.remove(mesh_comp.msh.unwrap());
@@ -320,6 +301,38 @@ namespace renderer {
 				mesh_comp.owner().destroy();
 			}
 		}
+	};
+	struct RendererPlugin :Core::Plugin {
+		void build(Core::App& game) {
+
+			ecs::Ecs& world = game.Ecs;
+
+			world.emplace_asset_loader<renderer::TextureLoader>();
+			world.emplace_asset_loader<renderer::TextureArrayLoader>();
+			world.emplace_asset_loader<shader_loader>();
+			world.emplace_asset_loader<assets::SelfDescriptorLoader<renderer::render_phase>>();
+			Renderer& renderer = world.insert_resource<Renderer>(world,90);
+			
+			world.emplace_asset_loader<MaterialManager>();
+			renderer::shader_id ui_shader = world.load_asset_emplaced<renderer::shader_descriptor>("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs").unwrap();
+			world.load_asset(render_phase(12, true, "ui_phase"));
+			world.load_asset(render_phase(0, false, "solid_phase"));
+			world.load_asset(render_phase(1, true, "transparent_phase"));
+			world.emplace_system<ColorSetter>();
+			world.load_asset_emplaced<MaterialDescriptor>("Ui", "ui_phase", "UiShader", RenderProperties(false, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+				stn::array{ renderer::UniformRefrence("aspect_ratio", "aspectratio") }
+			);
+			world.emplace_system<renderer::render_all>();
+			renderer::shader_id model_shader = world.load_asset_emplaced<renderer::shader_descriptor>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
+			world.load_asset_emplaced<MaterialDescriptor>("Model", "solid_phase", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+				stn::array<renderer::UniformRefrence>{
+				renderer::UniformRefrence("aspect_ratio", "aspectratio"),
+					renderer::UniformRefrence("proj_matrix", "projection"),
+					renderer::UniformRefrence("view_matrix", "view")
+			});
+			
+		}
+
 	};
 
 }

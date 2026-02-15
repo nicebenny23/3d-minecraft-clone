@@ -41,7 +41,7 @@ namespace ui {
 		void run(ecs::Ecs& world) {
 			MenuState& state = world.ensure_resource<MenuState>();
 
-			if (world.get_resource<userinput::InputManager>().getKey(userinput::escape_key).pressed) {
+			if (world.get_resource<userinput::InputManager>().key(userinput::escape_key).pressed) {
 				world.write_command<close_menu>(close_menu());
 			}
 

@@ -135,16 +135,16 @@ namespace grid {
 	}
 
 
-	array<stn::non_null<block>> Grid::voxel_in_range(geo::Box span) {
-		array<stn::non_null<block>> blocks;
+	array<ecs::obj> Grid::voxel_in_range(geo::Box span) {
+		array<ecs::obj> blocks;
 		v3::Coord lowest = getVoxel(span.min());
 		v3::Coord highest = getVoxel(span.max());
 		for (int x = lowest.x; x <= highest.x; x++) {
 			for (int y = lowest.y; y <= highest.y; y++) {
 				for (int z = lowest.z; z <= highest.z; z++) {
-					stn::Option<block&> blk = get_block(Coord(x, y, z));
+					stn::Option<ecs::obj&> blk = get_object(Coord(x, y, z));
 					if (blk) {
-						blocks.emplace(blk.unwrap());
+						blocks.push(blk.unwrap());
 					}
 				}
 			}

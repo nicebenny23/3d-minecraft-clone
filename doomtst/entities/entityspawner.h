@@ -40,7 +40,7 @@ struct spawn_mobs :ecs::System {
 				return stn::None;
 			}
 			v3::Point3 pos = spawn_loc.unwrap().center;
-			if (!ensure_light_level(pos, CtxName::ctx.GridRef())) {
+			if (!ensure_light_level(pos, CtxName::ctx.Ecs->get_resource<grid::Grid>())) {
 				continue;
 			}
 			if (!spawnable_dist(pos, player::goblin.get_component<ecs::transform_comp>().transform.position)) {

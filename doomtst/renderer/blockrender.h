@@ -192,17 +192,17 @@ namespace blockrender {
 			renderer::shader_id block_shader = ecs.load_asset_emplaced<renderer::shader_descriptor>("BlockShader", "shaders\\vert1.vs", "shaders\\frag1.vs").unwrap();
 			ecs.load_asset_emplaced<renderer::MaterialDescriptor>("SolidBlock", "solid_phase", "BlockShader", renderer::RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
 				stn::array{
-				renderer::uparam("aspect_ratio", "aspectratio"),
-				renderer::uparam("proj_matrix", "projection"),
-				renderer::uparam("view_matrix", "view"),
-				renderer::uparam("bind_block_texture", "tex")
+				renderer::UniformRefrence("aspect_ratio", "aspectratio"),
+				renderer::UniformRefrence("proj_matrix", "projection"),
+				renderer::UniformRefrence("view_matrix", "view"),
+				renderer::UniformRefrence("bind_block_texture", "tex")
 				});
 
 			ecs.load_asset_emplaced<renderer::MaterialDescriptor>("TransparentBlock", "transparent_phase", "BlockShader", renderer::RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-				stn::array{ renderer::uparam("aspect_ratio", "aspectratio"),
-				renderer::uparam("proj_matrix", "projection"),
-				renderer::uparam("view_matrix", "view"),
-				renderer::uparam("bind_block_texture", "tex")
+				stn::array{ renderer::UniformRefrence("aspect_ratio", "aspectratio"),
+				renderer::UniformRefrence("proj_matrix", "projection"),
+				renderer::UniformRefrence("view_matrix", "view"),
+				renderer::UniformRefrence("bind_block_texture", "tex")
 				});
 
 			array<std::string> texlist = array<std::string>();

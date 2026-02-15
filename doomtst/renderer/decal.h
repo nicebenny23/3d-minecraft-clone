@@ -4,6 +4,7 @@
 #include "../game/ecs/unique_object.h"
 #include "../game/ecs/query.h"
 #include "../math/meshes.h"
+#include "../game/camera.h"
 #pragma once
 namespace decals {
 	struct DecalReimageCommand {
@@ -115,9 +116,9 @@ namespace decals {
 			engine.emplace_system<render_decals>();
 			renderer::shader_id decal_shader = engine.Ecs.load_asset_emplaced<renderer::shader_descriptor>("decal_shader", "shaders\\decal_vert.vs", "shaders\\decal_frag.vs").unwrap();
 			engine.Ecs.load_asset_emplaced<renderer::MaterialDescriptor>("decal_mat", "transparent_phase", "decal_shader", renderer::RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-				stn::array{ renderer::uparam("aspect_ratio", "aspectratio"),
-				renderer::uparam("proj_matrix", "projection"),
-				renderer::uparam("view_matrix", "view") }
+				stn::array{ renderer::UniformRefrence("aspect_ratio", "aspectratio"),
+				renderer::UniformRefrence("proj_matrix", "projection"),
+				renderer::UniformRefrence("view_matrix", "view") }
 			);
 		}
 

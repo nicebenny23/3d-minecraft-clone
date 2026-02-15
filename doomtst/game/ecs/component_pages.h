@@ -159,12 +159,12 @@ namespace ecs {
 				return pages.reach(index >> chunk_exp).insert_at_unchecked(index, std::forward<Args>(args)...);
 		}
 		template<typename ...Args>
-		T& insert_at(size_t index, Args&&... args) {
+		stn::insertion<T&> insert_at(size_t index, Args&&... args) {
 			if (!contains(index)) {
 				element_filter.reaching_enable(index);
-				return pages.reach(index >> chunk_exp).insert_at_unchecked(index, std::forward<Args>(args)...);
+				return stn::insertion(pages.reach(index >> chunk_exp).insert_at_unchecked(index, std::forward<Args>(args)...),true);
 			}
-			return pages.unchecked_at(index >> chunk_exp)[index];
+			return stn::insertion<T&>(pages.unchecked_at(index >> chunk_exp)[index],false);
 		}
 
 		//does not check if this slot is also occupied or exists

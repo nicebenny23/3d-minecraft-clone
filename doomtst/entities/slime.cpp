@@ -39,7 +39,7 @@ array<navnode> getneighborslime(navnode& node) {
 
 
 						Coord testblock = place - Coord(0, 1, 0);
-						if (CtxName::ctx.Grid->getBlock(testblock + node.pos) == nullptr) {
+						if (CtxName::ctx.Ecs->get_resource<grid::Grid>().getBlock(testblock + node.pos) == nullptr) {
 							continue;
 						}
 					}

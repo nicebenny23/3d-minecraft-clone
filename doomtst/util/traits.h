@@ -1,6 +1,7 @@
 #include <type_traits>
 #include <concepts>
 #include <utility>
+#include "concepts.h"
 #pragma once
 namespace stn {
 
@@ -22,8 +23,8 @@ namespace stn {
 	using invoke_result_ref =
 		decltype(std::invoke(std::declval<std::add_lvalue_reference_t<Func>>(),
 			std::declval<Arg>()));
-	template<typename Func, typename ...Args>
-	concept nonvoid_invokable = std::invocable<Func, Args&&...> && !std::is_void_v<std::invoke_result_t<Func, Args&&...>>;
+	
+	//todo move up
 	template<typename>
 	struct function_traits;
 	template<typename C, typename R, typename... Args>
@@ -50,8 +51,23 @@ namespace stn {
 		typename function_traits<T>::return_type;
 		typename function_traits<T>::args;
 	};
-	
+	//this is shockingly not provided in std
+	template<typename Owner, typename Member>
+	using forward_as_member_t = std::conditional_t<
+		std::is_reference_v<Member>,
+		Member,
+		decltype(std::forward_like<Owner>(std::declval<Member>()))
+	>;
 
+	template<typename Owner, typename Member>
+	constexpr auto forward_as_member(std::remove_reference_t<Member>& value) noexcept
+		-> forward_as_member_t<Owner, Member> {
+		return static_cast<forward_as_member_t<Owner, Member>>(value);
+	}
+	template<typename T, typename Owner>
+	constexpr decltype(auto) forward_cast(Owner&& owner) noexcept {
+		return std::forward_like<Owner>(static_cast<T&>(owner));
+	}
 	template<HasFunctionTraits T,std::size_t N>
 	using arg_at_t = std::tuple_element_t<N, typename function_traits<T>::args>;
 
@@ -66,13 +82,4 @@ namespace stn {
 	template<typename Range, typename ElementType>
 	concept convertible_range = std::ranges::range<Range> && std::convertible_to<std::ranges::range_value_t<Range>, ElementType>;
 	
-	template <typename T, template <typename...> class Template>
-	struct is_type_instantiation_of : std::false_type {
-	};
-
-	template <template <typename...> class Template, typename... Args>
-	struct is_type_instantiation_of<Template<Args...>, Template> : std::true_type {
-	};
-	template <typename T, template <typename...> class Template>
-	concept TypeInstantiationOf = is_type_instantiation_of<T, Template>::value;
 }

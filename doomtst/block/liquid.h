@@ -41,7 +41,7 @@ struct liquidprop : ecs::component {
 			return;
 		}
 		Coord newpos = face.coord() + owner().get_component<block>().pos;
-		blocks::block* blk = CtxName::ctx.Grid->getBlock(newpos);
+		blocks::block* blk = world().get_resource<grid::Grid>().getBlock(newpos);
 		if (blk == nullptr) {
 			return;
 		}

@@ -37,11 +37,8 @@ namespace Core {
 
         void ConnectToContext();
         void createWindow();
-        void CreateGrid();
-        void InitInput();
         void InitOC();
         void CreateWorld();
-        void InitRenderer();
        CtxName::Context* ctx;
    
         World::world world;

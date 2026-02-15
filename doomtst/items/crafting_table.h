@@ -19,7 +19,7 @@ namespace items {
 		}
 
 		void start() {
-			binder.output.ensure_component<crafting_slot_tag>(owner());
+			binder.output.set_emplace_component<crafting_slot_tag>(owner());
 		}
 		RecipeBinder binder;
 		stn::Option<ItemRecipe> wanted;

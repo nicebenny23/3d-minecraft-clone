@@ -27,7 +27,7 @@ namespace player {
 		}
 		void apply(ecs::obj& entity) {
 			ecs::obj slots=ecs::spawn(entity.world(), items::ContainerDisplayRecipe(v2::Coord2(1, 2), main_item_slots));
-			entity.add_component<SlotPannelComponent>(main_item_slots.get_component< main_slots_component>();
+			entity.add_component<SlotPannelComponent>(main_item_slots.get_component< main_slots_component>());
 		}
 	};
 	struct inventory_menu_recipe :ecs::Recipe {
@@ -101,30 +101,30 @@ namespace player {
 		}
 		void update() {
 
-			userinput::InputManager& input = world().ensure_resource<userinput::InputManager>();
-			if (input.getKey('e').pressed) {
+			userinput::InputManager& input = world().get_resource<userinput::InputManager>();
+			if (input.key('e').pressed) {
 				world().write_command(ui::open_menu(inventory_object.get_component<ui::menu_component>()));
 			}
-			if (input.getKey('1').pressed) {
+			if (input.key('1').pressed) {
 
 				selected_ind = items::container_index(0, 0);
 			}
-			if (input.getKey('2').pressed) {
+			if (input.key('2').pressed) {
 
 				selected_ind = items::container_index(1, 0);
 			}
-			if (input.getKey('3').pressed) {
+			if (input.key('3').pressed) {
 
 				selected_ind = items::container_index(2, 0);
-			}if (input.getKey('4').pressed) {
+			}if (input.key('4').pressed) {
 
 				selected_ind = items::container_index(3, 0);
 			}
-			if (input.getKey('5').pressed) {
+			if (input.key('5').pressed) {
 
 				selected_ind = items::container_index(4, 0);
 			}
-			if (input.getKey('6').pressed) {
+			if (input.key('6').pressed) {
 				selected_ind = items::container_index(5, 0);
 
 			}
