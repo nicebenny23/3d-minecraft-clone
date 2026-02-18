@@ -27,6 +27,7 @@ namespace Core {
 	private:
 		App* engine;
 	};
+	
 	struct CloseGameCommand {
 
 	};
@@ -67,6 +68,13 @@ namespace Core {
         ecs::Ecs Ecs;
 		
     };
+	template<ecs::SystemType T>
+	struct AddSystemPlugin :Plugin {
+		void build(App& engine) {
+			engine.emplace_system<T>();
+		};
+
+	};
     extern App game;
 	struct GameState :ecs::resource {
 		GameState() :should_close(false) {

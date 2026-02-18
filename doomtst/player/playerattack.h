@@ -24,7 +24,7 @@ struct playerattackcomp: ecs::component
 	void update() {
 
 	
-		ray cameraray = ray(camera::campos(), camera::campos() + camera::GetCamFront() * 7);
+		math::ray cameraray = math::ray(camera::campos(), camera::campos() + camera::GetCamFront() * 7);
 		
 		voxtra::WorldRayCollision Hit = collision::raycast(cameraray, collision::HitQuery(owner()));
 		if (!Hit)

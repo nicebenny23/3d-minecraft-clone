@@ -89,7 +89,7 @@ namespace items {
 			return stack().map_member(&item_stack::contained_entry);
 		}
 	};
-	struct ItemSlotSpawner :ecs::Recipe {
+	struct ItemSlotSpawner {
 		ItemSlotSpawner(){
 
 		}

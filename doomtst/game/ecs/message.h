@@ -56,7 +56,7 @@ namespace ecs {
 			friend struct Events;
 		
 		};
-
+		//we need to make destructable
 		struct EventReader {
 			EventReader() = delete;
 			bool operator==(const EventReader& other)const {
@@ -65,6 +65,7 @@ namespace ecs {
 			bool operator!=(const EventReader& other)const {
 				return !((*this) == other);
 			} 
+			EventReader(const EventReader&&) = delete;
 			EventReader(const EventReader&) = delete;            
 			EventReader& operator=(const EventReader&) = delete; 
 			
@@ -77,6 +78,8 @@ namespace ecs {
 		private:
 			EventReader(Events& event_system, reader_id read_id) :events(event_system), id(read_id) {};
 			//returns if not in a move only state
+			//for clarity
+			stn::Option<std::string> name;
 			Events& events;
 			reader_id id;
 			friend struct Events;

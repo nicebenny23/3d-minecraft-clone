@@ -87,11 +87,11 @@ namespace blocks {
 			return blocks[id.id].name;
 		}
 		template<BlockLike T>
-		bool is(block_id id) {
-			return insert_id < T > == id;
+		bool is(block_id id) const {	
+			return ids.get_opt<T>() == id;
 		}
 		template<BlockLike T>
-		block_id insert_id() {
+		block_id register_block() {
 			return ids.insert<T>().on_insert([&](block_id id) {
 				blocks.push(CatchedBlock::Create<T>(ecs));
 				}).value;

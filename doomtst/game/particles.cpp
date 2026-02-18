@@ -24,7 +24,7 @@ const int indices[]{
 void particleemiter::update()
 {
 	float dt = world().ensure_resource<timename::TimeManager>().dt;
-	timetillspawn = Min(timetillspawn-dt,particlespawntime);
+	timetillspawn = min(timetillspawn-dt,particlespawntime);
 	for (int i = 0; i < particlearray.length(); i++)
 	{
 		//if (particlearray[i].exists())

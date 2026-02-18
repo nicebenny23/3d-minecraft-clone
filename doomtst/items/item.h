@@ -2,9 +2,6 @@
 
 #pragma once
 namespace items {
-
-
-
 	struct item_entry {
 		
 		item_entry(item_id Id, size_t cnt,const item_types& types) :id(Id), count(cnt){
@@ -211,7 +208,7 @@ namespace items {
 	inline bool can_transfer(const item_stack& from, const item_stack& to) {
 		return can_remove(from, to, from.owner().get_component<item_stack>().count());
 	}
-	struct ItemSpawner:ecs::Recipe{
+	struct ItemSpawner{
 		item_entry entry;
 		ItemSpawner(item_entry initial_state) :entry(initial_state) {
 		}
@@ -224,13 +221,13 @@ namespace items {
 	//clears all empty items
 	struct ItemClear :ecs::System {
 		void run(ecs::Ecs& world) {
-			ecs::View<item_stack> stack_query(world);
+			ecs::View<ecs::With<item_stack>> stack_query(world);
 			for (const auto& [slot] : stack_query) {
 				if (slot.count() == 0) {
 					slot.owner().destroy();
 				}
 			}
-			ecs::View<item_durability> dur_query(world);
+			ecs::View<ecs::With<item_durability>> dur_query(world);
 			for (const auto& [slot] : dur_query) {
 				if (slot.is_broken() == 0) {
 					slot.owner().destroy();

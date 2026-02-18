@@ -8,18 +8,21 @@
 
 namespace items {
 	
-	struct CrafterRecipe: ecs::Recipe {
+	struct CrafterRecipe{
 
-		CrafterRecipe(ecs::obj input, ecs::obj output, std::filesystem::path crafting_path) :input_container(input), output_slot(output), path(crafting_path){
+		CrafterRecipe(ecs::obj input, stn::array<std::filesystem::path> crafting_path) :input_container(input), paths(crafting_path){
 
 		}
 		void apply(ecs::obj& entity) {
-			json::Value booklet= json::parse_for_file(path);
-			ItemRecipes recipes = recipe_booklet_from_path(input_container.get_component<container>().size, booklet, entity.world());
-			entity.add_component<crafter>(RecipeBinder(input_container, output_slot, recipes));
+			ItemRecipes recipes;
+			recipes.size = input_container.get_component<container>().size;
+			for (std::filesystem::path& path: paths) {
+				json::Value booklet = json::parse_for_file(path);
+				recipes.recipe_list.append(recipe_booklet_from_path(recipes.size, booklet, entity.world()).recipe_list);
+			}
+			entity.add_component<crafter>(RecipeBinder(input_container, recipes));
 		}
-		std::filesystem::path path;
+		stn::array<std::filesystem::path> paths;
 		ecs::obj input_container;
-		ecs::obj output_slot;
 	};
 };

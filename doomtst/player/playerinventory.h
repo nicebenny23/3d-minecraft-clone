@@ -5,48 +5,29 @@
 #include "../items/menu.h"
 #include "../items/container_ui.h"
 #include "../items/crafting.h"
+#include "../game/ecs/filtered_object.h"
 #pragma once 
 namespace player {
-	struct main_slots_component :ecs::component {
-		main_slots_component(ecs::obj slots) :main_item_slots(slots) {
+	
+	struct inventory_menu_recipe {
+		ecs::Constrained<items::container> main_slots;
+		inventory_menu_recipe(ecs::Constrained<items::container> slots):main_slots(slots) {
 
 		}
-		ecs::obj main_item_slots;
-		
-	};
-	struct SlotPannelComponent :ecs::component {
-
-		SlotPannelComponent(main_slots_component& slot) {
-		}
-		ecs::obj main_item_slots;
-	};
-	struct SlotPannelRecipe :ecs::Recipe {
-		ecs::obj main_item_slots;
-		v2::Coord2 location;
-		SlotPannelRecipe(main_slots_component& slots,v2::Coord2 place):main_item_slots(slots.owner()), location(place){
-		}
-		void apply(ecs::obj& entity) {
-			ecs::obj slots=ecs::spawn(entity.world(), items::ContainerDisplayRecipe(v2::Coord2(1, 2), main_item_slots));
-			entity.add_component<SlotPannelComponent>(main_item_slots.get_component< main_slots_component>());
-		}
-	};
-	struct inventory_menu_recipe :ecs::Recipe {
-		inventory_menu_recipe() {
-
-		}
-
 		void apply(ecs::obj& ent) {
-			ent.add_component<ui::menu_component>();
-			ecs::obj main_slots = ent.spawn_child<items::container_recipe>( v2::Coord2(6, 5));
-			ui::MenuRecipe().apply(ent);
-			ecs::obj bg= ent.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\menutex.png","menu_texture"), geo::Box2d(v2::Vec2(.2f,.2f), v2::Vec2(.5f, .35f)), -1);
-			
-			ecs::spawn(ent.world(), items::ContainerDisplayRecipe(v2::Coord2(-12,-12), main_slots));
-
-			//items::CrafterRecipe(input, display, std::filesystem::path("crafting\\2x2craft.txt")).apply(ent);
+		ent.add_component<ui::menu_component>();
+		ui::MenuRecipe().apply(ent);
+		ent.spawn_child<items::ContainerDisplayRecipe>(v2::Coord2(0, 0),main_slots.get());
+		ecs::obj bg= ent.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\menutex.png","menu_texture"), geo::Box2d(v2::Vec2(.2f,.2f), v2::Vec2(.5f, .35f)), -1);
+		ecs::obj input_slots= ent.spawn_child<items::container_recipe>(v2::Coord2(2, 2));
+		ent.spawn_child<items::ContainerDisplayRecipe>(v2::Coord2(8, 0), input_slots);
+		ecs::Constrained<items::crafter> crafter = ent
+		.spawn_child< items::CrafterRecipe>(input_slots, stn::array({ std::filesystem::path("crafting\\2x2craft.txt") }));
+		ent.spawn_child<items::CraftingSlotDisplaySpawner>(v2::Coord2(-5,0), crafter);
 			ent.get_component<ui::UiEnabled>().disable();
 		}
 	};
+
 	struct HotbarSlot :ecs::component {
 
 	};
@@ -67,7 +48,7 @@ namespace player {
 
 
 		}
-
+		ecs::obj slots;
 		ecs::obj input;
 		ecs::obj inventory_object;
 		ecs::obj hotbar;
@@ -90,20 +71,22 @@ namespace player {
 				.element();
 		}
 		void start() {
-			inventory_object =ecs::spawn(world(),inventory_menu_recipe());
+
+		 slots=owner().spawn_child<items::container_recipe>(v2::Coord2(6, 5));
+			inventory_object =ecs::spawn(world(),inventory_menu_recipe(slots));
 			hotbar = ecs::spawn(world(), items::container_recipe(v2::Coord2(6,1)));
-			ecs::spawn(world(), items::ContainerDisplayRecipe(v2::Coord2(0,0), hotbar));
+			ecs::spawn(world(), items::ContainerDisplayRecipe(v2::Coord2(0,-2), hotbar));
 			for (ecs::object_handle& handle : hotbar.get_component<items::container>()) {
 				handle.add_component< HotbarSlot>();
 			}
-			stn::array<std::string> items({ "plank","torch","stone"});
+			stn::array<std::string> items({ "plank","torch","crafting_table"});
 			givestartitems(items);
 		}
 		void update() {
 
 			userinput::InputManager& input = world().get_resource<userinput::InputManager>();
 			if (input.key('e').pressed) {
-				world().write_command(ui::open_menu(inventory_object.get_component<ui::menu_component>()));
+				world().write_command(ui::open_menu(ecs::Constrained<ui::menu_component>(inventory_object)));
 			}
 			if (input.key('1').pressed) {
 
@@ -133,7 +116,7 @@ namespace player {
 	};
 	struct HotbarCommands :ecs::System {
 		void run(ecs::Ecs& world) {
-			for (auto&& [inventory_slot] : ecs::View<inventory>(world)) {
+			for (auto&& [inventory_slot] : ecs::View<ecs::With<inventory>>(world)) {
 				stn::Option<items::container_index> index = inventory_slot.selected_ind;
 				items::container& hotbar_container = inventory_slot.hotbar.get_component<items::container>();
 				for (ecs::object_handle& handle : hotbar_container) {
@@ -150,7 +133,7 @@ namespace player {
 
 	struct LoadHotbarSlots :ecs::System {
 		void run(ecs::Ecs& world) {
-			for (auto&& [inventory_slot] : ecs::View<inventory>(world)) {
+			for (auto [inventory_slot] : ecs::View<ecs::With<inventory>>(world)) {
 				stn::Option<items::container_index> index = inventory_slot.selected_ind;
 				items::container& hotbar_container = inventory_slot.hotbar.get_component<items::container>();
 				for (ecs::object_handle& handle : hotbar_container) {

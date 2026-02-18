@@ -21,7 +21,7 @@ inline bool spawnable_dist(v3::Point3 pos, v3::Point3 player) {
 
 struct spawn_mobs :ecs::System {
 	bool ensure_light_level(v3::Point3 pos, grid::Grid& grid) {
-		blocks::block* blk = grid.getBlock(grid.getVoxel(pos));
+		blocks::block* blk = grid.getBlock(grid.get_voxel(pos));
 		if (!blk) {
 			return false;
 		}
@@ -57,7 +57,7 @@ struct spawn_mobs :ecs::System {
 		float randomnum = random::random();
 		size_t total_alive = 0;
 
-		ecs::View<slimemove> slimes(ecs);
+		ecs::View<ecs::With<slimemove>> slimes(ecs);
 		for (auto [slime] : slimes) {
 
 			if (should_despawn(slime.owner().get_component<ecs::transform_comp>().transform.position, player::goblin.get_component<ecs::transform_comp>().transform.position)) {
@@ -69,7 +69,7 @@ struct spawn_mobs :ecs::System {
 		if (max_alive <= total_alive) {
 			return;
 		}
-		ecs::View<player::player_tag> players(ecs);
+		ecs::View<ecs::With<player::player_tag>> players(ecs);
 		for (auto [player] : players) {
 			{
 				if (randomnum < spawnthreshold) {

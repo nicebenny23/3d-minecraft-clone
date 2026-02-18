@@ -16,7 +16,7 @@ namespace blockrender {
 	inline bool chunk_viewable(Chunk::chunk& chk) {
 		float slope = tan(chk.world().get_resource<renderer::Renderer>().fov / 2);
 		geo::Box chkb = chk.span();
-		ray camray = ray::from_offset(camera::campos(), camera::GetCamFront());
+		math::ray camray = math::ray::from_offset(camera::campos(), camera::GetCamFront());
 		geo::cone ncone = geo::cone(camray, slope);
 		geo::Plane pln = geo::Plane(camera::GetCamFront(), camray.start);
 		bool srf = false;
@@ -107,7 +107,7 @@ namespace blockrender {
 			cnk_mesh.faces.clear();
 			renderer::MeshData mesh = cnk_mesh.SolidGeo.create_mesh();
 			for (int ind = 0; ind < Chunk::chunksize; ind++) {
-				blockmesh& mesh_at = (cnk.block_list[ind].get_component_unchecked<block>().mesh);//g
+				blockmesh& mesh_at = (cnk.block_list[ind].get_component<block>().mesh);//g
 				if (!mesh_at.is_transparent()) {
 					emit_block(mesh_at, mesh);
 				}

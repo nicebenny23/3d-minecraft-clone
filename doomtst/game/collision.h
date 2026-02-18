@@ -70,7 +70,7 @@ namespace collision {
 	struct DynamicCollisionSystem :ecs::System {
 		void run(ecs::Ecs& world) {
 
-			ecs::View<DynamicCollider, Collider> colliders(world);
+			ecs::View<ecs::With<DynamicCollider>, ecs::With<Collider>> colliders(world);
 			for (auto&& [dynamic_tag_1, collider_1] : colliders) {
 				for (auto&& [dynamic_tag_2, collider_2] : colliders) {
 					if (collider_1.owner() != collider_2.owner()) {
@@ -91,7 +91,7 @@ namespace collision {
 	struct StaticCollsionSystem :ecs::System {
 		void run(ecs::Ecs& world) {
 			for (int iters = 0; iters < iterations; iters++) {
-				ecs::View<DynamicCollider, Collider> colliders(world);
+				ecs::View<ecs::With<DynamicCollider>, ecs::With<Collider>> colliders(world);
 				for (auto&& [dynamic_tag, collider] : colliders) {
 					geo::Box entity_box = collider.global_box();
 					array<ecs::obj> blocks = collider.world().get_resource<grid::Grid>().voxel_in_range(entity_box);
@@ -133,7 +133,7 @@ namespace collision {
 	
 	//casting
 	inline bool boxcast_dynamic(geo::Box blk, HitQuery query) {
-		ecs::View<Collider, DynamicCollider> colliders(query.world);
+		ecs::View<ecs::With<Collider>,ecs::With< DynamicCollider>> colliders(query.world);
 		for (auto [collider, dynamic_tag] : colliders) {
 			if (query.matches(collider)) {
 				continue;

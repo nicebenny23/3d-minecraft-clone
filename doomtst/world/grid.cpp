@@ -36,7 +36,7 @@ namespace grid {
 
 
 	//gets the location of the currentvoxel
-	Coord Grid::getVoxel(Point3 pos) {
+	Coord Grid::get_voxel(Point3 pos) {
 
 		return  Coord(std::floor(pos.x / blocksize), std::floor(pos.y / blocksize), std::floor(pos.z / blocksize));
 
@@ -105,44 +105,32 @@ namespace grid {
 	}
 
 
-	Option<ecs::obj&> Grid::get_object(const v3::Coord pos) {
-		return get_chunk(pos).map([&](Chunk::chunk& chnk)->ecs::obj& {return chnk.block_list.unchecked_at(Chunk::index_from_pos(pos)); });
+	Option<ecs::Constrained<block>&> Grid::get_object(const v3::Coord pos) {
+		return get_chunk(pos).map([&](Chunk::chunk& chnk)->ecs::Constrained<block>& {return chnk.block_list.unchecked_at(Chunk::index_from_pos(pos)); });
 	}
 
 
 	Option<block&> Grid::get_block(const v3::Coord pos) {
-		return get_object(pos).map_member(&ecs::obj::get_component_unchecked<block>);
+		return get_object(pos).map_member(&ecs::Constrained<block>::get_component<block>);
 	}
 
 	block* Grid::getBlock(const v3::Coord pos) {
 
-		ecs::obj* blk = getObject(pos);
-		if (blk) {
-			return &blk->get_component_unchecked<block>();
-		}
-		return nullptr;
-	}
-
-
-	ecs::obj* Grid::getObject(const v3::Coord pos) {
-
 		Chunk::chunk* chnk = GetChunk(pos);
 		if (chnk) {
-			return &chnk->block_list.unchecked_at(Chunk::index_from_pos(pos));
+			return &chnk->block_list.unchecked_at(Chunk::index_from_pos(pos)).get_component<block>();
 		}
 		return nullptr;
-
 	}
-
 
 	array<ecs::obj> Grid::voxel_in_range(geo::Box span) {
 		array<ecs::obj> blocks;
-		v3::Coord lowest = getVoxel(span.min());
-		v3::Coord highest = getVoxel(span.max());
+		v3::Coord lowest = get_voxel(span.min());
+		v3::Coord highest = get_voxel(span.max());
 		for (int x = lowest.x; x <= highest.x; x++) {
 			for (int y = lowest.y; y <= highest.y; y++) {
 				for (int z = lowest.z; z <= highest.z; z++) {
-					stn::Option<ecs::obj&> blk = get_object(Coord(x, y, z));
+					stn::Option<ecs::obj> blk = get_object(Coord(x, y, z)).map_member(&ecs::Constrained<block>::get);
 					if (blk) {
 						blocks.push(blk.unwrap());
 					}

@@ -44,7 +44,7 @@ namespace console {
 				grid::Grid& grid = CtxName::ctx.Ecs->get_resource<grid::Grid>();
                 ImGui::Text(std::format("yaw:{:.3f},pitch:{:.3f}", player::goblin.get_component<CameraComp>().CamTransform.yaw, player::goblin.get_component<CameraComp>().CamTransform.pitch).c_str());
                 ImGui::Text(std::format("Chunk: {}", grid.chunkfromblockpos(Coord(pos))).c_str());
-                std::string text_for_look = player::goblin.get_component<playerplace>().Hit
+                std::string text_for_look = player::goblin.get_component<player::PlayerCursor>().Hit
 					.filter([&](const voxtra::RayWorldHit& blk) {return blk.owner().exists(); })
 					.filter([](const voxtra::RayWorldHit& blk) {return blk.owner().has_component<block>(); })
                     .map([&](const voxtra::RayWorldHit& blk) {

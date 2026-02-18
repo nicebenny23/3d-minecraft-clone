@@ -13,7 +13,7 @@ namespace items{
 			return container_object.get_component<container>();
 		}
 	};
-	struct ContainerDisplayRecipe :ecs::Recipe {
+	struct ContainerDisplayRecipe {
 		v2::Coord2 offset;
 		ecs::obj container_object;
 		ContainerDisplayRecipe(v2::Coord2 position, ecs::obj object):offset(position),container_object(object){

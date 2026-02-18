@@ -75,7 +75,13 @@ namespace ecs {
 			element_count++;
 			return *ptr;
 		}
-
+		template<typename ...Args>
+		T& replace_at_unchecked(size_t index, Args&&... args) {
+			get_ptr(index)->~T();
+			T* ptr = get_ptr(index);
+			::new (ptr) T(std::forward<Args>(args)...);
+			return *ptr;
+		}
 
 		//Assumes an object exists at the index 
 		void remove_at_unchecked(size_t index) {
@@ -165,6 +171,11 @@ namespace ecs {
 				return stn::insertion(pages.reach(index >> chunk_exp).insert_at_unchecked(index, std::forward<Args>(args)...),true);
 			}
 			return stn::insertion<T&>(pages.unchecked_at(index >> chunk_exp)[index],false);
+		}
+		//replace_at will not modify the adress of it 
+		template<typename ...Args>
+		T& replace_at_unchecked(size_t index, Args&&... args) {
+	return pages.unchecked_at(index >> chunk_exp).replace_at_unchecked(index, std::forward<Args>(args)...);
 		}
 
 		//does not check if this slot is also occupied or exists

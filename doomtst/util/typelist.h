@@ -132,7 +132,7 @@ namespace TypeList {
 	private:
 		template<std::size_t... Is>
 		static constexpr std::size_t index(std::index_sequence<Is...>) {
-			constexpr bool matches[] = { std::is_same_v<T, Ts>... };
+			constexpr bool matches[] = { std::same_as<T, Ts>... };
 			return ((matches[Is] ? Is : sizeof...(Ts)), ...);
 		}
 
@@ -140,7 +140,7 @@ namespace TypeList {
 		static constexpr std::size_t value =
 			index(std::index_sequence_for<Ts...>{});
 	};
-	template<typename List, typename T>
+	template<TypeListType List, typename T>
 	inline constexpr std::size_t find_v = find<List, T>::value;
 
 	// --- Map ---
@@ -175,14 +175,18 @@ namespace TypeList {
 	};
 	template<typename List, typename Init, template<typename Acc, typename T> class Func>
 	using fold_v = typename fold<List, Init, Func>::type;
-	template<TypeListType... Lists>
-		using concat_all_t = fold<
-		TypeList<Lists...>,    
-		TypeList<>,            
-		append                
-		>;
+	template<typename Acc, typename Next>
+	struct concat_impl;
 
-	// --- Filter ---
+	template<typename... AccTs, typename... NextTs>
+	struct concat_impl<TypeList<AccTs...>, TypeList<NextTs...>> {
+		using type = TypeList<AccTs..., NextTs...>;
+	};
+
+	
+	template<TypeListType... Lists>
+	using concat_all_t = typename fold< TypeList<Lists...>, TypeList<>, concat_impl >::type;
+	
 	template<typename List, template<typename> class Pred>
 	struct filter;
 
@@ -276,6 +280,6 @@ namespace TypeList {
 	};
 
 	template<TypeListType List, typename T>
-	inline constexpr bool occurs_once = occurs_once<List, T>::value;
+	inline constexpr bool occurs_once = occurs_once_impl<List, T>::value;
 	
 }

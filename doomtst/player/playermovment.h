@@ -34,7 +34,7 @@ struct PlayerMovementSys : ecs::System
     
     virtual void run(ecs::Ecs& ecs)
     {
-        auto view = ecs::View<rigidbody, playermovement, playerclimb>(ecs);
+        auto view = ecs::View<ecs::With<rigidbody>, ecs::With<playermovement>, ecs::With<playerclimb>>(ecs);
 
         for (auto [body, movement, climb] : view)
         {

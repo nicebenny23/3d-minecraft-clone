@@ -17,74 +17,65 @@ inline double  interoplate_quintic(double t) {
 
 }
 
-inline double lerp(double start, double end, double selector)
-{
-	return end*selector + start * (1 - selector);
+inline double lerp(double start, double end, double selector) {
+	return end * selector + start * (1 - selector);
 }
 
-inline double clamp(double val, double low, double high)
-{
-	if (val > high)
-	{
+inline double clamp(double val, double low, double high) {
+	if (val > high) {
 		return high;
 	}
-	if (val < low)
-	{
+	if (val < low) {
 		return low;
 	}
 	return val;
 }
 
 
-inline int clamp(int val, int low, int high)
-{
-	if (val > high)
-	{
+inline int clamp(int val, int low, int high) {
+	if (val > high) {
 		return high;
 	}
-	if (val < low)
-	{
+	if (val < low) {
 		return low;
 	}
 	return val;
 }
 
 
-inline bool inrange(double val, double low, double high)
-{
+inline bool in_range(double val, double low, double high) {
 	return val >= low && val <= high;
 }
-inline bool inrange_apx(double val, double low, double high)
-{
-	return val >= low && val <= high||apx(val,low)||apx(val,high);
+inline bool in_range_apx(double val, double low, double high) {
+	return val >= low && val <= high || apx(val, low) || apx(val, high);
 }
 
 inline  double sigmoid(double v1) {
 
-	return	1.0f/ (1.0f+ exp(-v1));
+	return	1.0f / (1.0f + exp(-v1));
 }
 namespace stn {
 	template<typename T1, typename T2, typename... Ts>
-	constexpr auto Max(T1 a, T2 b, Ts... rest) -> typename std::common_type<T1, T2, Ts...>::type {
+	constexpr auto max(T1 a, T2 b, Ts... rest) -> typename std::common_type<T1, T2, Ts...>::type {
 		using Common = typename std::common_type<T1, T2, Ts...>::type;
 		const Common max_ab = (a < b) ? static_cast<Common>(b) : static_cast<Common>(a);
 		if constexpr (sizeof...(Ts) == 0) {
 			return max_ab;
 		}
 		else {
-			return Max(max_ab, static_cast<Common>(rest)...);
+			return max(max_ab, static_cast<Common>(rest)...);
 		}
 	}
 
 	template<typename T1, typename T2, typename... Ts>
-	constexpr auto Min(T1 a, T2 b, Ts... rest) -> typename std::common_type<T1, T2, Ts...>::type {
+	constexpr auto min(T1 a, T2 b, Ts... rest) -> typename std::common_type<T1, T2, Ts...>::type {
 		using Common = typename std::common_type<T1, T2, Ts...>::type;
 		const Common min_ab = (a < b) ? static_cast<Common>(a) : static_cast<Common>(b);
 		if constexpr (sizeof...(Ts) == 0) {
 			return min_ab;
 		}
 		else {
-			return Min(min_ab, static_cast<Common>(rest)...);
+			return min(min_ab, static_cast<Common>(rest)...);
 		}
 	}
 }
@@ -93,42 +84,39 @@ inline int next_boundary(double x, bool positiveDirection) {
 
 	if (positiveDirection) {
 		// Next boundary is always i + 1
-return i + 1;
+		return i + 1;
 	}
 	else {
-		if (x==i)
-		{
-			return i-1;
+		if (x == i) {
+			return i - 1;
 		}
 		return i;
 	}
 }
 //
-inline stn::pair<int,int> extended_range(double x) {
+inline stn::pair<int, int> extended_range(double x) {
 	int low = static_cast<int>(std::floorl(x));
 	int high = low;
 	int rnd = std::lround(x);
-	if (apx(rnd,x))
-	{
-		if (rnd==low)
-		{
-		low--;
+	if (apx(rnd, x)) {
+		if (rnd == low) {
+			low--;
 		}
 		else {
-		high++;
+			high++;
 		}
 	}
-	return stn::pair(low,high);
+	return stn::pair(low, high);
 }
 //mod(x,m) that behaves intutiivlly (ex mod(-1,2)!=-1)
 __forceinline  int symmetric_mod(int x, int m) noexcept {
-	
+
 	int r = x % m;              // r is in (−m, +m)
 
 	// If r is negative, shift it into [0, m) by adding m;
 	// otherwise return r unchanged.
 	return (r < 0) ? (r + m) : r;
-} 
+}
 
 __forceinline double symmetric_modf(double x, double m) noexcept {
 	double r = std::fmod(x, m);
@@ -141,23 +129,19 @@ inline  int FastFloor(double f) {
 
 inline  double symmetric_floor(double x) {
 
-	if (x < 0)
-	{
+	if (x < 0) {
 		return -1 * floor(-1 * x);
 	}
-	else
-	{
+	else {
 		return floor(x);
 	}
 }
 inline int symmetric_ceil(double x) {
 
-	if (x < 0)
-	{
-		return int(- 1 * ceil(-1 * x));
+	if (x < 0) {
+		return int(-1 * ceil(-1 * x));
 	}
-	else
-	{
+	else {
 		return int(ceil(x));
 	}
 }

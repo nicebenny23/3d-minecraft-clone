@@ -51,7 +51,7 @@ namespace ui {
 	struct UiTextMesher:ecs::System{
 		void run(ecs::Ecs& world) {
 
-			ecs::View<ui::UiEnabled, ui::UiBounds, ui::InteractionState, text_component> bounds_view(world);
+			ecs::View<ecs::With<ui::UiEnabled>, ecs::With<ui::UiBounds>, ecs::With<ui::InteractionState>, ecs::With<text_component>> bounds_view(world);
 			for (auto [enabled, bounds, ui_interaction, ui_text] : bounds_view) {
 				if (enabled.enabled()) {
 					ui_text.set_handle();
@@ -80,7 +80,7 @@ namespace ui {
 		}
 	};
 
-	struct ui_text_spawner :ecs::Recipe {
+	struct ui_text_spawner {
 		UiSpawner ui_spawn;
 
 		ui_text_spawner(geo::Box2d box, size_t priority) :ui_spawn(geo::Box2d(box.center, box.scale), priority){

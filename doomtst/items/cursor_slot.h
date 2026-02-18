@@ -27,7 +27,7 @@ namespace items {
 			}
 			ecs::obj cursor_obj = world.get_resource<cursor_container>().primary_slot();
 			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
-			for (auto&& [interaction_state, container_slot,decl] : ecs::View<ui::InteractionState, items::RefrencedSlot,items::ItemSlotDecal>(world)) {
+			for (auto&& [interaction_state, container_slot,decl] : ecs::View<ecs::With<ui::InteractionState>, ecs::With<items::RefrencedSlot>, ecs::With<items::ItemSlotDecal>>(world)) {
 				if (!interaction_state.left_clicked) {
 					continue;
 				}
@@ -64,7 +64,7 @@ namespace items {
 			ecs::obj cursor_display = world.get_resource<cursor_container>().display;
 			ElementSlot& cursor_slot = world.get_resource<cursor_container>().primary_slot().get_component<ElementSlot>();
 			cursor_display.get_component<ui::UiBounds>().local.center = world.get_resource<userinput::InputManager>().mouse_position;
-			for (auto&& [interaction_state, container_slot,decl] : ecs::View< ui::InteractionState, items::RefrencedSlot, items::ItemSlotDecal>(world)) {
+			for (auto&& [interaction_state, container_slot,decl] : ecs::View<ecs::With< ui::InteractionState>, ecs::With<items::RefrencedSlot>, ecs::With<items::ItemSlotDecal>>(world)) {
 				if (!interaction_state.right_clicked) {
 					continue;
 				}
@@ -96,7 +96,7 @@ namespace items {
 
 			ecs::obj cursor_obj = world.get_resource<cursor_container>().primary_slot();
 			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
-			for (auto&& [item_decal, interaction_state] : ecs::View<ItemSlotDecal, ui::InteractionState>(world)) {
+			for (auto [item_decal, interaction_state] : ecs::View<ecs::With<ItemSlotDecal>, ecs::With<ui::InteractionState>>(world)) {
 				if (interaction_state.hovered) {
 		//should cause issues with other decals
 					item_decal.set_decal(renderer::TexturePath("images\\importantblockholder.png", "important_block_holder"));
@@ -113,7 +113,7 @@ namespace items {
 	struct CursorContainerPlugin :Core::Plugin {
 		void build(Core::App& app) {
 			ecs::obj cursor_entity = ecs::spawn(app.Ecs, items::ItemSlotSpawner());
-			ecs::obj cursor_display = ecs::spawn(app.Ecs, items::ClearItemSlotSpawner(cursor_entity));
+			ecs::obj cursor_display = ecs::spawn(app.Ecs, items::ClearItemSlotSpawner(ecs::Constrained<items::ElementSlot>(cursor_entity)));
 				
 			app.emplace_system<cursor_swapper>();
 			app.emplace_system<cursor_spreader>();

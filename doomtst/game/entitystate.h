@@ -2,7 +2,6 @@
 #include "../math/mathutil.h"
 #include "entity.h"
 #include "rigidbody.h"
-#include "objecthelper.h"
 #include "../renderer/model.h"
 #pragma once
 struct entityeffects {

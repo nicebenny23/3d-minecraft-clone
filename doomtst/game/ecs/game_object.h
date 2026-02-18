@@ -34,7 +34,7 @@ namespace ecs {
 		}
 		template<ComponentType T>
 		T& get_component_unchecked() {
-			return ecs->get_component_unchecked<T>(ent);
+			return ecs->get_component_unchecked<T>(ent.id());
 		}
 		template<ComponentType T>
 		void remove_component() {
@@ -48,7 +48,11 @@ namespace ecs {
 		bool has_component() const {
 			return ecs->has_component<T>(ent);
 		}
-		Ecs& world() {
+		template<ComponentType ...Types>
+		bool has_components() const {
+			return ecs->has_components<Types...>(ent);
+		}
+		Ecs& world() const {
 			return *ecs;
 		}
 		template<ComponentType T>
@@ -63,7 +67,7 @@ namespace ecs {
 		template<ComponentType T>
 		T* get_component_ptr() {
 			if (has_component<T>()) {
-				return &ecs->get_component_unchecked<T>(ent);
+				return &ecs->get_component_unchecked<T>(ent.id());
 			}
 			return nullptr;
 		}
@@ -96,6 +100,10 @@ namespace ecs {
 		}
 		void add_child(ecs::obj child) {
 			add_component<Parent>().add_child(child.inner());
+		}
+		template<RecipeType T, typename ...Args> requires std::constructible_from<T, Args&&...>
+		void apply_recipe(Args&&...args) {
+			T(std::forward<Args>(args)...).apply(*this);
 		}
 		template<RecipeType T, typename ...Args> requires std::constructible_from<T, Args&&...>
 		ecs::obj spawn_child(Args&&... args);

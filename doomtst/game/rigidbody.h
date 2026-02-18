@@ -144,7 +144,7 @@ struct rigidbody : ecs::component{
                 int sgn = sign(velocity[i]);
                 double scale_in_dir = owner().get_component<aabb::Collider>().global_box().scale[i];
                 v3::Vec3 max_dir_rel = Vec3(sgn * scale_in_dir, i);
-                ray dir_ray(owner().get_component<ecs::transform_comp>().transform.position + max_dir_rel, max_dir_rel + new_pos);
+				math::ray dir_ray(owner().get_component<ecs::transform_comp>().transform.position + max_dir_rel, max_dir_rel + new_pos);
                   voxtra::WorldRayCollision coll = collision::raycast(dir_ray, collision::HitQuery(owner()));
                 if (!coll)
                 {
@@ -168,11 +168,7 @@ struct rigidbody : ecs::component{
 struct RigidbodySystem :ecs::System {
 
     void run(ecs::Ecs& ecs) override {
-
-        int l = 6;
-         
-
-        ecs::View< ecs::transform_comp, rigidbody> rigids(ecs);
+        ecs::View<ecs::With< ecs::transform_comp>, ecs::With<rigidbody>> rigids(ecs);
         for (auto [pos,body] : rigids) {
             body.oldvelocity = body.velocity;
             body.calculateonground();

@@ -35,7 +35,7 @@ namespace ui {
 		}
 		
 	};
-	struct ui_image_spawner:ecs::Recipe {
+	struct ui_image_spawner{
 		UiSpawner ui_spawn;
 		stn::Option<renderer::TexturePath> path;
 		ui_image_spawner(renderer::TexturePath spawn_path,geo::Box2d box, size_t priority) :path(spawn_path),ui_spawn(geo::Box2d(box.center, box.scale),priority){
@@ -118,7 +118,7 @@ namespace ui {
 				img.tex_handle.set_uniform(renderer::uniform(world.load_asset(cmd.path).unwrap(), "tex"));
 			}
 
-			ecs::View<ui::UiEnabled, ui::UiBounds, ui::ComputedStyle, ui_image_component> bounds_view(world);
+			ecs::View<ecs::With<ui::UiEnabled>, ecs::With<ui::UiBounds>, ecs::With<ui::ComputedStyle>, ecs::With<ui_image_component>> bounds_view(world);
 			for (auto&& [enabled, bounds,UiPriority, ui_image] : bounds_view) {
 
 				if (ui_image.tex_handle) {

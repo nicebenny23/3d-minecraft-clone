@@ -123,12 +123,12 @@ namespace ecs {
 		}
 		template<typename...Args>
 		stn::insertion<T&> set_at(entity_id ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
-			bool is_new = true;
+			
 			if (has(ent)) {
-				is_new = false;
-				remove_at_unchecked(ent);
+				static_cast<component&>(pages[ent.id]).destroy_hook();
+				return stn::insertion<T&>(pages.replace_at_unchecked(ent.id, std::forward<Args>(args)...), false);
 			}
-			return stn::insertion<T&>(emplace_unchecked(ent, std::forward<Args>(args)...),is_new);
+			return stn::insertion<T&>(emplace_unchecked(ent, std::forward<Args>(args)...),true);
 		}
 	private:
 		component_pages<T, 11> pages;

@@ -50,7 +50,7 @@ namespace decals {
 		}
 	};
 	
-	struct DecalSpawner :ecs::Recipe {
+	struct DecalSpawner {
 		v3::Point3 pnt;
 		DecalSpawner(v3::Point3 center):pnt(center){
 			
@@ -90,7 +90,7 @@ namespace decals {
 					}
 				}
 			}
-			ecs::View<decal_component> view = ecs::View<decal_component>(world);
+			ecs::View<ecs::With<decal_component>> view = ecs::View<ecs::With<decal_component>>(world);
 			for (auto[dec] : view) {
 				
 				if (dec.handle) {

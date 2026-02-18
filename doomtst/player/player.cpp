@@ -23,9 +23,10 @@ void player::initplayer()
 	goblin.add_component<ecs::transform_comp>(v3::Point3(0,2,0));
 	goblin.add_component<estate>(10, true);
 	goblin.get_component<ecs::transform_comp>().transform.scale = unit_scale/ 2;
-
+	Core::game.insert_plugin<PlayerModificationPlugin>();
+	Core::game.insert_plugin<PlayerPlacePlugin>();
 	goblin.add_component<inventory>();
-
+	
 	aabb::DynamicColliderRecipe(geo::Box(v3::Point3(0, 0, 0), unit_scale / 2.3f)).apply(goblin);
 	goblin.add_component<rigidbody>(playerfric);
 
@@ -37,10 +38,10 @@ void player::initplayer()
 
 
 	goblin.add_component< playerbreak>();
-	goblin.add_component< playerplace>();
-
+	goblin.add_component< player_place>();
+	goblin.add_component<PlayerCursor>();
 	goblin.add_component<player_tag>();
-
+	goblin.world().insert_resource<player_resource>(goblin);
 	goblin.add_component<playerattackcomp>();
 	goblin.add_component<playerdaggercomp>();
 //	goblin.add_component<ecs::StaticComponent>();

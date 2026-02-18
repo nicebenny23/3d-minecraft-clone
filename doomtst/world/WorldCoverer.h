@@ -68,7 +68,7 @@ namespace grid {
 
 		void compute_chunk_cover(ecs::obj chunk) {
 			Chunk::chunk& cnk = chunk.get_component<Chunk::chunk >();
-			for (ecs::obj blk : cnk.block_list) {
+			for (auto& blk : cnk.block_list) {
 				compute_mesh_cover(blk.get_component<block>().mesh, chunk.world().get_resource<Grid>());
 			}
 		}

@@ -28,7 +28,7 @@ namespace grid {
 
 		Point3 toBlockPos(Point3 point);
 		Coord chunkfromblockpos(Coord pos);
-		Coord getVoxel(Point3 pos);
+		Coord get_voxel(Point3 pos);
 		Coord get_chunk(Point3 pos);
 		bool chunk_loaded(Coord loc);
 
@@ -41,10 +41,9 @@ namespace grid {
 
 		stn::Option<Chunk::chunk&> get_chunk(Chunk::ChunkLocation pos);
 		stn::Option<Chunk::chunk&> get_chunk(Coord pos);
-		Option< ecs::obj&> get_object(const v3::Coord pos);
+		Option<ecs::Constrained<block>&> get_object(const v3::Coord pos);
 		Option<block&> get_block(const v3::Coord pos);
 		block* getBlock(const v3::Coord pos);
-		ecs::obj* getObject(const v3::Coord pos);
 		array<ecs::obj > voxel_in_range(geo::Box span);
 
 		size_t chunks_loaded() {

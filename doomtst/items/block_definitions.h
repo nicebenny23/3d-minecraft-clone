@@ -1,7 +1,7 @@
 #include "item_type.h"
 #include "cursor_slot.h"
 #include "Item.h"
-#include "crafting_table.h"
+#include "../block/craftingtable.h"
 #include "../block/plank.h"
 #include "../block/air.h"
 #include "../block/torch.h"
@@ -223,14 +223,17 @@ namespace items {
 	struct register_core_items :Core::Plugin {
 		void build(Core::App& app) {
 			BlockRegistry& registry = app.ensure_resource<BlockRegistry>();
-			registry.insert_id<PlankBlock>();
-			registry.insert_id<MossBlock>();
-			registry.insert_id<TorchBlock>();
-			registry.insert_id<StoneBlock>();
-			registry.insert_id<AirBlock>();
-
-			app.emplace_system< ItemClear>();
 			item_types& item_register = app.ensure_resource<item_types>();
+
+			registry.register_block<PlankBlock>();
+			registry.register_block<MossBlock>();
+			registry.register_block<TorchBlock>();
+			registry.register_block<StoneBlock>();
+			registry.register_block<AirBlock>();
+			app.emplace_system< CraftingTableClickSystem>();
+			registry.register_block<CraftingTableBlock>();
+			item_register.register_item<items::crafting_table_item>();
+			app.emplace_system< ItemClear>();
 			app.emplace_system< run_crafts>();
 			app.emplace_system< cursor_crafter>();
 			app.emplace_system<SyncDisplayIcon>();

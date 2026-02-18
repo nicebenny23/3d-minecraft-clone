@@ -6,20 +6,20 @@ namespace ui {
 
 		};
 	};
-
 	struct menu_component :ecs::component {
 
 	};
+	
 
 	struct open_menu {
-		open_menu(menu_component& menu_comp) :menu_ent(menu_comp.owner()) {
+		open_menu(ecs::Constrained<menu_component> menu_comp) :menu_ent(menu_comp) {
 
 		}
-		ecs::obj menu_ent;
+		ecs::Constrained<menu_component> menu_ent;
 	};
-	struct MenuRecipe :ecs::Recipe {
-		MenuRecipe(){
-			
+	struct MenuRecipe {
+		MenuRecipe() {
+
 		}
 		void apply(ecs::obj& object) {
 			object.add_component<menu_component>();
@@ -28,15 +28,24 @@ namespace ui {
 	};
 	struct MenuState :ecs::resource {
 		bool menu_open() const {
-			return open_menu.is_some();
+			return !open_menu.empty();
 		}
 		bool no_menu_open() const {
-			return open_menu.is_none();
+			return !menu_open();
+		}
+		stn::Option<ecs::obj> top() {
+			if (menu_open()) {
+				return open_menu.peek();
+			}
+			return stn::None;
+
 		}
 		MenuState() = default;
-		stn::Option<ecs::obj> open_menu;
+		mutable stn::stack<ecs::obj> open_menu;
 	};
-
+	inline bool is_open(ecs::Constrained<menu_component> menu) {
+		return menu.world().get_resource< MenuState>().top()==menu.get();
+	}
 	struct MenuEnabler :ecs::System {
 		void run(ecs::Ecs& world) {
 			MenuState& state = world.ensure_resource<MenuState>();
@@ -44,17 +53,23 @@ namespace ui {
 			if (world.get_resource<userinput::InputManager>().key(userinput::escape_key).pressed) {
 				world.write_command<close_menu>(close_menu());
 			}
-
+			
 			for (open_menu menu : world.read_commands<open_menu>()) {
-
-				menu.menu_ent.get_component<ui::UiEnabled>().enable();
-				state.open_menu = menu.menu_ent;
-				return;
+				if (state.top() != menu.menu_ent.get()) {
+					if (state.menu_open()) {
+						state.top().unwrap().get_component<ui::UiEnabled>().disable();
+					}
+					menu.menu_ent.get_component<ui::UiEnabled>().enable();
+					state.open_menu.push(menu.menu_ent.get());
+				}
 			}
 			for (close_menu menu : world.read_commands<close_menu>()) {
 				if (state.menu_open()) {
-					state.open_menu.unwrap().get_component<ui::UiEnabled>().disable();
-					state.open_menu = stn::None;
+					state.top().unwrap().get_component<ui::UiEnabled>().disable();
+					state.open_menu.pop();
+					if (state.menu_open()) {
+						state.top().unwrap().get_component<ui::UiEnabled>().enable();
+					}
 					return;
 				}
 				else {

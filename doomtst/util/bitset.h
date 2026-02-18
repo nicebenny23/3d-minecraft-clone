@@ -48,7 +48,7 @@ namespace stn {
 			size_t max = 0;
 			bits = 0;
 			for (size_t i = 0; i < array.length(); i++) {
-				max = Max(static_cast<size_t>(array[i]), max);
+				max = stn::max(static_cast<size_t>(array[i]), max);
 			}
 			expand(max + 1);
 			for (size_t i = 0; i < array.length(); i++) {
@@ -206,9 +206,9 @@ namespace stn {
 			return (bit_list[word_index] >> bit_offset) & 1;
 		}
 		bitset operator|(const bitset& oth) const {
-			size_t max_size = Max(bit_list.length(), oth.bit_list.length());
-			size_t min_size = Min(bit_list.length(), oth.bit_list.length());
-			bitset result(Max(bits, oth.bits));
+			size_t max_size = max(bit_list.length(), oth.bit_list.length());
+			size_t min_size = min(bit_list.length(), oth.bit_list.length());
+			bitset result(max(bits, oth.bits));
 			for (size_t i = 0; i < min_size; i++) {
 				result.bit_list[i] = bit_list[i] | oth.bit_list[i];
 			}
@@ -235,8 +235,8 @@ namespace stn {
 		}
 		//
 		bitset operator&(const bitset& oth) const {
-			size_t min_size = Min(bit_list.length(), oth.bit_list.length());
-			bitset result(Min(bits, oth.bits));
+			size_t min_size = min(bit_list.length(), oth.bit_list.length());
+			bitset result(min(bits, oth.bits));
 			for (size_t i = 0; i < min_size; i++) {
 				result.bit_list[i] = bit_list[i] & oth.bit_list[i];
 			}
@@ -252,9 +252,9 @@ namespace stn {
 		}
 
 		bitset operator^(const bitset& oth) const {
-			size_t max_size = Max(bit_list.length(), oth.bit_list.length());
-			size_t min_size = Min(bit_list.length(), oth.bit_list.length());
-			bitset result(Max(bits, oth.bits));
+			size_t max_size = max(bit_list.length(), oth.bit_list.length());
+			size_t min_size = min(bit_list.length(), oth.bit_list.length());
+			bitset result(max(bits, oth.bits));
 			for (size_t i = 0; i < min_size; i++) {
 				result.bit_list[i] = (bit_list[i] ^ oth.bit_list[i]);
 			}
@@ -288,7 +288,7 @@ namespace stn {
 			return cnt;
 		}
 		bool ones_match(const bitset& oth) const {
-			size_t min_size = Min(oth.bit_list.length(), bit_list.length());
+			size_t min_size = min(oth.bit_list.length(), bit_list.length());
 
 			for (size_t i = 0; i < min_size; i++) {
 				if (bit_list[i] != oth.bit_list[i]) {

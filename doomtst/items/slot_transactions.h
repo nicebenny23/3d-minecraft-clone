@@ -96,14 +96,14 @@ namespace items {
 				return stn::None;
 			}
 			const item_stack& from_stack = from_slot.element().unwrap().get_component<item_stack>();
-			amount = stn::Min(amount,from_stack.count());
+			amount = stn::min(amount,from_stack.count());
 			
 			stn::Option<ecs::obj> mabye_slot = to_slot.element();
 			if (!mabye_slot) {
 				return GiveToSlot(from_slot, to_slot, amount);
 			}
 			const item_stack& other = mabye_slot.unwrap().get_component<item_stack>();
-			amount =stn::Min(amount,other.max_fit(from_stack));
+			amount =stn::min(amount,other.max_fit(from_stack));
 			if (amount!=0) {
 				return GiveToSlot(from_slot, to_slot,amount );
 			}

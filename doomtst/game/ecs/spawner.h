@@ -2,12 +2,13 @@
 #pragma once
 namespace ecs {
 	struct ecs::obj;
-	struct Recipe{
-		virtual void apply(ecs::obj& object) = 0;
-	};
-	
+
 	template<typename T>
-	concept RecipeType = std::derived_from<T, Recipe>;
+	concept RecipeType = requires(T & spawner, ecs::obj & object) {
+		{
+			spawner.apply(object)
+		}->std::same_as<void>;
+	}||stn::void_invokable<T&,ecs::obj&>;
 	template<typename T>
 	struct is_tuple : std::false_type {
 	};
@@ -20,7 +21,7 @@ namespace ecs {
 	template<typename T>
 	concept TupleType = is_tuple<T>::value;
 	template<RecipeType... Recipes>
-	struct RecipeBuilder:Recipe {
+	struct RecipeBuilder{
 		std::tuple<Recipes...> recipes;
 		RecipeBuilder() requires (std::is_default_constructible_v<Recipes>&&...) : recipes() {
 

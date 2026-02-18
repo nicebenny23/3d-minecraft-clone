@@ -4,7 +4,7 @@
 #include "System.h"
 #include "commands.h"
 #include "message.h"
-#include "archtype.h"
+#include "archetypes.h"
 #include "../../assets/Assets.h"
 #include "spawner.h"
 #include "ComponentType.h"
@@ -185,7 +185,7 @@ namespace ecs {
 
 
 		template<ComponentType T>
-		component_id insert_component_id() const {
+		component_id insert_component_id() {
 			return components.insert_id<T>();
 		}
 
@@ -247,8 +247,8 @@ namespace ecs {
 		}
 
 		template<ComponentType T>
-		T& get_component_unchecked(entity object) {
-			return components.get_component_unchecked<T>(object.id());
+		T& get_component_unchecked(entity_id object) {
+			return components.get_component_unchecked<T>(object);
 		}
 
 		template<ComponentType T>
@@ -276,13 +276,8 @@ namespace ecs {
 			return stn::None;
 		}
 		template<ComponentType... Components>
-		stn::TupleSet<Components&...> get_tuple_unchecked(entity_id obj, const stn::span<const component_id>& indices) {
-
-			return[&]<size_t... Is>(std::index_sequence<Is...>) {
-				return stn::TupleSet<Components&...>{
-					components.unchecked_at(indices.unchecked_at(Is)).get_as_unchecked<Components>(obj)...
-				};
-			}(std::index_sequence_for<Components...>{});
+		stn::TupleSet<Components&...> get_tuple_unchecked(entity_id id) {
+			return components.get_components_unchecked<Components...>(id);
 		}	
 		component_type& component_type_for(component_id id) {
 			return components[id];
@@ -297,8 +292,6 @@ namespace ecs {
 			}
 			return types;
 		}
-
-	
 
 		stn::array<component_type*> component_types_for(const stn::span<const component_id>& indices) {
 			stn::array<component_type*> types;
@@ -318,9 +311,7 @@ namespace ecs {
 			stn::span<const component_id> cached = archetypes.archetype_of(object.id()).view_cached();
 			for (component_id id : cached) {
 				components.unchecked_at(id).storage_erased().remove_at_unchecked(object.id());
-
 			}
-
 			//removes from both at the same time
 			archetypes.remove_from_archetypes_unchecked(object.id());
 			entities.remove_entity(object);

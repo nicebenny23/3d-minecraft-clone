@@ -41,7 +41,7 @@ namespace items {
 		}
 
 	};
-	struct container_recipe :ecs::Recipe {
+	struct container_recipe {
 		v2::Coord2 offset;
 		container_recipe(v2::Coord2 off):offset(off) {
 

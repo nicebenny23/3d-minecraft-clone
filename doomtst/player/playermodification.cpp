@@ -8,7 +8,7 @@
 #include "../game/particles.h"
 
 
-void playerbreak::make_drop(ecs::obj Hit)
+void player::playerbreak::make_drop(ecs::obj Hit)
 {
 	if (Hit.has_component<items::loot_table>())
 	{

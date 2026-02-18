@@ -41,13 +41,14 @@ namespace aabb {
 
 
 	};
-	struct DynamicColliderRecipe :ecs::Recipe {
+
+	struct DynamicColliderRecipe {
 		bool effector;
 		geo::Box box;
 		DynamicColliderRecipe(geo::Box aabb, bool is_effector = false) :effector(is_effector), box(aabb) {
 
 		}
-		void apply(ecs::obj& object) override {
+		void apply(ecs::obj& object)  {
 			object.add_component<DynamicCollider>();
 			object.add_component<Collider>(box, effector);
 

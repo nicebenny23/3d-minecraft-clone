@@ -81,8 +81,8 @@ namespace grid {
 		void run(ecs::Ecs& world) {
 			grid::Grid& grid = world.get_resource<grid::Grid>();
 			stn::queue<stn::non_null<block>> lightening_queue;
-			ecs::View<block_emmision, block> light_view(world);
-			for (const auto& [light, block_component] : light_view) {
+			ecs::View<ecs::With<block_emmision>, ecs::With<block>> light_view(world);
+			for (auto [light, block_component] : light_view) {
 				if (block_component.light_passing_through.is_none()) {
 					block_component.light_passing_through = light.emmision;
 				}

@@ -29,7 +29,7 @@ bool voxtra::boxcast_grid(geo::Box Box) {
 
 }
 
-voxtra::WorldRayCollision  voxtra::travvox(ray nray, GridTraverseMode trav) {
+voxtra::WorldRayCollision  voxtra::travvox(math::ray nray, GridTraverseMode trav) {
 	if (nray.length() == 0) {
 		return stn::None;
 	}
@@ -52,7 +52,7 @@ voxtra::WorldRayCollision  voxtra::travvox(ray nray, GridTraverseMode trav) {
 	}
 	v3::Point3 pos = nray.start - (norm_ray * 1e-6);
 
-	Coord curvox = CtxName::ctx.Ecs->get_resource<grid::Grid>().getVoxel(pos);
+	Coord curvox = CtxName::ctx.Ecs->get_resource<grid::Grid>().get_voxel(pos);
 	Coord Boundry;
 	for (size_t i = 0; i < 3; i++) {
 		Boundry[i] = next_boundary(pos[i], sgns[i] == 1);
@@ -113,12 +113,12 @@ voxtra::WorldRayCollision  voxtra::travvox(ray nray, GridTraverseMode trav) {
 }
 
 //goes to the next block and then goes backwords
-stn::Option<block&> voxtra::findprevblock(ray ray,grid::Grid& grid, GridTraverseMode trav) {
+stn::Option<block&> voxtra::findprevblock(math::ray ray,grid::Grid& grid, GridTraverseMode trav) {
 	WorldRayCollision Intersection = travvox(ray, trav);
 	if (!Intersection) {
 		return stn::None;
 	}
 	float BackMag = 1 / 1000.f;
-	Point3 BackProp = ray.pointAt(Intersection.unwrap().dist()-BackMag);
-	return	grid.get_block(grid.getVoxel(BackProp));
+	Point3 BackProp = ray.point_at(Intersection.unwrap().dist()-BackMag);
+	return	grid.get_block(grid.get_voxel(BackProp));
 }

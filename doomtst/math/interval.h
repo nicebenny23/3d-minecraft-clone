@@ -46,10 +46,7 @@ namespace math {
 			return max;
 		}
 		bool contains(double val) const {
-			return inrange(val, min, max);
-		}
-		bool apx_contains(double val) const {
-			return inrange_apx(val, min, max);
+			return in_range_apx(val, min, max);
 		}
 		bool contains(const range& other) const{
 			return contains(other.max) && contains(other.min);

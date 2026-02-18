@@ -2,7 +2,7 @@
 #include "intersection.h"
 #include "interval.h"
 namespace geointersect {
-	boxRayCollision intersection(geo::Box box, ray fray) {
+	boxRayCollision intersection(geo::Box box, math::ray fray) {
 		v3::Vec3 dir = fray.dir();
 
 		//not actually max
@@ -13,14 +13,14 @@ namespace geointersect {
 			double tst_val_1 = box.center[i] - box.scale[i] - fray.start[i];
 			double tst_val_2 = box.center[i] + box.scale[i] - fray.start[i];
 			if (apx(dir[i], 0)) {
-				if (math::range(tst_val_1, tst_val_2).apx_contains(0)) {
+				if (math::range(tst_val_1, tst_val_2).contains(0)) {
 					continue;
 				}
 			}
 			tst_val_1 /= dir[i];
 			tst_val_2 /= dir[i];
-			min_max =stn::Min(min_max, stn::Max(tst_val_1, tst_val_2));
-			max_min = stn::Max(max_min, stn::Min(tst_val_1, tst_val_2));
+			min_max =stn::min(min_max, stn::max(tst_val_1, tst_val_2));
+			max_min = stn::max(max_min, stn::min(tst_val_1, tst_val_2));
 		}
 
 

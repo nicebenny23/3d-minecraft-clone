@@ -269,7 +269,7 @@ namespace renderer {
 			std::unordered_map<phase_handle, render_pass> pass_map;
 			size_t cnt = 0;
 
-			ecs::View<material_component, order_key, is_enabled> renderable_iter(world);
+			ecs::View<ecs::With<material_component>, ecs::With<order_key>, ecs::With<is_enabled>> renderable_iter(world);
 			for (auto [mat, order, should_render] : renderable_iter) {
 				if (should_render.enabled) {
 					phase_handle pass = mat.mat_id->pass;

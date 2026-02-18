@@ -48,7 +48,7 @@ struct playercamcontrols : ecs::component
 			Core::game.Ecs.get_resource<window::Window>().EnableCursor();
 		}
 		double max_interact_range = 5;
-		ray cameraray = ray::from_offset(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.normal_dir() * max_interact_range);
+		math::ray cameraray = math::ray::from_offset(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.normal_dir() * max_interact_range);
 		voxtra::WorldRayCollision closest = collision::raycast(cameraray, collision::HitQuery(world()));
 		if (closest)
 		{

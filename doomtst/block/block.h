@@ -59,6 +59,11 @@ namespace blocks {
 		geo::Box bounds() const {
 			return mesh.box;
 		}
+		template<BlockLike T>
+		const bool is() const {
+			return world().get_resource<BlockRegistry>().is<T>(id);
+		}
+
 		const BlockRegistry& registry() const {
 			return world().get_resource<BlockRegistry>();
 		}

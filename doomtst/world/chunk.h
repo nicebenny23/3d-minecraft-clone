@@ -1,5 +1,6 @@
 #include "../block/block.h"
 #include "../util/cached.h"
+#include "../game/ecs/filtered_object.h"
 #include "chunk_mesh.h"
 #pragma once 
 using namespace blocks;
@@ -42,7 +43,7 @@ namespace Chunk {
 		Chunk::ChunkLocation location;
 		bool modified;
 		void write();
-		chunk(Chunk::ChunkLocation chunk_location) :modified(false), location(chunk_location), block_list(chunksize) {
+		chunk(Chunk::ChunkLocation chunk_location) :modified(false), location(chunk_location), block_list() {
 
 		}
 		Point3 center() const {
@@ -51,13 +52,13 @@ namespace Chunk {
 		geo::Box span() const {
 			return location.span();
 		}
-		ecs::obj& operator[](size_t index) {
+		ecs::Constrained<block>& operator[](size_t index) {
 			return block_list[index];
 		}
-		const ecs::obj& operator[](size_t index) const{
+		const ecs::Constrained<block>& operator[](size_t index) const{
 			return block_list[index];
 		}
-		stn::array<ecs::obj> block_list;
+		stn::array<ecs::Constrained<block>> block_list;
 
 		using iterator = decltype(block_list)::iterator;
 		using const_iterator = decltype(block_list)::const_iterator;

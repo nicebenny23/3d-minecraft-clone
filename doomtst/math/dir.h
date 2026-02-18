@@ -103,10 +103,8 @@ namespace math {
 
 
 	inline constexpr  stn::List<Direction3d, 6> Directions3d(right_3d, left_3d, up_3d, down_3d, front_3d, back_3d);
-	inline Direction3d Align(v3::Vec3 point) {
-
-
-		double max = stn::Max(abs(point.x), abs(point.y), abs(point.z));
+	inline Direction3d greatest_aligned_direction(v3::Vec3 point) {
+		double max = stn::max(abs(point.x), abs(point.y), abs(point.z));
 		int ind = 0;
 		if (abs(point.x) == max) {
 			ind = ((1 - sign(point.x)) / 2);
@@ -169,7 +167,7 @@ namespace math {
 	inline Direction2d max_2d_direction(v3::Vec3 point) {
 
 
-		double max = stn::Max(abs(point.x), abs(point.z));
+		double max = stn::max(abs(point.x), abs(point.z));
 		size_t index;
 		if (abs(point.x) == max) {
 			index = (1 - sign(point.x)) / 2;
@@ -188,7 +186,7 @@ namespace math {
 	static constexpr stn::List<Direction2d, 4> Directions2d(right2d, left2d, up2d, down2d);
 
 	inline Direction2d Align2d(v2::Vec2 point) {
-		double max_val = stn::Max(abs(point.x), abs(point.y));
+		double max_val = stn::max(abs(point.x), abs(point.y));
 		size_t ind = 0;
 
 		if (abs(point.x) == max_val) {

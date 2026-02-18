@@ -23,28 +23,37 @@ namespace items {
 		}
 	};
 
-	struct ItemUiSpawner:ecs::Recipe {
+	struct ItemUiSpawner{
 	
 		ItemUiSpawner( ){
 
 		}
 		void apply(ecs::obj& entity) {
-			ecs::obj image= entity.spawn_child< ui::ui_image_spawner>(geo::Box2d::origin_centered(v2::Vec2(item_size, item_size)), 20);
-			ecs::obj text= entity.spawn_child<ui::ui_text_spawner>(geo::Box2d::Box2d(v2::Vec2(.5f,.5f),v2::Vec2(.5f,.5f)), 30);
+			ecs::obj image= entity.spawn_child< ui::ui_image_spawner>(geo::Box2d::origin_centered(v2::Vec2(item_size, item_size)), 1);
+			ecs::obj text= entity.spawn_child<ui::ui_text_spawner>(geo::Box2d::Box2d(v2::Vec2(.5f,.5f),v2::Vec2(.5f,.5f)), 1);
 			entity.set_emplace_component<ItemIcon>(image);
-			entity.set_emplace_component<ItemCountDisplay>(text);
-			ui::UiSpawner(geo::Box2d::origin_centered(v2::Vec2(item_size, item_size)), 20).apply(entity);
+			entity.set_emplace_component<ItemCountDisplay>(text);	
 		}
 	};
 	struct DisplayItem :ecs::component {
 		stn::Option<item_entry> display;
+	};
+	struct DisplayedItemSpawner {
+
+		DisplayedItemSpawner() {
+		}
+		void apply(ecs::obj& entity) {
+
+			entity.add_component<DisplayItem>();
+			ItemUiSpawner().apply(entity);
+		}
 	};
 
 	
 	struct ItemIconSetter :ecs::System {
 		void run(ecs::Ecs& world) {
 			
-			for (auto&& [icon] : ecs::View<ItemIcon>(world)) {
+			for (auto&& [icon] : ecs::View<ecs::With<ItemIcon>>(world)) {
 
 				if (!icon.displayed_id) {
 					icon.image_component.get_component<ui::UiEnabled>().disable();
@@ -60,7 +69,7 @@ namespace items {
 	struct ItemCountSetter :ecs::System {
 		void run(ecs::Ecs& world) {
 
-			for (auto&& [count] : ecs::View<ItemCountDisplay>(world)) {
+			for (auto&& [count] : ecs::View<ecs::With<ItemCountDisplay>>(world)) {
 				if (!count.count) {
 					count.text_component.get_component<ui::UiEnabled>().disable();
 					continue;
@@ -73,12 +82,12 @@ namespace items {
 	struct SyncItemStackUi:ecs::System {
 
 		void run(ecs::Ecs& world) {
-			for (auto&& [display] : ecs::View<DisplayItem>(world)) {
+			for (auto&& [display] : ecs::View<ecs::With<DisplayItem>>(world)) {
 				if (display.display&&display.display.unwrap().count==0) {
 					display.display=stn::None;
 				}
 			}
-			for (auto&& [icon, display] : ecs::View<ItemIcon, DisplayItem>(world)) {
+			for (auto&& [icon, display] : ecs::View<ecs::With<ItemIcon>,ecs::With< DisplayItem>>(world)) {
 				if (display.display) {
 					icon.displayed_id = display.display.unwrap().id;
 				}
@@ -87,7 +96,7 @@ namespace items {
 				}
 			}
 	
-			for (auto&& [count, display] : ecs::View<ItemCountDisplay, DisplayItem>(world)) {
+			for (auto&& [count, display] : ecs::View<ecs::With<ItemCountDisplay>, ecs::With<DisplayItem>>(world)) {
 				if (display.display) {
 					count.count= display.display.unwrap().count;
 				}

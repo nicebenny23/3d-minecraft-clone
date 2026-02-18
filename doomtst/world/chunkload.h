@@ -130,10 +130,10 @@ namespace Chunk {
 		blocks::block_id id_at(Coord pos) {
 
 			pos -= loc * Chunk::chunkaxis;
-			if (inrange(int(pos.x), 0, Chunk::chunkaxis - 1)) {
-				if (inrange(int(pos.y), 0, Chunk::chunkaxis - 1)) {
+			if (in_range(int(pos.x), 0, Chunk::chunkaxis - 1)) {
+				if (in_range(int(pos.y), 0, Chunk::chunkaxis - 1)) {
 
-					if (inrange(int(pos.z), 0, Chunk::chunkaxis - 1)) {
+					if (in_range(int(pos.z), 0, Chunk::chunkaxis - 1)) {
 						return ids[Chunk::chunkaxis * Chunk::chunkaxis * pos.x + Chunk::chunkaxis * pos.y + pos.z].block_id;
 					}
 				}
@@ -179,7 +179,7 @@ namespace Chunk {
 
 	};
 
-	struct CreateEmptyChunk :ecs::Recipe {
+	struct CreateEmptyChunk {
 		CreateEmptyChunk(ChunkLocation chunk_spawn_location) :spawn_location(chunk_spawn_location) {
 
 		}
@@ -206,7 +206,7 @@ namespace Chunk {
 					for (int z = 0; z < Chunk::chunkaxis; z++) {
 						Coord pos = statemap.ids[ind].pos;
 						blocks::block_id block_id = statemap.ids[ind].block_id;
-						newchunk.block_list[ind] = GenerateBlock(mesh, block_id, pos, math::Direction2d(math::up2d), math::Direction3d(math::up_3d)).spawn(chunk_object.world());
+						newchunk.block_list.push(ecs::Constrained<block>(GenerateBlock(mesh, block_id, pos, math::Direction2d(math::up2d), math::Direction3d(math::up_3d)).spawn(chunk_object.world())));
 						ind++;
 					}
 				}
@@ -215,7 +215,7 @@ namespace Chunk {
 
 
 	};
-	struct LoadChunkFromFile :ecs::Recipe {
+	struct LoadChunkFromFile {
 		ChunkLocation location;
 		LoadChunkFromFile(ChunkLocation chunk_location) :location(chunk_location) {
 		}
@@ -251,7 +251,7 @@ namespace Chunk {
 		}
 		Chunk::ChunkLocation pos;
 	};
-	struct CreateChunk :ecs::Recipe {
+	struct CreateChunk {
 		ChunkLocation location;
 		CreateChunk(ChunkLocation chunk_location) :location(chunk_location) {
 

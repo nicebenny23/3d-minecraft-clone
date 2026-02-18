@@ -92,7 +92,7 @@ namespace geo {
 		Box transform(Box other_transform) const {
 			return Box(center.offset_local(other_transform.center * scale), other_transform.scale * scale*2);
 		}
-		bool rayintersects(ray fray);
+		bool rayintersects(math::ray fray);
 	};
 
 
@@ -147,7 +147,7 @@ namespace geo {
 		bool above(Point3 pnt) const{
 			return 0<=dot(normal,pnt- point);
 		}
-		bool crosses(ray potential_crossing) const{
+		bool crosses(math::ray potential_crossing) const{
 			return above(potential_crossing.start) != above(potential_crossing.end);
 		}
 
@@ -184,10 +184,10 @@ namespace geo {
 	};
 
 	struct cone {
-		ray direction;
+		math::ray direction;
 		double slope;
 
-		cone(const ray newray, double cone_slope)
+		cone(const math::ray newray, double cone_slope)
 			: direction(newray), slope(cone_slope) {}
 
 		//returns the normalized direction

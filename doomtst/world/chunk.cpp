@@ -43,7 +43,7 @@ void Chunk::chunk::write() {
 	}
 	for (int i = 0; i < chunksize; i++) {
 		bytelist.reach(chunksize + i) = 0;
-		appendspecialbytelist(bytelist, i, block_list[i].get_component_ptr<block>());
+		appendspecialbytelist(bytelist, i, &block_list[i].get_component<block>());
 	}
 	file.write<unsigned short>(bytelist.span());
 

@@ -45,7 +45,8 @@ namespace stn {
 	};
 	template <typename T, template <typename...> class Template>
 	concept TypeInstantiationOf = is_type_instantiation_of<T, Template>::value;
-
+	template<typename Func, typename ...Args>
+	concept void_invokable = std::invocable<Func, Args&&...> && std::is_void_v<std::invoke_result_t<Func, Args&&...>>;
 	template<typename Func, typename ...Args>
 	concept nonvoid_invokable = std::invocable<Func, Args&&...> && !std::is_void_v<std::invoke_result_t<Func, Args&&...>>;
 }

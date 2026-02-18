@@ -40,8 +40,9 @@ namespace grid {
 			grid::Grid& grid = blk.world().get_resource<grid::Grid>();
 			auto& blk_comp = blk.get_component<block>();
 			auto position = blk_comp.pos;
-			ecs::obj& to_flip = *grid.getObject(position);
+			ecs::Constrained<block>& to_flip = grid.get_object(position).unwrap();
 			to_flip = GenerateBlock(grid.GetChunk(position)->owner().get_component<Chunk::chunkmesh>(), new_id, position, blk_comp.mesh.direction, blk_comp.mesh.attached_direction).spawn(blk.world());
+			
 			blk.destroy();
 		}
 

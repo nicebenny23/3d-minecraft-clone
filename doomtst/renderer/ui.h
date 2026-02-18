@@ -158,7 +158,7 @@ namespace ui {
 			if (has_clicked_left) {
 				int l = 3;
 			}
-			ecs::View<UiEnabled, UiBounds, InteractionState> bounds_view(world);
+			ecs::View<ecs::With<UiEnabled>, ecs::With<UiBounds>, ecs::With<InteractionState>> bounds_view(world);
 			for (auto&& [enabled, bounds, ui_interaction] : bounds_view) {
 				bool cursor_touching = bounds.global().contains(pos) && enabled.enabled();
 				if (cursor_touching) {
@@ -170,7 +170,7 @@ namespace ui {
 			}
 		}
 	};
-	struct UiSpawner :ecs::Recipe {
+	struct UiSpawner {
 		geo::Box2d bounds;
 		size_t priority;
 		bool bounds_type;
@@ -178,11 +178,11 @@ namespace ui {
 		:bounds(geo::Box2d(box.center, box.scale)), priority(priority), bounds_type(global_bounds){
 		}
 		void apply(ecs::obj& object) {
-			object.add_component<UiBounds>(bounds, bounds_type);
-			object.add_component<UiEnabled>();
-			object.add_component<InteractionState>();
-			object.add_component<UiPriority>(priority);
-			object.add_component<ComputedStyle>(0);
+			object.set_emplace_component<UiBounds>(bounds, bounds_type);
+			object.set_emplace_component<UiEnabled>();
+			object.set_emplace_component<InteractionState>();
+			object.set_emplace_component<UiPriority>(priority);
+			object.set_emplace_component<ComputedStyle>(0);
 				
 			object
 			.world()

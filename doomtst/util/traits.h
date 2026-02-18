@@ -2,6 +2,7 @@
 #include <concepts>
 #include <utility>
 #include "concepts.h"
+#include "typelist.h"
 #pragma once
 namespace stn {
 
@@ -77,9 +78,32 @@ namespace stn {
 	template<HasFunctionTraits T>
 	using result_type_t = typename function_traits<T>::return_type;
 
+	template <typename T, template <typename...> class Template>
+	struct type_instantiation_parameters_impl {
+		using types = TypeList::EmptyList;
+	};
 
+	template <template <typename...> class Template, typename... Args>
+	struct type_instantiation_parameters_impl<Template<Args...>, Template> {
+		using types = TypeList::TypeList<Args...>;
+	};
+
+	template <typename T, template <typename...> class Template>
+		requires stn::TypeInstantiationOf<T, Template>
+	using type_instantiation_parameters = typename type_instantiation_parameters_impl<T, Template>::types;
+
+	template <template <typename...> class Template,typename TypeList>
+	struct instantiate_with_list_parameters_impl {
+	};
+
+	template <template <typename...> class Template, typename... Args>
+	struct instantiate_with_list_parameters_impl<Template,TypeList::TypeList<Args...>> {
+		using type = Template<Args...>;
+	};
+
+	template <template <typename...> class Template,TypeList::TypeListType T>
+	using instantiate_with_list= typename instantiate_with_list_parameters_impl<Template,T>::type;
 
 	template<typename Range, typename ElementType>
 	concept convertible_range = std::ranges::range<Range> && std::convertible_to<std::ranges::range_value_t<Range>, ElementType>;
-	
 }

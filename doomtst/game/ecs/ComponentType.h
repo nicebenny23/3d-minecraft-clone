@@ -1,4 +1,5 @@
 #include "component.h"
+#include "../../util/tuple.h"
 #pragma once
 namespace ecs {
 	struct component_type {
@@ -166,7 +167,19 @@ namespace ecs {
 		template<ComponentType T>
 		T& get_component_unchecked(entity_id entity) {
 			return unchecked_at(get_id_unchecked<T>()).get_as_unchecked<T>(entity);
+		}
+		template<ComponentType T>
+		const T& get_component_unchecked(entity_id entity) const {
+			return unchecked_at(get_id_unchecked<T>()).get_as_unchecked<T>(entity);
+		}
 
+		template<ComponentType ...Types>
+		stn::TupleSet<Types&...> get_components_unchecked(entity_id entity) {
+			return stn::TupleSet(get_component_unchecked<Types>(entity)...);
+		}
+		template<ComponentType ...Types>
+		stn::TupleSet<const Types&...> get_components_unchecked(entity_id entity) const{
+			return stn::TupleSet(get_component_unchecked<Types>(entity)...);
 		}
 		template<ComponentType T>
 		T& get_component(entity_id entity) {

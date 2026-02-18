@@ -102,10 +102,9 @@ namespace items {
 	};
 
 	struct RecipeBinder {
-		ecs::obj output;
 		ecs::obj input;
 		ItemRecipes list;
-		RecipeBinder(ecs::obj in, ecs::obj out, ItemRecipes list) :input(in), output(out), list(list) {
+		RecipeBinder(ecs::obj in, ItemRecipes list) :input(in), list(list) {
 
 		}
 	};
