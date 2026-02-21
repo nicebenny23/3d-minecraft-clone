@@ -1,6 +1,6 @@
 #include "ecs/game_object.h"
 #include "../math/mathutil.h"
-#include "entity.h"
+
 #include "rigidbody.h"
 #include "../renderer/model.h"
 #pragma once
@@ -31,7 +31,7 @@ struct estate : ecs::component {
 				}
 			}
 		}
-		timetilldmg -= CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
+		timetilldmg -= world().ensure_resource<timename::TimeManager>().dt;
 		if (owner().has_component<rigidbody>()) {
 			testfalldamage();
 			prevonground = owner().get_component<rigidbody>().isonground;
@@ -73,7 +73,13 @@ struct estate : ecs::component {
 		invincablilitymax = 1;
 		takesfalldmg = falls;
 	}
-	void remove();
+	void remove() {
+		if (owner().has_component<items::loot_table>()) {
+			owner().get_component<items::loot_table>().should_drop = true;
+		}
+		owner().destroy();
+
+	}
 	void damage(int dmg) {
 		dmg = static_cast<int>(dmg * damagemultiplyer);
 		if (dmg <= 0) {
@@ -100,8 +106,6 @@ struct estate : ecs::component {
 			}
 			health = clamp(health, 0, maxhealth);
 		}
-
-
 	}
 	void heal(int healamt) {
 		if (healamt <= 0) {

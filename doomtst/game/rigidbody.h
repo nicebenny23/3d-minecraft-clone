@@ -2,8 +2,6 @@
 #include "../game/ecs/game_object.h"
 #include "../game/aabb.h"
 #include "../game/time.h"
-#include "../game/entity.h"
-#include "../game/objecthelper.h"
 #include "../math/geometry.h"
 #include "../world/voxeltraversal.h"
 #include "ecs/query.h"
@@ -16,26 +14,21 @@ using namespace v3;
 
 struct rigid_force {
     Vec3 force;
-    tag::Tag tag;
+    std::string tag;
     stn::Option<timename::time> end_time;
-    bool has_ended() {
+    bool has_ended(timename::TimeManager& manager) {
         if (!end_time)
         {
             return true;
         }
-        bool val= CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now()<end_time.unwrap();
-        return val;
-    }
-    rigid_force(Vec3 frc, float Duration,const tag::Tag& tg):force(frc), end_time(CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now()+Duration), tag(tg) {
+
+        return manager.now()<end_time.unwrap();
         
     }
-    rigid_force(Vec3 frc, float Duration, const std::string& tg) :force(frc), end_time(CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().now() + Duration), tag(tg) {
-
+    
+    rigid_force(Vec3 frc, float Duration,timename::TimeManager& manager, std::string_view tg) :force(frc), end_time(manager.now() + Duration), tag(tg) {
     }
-    rigid_force(Vec3 frc, const tag::Tag& tg) :force(frc), end_time(stn::None),tag(tg){
-
-    }
-    rigid_force(Vec3 frc, const std::string& tg) :force(frc), end_time(stn::None), tag(tg) {
+    rigid_force(Vec3 frc, std::string_view tg) :force(frc), end_time(stn::None), tag(tg) {
 
     }
     rigid_force():end_time(stn::None),force(zerov) {
@@ -61,18 +54,19 @@ struct rigidbody : ecs::component{
         inliquid = false;
         Point3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position - Vec3(0, boundingbox->global_box().scale.y + .01, 0);
         geo::Box checkbox = geo::Box(boxcenter, Scale3(boundingbox->global_box().scale.x, .005, boundingbox->global_box().scale.z*.9f) * .92);
-        isonground = voxtra::boxcast_grid(checkbox);
+        isonground = voxtra::boxcast_grid(checkbox, world().get_resource<grid::Grid>());
     }
     void calculateonceil() {
 		Point3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position + Vec3(0, boundingbox->global_box().scale.y + .01, 0);
         geo::Box checkbox = geo::Box(boxcenter, Scale3(boundingbox->global_box().scale.x, .005, boundingbox->global_box().scale.z) * .9);
-        isonceil = voxtra::boxcast_grid(checkbox);
+        isonceil = voxtra::boxcast_grid(checkbox,world().get_resource<grid::Grid>());
     }
     // Constructor
     rigidbody() : velocity(zerov), oldvelocity(zerov), acceleration(zerov), boundingbox(nullptr) {
         friction = 1;
         gravityscale =1;
-    } rigidbody(float fric,float gravenabled=1  ) : velocity(zerov), oldvelocity(zerov), acceleration(zerov), boundingbox(nullptr) {
+    } 
+	rigidbody(float fric,float gravenabled=1  ) : velocity(zerov), oldvelocity(zerov), acceleration(zerov), boundingbox(nullptr) {
         gravityscale = 1;
         friction = fric;
 
@@ -90,7 +84,7 @@ struct rigidbody : ecs::component{
     void add_force(const rigid_force& frc) {
         forces.push(frc);
     }
-    stn::Option<rigid_force&> get_force(const tag::Tag& name) {
+    stn::Option<rigid_force&> get_force(const std::string& name) {
         for (rigid_force& frc : forces)
         {
             if (frc.tag == name)
@@ -102,13 +96,11 @@ struct rigidbody : ecs::component{
     }
 
     void apply_forces() {
-        
-       forces = forces.filter([](rigid_force val) {return val.has_ended(); }).into<stn::array>();
+		timename::TimeManager& time = world().get_resource<timename::TimeManager>();
+       forces = forces.filter([&time](rigid_force val) {return val.has_ended(time); }).into<stn::array>();
         for (rigid_force& frc : forces)
         {
-            
              acceleration += frc.force / mass;
-             int l = 2;
         }
 
     }

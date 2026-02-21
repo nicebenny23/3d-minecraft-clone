@@ -1,7 +1,7 @@
 #pragma once
 #include "ModelMesh.h"
 #include "../game/camera.h"
-#include "../game/GameContext.h"
+
 using namespace ModelMeshName;
 void ModelMesh::setmodeluniform()
 {	
@@ -41,7 +41,7 @@ v2::Vec2 ModelMesh::nthtex(size_t i)
 	return texcoords[texindices[i] - 1];
 }
 
-ModelMesh ModelMeshName::loadmesh(const char* location,const char* name, Vec3 position)
+ModelMesh ModelMeshName::loadmesh(const char* location,const char* name, Vec3 position, ecs::Ecs& world)
 {
 	
 	ModelMesh newmesh = ModelMesh();
@@ -82,7 +82,7 @@ ModelMesh ModelMeshName::loadmesh(const char* location,const char* name, Vec3 po
 
 		delete[] header;
 	}
-	newmesh.create_handle(location,name,*CtxName::ctx.Ecs);
+	newmesh.create_handle(location,name, world);
 
 	return newmesh;
 }

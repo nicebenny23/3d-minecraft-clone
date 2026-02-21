@@ -23,7 +23,7 @@ namespace ecs {
 			if (max_events <active_events().count) {
 				stn::throw_logic_error("you may not write with {} active events",active_events());
 			}
-			if (counts.nonempty()) {
+			if (counts.non_empty()) {
 				queue.emplace(std::forward<Args>(args)...);
 			}
 
@@ -34,7 +34,7 @@ namespace ecs {
 		}
 		//returns whether it is being read from
 		bool being_read_from() const {
-			return current_readers.nonempty();
+			return current_readers.non_empty();
 		}
 		struct EventRange {
 			using iterator = stn::queue<T>::iterator;

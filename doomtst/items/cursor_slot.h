@@ -60,7 +60,9 @@ namespace items {
 	};
 	struct cursor_spreader :ecs::System {
 		void run(ecs::Ecs& world) {
-
+			if (world.get_resource<ui::MenuState>().no_menu_open()) {
+				return;
+			}
 			ecs::obj cursor_display = world.get_resource<cursor_container>().display;
 			ElementSlot& cursor_slot = world.get_resource<cursor_container>().primary_slot().get_component<ElementSlot>();
 			cursor_display.get_component<ui::UiBounds>().local.center = world.get_resource<userinput::InputManager>().mouse_position;
@@ -93,13 +95,14 @@ namespace items {
 	};
 	struct cursor_highlighter :ecs::System {
 		void run(ecs::Ecs& world) {
-
+			
 			ecs::obj cursor_obj = world.get_resource<cursor_container>().primary_slot();
 			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
 			for (auto [item_decal, interaction_state] : ecs::View<ecs::With<ItemSlotDecal>, ecs::With<ui::InteractionState>>(world)) {
 				if (interaction_state.hovered) {
-		//should cause issues with other decals
-					item_decal.set_decal(renderer::TexturePath("images\\importantblockholder.png", "important_block_holder"));
+					if (world.get_resource<ui::MenuState>().menu_open()) {
+						item_decal.set_decal(renderer::TexturePath("images\\importantblockholder.png", "important_block_holder"));
+					}
 				}
 				else {
 					item_decal.reset_decal();

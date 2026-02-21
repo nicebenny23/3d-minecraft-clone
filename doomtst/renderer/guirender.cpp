@@ -1,6 +1,6 @@
 #include "guirender.h"
 #include "../game/Core.h"
-#include "../game/GameContext.h"
+
 #include "../imgui/imgui.h"
 #include "../imgui/imgui_impl_opengl3.h"
 #include "../imgui/imgui_impl_glfw.h"

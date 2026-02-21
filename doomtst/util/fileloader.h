@@ -259,5 +259,6 @@ namespace stn {
 			return result;
 		}
 	};
-
+	template<typename T> requires stn::Serializable<file_handle,T>
+	using file_serializer = stn::Serializer<file_handle,T>;
 }

@@ -35,56 +35,32 @@ namespace blocks {
 		virtual SolidBlockTraits mining_traits() const {
 			return SolidBlockTraits();
 		}
-		virtual void apply(ecs::obj& blk) {
+		virtual BlockTraits traits() const= 0;
+		virtual void apply(ecs::obj& blk) const {
+
+		};
+		//this sucks but i need to simplify my components to remove it
+		virtual void read_from_bytes(ecs::obj blk,stn::file_handle& handle) const {
+
+		};
+		virtual void write_into_bytes(ecs::obj blk, stn::file_handle& handle) const {
 
 		};
 	};
 	template<typename T>
 	concept BlockLike = std::derived_from<T, BlockType>;
 
-	template<typename T>
-	inline constexpr BlockTraits BlockInfo{};
 
-	struct CatchedBlock {
-		using ApplyFn = stn::Stateless<void(ecs::obj&)>;
-
-		ApplyFn apply;
-		SolidBlockTraits solid_traits;
-		BlockTraits block_traits;
-		std::string name;
-
-	private:
-		CatchedBlock(
-			BlockTraits bt,SolidBlockTraits st,std::string n,ApplyFn a)
-			: apply(std::move(a))
-			, solid_traits(std::move(st))
-			, block_traits(std::move(bt))
-			, name(std::move(n)) {
-		}
-
-	public:
-		template<BlockLike T>
-		static CatchedBlock Create(ecs::Ecs& world) {
-			return CatchedBlock{
-				BlockInfo<T>,
-				T().mining_traits(),
-				T().name(),
-				[](ecs::obj& block) {
-					T().apply(block);
-				}
-			};
-		}
-	};
 	struct BlockRegistry :ecs::resource {
 		stn::array<stn::Option<size_t>> to_id;
-		BlockTraits& traits_for(block_id id) {
-			return blocks[id.id].block_traits;
+		BlockTraits traits_for(block_id id) {
+			return blocks[id.id]->traits();
 		}
-		SolidBlockTraits& solid_traits_for(block_id id) {
-			return blocks[id.id].solid_traits;
+		SolidBlockTraits solid_traits_for(block_id id) {
+			return blocks[id.id]->mining_traits();
 		}
-		std::string_view name_for(block_id id) {
-			return blocks[id.id].name;
+		std::string name_for(block_id id) {
+			return blocks[id.id]->name();
 		}
 		template<BlockLike T>
 		bool is(block_id id) const {	
@@ -93,7 +69,7 @@ namespace blocks {
 		template<BlockLike T>
 		block_id register_block() {
 			return ids.insert<T>().on_insert([&](block_id id) {
-				blocks.push(CatchedBlock::Create<T>(ecs));
+				blocks.emplace(stn::construct_derived<T>());
 				}).value;
 		}
 		template<BlockLike T>
@@ -101,19 +77,19 @@ namespace blocks {
 			return ids.get<T>();
 		}
 
-		const CatchedBlock& block_for(block_id id) const {
+		const stn::box<BlockType>& block_for(block_id id) const {
 			return blocks[id.id];
 		}
 		block_id get_id(std::string_view name) const {
 			for (size_t i = 0; i < blocks.length();i++) {
-				if (name==blocks[i].name) {
+				if (name==blocks[i]->name()) {
 					return block_id(i);
 				}
 			}
 			stn::throw_logic_error("block with name {} does not exist", name);
 		}
 		void apply(ecs::obj& blk, block_id id) {
-			return blocks[id.id].apply(blk);
+			return blocks[id.id]->apply(blk);
 		}
 		BlockRegistry(ecs::Ecs& world) :ecs(world) {
 
@@ -123,6 +99,6 @@ namespace blocks {
 		ecs::Ecs& ecs;
 		stn::type_indexer<block_id> ids;
 
-		stn::array<CatchedBlock> blocks;
+		stn::array<stn::box<BlockType>> blocks;
 	};
 };

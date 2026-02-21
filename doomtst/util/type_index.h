@@ -10,6 +10,7 @@
 #include <string>
 #include "funtion.h"
 #include <mutex>
+#include "List.h"
 namespace stn {
 
 	template<typename T>
@@ -254,8 +255,8 @@ namespace stn {
 			return stn::array({ insert<Types>()... });
 		}
 		template <typename... Types>
-		stn::array<id_type> get_ids() {
-			return stn::array({ get<Types>()... });
+		stn::List<id_type, sizeof...(Types)> get_ids() {
+			return stn::List<id_type,sizeof...(Types)>({ get<Types>()... });
 		}
 		template <typename... Types>
 		stn::array<stn::Option<id_type>> get_opt_ids() {

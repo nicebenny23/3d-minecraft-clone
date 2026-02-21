@@ -36,7 +36,7 @@ namespace collision {
 		return closest;
 	}
 	inline voxtra::WorldRayCollision raycast(math::ray nray, HitQuery query, voxtra::GridTraverseMode travmode=voxtra::GridTraverseMode::countnormal) {
-		voxtra::WorldRayCollision closest_on_grid = voxtra::travvox(nray, travmode);
+		voxtra::WorldRayCollision closest_on_grid = voxtra::travvox(nray, travmode,query.world.get_resource<grid::Grid>());
 		voxtra::WorldRayCollision closest_entity = raycast_dynamic(nray, query);
 		return stn::min_some_on_map(closest_entity, closest_on_grid,
 		[&](const voxtra::RayWorldHit& col) {return col.dist(); });

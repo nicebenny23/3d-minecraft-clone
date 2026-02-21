@@ -21,6 +21,7 @@ namespace ecs {
 		entity inner() const {
 			return ent;
 		}
+
 		obj() :ent(entity_id(0),0), ecs(nullptr) {};
 		obj(entity inner, Ecs& ecs) :ecs(&ecs), ent(inner) {}
 		bool operator ==(const obj& other) const{
@@ -80,7 +81,7 @@ namespace ecs {
 			return ecs->set_component<T>(ent, std::forward<Args>(args)...);
 		}
 		void destroy() {
-			ecs->write_command(DestroyEntity(ent));
+			ecs->destroy_object(ent);
 		}
 		template<ComponentType C>
 		void destroy_component() {
@@ -101,9 +102,10 @@ namespace ecs {
 		void add_child(ecs::obj child) {
 			add_component<Parent>().add_child(child.inner());
 		}
-		template<RecipeType T, typename ...Args> requires std::constructible_from<T, Args&&...>
-		void apply_recipe(Args&&...args) {
-			T(std::forward<Args>(args)...).apply(*this);
+
+		template<RecipeType T>
+		void apply_recipe(const T& recipe) {
+			ecs::apply(recipe, *this);
 		}
 		template<RecipeType T, typename ...Args> requires std::constructible_from<T, Args&&...>
 		ecs::obj spawn_child(Args&&... args);
@@ -116,14 +118,14 @@ namespace ecs {
 	template<RecipeType T, typename ...Args> requires std::constructible_from<T, Args&&...>
 	obj spawn_emplaced(ecs::Ecs& world, Args&&... args) {
 		ecs::obj object = world.spawn_empty();
-		T(std::forward<Args>(args)...).apply(object);
+		ecs::apply(T(std::forward<Args>(args)...),object);
 		return object;
 	}
 
 	template<RecipeType T>
 	obj spawn(ecs::Ecs& world, T&& spawner) {
 		ecs::obj object = world.spawn_empty();
-		std::forward<T>(spawner).apply(object);
+		ecs::apply(std::forward<T>(spawner),object);
 		return object;
 	}
 	template<RecipeType T, typename ...Args> requires std::constructible_from<T, Args&&...>
@@ -132,7 +134,20 @@ namespace ecs {
 		add_child(child);
 		return child;
 	}
-
-	
+	template<typename T>
+	concept ObjectLike = std::same_as<T, obj> || requires(const T & value) {
+		{
+			value.object()
+		}->std::same_as<ecs::obj>;
+	};
+	template<ObjectLike T>
+	ecs::obj as_object(const T& object) {
+		if constexpr (std::same_as<T,obj>) {
+			return object;
+		}
+		else {
+			return object.object();
+		}
+	}
 
 }

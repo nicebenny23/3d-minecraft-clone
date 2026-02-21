@@ -65,7 +65,7 @@ namespace renderer {
 		void add_index(std::uint32_t index) {
 			indices.push(index);
 		}
-		template<typename Range> requires convertible_range<Range,std::uint32_t>
+		template<typename Range> requires convertible_range<Range, std::uint32_t>
 		void add_indices_offset_from(const Range& indice_list, std::uint32_t offset) {
 			for (auto i : indice_list) {
 				indices.push(i + offset);
@@ -89,10 +89,10 @@ namespace renderer {
 	};
 	struct Renderer;
 	struct RenderableHandle {
-		RenderableHandle() :id(), renderer() {
+		RenderableHandle() :id(){
 		}
-		RenderableHandle(renderable id, Renderer* renderer)
-			: id(id), renderer(renderer) {
+		RenderableHandle(renderable id)
+			: id(id){
 		}
 
 		void set_material(const std::string& name);
@@ -114,15 +114,15 @@ namespace renderer {
 		void set_order_key(float key);
 		void destroy();
 		bool operator==(const RenderableHandle& other) const {
-			return other.id == id && other.renderer == renderer;
+			return other.id == id;
 		}
+		Renderer& renderer();
 		MeshData create_mesh(indice_mode auto_ind = indice_mode::manual_generate);
 		explicit operator bool() const noexcept {
 			return static_cast<bool>(id);
 		}
 	private:
 		Option<renderable> id;
-		Renderer* renderer;
 
 	};
 
@@ -132,7 +132,7 @@ namespace renderer {
 	struct Renderer : ecs::resource {
 
 
-	
+
 
 		void bind_material(material_handle material);
 
@@ -143,14 +143,13 @@ namespace renderer {
 			context.bind(*Handle);
 		}
 		renderer::Context context;
+		//stored the currently bound uniforms
 		renderer::UniformRegistry uniform_manager;
 		template<typename val_type>
 		void set_uniform(const char* name, const val_type& val) {
-
-			uniform_manager.set(name, renderer::uniform_value(std::in_place_type<val_type>, val ));
-
+			uniform_manager.set(name, renderer::uniform_value(std::in_place_type<val_type>, val));
 		}
-		
+
 
 		void Clear();
 
@@ -160,7 +159,7 @@ namespace renderer {
 		void set_material(renderable id, std::string name);
 
 		RenderableHandle gen_renderable() {
-			return RenderableHandle(ecs::spawn_emplaced<renderable_recipe>(world), this);
+			return RenderableHandle(ecs::spawn_emplaced<renderable_recipe>(world));
 		}
 		void remove(renderable ren) {
 			ren.object.world().write_command(remove_render_object(ren.object));
@@ -179,13 +178,12 @@ namespace renderer {
 				return;
 			}
 			material_handle mat_id = ren.material();
-			mesh_id mesh_id = ren.get_mesh();
 
 			bind_material(mat_id);
 			for (auto& uniform : ren.view_overides()) {
-				context.apply_uniform(uniform.value,uniform.name);
+				context.apply_uniform(uniform.value, uniform.name);
 			}
-			Render(meshes[mesh_id]);
+			Render(meshes[ren.get_mesh()]);
 
 
 		}
@@ -207,12 +205,12 @@ namespace renderer {
 			if (!mabye_mesh) {
 				return;
 			}
-			Mesh& mesh = mabye_mesh.expect("Since we just checked the mesh must now exist");
+			Mesh& mesh = mabye_mesh.unwrap();
 			if (data.points.length() % mesh.Voa.attributes.components() != 0) {
 				throw std::logic_error("Vertex Data is corrupted");
 			}
 			if (!mesh.BuffersGenerated) {
-				throw std::invalid_argument("Cannot Fill a mesh without Generating buffers first");
+				throw std::invalid_argument("Cannot fill an unbuffered mesh");
 			}
 			context.bind(mesh);
 			mesh.Vbo.fillbuffer<float>(data.points);
@@ -223,26 +221,29 @@ namespace renderer {
 
 		MeshRegistry meshes;
 		float fov;
-		Renderer(ecs::Ecs& spawn_world,float initial_fov) :world(spawn_world), uniform_manager(),fov(initial_fov){
+		Renderer(ecs::Ecs& spawn_world, float initial_fov) :world(spawn_world), uniform_manager(), fov(initial_fov) {
 			meshes = MeshRegistry(&context);
 			setprojmatrix(90, .21f, 100);
 			set_uniform("aspect_ratio", world.get_resource<window::Window>().AspectRatio());
 		}
 
 	private:
+		stn::Option<material_handle> current_material;
 		ecs::Ecs& world;
 		//ensures a mesh exists
 		mesh_id insert_mesh(renderer::renderable id) {
 
 			if (!id.has_component<mesh_component>() || id.get_component<mesh_component>().msh.is_none()) {
 				id.set_mesh(meshes.create());
-	
+
 			}
 			return id.get_mesh();
 		}
 
 	};
-
+	inline Renderer& RenderableHandle::renderer() {
+		return id.unwrap().object.world().get_resource<Renderer>();
+	}
 	struct render_pass {
 		phase_handle pass;
 		stn::array<ecs::obj> phase_elements;
@@ -311,8 +312,8 @@ namespace renderer {
 			world.emplace_asset_loader<renderer::TextureArrayLoader>();
 			world.emplace_asset_loader<shader_loader>();
 			world.emplace_asset_loader<assets::SelfDescriptorLoader<renderer::render_phase>>();
-			Renderer& renderer = world.insert_resource<Renderer>(world,90);
-			
+			Renderer& renderer = world.insert_resource<Renderer>(world, 90);
+
 			world.emplace_asset_loader<MaterialManager>();
 			renderer::shader_id ui_shader = world.load_asset_emplaced<renderer::shader_descriptor>("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs").unwrap();
 			world.load_asset(render_phase(12, true, "ui_phase"));
@@ -330,7 +331,7 @@ namespace renderer {
 					renderer::UniformRefrence("proj_matrix", "projection"),
 					renderer::UniformRefrence("view_matrix", "view")
 			});
-			
+
 		}
 
 	};

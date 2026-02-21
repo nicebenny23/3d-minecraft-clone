@@ -1,6 +1,6 @@
 #pragma once
 #include "model.h"
-#include "../game/GameContext.h"
+
 
 ModelMeshName::ModelMesh& model::operator[](int index)
 {
@@ -11,7 +11,7 @@ void model::draw()
 }
 void model::add(const char* meshname,const char * meshtexname)
 {
-	meshlist.push(ModelMeshName::loadmesh(meshtexname,meshname, zerov));
+	meshlist.push(ModelMeshName::loadmesh(meshtexname,meshname, zerov,world()));
 }
 model::model(meshconnecttype connectmethod )
 {

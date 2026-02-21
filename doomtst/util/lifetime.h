@@ -94,7 +94,7 @@ namespace stn {
 		}
 
 		lifetime_tracker<T> view() const {
-			return lifetime_tracker<T>(lifetime_refrence<T>::from_rc_ptr(value).expect("should exist"));
+			return lifetime_tracker<T>(lifetime_refrence<T>::from_rc_ptr(value).expect("only living objects can be tracked"));
 		}
 	private:
 

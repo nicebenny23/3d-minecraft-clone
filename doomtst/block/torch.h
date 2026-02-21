@@ -4,17 +4,18 @@
 namespace blocks {
 	struct TorchBlock :BlockType {
 		TorchBlock() = default;
-		void apply(ecs::obj& block) override{
+		void apply(ecs::obj& block) const override{
 			block.add_component<items::loot_table>().add("torch", 1);
 		}
 		std::string name() const {
 			return std::string("torch");
 		}
+		BlockTraits traits() const {
+			return BlockTraits(
+				BlockMeshTraits(v3::Scale3(1 / 16.f, .375, 1 / 16.f), true, torchtex, torchtex, torchtex, torchtex, torchtex, torchtex)
+				, true, 14);
+		}
 	};
-	template<>
-	inline constexpr BlockTraits BlockInfo<TorchBlock> = BlockTraits(
-		BlockMeshTraits(v3::Scale3(1 / 16.f, .375, 1 / 16.f), true, torchtex, torchtex, torchtex, torchtex, torchtex, torchtex)
-	,true,14);
 
 }
 namespace items {

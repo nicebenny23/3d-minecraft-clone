@@ -282,7 +282,6 @@ namespace stn {
 			b.reassign_allocator_ptrs();
 		}
 
-		// Move assignment
 		flux& operator=(flux&& other) noexcept {
 			if (this != &other) {
 				clear();
@@ -322,7 +321,7 @@ namespace stn {
 				stn::throw_logic_error("Error: requested pool with size of 1<<{} is too big to exist", pool_number);
 			}
 			else {
-				return size_t(1) << pool_number;  // promote 1 to size_t
+				return size_t(1) << pool_number; 
 			}
 		}
 		//type safe emplace that checks the type_id first
@@ -354,7 +353,7 @@ namespace stn {
 		void clear() {
 			//first check that all nodes are free
 			if (!empty()) {
-				//       throw std::logic_error("all elements must be free before the allocator is destroyed");
+				   throw std::logic_error("all elements must be free before the allocator is destroyed");
 			}
 			for (std::byte* pool : pools) {
 				delete[] pool;
@@ -380,7 +379,7 @@ namespace stn {
 		void reassign_allocator_ptrs() noexcept {
 
 			// iterate pools that were moved into this->pools
-			// note: pools now contains the arrays previously owned by 'other'
+			// pools now contains the arrays previously owned by other
 			for (size_t pool_index = 0; pool_index < number_of_pools(); ++pool_index) {
 				size_t length = size_of_pool(pool_index);
 				std::byte* pool_ptr = pools[pool_index];
@@ -400,8 +399,8 @@ namespace stn {
 			//invariants satified since node satisfies invariants
 			top = node;
 		}
-		// Allocates a new pool with exponentially increasing block count.
-		// Each block is initialized as free and linked into the free list.
+		// Allocates a new pool  with exponentially increasing block count.
+		// Each block is initialqized as free and linked into the free list.
 		void create_pool() {
 			size_t new_pool_size = size_of_pool(number_of_pools());
 			std::byte* newPool = new std::byte[block_layout.size * new_pool_size];

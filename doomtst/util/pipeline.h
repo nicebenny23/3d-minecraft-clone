@@ -242,14 +242,13 @@ namespace stn {
 		MapView(S&& s, Func f) requires std::constructible_from<stored_t, S&&>
 			: source(std::forward<S>(s)), func(std::move(f)) {
 		}
-		// Iterator template: Iter = underlying iterator type, FuncPtr = Func* or const Func*
+	
 		template<typename iter_t, typename FuncPtr>
 		struct Iterator {
 			iter_t iter;
 			FuncPtr func_ptr;
 			using base_category = typename std::iterator_traits<iter_t>::iterator_category;
 
-			// Determine value_type and reference type
 			using value_type = std::invoke_result_t<Func&, std::iter_reference_t<iter_t>>;
 			using reference = value_type;
 			using pointer = void;
@@ -260,7 +259,6 @@ namespace stn {
 				std::random_access_iterator_tag,
 				base_category
 			>;
-			// compute result of invoking func on the iterator reference
 
 			static_assert(!std::is_void_v<value_type>, "MapView Func must not return void (use InspectView for void).");
 			static constexpr bool is_bidirectional = std::derived_from<iterator_category, std::bidirectional_iterator_tag>;
@@ -540,7 +538,7 @@ namespace stn {
 		bool empty() {
 			return begin() == end();
 		}
-		// Default move/copy
+
 		DrainRange(DrainRange&&) noexcept = default;
 		DrainRange& operator=(DrainRange&&) noexcept = default;
 

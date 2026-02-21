@@ -18,12 +18,13 @@ namespace ecs {
 			emplace_system<run_updates>();
 			emplace_system<delete_objects>();
 		}
-
+		bool deleting = false;
 		struct delete_objects :System {
 			delete_objects() {
 			};
 
 			void run(Ecs& ecs) {
+				ecs.deleting = true;
 				for (DestroyEntity& entity_cmd : ecs.read_commands<DestroyEntity>()) {
 					if (ecs.entities.contains(entity_cmd.ent)) {
 						ecs.remove_object_unchecked(entity_cmd.ent);
@@ -37,6 +38,8 @@ namespace ecs {
 						ecs.remove_component_unchecked(component_cmd.owning_entity, component_cmd.id);
 					}
 				}
+
+				ecs.deleting = false;
 			}
 
 		};
@@ -50,11 +53,11 @@ namespace ecs {
 					.filter([](component_type* type) {return type->updates(); })
 					.into<stn::array>();
 
-				types | stn::sort([](component_type* a) {return a->priority();});
+				types | stn::sort([](component_type* a) {return a->priority(); });
 
 				for (component_type* mgr : types) {
 					for (Archetype& archetype : stn::range(ecs.archetypes).filter([&](auto&& archetype) {return archetype.has_component(mgr->id()); })) {
-						
+
 						uint32_t originalCount = archetype.count();
 						for (uint32_t i = 0; i < originalCount; ++i) {
 							mgr->unchecked_at(archetype[archetype_index(i)]).update();
@@ -172,11 +175,11 @@ namespace ecs {
 			return get_resource<Systems>();
 		}
 		template<SystemType T>
-		void emplace_system() requires std::constructible_from<T,Ecs&>{
+		void emplace_system() requires std::constructible_from<T, Ecs&> {
 			systems().emplace<T>(*this);
 		}
 		template<SystemType T, typename...Args>
-		void emplace_system(Args&&... args)	requires std::constructible_from<T,Args&&...> {
+		void emplace_system(Args&&... args)	requires std::constructible_from<T, Args&&...> {
 			systems().emplace<T>(std::forward<Args>(args)...);
 		}
 		void run_systems() {
@@ -196,8 +199,8 @@ namespace ecs {
 
 		obj object_from_entity(ecs::entity ent);
 		obj spawn_empty();
-		
-	
+
+
 		bool contains(entity_id ent) const {
 			return entities.contains(ent);
 		}
@@ -209,18 +212,18 @@ namespace ecs {
 			return components.set<T>(object, std::forward<Args>(args)...)
 				.on_insert([this, object](T& component) {
 				archetypes.transfer_entity_to_flipped_index(object.id(), components.get_id_unchecked<T>());
-				}).value;
+					}).value;
 		}
 		template<ComponentType T, typename ...Args>
 		T& add_component(entity object, Args&&... args)   requires std::constructible_from<T, Args&&...> {
 			entities.assert_valid(object);
 			component_id id = components.insert_id<T>();
 			return components
-			.unchecked_at(id)
-			.emplace<T>(object, std::forward<Args>(args)...)
-			.on_insert([&](T& component) {
-					archetypes.transfer_entity_to_flipped_index(object.id(), id);
-				}).value;
+				.unchecked_at(id)
+				.emplace<T>(object, std::forward<Args>(args)...)
+				.on_insert([&](T& component) {
+				archetypes.transfer_entity_to_flipped_index(object.id(), id);
+					}).value;
 		}
 		template<ComponentType T, typename ...Args>
 		T& spawn_with_component(Args&&... args)   requires std::constructible_from<T, Args&&...> {
@@ -230,7 +233,7 @@ namespace ecs {
 			return components.unchecked_at(spawn_id).emplace<T>(new_entity, std::forward<Args>(args)...).value;
 		}
 
-		
+
 		bool has_component(entity ent, component_id id) const {
 			entities.assert_valid(ent);
 			return components.has_component(ent.id(), id);
@@ -262,23 +265,36 @@ namespace ecs {
 			return components.get_component<T>(object.id());
 		}
 		template<ComponentType T>
+		stn::Option<T&> get_component_opt(entity_id object) {
+			return components.get_component_opt<T>(object);
+		}
+		template<ComponentType T>
+		stn::Option<const T&> get_component_opt(entity_id object) const {
+			return components.get_component_opt<T>(object);
+		}
+		template<ComponentType T>
 		stn::Option<T&> get_component_opt(entity object) {
 			if (entities.contains(object)) {
-				return components.get_component_opt<T>(object.id());
+				return get_component_opt<T>(object.id());
 			}
 			return stn::None;
 		}
 		template<ComponentType T>
 		stn::Option<const T&> get_component_opt(entity object) const {
 			if (entities.contains(object)) {
-				return stn::Option<const T&>(components.get_component_opt<T>(object));
+				return get_component_opt(object.id());
 			}
 			return stn::None;
 		}
 		template<ComponentType... Components>
 		stn::TupleSet<Components&...> get_tuple_unchecked(entity_id id) {
-			return components.get_components_unchecked<Components...>(id);
-		}	
+			return stn::TupleSet(components.get_component<Components>(id)...);
+		}
+		template<ComponentType... Components>
+		stn::TupleSet<Components&...> get_components(entity entity) {
+			entities.assert_valid(entity);
+			return stn::TupleSet(components.get_component<Components>(entity.id())...);
+		}
 		component_type& component_type_for(component_id id) {
 			return components[id];
 		}
@@ -287,7 +303,7 @@ namespace ecs {
 				return stn::array<stn::non_null<component_type>>();
 			}
 			stn::array<stn::non_null<component_type>> types;
-			for (component_id id:archetypes.archetype_of(id).view_cached()) {
+			for (component_id id : archetypes.archetype_of(id).view_cached()) {
 				types.emplace(component_type_for(id));
 			}
 			return types;
@@ -295,16 +311,14 @@ namespace ecs {
 
 		stn::array<component_type*> component_types_for(const stn::span<const component_id>& indices) {
 			stn::array<component_type*> types;
-			for (component_id id:indices) {
+			for (component_id id : indices) {
 				types.push(&components[id]);
 			}
 			return types;
 		}
 
 		void remove_component_unchecked(entity object, component_id id) {
-
 			components.unchecked_at(id).storage_erased().remove_at_unchecked(object.id());
-			
 			archetypes.transfer_entity_to_flipped_index(object.id(), id);
 		}
 		void remove_object_unchecked(entity object) {
@@ -316,7 +330,16 @@ namespace ecs {
 			archetypes.remove_from_archetypes_unchecked(object.id());
 			entities.remove_entity(object);
 		}
-
+		void destroy_object(entity ent) {
+			if (deleting) {
+				if (contains(ent)) {
+					remove_object_unchecked(ent);
+				}
+			}
+			else {
+				write_command(DestroyEntity(ent));
+			}
+		}
 	};
 
 }

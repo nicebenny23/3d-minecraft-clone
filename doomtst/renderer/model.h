@@ -1,5 +1,5 @@
 #pragma once
-#include "../game/objecthelper.h"
+
 #include "ModelMesh.h"
 #include "../game/ecs/game_object.h"
 #include "../math/transform.h"

@@ -1,13 +1,12 @@
+#include "../game/ecs/ecs.h"
 #pragma once
 namespace settings {
-	struct GlobalSettings
+	struct GlobalSettings:ecs::resource
 	{
+		
 		bool viewmode;
 		GlobalSettings() {
 			viewmode = false;
 		}
 	};
-	extern GlobalSettings Gamesettings;
-	
-	void setinitialsettings();
 }

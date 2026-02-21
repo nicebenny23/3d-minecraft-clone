@@ -3,7 +3,7 @@
 #include "../game/ecs/game_object.h"
 #include "../game/collision.h"
 #include "../world/managegrid.h"
-#include "../game/objecthelper.h"
+
 #include "../world/voxeltraversal.h"
 #include "../util/dynamicarray.h"
 #include "../debugger/debug.h"
@@ -32,8 +32,6 @@ inline stn::pair<v3::Vec3, v3::Vec3> get_flat_frame(math::Direction3d dir) {
 }
 namespace player {
 	struct playerbreak : ecs::component {
-		stn::change <stn::Option<ecs::obj>> pickaxe;
-
 		ecs::obj break_decal;
 		float break_start_time = 0.f;
 		float timeuntilbreak = 0.f;
@@ -71,25 +69,30 @@ namespace player {
 		playerbreak() {
 		};
 
-		float curr_mining_power() {
-			if (!pickaxe()) {
+		float curr_mining_power(stn::Option<ecs::obj> pickaxe) {
+			if (!pickaxe) {
 				return 1;
 			}
-			return 1;
+			 items::item_stack& stack= pickaxe.unwrap().get_component<items::item_stack>();
+
+			 return stack.types()
+			.from_id(stack.contained_id())
+			.tool
+			.member(&items::tool_traits::pickaxe_speed)
+			.unwrap_or(1);
+			
 
 		}
 		void engage_block(ecs::obj blk) {
-			pickaxe.set(owner().get_component<player::inventory>().selected().map(&component::owner));
-
+			
 			if (currmining!=blk) {
 				currmining = blk;
-				break_start_time = blk.get_component<block>().info().solid_traits.time_to_mine;
+				break_start_time = blk.get_component<block>().type()->mining_traits().time_to_mine;
 				timeuntilbreak = break_start_time;
 			}
 		}
 		void disengage_block() {
 			currmining.clear();
-			pickaxe.clear(stn::None);
 			if (engaged()) {
 				int l = 4;
 			}
@@ -117,9 +120,10 @@ namespace player {
 			return currmining.is_some();
 		}
 
-		void try_modify(player::PlayerCursor& cursor) {
+		void try_modify(player::PlayerCursor& cursor,stn::Option<ecs::obj> pick) {
+			
 			if (ensure_engage(cursor)) {
-				timeuntilbreak -= curr_mining_power() * world().ensure_resource<timename::TimeManager>().dt;
+				timeuntilbreak -= curr_mining_power(pick) * world().ensure_resource<timename::TimeManager>().dt;
 				// Show progress decal
 				float prog = (break_start_time - timeuntilbreak) / break_start_time;
 				size_t phase = clamp(size_t(prog * 7.f), 0, 6);
@@ -128,7 +132,7 @@ namespace player {
 				}
 				if (timeuntilbreak <= 0.f) {
 					if (currmining) {
-						on_break(currmining.unwrap().get_component<block>());
+							on_break(currmining.unwrap().get_component<block>(), pick);
 					}
 				}
 			}
@@ -137,14 +141,15 @@ namespace player {
 			}
 		}
 
-		void on_break(block& broken) {
+		void on_break(block& broken, stn::Option<ecs::obj> pickaxe) {
 
 			// Break when timer completes
-			if (pickaxe()) {
-				pickaxe().unwrap().get_component_opt<items::item_durability>();
+			if (pickaxe.is_some_and(&ecs::obj::has_component<items::item_durability>)) {
+				items::item_durability& duribility = pickaxe.unwrap().get_component<items::item_durability>();
+				duribility.use();
 			}
 			
-			if (broken.info().solid_traits.time_to_mine <= curr_mining_power()) {
+			if (broken.type()->mining_traits().time_to_mine <= curr_mining_power(pickaxe)) {
 				make_drop(broken.owner());
 			}
 			grid::set_block(world(), broken.pos, broken.registry().get_id<AirBlock>());
@@ -156,14 +161,14 @@ namespace player {
 
 	struct PlayerUpdateSystem : ecs::System {
 		void run(ecs::Ecs& ecs) override {
-			for (auto [pb, look] : ecs::View<ecs::With<playerbreak>, ecs::With<player::PlayerCursor>>(ecs)) {
-				pb.try_modify(look);
+			for (auto [pb, look,inventory] : ecs::View<ecs::With<playerbreak>, ecs::With<player::PlayerCursor>, ecs::With<player::inventory>>(ecs)) {
+				pb.try_modify(look,inventory.selected_object());
 			};
 		}
 	};
 	struct PlayerModificationPlugin :Core::Plugin {
 		void build(Core::App& world) {
-			world.emplace_system<player::PlayerCursorCaster>();
+			world.insert_plugin<player::PlayerClickablePlugin>();
 			world.emplace_system<PlayerUpdateSystem>();
 
 		}

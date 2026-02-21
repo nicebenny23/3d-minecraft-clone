@@ -1,6 +1,5 @@
 #pragma once
 #include "navigation.h"
-#include "objecthelper.h"
 #include "../game/time.h"
 #include "../util/dynamicarray.h"
 #include "../math/dir.h"
@@ -14,23 +13,7 @@ float appdist(const navnode& a, const navnode& b) {
 
 array<navnode> getneighborsdefault( navnode& node) {
     
-    array<navnode> neighbors= array<navnode>();
-    for (auto dir: math::Directions3d) {
-        if (dir==math::down_3d||dir==math::up_3d) {
-            continue;
-        }
-        Coord point= Coord(dir.coord() + node.pos);
-
-        v3::Point3 center = point + unitv / 2;
-        v3::Scale3 scale = blockscale * v3::Scale3(1.1, .9f, 1.1);
-        geo::Box bx = geo::Box(center, scale);
-        if (!voxtra::boxcast_grid(bx))
-        {
-            neighbors.push(navnode(point));
-        }
-           
-        
-    }
+	array<navnode> neighbors = array<navnode>();
     return array<navnode>( neighbors);
 }
 
@@ -57,8 +40,8 @@ bool normaltestfunc(Coord pos, int dir)
 
 }
 
-array<navnode> astarpathfinding(navnode start, navnode goal, array<navnode> (*getconnected)(navnode& pos)) {
-    if (CtxName::ctx.Ecs->get_resource<grid::Grid>().GetChunk(goal.pos) == nullptr)
+array<navnode> astarpathfinding(navnode start, navnode goal, array<navnode> (*getconnected)(navnode& pos),ecs::Ecs& world) {
+    if (world.get_resource<grid::Grid>().GetChunk(goal.pos) == nullptr)
     {
 return        array<navnode>();
     }
@@ -161,7 +144,7 @@ return        array<navnode>();
 navigator::navigator(ecs::obj parentref, array<navnode>(*testfunc)(navnode& pos))
 {
     headed_index = 0;
-    path_creation_dur=CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().current_time();
+ //   path_creation_dur=CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().current_time();
     goingtwords = parentref;
     testfunction = testfunc;
 }
@@ -192,13 +175,13 @@ Vec3 transformnormal(Vec3 pos, Vec3 scale)
 
 				Point3 center = Point3(xind, pos.y - 1, zind);
                 geo::Box posbx = geo::Box(center+unitv/2, blockscale);
-                if (!voxtra::boxcast_grid(posbx))
+             //   if (!voxtra::boxcast_grid(posbx))
                 {
                     continue;
                 }
                 center += Vec3( 0,1,0);
                 posbx.center += Vec3(0, 1, 0);
-                if (voxtra::boxcast_grid(posbx) == true)
+               // if (voxtra::boxcast_grid(posbx) == true)
                 {
                     return Vec3(xind, pos.y, zind);
                 }
@@ -212,10 +195,10 @@ Vec3 transformnormal(Vec3 pos, Vec3 scale)
 void navigator::calcpath()
 {
     
-    Coord currpos = CtxName::ctx.Ecs->get_resource<grid::Grid>().get_voxel( owner().get_component<ecs::transform_comp>().transform.position);
+    Coord currpos =world().get_resource<grid::Grid>().get_voxel( owner().get_component<ecs::transform_comp>().transform.position);
 
-	Point3 gotopos = CtxName::ctx.Ecs->get_resource<grid::Grid>().get_voxel(goingtwords.get_component<ecs::transform_comp>().transform.position);
-    array<navnode>  finding = astarpathfinding(navnode(currpos),navnode(Coord(gotopos)), testfunction);
+	Point3 gotopos = world().get_resource<grid::Grid>().get_voxel(goingtwords.get_component<ecs::transform_comp>().transform.position);
+    array<navnode>  finding = astarpathfinding(navnode(currpos),navnode(Coord(gotopos)), testfunction,world());
     headed_list.clear();
     headed_index = 0;
     for (navnode& node:finding)

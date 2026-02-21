@@ -110,10 +110,10 @@ namespace handle {
 		}
 		
 		const T& element_of(const Handle& handle) const{
-			return (*this)[id_of(handle)].unwrap();
+			return elems[id_of(handle).id].expect(" handle must be bound");
 		}
 		T& element_of(const Handle& handle) {
-			return (*this)[id_of(handle)].unwrap();
+			return elems[id_of(handle).id].expect(" handle must be bound");
 		}
 		T& element_of(const HandleID& handle_id) {
 			return (*this)[handle_id].unwrap();
@@ -162,7 +162,7 @@ namespace handle {
 				return stn::insertion<uint32_t>(it->second, false);
 			}
 			uint32_t next_index() {
-				if (free_ids.nonempty()) {
+				if (free_ids.non_empty()) {
 					return free_ids.pop();
 				}
 				else {

@@ -190,10 +190,13 @@ namespace items {
 		size_t damage_taken() const {
 			return max_durability - remaining;
 		}
+		double precent_left() const{
+			return remaining /static_cast<double>( max_durability);
+		}
 
 		void use() {
 			if (is_broken()) {
-				throw std::logic_error("Item already broken, cannot damage further.");
+		//		throw std::logic_error("Item already broken, cannot damage further.");
 			}
 			--remaining;
 		}
@@ -212,10 +215,12 @@ namespace items {
 		item_entry entry;
 		ItemSpawner(item_entry initial_state) :entry(initial_state) {
 		}
-		void apply(ecs::obj& entity) {
+		void apply(ecs::obj& entity) const{
 			item_traits traits = entity.world().insert_resource<item_types>().from_id(entry.id);
-				entity.set_emplace_component<item_stack>(entry).set(entry);
-			
+				entity.set_emplace_component<item_stack>(entry);
+				if (traits.duribility) {
+					entity.add_component<item_durability>(traits.duribility.unwrap());
+				}
 		}
 	};
 	//clears all empty items
@@ -229,7 +234,7 @@ namespace items {
 			}
 			ecs::View<ecs::With<item_durability>> dur_query(world);
 			for (const auto& [slot] : dur_query) {
-				if (slot.is_broken() == 0) {
+				if (slot.is_broken()) {
 					slot.owner().destroy();
 				}
 			}

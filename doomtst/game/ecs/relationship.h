@@ -122,7 +122,7 @@ namespace ecs {
 
 		void destroy_hook() override {
 			for (auto& obj : children_list) {
-				world().remove_object_unchecked(obj);
+				world().destroy_object(obj);
 			}
 		}
 	private:

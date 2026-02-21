@@ -24,7 +24,7 @@ namespace window {
 	}
 
 	void Window::SetIcon(const char* ImgPath) {
-		state.icon.pixels = texdata::loadtexdata(&state.icon.width, &state.icon.height, ImgPath); // Expects RGBA data.
+		state.icon.pixels = texdata::texture_for(&state.icon.width, &state.icon.height, ImgPath); // Expects RGBA data.
 		glfwSetWindowIcon(WinPtr, 1, &state.icon);
 	}
 

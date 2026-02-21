@@ -1,4 +1,4 @@
-#include "../game/GameContext.h"
+
 #include "console.h"
 #include "../player/player.h"
 #include <format>
@@ -37,11 +37,11 @@ namespace console {
 
                 ImGui::BeginChild("Debug Info", ImVec2(0, 150), true);
                 ImGui::Text("Debug:");
-                ImGui::Text(std::format("Fps: {:.3f}", CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().smooth_fps).c_str());
+                ImGui::Text(std::format("Fps: {:.3f}", player::goblin.world().ensure_resource<timename::TimeManager>().smooth_fps).c_str());
 
 				Point3 pos = player::goblin.get_component<ecs::transform_comp>().transform.position;
                 ImGui::Text(std::format("position: {}", pos).c_str());
-				grid::Grid& grid = CtxName::ctx.Ecs->get_resource<grid::Grid>();
+				grid::Grid& grid = player::goblin.world().get_resource<grid::Grid>();
                 ImGui::Text(std::format("yaw:{:.3f},pitch:{:.3f}", player::goblin.get_component<CameraComp>().CamTransform.yaw, player::goblin.get_component<CameraComp>().CamTransform.pitch).c_str());
                 ImGui::Text(std::format("Chunk: {}", grid.chunkfromblockpos(Coord(pos))).c_str());
                 std::string text_for_look = player::goblin.get_component<player::PlayerCursor>().Hit
@@ -65,14 +65,14 @@ namespace console {
 				ImGui::InputScalar("Entity ID", ImGuiDataType_U32, &input_id);
 
 				ecs::entity_id entity(input_id);
-				if (CtxName::ctx.Ecs) {
+				/*if (CtxName::ctx.Ecs) {
 					auto types = CtxName::ctx.Ecs->component_types_for(entity);
 
 					for (const auto& type : types) {
 						ImGui::Text("%s", type->component_type_id().name().data());
 					}
 				}
-
+				*/
 				ImGui::EndTabItem();
 			}
 		
@@ -84,7 +84,7 @@ namespace console {
                     Clear();
                 }
 				if (ImGui::RadioButton("set_view", false)) {
-					settings::Gamesettings.viewmode ^= true;
+					player::goblin.world().ensure_resource<settings::GlobalSettings>().viewmode ^= true;
 				}
                 ImGui::BeginChild("ConsoleOutput", ImVec2(0, 200), true, ImGuiWindowFlags_AlwaysVerticalScrollbar);
                 float scrollY = ImGui::GetScrollY();

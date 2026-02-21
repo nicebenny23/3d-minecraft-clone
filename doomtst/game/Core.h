@@ -1,6 +1,6 @@
 #pragma once
-#include "GameContext.h"
 #include "../world/world.h"
+#include "../game/ecs/ecs.h"
 //start of the application
 namespace Core {
 	struct App;
@@ -36,14 +36,10 @@ namespace Core {
     struct App
     {
 
-        void ConnectToContext();
         void createWindow();
         void InitOC();
         void CreateWorld();
-       CtxName::Context* ctx;
-   
-        World::world world;
-		Plugins plugin_list;
+       Plugins plugin_list;
 		template<PluginType T>
 		void insert_plugin() {
 			plugin_list.insert<T>();

@@ -3,6 +3,7 @@
 
 array<navnode> getneighborslime(navnode& node) {
 	array<navnode> neighbors = array<navnode>();
+	/*
 	for (int xind = -1; xind <= 1; xind++) {
 		for (int yind = -1; yind <= 1; yind++) {
 
@@ -51,7 +52,7 @@ array<navnode> getneighborslime(navnode& node) {
 						bx.center += Vec3(offset[i], i);
 
 
-						if (voxtra::boxcast_grid(bx)) {
+						if (voxtra::boxcast_grid(bx, )) {
 							cango = false;
 						}
 					}
@@ -65,8 +66,7 @@ array<navnode> getneighborslime(navnode& node) {
 
 		}
 	}
-
-
-
+	return neighbors;
+	*/
 	return neighbors;
 }

@@ -30,17 +30,17 @@ struct spawn_mobs :ecs::System {
 		return 	(average < 8);
 	}
 
-	stn::Option<geo::Box> find_spawn_location(v3::Vec3 Scl) {
+	stn::Option<geo::Box> find_spawn_location(v3::Vec3 Scl, grid::Grid& grid) {
 		size_t max_checks = 40;
 		for (size_t chks = 0; chks < max_checks; chks++) {
 
 
-			stn::Option<Box> spawn_loc = voxtra::findground(unit_scale);
+			stn::Option<Box> spawn_loc = voxtra::findground(unit_scale,grid);
 			if (!spawn_loc) {
 				return stn::None;
 			}
 			v3::Point3 pos = spawn_loc.unwrap().center;
-			if (!ensure_light_level(pos, CtxName::ctx.Ecs->get_resource<grid::Grid>())) {
+			if (!ensure_light_level(pos,grid)) {
 				continue;
 			}
 			if (!spawnable_dist(pos, player::goblin.get_component<ecs::transform_comp>().transform.position)) {
@@ -74,11 +74,11 @@ struct spawn_mobs :ecs::System {
 			{
 				if (randomnum < spawnthreshold) {
 
-					stn::Option<Box> spawn_loc = find_spawn_location(unitv);
+					stn::Option<Box> spawn_loc = find_spawn_location(unitv,ecs.get_resource<grid::Grid>());
 					if (!spawn_loc) {
 						continue;
 					}
-					createslime(Coord(spawn_loc.unwrap().center), false);
+					createslime(Coord(spawn_loc.unwrap().center), false,ecs);
 				}
 			}
 		}

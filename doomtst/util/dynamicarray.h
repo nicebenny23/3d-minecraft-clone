@@ -30,7 +30,7 @@ namespace stn {
 			return len == 0;
 		}
 
-		inline constexpr bool nonempty() const {
+		inline constexpr bool non_empty() const {
 			return len != 0;
 		}
 
@@ -72,10 +72,10 @@ namespace stn {
 		}
 
 		stn::span<T> span() {
-			return stn::span<T>(data(), len);
+			return stn::span<T>(ptr, len);
 		}
 		stn::span<const T> span() const {
-			return stn::span<const T>(data(), len);
+			return stn::span<const T>(ptr, len);
 		}
 
 		decltype(auto) pipe() const& {

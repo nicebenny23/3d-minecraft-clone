@@ -1,4 +1,4 @@
-
+#include "../game/ecs/filtered_object.h"
 #include "ItemSlot.h"
 #include "../math/geometry.h"
 #pragma once
@@ -17,15 +17,17 @@ namespace items {
 
 	struct ItemSlotDecal :ecs::component {
 		ItemSlotDecal(ecs::obj decal_component) :item_decal_object(decal_component) {
-
 		}
-		void set_decal(renderer::TexturePath Path) {
-			item_decal_object.get_component<ui::ui_image_component>().set_image(Path);
+		void set_decal(const renderer::TexturePath& Path) {
+			item_decal_object.get<ui::ui_image_component>().set_image(Path);
 		}
 		void reset_decal() {
-			set_decal(renderer::TexturePath("images\\blockholder.png", "item_decal_original"));
+			renderer::TexturePath path = renderer::TexturePath("images\\blockholder.png", "item_decal_original");
+			if (item_decal_object.get<ui::ui_image_component>().current_image!=path) {
+				set_decal(path);
+			}
 		}
-		ecs::obj item_decal_object;
+		ecs::Constrained<ui::ui_image_component> item_decal_object;
 	};
 
 	

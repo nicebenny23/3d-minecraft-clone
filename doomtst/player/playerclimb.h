@@ -1,6 +1,6 @@
 #include "../game/ecs/game_object.h"
 #include "../game/rigidbody.h"
-#include "../game/objecthelper.h"
+
 #pragma once 
 struct playerclimb: ecs::component
 {

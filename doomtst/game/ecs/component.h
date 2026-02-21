@@ -6,7 +6,7 @@
 #include <stdexcept>
 #include <type_traits>
 #include <utility>
-#include "entity.h"
+
 #include "../../util/bitset.h"
 #include "../../util/dynamicarray.h"
 #include "../../util/pair.h"
@@ -19,6 +19,8 @@ namespace ecs {
 	struct Ecs;
 	template<typename T>
 	struct component_storage;
+
+
 	struct component {
 		obj owner() const;
 		component() :ecs(nullptr) {
@@ -30,8 +32,8 @@ namespace ecs {
 
 		virtual void start() {
 		}
-		virtual void update() {
-		}
+		virtual void update(){
+		} 
 		virtual void destroy_hook() {
 		};
 		Ecs& world() {
@@ -131,7 +133,7 @@ namespace ecs {
 			return stn::insertion<T&>(emplace_unchecked(ent, std::forward<Args>(args)...),true);
 		}
 	private:
-		component_pages<T, 11> pages;
+		component_pages<T, 8> pages;
 
 	};
 

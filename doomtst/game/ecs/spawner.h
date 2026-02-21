@@ -4,11 +4,11 @@ namespace ecs {
 	struct ecs::obj;
 
 	template<typename T>
-	concept RecipeType = requires(T & spawner, ecs::obj & object) {
+	concept RecipeType = requires(const T & spawner, ecs::obj & object) {
 		{
 			spawner.apply(object)
 		}->std::same_as<void>;
-	}||stn::void_invokable<T&,ecs::obj&>;
+	}||stn::void_invokable<const T&,ecs::obj&>;
 	template<typename T>
 	struct is_tuple : std::false_type {
 	};
@@ -16,6 +16,16 @@ namespace ecs {
 	template<typename... Ts>
 	struct is_tuple<std::tuple<Ts...>> : std::true_type {
 	};
+	template<RecipeType T>
+	void apply(const T& recipe, ecs::obj& object) {
+		if constexpr(stn::void_invokable<const T&, ecs::obj&>) {
+			recipe(object);
+		}
+		else {
+			recipe.apply(object);
+		}
+	}
+
 
 	//did this 
 	template<typename T>
@@ -30,7 +40,7 @@ namespace ecs {
 			requires std::same_as<std::tuple<std::decay_t<Rs>...>, std::tuple<Recipes...>>
 		RecipeBuilder(Rs&&... rs) : recipes(std::forward<Rs>(rs)...) {
 		}
-		void apply(ecs::obj& object) {
+		void apply(ecs::obj& object) const{
 			std::apply([&](auto&... r) { (r.apply(object), ...); }, recipes);
 		}
 		template<RecipeType T>

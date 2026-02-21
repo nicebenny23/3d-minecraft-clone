@@ -22,13 +22,14 @@ namespace Chunk {
 		renderer::RenderableHandle SolidGeo;
 		renderer::RenderableHandle TransparentGeo;
 
-		stn::dirty_flag recreate_mesh;
+		array<blocks::face> faces;
 		v3::Coord loc;
+		stn::dirty_flag recreate_mesh;
+		
 
 		Point3 center() const {
 			return (loc + unitv / 2.f) * chunklength;
 		}
-		array<blocks::face> faces;
 		void sort_faces() {
 
 			std::sort(faces.begin(), faces.end(), [](blocks::face& a, blocks::face& b) {

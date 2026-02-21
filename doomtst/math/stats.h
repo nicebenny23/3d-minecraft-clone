@@ -44,7 +44,7 @@ namespace statistics {
 			}
 			size_t  diff = (max_val.first - min_val.first);
 			if (diff != 0) {
-				interpolation.push(lerp(min_val.second, max_val.second, (i - static_cast<double>(min_val.first)) / diff));
+				interpolation.push(stn::lerp(min_val.second, max_val.second, (i - static_cast<double>(min_val.first)) / diff));
 			}
 			else {
 				interpolation.push(min_val.second);

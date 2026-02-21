@@ -4,7 +4,7 @@
 #include "../math/vector2.h"
 #include "../math/vector3.h"
 
- #include "../game/GameContext.h"
+ 
 #include "../math/transform.h"
 #include "renderer.h"
 //fix
@@ -45,7 +45,7 @@ namespace ModelMeshName {
 		glm::mat4* modelmatrix;
 
 
-	};	ModelMesh loadmesh(const char* location, const char* name, Vec3 position);
+	};	ModelMesh loadmesh(const char* location, const char* name, Vec3 position,ecs::Ecs& world);
 	void rendermesh(ModelMesh& torender);
 
 }

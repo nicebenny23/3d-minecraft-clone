@@ -12,6 +12,7 @@
 #include "../entities/entityspawner.h"
 #include "../renderer/decal.h"
 #include "../renderer/guirender.h"
+#include "../player/inventory_ui.h"
 #pragma once 
 
 void endframe() {
@@ -28,7 +29,6 @@ void update() {
 }
 
 void init() {
-	Core::game.ConnectToContext();
 	Core::game.InitOC();
 	Core::game.createWindow();
 	Core::game.insert_plugin<renderer::RendererPlugin>();
@@ -42,7 +42,7 @@ void init() {
 	Core::game.CreateWorld();
 	//ui::createuielement<ui_image_component>("images\\crosshair.png", "CrosshairTexture", v2::unitv / 32, v2::zerov, -3);
 	Core::game.emplace_resource<grid::Grid>(2);
-	player::initplayer();
+	ecs::spawn(Core::game.Ecs,player::initplayer);
 	glfwSwapInterval(0);
 }
 

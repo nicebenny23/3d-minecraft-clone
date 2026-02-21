@@ -10,7 +10,8 @@
 
 struct playerhealth: ecs::component
 {
-	ui::ui_image damage_decal;
+	
+	stn::Option<ui::ui_image> damage_decal;
 	timename::Duration damage_decal_duration;
 	
 	bool dmgimmune = false;
@@ -24,6 +25,7 @@ struct playerhealth: ecs::component
 
 	array<ui::ui_image>healthboxes;
 	void start(){
+		damage_decal= std::move(ui::ui_image(world(),"images\\red_back.png", "on_dmg_texture", geo::Box2d::origin_centered(v2::zerov), -3));
 		damage_decal_duration=world().ensure_resource<timename::TimeManager>().current_time();
 		size_t max_health = owner().get_component<estate>().maxhealth;
 		v2::Vec2 scale = v2::unitv / 100;
@@ -35,13 +37,9 @@ struct playerhealth: ecs::component
 		}
 	}
 	
-	playerhealth():damage_decal(*CtxName::ctx.Ecs, "images\\red_back.png", "on_dmg_texture", geo::Box2d::origin_centered(v2::zerov), -3){
-
-		damage_decal.disable();
-	}
 	void update() {
 		
-		damage_decal.enable_if(owner().get_component<estate>().model_red_dur.is_active());
+		damage_decal.unwrap().enable_if(owner().get_component<estate>().model_red_dur.is_active());
 		size_t max_health = owner().get_component<estate>().maxhealth;
 		float dmgmul = 1;
 		for (int i = 0; i < 2; i++)

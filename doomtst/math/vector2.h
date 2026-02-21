@@ -66,59 +66,59 @@ namespace v2 {
 		explicit Vec2(Coord2 crd) {
 			x = crd.x; y = crd.y;
 		}
-		bool operator==(const Vec2& p1) const {
+		constexpr bool operator==(const Vec2& p1) const {
 			return (x == p1.x && p1.y == y);
 		}
 
-		bool operator!=(const Vec2& p1) const {
+		constexpr bool operator!=(const Vec2& p1) const {
 			return !(*this == p1);
 		}
-		Vec2& operator+=(const Vec2& p1) {
+		constexpr Vec2& operator+=(const Vec2& p1) {
 			x += p1.x;
 			y += p1.y;
 			return *this;
 		}
-		Vec2 operator+(const Vec2& p1) const {
+		constexpr Vec2 operator+(const Vec2& p1) const {
 			return Vec2(x + p1.x, y + p1.y);
 		}
 
-		Vec2& operator-=(const Vec2& p1) {
+		constexpr Vec2& operator-=(const Vec2& p1) {
 			x -= p1.x;
 			y -= p1.y;
 			return *this;
 		}
-		Vec2 operator-(const Vec2& p1) const {
+		constexpr Vec2 operator-(const Vec2& p1) const {
 			return Vec2(x - p1.x, y - p1.y);
 		}
 
-		Vec2 operator*(double scale) const {
+		constexpr Vec2 operator*(double scale) const {
 			return Vec2(x * scale, y * scale);
 		}
 
-		Vec2& operator*=(double scale) {
+		constexpr Vec2& operator*=(double scale) {
 			x *= scale;
 			y *= scale;
 			return *this;
 		}
-		Vec2 operator/(double scale) const {
+		constexpr Vec2 operator/(double scale) const {
 			return Vec2(x / scale, y / scale);
 		}
 
-		Vec2& operator/=(double scale) {
+		constexpr Vec2& operator/=(double scale) {
 			x /= scale;
 			y /= scale;
 			return *this;
 		}
-		bool operator==(const Coord2& p1) const {
+		constexpr bool operator==(const Coord2& p1) const {
 			return (p1.x == x && p1.y == y);
 		}
 		double x;
 		double y;
-		void operator= (const Coord2& p1) {
+		constexpr void operator= (const Coord2& p1) {
 			x = p1.x;
 			y = p1.y;
 		}
-		Vec2 operator*(Vec2 scale) const {
+		constexpr Vec2 operator*(Vec2 scale) const {
 			return Vec2(x * scale.x, y * scale.y);
 		}
 	};

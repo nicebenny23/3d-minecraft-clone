@@ -75,7 +75,7 @@ namespace renderer {
 		using load_descriptor = renderer::TexturePath;
 		stn::box<Texture2D> load(const renderer::TexturePath& path) {
 			v2::Coord2 size;
-			unsigned char* data = texdata::loadtexdata(&size.x, &size.y, path.path.c_str());
+			unsigned char* data = texdata::texture_for(&size.x, &size.y, path.path.c_str());
 			GLuint id = 0;
 			glGenTextures(1, &id);
 			glBindTexture(GL_TEXTURE_2D, id);
@@ -156,7 +156,7 @@ namespace renderer {
 			glBindTexture(GL_TEXTURE_2D_ARRAY, id);
 			v2::Coord2 size;
 			if (path.count() != 0) {
-				size = texdata::GetImgSize(path.paths[0].c_str());
+				size = texdata::image_size(path.paths[0].c_str());
 			}
 
 
@@ -173,7 +173,7 @@ namespace renderer {
 			for (int i = 0; i < path.count(); i++) {
 				//colchannel not used but it hastto be given
 				v2::Coord2 ImgSize;
-				unsigned char* datatoappend = texdata::loadtexdata(&ImgSize.x, &ImgSize.y, path[i].c_str());
+				unsigned char* datatoappend = texdata::texture_for(&ImgSize.x, &ImgSize.y, path[i].c_str());
 				if (ImgSize != size) {
 					throw	std::logic_error("texture is invalid");
 				}

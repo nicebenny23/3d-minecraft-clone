@@ -112,8 +112,8 @@ namespace ecs {
 		}
 		//for later
 		template<ComponentType ...Types>
-		inline component_ids get_ids() {
-			return component_ids(stn::bitset(component_indexer.get_ids<Types...>()));
+		inline stn::List<component_id,sizeof...(Types)> get_ids() {
+			return component_indexer.get_ids<Types...>();
 		}
 		template<ComponentType T>
 		inline component_id insert_id() {
@@ -173,14 +173,6 @@ namespace ecs {
 			return unchecked_at(get_id_unchecked<T>()).get_as_unchecked<T>(entity);
 		}
 
-		template<ComponentType ...Types>
-		stn::TupleSet<Types&...> get_components_unchecked(entity_id entity) {
-			return stn::TupleSet(get_component_unchecked<Types>(entity)...);
-		}
-		template<ComponentType ...Types>
-		stn::TupleSet<const Types&...> get_components_unchecked(entity_id entity) const{
-			return stn::TupleSet(get_component_unchecked<Types>(entity)...);
-		}
 		template<ComponentType T>
 		T& get_component(entity_id entity) {
 			component_type& comp_type = unchecked_at(get_id<T>());

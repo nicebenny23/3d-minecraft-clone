@@ -86,7 +86,7 @@ namespace renderer{
 
 	};
 	struct renderable_recipe {
-		void apply(ecs::obj& object) {
+		void apply(ecs::obj& object) const{
 			object.add_component<is_enabled>();
 			object.add_component<order_key>(0);
 			object.add_component<renderable_marker>();

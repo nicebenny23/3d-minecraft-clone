@@ -40,9 +40,11 @@ namespace v3 {
 		}
 		Scale3& shink(double size){
 			*this = shrunk(size);
+			return *this;
 		}
 		Scale3& expand(double size){
 			*this = expanded(size);
+			return *this;
 		}
 		constexpr Scale3 operator*(double scale) const {
 			return Scale3(x * scale, y * scale, z * scale);

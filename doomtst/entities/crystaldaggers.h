@@ -3,8 +3,8 @@
 #include "../game/collision.h"
 #include "../game/rigidbody.h"
 #include "../renderer/model.h"
-#include "../game/entity.h"
-#include "../game/objecthelper.h"
+
+
 #include "../player/player.h"
 #include "../items/item.h"
 #include "../items/loottable.h"
@@ -12,7 +12,7 @@
 #pragma once 
 inline ecs::obj spawndagger(v3::Point3 pos,v3::Vec3 velocity,float gravscale=.4f) {
 
-	ecs::obj refmodel = CtxName::ctx.Ecs->spawn_empty();
+	ecs::obj refmodel = player::goblin.world().spawn_empty();
 	refmodel.add_component<ecs::transform_comp>(pos);
   refmodel.add_component<model>().add("objs\\crystaldagger.obj", "images\\crystaldagger.png");
 

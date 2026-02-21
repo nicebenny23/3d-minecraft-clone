@@ -31,7 +31,7 @@ namespace ui {
 
 			}
 		}
-		text_component() :word(""),text_color(colors::Blue) {
+		text_component(colors::Color color) :word(""),text_color(color) {
 		}
 		colors::Color text_color;
 		renderer::RenderableHandle handle;
@@ -51,13 +51,13 @@ namespace ui {
 	struct UiTextMesher:ecs::System{
 		void run(ecs::Ecs& world) {
 
-			ecs::View<ecs::With<ui::UiEnabled>, ecs::With<ui::UiBounds>, ecs::With<ui::InteractionState>, ecs::With<text_component>> bounds_view(world);
-			for (auto [enabled, bounds, ui_interaction, ui_text] : bounds_view) {
-				if (enabled.enabled()) {
+			ecs::View<ecs::With<ui::ComputedStyle>, ecs::With<text_component>> bounds_view(world);
+			for (auto [style, ui_text] : bounds_view) {
+				if (style.enabled) {
 					ui_text.set_handle();
 					ui_text.handle.enable();
 					double char_offset = 1.5f;
-					geo::Box2d bounds = ui_text.owner().get_component<ui::UiBounds>().global();
+					geo::Box2d bounds = style.final_size;
 					v2::Vec2 min = bounds.center - v2::Vec2(char_offset * ui_text.word.length(), 1.f) * bounds.half_size();
 					v2::Vec2 boxoffset = v2::Vec2(char_offset, 1) * bounds.half_size();
 					v2::Vec2 increse = v2::Vec2(char_offset, 0) * bounds.scale;
@@ -82,57 +82,15 @@ namespace ui {
 
 	struct ui_text_spawner {
 		UiSpawner ui_spawn;
-
-		ui_text_spawner(geo::Box2d box, size_t priority) :ui_spawn(geo::Box2d(box.center, box.scale), priority){
+		colors::Color color;
+		ui_text_spawner(geo::Box2d box, size_t priority,colors::Color initial_color) :ui_spawn(geo::Box2d(box.center, box.scale), priority),color(initial_color){
 			
 		}
-		void apply(ecs::obj& object) {
+		void apply(ecs::obj& object) const{
 			ui_spawn.apply(object);
-			object.add_component<text_component>();
+			object.add_component<text_component>(color);
 		}
 	};
-	struct ui_text {
-
-		ui_text(ecs::Ecs& world, geo::Box2d bounds,size_t priority) :object(ecs::spawn_emplaced<ui::ui_text_spawner>(world, bounds, priority)) {}
-
-		void write();
-		ui_text operator=(ui_text&& other) noexcept{
-			object.destroy();
-			object = other.object;
-			other.object = ecs::obj();
-		}
-		ui_text(ui_text&& other) noexcept {
-			object = other.object;
-			other.object = ecs::obj();
-		}
-		~ui_text() {
-			object.destroy();
-		}
-		ecs::obj object;
-		template<typename... Args>
-		void format(const std::format_string<Args...>& fmt, Args&&... args) {
-			object.get_component<text_component>().format(fmt, std::forward<Args>(args)...);
-		}
-		v2::Vec2 center() {
-			object.get_component<ui::UiBounds>().center();
-		}
-		geo::Box2d bounds() {
-			return object.get_component<ui::UiBounds>().global();
-		}
-		void set_center(v2::Vec2 pos) {
-			object.get_component<ui::UiBounds>().local.center = pos;
-		}
-		void set_bounds(geo::Box2d bounds) {
-			object.get_component<ui::UiBounds>().local = bounds;
-		}
-		void enable() {
-			object.get_component<ui::UiEnabled>().enable();
-		}
-		void disable() {
-			object.get_component<ui::UiEnabled>().disable();
-		}
-	};
-
 
 	struct UiTextPlugin :Core::Plugin {
 		void build(Core::App& app) {

@@ -1,5 +1,5 @@
-﻿#include "../game/entity.h"
-#include "../game/objecthelper.h"
+﻿
+
 #include "../util/userinput.h"
 #include <GLFW/glfw3.h>
 #include "../game/time.h"
@@ -30,10 +30,14 @@ struct PlayerMovementSys : ecs::System
     const float coyoteDuration = 0.15f;
     const float bufferDuration = 0.10f;
     const float jumpStrength = 150.0f * 12.0f / 200.0f;
-    const float slamStrength = -30.0f;    // tweak for slam speed
+    const float slamStrength = -30.0f;  
     
     virtual void run(ecs::Ecs& ecs)
     {
+		if (ecs.get_resource<ui::MenuState>().menu_open()) {
+			return;
+		}
+
         auto view = ecs::View<ecs::With<rigidbody>, ecs::With<playermovement>, ecs::With<playerclimb>>(ecs);
 
         for (auto [body, movement, climb] : view)
@@ -82,7 +86,7 @@ struct PlayerMovementSys : ecs::System
                 float targetY = man.key(userinput::shift_key).held ? -10.0f
                     : man.key(' ').held ? 10.0f
                     : 0.0f;
-                body.velocity.y = lerp(body.velocity.y, targetY, 0.1f);
+                body.velocity.y = stn::lerp(body.velocity.y, targetY, 0.1f);
             }
 
             if (climb.onrope)
@@ -91,7 +95,7 @@ struct PlayerMovementSys : ecs::System
                 float targetY = man.key(userinput::shift_key).held ? -5.0f
                     : man.key(' ').held ? 5.0f
                     : 0.0f;
-                body.velocity.y = lerp(body.velocity.y, targetY, 0.1f);
+                body.velocity.y = stn::lerp(body.velocity.y, targetY, 0.1f);
             }
 
             // — jumping, slam, and sneak-down —
@@ -127,7 +131,7 @@ struct PlayerMovementSys : ecs::System
 					body.owner().get_component<ecs::transform_comp>().transform.position.y = 4;
 				}
 					if (man.key('f').held) {
-					body.owner().get_component<ecs::transform_comp>().transform.position += Vec3(16, 0, 0);
+					body.owner().get_component<ecs::transform_comp>().transform.position += Vec3(4, 0, 0);
 				
 				}
 					

@@ -1,10 +1,10 @@
-#include "../game/entity.h"
+
 #include "../game/entitystate.h"
 #include "../world/voxeltraversal.h"
 #include "../game/collision.h"
 #include "../game/entityutil.h"
 #include "../math/mathutil.h"
-#include "../game/entity.h"
+
 #pragma once
 inline double wrap_angle(double a) {
 return wrap_to_range(a,0,360);

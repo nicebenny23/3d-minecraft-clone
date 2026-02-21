@@ -31,7 +31,12 @@ namespace Chunk {
 			return v3::manhattan_distance(position, c2.position);
 		}
 	};
-	std::string getcorefilename(ChunkLocation pos);
+	inline std::string file_name(ChunkLocation pos, grid::world& world) {
+		std::string m = std::format("Chunk{}", pos.position);
+		std::filesystem::path path = world.get_path();
+		path = path / "Chunks" / m;  // assign the combined path back
+		return 	path.string();
+	}
 	inline size_t index_from_pos(Coord pos) {
 		int x = symmetric_mod(pos.x, chunkaxis);
 		int y = symmetric_mod(pos.y, chunkaxis);
@@ -40,12 +45,13 @@ namespace Chunk {
 	}
 	struct chunk:ecs::component
 	{
+		stn::array<ecs::Constrained<block>> block_list;
 		Chunk::ChunkLocation location;
 		bool modified;
-		void write();
 		chunk(Chunk::ChunkLocation chunk_location) :modified(false), location(chunk_location), block_list() {
-
+			block_list.reserve(chunksize);
 		}
+
 		Point3 center() const {
 			return location.center();
 		}
@@ -58,7 +64,6 @@ namespace Chunk {
 		const ecs::Constrained<block>& operator[](size_t index) const{
 			return block_list[index];
 		}
-		stn::array<ecs::Constrained<block>> block_list;
 
 		using iterator = decltype(block_list)::iterator;
 		using const_iterator = decltype(block_list)::const_iterator;
@@ -74,7 +79,23 @@ namespace Chunk {
 		const_iterator end() const{
 			return block_list.end();
 		}
-		void destroy();
+		
+		void destroy_hook() {
+			if (modified) {
+				file_handle file = file_handle(file_name(location.position,world().get_resource<grid::world>()), FileMode::ReadWriteBinary);
+				for (int i = 0; i < chunksize; i++) {
+					block& block_at = block_list[i].get<block>();
+					stn::file_serializer<block_id>().write(block_at.id, file);
+					stn::file_serializer<math::Direction2d>().write(block_at.mesh.direction, file);
+					stn::file_serializer<math::Direction3d>().write(block_at.mesh.attached_direction, file);
+					block_at.type()->write_into_bytes(block_list[i].object(), file);
+				}
+				file.close();
+			}
+			for (int i = 0; i < chunksize; i++) {
+				std::move(block_list[i]).destroy();
+			}
+		}
 	};
 
 }

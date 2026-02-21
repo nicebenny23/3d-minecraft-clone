@@ -3,8 +3,8 @@
 #include "../game/collision.h"
 #include "../game/rigidbody.h"
 #include "../renderer/model.h"
-/*#include "../game/entity.h"
-#include "../game/objecthelper.h"
+/*
+
 #include "../player/player.h"
 #include "../items/item.h"
 #include "../items/loottable.h"

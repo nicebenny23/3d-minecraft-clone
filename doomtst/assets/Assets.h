@@ -87,7 +87,6 @@ namespace assets {
 					}
 				});
 			if (id) {
-				map.element_of(id.unwrap());
 				return AssetHandle<DescriptorAssetType<T>>(id.unwrap(), us);
 			}
 			return stn::None;

@@ -49,7 +49,7 @@ namespace grid {
 		size_t chunks_loaded() {
 			return chunklist.pipe().count([](Chunk::chunk* ptr) {return ptr != nullptr; });
 		}
-
+		stn::array<Chunk::chunk*> need_to_deload;
 
 		//normed pos is when pos is in the range [0...2*CtxName::cxt.Grid->length+1) for each direction;
 

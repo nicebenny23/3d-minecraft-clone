@@ -25,13 +25,6 @@ namespace blocks {
 
 
 
-
-	struct blockatt {
-		bool solid;
-		blockatt() {
-			solid = true;
-		}
-	};
 	struct block_emmision :ecs::component {
 		block_emmision(size_t emmited_light) :emmision(emmited_light) {
 
@@ -41,14 +34,17 @@ namespace blocks {
 	};
 	struct block : ecs::component {
 		blockmesh mesh;
-		v3::Coord pos;
 		//based on if it is computed
-		stn::Option<size_t> light_passing_through;
+		stn::Option<std::uint16_t> light_passing_through;
+
+		v3::Coord pos;
 		block_id id;
 		face& operator[](size_t index) {
 			return mesh[index];
 		}
-		blockatt attributes;
+		bool solid() const{
+			return info().solid;
+		}
 		Point3 center() const {
 			return mesh.box.center;
 		}
@@ -67,14 +63,16 @@ namespace blocks {
 		const BlockRegistry& registry() const {
 			return world().get_resource<BlockRegistry>();
 		}
-		const CatchedBlock& info() const{
+		BlockTraits info() const{
+			return registry().block_for(id)->traits();
+		}
+		const stn::box<BlockType>&  type() const {
 			return registry().block_for(id);
 		}
 		block(const BlockMeshTraits& traits, Chunk::chunkmesh& chunk_mesh, v3::Coord location, blocks::block_id blockid, math::Direction3d attachment_face, math::Direction2d block_direction,bool is_solid) 
 			:mesh(traits.faces, chunk_mesh.recreate_mesh, location, traits.size, attachment_face, block_direction),
 			id(blockid){
 			pos = location;
-			attributes.solid = is_solid;
 		};
 
 	};

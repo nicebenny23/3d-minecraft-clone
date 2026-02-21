@@ -81,13 +81,13 @@ namespace stn {
 			}
 		}
 		template<typename U>
-		Option& operator=(const U& other) requires(std::constructible_from<T, U>) {
+		Option& operator=(U&& other) requires(std::constructible_from<T, U&&>) {
 			if (has_value) {
 				value.clear<T>();
 			}
 			has_value = true;
 
-			value.construct<T>(other);
+			value.construct<T>(std::forward<U>(other));
 
 			return *this;
 		}

@@ -3,12 +3,14 @@
 #include "../../util/index.h"
 #pragma once
 namespace ecs {
-	struct ArchetypeIndexTag {};
+	struct ArchetypeIndexTag {
+	};
 	using archetype_index = stn::typed_index<ArchetypeIndexTag>;
 	//index of a distint archetypr
-	struct Archetype_tag {};
+	struct Archetype_tag {
+	};
 	using archetype_id = stn::typed_id<Archetype_tag>;
-	
+
 	struct archetype_location {
 		archetype_index index;
 		archetype_id id;
@@ -33,6 +35,8 @@ namespace ecs {
 		bool is_alive;
 
 	};
+	
+
 	struct Entities {
 		Entities(size_t count) :entity_list(count) {
 

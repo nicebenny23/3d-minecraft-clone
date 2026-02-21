@@ -5,7 +5,7 @@
 #include "../math/vector2.h"
 #include "chunkload.h"	
 #include "../math/geometry.h"
-#include "../game/GameContext.h"
+
 #include "../util/random.h"
 using namespace v3;
 
@@ -111,14 +111,14 @@ namespace grid {
 
 
 	Option<block&> Grid::get_block(const v3::Coord pos) {
-		return get_object(pos).map_member(&ecs::Constrained<block>::get_component<block>);
+		return get_object(pos).map_member(&ecs::Constrained<block>::get<block>);
 	}
 
 	block* Grid::getBlock(const v3::Coord pos) {
 
 		Chunk::chunk* chnk = GetChunk(pos);
 		if (chnk) {
-			return &chnk->block_list.unchecked_at(Chunk::index_from_pos(pos)).get_component<block>();
+			return &chnk->block_list.unchecked_at(Chunk::index_from_pos(pos)).get<block>();
 		}
 		return nullptr;
 	}
@@ -130,7 +130,7 @@ namespace grid {
 		for (int x = lowest.x; x <= highest.x; x++) {
 			for (int y = lowest.y; y <= highest.y; y++) {
 				for (int z = lowest.z; z <= highest.z; z++) {
-					stn::Option<ecs::obj> blk = get_object(Coord(x, y, z)).map_member(&ecs::Constrained<block>::get);
+					stn::Option<ecs::obj> blk = get_object(Coord(x, y, z)).map_member(&ecs::Constrained<block>::object);
 					if (blk) {
 						blocks.push(blk.unwrap());
 					}
@@ -148,7 +148,7 @@ namespace grid {
 	//pattern repeats in the y direction
 	void Grid::load(ecs::Ecs& world) {
 		stn::array<Chunk::chunk*> newchunklist = stn::array<Chunk::chunk*>(totalChunks, nullptr);
-
+		bool has_unloaded_chunk = false;
 		for (size_t ind = 0; ind < totalChunks; ind++) {
 			bool chunk_loaded = chunklist[ind] != nullptr;
 			if (chunk_loaded) {
@@ -156,9 +156,16 @@ namespace grid {
 					newchunklist[chunkIndex(chunklist[ind]->location)] = chunklist[ind];
 				}
 				else {
-					chunklist[ind]->destroy();
+					if (!has_unloaded_chunk) {
+						need_to_deload.push(chunklist[ind]);
+
+					}
 				}
 			}
+		}
+		if (need_to_deload.non_empty()) {
+
+			need_to_deload.pop()->owner().destroy();
 		}
 		stn::Option <Chunk::ChunkLocation> closest_unloaded_chunk;
 		int r = static_cast<int>(rad);
@@ -193,7 +200,7 @@ namespace grid {
 
 		for (int i = 0; i < totalChunks; i++) {
 			if (chunklist[i]) {
-				chunklist[i]->destroy();
+				chunklist[i]->owner().destroy();
 			}
 		}
 

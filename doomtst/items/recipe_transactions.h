@@ -32,9 +32,13 @@ namespace items {
 			stn::throw_logic_error("recipe size {} must match container size {}", item_recipe.size, input_container.size);
 		}
 		for (size_t index = 0; index < input_container.slots.length(); index++) {
-			if (item_recipe.item_list[index]) {
+			const ElementSlot& element = input_container.slots[index].get_component<ElementSlot>();
+			bool should_be_empty = item_recipe.item_list[index].is_none();
+			if (should_be_empty != element.empty()) {
+				return false;
+			}
+			if (!should_be_empty) {
 				item_entry item = item_recipe.item_list[index].unwrap();
-				const ElementSlot& element = input_container.slots[index].get_component<ElementSlot>();
 				if (element.empty()) {
 					return false;
 				}
@@ -42,7 +46,6 @@ namespace items {
 				if (!stck.can_fit(item)) {
 					return false;
 				}
-
 			}
 		}
 		return true;
@@ -50,24 +53,17 @@ namespace items {
 
 	inline stn::Option<ItemRecipe> best_booklet_recipe(ItemRecipes recipes, const container& input, stn::Option<item_entry> output) {
 
-		stn::Option < ItemRecipe> maximal_recipe;
 		for (const ItemRecipe& recipe : recipes) {
-			bool can_build_recipe = can_build(recipe, input, output);
-
-			if (can_build_recipe){
-
-				if (!maximal_recipe || maximal_recipe.unwrap().nonempty_slots() < recipe.nonempty_slots())
-				{
-					maximal_recipe = recipe;
-				}
+			if (can_build(recipe, input, output)) {
+				return recipe;
 			}
 		}
-		return maximal_recipe;
+		return stn::None;
 	}
 
 	inline stn::Option<craft_recipe> build_recipe_from_booklet(ItemRecipes recipes, container& input, ElementSlot& output) {
 
-		stn::Option<ItemRecipe> recipe=best_booklet_recipe(recipes, input, output.entry());
+		stn::Option<ItemRecipe> recipe = best_booklet_recipe(recipes, input, output.entry());
 		if (!recipe) {
 			return stn::None;
 		}

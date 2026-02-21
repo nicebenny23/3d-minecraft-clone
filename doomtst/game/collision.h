@@ -1,5 +1,5 @@
 #include "aabb.h"
-#include "entity.h"
+
 #include "../world/grid.h"
 #include "../world/voxeltraversal.h"
 #include "../util/Option.h"
@@ -144,6 +144,9 @@ namespace collision {
 
 		}
 		return false;
+	}
+	inline bool boxcast(geo::Box box, HitQuery query) {
+		return voxtra::boxcast_grid(box,query.world.get_resource<grid::Grid>()) || boxcast_dynamic(box, query);
 	}
 
 }

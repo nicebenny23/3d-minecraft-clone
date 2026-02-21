@@ -2,7 +2,7 @@
 #include "../game/ecs/multi_query.h"
 #include "grid.h"
 #include "../block/air.h"
-#include "../game/GameContext.h"
+
 #include "../util/mutex.h"
 #include "../util/cached.h"
 #include <cstdint>

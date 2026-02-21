@@ -99,8 +99,13 @@ namespace geo {
 	struct Box2d {
 		v2::Vec2 center;
 		v2::Vec2 scale;
-		
-		Box2d(v2::Vec2 cent, v2::Vec2 scl)
+		double x_scale() const {
+			return scale.x;
+		}
+		double y_scale() const {
+			return scale.y;
+		}
+		constexpr Box2d(v2::Vec2 cent, v2::Vec2 scl)
 			: center(cent), scale(scl) {}
 		v2::Vec2 upper() const {
 			return center + scale / 2;
@@ -110,6 +115,10 @@ namespace geo {
 		}
 		v2::Vec2 half_size() const{
 			return scale / 2;
+		}
+
+		Box2d transform(Box2d other_transform) const {
+			return Box2d(center+other_transform.center * scale, other_transform.scale * scale);
 		}
 		bool contains(Box2d box) const{
 			return contains(box.upper()) && contains(box.lower());
@@ -126,7 +135,11 @@ namespace geo {
 		static Box2d origin_centered(v2::Vec2 scale) {
 			return Box2d(v2::zerov, scale);
 		}
+		static Box2d from_min_max(v2::Vec2 min, v2::Vec2 max) {
+			return Box2d((max + min) / 2, (max - min) / 2);
+		}
 	};
+	inline constexpr Box2d unit_box_2d = Box2d(v2::Vec2(0,0), v2::Vec2(1,1));
 
 
 

@@ -41,6 +41,7 @@ namespace ecs {
 		}
 		ecs::Ecs& world;
 	};
+
 	template<typename T>
 	concept QueryElement = QueryMap<T> || QueryFilter<T> && std::constructible_from<T, Ecs&>;
 	template<ComponentType T>
@@ -55,6 +56,26 @@ namespace ecs {
 
 		}
 		ecs::Ecs& world;
+		component_id id_for;
+	};
+	template<ComponentType T>
+	struct Mabye {
+		stn::Option<T&> map(entity_id ent) const {
+			return world.get_component_opt<T>(ent);
+		}
+		Mabye(ecs::Ecs& world) :world(world), id_for(world.insert_component_id<T>()) {
+
+		}
+		ecs::Ecs& world;
+		component_id id_for;
+	};
+	template<ComponentType T>
+	struct Has {
+		Has(ecs::Ecs& world) :id_for(world.insert_component_id<T>()) {
+		}
+		bool filter(const Archetype& archetype) const {
+			return archetype.has_component(id_for);
+		}
 		component_id id_for;
 	};
 

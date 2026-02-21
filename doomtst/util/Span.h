@@ -36,6 +36,7 @@ namespace stn {
 		}
 		constexpr span() noexcept :ptr(nullptr), len(0) {
 		};
+
 		constexpr span(T* data, size_t length) noexcept
 			: ptr(data), len(length) {
 		}

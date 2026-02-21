@@ -3,7 +3,7 @@
 #include "../game/ecs/game_object.h"
 #include "../util/dynamicarray.h"
 #include "../util/queue.h"
-#include "../game/entity.h"
+
 #include "../game/time.h"
 #include "../renderer/renderer.h"
 #include "camera.h"

@@ -4,16 +4,17 @@
 #pragma once 
 namespace blocks {
 	struct MossBlock :BlockType  {
-		void apply(ecs::obj& block) override {
+		void apply(ecs::obj& block) const override {
 			block.add_component<items::loot_table>().add("moss", 1);
 		}
 		std::string name() const {
 			return std::string("moss");
 		}
+		BlockTraits traits() const {
+			return BlockTraits(
+				BlockMeshTraits(v3::unit_scale, false, mosstex, mosstex, mosstex, mosstex, mosstex, mosstex)
+			);
+		}
 	};
-	template<>
-	inline constexpr BlockTraits BlockInfo<MossBlock> = BlockTraits(
-		BlockMeshTraits(v3::unit_scale,false,mosstex,mosstex,mosstex,mosstex,mosstex,mosstex)
-	);
 
 }

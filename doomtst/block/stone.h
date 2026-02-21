@@ -16,7 +16,7 @@ namespace items {
 }
 namespace blocks {
 	struct StoneBlock :BlockType {
-		void apply(ecs::obj& block) {
+		void apply(ecs::obj& block) const {
 			block.add_component<items::loot_table>().add<items::stone_item>(1);
 		}
 		std::string name() const override {
@@ -25,9 +25,9 @@ namespace blocks {
 		SolidBlockTraits mining_traits() const override {
 			return SolidBlockTraits{ .time_to_mine = 3 };
 		}
+		BlockTraits traits()const {
+			return BlockTraits(
+				BlockMeshTraits(v3::unit_scale / 2, false, stonetex, stonetex, stonetex, stonetex, stonetex, stonetex));
+		}
 	};
-	template<>
-	inline constexpr BlockTraits BlockInfo<StoneBlock> = BlockTraits(
-		BlockMeshTraits(v3::unit_scale / 2, false, stonetex, stonetex, stonetex, stonetex, stonetex, stonetex));
-
 }

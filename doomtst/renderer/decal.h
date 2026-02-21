@@ -1,5 +1,5 @@
 #include "renderer.h"
-#include "../game/GameContext.h"
+
 #include "../game/Core.h"
 #include "../game/ecs/unique_object.h"
 #include "../game/ecs/query.h"
@@ -55,7 +55,7 @@ namespace decals {
 		DecalSpawner(v3::Point3 center):pnt(center){
 			
 		}
-		void apply(ecs::obj& entity) {
+		void apply(ecs::obj& entity) const{
 			entity.add_component<decal_component>(pnt);
 		}
 	};

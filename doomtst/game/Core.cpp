@@ -41,16 +41,13 @@ namespace Core {
 		    }
 
 
-    void App::ConnectToContext()
-    {
-        ctx = &CtxName::ctx;
-    }
+    
 
     void App::createWindow()
     {
 
-		CtxName::ctx.Ecs->insert_resource<userinput::InputManager>();
-		window::Window& window=ctx->Ecs->insert_resource<window::Window>("Benny Render 3d", "images\\crystaloreenhanced.png");
+		Ecs.insert_resource<userinput::InputManager>();
+		window::Window& window= Ecs.insert_resource<window::Window>("Benny Render 3d", "images\\crystaloreenhanced.png");
 		window.setCursorCallback(cursorPositionCallback);
 		window.SetFrameBufferCallback(framebufferSizeCallback);
 		window.SetMouseCallback(mouseButtonCallback);
@@ -62,15 +59,13 @@ namespace Core {
 
     void App::InitOC()
     {
-        ctx->Ecs = &Ecs;
 		insert_plugin<GamePlugin>();
     }
 
     void App::CreateWorld()
     {
-		
-        new (&world) World::world(0);
-        ctx->wrld = &world;
+		Ecs.insert_resource<grid::world>(0);
+
     }
 
    

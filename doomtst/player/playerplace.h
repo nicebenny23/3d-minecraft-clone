@@ -2,7 +2,7 @@
 #include "../game/ecs/game_object.h"
 #include "../game/collision.h"
 #include "../world/managegrid.h"
-#include "../game/objecthelper.h"
+
 #include "../world/voxeltraversal.h"
 #include "playerinventory.h"
 #include "player_look.h"
@@ -31,6 +31,10 @@ namespace player {
 				if (!hit.owner().has_component<block>()) {
 					continue;
 				}
+				
+				if (hit.owner().has_component<player::OpenMenuOnClick>()) {
+					continue;
+				}
 				block& block_hit_at = hit.owner().get_component<block>();
 
 				double eps = .0001;
@@ -40,13 +44,18 @@ namespace player {
 					continue;
 				}
 				block& block_at = mabye_block_at.unwrap();
-				math::Direction3d attach_direction = math::greatest_aligned_direction(block_at.center() - block_hit_at.center());
-				v3::Scale3 mesh_scale = block_at.registry().block_for(spawn_id).block_traits.mesh.size;
+				math::Direction3d attach_direction = math::greatest_aligned_direction( block_hit_at.center()- block_at.center());
+				v3::Scale3 mesh_scale = block_at.registry().block_for(spawn_id)->traits().mesh.size;
 				Box new_block_box = Box(block_at.center(), mesh_scale);
 				new_block_box.center -= attach_direction.vec() * mesh_scale.shrunk(.5f);
-				new_block_box.scale.shrunk(.01f);
+
+				double block_push_margin = .03f;
+				new_block_box.scale.shink(block_push_margin);
+				if (collision::boxcast(new_block_box,collision::HitQuery(ecs))) {
+					continue;
+				}
 				if (ecs.get_resource<userinput::InputManager>().right_mouse().pressed) {
-   					grid::set_block(ecs, block_at.pos, spawn_id);
+   					grid::set_block(ecs, block_at.pos, spawn_id,attach_direction);
 					stack.remove(1);
 				};
 			}
@@ -54,7 +63,7 @@ namespace player {
 	};
 	struct PlayerPlacePlugin :Core::Plugin {
 		void build(Core::App& world) {
-			world.emplace_system<player::PlayerCursorCaster>();
+			world.insert_plugin<player::PlayerClickablePlugin>();
 			world.emplace_system<PlayerPlaceSystem>();
 
 		}

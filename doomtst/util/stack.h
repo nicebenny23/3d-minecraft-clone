@@ -2,13 +2,16 @@
 #include "dynamicarray.h"
 
 namespace stn {
-
+	//an array restricted with stack operations
 	template<typename T>
 	struct stack {
 		stack() = default;
 
 		bool empty() const {
 			return list.empty();
+		}
+		bool non_empty() const {
+			return list.non_empty();
 		}
 
 		T& peek() {

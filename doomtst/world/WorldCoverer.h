@@ -41,7 +41,7 @@ namespace grid {
 					continue;
 				}
 
-				Coord pos = mesh.mesh_location + blkface.face_direction.coord();
+				Coord pos = grid.get_voxel(mesh.center()) + blkface.face_direction.coord();
 				block* adjacent_block = grid.getBlock(pos);
 				if (adjacent_block == nullptr) {
 					continue;
@@ -104,7 +104,7 @@ namespace grid {
 					chunks_to_recompute.push(cmd.chunk);
 				}
 			}
-			if (chunks_to_recompute.nonempty()) {
+			if (chunks_to_recompute.non_empty()) {
 
 				thread_util::par_iter_rng(chunks_to_recompute, [&](ecs::obj elem) {compute_chunk_cover(elem); }, 4);
 			}

@@ -55,7 +55,10 @@ inline void debug(Args&&... args) {
     (ss << ... << std::forward<Args>(args)); // fold expression
     console::Console::Instance().Log(console::LogLevel::Info, ss.str());
 }
-
+template<typename... Args>
+inline void debug_fmt(const std::format_string<Args...>& fmt, Args&&... args) {
+	console::Console::Instance().Log(console::LogLevel::Info,std::format(fmt, std::forward<Args>(args)...));
+}
 template<typename... Args>
 inline void warn(Args&&... args) {
     std::stringstream ss;

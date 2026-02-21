@@ -1,11 +1,14 @@
 #include "item_type.h"
 #include "cursor_slot.h"
 #include "Item.h"
+
 #include "../block/craftingtable.h"
+#include "../block/Chest.h"
 #include "../block/plank.h"
 #include "../block/air.h"
 #include "../block/torch.h"
 #include "../block/moss.h"
+#include "../game/Core.h"
 #pragma once
 namespace items {
  struct glass_bottle_item : item_type {
@@ -55,12 +58,11 @@ namespace items {
 			// Uses the old initcrystalbottomitem values
 			return item_traits(
 				"crystal_bottom",
-				item_use_type::tool,
 				renderer::TexturePath("images\\crystalbottom.png", "CrystalBottomTexture"),
-				0.0f,   // damage
+				64,
+				tool_traits({ .damage = 6,.pickaxe_speed = .8 }),
 				0.7f,   // armor
-				0.0f,   // food
-				0.0f    // pickaxe_speed
+				0.0f
 			);
 		}
 	};
@@ -69,10 +71,9 @@ namespace items {
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"crystal",
-				item_use_type::block,
 				renderer::TexturePath("images\\crystal.png", "CrystalTexture"),
-				0.0f,
-				0.0f,
+				64,
+				tool_traits({ .damage = 6,.pickaxe_speed = .8 }),
 				0.0f,
 				0.0f
 			);
@@ -83,10 +84,9 @@ namespace items {
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"crystal_pick",
-				item_use_type::tool,
 				renderer::TexturePath("images\\crystalpick.png", "CrystalPickaxeTexture"),
-				0.0f,
-				0.0f,
+				64,
+				tool_traits({ .damage = 6,.pickaxe_speed = 3 }),
 				0.0f,
 				7.0f // pickaxe_speed from pickaxepower
 			);
@@ -97,10 +97,9 @@ namespace items {
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"crystal_top",
-				item_use_type::tool,
 				renderer::TexturePath("images\\crystaltop.png", "CrystalTopTexture"),
-				0.0f,  // damage
-				0.7f,  // armor
+				64,
+				tool_traits({ .damage = 6,.pickaxe_speed = .8 }),
 				0.0f,
 				0.0f
 			);
@@ -111,10 +110,9 @@ namespace items {
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"iron_bottom",
-				item_use_type::tool,
 				renderer::TexturePath("images\\ironbottom.png", "IronBottomTexture"),
-				0.0f,
-				0.8f,
+				64,
+				tool_traits({ .damage = 0,.pickaxe_speed = .8 }),
 				0.0f,
 				0.0f
 			);
@@ -125,10 +123,9 @@ namespace items {
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"iron_pick",
-				item_use_type::tool,
 				renderer::TexturePath("images\\ironpick.png", "IronPickTexture"),
-				0.0f,
-				0.0f,
+				64,
+				tool_traits({ .damage = 3,.pickaxe_speed = 8 }),
 				0.0f,
 				4.9f // pickaxepower mapped to pickaxe_speed
 			);
@@ -139,10 +136,9 @@ namespace items {
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"iron_sword",
-				item_use_type::tool,
 				renderer::TexturePath("images\\ironsword.png", "IronSwordTexture"),
-				6.0f,  // damage
-				0.0f,  // armor
+				64,
+				tool_traits({ .damage = 6,.pickaxe_speed = .8 }),
 				0.0f,
 				0.0f
 			);
@@ -153,10 +149,9 @@ namespace items {
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"iron_top",
-				item_use_type::tool,
 				renderer::TexturePath("images\\irontop.png", "IronTopTexture"),
-				0.0f,
-				0.8f,
+				64,
+				tool_traits({ .damage = 0,.pickaxe_speed = .8 }),
 				0.0f,
 				0.0f
 			);
@@ -167,10 +162,9 @@ namespace items {
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"lava_pick",
-				item_use_type::tool,
 				renderer::TexturePath("images\\pikaxe.png", "PickaxeTexture"),
-				0.0f,
-				0.0f,
+				64,
+				tool_traits({ .damage = 0,.pickaxe_speed = 10 }),
 				0.0f,
 				3.0f
 			);
@@ -181,10 +175,9 @@ namespace items {
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"rock",
-				item_use_type::tool,
 				renderer::TexturePath("images\\rock.png", "RockTexture"),
-				0.0f,
-				0.0f,
+				64,
+				tool_traits({ .damage = 1,.pickaxe_speed = 1}),
 				0.0f,
 				2.0f
 			);
@@ -195,10 +188,9 @@ namespace items {
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"sword",
-				item_use_type::tool,
 				renderer::TexturePath("images\\sword.png", "SwordTexture"),
-				4.0f,
-				0.0f,
+				64,
+				tool_traits({ .damage = 4,.pickaxe_speed=0}),
 				0.0f,
 				0.0f
 			);
@@ -209,10 +201,9 @@ namespace items {
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
 				"final_sword",
-				item_use_type::tool,
 				renderer::TexturePath("images\\finalsword.png", "FinalSwordTexture"),
-				10.0f,
-				0.0f,
+				64,
+				tool_traits({ .damage = 4,.pickaxe_speed = 0 }),
 				0.0f,
 				0.0f
 			);
@@ -230,8 +221,10 @@ namespace items {
 			registry.register_block<TorchBlock>();
 			registry.register_block<StoneBlock>();
 			registry.register_block<AirBlock>();
-			app.emplace_system< CraftingTableClickSystem>();
+			registry.register_block<ChestBlock>();
 			registry.register_block<CraftingTableBlock>();
+
+			item_register.register_item<items::chest_item>();
 			item_register.register_item<items::crafting_table_item>();
 			app.emplace_system< ItemClear>();
 			app.emplace_system< run_crafts>();

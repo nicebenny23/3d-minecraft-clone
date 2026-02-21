@@ -1,8 +1,13 @@
 #pragma once
 #include "dynamicarray.h"
 #include <tuple>
-#include "type_tag.h"
 namespace stn {
+	
+	struct Context {
+
+	};
+
+
 	template<typename Ctx>
 	concept ByteContext = requires(Ctx ctx, stn::span<const std::byte> data, size_t n) {
 		{
@@ -12,48 +17,34 @@ namespace stn {
 			ctx.read_bytes(n)
 		} -> std::convertible_to<stn::array<std::byte>>;
 	};
-	struct IByteContext {
-		virtual void write_bytes(stn::span<const std::byte> data) = 0;
-		virtual stn::array<std::byte> read_bytes(size_t count) = 0;
-		virtual ~IByteContext() = default;
-	};
-	template<ByteContext Ctx>
-	struct ByteContextAdapter : IByteContext {
-		Ctx& ctx;
-		void write_bytes(stn::span<const std::byte> data) override {
-			ctx.write_bytes(data);
-		}
-		stn::array<std::byte> read_bytes(size_t count) override {
-			return ctx.read_bytes(count);
-		}
-	};
-	template<typename T>
+	
+	template<ByteContext Ctx,typename T>
 	struct Serializer;
 
 
-	template<typename T>
-	concept Readable = requires(IByteContext & context, const T & format) {
-		Serializer<T>::read(context);
+	template<typename Ctx,typename T>
+	concept Readable = ByteContext<Ctx>&&requires(Ctx & context) {
+		Serializer<Ctx,T>::read(context);
 	};
-	template<typename T>
-	concept Writable = requires(IByteContext & context, const T & value) {
+	template<typename Ctx, typename T>
+	concept Writable = ByteContext<Ctx> && requires(Ctx & context, const T & value) {
 		//1. write exists
 		{
-			Serializer<T>::write(value, context)
+			Serializer<Ctx,T>::write(value, context)
 		}->std::same_as<void>;
 	};
 
-	template<typename T>
-	concept Serializable = Readable<T> && Writable<T> ;
+	template<typename Ctx,typename T>
+	concept Serializable = Readable<Ctx,T> && Writable<Ctx, T> ;
 
-	template<typename T> requires std::is_trivially_constructible_v<T>
-	struct Serializer<T> {
-		static void write(const T& val, IByteContext& ctx) {
-			
-			//ctx.write_bytes(stn::span<std::byte>(static_cast<std::byte*>(&val), sizeof(T)));
+	template<ByteContext Ctx, typename T> requires std::is_trivially_copyable_v<T>
+	struct Serializer<Ctx,T> {
+		static void write(T val, Ctx& ctx) {
+			stn::span<std::byte> data(std::bit_cast<std::byte*>(&val), sizeof(T));
+			ctx.write_bytes(data);
 		}
 
-		static T read(IByteContext& ctx) {
+		static T read(Ctx& ctx) {
 			stn::array<std::byte> bytes=ctx.read_bytes(sizeof(T));
 			return *reinterpret_cast<T*>(bytes.data());
 			
@@ -61,17 +52,17 @@ namespace stn {
 	};
 
 
-	template<typename T>
-	struct Serializer<stn::array<T>> {
-		static void write(const stn::array<T>& arr, IByteContext& ctx) requires Writable<T>{
-			Serializer<size_t>::write(arr.length(),ctx);
+	template<ByteContext Ctx, typename T>
+	struct Serializer<Ctx,stn::array<T>> {
+		static void write(const stn::array<T>& arr, Ctx& ctx) requires Writable<Ctx,T>{
+			Serializer<Ctx, size_t>::write(arr.length(),ctx);
 			for (const auto& element: arr) {
-				Serializer<T>::write(element, ctx);
+				Serializer<Ctx, T>::write(element, ctx);
 			}
 		}
 
-		static stn::array<T> read(IByteContext& ctx)  requires Readable<T> {
-			size_t length= Serializer<size_t>::read(ctx);
+		static stn::array<T> read(Ctx& ctx)  requires Readable<Ctx,T> {
+			size_t length= Serializer<Ctx,size_t>::read(ctx);
 			stn::array<T> elements;
 			for (size_t i = 0; i <length;i++) {
 				elements.push(Serializer<T>::read(ctx));
@@ -81,48 +72,49 @@ namespace stn {
 	};
 
 
-	template<typename T>
-	struct Serializer<stn::Option<T>> {
-		static void write(const Option<T>& opt, IByteContext& ctx) requires Writable<T> {
-			Serializer<bool>::write(opt.is_some(), ctx);
+	template<ByteContext Ctx, typename T>
+	struct Serializer<Ctx,stn::Option<T>> {
+		static void write(const Option<T>& opt, Ctx& ctx) requires Writable<Ctx,T> {
+			Serializer<Ctx,bool>::write(opt.is_some(), ctx);
 			if (opt.is_some()) {
-				Serializer<T>().write(opt.unwrap_unchecked(), ctx);
+				Serializer<Ctx, T>().write(opt.unwrap_unchecked(), ctx);
 			}
 		}
 
-		static stn::Option<T> read(IByteContext& ctx)  requires Readable<T> {
-			if (Serializer<bool>::read(ctx)) {
-				return Serializer<T>().read(ctx);
+		static stn::Option<T> read(Ctx& ctx)  requires Readable<Ctx,T> {
+			if (Serializer<Ctx, bool>::read(ctx)) {
+				return Serializer<Ctx, T>().read(ctx);
 			}
 			return stn::None;
 		}
 	};
 	
-	template<typename E>
+	template<ByteContext Ctx, typename E>
 		requires std::is_enum_v<E>
-	struct Serializer<E> {
+	struct Serializer<Ctx,E> {
 		using Underlying = std::underlying_type_t<E>;
-		static void write(E value, IByteContext& ctx) {
-			Serializer<Underlying>::write(static_cast<Underlying>(value), ctx);
+		static void write(E value, Ctx& ctx) {
+			Serializer<Ctx, Underlying>::write(static_cast<Underlying>(value), ctx);
 		}
-		static E read(IByteContext& ctx) {
-		return static_cast<E>(Serializer<Underlying>::read(ctx));
+		static E read(Ctx& ctx) {
+		return static_cast<E>(Serializer<Ctx, Underlying>::read(ctx));
 		}
 	};
-	template<>
-	struct Serializer<std::string> {
-		static void write(const std::string& str, IByteContext& ctx) {
-			Serializer<size_t>::write(str.size(), ctx);
+	template<ByteContext Ctx>
+	struct Serializer<Ctx,std::string> {
+		static void write(const std::string& str, Ctx& ctx) {
+			Serializer<Ctx, size_t>::write(str.size(), ctx);
 			ctx.write_bytes(stn::span<const std::byte>(
 				reinterpret_cast<const std::byte*>(str.data()),
 				str.size()
 			));
 		}
 
-		static std::string read(IByteContext& ctx) {
-			size_t len = Serializer<size_t>::read(ctx);
+		static std::string read(Ctx& ctx) {
+			size_t len = Serializer<Ctx, size_t>::read(ctx);
 			auto bytes = ctx.read_bytes(len);
 			return std::string(reinterpret_cast<const char*>(bytes.data()), len);
 		}
 	};
+	
 }

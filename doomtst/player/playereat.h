@@ -1,6 +1,6 @@
 
 #include "../game/ecs/game_object.h"
-#include "../game/objecthelper.h"
+
 #include "../util/dynamicarray.h"
 #include "../items/Container.h"
 #include "playerinventory.h"

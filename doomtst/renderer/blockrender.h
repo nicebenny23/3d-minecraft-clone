@@ -1,10 +1,10 @@
 #include "../world/managegrid.h"
-#include "../util/algorthm.h"
+
 #include "../game/Core.h"
 #include "../util/thread_split.h"
 #include "../math/geometry.h"
 #include "../math/intersection.h"
-#include "../game/GameContext.h"
+
 #include <mutex>
 #include "../math/meshes.h"
 #pragma once 
@@ -215,16 +215,16 @@ namespace blockrender {
 			texlist.reach(torchtex) = "images\\torch.png";
 			texlist.reach(torchtoptex) = "images\\torchtop.png";
 			texlist.reach(crystaloretex) = "images\\crystalore.png";
-			texlist.reach(craftingtabletop) = "images\\craftingtabletop.png";
-			texlist.reach(craftingtableside) = "images\\craftingtableside.png";
+			texlist.reach(chestside) = "images\\chestsides.png";
+			texlist.reach(chestfront) = "images\\chest.png";
 			texlist.reach(crystaltorchtex) = "images\\crystaltorch.png";
 			texlist.reach(crystaltorchtoptex) = "images\\crystaltorchtop.png";
 			texlist.reach(mosstex) = "images\\moss.png";
 			texlist.reach(ropetex) = "images\\rope.png";
 			texlist.reach(lavatex) = "images\\lava.png";
 			texlist.reach(obsidiantex) = "images\\obb.png";
-			texlist.reach(chestfront) = "images\\chest.png";
-			texlist.reach(chestside) = "images\\chestsides.png";
+			texlist.reach(crafting_table_front) = "images\\craftingtable.png";
+			texlist.reach(crafting_table_side) = "images\\craftingtableside.png";
 			texlist.reach(furnacefront) = "images\\furnacetop.png";
 			texlist.reach(furnaceside) = "images\\furnace.png";
 			texlist.reach(ironoretex) = "images\\ironore.png";

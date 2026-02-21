@@ -55,7 +55,7 @@ namespace items {
 			unfilled_slot.unwrap().count = remaining_amount;
 			filled_slots.push(unfilled_slot.unwrap());
 		}
-		if (filled_slots.nonempty()) {
+		if (filled_slots.non_empty()) {
 			return take_plans(std::move(filled_slots));
 		}
 		return stn::None;

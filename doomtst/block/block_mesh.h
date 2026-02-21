@@ -7,7 +7,7 @@ namespace blocks {
 	struct block_tag;
 
 	using block_id = stn::typed_id<block_tag>;
-	enum block_textures {
+	enum block_textures:short {
 		treestonetex = 0,
 		grasstex = 1,
 		stonetex = 2,
@@ -17,8 +17,8 @@ namespace blocks {
 		torchtex = 6,
 		torchtoptex = 7,
 		crystaloretex = 8,
-		craftingtabletop = 9,
-		craftingtableside = 10,
+		crafting_table_front= 9,
+		crafting_table_side = 10,
 		crystaltorchtex = 11,
 		crystaltorchtoptex = 12,
 		mosstex = 13,
@@ -47,8 +47,6 @@ namespace blocks {
 	struct face {
 
 
-		block_textures tex;
-		math::Direction3d face_direction;
 		bool uncomputed() const {
 			return cover == cover_state::Uncomputed;
 		}
@@ -69,14 +67,20 @@ namespace blocks {
 
 		void set_cover(cover_state new_state);
 		void set_light(std::uint8_t  value);
+
+		block_textures tex;
+		math::Direction3d face_direction;
 	private:
 		cover_state cover;
 		std::uint8_t light;
 	};
 
 	struct blockmesh {
-		math::Direction2d direction;
+		stn::List<face, 6> faces;
+		geo::Box box;
+
 		math::Direction3d attached_direction;
+		math::Direction2d direction;
 		v3::Point3 center() const {
 			return box.center;
 		}
@@ -94,16 +98,14 @@ namespace blocks {
 			return box.scale.x==0;
 		}
 		blockmesh(const stn::List<block_textures,6>& textures,stn::dirty_flag& d_flag,v3::Coord position, Scale3 blkscale,math::Direction3d attachment_direction,math::Direction2d facing_direction) :
-			flag(d_flag), box(position + unitv / 2, blkscale), mesh_location(position),transparent(false),faces([&](size_t index) { 
+			flag(d_flag), box(position + unitv / 2, blkscale),transparent(false),faces([&](size_t index) { 
 				return face(textures[index],math::Direction3d(math::DirectionIndex3d(index)), this);
 			}), attached_direction(attachment_direction),direction(facing_direction)
 		{
-
 			box.center -= attached_direction.vec()*box.scale.shrunk(.5f);
 		}
-		geo::Box box;
-		Coord mesh_location;
-		stn::List<face,6> faces;
+
+			
 		face& operator[](size_t index) {
 			return faces[index];
 		}

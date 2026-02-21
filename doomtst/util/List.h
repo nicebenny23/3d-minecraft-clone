@@ -76,13 +76,13 @@ namespace stn {
 		}
 
 		constexpr T& operator[](size_t index) {
-			if (index >= N) {
+			if (N<= index) {
 				throw std::out_of_range("List index out of bounds");
 			}
 			return storage[index];
 		}
 		constexpr const T& operator[](size_t index) const {
-			if (index >= N) {
+			if (N <= index) {
 				throw std::out_of_range("List index out of bounds");
 			}
 			return storage[index];

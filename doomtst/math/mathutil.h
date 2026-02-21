@@ -55,6 +55,11 @@ inline  double sigmoid(double v1) {
 	return	1.0f / (1.0f + exp(-v1));
 }
 namespace stn {
+	
+	inline double lerp(double start, double end, double selector) {
+		return end * selector + start * (1 - selector);
+	}
+
 	template<typename T1, typename T2, typename... Ts>
 	constexpr auto max(T1 a, T2 b, Ts... rest) -> typename std::common_type<T1, T2, Ts...>::type {
 		using Common = typename std::common_type<T1, T2, Ts...>::type;

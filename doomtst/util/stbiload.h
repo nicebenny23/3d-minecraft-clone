@@ -5,8 +5,8 @@
 #include "../math/vector2.h"
 
 namespace texdata {
-	unsigned char* loadtexdata(int* width, int* height, const char* name);
+	unsigned char* texture_for(int* width, int* height, const char* name);
 
-	v2::Coord2 GetImgSize(const char* Img_Path);
+	v2::Coord2 image_size(const char* Img_Path);
 
 }

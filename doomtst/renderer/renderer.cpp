@@ -1,7 +1,7 @@
 #include "renderer.h"
 #include "../game/Core.h"
 #include "../game/Settings.h"
-#include "../game/GameContext.h"
+
 #include "decal.h"
 namespace renderer {
 
@@ -15,7 +15,7 @@ namespace renderer {
 		context.bind(mesh);
 
 		mesh.Voa.SetAllAttributes();
-		if (settings::Gamesettings.viewmode) {
+		if (world.ensure_resource<settings::GlobalSettings>().viewmode) {
 			glDrawElements(GL_LINES, mesh.length, GL_UNSIGNED_INT, 0);
 		}
 		else {
@@ -37,12 +37,15 @@ namespace renderer {
 	}
 
 	void Renderer::bind_material(material_handle material) {
-		Material& mat = *material;
-		context.bind(*mat.shader);
-		for (auto& elem : mat.handles) {
-			context.apply_uniform(uniform_manager.get(elem), std::string_view(elem.shader_alias));
+		if (current_material != material) {
+			Material& mat = *material;
+			context.bind(*mat.shader);
+			for (auto& elem : mat.handles) {
+				context.apply_uniform(uniform_manager.get(elem), std::string_view(elem.shader_alias));
+			}
+			context.bind_properties(mat.prop);
+			current_material = material;
 		}
-		context.bind_properties(mat.prop);
 	}
 
 	void Renderer::Clear() {
@@ -55,11 +58,11 @@ namespace renderer {
 
 
 	void RenderableHandle::set_material(const std::string& name) {
-		renderer->set_material(id.unwrap(), name);
+		renderer().set_material(id.unwrap(), name);
 	}
 
 	void RenderableHandle::set_layout(vertice::vertex layout) {
-		renderer->set_layout(id.unwrap(), layout);
+		renderer().set_layout(id.unwrap(), layout);
 	}
 
 	void RenderableHandle::fill(MeshData&& new_mesh) {
@@ -72,7 +75,7 @@ namespace renderer {
 	}
 
 	void RenderableHandle::disable() {
-		renderer->set_enabled(id.unwrap(), false);
+		renderer().set_enabled(id.unwrap(), false);
 	}
 
 	void RenderableHandle::set_order_key(float key) {
@@ -81,27 +84,27 @@ namespace renderer {
 
 	void RenderableHandle::enable() {
 
-		renderer->set_enabled(id.unwrap(), true);
+		renderer().set_enabled(id.unwrap(), true);
 	}
 	void RenderableHandle::set_uniform(const renderer::uniform& u) {
-		renderer->set_uniform(id.unwrap(), u);
+		renderer().set_uniform(id.unwrap(), u);
 	}
 
 	void RenderableHandle::render() {
-		renderer->render(id.unwrap());
+		renderer().render(id.unwrap());
 	}
 
 	void RenderableHandle::destroy() {
-		if (renderer) {
-
-			renderer->remove(id.unwrap());
-			renderer = nullptr;
+		if (id) {
+			renderer().remove(id.unwrap());
 			id = None;
 		}
 	}
 
+	
+
 	MeshData RenderableHandle::create_mesh(indice_mode auto_ind) {
-		return renderer->create(id.unwrap(), auto_ind);
+		return renderer().create(id.unwrap(), auto_ind);
 	}
 
 

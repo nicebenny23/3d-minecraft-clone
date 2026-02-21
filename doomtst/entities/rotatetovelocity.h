@@ -1,4 +1,4 @@
-#include "../game/objecthelper.h"
+
 #include "../game/rigidbody.h"
 #pragma once 
 struct rotate_to_velocity: ecs::component

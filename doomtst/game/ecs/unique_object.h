@@ -25,7 +25,7 @@ namespace ecs {
 				owned.destroy();
 			}
 		}
-		const obj get() const {
+		obj object() const {
 			return owned;
 		}
 

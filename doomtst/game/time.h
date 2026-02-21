@@ -64,7 +64,7 @@ namespace timename {
 			{
 				fps_counter = 0;
 				double fps_inter_rate =1;
-				smooth_fps = lerp(smooth_fps, fps, fps_inter_rate);
+				smooth_fps = stn::lerp(smooth_fps, fps, fps_inter_rate);
 
 			}
 		}

@@ -244,12 +244,8 @@
     <ClCompile Include="game\Core.cpp" />
     <ClCompile Include="game\ecs\component.cpp" />
     <ClCompile Include="game\ecs\ecs.cpp" />
-    <ClCompile Include="game\entity.cpp" />
-    <ClCompile Include="game\entitystate.cpp" />
-    <ClCompile Include="game\GameContext.cpp" />
     <ClCompile Include="game\navigation.cpp" />
     <ClCompile Include="game\particles.cpp" />
-    <ClCompile Include="game\Settings.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
@@ -270,19 +266,15 @@
     <ClCompile Include="renderer\model.cpp" />
     <ClCompile Include="renderer\ui.cpp" />
     <ClCompile Include="block\block.cpp" />
-    <ClCompile Include="util\algorthm.cpp" />
     <ClCompile Include="math\intersection.cpp" />
     <ClCompile Include="json\json_value.cpp" />
     <ClCompile Include="util\random.cpp" />
     <ClCompile Include="game\time.cpp" />
     <ClCompile Include="util\stbiload.cpp" />
     <ClCompile Include="game\camera.cpp" />
-    <ClCompile Include="world\chunk.cpp" />
     <ClCompile Include="external\glad.c" />
     <ClCompile Include="world\grid.cpp" />
     <ClCompile Include="renderer\renderer.cpp" />
-    <ClCompile Include="world\managegrid.cpp" />
-    <ClCompile Include="world\voxeltraversal.cpp" />
     <ClCompile Include="renderer\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -294,6 +286,7 @@
     <ClInclude Include="block\blockinit.h" />
     <ClInclude Include="block\block_mesh.h" />
     <ClInclude Include="block\block_registry.h" />
+    <ClInclude Include="block\chest.h" />
     <ClInclude Include="block\craftingtable.h" />
     <ClInclude Include="block\plank.h" />
     <ClInclude Include="block\treestone.h" />
@@ -313,7 +306,6 @@
     <ClInclude Include="entities\slime.h" />
     <ClInclude Include="entities\wisp.h" />
     <ClInclude Include="game\casts.h" />
-    <ClInclude Include="game\Commands.h" />
     <ClInclude Include="game\ecs\archetypes.h" />
     <ClInclude Include="game\ecs\archtype.h" />
     <ClInclude Include="game\ecs\commands.h" />
@@ -325,6 +317,7 @@
     <ClInclude Include="game\ecs\ecs.h" />
     <ClInclude Include="game\ecs\entities.h" />
     <ClInclude Include="game\ecs\entity.h" />
+    <ClInclude Include="game\ecs\EntityAllocator.h" />
     <ClInclude Include="game\ecs\filtered_object.h" />
     <ClInclude Include="game\ecs\game_object.h" />
     <ClInclude Include="game\ecs\message.h" />
@@ -337,17 +330,14 @@
     <ClInclude Include="game\ecs\traversal.h" />
     <ClInclude Include="game\ecs\unique_object.h" />
     <ClInclude Include="game\ecs\weak_object.h" />
-    <ClInclude Include="game\entity.h" />
     <ClInclude Include="game\entityutil.h" />
-    <ClInclude Include="game\Event.h" />
     <ClInclude Include="game\game.h" />
     <ClInclude Include="game\Core.h" />
-    <ClInclude Include="game\GameContext.h" />
     <ClInclude Include="game\navigation.h" />
     <ClInclude Include="game\ecs\relationship.h" />
+    <ClInclude Include="game\serialization.h" />
     <ClInclude Include="game\Settings.h" />
     <ClInclude Include="items\container_ui.h" />
-    <ClInclude Include="items\crafting_table.h" />
     <ClInclude Include="items\FakeItem.h" />
     <ClInclude Include="math\transform.h" />
     <ClInclude Include="game\wormobj.h" />
@@ -421,6 +411,7 @@
     <ClInclude Include="math\angle.h" />
     <ClInclude Include="math\meshes.h" />
     <ClInclude Include="math\Scale3.h" />
+    <ClInclude Include="player\inventory_ui.h" />
     <ClInclude Include="player\playermovment.h" />
     <ClInclude Include="player\player_look.h" />
     <ClInclude Include="renderer\color.h" />
@@ -462,7 +453,6 @@
     <ClInclude Include="game\rigidbody.h" />
     <ClInclude Include="renderer\uibox.h" />
     <ClInclude Include="tests\ecs_tests.h" />
-    <ClInclude Include="util\algorthm.h" />
     <ClInclude Include="util\bitset.h" />
     <ClInclude Include="util\bit_mask.h" />
     <ClInclude Include="util\cached.h" />
@@ -482,7 +472,6 @@
     <ClInclude Include="util\index.h" />
     <ClInclude Include="math\intersection.h" />
     <ClInclude Include="math\interval.h" />
-    <ClInclude Include="util\Invoke.h" />
     <ClInclude Include="json\json_value.h" />
     <ClInclude Include="util\layout.h" />
     <ClInclude Include="util\lifetime.h" />
@@ -517,15 +506,12 @@
     <ClInclude Include="util\tuple.h" />
     <ClInclude Include="util\typelist.h" />
     <ClInclude Include="util\traits.h" />
-    <ClInclude Include="util\type_graph.h" />
     <ClInclude Include="util\type_index.h" />
-    <ClInclude Include="util\type_tag.h" />
     <ClInclude Include="util\unique.h" />
     <ClInclude Include="util\userinput.h" />
     <ClInclude Include="util\variant.h" />
     <ClInclude Include="math\vector2.h" />
     <ClInclude Include="math\vector3.h" />
-    <ClInclude Include="world\bicube_array.h" />
     <ClInclude Include="world\chunkload.h" />
     <ClInclude Include="world\chunk_mesh.h" />
     <ClInclude Include="world\Lighter.h" />
@@ -537,7 +523,6 @@
     <ClInclude Include="game\collision.h" />
     <ClInclude Include="world\grid.h" />
     <ClInclude Include="world\noise.h" />
-    <ClInclude Include="game\objecthelper.h" />
     <ClInclude Include="renderer\renderer.h" />
     <ClInclude Include="renderer\renderer\shader.h" />
     <ClInclude Include="external\stb_image.h" />

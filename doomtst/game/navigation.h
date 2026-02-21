@@ -2,7 +2,7 @@
 #include "../math/mathutil.h"
 #include "../world/grid.h"
 #include "../math/dir.h"
-#include "entity.h"
+
 #include "../game/time.h"
 
 struct navnode {
@@ -69,4 +69,4 @@ struct navigator: ecs::component
     bool should_update_path();
 };
 
-array<navnode> astarpathfinding(navnode start, navnode goal, array<navnode> (*getconnected)(navnode& pos));
+array<navnode> astarpathfinding(navnode start, navnode goal, array<navnode> (*getconnected)(navnode& pos), ecs::Ecs& world);

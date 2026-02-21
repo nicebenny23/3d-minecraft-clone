@@ -39,7 +39,7 @@ namespace stn {
 		}
 		template<typename U>
 		rc<U> downcast_unchecked() requires std::derived_from<U, T> {
-			(*count)++;          // increment reference count
+			(*count)++;         
 			return rc<U>(static_cast<U*>(ptr), count);
 		}
 
@@ -190,7 +190,7 @@ namespace stn {
 		template<typename U>
 		friend struct rc;
 	};
-
+	//returns an Option<rc<T>> which has a value if rc_ptr<T> has a value
 	template<typename T>
 	inline stn::Option<rc<T>> rc<T>::from_rc_ptr(const rc_ptr<T>& rp) {
 		if (!rp) {

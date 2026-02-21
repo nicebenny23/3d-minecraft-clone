@@ -2,10 +2,15 @@
 #include "SlotUi.h"
 #pragma once
 namespace items {
+	struct container_id_tag {
+	};
+	using container_id =stn::typed_id<container_id_tag >;
+	
 	struct container :ecs::component {
 		stn::array <ecs::object_handle> slots;
 		v2::Coord2 size;
-		container(v2::Coord2 Size) :size(Size) {
+		container_id id;
+		container(v2::Coord2 Size, container_id cont_id) :size(Size),id(cont_id){
 		}
 		void start() {
 
@@ -41,13 +46,27 @@ namespace items {
 		}
 
 	};
+	//because i cannot get serilization to work
+	struct WorldContainers :ecs::resource {
+		stn::array<ecs::Constrained<container>> containers;
+		container_id gen_next() const{
+			return container_id(containers.length());
+		}
+		ecs::Constrained<container>& operator[](container_id index) {
+			return containers[index.id];
+		}
+	};
+
 	struct container_recipe {
 		v2::Coord2 offset;
 		container_recipe(v2::Coord2 off):offset(off) {
 
 		}
-		void apply(ecs::obj& ent) {
-			container& cont = ent.add_component< container>(offset);
+		void apply(ecs::obj& ent) const{
+			WorldContainers& containers=ent.world().ensure_resource<WorldContainers>();
+			container_id id = containers.gen_next();
+			container& cont = ent.add_component< container>(offset, id);
+			containers.containers.emplace(ent);
 			for (int y = 0; y < offset.y; y++) {
 				for (int x = 0; x < offset.x; x++) {
 					cont.slots.emplace<ecs::object_handle>(ecs::spawn(ent.world(), ItemSlotSpawner()));

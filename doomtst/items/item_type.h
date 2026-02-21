@@ -6,46 +6,45 @@
 #pragma once
 namespace items {
 	enum class item_use_type {
-		tool,
+		use,
 		block
 	};
 
+	struct tool_traits {
+		float damage;
+		float pickaxe_speed;
+		bool operator==(const tool_traits& other) const = default;
+	};
 	struct item_traits {
 		std::string item_name;
-		item_use_type use_type;
+		stn::Option<size_t> duribility;
 		renderer::TexturePath image_path;
+		stn::Option<tool_traits> tool;
 		float armor = 0;
-		float damage = 0;
 		float food=0;
-		float pickaxe_speed = 0;
 		stn::Option <blocks::block_id> blk_id = stn::None;
 		bool operator==(const item_traits& other) const = default;
-		item_traits(std::string_view name,item_use_type use,renderer::TexturePath image,float dmg,float protection,float food_value,float pick)
+		item_traits(std::string_view name, renderer::TexturePath image, size_t initial_duribility, tool_traits traits, float protection, float food_value)
 			: item_name(name),
-			use_type(use),
+			duribility(initial_duribility),
 			image_path(std::move(image)),
 			armor(protection),
-			damage(dmg),
-			pickaxe_speed(pick),
+			tool(traits),
 			food(food_value),
 			blk_id(stn::None) {
 		}
 		item_traits(std::string_view name, renderer::TexturePath image,blocks::block_id blk_id)
 			: item_name(name),
-			use_type(item_use_type::block),
+			duribility(),
 			image_path(std::move(image)),
 			armor(0),
-			damage(0.0f),
-			pickaxe_speed(0),
 			blk_id(blk_id) {
 		}
 		item_traits(std::string_view name, renderer::TexturePath image)
 			: item_name(name),
-			use_type(item_use_type::block),
+			duribility(),
 			image_path(std::move(image)),
 			armor(0),
-			damage(0.0f),
-			pickaxe_speed(0),
 			blk_id(stn::None) {
 		}
 	};

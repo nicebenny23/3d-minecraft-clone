@@ -32,7 +32,7 @@ struct liquidprop : ecs::component {
 	void oncollision(ecs::obj* collidedwith) {
 		if (collidedwith->has_component<rigidbody>()) {
 			collidedwith->get_component<rigidbody>().inliquid = true;
-			collidedwith->get_component<rigidbody>().velocity *= 1 - CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt * 5;
+			collidedwith->get_component<rigidbody>().velocity *= 1 -world().ensure_resource<timename::TimeManager>().dt * 5;
 		}
 	}
 	void updateinface(math::Direction3d face) {

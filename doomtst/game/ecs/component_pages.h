@@ -7,22 +7,27 @@ namespace ecs {
 	template<typename T, size_t chunk_exp>
 	struct component_page {
 
-		bool nonempty() const {
+		bool non_empty() const {
 			return element_count != 0;
 		}
 		bool empty() const {
 			return element_count == 0;
 		}
-		//index unchecked
+		//index is unchecked
 		T& operator[](size_t index) {
 			return *reinterpret_cast<T*>(element_offset_ptr + sizeof(T) * index);
 		}
+
+		//index is unchecked
 		const T& operator[](size_t index) const {
 			return *reinterpret_cast<const T*>(element_offset_ptr + sizeof(T) * index);
 		}
+
+		//index is unchecked
 		T* get_ptr(size_t index) {
 			return reinterpret_cast<T*>(element_offset_ptr + sizeof(T) * index);
 		}
+		//index is unchecked
 		const T* get_ptr(size_t index) const {
 			return reinterpret_cast<const T*>(element_offset_ptr + sizeof(T) * index);
 		}
@@ -34,7 +39,7 @@ namespace ecs {
 			element_offset_ptr = 0;
 			element_count = 0;
 		}
-		// Move constructor
+		
 		component_page(component_page&& other) noexcept
 			: elems(other.elems),
 			element_offset_ptr(other.element_offset_ptr),
@@ -44,7 +49,6 @@ namespace ecs {
 			other.element_count = 0;
 		}
 
-		// Move assignment
 		component_page& operator=(component_page&& other) noexcept {
 			if (this != &other) {
 				clear_unchecked();
@@ -129,7 +133,7 @@ namespace ecs {
 		}
 		component_pages& operator=(component_pages&& other) noexcept {
 			if (this != &other) {
-				clear(); // delete current components
+				clear(); 
 				pages = std::move(other.pages);
 				element_filter = std::move(other.element_filter);
 				other.clear();
@@ -172,7 +176,7 @@ namespace ecs {
 			}
 			return stn::insertion<T&>(pages.unchecked_at(index >> chunk_exp)[index],false);
 		}
-		//replace_at will not modify the adress of it 
+		//replace_at_unchecked assumes the element exists and  will not modify the adress of an element 
 		template<typename ...Args>
 		T& replace_at_unchecked(size_t index, Args&&... args) {
 	return pages.unchecked_at(index >> chunk_exp).replace_at_unchecked(index, std::forward<Args>(args)...);

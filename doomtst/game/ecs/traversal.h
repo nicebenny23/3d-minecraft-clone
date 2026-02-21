@@ -58,7 +58,11 @@ namespace ecs {
 		return view(entity).has_parent();
 	}
 	inline stn::Option<ecs::obj> parent(ecs::obj entity) {
-		return view(entity).parent().map(std::function([](HierarchyView view) {return view.entity; }));
+		stn::Option<ecs::entity> parent= entity.get_component_opt<Child>().map(&Child::parent);
+		if (parent) {
+			return ecs::obj(parent.unwrap(), entity.world());
+		}
+		return stn::None;	
 	}
 	inline stn::span<ecs::entity> children(ecs::obj entity) {
 		return view(entity).children_entities();

@@ -25,8 +25,9 @@ namespace ecs {
 
 		constexpr entity() noexcept:Id(0), gen(0) {};
 	private:
-		std::uint16_t gen;
+
 		entity_id Id;
+		std::uint16_t gen;
 
 	};
 
