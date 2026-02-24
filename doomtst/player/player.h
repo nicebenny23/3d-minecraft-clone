@@ -1,7 +1,6 @@
 #pragma once
 
-#include "../game/entitystate.h"
-
+#include "../game/ecs/filtered_object.h"
 // settings
 
 namespace player {

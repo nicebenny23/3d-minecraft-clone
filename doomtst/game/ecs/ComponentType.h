@@ -34,8 +34,13 @@ namespace ecs {
 		bool has(entity_id owner) const {
 			return pages->has(owner);
 		}
-
-
+		const component& at(entity_id entity) const{
+			return pages->at(entity);
+		}
+		component& at(entity_id entity) {
+			return pages->at(entity);
+		}
+		
 		component& unchecked_at(entity_id entity) {
 			return pages->unchecked_at(entity);
 		}

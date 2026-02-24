@@ -24,6 +24,6 @@ int Hash(int seed, int xPrimed, int yPrimed, int zPrimed);
 		return seeded_directions.unchecked_at(hash);
 
 	}
-	void initrandom();
+	void initilize_random();
 
 }

@@ -23,8 +23,14 @@ namespace stn {
 
 	template<typename T>
 	concept OptionType =stn::TypeInstantiationOf<T,Option>;
-
-
+	/*
+	template<typename T>
+	union option_union {
+		NoneType nothing,
+		std::conditional_t<std::is_lvalue_reference_v<T>,std::remove_reference_t<T>*,T> value
+	
+	};
+	*/
 	template<typename T>
 	struct Option {
 		using value_type = T;
@@ -67,7 +73,12 @@ namespace stn {
 		Option(const Option& other) requires std::copy_constructible<T>
 			: has_value(other.has_value), value() {
 			if (has_value) {
-				value.construct<T>(other.value.get<T>());
+				if constexpr (std::is_reference_v<T>) {
+					value.template copy_reference_from<T>(other.value);
+				}
+				else {
+					value.construct<T>(other.value.get<T>());
+				}
 			}
 		}
 
@@ -99,7 +110,12 @@ namespace stn {
 				}
 				has_value = other.has_value;
 				if (has_value) {
-					value.construct<T>(other.value.get<T>());
+					if constexpr (std::is_reference_v<T>) {
+						value.template copy_reference_from<T>(other.value);
+					}
+					else{
+						value.construct<T>(other.value.get<T>());
+					}
 				}
 			}
 			return *this;

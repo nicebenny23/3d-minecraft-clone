@@ -6,6 +6,9 @@ namespace colors {
 		Color(double red, double green, double blue, double alpha) :r(red), g(green), b(blue), a(alpha) {
 
 		}
+		Color():r(1),g(1),b(1),a(1) {
+
+		}
 		double r;
 		double g;
 		double b;

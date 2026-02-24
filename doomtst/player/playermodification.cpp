@@ -10,8 +10,8 @@
 
 void player::playerbreak::make_drop(ecs::obj Hit)
 {
-	if (Hit.has_component<items::loot_table>())
+	if (Hit.has_component<items::loot_dropper>())
 	{
-		Hit.get_component<items::loot_table>().should_drop = true;
+		Hit.get_component<items::loot_dropper>().drop_to = owner().inner();
 	}
 }

@@ -36,48 +36,48 @@ namespace stn {
 		static type_id_chart make() {
 			type_id_chart c;
 			c.name = std::string(typeid(T).name());
-			c.layout = stn::memory::layout_of<T>;
-
-			if constexpr (requires { std::hash<T>{}(std::declval<T>()); }) {
-				c.hash = [](const void* a) -> std::size_t {
-					return std::hash<T>{}(*static_cast<const T*>(a));
-					};
-			}
-			if constexpr (std::equality_comparable<T>) {
-				c.equals = [](const void* a, const void* b) -> bool {
-					return *static_cast<const T*>(a) == *static_cast<const T*>(b);
-					};
-			}
-			if constexpr (std::is_copy_constructible_v<T>) {
-				c.copy_construct = [](void* dst, const void* src) {
-					new (dst) T(*static_cast<const T*>(src));
-					};
-			}
-			if constexpr (std::is_move_constructible_v<T>) {
-				c.move_construct = [](void* dst, void* src) {
-					new (dst) T(std::move(*static_cast<T*>(src)));
-					};
-			}
-			if constexpr (std::is_copy_assignable_v<T>) {
-				c.copy_assign = [](void* dst, const void* src) {
-					*static_cast<T*>(dst) = *static_cast<const T*>(src);
-					};
-			}
-			if constexpr (std::is_move_assignable_v<T>) {
-				c.move_assign = +[](void* dst, void* src) {
-					*static_cast<T*>(dst) = std::move(*static_cast<T*>(src));
-					};
-			}
-			if constexpr (!std::is_trivially_destructible_v<T>) {
-				c.destroy = [](void* obj) {
-					static_cast<T*>(obj)->~T();
-					};
-			}
-			if constexpr (std::is_default_constructible_v<T>) {
-				c.default_construct = [](void* dst) {
-					new (dst) T();
-					};
-			}
+				c.layout = stn::memory::layout_of<T>;
+				if constexpr (requires { std::hash<T>{}(std::declval<T>()); }) {
+					c.hash = [](const void* a) -> std::size_t {
+						return std::hash<T>{}(*static_cast<const T*>(a));
+						};
+				}
+				if constexpr (std::equality_comparable<T>) {
+					c.equals = [](const void* a, const void* b) -> bool {
+						return *static_cast<const T*>(a) == *static_cast<const T*>(b);
+						};
+				}
+				if constexpr (std::is_copy_constructible_v<T>) {
+					c.copy_construct = [](void* dst, const void* src) {
+						new (dst) T(*static_cast<const T*>(src));
+						};
+				}
+				if constexpr (std::is_move_constructible_v<T>) {
+					c.move_construct = [](void* dst, void* src) {
+						new (dst) T(std::move(*static_cast<T*>(src)));
+						};
+				}
+				if constexpr (std::is_copy_assignable_v<T>) {
+					c.copy_assign = [](void* dst, const void* src) {
+						*static_cast<T*>(dst) = *static_cast<const T*>(src);
+						};
+				}
+				if constexpr (std::is_move_assignable_v<T>) {
+					c.move_assign = +[](void* dst, void* src) {
+						*static_cast<T*>(dst) = std::move(*static_cast<T*>(src));
+						};
+				}
+				if constexpr (!std::is_trivially_destructible_v<T>) {
+					c.destroy = [](void* obj) {
+						static_cast<T*>(obj)->~T();
+						};
+				}
+				if constexpr (std::is_default_constructible_v<T>) {
+					c.default_construct = [](void* dst) {
+						new (dst) T();
+						};
+				}
+			
 			return c;
 		}
 	};
@@ -286,8 +286,17 @@ namespace stn {
 		void set(stn::type_id id,const T& value) {
 			sparse_map.reach(id.id) = value;
 		}
+		
+		template<typename U> requires std::is_default_constructible_v<T>
+		T& get_or_default() {
+			size_t index = typeIndex<U>;
+			stn::Option<T&> value = sparse_map.reach(index);
+			if (!value) {
+				sparse_map[index] = T();
+			}
+			return value.unwrap();
+		}
 
-		template<typename T>
 		bool contains(stn::type_id id) const {
 			return sparse_map.get_flat(id.id).has_value;
 		}
@@ -297,6 +306,7 @@ namespace stn {
 				sparse_map[id.id] = stn::None;
 			}
 		}
+		
 		
 		stn::Option<T> at(stn::type_id id) const {
 			return sparse_map.get_flat(id.id);
@@ -308,16 +318,17 @@ namespace stn {
 		}
 
 		template<typename U>
-		stn::Option<T> remove() {
+		void remove() {
 			size_t index = typeIndex<U>;
 			if (sparse_map.contains_index(index)) {
 				sparse_map[index] = stn::None;
 			}
+
 		}
 
 		template<typename U>
 		bool contains() const {
-			return sparse_map.get_flat(typeIndex<U>).has_value;
+			return sparse_map.get_flat(typeIndex<U>).is_some();
 		}
 
 		template<typename U>

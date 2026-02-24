@@ -37,14 +37,19 @@ namespace renderer {
 	struct TexturePath {
 		using asset_type = Texture2D;
 		std::string path;
-		std::string name;
-		TexturePath(const std::string& path, const std::string& name) :path(path), name(name) {
+		std::string_view name() const{
+			return path;
+		};
+		//we should get rid of this as soon as possible
+		TexturePath(const std::string& path, const std::string& name) :path(path) {
+		
 		}
-		TexturePath(const char* path, const char* name) :path(path), name(name) {
+		TexturePath(const std::string& path) :path(path) {
+		}
+		TexturePath(const char* path, const char* name) :path(path){
 		}
 		bool operator==(const TexturePath& other) const noexcept {
-			return path == other.path
-				&& name == other.name;
+			return path == other.path;
 		}
 
 	};
@@ -54,7 +59,7 @@ namespace std {
 	struct hash<renderer::TexturePath> {
 		std::size_t operator()(const renderer::TexturePath& s) const noexcept {
 			std::hash<std::string> hasher;
-			return hasher(s.name) + hasher(s.path);
+			return hasher(s.path);
 		}
 	};
 }

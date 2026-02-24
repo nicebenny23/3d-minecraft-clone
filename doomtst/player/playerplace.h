@@ -46,10 +46,10 @@ namespace player {
 				block& block_at = mabye_block_at.unwrap();
 				math::Direction3d attach_direction = math::greatest_aligned_direction( block_hit_at.center()- block_at.center());
 				v3::Scale3 mesh_scale = block_at.registry().block_for(spawn_id)->traits().mesh.size;
-				Box new_block_box = Box(block_at.center(), mesh_scale);
+				Box new_block_box = Box(block_at.pos+unitv/2, mesh_scale);
 				new_block_box.center -= attach_direction.vec() * mesh_scale.shrunk(.5f);
 
-				double block_push_margin = .03f;
+				double block_push_margin = .06f;
 				new_block_box.scale.shink(block_push_margin);
 				if (collision::boxcast(new_block_box,collision::HitQuery(ecs))) {
 					continue;

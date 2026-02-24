@@ -36,7 +36,7 @@ namespace stn {
 		using Base = Tuple<Tail...>;
 
 		template<typename H, typename... T>
-		Tuple(H&& head, T&&... tail)
+		Tuple(H&& head, T&&... tail)			requires (std::constructible_from<Head, H&&>)
 			: Base(std::forward<T>(tail)...),
 			value(std::forward<H>(head)) {
 		}

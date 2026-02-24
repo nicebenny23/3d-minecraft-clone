@@ -87,7 +87,20 @@ namespace Chunk {
 	}
 
 	*/
-	inline blocks::block_id generatechunkvalfromnoise(Point3 pos, math::NoiseMap& map, math::NoiseMap& crazy, math::NoiseMap& slow, const BlockRegistry& registry) {
+
+	//catched noise_maps for a world
+	struct NoiseMaps :ecs::resource {
+		stn::type_map < math::NoiseMap> maps;
+
+		template<typename T>
+		const math::NoiseMap& register_map(const math::NoiseParameters& params) {
+			if (!maps.contains<T>()) {
+				maps.set<T>(math::NoiseMap(params));
+			}
+			return maps.at<T>().unwrap();
+		}
+	};
+	inline blocks::block_id generatechunkvalfromnoise(Point3 pos,const math::NoiseMap& map, const math::NoiseMap& crazy, const math::NoiseMap& slow, const BlockRegistry& registry) {
 		if (generateflat) {
 			if (0 < pos.y) {
 				return registry.get_id<blocks::AirBlock>();
@@ -120,21 +133,21 @@ namespace Chunk {
 	};
 
 	struct idmap {
-		math::NoiseMap slow;
-		math::NoiseMap map;
-		math::NoiseMap middle_map;
-		math::NoiseMap crazy;
+		const math::NoiseMap& slow;
+		const math::NoiseMap& map;
+		const math::NoiseMap& middle_map;
+		const math::NoiseMap& crazy;
 		array<idblock> ids;
 		Coord loc;
 		const BlockRegistry& registry;
 		blocks::block_id id_at(Coord pos) {
 
-			pos -= loc * Chunk::chunkaxis;
-			if (in_range(int(pos.x), 0, Chunk::chunkaxis - 1)) {
-				if (in_range(int(pos.y), 0, Chunk::chunkaxis - 1)) {
+			pos -= loc * Chunk::chunk_axis;
+			if (in_range(int(pos.x), 0, Chunk::chunk_axis - 1)) {
+				if (in_range(int(pos.y), 0, Chunk::chunk_axis - 1)) {
 
-					if (in_range(int(pos.z), 0, Chunk::chunkaxis - 1)) {
-						return ids[Chunk::chunkaxis * Chunk::chunkaxis * pos.x + Chunk::chunkaxis * pos.y + pos.z].block_id;
+					if (in_range(int(pos.z), 0, Chunk::chunk_axis - 1)) {
+						return ids[Chunk::chunk_axis * Chunk::chunk_axis * pos.x + Chunk::chunk_axis * pos.y + pos.z].block_id;
 					}
 				}
 			}
@@ -142,10 +155,10 @@ namespace Chunk {
 
 		}
 		void iterate(int x, std::mutex& mtx) {
-			int ind = Chunk::chunkaxis * Chunk::chunkaxis * x;
-			for (int y = 0; y < Chunk::chunkaxis; y++) {
-				for (int z = 0; z < Chunk::chunkaxis; z++) {
-					Coord idpos = loc * Chunk::chunkaxis + Coord(x, y, z);
+			int ind = Chunk::chunk_axis * Chunk::chunk_axis * x;
+			for (int y = 0; y < Chunk::chunk_axis; y++) {
+				for (int z = 0; z < Chunk::chunk_axis; z++) {
+					Coord idpos = loc * Chunk::chunk_axis + Coord(x, y, z);
 
 					blocks::block_id neid = generatechunkvalfromnoise(idpos, map, crazy, slow, registry);
 					mtx.lock();
@@ -156,14 +169,24 @@ namespace Chunk {
 			}
 
 		}
-		idmap(Coord location, const BlockRegistry& block_registry) :
-			slow(math::NoiseParameters(1, 1, .005, 1.2)),
-			map(math::NoiseParameters(3, .6, .02, 1.2)),
-			crazy(math::NoiseParameters(4, 1., .005, 1.2)),
-			middle_map(math::NoiseParameters(2, 1, .005, 1.2)), registry(block_registry) {
+
+		struct slow_map {
+		};
+		struct normal_noise_map {
+		};
+		struct crazy_noise_map {
+		};
+		struct middle_map {
+		};
+		idmap(Coord location, const BlockRegistry& block_registry, NoiseMaps& maps) :
+
+			slow(maps.register_map<slow_map>(math::NoiseParameters(1, 1, .005, 1.2))),
+			map(maps.register_map<slow_map>(math::NoiseParameters(3, .6, .02, 1.2))),
+			crazy(maps.register_map<slow_map>(math::NoiseParameters(4, 1., .005, 1.2))),
+			middle_map(maps.register_map<slow_map>(math::NoiseParameters(2, 1, .005, 1.2))), registry(block_registry) {
 
 			array<int> x_index_list;
-			for (size_t i = 0; i < Chunk::chunkaxis; i++) {
+			for (size_t i = 0; i < Chunk::chunk_axis; i++) {
 				x_index_list.push(i);
 			}
 
@@ -178,14 +201,21 @@ namespace Chunk {
 
 
 	};
+	struct ChunkLoaderPlugin :ecs::System {
+		void build(Core::App& world) {
 
+
+		}
+
+
+	};
 	struct CreateEmptyChunk {
 		CreateEmptyChunk(ChunkLocation chunk_spawn_location) :spawn_location(chunk_spawn_location) {
 
 		}
 		void apply(ecs::obj& chunk_object) {
 			Chunk::chunk& newchunk = chunk_object.add_component<Chunk::chunk>(spawn_location);
-			chunk_object.add_component<Chunk::chunkmesh>();
+			chunk_object.add_component<Chunk::chunkmesh>(spawn_location.position);
 		}
 		ChunkLocation spawn_location;
 	};
@@ -199,18 +229,18 @@ namespace Chunk {
 			CreateEmptyChunk(location).apply(chunk_object);
 			Chunk::chunk& newchunk = chunk_object.get_component<Chunk::chunk>();
 			Chunk::chunkmesh& mesh = chunk_object.get_component<Chunk::chunkmesh>();
-			idmap statemap = idmap(location.position, chunk_object.world().get_resource<BlockRegistry>());
+			idmap statemap = idmap(location.position, chunk_object.world().get_resource<BlockRegistry>(), chunk_object.world().insert_resource<NoiseMaps>());
 			size_t ind = 0;
-			for (int x = 0; x < Chunk::chunkaxis; x++) {
-				for (int y = 0; y < Chunk::chunkaxis; y++) {
-					for (int z = 0; z < Chunk::chunkaxis; z++) {
+			for (int x = 0; x < Chunk::chunk_axis; x++) {
+				for (int y = 0; y < Chunk::chunk_axis; y++) {
+					for (int z = 0; z < Chunk::chunk_axis; z++) {
 						Coord pos = statemap.ids[ind].pos;
 						blocks::block_id block_id = statemap.ids[ind].block_id;
-						newchunk.block_list.push(ecs::Constrained<block>(GenerateBlock{ .id = block_id,
+						newchunk.block_list.push(ecs::Constrained<block>::make_unchecked(GenerateBlock{ .id = block_id,
 						.loc = pos,
 						.face = math::up2d,
 						.direction = math::up_3d,
-						.mesh = chunk_object.get_component<Chunk::chunkmesh>() }.spawn(chunk_object.world())));
+						.mesh = mesh }.spawn(chunk_object.world())));
 						ind++;
 					}
 				}
@@ -224,24 +254,24 @@ namespace Chunk {
 		LoadChunkFromFile(ChunkLocation chunk_location) :location(chunk_location) {
 		}
 		void apply(ecs::obj& chunk_object) {
-			stn::file_handle file = stn::file_handle(Chunk::file_name(location,chunk_object.world().get_resource<grid::world>()), stn::FileMode::ReadBinary);
+			stn::file_handle file = stn::file_handle(Chunk::file_name(location, chunk_object.world().get_resource<grid::world>()), stn::FileMode::ReadBinary);
 
 			CreateEmptyChunk(location).apply(chunk_object);
 			Chunk::chunk& newchunk = chunk_object.get_component<Chunk::chunk>();
-			for (int x = 0; x < Chunk::chunkaxis; x++) {
-				for (int y = 0; y < Chunk::chunkaxis; y++) {
-					for (int z = 0; z < Chunk::chunkaxis; z++) {
+			for (int x = 0; x < Chunk::chunk_axis; x++) {
+				for (int y = 0; y < Chunk::chunk_axis; y++) {
+					for (int z = 0; z < Chunk::chunk_axis; z++) {
 						block_id block_id_for = stn::file_serializer<block_id>().read(file);
 						math::Direction2d dir = stn::file_serializer<math::Direction2d>().read(file);
 						math::Direction3d align = stn::file_serializer<math::Direction3d>().read(file);
-						Coord pos = Coord(x, y, z) + location.position * Chunk::chunkaxis;
-						newchunk.block_list.push(GenerateBlock{ .id=block_id_for,
+						Coord pos = Coord(x, y, z) + location.position * Chunk::chunk_axis;
+						newchunk.block_list.push(GenerateBlock{ .id = block_id_for,
 						.loc = pos,
 						.face = dir,
-						.direction =align,
+						.direction = align,
 						.mesh = chunk_object.get_component<Chunk::chunkmesh>(),
-						.handle=file } .spawn(chunk_object.world()));
-				
+						.handle = file } .spawn(chunk_object.world()));
+
 					}
 				}
 			}
@@ -252,6 +282,7 @@ namespace Chunk {
 		chunk_loaded(Chunk::ChunkLocation loaded_position) :pos(loaded_position) {
 
 		}
+
 		Chunk::ChunkLocation pos;
 	};
 	struct CreateChunk {
@@ -259,8 +290,8 @@ namespace Chunk {
 		CreateChunk(ChunkLocation chunk_location) :location(chunk_location) {
 
 		}
-		void apply(ecs::obj& object) const{
-			if (fileexists(Chunk::file_name(location,object.world().get_resource<grid::world>()))) {
+		void apply(ecs::obj& object) const {
+			if (fileexists(Chunk::file_name(location, object.world().get_resource<grid::world>()))) {
 				LoadChunkFromFile(location).apply(object);
 			}
 			else {
@@ -268,14 +299,6 @@ namespace Chunk {
 			}
 			object.world().write_event(chunk_loaded(location));
 		}
-
-	};
-	struct ChunkLoader :ecs::System {
-		void run(ecs::Ecs& world) {
-
-
-		}
-
 
 	};
 

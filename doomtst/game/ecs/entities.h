@@ -1,6 +1,7 @@
 #include "entity.h"
 #include "../../util/dynamicarray.h"
 #include "../../util/index.h"
+#include "EntityAllocator.h"
 #pragma once
 namespace ecs {
 	struct ArchetypeIndexTag {
@@ -23,6 +24,7 @@ namespace ecs {
 	struct entity_metadata {
 		uint32_t gen_count;
 		entity_metadata() {
+
 			gen_count = 0;
 		}
 		void clear() {
@@ -38,11 +40,8 @@ namespace ecs {
 	
 
 	struct Entities {
-		Entities(size_t count) :entity_list(count) {
+		Entities() :entity_list(),free_ids() {
 
-			for (std::uint32_t i = 0; i < count; i++) {
-				free_ids.push(entity_id(i));
-			}
 		}
 
 		entity_metadata& operator[](size_t index) {	
@@ -95,18 +94,23 @@ namespace ecs {
 		bool is_empty() const {
 			return entity_list.empty();
 		}
-		entity allocate_entity() {
-			entity_id id= free_ids.pop();
-			at(id).mark_alive();
-			return entity(id, entity_list[id.id].gen_count);
+		template<typename A= default_allocator>
+		stn::insertion<entity> allocate_entity() {
+			stn::insertion<entity_id> id= free_ids.allocate<A>();
+			if (id.is_new) {
+				//expands to the index
+				entity_list.geometric_expand(max_sharing_page(id.value).id + 1);
+			}
+			at(id.value).mark_alive();
+			return stn::insertion<entity>(entity(id.value, entity_list[id.value.id].gen_count), id.is_new);;
 		}
 		void remove_entity(entity entity) {
 			at(entity.id()).clear();
-			free_ids.push(entity.id());
+			free_ids.free(entity.id());
 		}
 	private:
 
-		stn::array<entity_id> free_ids;
+		EntityIds free_ids;
 		stn::array<entity_metadata> entity_list;
 	};
 }

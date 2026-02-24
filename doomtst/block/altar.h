@@ -9,7 +9,7 @@ inline void altarinit(blocks::block& blk) {
 	blk.mininglevel = .3f;
 	blk.mesh.box.scale = blocks::blockscale;
 	blk.createdefaultaabb();
-	blk.owner().add_component<loot_table>().add("altar item", 1, true);
+	blk.owner().add_component<loot_dropper>().add("altar item", 1, true);
 	//CtxName::ctx.EntMan->shouldspawnfinalboss = true;
 	blk.minedfastwithpick = false;
 }

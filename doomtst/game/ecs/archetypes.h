@@ -60,30 +60,30 @@ namespace ecs {
 			return archetypes.unchecked_at(location.id.id).contains_index(location.index);
 		}
 		ArchetypeEntity& archetype_entity_of(entity_id ent) {
-			return locations[ent.id];
-		}
-		const ArchetypeEntity& archetype_entity_of(entity_id ent) const {
-			return locations[ent.id];
-		}
-		const Archetype& archetype_of(entity_id ent) const {
-			return archetype_at(archetype_entity_of(ent).id());
+			return locations.reach(ent.id);
 		}
 		Archetype& archetype_of(entity_id ent) {
 			return archetype_at(archetype_entity_of(ent).id());
+		}
+		Archetype& archetype_of_unchecked(entity_id ent) {
+			return archetype_at_unchecked(archetype_entity_of(ent).id());
 		}
 		void spawn_at(entity_id new_spawn, component_id component_id) {
 			archetype_id spawn_at = empty_archetype().arch_connection_at(component_id).unwrap_or_else([&]() {
 				//in this case we have not created an archetype connected to old_archetype at index yet
 				return add_archetype(empty_archetype().id_set.flipped(component_id));
 				});
-			locations[new_spawn.id].set(archetype_at(spawn_at).add(new_spawn));
+			archetype_entity_of(new_spawn).set(archetype_at(spawn_at).add(new_spawn));
 		}
-		Archetypes(size_t size) :locations(size) {
+		Archetypes(){
 			//empty archetype
 			add_archetype(component_ids(stn::None));
 		};
+		void add_page(page_index index) {
+			
+		}
 		void add_to_empty(entity_id new_spawn) {
-			locations[new_spawn.id].set(empty_archetype().add(new_spawn));
+			archetype_entity_of(new_spawn).set(empty_archetype().add(new_spawn));
 		}
 
 		archetype_id add_archetype(const component_ids& Components) {
@@ -159,7 +159,7 @@ namespace ecs {
 		}
 
 	private:
-		stn::array<ArchetypeEntity> locations;
+		stn::paged_array<ArchetypeEntity> locations;
 		stn::array<Archetype> archetypes;
 
 	};

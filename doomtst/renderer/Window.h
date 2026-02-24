@@ -66,7 +66,6 @@ namespace window {
 		void InitGLFW();
 	};
 	
-	// Returns the current window aspect ratio.
 
 
 

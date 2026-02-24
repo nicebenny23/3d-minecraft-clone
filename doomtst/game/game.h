@@ -16,10 +16,7 @@
 #pragma once 
 
 void endframe() {
-	Core::game.Ecs.get_resource<userinput::InputManager>().endupdate();
-	updateltick();
 	Core::game.Ecs.get_resource<window::Window>().SwapBuffers();
-	glfwPollEvents();
 	Core::game.Ecs.get_resource<renderer::Renderer>().Clear();
 }
 
@@ -27,41 +24,38 @@ void update() {
 	Core::game.Ecs.run_systems();
 	endframe();
 }
+struct MinecraftPlugin :Core::Plugin {
+	void build(Core::App& app) {
 
-void init() {
-	Core::game.InitOC();
-	Core::game.createWindow();
-	Core::game.insert_plugin<renderer::RendererPlugin>();
-	Core::game.insert_plugin<ui::UiImagePlugin>();
-	Core::game.insert_plugin<ui::MenuPlugin>();
-	Core::game.insert_plugin<items::register_core_items>();
-	Core::game.insert_plugin<items::ItemUiPlugin>();
-	Core::game.insert_plugin<ui::UiTextPlugin>();
-	Core::game.insert_plugin<collision::CollsionPlugin>();
-	random::initrandom();
-	Core::game.CreateWorld();
-	//ui::createuielement<ui_image_component>("images\\crosshair.png", "CrosshairTexture", v2::unitv / 32, v2::zerov, -3);
-	Core::game.emplace_resource<grid::Grid>(2);
-	ecs::spawn(Core::game.Ecs,player::initplayer);
-	glfwSwapInterval(0);
-}
+		app.insert_plugin<Core::GamePlugin>();
+		app.createWindow();
+		app.insert_plugin<renderer::RendererPlugin>();
+		app.insert_plugin<ui::MenuPlugin>();
+		app.insert_plugin<items::ItemUiPlugin>();
+		app.insert_plugin<items::register_core_items>();
+		app.insert_plugin<collision::CollsionPlugin>();
+		app.emplace_system<userinput::InputPollingSystem>();
+		app.emplace_resource<grid::world>(0);
+		random::initilize_random();
+		app.emplace_resource<grid::Grid>(3);
+		ecs::spawn(app.Ecs, player::initplayer);
+		glfwSwapInterval(0);
+		app.insert_plugin<timename::TimePlugin>();
+		app.Ecs.emplace_system<RigidbodySystem>();
+		app.Ecs.emplace_system<spawn_mobs>();
+		app.Ecs.emplace_system<PlayerMovementSys>();
+		app.insert_plugin<blockrender::BlockRenderPlugin>();
+		app.insert_plugin<player::PlayerInventoryPlugin>();
+		app.insert_plugin<decals::decal_plugin>();
+		app.insert_plugin<guirender::ConsolePlugin>();
 
-struct PlayerInventoryPlugin :Core::Plugin {
-	void build(Core::App& world) {
-		world.emplace_system<player::LoadHotbarSlots>();
 	}
-};
-void rungame() {
-	init();
 
-	Core::game.insert_plugin<timename::TimePlugin>();
-	Core::game.Ecs.emplace_system<RigidbodySystem>();
-	Core::game.Ecs.emplace_system<spawn_mobs>();
-	Core::game.Ecs.emplace_system<PlayerMovementSys>();
-	Core::game.insert_plugin<blockrender::BlockRenderPlugin>();
-	Core::game.insert_plugin<PlayerInventoryPlugin>();
-	Core::game.insert_plugin<decals::decal_plugin>();
-	Core::game.insert_plugin<guirender::ConsolePlugin>();
+
+};
+
+void rungame() {
+	Core::game.insert_plugin<MinecraftPlugin>();
 	while (!Core::game.Ecs.get_resource<Core::GameState>().should_close) {
 		update();
 	}

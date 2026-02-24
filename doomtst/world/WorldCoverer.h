@@ -22,12 +22,10 @@ namespace grid {
 		GridCoverer(ecs::Ecs& world) :event_key(world.make_reader<Chunk::chunk_loaded>()) {
 
 		}
-		void compute_mesh_cover(blockmesh& mesh, Grid& grid) {
+		void compute_mesh_cover(block_mesh& mesh, Grid& grid) {
 			if (mesh.invisible()) {
-				for (size_t i = 0; i < 6; i++) {
-					mesh[i].set_cover(cover_state::Covered);
-				}
 				return;
+				//we can skip all covering in this case
 			}
 			if (mesh.scale()!=v3::Scale3(blockscale)) {
 				for (size_t i = 0; i < 6; i++) {
@@ -66,10 +64,11 @@ namespace grid {
 			}
 		}
 
-		void compute_chunk_cover(ecs::obj chunk) {
-			Chunk::chunk& cnk = chunk.get_component<Chunk::chunk >();
+		void compute_chunk_cover(ecs::Constrained<Chunk::chunk> chunk) {
+			grid::Grid& grid = chunk.world().get_resource<Grid>();
+			Chunk::chunk& cnk = chunk.get<Chunk::chunk >();
 			for (auto& blk : cnk.block_list) {
-				compute_mesh_cover(blk.get_component<block>().mesh, chunk.world().get_resource<Grid>());
+				compute_mesh_cover(blk.get<block>().mesh, grid);
 			}
 		}
 
@@ -88,27 +87,18 @@ namespace grid {
 
 			for (Chunk::chunk_loaded& cmd : event_key.read()) {
 				if (grid.get_chunk(cmd.pos)) {
-					world.emplace_command<recompute_chunk_cover>(grid.get_chunk(cmd.pos).unwrap().owner());
+					compute_chunk_cover(grid.get_chunk(cmd.pos).unwrap().owner());
 				}
 				for (math::Direction3d direction : math::Directions3d) {
 					Chunk::ChunkLocation pos = Chunk::ChunkLocation(direction.coord() + cmd.pos.position);
-					if (grid.get_chunk(pos)) {
-						world.emplace_command<recompute_chunk_cover>(grid.get_chunk(pos).unwrap().owner());
-					}
+					grid.get_chunk(pos).then([&](Chunk::chunk& chunk) {
+						//for eac
+						for (Chunk::block_object& object : chunk.on_face(-direction)) {
+							compute_mesh_cover(object.get<block>().mesh, grid);
+						}
+					});
 				}
 			}
-			stn::array<ecs::obj> chunks_to_recompute;
-
-			for (recompute_chunk_cover cmd : world.read_commands<recompute_chunk_cover>()) {
-				if (!chunks_to_recompute.contains(cmd.chunk)) {
-					chunks_to_recompute.push(cmd.chunk);
-				}
-			}
-			if (chunks_to_recompute.non_empty()) {
-
-				thread_util::par_iter_rng(chunks_to_recompute, [&](ecs::obj elem) {compute_chunk_cover(elem); }, 4);
-			}
-
 		}
 	private:
 		ecs::EventReader<Chunk::chunk_loaded> event_key;

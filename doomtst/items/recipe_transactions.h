@@ -43,10 +43,14 @@ namespace items {
 					return false;
 				}
 				const item_stack& stck = element.element().unwrap().get_component<item_stack>();
-				if (!stck.can_fit(item)) {
+				if (!stck.can_accept(item)) {
 					return false;
 				}
 			}
+		}
+		if (output_slot) {
+			
+			return output_slot.unwrap().can_accept(item_recipe.output, input_container.types());
 		}
 		return true;
 	}

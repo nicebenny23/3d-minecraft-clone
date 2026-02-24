@@ -12,8 +12,8 @@ namespace items {
 		ecs::obj primary_slot() {
 			return container_object;
 		}
-		cursor_container(ElementSlot& container,ecs::obj cursor_display)
-		:container_object(container.owner()),display(cursor_display) {
+		cursor_container(ecs::Constrained<ElementSlot> container,ecs::obj cursor_display)
+		:container_object(container.object()),display(cursor_display) {
 
 		}
 		ecs::obj display;
@@ -66,6 +66,7 @@ namespace items {
 			ecs::obj cursor_display = world.get_resource<cursor_container>().display;
 			ElementSlot& cursor_slot = world.get_resource<cursor_container>().primary_slot().get_component<ElementSlot>();
 			cursor_display.get_component<ui::UiBounds>().local.center = world.get_resource<userinput::InputManager>().mouse_position;
+			debug(cursor_display.get_component<ui::ComputedStyle>().enabled);
 			for (auto&& [interaction_state, container_slot,decl] : ecs::View<ecs::With< ui::InteractionState>, ecs::With<items::RefrencedSlot>, ecs::With<items::ItemSlotDecal>>(world)) {
 				if (!interaction_state.right_clicked) {
 					continue;
@@ -95,8 +96,12 @@ namespace items {
 	};
 	struct cursor_highlighter :ecs::System {
 		void run(ecs::Ecs& world) {
-			
+			world.get_resource<cursor_container>().display.get_component<ui::UiEnabled>().enable();
 			ecs::obj cursor_obj = world.get_resource<cursor_container>().primary_slot();
+			ui::ComputedStyle & style = ecs::parent(world.get_resource<cursor_container>().display)
+			.unwrap()
+			.get_component<ui::ComputedStyle>();
+
 			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
 			for (auto [item_decal, interaction_state] : ecs::View<ecs::With<ItemSlotDecal>, ecs::With<ui::InteractionState>>(world)) {
 				if (interaction_state.hovered) {
@@ -121,7 +126,7 @@ namespace items {
 			app.emplace_system<cursor_swapper>();
 			app.emplace_system<cursor_spreader>();
 			app.emplace_system<cursor_highlighter>();
-			app.emplace_resource<cursor_container>(cursor_entity.get_component<ElementSlot>(), cursor_display);
+			app.emplace_resource<cursor_container>(cursor_entity, cursor_display);
 		}
 	};
 

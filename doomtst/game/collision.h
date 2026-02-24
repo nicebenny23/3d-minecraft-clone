@@ -70,19 +70,19 @@ namespace collision {
 	struct DynamicCollisionSystem :ecs::System {
 		void run(ecs::Ecs& world) {
 
-			ecs::View<ecs::With<DynamicCollider>, ecs::With<Collider>> colliders(world);
-			for (auto&& [dynamic_tag_1, collider_1] : colliders) {
-				for (auto&& [dynamic_tag_2, collider_2] : colliders) {
-					if (collider_1.owner() != collider_2.owner()) {
+			ecs::View<ecs::With<DynamicCollider>, ecs::With<Collider>,ecs::Owner> colliders(world);
+			for (auto&& [dynamic_tag_1, collider_1,obj_1] : colliders) {
+				for (auto&& [dynamic_tag_2, collider_2,obj_2] : colliders) {
+					if (obj_1 != obj_2) {
 						Option<v3::Vec3> force = aabb::collide_aabb(collider_1, collider_2);
 						if (force.is_none()) {
 							continue;
 						}
-						write_collision_event(collider_1.owner(), collider_2.owner());
+						write_collision_event(obj_1, obj_2);
 						if (collider_1.effector || collider_2.effector) {
 							continue;
 						}
-						distribute_collision_force(collider_1.owner(), collider_2.owner(), force.unwrap());
+						distribute_collision_force(obj_1,obj_2, force.unwrap());
 					}
 				}
 			}

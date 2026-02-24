@@ -5,7 +5,10 @@
 #include "typelist.h"
 #pragma once
 namespace stn {
-
+	template<bool is_const,typename T>
+	using apply_const_t = std::conditional_t<is_const, const T,T>;
+	template<typename Like, typename T>
+	using apply_const_like_t = apply_const_t<std::is_const_v<std::remove_reference_t<Like>>, T>;
 	template<typename T>
 	constexpr T&& carry(T&& t) noexcept {
 		if constexpr (std::is_reference_v<T>) {

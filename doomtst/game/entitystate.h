@@ -74,8 +74,8 @@ struct estate : ecs::component {
 		takesfalldmg = falls;
 	}
 	void remove() {
-		if (owner().has_component<items::loot_table>()) {
-			owner().get_component<items::loot_table>().should_drop = true;
+		if (owner().has_component<items::loot_dropper>()) {
+			//owner().get_component<items::loot_dropper>().should_drop = true;
 		}
 		owner().destroy();
 

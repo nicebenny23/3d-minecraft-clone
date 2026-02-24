@@ -12,7 +12,9 @@ namespace ecs {
 		constexpr entity_id id() const {
 			return Id;
 		}
-		entity(entity_id id, std::uint16_t generation) :Id(id), gen(generation) {}
+		entity(entity_id id, std::uint16_t generation) :Id(id), gen(generation) {
+			int l = 4;
+		}
 		friend bool operator==(const entity& lhs, const entity& rhs) {
 			return lhs.Id== rhs.Id&&lhs.gen==rhs.gen;
 		}

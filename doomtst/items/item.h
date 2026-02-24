@@ -27,11 +27,11 @@ namespace items {
 		size_t rem_capacity(const item_types& types) const {
 			return effective_capacity(types) - count;
 		}
-		bool can_fit(size_t fit_count, const item_types& types) const {
+		bool can_accept(size_t fit_count, const item_types& types) const {
 			return fit_count <= rem_capacity(types);
 		}
-		bool can_fit(item_entry ent, const item_types& types) const {
-			return can_interact(ent, *this) && can_fit(ent.count, types);
+		bool can_accept(item_entry ent, const item_types& types) const {
+			return can_interact(ent, *this) && can_accept(ent.count, types);
 		}
 		bool can_remove(size_t remove_count, const item_types& types) const {
 			return  remove_count <= count;
@@ -43,7 +43,7 @@ namespace items {
 			return rem_capacity(types);
 		}
 		void add(size_t add_count,const item_types& types) {
-			if (!can_fit(add_count,types)) {
+			if (!can_accept(add_count,types)) {
 				stn::throw_logic_error("Add error: attempting to add {} items to stack with {} items, exceeding its capacity of {} items", count, add_count, effective_capacity(types));
 			}
 			count += add_count;
@@ -56,7 +56,7 @@ namespace items {
 		}
 
 		bool can_give_to(const item_entry& other_item, size_t amt, const item_types& types) const {
-			return other_item.can_fit(amt, types) && can_remove(amt, types) && can_interact(*this, other_item);
+			return other_item.can_accept(amt, types) && can_remove(amt, types) && can_interact(*this, other_item);
 
 		}
 		bool can_transfer(const item_entry& other_item, const item_types& types) const {
@@ -120,11 +120,11 @@ namespace items {
 		size_t rem_capacity() const {
 			return entry.rem_capacity(types());
 		}
-		bool can_fit(size_t count) const {
-			return entry.can_fit(count,types());
+		bool can_accept(size_t count) const {
+			return entry.can_accept(count,types());
 		}
-		bool can_fit(item_entry ent) const {
-			return entry.can_fit(ent, types());
+		bool can_accept(item_entry ent) const {
+			return entry.can_accept(ent, types());
 		}
 		bool can_remove(size_t count) const {
 			return count <= entry.count;
@@ -205,11 +205,11 @@ namespace items {
 		size_t remaining;
 	};
 	inline bool can_remove(const item_stack& from, const item_stack& to, size_t amount) {
-		return from.owner().get_component<item_stack>().can_give_to(to.owner().get_component<item_stack>(), amount);
+		return from.can_give_to(to, amount);
 	}
 
 	inline bool can_transfer(const item_stack& from, const item_stack& to) {
-		return can_remove(from, to, from.owner().get_component<item_stack>().count());
+		return can_remove(from, to, from.count());
 	}
 	struct ItemSpawner{
 		item_entry entry;

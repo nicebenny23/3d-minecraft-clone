@@ -97,7 +97,7 @@ namespace ui {
 							debug_fmt("missing priority component on {}", ent.id().id);
 						}
 					}
-						children | stn::sort([](ecs::obj object)->int {return object.get_component<UiPriority>().priority; });
+						children | stn::sort([](ecs::obj object)->size_t {return object.get_component<UiPriority>().priority; });
 						children.reverse_in_place();
 					//so children who are later are pushed last
 					ui_nodes.push(children);
@@ -152,7 +152,7 @@ namespace ui {
 			object.set_emplace_component<InteractionState>();
 			object.set_emplace_component<UiPriority>(priority);
 			object.set_emplace_component<ComputedStyle>(0, geo::Box2d(v2::zerov, v2::unitv), false);
-
+			
 			object
 				.world()
 				.get_resource_opt<BaseUiNode>()

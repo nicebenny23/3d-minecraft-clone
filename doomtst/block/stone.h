@@ -13,11 +13,16 @@ namespace items {
 			);
 		}
 	};
+	struct stone_loot_table :items::LootTable {
+		items::LootDrops drops_for(items::item_types& types) {
+			return items::LootDrops({ items::loot_element(types.from_type<stone_item>(),1,types) });
+		}
+	};
 }
 namespace blocks {
 	struct StoneBlock :BlockType {
 		void apply(ecs::obj& block) const {
-			block.add_component<items::loot_table>().add<items::stone_item>(1);
+			block.apply_recipe(items::loot_table_recipe<items::stone_loot_table>);
 		}
 		std::string name() const override {
 			return std::string("stone");
@@ -27,7 +32,7 @@ namespace blocks {
 		}
 		BlockTraits traits()const {
 			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale / 2, false, stonetex, stonetex, stonetex, stonetex, stonetex, stonetex));
+				BlockMeshTraits(v3::unit_scale / 2, false, stonetex));
 		}
 	};
 }

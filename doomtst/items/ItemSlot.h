@@ -93,7 +93,7 @@ namespace items {
 		ItemSlotSpawner(){
 
 		}
-		void apply(ecs::obj& entity) {
+		void apply(ecs::obj& entity) const{
 			entity.add_component<ElementSlot>();
 		}
 	};

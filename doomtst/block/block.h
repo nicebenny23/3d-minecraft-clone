@@ -11,7 +11,6 @@
 #include "../util/Option.h"
 #include "../math/vector3.h"
 #include "block_mesh.h"
-#include "../world/chunk_mesh.h"
 #include "block_registry.h"
 #pragma once 
 constexpr double blocksize = 1.f;
@@ -33,11 +32,10 @@ namespace blocks {
 
 	};
 	struct block : ecs::component {
-		blockmesh mesh;
-		//based on if it is computed
-		stn::Option<std::uint16_t> light_passing_through;
-
+		block_mesh mesh;
 		v3::Coord pos;
+		std::uint16_t light_passing_through;
+
 		block_id id;
 		face& operator[](size_t index) {
 			return mesh[index];
@@ -69,9 +67,10 @@ namespace blocks {
 		const stn::box<BlockType>&  type() const {
 			return registry().block_for(id);
 		}
-		block(const BlockMeshTraits& traits, Chunk::chunkmesh& chunk_mesh, v3::Coord location, blocks::block_id blockid, math::Direction3d attachment_face, math::Direction2d block_direction,bool is_solid) 
-			:mesh(traits.faces, chunk_mesh.recreate_mesh, location, traits.size, attachment_face, block_direction),
-			id(blockid){
+		block(const BlockMeshTraits& traits, dirty_flag& chunk_mesh_flag, v3::Coord location, blocks::block_id block_id, math::Direction3d attachment_face, math::Direction2d block_direction) 
+			:mesh(traits, chunk_mesh_flag, location, attachment_face, block_direction),
+			id(block_id){
+			light_passing_through = 0;
 			pos = location;
 		};
 

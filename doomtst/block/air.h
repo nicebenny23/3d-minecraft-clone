@@ -10,7 +10,7 @@ namespace blocks {
 		}
 		BlockTraits traits() const{
 			return BlockTraits(
-				BlockMeshTraits(v3::Scale3(0), true, stonetex, mosstex, mosstex, mosstex, mosstex, mosstex)
+				BlockMeshTraits(v3::Scale3(.5f), true, stonetex, mosstex, mosstex, mosstex, mosstex, mosstex,true)
 				, non_solid_block);
 		}
 	};

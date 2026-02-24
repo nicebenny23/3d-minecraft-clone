@@ -3,41 +3,10 @@
 #include "../math/dir.h"
 #include "../math/geometry.h"
 #include "../util/cached.h"
+#include "block_registry.h"
 namespace blocks {
-	struct block_tag;
 
-	using block_id = stn::typed_id<block_tag>;
-	enum block_textures:short {
-		treestonetex = 0,
-		grasstex = 1,
-		stonetex = 2,
-		altartex = 3,
-		glasstex = 4,
-		watertex = 5,
-		torchtex = 6,
-		torchtoptex = 7,
-		crystaloretex = 8,
-		crafting_table_front= 9,
-		crafting_table_side = 10,
-		crystaltorchtex = 11,
-		crystaltorchtoptex = 12,
-		mosstex = 13,
-		ropetex = 14,
-		lavatex = 15,
-		obsidiantex = 16,
-		chestfront = 17,
-		chestside = 18,
-		furnaceside = 19,
-		furnacefront = 20,
-		ironoretex = 21,
-		furnacefronton = 22,
-		furnacesideon = 23,
-		logtoppng = 24,
-		ultraaltarpngultrapng = 25,
-		sandtex = 26,
-		planktex = 27,
-	};
-	struct blockmesh;
+	struct block_mesh;
 	enum class cover_state :char {
 		Covered = 0,
 		Uncovered = 1,
@@ -57,8 +26,8 @@ namespace blocks {
 			return cover == cover_state::Covered;
 		}
 		
-		blockmesh* mesh;
-		face(block_textures texval, math::Direction3d num, blockmesh* owner)
+		block_mesh* mesh;
+		face(block_textures texval, math::Direction3d num, block_mesh* owner)
 		:face_direction(math::Direction3d(num)),mesh(owner),tex(texval),cover(cover_state::Uncomputed),light(0){}
 		inline Point3 center() const;
 		size_t get_light() const{
@@ -75,10 +44,9 @@ namespace blocks {
 		std::uint8_t light;
 	};
 
-	struct blockmesh {
+	struct block_mesh {
 		stn::List<face, 6> faces;
 		geo::Box box;
-
 		math::Direction3d attached_direction;
 		math::Direction2d direction;
 		v3::Point3 center() const {
@@ -93,14 +61,15 @@ namespace blocks {
 		bool is_transparent() const {
 			return transparent;
 		}
-		//fix this is not supposed to work
+		//we should make a better mechanism to do this
 		bool invisible() const {
-			return box.scale.x==0;
+			return air_like;
 		}
-		blockmesh(const stn::List<block_textures,6>& textures,stn::dirty_flag& d_flag,v3::Coord position, Scale3 blkscale,math::Direction3d attachment_direction,math::Direction2d facing_direction) :
-			flag(d_flag), box(position + unitv / 2, blkscale),transparent(false),faces([&](size_t index) { 
-				return face(textures[index],math::Direction3d(math::DirectionIndex3d(index)), this);
-			}), attached_direction(attachment_direction),direction(facing_direction)
+		block_mesh(const BlockMeshTraits& textures,stn::dirty_flag& d_flag,v3::Coord position,math::Direction3d attachment_direction,math::Direction2d facing_direction) :
+			flag(d_flag), box(position + unitv / 2, textures.size),transparent(false),faces([&](size_t index) {
+				return face(textures.faces[index],math::Direction3d(math::DirectionIndex3d(index)), this);
+			}), attached_direction(attachment_direction)
+			,direction(facing_direction), air_like(textures.invisible)
 		{
 			box.center -= attached_direction.vec()*box.scale.shrunk(.5f);
 		}
@@ -127,6 +96,7 @@ namespace blocks {
 			return faces.end();
 		}
 		bool transparent;
+		bool air_like;
 		friend struct face;
 		stn::dirty_flag& flag;
 
@@ -135,11 +105,15 @@ namespace blocks {
 		return face_direction.vec() * mesh->box.scale + mesh->box.center;
 	}
 	inline void face::set_cover(cover_state new_state) {
-		mesh->flag.mark_dirty();
-		cover=new_state;
+		if (new_state!=cover) {
+			mesh->flag.mark_dirty();
+			cover = new_state;
+		}
 	}
 	inline void face::set_light(std::uint8_t value) {
-		mesh->flag.mark_dirty();
-		light = value;
+		if (value!=light) {
+			mesh->flag.mark_dirty();
+			light = value;
+		}
 	}
 }

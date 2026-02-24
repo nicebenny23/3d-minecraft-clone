@@ -3,6 +3,7 @@
 #include "../../util/bitset.h"
 #include "component_id.h"
 #include "../../util/counter.h"
+#include "../../util/paged_array.h"
 namespace ecs {
 	struct Archetype {
 

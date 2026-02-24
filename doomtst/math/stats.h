@@ -94,15 +94,9 @@ namespace statistics {
 			}
 			equalizedDistribution= interpolate(points, -1, 1);
 		}
-		bool generated() {
-
-			return equalizedDistribution.length() > 0;
-		}
+		
 		// Applies the equalized distribution to a value
-		double apply_distribution(double value) {
-			if (!generated()) {
-				throw std::logic_error("Distribution has not been generated");
-			}
+		double apply_distribution(double value) const {
 			return equalizedDistribution[get_bucket(value)];
 		}
 

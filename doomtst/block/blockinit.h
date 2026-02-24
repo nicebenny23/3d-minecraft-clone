@@ -2,7 +2,7 @@
 #include "block_registry.h"
 #include "../game/aabb.h"
 #include "../util/fileloader.h"
-
+#include "../world/chunk_mesh.h"
 #pragma once  
 namespace blocks {
 
@@ -19,7 +19,19 @@ namespace blocks {
 		ecs::obj spawn(ecs::Ecs& world) {
 			BlockRegistry& registry =world.insert_resource<BlockRegistry>();
 			BlockTraits traits=registry.traits_for(id);
-			block& blk = world.spawn_with_component<block>(traits.mesh, mesh, loc, id, direction, face,traits.solid);
+			block* blk_ptr;
+			if (traits.solid) {
+				//best diffrerentiator
+				blk_ptr=&world.spawn_with_component<block>(traits.mesh, mesh.recreate_mesh, loc, id, direction, face);
+			}
+			else {
+				struct air_tag {
+
+				};
+				blk_ptr=&world.spawn_with_component_tagged<air_tag,block>(traits.mesh, mesh.recreate_mesh, loc, id, direction, face);
+			}
+			//stupid trick to save memory
+			block& blk = *blk_ptr;
 			ecs::obj object = blk.owner();
 			if (traits.emmited_light!=0) {
 				object.add_component<block_emmision>(traits.emmited_light);

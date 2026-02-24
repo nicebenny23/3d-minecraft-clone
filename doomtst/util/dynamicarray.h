@@ -161,7 +161,19 @@ namespace stn {
 			}
 			return ptr[index];
 		}
+		[[nodiscard]] stn::Option<T&> first_opt() {
+			if (len == 0) {
+				return stn::None;
+			}
+			return ptr[0];
+		}
 
+		[[nodiscard]] stn::Option<const T&> first_opt() const {
+			if (len == 0) {
+				return stn::None;
+			}
+			return ptr[0];
+		}
 		[[nodiscard]] T& first() {
 			if (len == 0) {
 				throw std::logic_error("Cannot access the first element of an empty array");
@@ -175,7 +187,33 @@ namespace stn {
 			}
 			return ptr[0];
 		}
+		[[nodiscard]] T& first_unchecked() {
+			return ptr[0];
+		}
 
+		[[nodiscard]] const T& first_unchecked() const {
+			return ptr[0];
+		}
+		[[nodiscard]] stn::Option<T&> last_opt() {
+			if (len == 0) {
+				return stn::None;
+			}
+			return ptr[len - 1];
+		}
+
+		[[nodiscard]] stn::Option<const T&> last_opt() const {
+			if (len == 0) {
+				return stn::None;
+			}
+			return ptr[len - 1];
+		}
+		[[nodiscard]] T& last_unchecked() {
+			return ptr[len - 1];
+		}
+
+		[[nodiscard]] const T& last_unchecked() const {
+			return ptr[len - 1];
+		}
 		[[nodiscard]] T& last() {
 			if (len==0) {
 				throw std::logic_error("Cannot access the last element of an empty array");
@@ -190,7 +228,6 @@ namespace stn {
 			return ptr[len - 1];
 		}
 
-		// for_each using C++20 ranges
 		template <std::ranges::forward_range Range, typename Func>
 		void for_each(Func&& fn) {
 			for (size_t i = 0; i < len; i++) {
@@ -364,6 +401,16 @@ namespace stn {
 			emplace_at(index, std::forward<U>(value));
 		}
 
+		//removes and returns the last element
+		[[nodiscard]] stn::Option<T> pop_opt() {
+			if (empty()) {
+				return stn::None;
+			}
+			//subtracts first to enget the last element;
+			T res = std::move(ptr[(--len)]);
+			destruct_at(len);
+			return res;
+		}
 		//removes and returns the last element
 		[[nodiscard]] T pop() {
 			if (empty()) {

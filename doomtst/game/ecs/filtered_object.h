@@ -2,65 +2,57 @@
 #include "unique_object.h"
 #pragma once
 namespace ecs {
-	//we can use this until merge it 
+	//we may want too merge this with the query filter
 	template<ObjectLike Object, ComponentType... Types>
 	struct ConstrainedObject {
+
 		template<ComponentType T> requires stn::OneOf<T, Types...>
-		T& get() {
-			if (*last_checked_ticks != ticks) {
-				validate();
-			}
-			return *contained.get<T*>();
+		auto get(this auto&& self) -> stn::apply_const_like_t<decltype(self), T>& {
+			self.validate();
+			return *self.contained.get<T*>();
 		}
 		template<ComponentType T> requires stn::OneOf<T, Types...>
-		const T& get() const {
-			if (*last_checked_ticks != ticks) {
-				validate();
-			}
-			return *contained.get<T*>();
+		auto get_unchecked(this auto&& self) -> stn::apply_const_like_t<decltype(self), T>& {
+			return *self.contained.get<T*>();
 		}
 		template<ComponentType T>
-		T& get_component() {
-			if constexpr (stn::OneOf<T, Types...>) {
-				//adding this line should lead to the bp being hit or do nothing
-
-				if (*last_checked_ticks != ticks) {
-					validate();
-				}
-				return *contained.get<T*>();
-			}
-			else {
-				return object().get_component<T>();
-			}
+		stn::Option<T&> get_component_opt() {
+			return object().get_component_opt<T>();
+		}
+		template<ComponentType T>
+		stn::Option<const T&> get_component_opt() const {
+			return object().get_component_opt<T>();
 		}
 
 		template<ComponentType T>
-		const T& get_component() const {
+		auto get_component(this auto&& self) -> stn::apply_const_like_t<decltype(self), T>& {
 			if constexpr (stn::OneOf<T, Types...>) {
-
-				if (*last_checked_ticks != ticks) {
-					validate();
-				}
-				return *contained.get<T*>();
+				self.validate();
+				return *self.contained.template get<T*>();
 			}
 			else {
-				return object().get_component<T>();
+				return self.object().template get_component<T>();
 			}
 		}
 
 
 		void validate() const {
-			stn::TupleSet<Types&...> as_refs = world().get_components<Types...>(object().inner());
-			ticks = *last_checked_ticks;
-			contained = stn::TupleSet((&as_refs.get<Types&>())...);
+			if (*last_checked_ticks != ticks) {
+				stn::TupleSet<Types&...> as_refs = world().get_components<Types...>(object().inner());
+				ticks = *last_checked_ticks;
+				contained = stn::TupleSet((&as_refs.get<Types&>())...);
+			}
 		}
+
 		template<typename Arg> requires std::constructible_from<Object, Arg&&>
 		ConstrainedObject(Arg&& obj) :entity(std::forward<Arg>(obj)), ticks(), last_checked_ticks(ticks), contained(nullptr) {
 			last_checked_ticks.observe(world().archetypes.archetype_entity_of(object().id()).ticks);
+
+			//we can just validate because if we have a Constrained object, its archtype ticks cannot be zero as that would mean they have not been initilized
 			validate();
 		}
-		
-		
+
+
 		template<stn::ReducerType T> requires stn::TupleSuperset<typename stn::reducer_held_type<T>::tuple_set_type, tuple_set_type>
 		ConstrainedObject(T&& value) :
 			ticks(value.reduction.ticks),
@@ -79,16 +71,40 @@ namespace ecs {
 		ecs::obj object() const {
 			return as_object(entity);
 		}
+		ecs::entity_id id() const {
+			return entity.id();
+		}
 		void destroy() {
 			entity.destroy();
 		}
+		template<typename Arg> requires std::constructible_from<Object, Arg&&>
+		static ConstrainedObject make_unchecked(Arg&& obj) {
+			ecs::Ecs& world = obj.world();
+			stn::non_null < ecs::archetype_ticks> last_checked_ticks(world.archetypes.archetype_entity_of(obj.id()).ticks);
+			stn::TupleSet<Types&...> as_refs = world.get_components_unchecked<Types...>(obj.id());
+			return ConstrainedObject(last_checked_ticks, obj, stn::TupleSet((&as_refs.get<Types&>())...));
+		}
+		bool operator!=(const ConstrainedObject& other) const {
+			return !(other == *this);
+		}
+
+		bool operator==(const ConstrainedObject& other) const {
+			validate();
+			other.validate();
+			return other.entity == entity;
+		}
 	private:
 
+
+		using tuple_set_type = stn::TupleSet<Types*...>;
+		ConstrainedObject(stn::non_null < ecs::archetype_ticks> last_checked, Object object, tuple_set_type components)
+			:ticks(*last_checked), last_checked_ticks(last_checked), entity(object), contained(components) {
+
+		}
 		Object entity;
 		mutable ecs::archetype_ticks ticks;
-		using tuple_set_type = stn::TupleSet<Types*...>;
 		stn::non_null < ecs::archetype_ticks> last_checked_ticks;
-		mutable stn::TupleSet<Types*...> contained;
+		mutable tuple_set_type contained;
 		template<ObjectLike U, ComponentType... others>
 		friend struct ConstrainedObject;
 	};

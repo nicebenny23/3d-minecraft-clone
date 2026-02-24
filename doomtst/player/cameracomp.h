@@ -6,27 +6,37 @@
 #include "../math/mathutil.h"
 
 #pragma once
-inline double wrap_angle(double a) {
-return wrap_to_range(a,0,360);
+namespace player {
+	inline double wrap_angle(double a) {
+		return wrap_to_range(a, 0, 360);
+	}
+	struct CameraComp : ecs::component {
+		CameraComp() :CamTransform(Point3(0, 0, 0), 0, 0, unit_scale) {
+
+			//utype = ecs::updaterender;
+		}
+		v3::Point3 center()const {
+			return CamTransform.position;
+		}
+		math::Transform CamTransform;
+		void start() {
+			CamTransform = owner().get_component<ecs::transform_comp>().transform;
+
+		}
+		void update() {
+			owner().get_component<ecs::transform_comp>().transform.yaw = wrap_angle(owner().get_component<ecs::transform_comp>().transform.yaw);
+
+			owner().get_component<ecs::transform_comp>().transform.pitch = wrap_to_range(owner().get_component<ecs::transform_comp>().transform.pitch, -90, 90);
+			world().get_resource<renderer::Renderer>().set_uniform("view_matrix", LookAt(owner().get_component<ecs::transform_comp>().transform));
+			CamTransform = owner().get_component<ecs::transform_comp>().transform;
+
+		}
+	};
+	struct camera_resource :ecs::resource {
+		camera_resource(ecs::Constrained<CameraComp> camera_object) :camera(camera_object) {
+
+		}
+		ecs::Constrained<CameraComp> camera;
+	};
+	
 }
-struct CameraComp : ecs::component
-{
-	CameraComp():CamTransform(Point3(0,0,0), 0, 0, unit_scale) {
-
-		//utype = ecs::updaterender;
-	}
-	
-	math::Transform CamTransform;
-	void start() {
-		CamTransform = owner().get_component<ecs::transform_comp>().transform;
-	
-	}
-	void update() {
-		owner().get_component<ecs::transform_comp>().transform.yaw=wrap_angle(owner().get_component<ecs::transform_comp>().transform.yaw);
-
-		owner().get_component<ecs::transform_comp>().transform.pitch = wrap_to_range(owner().get_component<ecs::transform_comp>().transform.pitch,-90,90);
-		world().get_resource<renderer::Renderer>().set_uniform("view_matrix", LookAt(owner().get_component<ecs::transform_comp>().transform));
-		CamTransform = owner().get_component<ecs::transform_comp>().transform;
-
-	}
-};

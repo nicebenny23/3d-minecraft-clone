@@ -1,5 +1,6 @@
 #include "ItemSlot.h"
 #include "SlotUi.h"
+#include "item_type.h"
 #pragma once
 namespace items {
 	struct container_id_tag {
@@ -20,6 +21,9 @@ namespace items {
 				stn::throw_logic_error("index {} does not fit into size {}", ind.coord, size);
 			}
 			return slots[ind.index_in(size)];
+		}
+		const item_types& types() const{
+			return world().get_resource<item_types>();
 		}
 		const ecs::object_handle& operator[](container_index ind) const {
 			if (!ind.fits_in(size)) {

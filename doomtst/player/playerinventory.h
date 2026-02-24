@@ -1,12 +1,7 @@
 #include "../items/container_transactions.h"
 #include "../game/ecs/game_object.h"
-#include "../util/userinput.h"
-#include "../items/recipe.h"
-#include "../items/menu.h"
 #include "../items/container_ui.h"
-#include "../items/crafting.h"
 #include "../game/ecs/filtered_object.h"
-#include "player.h"
 #pragma once 
 namespace player {
 

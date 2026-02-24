@@ -40,7 +40,7 @@ namespace items {
 	struct metal_rod_item : item_type {
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
-				"metal_rod",
+				"stick",
 				renderer::TexturePath("images\\metalrod.png", "MetalRodTexture")
 			);
 		}
@@ -85,10 +85,10 @@ namespace items {
 			return item_traits(
 				"crystal_pick",
 				renderer::TexturePath("images\\crystalpick.png", "CrystalPickaxeTexture"),
-				64,
+				256,
 				tool_traits({ .damage = 6,.pickaxe_speed = 3 }),
 				0.0f,
-				7.0f // pickaxe_speed from pickaxepower
+				12.f // pickaxe_speed from pickaxepower
 			);
 		}
 	};
@@ -115,6 +115,18 @@ namespace items {
 				tool_traits({ .damage = 0,.pickaxe_speed = .8 }),
 				0.0f,
 				0.0f
+			);
+		}
+	};
+	struct stone_pickaxe_item : item_type {
+		item_traits traits(const ecs::Ecs& world) const {
+			return item_traits(
+				"stone_pickaxe",
+				renderer::TexturePath("images\\stone_pickaxe.png"),
+				64,
+				tool_traits({ .damage = 3,.pickaxe_speed = 6 }),
+				0.0f,
+				0
 			);
 		}
 	};
@@ -226,10 +238,6 @@ namespace items {
 
 			item_register.register_item<items::chest_item>();
 			item_register.register_item<items::crafting_table_item>();
-			app.emplace_system< ItemClear>();
-			app.emplace_system< run_crafts>();
-			app.emplace_system< cursor_crafter>();
-			app.emplace_system<SyncDisplayIcon>();
 			item_register.register_item<items::air_item>();
 			item_register.register_item<items::glass_bottle_item>();
 			item_register.register_item<items::iron_ore_item>();
@@ -238,6 +246,7 @@ namespace items {
 			item_register.register_item<items::moss_item>();
 			item_register.register_item<items::plank_item>();
 			item_register.register_item<items::stone_item>();
+			item_register.register_item<items::stone_pickaxe_item>();
 			// Crystal items
 			item_register.register_item<items::crystal_bottom_item>();
 			item_register.register_item<items::crystal_item>();

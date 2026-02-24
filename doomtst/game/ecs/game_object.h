@@ -111,9 +111,9 @@ namespace ecs {
 		ecs::obj spawn_child(Args&&... args);
 		
 	private:
-		entity ent;
 		Ecs* ecs;
-	};
+		entity ent;
+};
 
 	template<RecipeType T, typename ...Args> requires std::constructible_from<T, Args&&...>
 	obj spawn_emplaced(ecs::Ecs& world, Args&&... args) {

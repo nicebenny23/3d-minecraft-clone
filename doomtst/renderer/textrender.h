@@ -25,8 +25,7 @@ namespace ui {
 
 		void set_handle() {
 			if (!handle) {
-				handle = world().get_resource<renderer::Renderer>().gen_renderable();
-				handle.set_material("Text");
+				handle = world().get_resource<renderer::Renderer>().gen_renderable("Text");
 				handle.set_layout(vertice::vertex().push<float, 2>().push<float, 3>());
 
 			}
@@ -69,7 +68,7 @@ namespace ui {
 					}
 					ui_text.handle.set_color(ui_text.text_color);
 					ui_text.handle.fill(std::move(mesh_data));
-					ui_text.handle.set_order_key(ui_text.owner().get_component<ComputedStyle>().priority);
+					ui_text.handle.set_order_key(style.priority);
 				}
 				else {
 					if (ui_text.handle) {

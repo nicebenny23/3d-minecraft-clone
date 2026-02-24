@@ -3,7 +3,7 @@
 namespace stn {
 	template<typename T>
 	struct ticks {
-		ticks():current(0) {
+		ticks() :current(0) {
 
 		}
 
@@ -14,7 +14,7 @@ namespace stn {
 		bool operator!=(const ticks& other) const = default;
 
 	private:
-		size_t current;
+		std::uint16_t current;
 	};
 
 }

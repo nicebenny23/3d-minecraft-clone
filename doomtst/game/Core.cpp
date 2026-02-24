@@ -57,16 +57,8 @@ namespace Core {
        
     }
 
-    void App::InitOC()
-    {
-		insert_plugin<GamePlugin>();
-    }
 
-    void App::CreateWorld()
-    {
-		Ecs.insert_resource<grid::world>(0);
-
-    }
+   
 
    
 }

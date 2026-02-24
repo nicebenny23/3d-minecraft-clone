@@ -12,7 +12,7 @@ inline void treestoneinit(blocks::block& blk) {
 	blk.mesh.box.scale = blocks::blockscale;
 
 	blk.createdefaultaabb(false);
-	blk.owner().add_component<loot_table>().add("stone", 1);
+	blk.owner().add_component<loot_dropper>().add("stone", 1);
 	blk.mininglevel = 3;
 	blk.minedfastwithpick = false;
 }

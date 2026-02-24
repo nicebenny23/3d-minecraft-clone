@@ -18,6 +18,8 @@
 #include "renderer/pass.h"
 #include "../game/Core.h"
 #include "../util/Name.h"
+#include "../game/ecs/filtered_object.h"
+#include "../game/Settings.h"
 using namespace buffer_object;
 //Fix
 
@@ -54,7 +56,7 @@ namespace renderer {
 			}
 
 			if (generate_trivial == indice_mode::generate_indices) {
-				indices.push(indices.length());
+				indices.push(static_cast<size_t>(indices.length()));
 			}
 
 		}
@@ -89,33 +91,51 @@ namespace renderer {
 	};
 	struct Renderer;
 	struct RenderableHandle {
-		RenderableHandle() :id(){
+		RenderableHandle() :id() {
 		}
 		RenderableHandle(renderable id)
-			: id(id){
+			: id(id) {
 		}
-
-		void set_material(const std::string& name);
 		void set_color(colors::Color color) {
 			if (id) {
-				id.unwrap().set_emplace_component<color_component>(color);
+				id.unwrap().object().set_emplace_component<color_component>(color);
 			}
 		}
 		void set_layout(vertice::vertex layout);
 
-		void fill(MeshData&& new_mesh);
-
-		void set_uniform(const renderer::uniform& u);
-
-		void render();
-
-		void enable();
-		void disable();
-		void set_order_key(float key);
-		void destroy();
-		bool operator==(const RenderableHandle& other) const {
-			return other.id == id;
+		void fill(MeshData&& new_mesh) {
+			if (id) {
+				id.unwrap().world().write_command(std::move(new_mesh));
+			}
+			else {
+				stn::throw_logic_error("cannot fill uninitialized mesh");
+			}
 		}
+
+		void set_uniform(const renderer::uniform& value) {
+			if (id) {
+				id.unwrap().get<renderable_overides>().set(value);
+			}
+		}
+
+		void enable() {
+			if (id) {
+				id.unwrap().get<is_enabled>().enable();
+			}
+		}
+		void disable() {
+			if (id) {
+				id.unwrap().get<is_enabled>().disable();
+			}
+		}
+		void set_order_key(float key) {
+			if (id) {
+				id.unwrap().object().set_emplace_component<order_key>(key);
+			}
+
+		}
+		void destroy();
+		bool operator==(const RenderableHandle& other) const = default;
 		Renderer& renderer();
 		MeshData create_mesh(indice_mode auto_ind = indice_mode::manual_generate);
 		explicit operator bool() const noexcept {
@@ -131,15 +151,22 @@ namespace renderer {
 	};
 	struct Renderer : ecs::resource {
 
+		void bind_material(material_handle material) {
+			if (current_material != material) {
+				Material& mat = *material;
+				context.bind(*mat.shader);
+				for (auto& elem : mat.handles) {
+					context.apply_uniform(uniform_manager.get(elem), std::string_view(elem.shader_alias));
+				}
+				context.bind_properties(mat.prop);
+				current_material = material;
+			}
+		}
 
-
-
-		void bind_material(material_handle material);
-
-		void Bind_Texture(texture_2d_id Handle) {
+		void Bind_texture(texture_2d_id Handle) {
 			context.bind(*Handle);
 		}
-		void Bind_Texture(texture_array_id Handle) {
+		void Bind_texture(texture_array_id Handle) {
 			context.bind(*Handle);
 		}
 		renderer::Context context;
@@ -151,22 +178,22 @@ namespace renderer {
 		}
 
 
-		void Clear();
+		void Clear() {
+			set_uniform("aspect_ratio", world.get_resource<window::Window>().AspectRatio());
+			glClearColor(0, 0, 0, 0.0f);
+			glDepthMask(GL_TRUE);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glDepthMask(GL_FALSE);
+		}
 
-		void Render(Mesh& mesh);
 
-		void setprojmatrix(float newfov, float nearclipplane, float farclipplane);
-		void set_material(renderable id, std::string name);
 
-		RenderableHandle gen_renderable() {
-			return RenderableHandle(ecs::spawn_emplaced<renderable_recipe>(world));
+		RenderableHandle gen_renderable(std::string material) {
+			material_handle handle = world.from_name<Material>(material).expect("material should exist");
+			return RenderableHandle((ecs::spawn_emplaced<renderable_recipe>(world, handle)));
 		}
 		void remove(renderable ren) {
-			ren.object.world().write_command(remove_render_object(ren.object));
-		}
-
-		void set_uniform(renderable rend, const renderer::uniform& value) {
-			rend.set(value);
+			ren.world().write_command(remove_render_object(ren.object()));
 		}
 
 		void set_layout(renderer::renderable id, vertice::vertex layout) {
@@ -174,31 +201,28 @@ namespace renderer {
 			meshes[mesh].Voa.attributes = layout;
 		}
 		void render(renderer::renderable ren) {
-			if (!ren.should_render()) {
-				return;
-			}
-			material_handle mat_id = ren.material();
-
-			bind_material(mat_id);
-			for (auto& uniform : ren.view_overides()) {
+			bind_material(ren.get<material_component>().mat_id);
+			for (auto& uniform : ren.get<renderable_overides>().view()) {
 				context.apply_uniform(uniform.value, uniform.name);
 			}
-			Render(meshes[ren.get_mesh()]);
-
-
-		}
-
-		void set_enabled(renderable ren, bool should_render) {
-			if (should_render) {
-				ren.enable();
+			Mesh& mesh = meshes[ren.get<mesh_component>().msh.expect("mesh should exist")];
+			if (!mesh.filled()) {
+				return;
+			}
+			context.bind(mesh);
+			mesh.Voa.SetAllAttributes();
+			if (world.ensure_resource<settings::GlobalSettings>().viewmode) {
+				glDrawElements(GL_LINES, mesh.length, GL_UNSIGNED_INT, 0);
 			}
 			else {
-				ren.disable();
-			}
+				glDrawElements(GL_TRIANGLES, mesh.length, GL_UNSIGNED_INT, 0);
+			};
 		}
-		MeshData create(renderable id, indice_mode is_trivial = indice_mode::manual_generate) {
 
-			return MeshData(id.get_mesh(), meshes[id.get_mesh()].Voa.attributes, is_trivial);
+		
+		MeshData create(renderable id, indice_mode is_trivial = indice_mode::manual_generate) {
+			mesh_id mesh_id = id.get_component<renderer::mesh_component>().msh.unwrap();
+			return MeshData(mesh_id, meshes[mesh_id].Voa.attributes, is_trivial);
 		}
 		void fill_mesh(MeshData& data) {
 			Option<Mesh&> mabye_mesh = meshes.get(data.mesh);
@@ -223,7 +247,7 @@ namespace renderer {
 		float fov;
 		Renderer(ecs::Ecs& spawn_world, float initial_fov) :world(spawn_world), uniform_manager(), fov(initial_fov) {
 			meshes = MeshRegistry(&context);
-			setprojmatrix(90, .21f, 100);
+			set_uniform("proj_matrix", glm::perspective(glm::radians(initial_fov), float(4 / 3.f), .21f, 500.f));
 			set_uniform("aspect_ratio", world.get_resource<window::Window>().AspectRatio());
 		}
 
@@ -233,23 +257,23 @@ namespace renderer {
 		//ensures a mesh exists
 		mesh_id insert_mesh(renderer::renderable id) {
 
-			if (!id.has_component<mesh_component>() || id.get_component<mesh_component>().msh.is_none()) {
-				id.set_mesh(meshes.create());
-
+			if (id.get_component<mesh_component>().msh.is_none()) {
+				id.object().set_emplace_component<mesh_component>(meshes.create());
 			}
-			return id.get_mesh();
+			return id.get<mesh_component>().msh.expect("");
 		}
 
 	};
 	inline Renderer& RenderableHandle::renderer() {
-		return id.unwrap().object.world().get_resource<Renderer>();
+		return id.unwrap().world().get_resource<Renderer>();
 	}
 	struct render_pass {
 		phase_handle pass;
-		stn::array<ecs::obj> phase_elements;
+		//make constrained
+		stn::array<renderable> phase_elements;
 		void sort() {
 			if (pass->should_sort) {
-				phase_elements | stn::sort([this](ecs::obj p1) {return p1.get_component<order_key>().order; });
+				phase_elements | stn::sort([this](renderable p1) {return p1.get<order_key>().order; });
 			}
 		}
 		std::string_view name() const {
@@ -270,12 +294,12 @@ namespace renderer {
 			std::unordered_map<phase_handle, render_pass> pass_map;
 			size_t cnt = 0;
 
-			ecs::View<ecs::With<material_component>, ecs::With<order_key>, ecs::With<is_enabled>> renderable_iter(world);
-			for (auto [mat, order, should_render] : renderable_iter) {
+			ecs::View<ecs::With<material_component>, ecs::With<order_key>, ecs::With<is_enabled>,ecs::Owner> renderable_iter(world);
+			for (auto [mat, order, should_render,object] : renderable_iter) {
 				if (should_render.enabled) {
 					phase_handle pass = mat.mat_id->pass;
 					pass_map.try_emplace(pass, render_pass(pass));
-					pass_map.at(pass).phase_elements.emplace(mat.owner());
+					pass_map.at(pass).phase_elements.push(renderable::make_unchecked(object));
 					cnt++;
 				}
 
@@ -290,8 +314,8 @@ namespace renderer {
 			}
 			passes | stn::sort([](const render_pass& a) {return a.pass->priority; });
 			for (render_pass& pass : passes) {
-				for (ecs::obj id : pass.phase_elements) {
-					ren.render(renderable(id));
+				for (renderable& id : pass.phase_elements) {
+					ren.render(id);
 				}
 			}
 			for (remove_render_object to_remove : world.read_commands<remove_render_object>()) {

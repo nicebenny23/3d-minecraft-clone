@@ -83,7 +83,7 @@ namespace items {
 	inline stn::Option<AddToSlotPlan> AddToSlot(ElementSlot& to, item_entry amount) {
 			stn::Option<ecs::obj> element = to.element();
 			if (element) {
-				if (!element.unwrap().get_component<item_stack>().can_fit(amount)) {
+				if (!element.unwrap().get_component<item_stack>().can_accept(amount)) {
 					return stn::None;
 				}
 			}

@@ -5,6 +5,8 @@
 #include "../game/ecs/query.h"
 #include "../math/meshes.h"
 #include "../game/camera.h"
+#include "../game/ecs/filtered_object.h"
+#include "../player/cameracomp.h"
 #pragma once
 namespace decals {
 	struct DecalReimageCommand {
@@ -25,7 +27,7 @@ namespace decals {
 
 	struct decal_component :ecs::component {
 		v3::Point3 center;
-		decal_component(v3::Point3 decal_center):center(decal_center),tangent(v3::zerov),bi_tangent(v3::zerov),normal(v3::zerov),handle() {
+		decal_component(v3::Point3 decal_center) :center(decal_center), tangent(v3::zerov), bi_tangent(v3::zerov), normal(v3::zerov), handle() {
 
 		}
 		v3::Vec3 tangent;
@@ -46,16 +48,16 @@ namespace decals {
 		}
 		renderer::RenderableHandle handle;
 		void set_handle(const renderer::TexturePath& path) {
-			world().emplace_command<DecalReimageCommand>(owner(),path);
+			world().emplace_command<DecalReimageCommand>(owner(), path);
 		}
 	};
-	
+
 	struct DecalSpawner {
 		v3::Point3 pnt;
-		DecalSpawner(v3::Point3 center):pnt(center){
-			
+		DecalSpawner(v3::Point3 center) :pnt(center) {
+
 		}
-		void apply(ecs::obj& entity) const{
+		void apply(ecs::obj& entity) const {
 			entity.add_component<decal_component>(pnt);
 		}
 	};
@@ -65,15 +67,16 @@ namespace decals {
 
 		};
 		void run(ecs::Ecs& world) {
-			
+			ecs::Constrained<player::CameraComp> cam = world.get_resource<player::camera_resource>().camera;
 			for (DecalReimageCommand& cmd : world.read_commands<DecalReimageCommand>()) {
 				if (cmd.decal_comp.exists()) {
 					decal_component& dec = cmd.decal_comp.get_component<decal_component>();
 					if (!dec.handle) {
-						dec.handle = world.get_resource<renderer::Renderer>().gen_renderable();
-						dec.handle.set_material("decal_mat");
+						dec.handle = world.get_resource<renderer::Renderer>().gen_renderable("decal_mat");
 						dec.handle.set_layout(vertice::vertex().push<float, 3>().push<float, 2>());
+
 					}
+					dec.handle.set_order_key(dist(dec.center, cam.get<player::CameraComp>().center()));
 					dec.handle.set_uniform(renderer::uniform(world.load_asset_emplaced<renderer::TexturePath>(cmd.path).unwrap(), "tex"));
 				}
 			}
@@ -91,8 +94,8 @@ namespace decals {
 				}
 			}
 			ecs::View<ecs::With<decal_component>> view = ecs::View<ecs::With<decal_component>>(world);
-			for (auto[dec] : view) {
-				
+			for (auto [dec] : view) {
+
 				if (dec.handle) {
 
 
@@ -115,7 +118,7 @@ namespace decals {
 		void build(Core::App& engine) {
 			engine.emplace_system<render_decals>();
 			renderer::shader_id decal_shader = engine.Ecs.load_asset_emplaced<renderer::shader_descriptor>("decal_shader", "shaders\\decal_vert.vs", "shaders\\decal_frag.vs").unwrap();
-			engine.Ecs.load_asset_emplaced<renderer::MaterialDescriptor>("decal_mat", "transparent_phase", "decal_shader", renderer::RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+			engine.Ecs.load_asset_emplaced<renderer::MaterialDescriptor>("decal_mat", "solid_phase", "decal_shader", renderer::RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
 				stn::array{ renderer::UniformRefrence("aspect_ratio", "aspectratio"),
 				renderer::UniformRefrence("proj_matrix", "projection"),
 				renderer::UniformRefrence("view_matrix", "view") }

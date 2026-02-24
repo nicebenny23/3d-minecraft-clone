@@ -87,7 +87,7 @@ namespace ecs {
 		
 		
 		EventReader make_reader() {
-			reader_id id = reader_id(counts.length());
+			reader_id id = reader_id(static_cast<std::uint32_t>(counts.length()));
 			counts.push(active_events());
 			return	EventReader(*this, id);
 		}
@@ -103,9 +103,8 @@ namespace ecs {
 			if (!current_readers.contains(reader)) {
 				stn::throw_logic_error("Invariant violated: Event Reader must be a current_reader");
 			}
-			size_t index = reader.id;
-			counts[index] = active_events();
-			current_readers.remove_at(index);
+			counts[reader.id] = active_events();
+			current_readers.swap_drop(current_readers.find(reader).expect("we have validated that we are reading from this event type"));
 			if (!being_read_from()) {
 				event_count all_read_upto = active_events();
 				for (event_count& count : counts) {

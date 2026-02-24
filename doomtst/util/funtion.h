@@ -28,5 +28,5 @@ namespace stn {
 		}
 	private:
 		ptr_type fn;
-	};
+	}; 
 }

@@ -7,7 +7,7 @@ uniform sampler2DArray tex;
 in vec3 Color;
 
 float near = 0.23; 
-float far  = 60; 
+float far  = 100; 
   
 float LinearizeDepth(float depth) 
 {
@@ -19,7 +19,7 @@ float LinearizeDepth(float depth)
 void main()
 {
   float depth = -LinearizeDepth(gl_FragCoord.z) ; 
-  depth=(exp(depth/8));
+  depth=(exp(depth/128));
   vec4 col= vec4(depth,depth,depth,1);
  
     FragColor =vec4((Color+4)/16,1)*texture(tex,  vec3( fragcoord))*col;

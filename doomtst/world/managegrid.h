@@ -31,7 +31,6 @@ namespace grid {
 	inline void set_block(ecs::Ecs& world, Coord pos, block_id block_id, math::Direction3d attach_direction= math::up_3d) {
 		world.write_command<set_block_command>(set_block_command(pos, block_id,attach_direction));
 	}
-
 	struct GridManager :ecs::System {
 
 		GridManager() {
@@ -55,26 +54,27 @@ namespace grid {
 
 
 
-		void block_change_cover_update(ecs::Ecs& world, blocks::block* location) {
-			world.write_command<cover_block_command>(cover_block_command(location->pos));
+		void block_change_updates(ecs::Ecs& world, Chunk::block_object& location) {
+			blocks::block& blk = location.get<blocks::block>();
+			world.write_command(cover_block_command(blk.pos));
 			for (math::Direction3d block_dir : math::Directions3d) {
 
-				world.write_command<cover_block_command>(cover_block_command(location->pos + block_dir.coord()));
-			}
+				world.write_command(cover_block_command(blk.pos + block_dir.coord()));			}
 		}
 
 		void run(ecs::Ecs& world) {
 			grid::Grid& grid = world.get_resource<grid::Grid>();
 			for (set_block_command& cmd : world.read_commands<set_block_command>()) {
-				block* location = grid.getBlock(cmd.pos);
-				if (location != nullptr) {
+
+				stn::Option<Chunk::block_object&> mabye_location = grid.get_object(cmd.pos);
+				if (mabye_location) {
+					Chunk::block_object& location = mabye_location.unwrap();
 					grid.GetChunk(cmd.pos)->modified = true;
-					dislocate_from_grid(location->owner(), cmd.id, cmd.attach_direction);
-					block_change_cover_update(world, location);
-					if (location->owner().has_component<block_emmision>()) {
-						world.write_command(grid::SpreadLightCommand());
-					}
-					world.write_command(grid::partial_reshade_command(grid, cmd.pos));
+					size_t old_light = location.get<block>().light_passing_through;
+					world.write_command(partial_darken_command{ .location = cmd.pos, .old_light = old_light});
+					dislocate_from_grid(location.object(), cmd.id, cmd.attach_direction);
+					location = grid.get_object(cmd.pos).unwrap();
+					block_change_updates(world, location);
 				}
 			}
 			grid.updateborders();

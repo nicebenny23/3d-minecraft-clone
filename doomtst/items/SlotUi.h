@@ -23,9 +23,7 @@ namespace items {
 		}
 		void reset_decal() {
 			renderer::TexturePath path = renderer::TexturePath("images\\blockholder.png", "item_decal_original");
-			if (item_decal_object.get<ui::ui_image_component>().current_image!=path) {
-				set_decal(path);
-			}
+				set_decal(path);			
 		}
 		ecs::Constrained<ui::ui_image_component> item_decal_object;
 	};

@@ -71,7 +71,7 @@ namespace random {
 		return hash;
 	}
 
-	void initrandom() {
+	void initilize_random() {
 		InitRandomDirections();
 		seed64 = 1;
 	}

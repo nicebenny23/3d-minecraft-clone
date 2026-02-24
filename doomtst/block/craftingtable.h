@@ -25,6 +25,11 @@ namespace items {
 			);
 		}
 	};
+	struct crafting_table_loot_table :items::LootTable {
+		items::LootDrops drops_for(items::item_types& types) {
+			return items::LootDrops({ items::loot_element(types.from_type<crafting_table_item>(),1,types) });
+		}
+	};
 }
 namespace blocks {
 
@@ -51,7 +56,7 @@ namespace blocks {
 		void apply(ecs::obj& block) const override {
 			ecs::Constrained<items::container> input_slots(block.spawn_child<items::container_recipe>(v2::Coord2(3, 3)));
 			block.apply_recipe(CraftingTableMenuRecipe{ .input_slots = input_slots});
-			block.add_component<items::loot_table>().add("crafting_table", 1);
+			block.apply_recipe<>(items::loot_table_recipe<items::crafting_table_loot_table>);
 		}
 		std::string name() const {
 			return std::string("crafting_table");

@@ -10,8 +10,8 @@ namespace math {
 	struct NoiseParameters {
 
 		NoiseParameters(size_t octave_count, double frequency_multiplier, double initial_frequency, double amplification_multiplier) {
-			//400 is enough for all cases
-			histogram_sample_count = 400;
+			//200 is enough for all cases
+			histogram_sample_count = 200;
 			starting_frequency = initial_frequency;
 			frequency_factor = frequency_multiplier;
 			octaves = octave_count;
@@ -112,10 +112,10 @@ namespace math {
 			}
 			equalizer = statistics::HistogramEqualizer(array<double>(distribution));
 		}
-		inline double operator()(Coord pos) {
+		inline double operator()(Coord pos) const {
 			return this->operator()(v3::Point3(pos));
 		}
-		inline double operator()(v3::Point3 pos) {
+		inline double operator()(v3::Point3 pos) const{
 			return equalizer.apply_distribution(perlin_for(pos, properties));
 		}
 	private:

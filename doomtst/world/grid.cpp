@@ -29,7 +29,7 @@ namespace grid {
 		return shifts;
 	}
 
-	constexpr int shift = powof2< Chunk::chunkaxis>();
+	constexpr int shift = powof2< Chunk::chunk_axis>();
 	Coord Grid::chunkfromblockpos(Coord pos) {
 		return  Coord(pos.x >> shift, pos.y >> shift, pos.z >> shift);
 	}
@@ -43,7 +43,7 @@ namespace grid {
 	}
 
 	Coord Grid::get_chunk(Point3 pos) {
-		return  Coord(std::floor(pos.x / Chunk::chunkaxis), std::floor(pos.y / Chunk::chunkaxis), std::floor(pos.z / Chunk::chunkaxis));
+		return  Coord(std::floor(pos.x / Chunk::chunk_axis), std::floor(pos.y / Chunk::chunk_axis), std::floor(pos.z / Chunk::chunk_axis));
 	}
 
 	//
@@ -111,14 +111,14 @@ namespace grid {
 
 
 	Option<block&> Grid::get_block(const v3::Coord pos) {
-		return get_object(pos).map_member(&ecs::Constrained<block>::get<block>);
+		return get_object(pos).map([](Chunk::block_object& block_object)->block& {return block_object.get<block>(); });
 	}
 
 	block* Grid::getBlock(const v3::Coord pos) {
 
 		Chunk::chunk* chnk = GetChunk(pos);
 		if (chnk) {
-			return &chnk->block_list.unchecked_at(Chunk::index_from_pos(pos)).get<block>();
+			return &chnk->block_list.unchecked_at(Chunk::index_from_pos(pos)).get_unchecked<block>();
 		}
 		return nullptr;
 	}
@@ -184,7 +184,11 @@ namespace grid {
 		}
 		if (closest_unloaded_chunk) {
 			Chunk::ChunkLocation spawn_location = closest_unloaded_chunk.unwrap();
-			ecs::obj chunk_object = ecs::spawn_emplaced<Chunk::CreateChunk>(world, spawn_location);
+			struct chunk_tag {
+
+			};
+			ecs::obj chunk_object(world.spawn_tagged<chunk_tag>(),world);
+			chunk_object.apply_recipe(Chunk::CreateChunk(spawn_location));
 			newchunklist[chunkIndex(spawn_location)] = &chunk_object.get_component<Chunk::chunk>();
 		}
 

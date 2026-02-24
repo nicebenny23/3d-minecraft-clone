@@ -29,25 +29,22 @@ namespace geo {
 	struct Box {
 		Point3 center;
 		Scale3 scale;
-	
-		Box(Point3 cent, Scale3 scl) : center(cent), scale(scl) {}
 
-		Point3 max() const{
-			return center +Vec3(scale);
+		Box(Point3 cent, Scale3 scl) : center(cent), scale(scl) {
+		}
+
+		Point3 max() const {
+			return center + Vec3(scale);
 		}
 		Point3 min() const {
-			return center-Vec3(scale);
+			return center - Vec3(scale);
 		}
-	
-		bool contains(Point3 pos) const
-		{
-			Vec3 shifted= center-pos;
-			if (abs(shifted.x) <= scale.x)
-			{
-				if (abs(shifted.y) <= scale.y)
-				{
-					if (abs(shifted.z) <= scale.z)
-					{
+
+		bool contains(Point3 pos) const {
+			Vec3 shifted = center - pos;
+			if (abs(shifted.x) <= scale.x) {
+				if (abs(shifted.y) <= scale.y) {
+					if (abs(shifted.z) <= scale.z) {
 						return true;
 					}
 				}
@@ -55,15 +52,12 @@ namespace geo {
 			return false;
 		}
 
-		
-		bool contains_box(Box b) const{
-		Vec3 sub= b.center-center;
-			if (abs(sub.x)+b.scale.x<scale.x)
-			{
-				if (abs(sub.y) + b.scale.y < scale.y)
-				{
-					if (abs(sub.z) + b.scale.z < scale.z)
-					{
+
+		bool contains_box(Box b) const {
+			Vec3 sub = b.center - center;
+			if (abs(sub.x) + b.scale.x < scale.x) {
+				if (abs(sub.y) + b.scale.y < scale.y) {
+					if (abs(sub.z) + b.scale.z < scale.z) {
 						return true;
 					}
 
@@ -80,17 +74,17 @@ namespace geo {
 			//minkoski diffrence changes affinity
 			return LocalBox(center - other.center, scale.expanded(other.scale));
 		}
-		Box translate(Vec3 translation_vector) const{
+		Box translate(Vec3 translation_vector) const {
 			return Box(center + translation_vector, scale);
 		}
-		Box scale_from_center(float dialation) const{
-			return Box(center , scale* dialation);
+		Box scale_from_center(float dialation) const {
+			return Box(center, scale * dialation);
 		}
 		Box transform(LocalBox local_transform) const {
-			return Box(local_transform.center*scale+center, local_transform.scale * scale);
+			return Box(local_transform.center * scale + center, local_transform.scale * scale);
 		}
 		Box transform(Box other_transform) const {
-			return Box(center.offset_local(other_transform.center * scale), other_transform.scale * scale*2);
+			return Box(center.offset_local(other_transform.center * scale), other_transform.scale * scale * 2);
 		}
 		bool rayintersects(math::ray fray);
 	};
@@ -106,31 +100,31 @@ namespace geo {
 			return scale.y;
 		}
 		constexpr Box2d(v2::Vec2 cent, v2::Vec2 scl)
-			: center(cent), scale(scl) {}
+			: center(cent), scale(scl) {
+		}
 		v2::Vec2 upper() const {
 			return center + scale / 2;
 		}
 		v2::Vec2 lower() const {
-			return center-scale / 2;
+			return center - scale / 2;
 		}
-		v2::Vec2 half_size() const{
+		v2::Vec2 half_size() const {
 			return scale / 2;
 		}
 
 		Box2d transform(Box2d other_transform) const {
-			return Box2d(center+other_transform.center * scale, other_transform.scale * scale);
+			return Box2d(center + other_transform.center * scale, other_transform.scale * scale);
 		}
-		bool contains(Box2d box) const{
+		bool contains(Box2d box) const {
 			return contains(box.upper()) && contains(box.lower());
 		}
-		bool contains(v2::Vec2 point) const{
+		bool contains(v2::Vec2 point) const {
 
 			point -= center;
-			if (abs(point.x)<=scale.x&&abs(point.y)<=scale.y)
-			{
+			if (abs(point.x) <= scale.x && abs(point.y) <= scale.y) {
 				return true;
 			}
-			return false;    
+			return false;
 		}
 		static Box2d origin_centered(v2::Vec2 scale) {
 			return Box2d(v2::zerov, scale);
@@ -139,7 +133,7 @@ namespace geo {
 			return Box2d((max + min) / 2, (max - min) / 2);
 		}
 	};
-	inline constexpr Box2d unit_box_2d = Box2d(v2::Vec2(0,0), v2::Vec2(1,1));
+	inline constexpr Box2d unit_box_2d = Box2d(v2::Vec2(0, 0), v2::Vec2(1, 1));
 
 
 
@@ -149,7 +143,8 @@ namespace geo {
 
 		Plane() = default;
 		Plane(Vec3 norm, Point3 pnt)
-			: normal(norm), point(pnt) {}
+			: normal(norm), point(pnt) {
+		}
 
 		Plane(Point3 p1, Point3 p2, Point3 p3) {
 			Vec3 v1 = p2 - p1;
@@ -157,10 +152,10 @@ namespace geo {
 			normal = v3::normal(Cross(v1, v2));
 			point = p1;
 		}
-		bool above(Point3 pnt) const{
-			return 0<=dot(normal,pnt- point);
+		bool above(Point3 pnt) const {
+			return 0 <= dot(normal, pnt - point);
 		}
-		bool crosses(math::ray potential_crossing) const{
+		bool crosses(math::ray potential_crossing) const {
 			return above(potential_crossing.start) != above(potential_crossing.end);
 		}
 
@@ -173,27 +168,27 @@ namespace geo {
 	struct Sphere {
 		double radius;
 		Point3 center;
-		bool contains(Point3 point) const{
+		bool contains(Point3 point) const {
 			return dist(center, point) <= radius;
 		}
-		
+
 		Sphere(Box bx)
-			: radius(Vec3(bx.scale).length()), center(bx.center) {}
-		
-		Point3 project(Point3 point) const{
+			: radius(Vec3(bx.scale).length()), center(bx.center) {
+		}
+
+		Point3 project(Point3 point) const {
 			return center + normal(point - center) * radius;
 		}
 		Point3 bound(Point3 point) const {
-			if (contains(point))
-			{
+			if (contains(point)) {
 				return point;
 			}
 			return project(point);
 		}
-		bool is_on_or_above_plane(const Plane& plane) const{
+		bool is_on_or_above_plane(const Plane& plane) const {
 			return plane.distance_to_point(center) > -radius;
 		}
-		
+
 	};
 
 	struct cone {
@@ -201,17 +196,18 @@ namespace geo {
 		double slope;
 
 		cone(const math::ray newray, double cone_slope)
-			: direction(newray), slope(cone_slope) {}
+			: direction(newray), slope(cone_slope) {
+		}
 
 		//returns the normalized direction
-		Vec3 normal_direction() const{
+		Vec3 normal_direction() const {
 			return direction.dir();
 		}
-		Point3 orgin() const{
+		Point3 orgin() const {
 			return direction.start;
 		}
 
-		double distance_from_point(Point3 samplePoint) const{
+		double distance_from_point(Point3 samplePoint) const {
 			// Project the sample point onto the cone's central axis (ray)
 			Point3 axisProjection = direction.project(samplePoint);
 
@@ -230,31 +226,27 @@ namespace geo {
 		}
 	};
 
-	inline bool boxes_intersect(geo::Box p1, geo::Box p2)
-	{
+	inline bool boxes_intersect(geo::Box p1, geo::Box p2) {
 		return (p1 - p2).contains_orgin();
-					
+
 	}
-	inline 	stn::Option<v3::Vec3> collide_box(Box p1, Box p2)
-	{
+	inline 	stn::Option<v3::Vec3> collide_box(Box p1, Box p2) {
 		if (!geo::boxes_intersect(p1, p2)) {
 			return stn::None;
 
 		}
 		Vec3 min_vector = zerov;
-		double min_depth=std::numeric_limits<double>().infinity();
-		for (int i = 0; i < 3; i++)
-		{
+		double min_depth = std::numeric_limits<double>().infinity();
+		for (int i = 0; i < 3; i++) {
 			int sgn = p1.center[i] > p2.center[i] ? 1 : -1;
 			double depth = sgn * (p1.scale[i] + p2.scale[i]) - (p1.center[i] - p2.center[i]);
-			if (abs(depth)<=min_depth )
-			{
+			if (abs(depth) <= min_depth) {
 				min_depth = abs(depth);
 				min_vector = Vec3(depth, i);
 			}
 		}
 		return min_vector;
-		
+
 	}
 }
 

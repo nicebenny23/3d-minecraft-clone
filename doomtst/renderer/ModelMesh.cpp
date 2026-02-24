@@ -22,9 +22,8 @@ ModelMesh::ModelMesh()
 
 void ModelMeshName::ModelMesh::create_handle(const char* locaion,const char* name,ecs::Ecs& world)
 {
-handle= world.get_resource<renderer::Renderer>().gen_renderable();
+handle= world.get_resource<renderer::Renderer>().gen_renderable("Model");
 handle.set_layout(vertice::vertex().push<float, 3>().push<float, 2>());
-handle.set_material("Model");
 handle.set_uniform(renderer::uniform(world.load_asset_emplaced<renderer::TexturePath>(locaion, name).unwrap(), "tex"));
 }
 
@@ -104,5 +103,4 @@ void ModelMeshName::rendermesh(ModelMesh& torender)
 		data.add_point(vertex, Texture2D);
 	}
 	torender.handle.fill(std::move(data));
-		torender.handle.render();
 }

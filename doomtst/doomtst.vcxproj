@@ -411,6 +411,7 @@
     <ClInclude Include="math\angle.h" />
     <ClInclude Include="math\meshes.h" />
     <ClInclude Include="math\Scale3.h" />
+    <ClInclude Include="player\crosshair.h" />
     <ClInclude Include="player\inventory_ui.h" />
     <ClInclude Include="player\playermovment.h" />
     <ClInclude Include="player\player_look.h" />
@@ -483,6 +484,7 @@
     <ClInclude Include="util\mutex.h" />
     <ClInclude Include="util\Name.h" />
     <ClInclude Include="util\Option.h" />
+    <ClInclude Include="util\paged_array.h" />
     <ClInclude Include="util\pair.h" />
     <ClInclude Include="util\pipeline.h" />
     <ClInclude Include="util\queue.h" />

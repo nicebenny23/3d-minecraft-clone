@@ -90,7 +90,12 @@ namespace userinput {
 		}
 
 	};
-
+	struct InputPollingSystem :ecs::System {
+		void run(ecs::Ecs& world) {
+			world.get_resource<userinput::InputManager>().endupdate();
+			glfwPollEvents();
+		}
+	};
 
 }
 

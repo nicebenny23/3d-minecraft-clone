@@ -42,8 +42,7 @@ namespace items {
 			entity.set_emplace_component<ItemIcon>(ecs::Constrained<ui::ui_image_component>(image));
 			entity.set_emplace_component<ItemCountDisplay>(ecs::Constrained<ui::text_component>(text));
 				geo::Box2d max_size(v2::Vec2(0, -.7f), v2::Vec2(item_size, item_size / 4));
-				ecs::obj bar= entity.spawn_child< ui::ui_image_spawner>(max_size, 1);
-				bar.get_component<ui::ui_image_component>().set_image(renderer::TexturePath("images\\water.png", "item_water_bar_original"));
+				ecs::obj bar= entity.spawn_child< ui::ui_image_spawner>(renderer::TexturePath("images\\default.png"), max_size, 1, colors::Green);
 				entity.set_emplace_component<ItemProgressDisplay>(bar,max_size);
 		}
 	};
@@ -60,7 +59,7 @@ namespace items {
 					double dur_progress = icon.value.unwrap();
 					geo::Box2d& box = icon.bar.get_component<ui::UiBounds>().local;
 					box.scale.x = icon.full_box.scale.x * dur_progress;
-					box.center.x = stn::lerp(icon.full_box.lower().x, icon.full_box.upper().x, dur_progress);
+					box.center.x = stn::lerp(icon.full_box.lower().x, icon.full_box.center.x, dur_progress);
 				}
 			}
 		}
@@ -83,7 +82,7 @@ namespace items {
 		void run(ecs::Ecs& world) {
 
 			for (auto&& [count] : ecs::View<ecs::With<ItemCountDisplay>>(world)) {
-				if (!count.count||count.count.unwrap()==1) {
+				if (!count.count||count.count.unwrap()<=1) {
 					count.text_component.get_component<ui::UiEnabled>().disable();
 					continue;
 				}
@@ -95,6 +94,8 @@ namespace items {
 
 	struct ItemUiPlugin :Core::Plugin {
 		void build(Core::App& app) {
+			app.insert_plugin<ui::UiImagePlugin>();
+			app.insert_plugin<ui::UiTextPlugin>();
 			app.emplace_system<ItemIconSetter>();
 			app.emplace_system<ItemDuribilityBarSetter>();
 			app.emplace_system<ItemCountSetter>();

@@ -21,7 +21,7 @@ namespace voxtra {
 		ecs::obj owner() const {
 			return collider.owner();
 		}
-		float dist() const {
+		double dist() const {
 			return Hit.dist;
 		}
 		math::ray ray() const {
@@ -64,8 +64,8 @@ namespace voxtra {
 		if (nray.length() == 0) {
 			return stn::None;
 		}
-		float ray_length = nray.length();
-		float travel_dist = 0;
+		double ray_length = nray.length();
+		double travel_dist = 0;
 		Vec3 norm_ray = nray.dir();
 		Vec3 conv_each;
 		v3::Coord sgns;
@@ -93,20 +93,20 @@ namespace voxtra {
 			for (int x = extended_range(pos.x).first; x <= extended_range(pos.x).second; ++x) {
 				for (int y = extended_range(pos.y).first; y <= extended_range(pos.y).second; ++y) {
 					for (int z = extended_range(pos.z).first; z <= extended_range(pos.z).second; ++z) {
-						block* blk = grid.getBlock(Coord(x, y, z));
-							if (blk == nullptr) {
+						stn::Option<ecs::Constrained<block>&> blk = grid.get_object(Coord(x, y, z));
+							if (blk.is_none()) {
 								continue;
 							}
-						aabb::Collider* BlockCollider = blk->owner().get_component_ptr<aabb::Collider>();
-						if (BlockCollider == nullptr) {
+						stn::Option<aabb::Collider&> BlockCollider = blk.unwrap().get_component_opt<aabb::Collider>();
+						if (!BlockCollider) {
 							continue;
 						}
-						if (!counttablevoxel(*blk, trav)) {
+						if (!counttablevoxel(blk.unwrap().get<block>(), trav)) {
 							continue;
 						}
-						geointersect::boxRayCollision PotentialCollision = geointersect::intersection(BlockCollider->global_box(), nray);
+						geointersect::boxRayCollision PotentialCollision = geointersect::intersection(BlockCollider.unwrap().global_box(), nray);
 						if (PotentialCollision && PotentialCollision.unwrap().dist < ray_length && (!Collision || PotentialCollision.unwrap().dist < Collision.unwrap().dist())) {
-							Collision = PotentialCollision.map([&](geointersect::RayHit hit) {return RayWorldHit(hit, blk->owner().get_component<aabb::Collider>()); });
+							Collision = PotentialCollision.map([&](geointersect::RayHit hit) {return RayWorldHit(hit, BlockCollider.unwrap()); });
 						}
 
 
@@ -117,13 +117,13 @@ namespace voxtra {
 				return Collision;
 
 			}
-			float min_dist = std::numeric_limits<float>::infinity();
+			double min_dist = std::numeric_limits<double>::infinity();
 			size_t min_ind = 0;
 			for (size_t i = 0; i < 3; i++) {
 				if (sgns[i] == 0) {
 					continue;
 				}
-				float new_val = abs(Boundry[i] - pos[i]) * conv_each[i];
+				double new_val = abs(Boundry[i] - pos[i]) * conv_each[i];
 				if (new_val < min_dist) {
 					min_dist = new_val;
 					min_ind = i;
@@ -149,7 +149,7 @@ namespace voxtra {
 			double ranx = (random::random() - .5) * 2;
 			double rany = (random::random() - .5) * 2;
 			double ranz = (random::random() - .5) * 2;
-			v3::Point3 test_pos = (Vec3(ranx, rany, ranz) * (world.dim_axis) / 2 + world.grid_pos.position) * Chunk::chunkaxis;
+			v3::Point3 test_pos = (Vec3(ranx, rany, ranz) * (world.dim_axis) / 2 + world.grid_pos.position) * Chunk::chunk_axis;
 			geo::Box test_box = geo::Box(test_pos,scale);
 			if (!boxcast_grid(test_box,world))
 			{

@@ -8,7 +8,7 @@ namespace ecs {
 		{
 			spawner.apply(object)
 		}->std::same_as<void>;
-	}||stn::void_invokable<const T&,ecs::obj&>;
+	}||stn::void_invokable<T&,ecs::obj&>;
 	template<typename T>
 	struct is_tuple : std::false_type {
 	};

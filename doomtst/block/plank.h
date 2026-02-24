@@ -2,11 +2,16 @@
 #include "block_registry.h"
 #pragma once 
 namespace blocks {
-	struct PlankBlock :BlockType {
-		void apply(ecs::obj& block)  const override {
 
-			constexpr stn::HashedString hashed("plank");
-			block.add_component<items::loot_table>().add(hashed, 1);
+	struct crafting_table_loot_table :items::LootTable {
+		items::LootDrops drops_for(items::item_types& types) {
+			return items::LootDrops({ items::loot_element("plank",1,types) });
+		};
+	};
+	struct PlankBlock :BlockType {
+		void apply(ecs::obj& block)  const override 
+		{
+			block.apply_recipe(items::loot_table_recipe<items::crafting_table_loot_table>);
 		}
 		std::string name() const{
 			return std::string("plank");
@@ -26,7 +31,4 @@ namespace items {
 			,world.get_resource<BlockRegistry>().get_id<blocks::PlankBlock>());
 		}
 	};
-
-
-
 }

@@ -16,7 +16,13 @@ namespace stn {
             }
             template<typename T>
             static constexpr bool is_member =TypeList::contains_v<type_list,T>;
-
+			template<typename T>
+				requires(is_member<T>&& std::is_lvalue_reference_v<T>)
+			inline void copy_reference_from(const erased& other) {
+				using raw_T = std::remove_reference_t<T>;
+				auto src = reinterpret_cast<raw_T* const*>(&other.storage);
+				*reinterpret_cast<raw_T**>(&storage) = *src;
+			}
 			template<typename T>
 				requires(is_member<T>)
 			inline T&& get()&& {

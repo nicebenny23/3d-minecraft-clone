@@ -45,7 +45,7 @@ namespace items {
 	struct CraftingSlotDisplaySpawner {
 		v2::Coord2 pos;
 		ecs::Constrained<crafter> crafter;
-		void apply(ecs::obj& entity) const{
+		void apply(ecs::obj& entity) const {
 			entity.apply_recipe(ui::UiSpawner(geo::unit_box_2d, 1));
 			ecs::Constrained<ui::InteractionState, ItemIcon, ItemCountDisplay> display = entity.spawn_child<FakeItemSlotDispaySpawner>(pos);
 			entity.add_component <crafting_slot_displayer>(crafter, display);
@@ -67,6 +67,7 @@ namespace items {
 				crafting_slot_display.display.get<ItemIcon>().displayed_id = entry.member(&item_entry::id);
 			}
 			for (auto&& [crafting_slot_display] : ecs::View<ecs::With<items::crafting_slot_displayer>>(world)) {
+				
 				if (crafting_slot_display.display.get_component<ui::InteractionState>().left_clicked) {
 					crafter& crafter_comp = crafting_slot_display.crafter_comp.get_component<crafter>();
 					auto auto_val = build_recipe_from_booklet(crafter_comp.binder.list, crafter_comp.binder.input.get_component<container>(), cursor_slot);
@@ -86,15 +87,15 @@ namespace items {
 			}
 		}
 	};
-	struct CrafterRecipe{
+	struct CrafterRecipe {
 
-		CrafterRecipe(ecs::obj input, stn::array<std::filesystem::path> crafting_path) :input_container(input), paths(crafting_path){
+		CrafterRecipe(ecs::obj input, stn::array<std::filesystem::path> crafting_path) :input_container(input), paths(crafting_path) {
 
 		}
-		void apply(ecs::obj& entity) const{
+		void apply(ecs::obj& entity) const {
 			ItemRecipes recipes;
 			recipes.size = input_container.get_component<container>().size;
-			for (const std::filesystem::path& path: paths) {
+			for (const std::filesystem::path& path : paths) {
 				json::Value booklet = json::parse_for_file(path);
 				recipes.recipe_list.append(recipe_booklet_from_path(recipes.size, booklet, entity.world()).recipe_list);
 			}

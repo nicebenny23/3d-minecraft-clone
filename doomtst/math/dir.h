@@ -25,7 +25,9 @@ namespace math {
 	public:
 		constexpr Direction3d(DirectionIndex3d d) : dir(d) {
 		}
-
+		constexpr DirectionIndex3d direction() const {
+			return dir;
+		}
 		constexpr size_t index() const {
 			return static_cast<size_t>(dir);
 		}
