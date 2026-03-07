@@ -89,7 +89,7 @@ namespace handle {
 			if (insertion.is_new || elems[insertion.value].is_none()) {
 				elems.reach(insertion.value) = func(handle, HandleID(insertion.value));
 			}
-			return stn::Option<HandleID>(insertion.value).filter([this](HandleID id) {return elems[id.id].is_some(); });
+			return stn::Option<HandleID>(HandleID(insertion.value)).filter([this](HandleID id) {return elems[id.id].is_some(); });
 		}
 
 		HandleID get_or(const Handle& handle, const T& value) {
