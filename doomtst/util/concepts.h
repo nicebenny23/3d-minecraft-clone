@@ -2,14 +2,16 @@
 #include <concepts>
 namespace stn {
 
-
-
+	
 	template<typename T>
 	concept CalledWhileIncomplete =! requires { sizeof(T); };
 	template<typename From, typename To>
 	concept decays_to = std::same_as<std::remove_cvref_t<From>, To>;
-	//
-	template<typename T, typename... Args>
+	template<typename Result, typename Func, typename ...Args>
+	concept invocable_to = std::invocable<Func&&, Args&&...>&&
+		std::constructible_from<Result, std::invoke_result_t<Func&&, Args&&...>>;
+	
+		template<typename T, typename... Args>
 	concept RecursiveConstructible =
 		//skip the call if incomplete
 		stn::CalledWhileIncomplete<T>

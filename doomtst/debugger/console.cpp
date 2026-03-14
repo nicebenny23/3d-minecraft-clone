@@ -23,7 +23,7 @@ namespace console {
 		}
 	}
 
-	void Console::Clear() {
+	void Console::clear() {
 		head_.store(0, std::memory_order_relaxed);
 		count_.store(0, std::memory_order_relaxed);
 	}
@@ -42,8 +42,8 @@ namespace console {
 				Point3 pos = player::goblin.get_component<ecs::transform_comp>().transform.position;
 				ImGui::Text(std::format("position: {}", pos).c_str());
 				grid::Grid& grid = player::goblin.world().get_resource<grid::Grid>();
-				ImGui::Text(std::format("yaw:{:.3f},pitch:{:.3f}", player::goblin.get_component<player::CameraComp>().CamTransform.yaw, player::goblin.get_component<player::CameraComp>().CamTransform.pitch).c_str());
-				ImGui::Text(std::format("Chunk: {}", grid.chunkfromblockpos(Coord(pos))).c_str());
+				ImGui::Text(std::format("yaw:{:.3f},pitch:{:.3f}", player::goblin.get_component<renderer::CameraComponent>().CamTransform.yaw, player::goblin.get_component<renderer::CameraComponent>().CamTransform.pitch).c_str());
+				ImGui::Text(std::format("Chunk: {}", grid.chunk_from_block_pos(Coord(pos)).position).c_str());
 				std::string text_for_look = player::goblin.get_component<player::PlayerCursor>().Hit
 					.filter([&](const voxtra::RayWorldHit& blk) {return blk.owner().exists(); })
 					.filter([](const voxtra::RayWorldHit& blk) {return blk.owner().has_component<block>(); })
@@ -81,7 +81,7 @@ namespace console {
 				filter_.Draw("Filter");
 				ImGui::SameLine();
 				if (ImGui::RadioButton("Clear", true)) {
-					Clear();
+					clear();
 				}
 				if (ImGui::RadioButton("set_view", false)) {
 					player::goblin.world().ensure_resource<settings::GlobalSettings>().viewmode ^= true;

@@ -60,6 +60,7 @@ namespace ecs {
 		stn::Option<T&> get_component_opt() {
 			return ecs->get_component_opt<T>(ent);
 		}
+
 		template<ComponentType T>
 		stn::Option<const T&> get_component_opt() const{
 			return ecs->get_component_opt<T>(ent);

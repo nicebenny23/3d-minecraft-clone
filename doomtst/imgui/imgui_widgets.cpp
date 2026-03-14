@@ -7146,7 +7146,7 @@ ImGuiTypingSelectRequest* ImGui::GetTypingSelectRequest(ImGuiTypingSelectFlags f
         clear_buffer |= IsKeyPressed(ImGuiKey_Backspace) && (flags & ImGuiTypingSelectFlags_AllowBackspace) == 0;
         //if (clear_buffer) { IMGUI_DEBUG_LOG("GetTypingSelectRequest(): Clear SearchBuffer.\n"); }
         if (clear_buffer)
-            data->Clear();
+            data->clear();
     }
 
     // Append to buffer
@@ -7167,7 +7167,7 @@ ImGuiTypingSelectRequest* ImGui::GetTypingSelectRequest(ImGuiTypingSelectFlags f
         }
         if (data->SingleCharModeLock)
         {
-            data->Clear(); // Different character: clear
+            data->clear(); // Different character: clear
             buffer_len = 0;
         }
         memcpy(data->SearchBuffer + buffer_len, w_buf, w_len + 1); // Append
@@ -7537,7 +7537,7 @@ ImGuiMultiSelectIO* ImGui::BeginMultiSelect(ImGuiMultiSelectFlags flags, int sel
 
     // FIXME: BeginFocusScope()
     const ImGuiID id = window->IDStack.back();
-    ms->Clear();
+    ms->clear();
     ms->FocusScopeId = id;
     ms->Flags = flags;
     ms->IsFocused = (ms->FocusScopeId == g.NavFocusScopeId);
@@ -8063,7 +8063,7 @@ ImGuiSelectionBasicStorage::ImGuiSelectionBasicStorage()
     _SelectionOrder = 1; // Always >0
 }
 
-void ImGuiSelectionBasicStorage::Clear()
+void ImGuiSelectionBasicStorage::clear()
 {
     Size = 0;
     _SelectionOrder = 1; // Always >0
@@ -8177,7 +8177,7 @@ void ImGuiSelectionBasicStorage::ApplyRequests(ImGuiMultiSelectIO* ms_io)
     {
         if (req.Type == ImGuiSelectionRequestType_SetAll)
         {
-            Clear();
+            clear();
             if (req.Selected)
             {
                 _Storage.Data.reserve(ms_io->ItemsCount);

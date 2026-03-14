@@ -2,6 +2,7 @@
 
 #pragma once
 namespace items {
+
 	struct item_entry {
 		
 		item_entry(item_id Id, size_t cnt,const item_types& types) :id(Id), count(cnt){

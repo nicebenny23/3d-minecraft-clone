@@ -13,7 +13,7 @@ namespace player {
 	struct PlayerCursor:ecs::component {
 
 		voxtra::WorldRayCollision Hit;
-		math::range look_range= math::range(0,4);
+		math::bounds look_range= math::bounds(0,4);
 	};
 
 	struct PlayerCursorCaster:ecs::System{
@@ -28,7 +28,7 @@ namespace player {
 					continue;
 				}
 				math::Transform& transform= view.get<ecs::transform_comp&>().transform;
-				math::ray look_ray=transform.forward_ray().dialate_from_start(cursor.look_range.upper());
+				math::ray look_ray=transform.forward_ray().dialate_from_start(cursor.look_range.max());
 
 				cursor.Hit = collision::raycast(look_ray, collision::HitQuery(view.get<ecs::obj>()));
 				if (cursor.Hit) {

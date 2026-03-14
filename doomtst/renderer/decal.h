@@ -67,16 +67,14 @@ namespace decals {
 
 		};
 		void run(ecs::Ecs& world) {
-			ecs::Constrained<player::CameraComp> cam = world.get_resource<player::camera_resource>().camera;
+			ecs::Constrained<renderer::CameraComponent> cam = world.get_resource<renderer::camera_resource>().camera;
 			for (DecalReimageCommand& cmd : world.read_commands<DecalReimageCommand>()) {
 				if (cmd.decal_comp.exists()) {
 					decal_component& dec = cmd.decal_comp.get_component<decal_component>();
 					if (!dec.handle) {
 						dec.handle = world.get_resource<renderer::Renderer>().gen_renderable("decal_mat");
-						dec.handle.set_layout(vertice::vertex().push<float, 3>().push<float, 2>());
-
 					}
-					dec.handle.set_order_key(dist(dec.center, cam.get<player::CameraComp>().center()));
+					dec.handle.set_order_key(dist(dec.center, cam.get<renderer::CameraComponent>().center()));
 					dec.handle.set_uniform(renderer::uniform(world.load_asset_emplaced<renderer::TexturePath>(cmd.path).unwrap(), "tex"));
 				}
 			}
@@ -99,7 +97,7 @@ namespace decals {
 				if (dec.handle) {
 
 
-					renderer::MeshData mesh = dec.handle.create_mesh();
+					renderer::MeshData mesh = dec.handle.create_mesh(vertice::vertex().push<float, 3>().push<float, 2>());
 					for (int i = 0; i < 4; i++) {
 						v2::Vec2 norm_uv = math::symetrical_square_mesh[i];
 						const double eps = .001;

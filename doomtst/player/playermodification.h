@@ -55,8 +55,9 @@ namespace player {
 			decals::decal_component& decal = break_decal.get_component<decals::decal_component>();
 			decal.enable();
 			auto hit = look.Hit.unwrap().intersection();
-			math::Direction3d fd = closest_face(hit, currmining.unwrap().get_component<block>());
-			auto& f = currmining.unwrap().get_component<block>().mesh[fd.index()];
+			block& blk= currmining.unwrap().get_component<block>();
+			math::Direction3d fd = closest_face(hit, blk);
+			auto f = currmining.unwrap().get_component<block>().mesh[fd.index()];
 			decal.center = f.center();
 			decal.normal = fd.vec();
 			auto [b, t] = get_flat_frame(fd);

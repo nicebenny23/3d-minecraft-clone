@@ -23,7 +23,6 @@ ModelMesh::ModelMesh()
 void ModelMeshName::ModelMesh::create_handle(const char* locaion,const char* name,ecs::Ecs& world)
 {
 handle= world.get_resource<renderer::Renderer>().gen_renderable("Model");
-handle.set_layout(vertice::vertex().push<float, 3>().push<float, 2>());
 handle.set_uniform(renderer::uniform(world.load_asset_emplaced<renderer::TexturePath>(locaion, name).unwrap(), "tex"));
 }
 
@@ -90,7 +89,7 @@ void ModelMeshName::rendermesh(ModelMesh& torender)
 {
 //	CtxName::ctx.Ren->Bind_Texture(torender->tex);
 	
-	renderer::MeshData data=torender.handle.create_mesh(renderer::indice_mode::generate_indices);
+	renderer::MeshData data=torender.handle.create_mesh(vertice::vertex().push<float, 3>().push<float, 2>(),renderer::indice_mode::generate_indices);
 	v3::Point3 pos = torender.transform.position;
 	
 	torender.setmodeluniform();

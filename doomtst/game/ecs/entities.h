@@ -23,19 +23,19 @@ namespace ecs {
 
 	struct entity_metadata {
 		uint32_t gen_count;
-		entity_metadata() {
-
+		entity_metadata(entity_id id_for):id(id_for) {
 			gen_count = 0;
 		}
 		void clear() {
 			gen_count++;
 			is_alive = false;
 		}
-		void mark_alive() {
+		entity make_live_handle() {
 			is_alive = true;
+			return entity(id, gen_count);
 		}
 		bool is_alive;
-
+		entity_id id;
 	};
 	
 
@@ -95,14 +95,17 @@ namespace ecs {
 			return entity_list.empty();
 		}
 		template<typename A= default_allocator>
-		stn::insertion<entity> allocate_entity() {
+		entity allocate_entity() {
 			stn::insertion<entity_id> id= free_ids.allocate<A>();
 			if (id.is_new) {
 				//expands to the index
-				entity_list.geometric_expand(max_sharing_page(id.value).id + 1);
+				entity_list.geometric_expand_with(max_sharing_page(id.value).id + 1,
+					[](size_t index) {
+						return entity_metadata(entity_id(index));
+					}
+				);
 			}
-			at(id.value).mark_alive();
-			return stn::insertion<entity>(entity(id.value, entity_list[id.value.id].gen_count), id.is_new);;
+			return at(id.value).make_live_handle();
 		}
 		void remove_entity(entity entity) {
 			at(entity.id()).clear();

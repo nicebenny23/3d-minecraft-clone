@@ -99,6 +99,10 @@ namespace ecs {
 		bool exists() const {
 			return owned.exists();
 		}
+		void destroy() {
+			owned.destroy();
+			owned = obj();
+		}
 	private:
 
 		obj owned;

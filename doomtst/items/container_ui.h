@@ -33,6 +33,7 @@ namespace items{
 		v2::Coord2 offset;
 		ecs::Constrained<items::container> container_object;
 		ContainerDisplayRecipe(v2::Coord2 position, ecs::Constrained<items::container> object):offset(position),container_object(object){
+			object.validate();
 		}
 		void apply(ecs::obj& object) const{
 			ui::UiSpawner(geo::unit_box_2d, 1000).apply(object);

@@ -431,7 +431,7 @@ void ImDrawList::_ResetForNewFrame()
     _TextureIdStack.resize(0);
     _CallbacksDataBuf.resize(0);
     _Path.resize(0);
-    _Splitter.Clear();
+    _Splitter.clear();
     CmdBuffer.push_back(ImDrawCmd());
     _FringeScale = 1.0f;
 }
@@ -2213,7 +2213,7 @@ void ImDrawListSplitter::SetCurrentChannel(ImDrawList* draw_list, int idx)
 // [SECTION] ImDrawData
 //-----------------------------------------------------------------------------
 
-void ImDrawData::Clear()
+void ImDrawData::clear()
 {
     Valid = false;
     CmdListsCount = TotalIdxCount = TotalVtxCount = 0;
@@ -2478,7 +2478,7 @@ ImFontAtlas::ImFontAtlas()
 ImFontAtlas::~ImFontAtlas()
 {
     IM_ASSERT(!Locked && "Cannot modify a locked ImFontAtlas between NewFrame() and EndFrame/Render()!");
-    Clear();
+    clear();
 }
 
 void    ImFontAtlas::ClearInputData()
@@ -2525,7 +2525,7 @@ void    ImFontAtlas::ClearFonts()
     TexReady = false;
 }
 
-void    ImFontAtlas::Clear()
+void    ImFontAtlas::clear()
 {
     ClearInputData();
     ClearTexData();
@@ -2919,7 +2919,7 @@ static bool ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
             // Check for valid range. This may also help detect *some* dangling pointers, because a common
             // user error is to setup ImFontConfig::GlyphRanges with a pointer to data that isn't persistent,
             // or to forget to zero-terminate the glyph range array.
-            IM_ASSERT(src_range[0] <= src_range[1] && "Invalid range: is your glyph range array persistent? it is zero-terminated?");
+            IM_ASSERT(src_range[0] <= src_range[1] && "Invalid bounds: is your glyph bounds array persistent? it is zero-terminated?");
             src_tmp.GlyphsHighest = ImMax(src_tmp.GlyphsHighest, (int)src_range[1]);
         }
         dst_tmp.SrcCount++;
@@ -2959,11 +2959,11 @@ static bool ImFontAtlasBuildWithStbTruetype(ImFontAtlas* atlas)
         ImFontBuildSrcData& src_tmp = src_tmp_array[src_i];
         src_tmp.GlyphsList.reserve(src_tmp.GlyphsCount);
         UnpackBitVectorToFlatIndexList(&src_tmp.GlyphsSet, &src_tmp.GlyphsList);
-        src_tmp.GlyphsSet.Clear();
+        src_tmp.GlyphsSet.clear();
         IM_ASSERT(src_tmp.GlyphsList.Size == src_tmp.GlyphsCount);
     }
     for (int dst_i = 0; dst_i < dst_tmp_array.Size; dst_i++)
-        dst_tmp_array[dst_i].GlyphsSet.Clear();
+        dst_tmp_array[dst_i].GlyphsSet.clear();
     dst_tmp_array.clearscreen();
 
     // Allocate packing character data and flag packed characters buffer as non-packed (x0=y0=x1=y1=0)

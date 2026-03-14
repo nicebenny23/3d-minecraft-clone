@@ -12,7 +12,7 @@ namespace ui {
 	
 	inline void write_letter(renderer::MeshData& mesh_data, geo::Box2d location, int letter) {
 
-		const std::uint32_t baselocation = static_cast<size_t>(mesh_data.length());
+		const std::uint32_t baselocation = static_cast<size_t>(mesh_data.vertex_count());
 		for (int j = 0; j < 4; j++) {
 			v2::Vec2 pointtoappend = location.scale * math::symetrical_square_mesh[j] + location.center;
 			mesh_data.add_point(pointtoappend, math::square_mesh[j], letter);
@@ -26,8 +26,6 @@ namespace ui {
 		void set_handle() {
 			if (!handle) {
 				handle = world().get_resource<renderer::Renderer>().gen_renderable("Text");
-				handle.set_layout(vertice::vertex().push<float, 2>().push<float, 3>());
-
 			}
 		}
 		text_component(colors::Color color) :word(""),text_color(color) {
@@ -61,7 +59,7 @@ namespace ui {
 					v2::Vec2 boxoffset = v2::Vec2(char_offset, 1) * bounds.half_size();
 					v2::Vec2 increse = v2::Vec2(char_offset, 0) * bounds.scale;
 					geo::Box2d charlocation = geo::Box2d(min + boxoffset, bounds.scale);
-					renderer::MeshData mesh_data = ui_text.handle.create_mesh();
+					renderer::MeshData mesh_data = ui_text.handle.create_mesh(vertice::vertex().push<float, 2>().push<float, 3>());
 					for (int i = 0; i < ui_text.word.length(); i++) {
 						write_letter(mesh_data, charlocation, int(ui_text.word[i] - '0'));
 						charlocation.center += increse;

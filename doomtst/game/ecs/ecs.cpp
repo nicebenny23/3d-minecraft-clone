@@ -6,7 +6,7 @@ namespace ecs {
 	}
 
 	obj Ecs::spawn_empty() {
-		entity new_entity = entities.allocate_entity().value;
+		entity new_entity = entities.allocate_entity();
 		archetypes.add_to_empty(new_entity.id());
 		return object_from_entity(new_entity);
 	}

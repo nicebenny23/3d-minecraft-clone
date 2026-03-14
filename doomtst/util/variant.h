@@ -27,15 +27,15 @@ namespace stn {
 	template <std::size_t N, typename Func, typename... Args>
 	auto switch_index(std::size_t index, Func&& func, Args&&... args) -> decltype(func.template operator() < N - 1 > (std::forward<Args>(args)...))  requires(N > 0) {
 
-		constexpr size_t lower = N - 1;
-		if (index == lower) {
-			return func.template operator() < lower > (std::forward<Args>(args)...);
+		constexpr size_t min = N - 1;
+		if (index == min) {
+			return func.template operator() < min > (std::forward<Args>(args)...);
 		}
-		else if constexpr (lower != 0) {
-			return switch_index<lower>(index, std::forward<Func>(func), std::forward<Args>(args)...);
+		else if constexpr (min != 0) {
+			return switch_index<min>(index, std::forward<Func>(func), std::forward<Args>(args)...);
 		}
 		else {
-			throw std::logic_error("Index Out of range");
+			throw std::logic_error("Index Out of bounds");
 		}
 	}
 

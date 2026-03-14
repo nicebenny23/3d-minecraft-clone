@@ -12,8 +12,8 @@ namespace stn {
 
 		template<typename ...Args>
 			requires std::constructible_from<T, Args...>
-		rc(Args&&... args)
-			: count(new unsigned int(1)), ptr(new T(std::forward<Args>(args)...)) {
+		explicit rc(Args&&... args)
+			: count(new size_t(1)), ptr(new T(std::forward<Args>(args)...)) {
 		}
 
 		rc(const rc& other) : ptr(other.ptr), count(other.count) {

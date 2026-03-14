@@ -215,7 +215,7 @@ namespace Chunk {
 		}
 		void apply(ecs::obj& chunk_object) {
 			Chunk::chunk& newchunk = chunk_object.add_component<Chunk::chunk>(spawn_location);
-			chunk_object.add_component<Chunk::chunkmesh>(spawn_location.position);
+			chunk_object.add_component<Chunk::chunkmesh>(spawn_location);
 		}
 		ChunkLocation spawn_location;
 	};
@@ -236,11 +236,11 @@ namespace Chunk {
 					for (int z = 0; z < Chunk::chunk_axis; z++) {
 						Coord pos = statemap.ids[ind].pos;
 						blocks::block_id block_id = statemap.ids[ind].block_id;
-						newchunk.block_list.push(ecs::Constrained<block>::make_unchecked(GenerateBlock{ .id = block_id,
+						newchunk.block_list.push(GenerateBlock{ .id = block_id,
 						.loc = pos,
 						.face = math::up2d,
 						.direction = math::up_3d,
-						.mesh = mesh }.spawn(chunk_object.world())));
+						.mesh = mesh }.spawn(chunk_object.world()));
 						ind++;
 					}
 				}

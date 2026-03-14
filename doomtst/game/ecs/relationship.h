@@ -1,7 +1,6 @@
 #pragma once
 #include "ecs.h"
 #include "../../util/Option.h"
-#include "../../util/SparseSet.h"
 #include "../../util/pipeline.h"
 #include <tuple>
 #include "../../util/counter.h"

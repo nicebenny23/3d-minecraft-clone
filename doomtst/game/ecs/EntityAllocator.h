@@ -106,7 +106,6 @@ namespace ecs {
 			bool needed_expanding = false;
 			AllocatorPages& alloc_pages = allocator_from_id(allocator);
 			if (alloc_pages.out_of_ids()) {
-
 				needed_expanding = true;
 				gen_page_for(allocator);
 			}

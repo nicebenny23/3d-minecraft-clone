@@ -211,35 +211,25 @@ namespace v3 {
 
 		explicit Coord(const Point3& p1);
 
-		void operator=(const Coord& p1) {
-			x = p1.x; y = p1.y; z = p1.z;
-		}
-
-		bool operator==(const Coord& p1) {
-			return (p1.x == x && p1.y == y && p1.z == z);
-		}
-
-		bool operator!=(const Coord& p1) {
-			return (p1.x != x || p1.y != y || z != p1.z);
-		}
-
-		Coord& operator+=(const Coord& p1) {
+		inline bool operator==(const Coord& p1) const = default;
+		inline bool operator!=(const Coord& p1) const = default;
+		inline Coord& operator+=(const Coord& p1) {
 			x += p1.x; y += p1.y; z += p1.z; return *this;
 		}
-		Coord operator+(const Coord& p1) const {
+		inline Coord operator+(const Coord& p1) const {
 			return Coord(x + p1.x, y + p1.y, z + p1.z);
 		}
-		Coord& operator-=(const Coord& p1) {
+		inline Coord& operator-=(const Coord& p1) {
 			x -= p1.x; y -= p1.y; z -= p1.z; return *this;
 		}
-		Coord operator-(const Coord& p1) const {
+		inline Coord operator-(const Coord& p1) const {
 			return Coord(x - p1.x, y - p1.y, z - p1.z);
 		}
 
-		Coord operator*(int scale) const {
+		inline Coord operator*(int scale) const {
 			return Coord(x * scale, y * scale, z * scale);
 		}
-		Coord& operator*=(int scale) {
+		inline Coord& operator*=(int scale) {
 			x *= scale; y *= scale; z *= scale; return *this;
 		}
 

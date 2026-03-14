@@ -37,28 +37,28 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <EnableASAN>false</EnableASAN>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <EnableASAN>false</EnableASAN>
     <EnableFuzzer>false</EnableFuzzer>
@@ -66,7 +66,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <EnableASAN>false</EnableASAN>
     <EnableFuzzer>false</EnableFuzzer>
@@ -75,7 +75,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v143</PlatformToolset>
+    <PlatformToolset>v145</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <EnableASAN>false</EnableASAN>
@@ -221,7 +221,7 @@
       <SDLCheck>No</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <MultiProcessorCompilation>Yes</MultiProcessorCompilation>
+      <MultiProcessorCompilation>false</MultiProcessorCompilation>
       <LanguageStandard>stdcpp23</LanguageStandard>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
@@ -273,7 +273,6 @@
     <ClCompile Include="util\stbiload.cpp" />
     <ClCompile Include="game\camera.cpp" />
     <ClCompile Include="external\glad.c" />
-    <ClCompile Include="world\grid.cpp" />
     <ClCompile Include="renderer\renderer.cpp" />
     <ClCompile Include="renderer\Window.cpp" />
   </ItemGroup>
@@ -339,6 +338,7 @@
     <ClInclude Include="game\Settings.h" />
     <ClInclude Include="items\container_ui.h" />
     <ClInclude Include="items\FakeItem.h" />
+    <ClInclude Include="math\cube_vertex.h" />
     <ClInclude Include="math\transform.h" />
     <ClInclude Include="game\wormobj.h" />
     <ClInclude Include="imgui\imconfig.h" />
@@ -454,6 +454,7 @@
     <ClInclude Include="game\rigidbody.h" />
     <ClInclude Include="renderer\uibox.h" />
     <ClInclude Include="tests\ecs_tests.h" />
+    <ClInclude Include="util\Any.h" />
     <ClInclude Include="util\bitset.h" />
     <ClInclude Include="util\bit_mask.h" />
     <ClInclude Include="util\cached.h" />

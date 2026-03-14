@@ -171,6 +171,7 @@ namespace ecs {
 		template<typename ...Args>
 		stn::insertion<T&> insert_at(size_t index, Args&&... args) {
 			if (!contains(index)) {
+				
 				element_filter.reaching_enable(index);
 				return stn::insertion(pages.reach(index >> chunk_exp).insert_at_unchecked(index, std::forward<Args>(args)...),true);
 			}

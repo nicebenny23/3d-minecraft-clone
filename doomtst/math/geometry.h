@@ -102,10 +102,10 @@ namespace geo {
 		constexpr Box2d(v2::Vec2 cent, v2::Vec2 scl)
 			: center(cent), scale(scl) {
 		}
-		v2::Vec2 upper() const {
+		v2::Vec2 max() const {
 			return center + scale / 2;
 		}
-		v2::Vec2 lower() const {
+		v2::Vec2 min() const {
 			return center - scale / 2;
 		}
 		v2::Vec2 half_size() const {
@@ -116,7 +116,7 @@ namespace geo {
 			return Box2d(center + other_transform.center * scale, other_transform.scale * scale);
 		}
 		bool contains(Box2d box) const {
-			return contains(box.upper()) && contains(box.lower());
+			return contains(box.max()) && contains(box.min());
 		}
 		bool contains(v2::Vec2 point) const {
 
@@ -155,6 +155,7 @@ namespace geo {
 		bool above(Point3 pnt) const {
 			return 0 <= dot(normal, pnt - point);
 		}
+		//returns if it crosses a vector
 		bool crosses(math::ray potential_crossing) const {
 			return above(potential_crossing.start) != above(potential_crossing.end);
 		}
@@ -176,9 +177,11 @@ namespace geo {
 			: radius(Vec3(bx.scale).length()), center(bx.center) {
 		}
 
+		//returns the closest point on the spheres surface to the point 
 		Point3 project(Point3 point) const {
 			return center + normal(point - center) * radius;
 		}
+		//returns the closest point inside the sphere to the point 
 		Point3 bound(Point3 point) const {
 			if (contains(point)) {
 				return point;

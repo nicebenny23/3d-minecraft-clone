@@ -1,12 +1,74 @@
 #include "../world/managegrid.h"
 
 #include "../game/Core.h"
-#include "../util/thread_split.h"
 #include "../math/geometry.h"
 #include "../math/intersection.h"
+#include "../util/thread_split.h"
 
-#include <mutex>
+#include "../block/block.h"
+#include "../block/block.h"
+#include "../block/block_mesh.h"
+#include "../block/block_mesh.h"
+#include "../block/block_registry.h"
+#include "../block/block_registry.h"
+#include "../game/camera.h"
+#include "../game/camera.h"
+#include "../game/ecs/ecs.h"
+#include "../game/ecs/ecs.h"
+#include "../game/ecs/game_object.h"
+#include "../game/ecs/game_object.h"
+#include "../game/ecs/system.h"
+#include "../game/ecs/system.h"
+#include "../math/cube_vertex.h"
+#include "../math/cube_vertex.h"
+#include "../math/dir.h"
+#include "../math/dir.h"
 #include "../math/meshes.h"
+#include "../math/ray.h"
+#include "../math/ray.h"
+#include "../math/Scale3.h"
+#include "../math/Scale3.h"
+#include "../math/vector2.h"
+#include "../math/vector2.h"
+#include "../math/vector3.h"
+#include "../math/vector3.h"
+#include "../player/cameracomp.h"
+#include "../player/cameracomp.h"
+#include "../util/dynamicarray.h"
+#include "../util/dynamicarray.h"
+#include "../util/exception.h"
+#include "../util/exception.h"
+#include "../world/chunk.h"
+#include "../world/chunk.h"
+#include "../world/chunk_mesh.h"
+#include "../world/chunk_mesh.h"
+#include "../world/grid.h"
+#include "../world/grid.h"
+#include "../world/Lighter.h"
+#include "../world/Lighter.h"
+#include "../world/WorldCoverer.h"
+#include "../world/WorldCoverer.h"
+#include "renderer.h"
+#include "renderer.h"
+#include "renderer/RenderContext.h"
+#include "renderer/RenderContext.h"
+#include "renderer/RenderProperties.h"
+#include "renderer/RenderProperties.h"
+#include "renderer/shader.h"
+#include "renderer/shader.h"
+#include "renderer/texture.h"
+#include "renderer/texture.h"
+#include "renderer/Uniform.h"
+#include "renderer/Uniform.h"
+#include <cmath>
+#include <cmath>
+#include <glad/glad.h>
+#include <glad/glad.h>
+#include <mutex>
+#include <string>
+#include <string>
+#include <utility>
+#include <utility>
 #pragma once 
 namespace blockrender {
 	using namespace grid;
@@ -14,14 +76,14 @@ namespace blockrender {
 
 
 	inline bool chunk_viewable(Chunk::chunk& chk) {
-		float slope = tan(chk.world().get_resource<renderer::Renderer>().fov / 2);
+		float slope = tan(chk.world().get_resource<renderer::camera_resource>().camera.get<renderer::CameraComponent>().fov / 2);
 		geo::Box chkb = chk.bounds();
 		math::ray camray = math::ray::from_offset(camera::campos(), camera::GetCamFront());
 		geo::cone ncone = geo::cone(camray, slope);
 		geo::Plane pln = geo::Plane(camera::GetCamFront(), camray.start);
 		bool srf = false;
 		for (int i = 0; i < 8; i++) {
-			Point3 vertex = chk.center() + (math::cube_mesh[i] - unitv / 2.f) * float(Chunk::chunk_length);
+			Point3 vertex = chk.center().offset_local((math::cube_mesh[i] - unitv / 2.f) * float(Chunk::chunk_length));
 			if (dot(camera::campos() - vertex, camera::GetCamFront()) > 0) {
 				srf = true;
 			}
@@ -36,7 +98,7 @@ namespace blockrender {
 
 	// Calculate UV coordinates for a face centered at the mesh
 	v2::Vec2 face_to_uv_coords(const block_mesh& mesh, const size_t index, size_t uv_index) {
-		const v3::Scale3& meshscale = mesh.box.scale;
+		const v3::Scale3& meshscale = mesh.scale();
 		size_t facetype = index / 2;
 		v2::Vec2 offset;
 
@@ -55,62 +117,58 @@ namespace blockrender {
 		}
 
 		v2::Vec2 uvCoord = math::square_mesh[uv_index];
-		v2::Vec2 ret = v2::unitv / 2 + offset * ((uvCoord - v2::unitv / 2) * -2);
+		v2::Vec2 ret = v2::unitv / 2 + offset * (v2::unitv-uvCoord*2);
 		return ret;
 	}
+	template<WorldAccessor Accesor>
+	void emit_face(Accesor& world, blocks::MeshFace mesh_face, renderer::MeshData& render_mesh) {
+		blocks::face& face = mesh_face.face();
+		if (face.uncovered()) {
 
-
-	void emit_face(size_t face, const block_mesh& torender, renderer::MeshData& mesh) {
-		if (torender.faces[face].uncovered()) {
-			const int baselocation = mesh.length();
-			const int* uniqueInds = &math::cube_mesh_face_indices[4 * face];
-			Scale3 scale = torender.scale();
-			Point3 position = torender.center();
-			const int textureNumber = torender[face].tex;
-			//note: fix was const float lightValue = torender.mesh.invisible() ? torender.lightval.unwrap_or(1) : torender.mesh[face].light;
-			//removed it for fixing
-			const float lightValue = torender[face].get_light();
+			const int baselocation = render_mesh.vertex_count();
+			const int* uniqueInds = &math::cube_mesh_face_indices[4 * face.face_direction.index()];
+			Scale3 scale = mesh_face.mesh().scale();
+			Point3 position = mesh_face.mesh().center();
+			const int textureNumber = face.tex;
 			for (size_t j = 0; j < 4; j++) {
 				int uniqueind = uniqueInds[j];
-				Vec3 offset_from_center = (math::cube_mesh[uniqueind] - unitv / 2) * scale * 2;
-				Point3 offset = position + offset_from_center;
+				v3::Coord cube_ind = math::cube_mesh[uniqueind];
+				v3::Point3 offset_from_center = (v3::Point3(cube_ind) - unitv / 2) * scale * 2;
+				Point3 offset = position.offset_local(offset_from_center);
 
-				v2::Vec2 uv_coords = face_to_uv_coords(torender, face, j);
+				v2::Vec2 uv_coords = face_to_uv_coords(mesh_face.mesh(), face.face_direction.index(), j);
 
-				mesh.add_point(offset, uv_coords, textureNumber, lightValue);
+				math::cube_index face_cube = math::cube_index::from_coord(cube_ind).expect("cube ind should be valid");
+				float light_value = grid::get_vertex_light(world.get_voxel(mesh_face.mesh().center() + face_cube.vertex()), world);
+				render_mesh.add_point(offset, uv_coords, textureNumber, light_value);
 			}
-			mesh.add_indices_offset_from(math::square_mesh_triangle_indices, baselocation);
+			render_mesh.add_indices_offset_from(math::square_mesh_triangle_indices, baselocation);
 		}
 
 	}
-
-	// Emit the faces for a block
-	void emit_block(block_mesh& torender, renderer::MeshData& mesh) {
-		if (!torender.invisible()) {
-			for (int i = 0; i < 6; i++) {
-				emit_face(i, torender, mesh);
-			}
-		}
-	}
-
 	// Recreate the mesh for a chunk
-	void recreate_chunk_mesh(ecs::obj chunk_to_fill, std::mutex& fill_lock) {
-
-		Chunk::chunk& cnk = chunk_to_fill.get_component<Chunk::chunk>();
-		Chunk::chunkmesh& cnk_mesh = chunk_to_fill.get_component<Chunk::chunkmesh>();
+	void recreate_chunk_mesh(grid::ChunkObject::ObjectType chunk_to_fill, std::mutex& fill_lock) {
+		grid::Grid& grid = chunk_to_fill.world().get_resource<grid::Grid>();
+		Chunk::chunk& cnk = chunk_to_fill.get<Chunk::chunk>();
+		Chunk::chunkmesh& cnk_mesh = chunk_to_fill.get<Chunk::chunkmesh>();
+		grid::FocusedGridAcessor chunk_getter(chunk_to_fill);
 		cnk_mesh.recreate_mesh.clean([&]() {
+
 			cnk_mesh.faces.clear();
-			renderer::MeshData mesh = cnk_mesh.SolidGeo.create_mesh();
+			renderer::MeshData mesh = cnk_mesh.SolidGeo.create_mesh(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
 			for (int ind = 0; ind < Chunk::chunk_elements; ind++) {
-				block_mesh& mesh_at = (cnk.block_list[ind].get_component<block>().mesh);//g
+				block_mesh& mesh_at = (cnk.block_list[ind].get_unchecked<block>().mesh);//g
+				compute_mesh_cover(mesh_at, chunk_getter);
 				if (!mesh_at.is_transparent()) {
-					emit_block(mesh_at, mesh);
+					for (math::Direction3d dir : math::Directions3d) {
+						emit_face(chunk_getter, mesh_at[dir], mesh);
+					}
 				}
 				else {
-					if (!mesh_at.invisible()) {
-						for (int x = 0; x < 6; x++) {
-							if (mesh_at[x].uncovered()) {
-								cnk_mesh.faces.push(mesh_at[x]);
+					if (mesh_at.visible()) {
+						for (math::Direction3d dir : math::Directions3d) {
+							if (mesh_at[dir].uncovered()) {
+								cnk_mesh.faces.push(mesh_at[dir]);
 							}
 						}
 					}
@@ -120,24 +178,23 @@ namespace blockrender {
 				std::unique_lock lck(fill_lock);
 				cnk_mesh.SolidGeo.fill(std::move(mesh));
 			}
-
-			});
+		});
 	}
 
 
 
 	// Render a chunk mesh
-	void renderchunk(Chunk::chunkmesh& mesh) {
+	void render_chunk(grid::Grid& world, Chunk::chunkmesh& mesh) {
 		double distance = v3::dist(camera::GetCam().position, mesh.center());
 		mesh.SolidGeo.set_order_key(distance);
 		mesh.sort_faces();
-		renderer::MeshData mesh_data = mesh.TransparentGeo.create_mesh();
+		renderer::MeshData mesh_data = mesh.TransparentGeo.create_mesh(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
 		for (int i = 0; i < mesh.faces.length(); i++) {
-			emit_face(mesh.faces[i].face_direction.index(), *(mesh.faces[i].mesh), mesh_data);
+
+			emit_face(world, mesh.faces[i], mesh_data);
 		}
 		mesh.TransparentGeo.set_order_key(-distance);
 		mesh.TransparentGeo.fill(std::move(mesh_data));
-
 	}
 
 	struct ChunkPreMesher :ecs::System {
@@ -146,14 +203,26 @@ namespace blockrender {
 		}
 
 		void run(ecs::Ecs& ecs) {
-			grid::Grid& world_grid = ecs.get_resource<grid::Grid>();
+			grid::Grid& world_grid = ecs.get_resource<grid::Grid>();			GlUtil::poll_errors();
+
+			ecs.get_resource<renderer::Renderer>().set_uniform("render_dist", int(world_grid.rad));
 			std::mutex fill_mutex;
-			auto recompute_for = [&fill_mutex](Chunk::chunk* item) {
-				if (item) {
-					recreate_chunk_mesh(item->owner(), fill_mutex);
-				}
+			auto recompute_for = [&fill_mutex](grid::ChunkObject::ObjectType& item) {
+
+				recreate_chunk_mesh(grid::ChunkObject::ObjectType(item), fill_mutex);
 				};
-			thread_util::par_iter(world_grid.chunklist.begin(), world_grid.chunklist.end(), recompute_for, 4);
+			stn::array<grid::ChunkObject::ObjectType> reloads;
+			ecs::View<ecs::With<Chunk::chunkmesh>, ecs::Owner> meshes(ecs);
+			size_t max_recomputes = 4;
+			for (auto&& [mesh, object] : meshes) {
+				if (mesh.recreate_mesh.is_dirty()) {
+					reloads.push(object);
+				}
+				if (reloads.length() == max_recomputes) {
+					break;
+				}
+			}
+			thread_util::par_iter(reloads.begin(), reloads.end(), recompute_for, reloads.length());
 		};
 	};
 
@@ -163,10 +232,10 @@ namespace blockrender {
 		void run(ecs::Ecs& ecs) {
 			array<ecs::obj> to_render = array<ecs::obj>();
 			Grid& grid = ecs.get_resource<grid::Grid>();
-			for (int i = 0; i < grid.totalChunks; i++) {
-				if (grid[i]) {
-					renderchunk(grid[i]->owner().get_component<Chunk::chunkmesh>());
-				}
+			ecs::View<ecs::With<Chunk::chunkmesh>> meshes(ecs);
+			for (auto&& [mesh] : meshes) {
+				render_chunk(grid, mesh);
+
 			}
 
 		}
@@ -190,6 +259,9 @@ namespace blockrender {
 				stn::array{
 				renderer::UniformRefrence("aspect_ratio", "aspectratio"),
 				renderer::UniformRefrence("proj_matrix", "projection"),
+				renderer::UniformRefrence("view_matrix", "view"),
+				renderer::UniformRefrence("camera_pos", "camera_pos"),
+				renderer::UniformRefrence("render_dist", "render_distance"),
 				renderer::UniformRefrence("view_matrix", "view"),
 				renderer::UniformRefrence("bind_block_texture", "tex")
 				});

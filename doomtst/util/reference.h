@@ -26,12 +26,13 @@ namespace stn {
 			ptr = &value;
 			return *this;
 		}
-		bool operator==(const T& value) const {
+		bool operator==(const T& value)  const requires std::equality_comparable<T> {
 			return *ptr == value;
 		}
-		bool operator!=(const T& value) const {
+		bool operator!=(const T& value) const requires std::equality_comparable<T> {
 			return *ptr != value;
 		}
+
 		T* operator->() {
 			return ptr;
 		}

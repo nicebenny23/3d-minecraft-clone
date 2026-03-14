@@ -41,7 +41,7 @@ struct liquidprop : ecs::component {
 			return;
 		}
 		Coord newpos = face.coord() + owner().get_component<block>().pos;
-		blocks::block* blk = world().get_resource<grid::Grid>().getBlock(newpos);
+		blocks::block* blk = &world().get_resource<grid::Grid>().get_block(newpos).unwrap();
 		if (blk == nullptr) {
 			return;
 		}
@@ -68,7 +68,7 @@ struct liquidprop : ecs::component {
 
 		Coord pos = blk->pos;
 		grid::set_block(world(), pos, owner().get_component<blocks::block>().id);
-		blk = world().get_resource<grid::Grid>().getBlock(pos);
+		//blk = world().get_resource<grid::Grid>().getBlock(pos);
 
 		if (!blk->owner().has_component<liquidprop>()) {
 			Assert("block must be inititated with liquid component");

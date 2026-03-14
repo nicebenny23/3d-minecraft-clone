@@ -6,8 +6,9 @@
 #include "../util/pair.h"
 #define NaNf std::numeric_limits<double>::max()
 __forceinline bool apx(double a, double b) {
-	constexpr double EPS = 1e-4f;
-	return (abs(a - b) < EPS);
+	constexpr double EPS = 1e-8f;
+	double diff = a - b;
+	return (diff*diff<EPS);
 }
 
 
@@ -17,7 +18,7 @@ inline double  interoplate_quintic(double t) {
 
 }
 
-inline double lerp(double start, double end, double selector) {
+inline constexpr double lerp(double start, double end, double selector) {
 	return end * selector + start * (1 - selector);
 }
 
@@ -43,13 +44,9 @@ inline int clamp(int val, int low, int high) {
 }
 
 
-inline bool in_range(double val, double low, double high) {
-	return val >= low && val <= high;
-}
-inline bool in_range_apx(double val, double low, double high) {
+inline constexpr bool in_range(double val, double low, double high) {
 	return val >= low && val <= high || apx(val, low) || apx(val, high);
 }
-
 inline  double sigmoid(double v1) {
 
 	return	1.0f / (1.0f + exp(-v1));
@@ -71,6 +68,10 @@ namespace stn {
 			return max(max_ab, static_cast<Common>(rest)...);
 		}
 	}
+	template<typename T>
+	constexpr void set_max(T& value_to_set, T other) {
+		value_to_set = max(value_to_set, other);
+	}
 
 	template<typename T1, typename T2, typename... Ts>
 	constexpr auto min(T1 a, T2 b, Ts... rest) -> typename std::common_type<T1, T2, Ts...>::type {
@@ -82,6 +83,10 @@ namespace stn {
 		else {
 			return min(min_ab, static_cast<Common>(rest)...);
 		}
+	}
+	template<typename T>
+	constexpr void set_min(T& value_to_set, T other) {
+		value_to_set = min(value_to_set, other);
 	}
 }
 inline int next_boundary(double x, bool positiveDirection) {

@@ -11,6 +11,7 @@
 
 #include <algorithm>
 #include "index.h"
+#include "concepts.h"
 namespace stn {
 	// Resizing function that doubles the size of the array when needed.
 	// If the length is 0, it initializes to a default size of 2.
@@ -160,6 +161,14 @@ namespace stn {
 				geometric_expand(index + 1, value);
 			}
 			return ptr[index];
+		}
+		
+		template<typename Func> requires stn::invocable_to<T, Func&&, size_t>
+		[[nodiscard]] T& reach_with(size_t index,Func&& func) {
+			if (len <= index) {
+				geometric_expand_with(index + 1, std::forward<Func>(func));
+			}
+				return ptr[index];
 		}
 		[[nodiscard]] stn::Option<T&> first_opt() {
 			if (len == 0) {
@@ -413,17 +422,23 @@ namespace stn {
 		}
 		//removes and returns the last element
 		[[nodiscard]] T pop() {
-			if (empty()) {
+			if (len==0) {
 				throw std::logic_error("Cannot pop from empty array");
 			}
 			//subtracts first to get the last element;
-			T res = std::move(ptr[(--len)]);
-			destruct_at(len);
-			return res;
+			//this makes it faster in debug mode
+			if constexpr (std::is_trivially_destructible_v<T>) {
+				return ptr[--len];
+			}
+			else {
+				T res = std::move(ptr[(--len)]);
+				destruct_at(len);
+				return res;
+			}
 		}
 		//removes the last element
 		void drop() {
-			if (empty()) {
+			if (len == 0) {
 				throw std::logic_error("Cannot drop from empty array");
 			}
 			destruct_at(--len);
@@ -712,10 +727,7 @@ namespace stn {
 		}
 
 		void geometric_expand(size_t new_size) requires(is_default) {
-			if (capacity < new_size) {
-				reserve(resize_length(new_size));
-
-			}
+				geometric_reserve(new_size);
 			if (len < new_size) {
 				for (size_t i = len; i < new_size; i++) {
 					construct_at(i, T());
@@ -725,9 +737,7 @@ namespace stn {
 		}
 
 		void geometric_expand(size_t new_size, const T& value) requires (is_copyable) {
-			if (capacity < new_size) {
-				reserve(resize_length(new_size));
-			}
+			geometric_reserve(new_size);
 			if (len < new_size) {
 				for (size_t i = len; i < new_size; i++) {
 					construct_at(i, value);
@@ -735,10 +745,19 @@ namespace stn {
 				len = new_size;
 			}
 		}
-
+		template<typename Func> requires stn::invocable_to<T,Func&&,size_t>
+		void geometric_expand_with(size_t new_size, Func&& func){
+			geometric_reserve(new_size);
+			if (len < new_size) {
+				for (size_t i = len; i < new_size; i++) {
+					construct_at(i,std::invoke(std::forward<Func>(func),i));
+				}
+				len = new_size;
+			}
+		}
 		//expands the capacity geometricly
 		void geometric_reserve(size_t new_size) {
-			if (capacity < new_size) {
+			if (capacity<new_size) {
 				reserve(resize_length(new_size));
 			}
 		}

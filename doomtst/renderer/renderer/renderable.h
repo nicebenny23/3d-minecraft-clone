@@ -37,6 +37,8 @@ namespace renderer{
 		}
 
 		void set(const renderer::uniform& value) {
+			size_t check=
+			owner().get_component<material_component>().mat_id->shader->uniformlocation(value.name.c_str());
 			for (auto& val : overides) {
 				if (val.name == value.name) {
 					if (val.value.index() != value.value.index()) {

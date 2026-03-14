@@ -14,14 +14,9 @@ namespace Chunk {
 		path = path / "Chunks" / m;
 		return 	path.string();
 	}
-	inline size_t index_from_pos(Coord pos) {
-		int x = symmetric_mod(pos.x, chunk_axis);
-		int y = symmetric_mod(pos.y, chunk_axis);
-		int z = symmetric_mod(pos.z, chunk_axis);
-		return	chunk_axis * chunk_axis * x + chunk_axis * y + z;
-	}
-	inline size_t index_from_local_position(size_t x, size_t y, size_t z) {
-		return	chunk_axis * chunk_axis * x + chunk_axis * y + z;
+	
+	inline size_t index_from_local_position(Coord pos) {
+		return	chunk_axis * chunk_axis * pos.x + chunk_axis * pos.y + pos.z;
 	}
 	using block_object = ecs::Constrained<block>;
 	struct chunk :ecs::component {
@@ -30,6 +25,7 @@ namespace Chunk {
 		bool modified;
 		chunk(Chunk::ChunkLocation chunk_location) :modified(false), location(chunk_location), block_list() {
 			block_list.reserve(chunk_elements);
+			chunk_access_offset = index_from_local_position(location.position * chunk_axis);
 		}
 
 		Point3 center() const {
@@ -38,13 +34,15 @@ namespace Chunk {
 		geo::Box bounds() const {
 			return location.bounds();
 		}
-		ecs::Constrained<block>& operator[](size_t index) {
+		block_object& operator[](size_t index) {
 			return block_list[index];
 		}
-		const ecs::Constrained<block>& operator[](size_t index) const {
+		const block_object& operator[](size_t index) const {
 			return block_list[index];
 		}
-
+		inline block_object& unchecked_at_pos(v3::Coord pos){
+		 return block_list.unchecked_at(index_from_local_position(pos)-chunk_access_offset);
+		}
 		using iterator = decltype(block_list)::iterator;
 		using const_iterator = decltype(block_list)::const_iterator;
 		iterator begin() {
@@ -59,17 +57,18 @@ namespace Chunk {
 		const_iterator end() const {
 			return block_list.end();
 		}
+		chunk() = delete;
 		//A range on the a Face(16-16) region a chunk 
 		template<typename T> requires std::same_as<std::remove_const_t<T>,chunk>
 		struct FaceRange {
 			size_t face_index(size_t x, size_t y) const {
 				switch (dir.direction()) {
-				case math::DirectionIndex3d::Right: return index_from_local_position(chunk_axis - 1, x, y);
-				case math::DirectionIndex3d::Left: return index_from_local_position(0, x, y);
-				case math::DirectionIndex3d::Up: return index_from_local_position(x, chunk_axis - 1, y);
-				case math::DirectionIndex3d::Down: return index_from_local_position(x, 0, y);
-				case math::DirectionIndex3d::Front: return index_from_local_position(x, y, chunk_axis - 1);
-				case math::DirectionIndex3d::Back: return index_from_local_position(x, y, 0);
+				case math::DirectionIndex3d::Right: return index_from_local_position(v3::Coord(chunk_axis - 1, x, y));
+				case math::DirectionIndex3d::Left: return index_from_local_position(v3::Coord(0, x, y));
+				case math::DirectionIndex3d::Up: return index_from_local_position(v3::Coord(x, chunk_axis - 1, y));
+				case math::DirectionIndex3d::Down: return index_from_local_position(v3::Coord(x, 0, y));
+				case math::DirectionIndex3d::Front: return index_from_local_position(v3::Coord(x, y, chunk_axis - 1));
+				case math::DirectionIndex3d::Back: return index_from_local_position(v3::Coord(x, y, 0));
 				}
 			}
 			struct iterator {
@@ -127,7 +126,7 @@ namespace Chunk {
 		}
 		void destroy_hook() {
 			if (modified) {
-				file_handle file = file_handle(file_name(location.position, world().get_resource<grid::world>()), FileMode::ReadWriteBinary);
+				file_handle file = file_handle(file_name(location, world().get_resource<grid::world>()), FileMode::ReadWriteBinary);
 				for (int i = 0; i < chunk_elements; i++) {
 					block& block_at = block_list[i].get<block>();
 					stn::file_serializer<block_id>().write(block_at.id, file);
@@ -141,6 +140,8 @@ namespace Chunk {
 				std::move(block_list[i]).destroy();
 			}
 		}
+		private:
+			int chunk_access_offset;
 	};
 
 

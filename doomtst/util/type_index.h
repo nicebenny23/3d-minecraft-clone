@@ -172,9 +172,7 @@ namespace stn {
 	type_id make_type_id() {
 		return type_id(typeIndex<T>);
 	}
-	// Retrieve a unique ID for type T
-
-
+	// Retrieve a unique ID for type 
 
 	template<typename id_type = stn::Id>
 	struct type_indexer {

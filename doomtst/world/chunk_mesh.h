@@ -10,10 +10,18 @@ namespace Chunk {
 	constexpr size_t chunk_length = 16;
 	constexpr size_t chunk_axis = size_t(chunk_length / blocksize);
 	constexpr size_t chunk_elements = chunk_axis * chunk_axis * chunk_axis;
+
+	constexpr int chunk_shift = std::countr_zero(Chunk::chunk_axis);
 	struct ChunkLocation {
 
-		ChunkLocation(v3::Coord pos) :position(pos) {
+		explicit ChunkLocation(v3::Coord pos) :position(pos) {
 
+		}
+		static ChunkLocation from_block_pos(v3::Coord pos) {
+			pos.x >>= chunk_shift;
+			pos.y >>= chunk_shift;
+			pos.z >>= chunk_shift;
+			return ChunkLocation(pos);
 		}
 		bool operator==(const ChunkLocation& other) const = default;
 		bool operator!=(const ChunkLocation& other) const = default;
@@ -25,7 +33,7 @@ namespace Chunk {
 			return geo::Box(center(), v3::Scale3(chunk_length) / 2);
 		}
 		bool contains_block(v3::Coord block_position) const {
-			return bounds().contains(block_position+v3::unitv/2);
+			return from_block_pos(block_position).position==position;
 		}
 		size_t distance_to(const ChunkLocation& c2) const {
 			return v3::manhattan_distance(position, c2.position);
@@ -38,19 +46,21 @@ namespace Chunk {
 		void start() {
 			renderer::Renderer& ren = world().get_resource<renderer::Renderer>();
 			SolidGeo = ren.gen_renderable("SolidBlock");
-			SolidGeo.set_layout(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
-			TransparentGeo = ren.gen_renderable("TransparentBlock");
 			
-			TransparentGeo.set_layout(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
+			SolidGeo.mesh();
+			TransparentGeo = ren.gen_renderable("TransparentBlock");
+			TransparentGeo.mesh();
 		}
 
 		renderer::RenderableHandle SolidGeo;
 		renderer::RenderableHandle TransparentGeo;
 
-		array<blocks::face> faces;
+		array<blocks::MeshFace> faces;
 		ChunkLocation loc;
 		stn::dirty_flag recreate_mesh;
-
+		void mark_dirty() {
+			recreate_mesh.mark_dirty();
+		}
 		Point3 center() const {
 			return loc.center();
 		}
@@ -59,7 +69,7 @@ namespace Chunk {
 		}
 		void sort_faces() {
 
-			std::sort(faces.begin(), faces.end(), [](blocks::face& a, blocks::face& b) {
+			std::sort(faces.begin(), faces.end(), [](blocks::MeshFace& a, blocks::MeshFace& b) {
 				return  v3::dist2(b.center(), camera::campos()) < v3::dist2(a.center(), camera::campos());
 				});
 		}

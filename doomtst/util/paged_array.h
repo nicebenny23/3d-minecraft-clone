@@ -40,7 +40,7 @@ namespace stn {
 			new (ptr_to) T(std::forward<Args>(args)...);
 			len++;
 			return *ptr_to;
-		}
+		}	
 		void expand(size_t size) {
 			if (len < size) {
 				size_t needed = size - len;
@@ -55,7 +55,7 @@ namespace stn {
 			return emplace(std::forward<U>(value));
 		}
 		T& reach(size_t index) requires std::is_default_constructible_v<T> {
-			if (length() <= index) {
+			if (len<=index) {
 				expand(index + 1);
 			}
 			return page_pointers.unchecked_at(index >> page_size)[index & page_elements_minus_one];

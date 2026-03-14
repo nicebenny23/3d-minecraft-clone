@@ -123,7 +123,7 @@ namespace timename {
 		void set(double dur) {
 			if (dur<=0)
 			{
-				throw std::logic_error("Duration must wasit for a positive number of time");
+				throw std::logic_error("Duration must wait for a positive number of time");
 			}
 
 			if (!tm)

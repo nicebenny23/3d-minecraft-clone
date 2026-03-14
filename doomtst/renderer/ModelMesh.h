@@ -10,7 +10,7 @@
 //fix
 using namespace stn;
 using namespace v3;
-using namespace buffer_object;
+using namespace renderer;
 #ifndef _CRT_SECURE_NO_WARNINGS
 #define _CRT_SECURE_NO_WARNINGS
 #endif // !_CRT_SECURE_NO_WARNINGS

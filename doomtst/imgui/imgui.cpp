@@ -4175,13 +4175,13 @@ void ImGui::Shutdown()
     g.WindowsTempSortBuffer.clearscreen();
     g.CurrentWindow = NULL;
     g.CurrentWindowStack.clearscreen();
-    g.WindowsById.Clear();
+    g.WindowsById.clear();
     g.NavWindow = NULL;
     g.HoveredWindow = g.HoveredWindowUnderMovingWindow = NULL;
     g.ActiveIdWindow = NULL;
     g.MovingWindow = NULL;
 
-    g.KeysRoutingTable.Clear();
+    g.KeysRoutingTable.clear();
 
     g.ColorStack.clearscreen();
     g.StyleVarStack.clearscreen();
@@ -4192,17 +4192,17 @@ void ImGui::Shutdown()
 
     g.Viewports.clear_delete();
 
-    g.TabBars.Clear();
+    g.TabBars.clear();
     g.CurrentTabBarStack.clearscreen();
     g.ShrinkWidthBuffer.clearscreen();
 
     g.ClipperTempData.clear_destruct();
 
-    g.Tables.Clear();
+    g.Tables.clear();
     g.TablesTempData.clear_destruct();
     g.DrawChannelsTempMergeBuffer.clearscreen();
 
-    g.MultiSelectStorage.Clear();
+    g.MultiSelectStorage.clear();
     g.MultiSelectTempData.clear_destruct();
 
     g.ClipboardHandlerData.clearscreen();
@@ -12682,11 +12682,11 @@ void ImGui::NavMoveRequestSubmit(ImGuiDir move_dir, ImGuiDir clip_dir, ImGuiNavM
     g.NavMoveScrollFlags = scroll_flags;
     g.NavMoveForwardToNextFrame = false;
     g.NavMoveKeyMods = (move_flags & ImGuiNavMoveFlags_FocusApi) ? 0 : g.IO.KeyMods;
-    g.NavMoveResultLocal.Clear();
-    g.NavMoveResultLocalVisible.Clear();
-    g.NavMoveResultOther.Clear();
+    g.NavMoveResultLocal.clear();
+    g.NavMoveResultLocalVisible.clear();
+    g.NavMoveResultOther.clear();
     g.NavTabbingCounter = 0;
-    g.NavTabbingResultFirst.Clear();
+    g.NavTabbingResultFirst.clear();
     NavUpdateAnyRequestFlag();
 }
 
@@ -13893,7 +13893,7 @@ void ImGui::ClearDragDrop()
     if (g.DragDropActive)
         IMGUI_DEBUG_LOG_ACTIVEID("[dragdrop] ClearDragDrop()\n");
     g.DragDropActive = false;
-    g.DragDropPayload.Clear();
+    g.DragDropPayload.clear();
     g.DragDropAcceptFlags = ImGuiDragDropFlags_None;
     g.DragDropAcceptIdCurr = g.DragDropAcceptIdPrev = 0;
     g.DragDropAcceptIdCurrRectSurface = FLT_MAX;

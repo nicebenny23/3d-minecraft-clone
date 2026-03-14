@@ -4,6 +4,9 @@
 #include "../util/List.h"
 namespace math {
 
+
+
+
 	enum class DirectionIndex3d :char {
 		Right = 0,
 		Left = 1,
@@ -104,7 +107,7 @@ namespace math {
 	inline constexpr Direction3d  back_3d = Direction3d(DirectionIndex3d::Back);   // (0, 0, -1)
 
 
-	inline constexpr  stn::List<Direction3d, 6> Directions3d(right_3d, left_3d, up_3d, down_3d, front_3d, back_3d);
+	inline  Direction3d Directions3d[6] = { right_3d, left_3d, up_3d, down_3d, front_3d, back_3d };
 	inline Direction3d greatest_aligned_direction(v3::Vec3 point) {
 		double max = stn::max(abs(point.x), abs(point.y), abs(point.z));
 		int ind = 0;
@@ -185,8 +188,7 @@ namespace math {
 	static constexpr Direction2d up2d = Direction2d(DirectionIndex2d::Up);        // (0, 1)
 	static constexpr Direction2d down2d = Direction2d(DirectionIndex2d::Down);    // (0, -1)
 
-	static constexpr stn::List<Direction2d, 4> Directions2d(right2d, left2d, up2d, down2d);
-
+	inline  Direction2d Directions2d[4] = { right2d, left2d, up2d, down2d };
 	inline Direction2d Align2d(v2::Vec2 point) {
 		double max_val = stn::max(abs(point.x), abs(point.y));
 		size_t ind = 0;

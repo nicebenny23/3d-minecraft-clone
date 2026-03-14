@@ -16,8 +16,8 @@ namespace blocks {
 		stn::Option<stn::file_handle&> handle;
 		
 		//it cannot be a recipe due to its optimizations mechanics
-		ecs::obj spawn(ecs::Ecs& world) {
-			BlockRegistry& registry =world.insert_resource<BlockRegistry>();
+		Chunk::block_object spawn(ecs::Ecs& world) {
+			BlockRegistry& registry =world.get_resource<BlockRegistry>();
 			BlockTraits traits=registry.traits_for(id);
 			block* blk_ptr;
 			if (traits.solid) {
@@ -43,13 +43,12 @@ namespace blocks {
 				blk.mesh.transparent = true;
 			}
 			if (handle) {
-
 				registry.block_for(id)->read_from_bytes(object, handle.unwrap());
 			}
 			else {
 				registry.block_for(id)->apply(object);
 			}
-			return blk.owner();
+			return Chunk::block_object::make_unchecked(object,*blk_ptr);
 		}
 	};
 

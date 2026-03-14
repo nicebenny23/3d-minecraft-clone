@@ -27,7 +27,7 @@ namespace console {
 
         void Log(LogLevel level, std::string&& message);
 
-        void Clear();
+        void clear();
 
         void Render();
 

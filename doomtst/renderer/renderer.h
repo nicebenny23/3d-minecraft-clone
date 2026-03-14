@@ -20,75 +20,13 @@
 #include "../util/Name.h"
 #include "../game/ecs/filtered_object.h"
 #include "../game/Settings.h"
-using namespace buffer_object;
+#include "../player/cameracomp.h"
+#include "renderer/meshStorage.h"
+using namespace renderer;
 //Fix
 
 namespace renderer {
 
-	enum class indice_mode {
-		generate_indices = 0,
-		manual_generate = 1,
-	};
-	struct MeshData {
-
-		size_t components() const {
-			return layout.components();
-		}
-		size_t stride() const {
-			return layout.stride();
-		}
-		size_t length() const {
-			return points.length() / components();
-		}
-		MeshData(mesh_id msh, const vertice::vertex& vertex_layout, indice_mode indices) :mesh(msh), generate_trivial(indices), layout(vertex_layout), points() {
-		}
-		template<typename ...Args>
-		inline void add_point(const Args& ...values) {
-			size_t start_len = points.length();
-
-			(push_single(values), ...);
-
-			size_t end_len = points.length();
-			size_t floats_pushed = end_len - start_len;
-
-			if (components() != floats_pushed) {
-				stn::throw_logic_error("mismatch: number of appended points {} does not match the stated number of components {}", floats_pushed, components());
-			}
-
-			if (generate_trivial == indice_mode::generate_indices) {
-				indices.push(static_cast<size_t>(indices.length()));
-			}
-
-		}
-		template<typename Range> requires convertible_range<Range, std::uint32_t>
-		void add_indices(const Range& indice_list) {
-			indices.append(indice_list);
-		}
-		void add_index(std::uint32_t index) {
-			indices.push(index);
-		}
-		template<typename Range> requires convertible_range<Range, std::uint32_t>
-		void add_indices_offset_from(const Range& indice_list, std::uint32_t offset) {
-			for (auto i : indice_list) {
-				indices.push(i + offset);
-			}
-		}
-		mesh_id mesh;
-		indice_mode generate_trivial;
-		vertice::vertex layout;
-		stn::array<float> points;
-		stn::array<std::uint32_t> indices;
-	private:
-		inline void push_single(const v3::Point3& v) {
-			points.push({ float(v.x),float(v.y),float(v.z) });
-		}
-		inline void push_single(const v2::Vec2& v) {
-			points.push({ float(v.x),float(v.y) });
-		}
-		inline void push_single(float f) {
-			points.push(f);
-		}
-	};
 	struct Renderer;
 	struct RenderableHandle {
 		RenderableHandle() :id() {
@@ -101,8 +39,6 @@ namespace renderer {
 				id.unwrap().object().set_emplace_component<color_component>(color);
 			}
 		}
-		void set_layout(vertice::vertex layout);
-
 		void fill(MeshData&& new_mesh) {
 			if (id) {
 				id.unwrap().world().write_command(std::move(new_mesh));
@@ -132,12 +68,12 @@ namespace renderer {
 			if (id) {
 				id.unwrap().object().set_emplace_component<order_key>(key);
 			}
-
 		}
+		mesh_id mesh();
 		void destroy();
 		bool operator==(const RenderableHandle& other) const = default;
 		Renderer& renderer();
-		MeshData create_mesh(indice_mode auto_ind = indice_mode::manual_generate);
+		MeshData create_mesh(vertice::vertex& mesh, indice_mode auto_ind = indice_mode::manual_generate);
 		explicit operator bool() const noexcept {
 			return static_cast<bool>(id);
 		}
@@ -149,17 +85,22 @@ namespace renderer {
 	struct remove_render_object {
 		ecs::obj object;
 	};
+
 	struct Renderer : ecs::resource {
 
 		void bind_material(material_handle material) {
+			GlUtil::poll_errors();
+
 			if (current_material != material) {
 				Material& mat = *material;
-				context.bind(*mat.shader);
+				context.bind(*mat.shader);			
+
 				for (auto& elem : mat.handles) {
 					context.apply_uniform(uniform_manager.get(elem), std::string_view(elem.shader_alias));
 				}
 				context.bind_properties(mat.prop);
-				current_material = material;
+				current_material = material;			
+
 			}
 		}
 
@@ -178,17 +119,12 @@ namespace renderer {
 		}
 
 
-		void Clear() {
-			set_uniform("aspect_ratio", world.get_resource<window::Window>().AspectRatio());
-			glClearColor(0, 0, 0, 0.0f);
-			glDepthMask(GL_TRUE);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-			glDepthMask(GL_FALSE);
+		void clear() {
+			context.clear();
 		}
 
-
-
 		RenderableHandle gen_renderable(std::string material) {
+			
 			material_handle handle = world.from_name<Material>(material).expect("material should exist");
 			return RenderableHandle((ecs::spawn_emplaced<renderable_recipe>(world, handle)));
 		}
@@ -196,72 +132,49 @@ namespace renderer {
 			ren.world().write_command(remove_render_object(ren.object()));
 		}
 
-		void set_layout(renderer::renderable id, vertice::vertex layout) {
-			mesh_id  mesh = insert_mesh(id);
-			meshes[mesh].Voa.attributes = layout;
-		}
-		void render(renderer::renderable ren) {
+		void render(renderer::renderable& ren) {
+
 			bind_material(ren.get<material_component>().mat_id);
 			for (auto& uniform : ren.get<renderable_overides>().view()) {
 				context.apply_uniform(uniform.value, uniform.name);
 			}
-			Mesh& mesh = meshes[ren.get<mesh_component>().msh.expect("mesh should exist")];
+			GlUtil::poll_errors();
+
+			Mesh& mesh = *ren.get<mesh_component>().msh.expect("all must have a mesh");
 			if (!mesh.filled()) {
 				return;
 			}
 			context.bind(mesh);
-			mesh.Voa.SetAllAttributes();
 			if (world.ensure_resource<settings::GlobalSettings>().viewmode) {
 				glDrawElements(GL_LINES, mesh.length, GL_UNSIGNED_INT, 0);
 			}
 			else {
 				glDrawElements(GL_TRIANGLES, mesh.length, GL_UNSIGNED_INT, 0);
-			};
+			};		
+
 		}
 
-		
-		MeshData create(renderable id, indice_mode is_trivial = indice_mode::manual_generate) {
-			mesh_id mesh_id = id.get_component<renderer::mesh_component>().msh.unwrap();
-			return MeshData(mesh_id, meshes[mesh_id].Voa.attributes, is_trivial);
-		}
+
 		void fill_mesh(MeshData& data) {
-			Option<Mesh&> mabye_mesh = meshes.get(data.mesh);
-			if (!mabye_mesh) {
-				return;
-			}
-			Mesh& mesh = mabye_mesh.unwrap();
-			if (data.points.length() % mesh.Voa.attributes.components() != 0) {
-				throw std::logic_error("Vertex Data is corrupted");
-			}
-			if (!mesh.BuffersGenerated) {
-				throw std::invalid_argument("Cannot fill an unbuffered mesh");
-			}
-			context.bind(mesh);
-			mesh.Vbo.fillbuffer<float>(data.points);
-			mesh.Voa.SetAllAttributes();
-			mesh.Ibo.fillbuffer<unsigned int>(data.indices);
-			mesh.length = data.indices.length();
+			meshes.load_in(data);
 		}
 
 		MeshRegistry meshes;
-		float fov;
-		Renderer(ecs::Ecs& spawn_world, float initial_fov) :world(spawn_world), uniform_manager(), fov(initial_fov) {
-			meshes = MeshRegistry(&context);
-			set_uniform("proj_matrix", glm::perspective(glm::radians(initial_fov), float(4 / 3.f), .21f, 500.f));
-			set_uniform("aspect_ratio", world.get_resource<window::Window>().AspectRatio());
-		}
 
+		Renderer(ecs::Ecs& spawn_world) :world(spawn_world), uniform_manager() {
+			meshes = MeshRegistry(&context);
+
+		}
+		mesh_id insert_mesh(renderer::renderable id) {
+			stn::Option<mesh_id>& msh_id= id.get_component<mesh_component>().msh;
+			msh_id.fallback_on([&]() {
+				return meshes.create_mesh_data(); });
+			return msh_id.unwrap();
+		}
 	private:
 		stn::Option<material_handle> current_material;
 		ecs::Ecs& world;
-		//ensures a mesh exists
-		mesh_id insert_mesh(renderer::renderable id) {
 
-			if (id.get_component<mesh_component>().msh.is_none()) {
-				id.object().set_emplace_component<mesh_component>(meshes.create());
-			}
-			return id.get<mesh_component>().msh.expect("");
-		}
 
 	};
 	inline Renderer& RenderableHandle::renderer() {
@@ -273,7 +186,7 @@ namespace renderer {
 		stn::array<renderable> phase_elements;
 		void sort() {
 			if (pass->should_sort) {
-				phase_elements | stn::sort([this](renderable p1) {return p1.get<order_key>().order; });
+				phase_elements | stn::sort([](const renderable& p1) {return p1.get_unchecked<order_key>().order; });
 			}
 		}
 		std::string_view name() const {
@@ -286,7 +199,20 @@ namespace renderer {
 	};
 	struct render_all :ecs::System {
 		void run(ecs::Ecs& world) {
+			ecs::Constrained<CameraComponent> camera_object = world.get_resource<renderer::camera_resource>().camera;
+			CameraComponent& cam = camera_object.get_component<CameraComponent>();
 			Renderer& ren = world.get_resource<Renderer>();
+			window::Window& window = world.get_resource<window::Window>();
+			ren.set_uniform("aspect_ratio", window.AspectRatio());
+			ren.set_uniform("fov", float(cam.fov));
+			ren.set_uniform("view_matrix", LookAt(camera_object.get_component<ecs::transform_comp>().transform));
+			ren.set_uniform("camera_pos", v3::Vec3(camera_object.get_component<ecs::transform_comp>().transform.position.glm()));
+
+			ren.set_uniform(
+				"proj_matrix", glm::perspective(float(glm::radians(cam.fov)), window.AspectRatio(), float(cam.viewport.min()), float(cam.viewport.max())
+				));
+			ren.set_uniform("near_plane", float(cam.viewport.min()));
+			ren.set_uniform("far_plane", float(cam.viewport.max()));
 			for (MeshData& mesh : world.read_commands<MeshData>()) {
 
 				ren.fill_mesh(mesh);
@@ -294,12 +220,12 @@ namespace renderer {
 			std::unordered_map<phase_handle, render_pass> pass_map;
 			size_t cnt = 0;
 
-			ecs::View<ecs::With<material_component>, ecs::With<order_key>, ecs::With<is_enabled>,ecs::Owner> renderable_iter(world);
-			for (auto [mat, order, should_render,object] : renderable_iter) {
+			ecs::View<ecs::With<material_component>, ecs::With<order_key>, ecs::With<is_enabled>, ecs::Owner> renderable_iter(world);
+			for (auto [mat, order, should_render, object] : renderable_iter) {
 				if (should_render.enabled) {
 					phase_handle pass = mat.mat_id->pass;
 					pass_map.try_emplace(pass, render_pass(pass));
-					pass_map.at(pass).phase_elements.push(renderable::make_unchecked(object));
+					pass_map.at(pass).phase_elements.push(object);
 					cnt++;
 				}
 
@@ -318,12 +244,9 @@ namespace renderer {
 					ren.render(id);
 				}
 			}
+			ren.meshes.remove_empty();
 			for (remove_render_object to_remove : world.read_commands<remove_render_object>()) {
-				mesh_component& mesh_comp = to_remove.object.get_component<mesh_component>();
-				if (mesh_comp.msh) {
-					ren.meshes.remove(mesh_comp.msh.unwrap());
-				}
-				mesh_comp.owner().destroy();
+				to_remove.object.destroy();
 			}
 		}
 	};
@@ -336,8 +259,7 @@ namespace renderer {
 			world.emplace_asset_loader<renderer::TextureArrayLoader>();
 			world.emplace_asset_loader<shader_loader>();
 			world.emplace_asset_loader<assets::SelfDescriptorLoader<renderer::render_phase>>();
-			Renderer& renderer = world.insert_resource<Renderer>(world, 90);
-
+			Renderer& renderer = world.insert_resource<Renderer>();
 			world.emplace_asset_loader<MaterialManager>();
 			renderer::shader_id ui_shader = world.load_asset_emplaced<renderer::shader_descriptor>("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs").unwrap();
 			world.load_asset(render_phase(12, true, "ui_phase"));

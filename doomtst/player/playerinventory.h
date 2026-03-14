@@ -12,7 +12,7 @@ namespace player {
 		void givestartitems(stn::array<std::string>& items) {
 			for (const std::string& item : items) {
 				items::item_id id = world().get_resource<items::item_types>().from_name(item);
-				items::item_entry entry = items::item_entry(id, 10, world().insert_resource<items::item_types>());
+				items::item_entry entry = items::item_entry(id, 40, world().insert_resource<items::item_types>());
 				stn::Option<items::AddToSlotPlan> plan = items::give_container_entry(entry, hotbar.get_component < items::container>());
 				if (plan) {
 					plan.unwrap().apply(world());

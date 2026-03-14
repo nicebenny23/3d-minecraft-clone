@@ -19,19 +19,19 @@ namespace renderer {
 			if (id == 0) {
 				throw std::logic_error("invalid block_id");
 			}
+			
 			GLint location = glGetUniformLocation(id, name);
 			if (location == -1) {
-				std::string msg = "Uniform '" + std::string(name) + "' not found or not active in shader '" + name + "'";
+				std::string msg = "Uniform '" + std::string(name) + "' not found or not active in shader";
 				throw std::logic_error(msg);
 			}
 			return location;
 
 		}
-		shader(GLint id) :id(id) {
+		shader(GLint shader_id) :id(shader_id) {
+			int l = 4;
 		}
 	};
-
-
 
 	struct shader_descriptor {
 		using asset_type = shader;

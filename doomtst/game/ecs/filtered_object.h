@@ -46,7 +46,7 @@ namespace ecs {
 
 		template<typename Arg> requires std::constructible_from<Object, Arg&&>
 		ConstrainedObject(Arg&& obj) :entity(std::forward<Arg>(obj)), ticks(), last_checked_ticks(ticks), contained(nullptr) {
-			last_checked_ticks.observe(world().archetypes.archetype_entity_of(object().id()).ticks);
+			last_checked_ticks.observe(world().archetypes.reaching_archetype_entity_of(object().id()).ticks);
 
 			//we can just validate because if we have a Constrained object, its archtype ticks cannot be zero as that would mean they have not been initilized
 			validate();
@@ -78,11 +78,10 @@ namespace ecs {
 			entity.destroy();
 		}
 		template<typename Arg> requires std::constructible_from<Object, Arg&&>
-		static ConstrainedObject make_unchecked(Arg&& obj) {
+		static ConstrainedObject make_unchecked(Arg&& obj, stn::TupleSet<Types&...> components) {
 			ecs::Ecs& world = obj.world();
 			stn::non_null < ecs::archetype_ticks> last_checked_ticks(world.archetypes.archetype_entity_of(obj.id()).ticks);
-			stn::TupleSet<Types&...> as_refs = world.get_components_unchecked<Types...>(obj.id());
-			return ConstrainedObject(last_checked_ticks, obj, stn::TupleSet((&as_refs.get<Types&>())...));
+			return ConstrainedObject(last_checked_ticks, obj, stn::TupleSet((&components.get<Types&>())...));
 		}
 		bool operator!=(const ConstrainedObject& other) const {
 			return !(other == *this);
@@ -93,6 +92,15 @@ namespace ecs {
 			other.validate();
 			return other.entity == entity;
 		}
+		using ObjectType= ConstrainedObject<ecs::obj, Types...>;
+		template<ObjectLike T>
+		explicit ConstrainedObject(const ConstrainedObject<T, Types...>& other)
+			:entity(other.object()), ticks(other.ticks)
+		, last_checked_ticks(other.last_checked_ticks), contained(other.contained)
+		{
+
+		}
+	
 	private:
 
 

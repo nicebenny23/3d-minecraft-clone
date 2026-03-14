@@ -37,15 +37,23 @@ namespace renderer {
 
 	};
 	struct Context {
-
+		void clear() {
+			glClearColor(0, 0, 0, 0.0f);
+			glDepthMask(GL_TRUE);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			glDepthMask(GL_FALSE);
+		}
 
 		size_t frame_id() {
 			return bound_frame.map([](Fbo frame) {return frame.id; }).unwrap_or(0);
 		}
 		void bind(Mesh& mesh) {
-			glBindVertexArray(mesh.vao_id());
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo_id());
-			glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo_id());
+			if (mesh.vao.id == 0) {
+				throw std::logic_error("mesh unitilized");
+			}
+			glBindVertexArray(mesh.vao.id);
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo.id);
+			glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo.id);
 			bound_mesh = mesh;
 
 		}
@@ -101,7 +109,9 @@ namespace renderer {
 		void apply_uniform(const renderer::uniform_value& value, std::string_view name) {
 			GLint location = BoundShader.unwrap().uniformlocation(name.data());
 			auto visitor = stn::visitor(
-				[&](const int& val) {glad_glUniform1i(location, val); },
+				[&](const int& val) {
+					glad_glUniform1i(location, val);
+				},
 				[&](const float& val) {glad_glUniform1f(location, val); },
 				[&](const unsigned int& val) {glad_glUniform1ui(location, val); },
 				[&](const v2::Vec2& val) {
@@ -126,24 +136,24 @@ namespace renderer {
 
 
 
-
 		Mesh create_mesh() {
-			Mesh new_mesh = Mesh();
-			glGenVertexArrays(1, &new_mesh.Voa.id);
-			glGenBuffers(1, &new_mesh.Vbo.Buf.id);
-			glGenBuffers(1, &new_mesh.Ibo.Buf.id);
-			new_mesh.BuffersGenerated = true;
-			return new_mesh;
-		}
-		void destroy(Mesh& msh) {
-			if (!msh.generated()) {
-				throw std::invalid_argument("Cannot Delete a mesh without Generating buffers first");
-			}
 
-			glDeleteBuffers(1, &msh.Ibo.Buf.id);
-			glDeleteBuffers(1, &msh.Vbo.Buf.id);
-			glDeleteVertexArrays(1, &msh.Voa.id);
-			msh.BuffersGenerated = false;
+			GLuint vao = 0, vbo = 0, ebo = 0;
+			glGenVertexArrays(1, &vao);
+			glGenBuffers(1, &vbo);
+			glGenBuffers(1, &ebo);
+			GlUtil::poll_errors();
+			return Mesh(
+			0,
+			Vao(vao),
+			Ebo(ebo),
+			Vbo(vbo));
+		}
+
+		void destroy(Mesh& msh) {
+			glDeleteBuffers(1, &msh.ebo.id);
+			glDeleteBuffers(1, &msh.vbo.id);
+			glDeleteVertexArrays(1, &msh.vao.id);
 			msh.length = 0;
 
 		}

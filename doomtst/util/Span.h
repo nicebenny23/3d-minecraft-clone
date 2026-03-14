@@ -57,14 +57,14 @@ namespace stn {
 		}
 		T& operator[](size_t index) {
 			if (!contains_index(index)) {
-				throw_range_exception("span index {} out of range (len={})", index, len);
+				throw_range_exception("span index {} out of bounds (len={})", index, len);
 			}
 			return ptr[index];
 		}
 
 		const T& operator[](size_t index) const {
 			if (!contains_index(index)) {
-				throw_range_exception("span index {} out of range (len={})", index, len);
+				throw_range_exception("span index {} out of bounds (len={})", index, len);
 			}
 			return ptr[index];
 		}
@@ -101,7 +101,7 @@ namespace stn {
 		span from(size_t start, size_t count) const {
 			//in the second important case len>start so it wont overflow
 			if (len < start || len - start < count) {
-				throw_range_exception("span::from requested range [{}:{}) out of bounds (valid: [0:{})", start, start + count, len);
+				throw_range_exception("span::from requested bounds [{}:{}) out of bounds (valid: [0:{})", start, start + count, len);
 			}
 			return span<T>(ptr + start, count);
 		}
@@ -109,7 +109,7 @@ namespace stn {
 		span slice(size_t start, size_t end) const {
 			if (start > end || end > len) {
 				throw_range_exception(
-					"span::slice requested range [{}:{}) out of bounds (valid: [0:{})",
+					"span::slice requested bounds [{}:{}) out of bounds (valid: [0:{})",
 					start, end, len
 				);
 			}
@@ -121,7 +121,7 @@ namespace stn {
 		span first(size_t elements) const {
 			if (len < elements) {
 				throw_range_exception(
-					"span::first requested [0:{}) out of range (valid [0:{}))",
+					"span::first requested [0:{}) out of bounds (valid [0:{}))",
 					elements, len
 				);
 			}
@@ -130,7 +130,7 @@ namespace stn {
 		span last(size_t elements) const {
 			if (elements > len) {
 				throw_range_exception(
-					"span::last requested last {} elements out of range (valid [0:{}))",
+					"span::last requested last {} elements out of bounds (valid [0:{}))",
 					elements, len
 				);
 			}

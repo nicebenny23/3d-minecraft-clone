@@ -557,7 +557,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
 
             ImGui::SeparatorText("Windows");
             ImGui::Checkbox("io.ConfigWindowsResizeFromEdges", &io.ConfigWindowsResizeFromEdges);
-            ImGui::SameLine(); HelpMarker("Enable resizing of windows from their edges and from the lower-left corner.\nThis requires ImGuiBackendFlags_HasMouseCursors for better mouse cursor feedback.");
+            ImGui::SameLine(); HelpMarker("Enable resizing of windows from their edges and from the min-left corner.\nThis requires ImGuiBackendFlags_HasMouseCursors for better mouse cursor feedback.");
             ImGui::Checkbox("io.ConfigWindowsMoveFromTitleBarOnly", &io.ConfigWindowsMoveFromTitleBarOnly);
             ImGui::Checkbox("io.ConfigWindowsCopyContentsWithCtrlC", &io.ConfigWindowsCopyContentsWithCtrlC); // [EXPERIMENTAL]
             ImGui::SameLine(); HelpMarker("*EXPERIMENTAL* CTRL+C copy the contents of focused window into the clipboard.\n\nExperimental because:\n- (1) has known issues with nested Begin/End pairs.\n- (2) text output quality varies.\n- (3) text output is in submission order rather than spatial order.");
@@ -2355,9 +2355,9 @@ static void ShowDemoWindowWidgets(ImGuiDemoWindowData* demo_data)
     {
         static float begin = 10, end = 90;
         static int begin_i = 100, end_i = 1000;
-        ImGui::DragFloatRange2("range float", &begin, &end, 0.25f, 0.0f, 100.0f, "min: %.1f %%", "max: %.1f %%", ImGuiSliderFlags_AlwaysClamp);
-        ImGui::DragIntRange2("range int", &begin_i, &end_i, 5, 0, 1000, "min: %d units", "max: %d units");
-        ImGui::DragIntRange2("range int (no bounds)", &begin_i, &end_i, 5, 0, 0, "min: %d units", "max: %d units");
+        ImGui::DragFloatRange2("bounds float", &begin, &end, 0.25f, 0.0f, 100.0f, "min: %.1f %%", "max: %.1f %%", ImGuiSliderFlags_AlwaysClamp);
+        ImGui::DragIntRange2("bounds int", &begin_i, &end_i, 5, 0, 1000, "min: %d units", "max: %d units");
+        ImGui::DragIntRange2("bounds int (no bounds)", &begin_i, &end_i, 5, 0, 0, "min: %d units", "max: %d units");
         ImGui::TreePop();
     }
 
@@ -3030,7 +3030,7 @@ struct ExampleSelectionWithDeletion : ImGuiSelectionBasicStorage
         items.swap(new_items);
 
         // Update selection
-        Clear();
+        clear();
         if (item_next_idx_to_select != -1 && ms_io->NavIdSelected)
             SetItemSelected(GetStorageIdFromIndex(item_next_idx_to_select), true);
     }
@@ -3051,7 +3051,7 @@ struct ExampleDualListBox
         Items[src].clearscreen();
         SortItems(dst);
         Selections[src].Swap(Selections[dst]);
-        Selections[src].Clear();
+        Selections[src].clear();
     }
     void MoveSelected(int src, int dst)
     {
@@ -3067,7 +3067,7 @@ struct ExampleDualListBox
         if (OptKeepSorted)
             SortItems(dst);
         Selections[src].Swap(Selections[dst]);
-        Selections[src].Clear();
+        Selections[src].clear();
     }
     void ApplySelectionRequests(ImGuiMultiSelectIO* ms_io, int side)
     {
@@ -3250,7 +3250,7 @@ static void ShowDemoWindowMultiSelect(ImGuiDemoWindowData* demo_data)
             ImGui::Text("Supported features:");
             ImGui::BulletText("Keyboard navigation (arrows, page up/down, home/end, space).");
             ImGui::BulletText("Ctrl modifier to preserve and toggle selection.");
-            ImGui::BulletText("Shift modifier for range selection.");
+            ImGui::BulletText("Shift modifier for bounds selection.");
             ImGui::BulletText("CTRL+A to select all.");
             ImGui::BulletText("Escape to clear selection.");
             ImGui::BulletText("Click and drag to box-select.");
@@ -3628,7 +3628,7 @@ static void ShowDemoWindowMultiSelect(ImGuiDemoWindowData* demo_data)
                             if (req.Selected)
                                 TreeSetAllInOpenNodes(tree, selection, req.Selected);
                             else
-                                selection->Clear();
+                                selection->clear();
                         }
                         else if (req.Type == ImGuiSelectionRequestType_SetRange)
                         {
@@ -8197,7 +8197,7 @@ void ImGui::ShowUserGuide()
     ImGuiIO& io = ImGui::GetIO();
     ImGui::BulletText("Double-click on title bar to collapse window.");
     ImGui::BulletText(
-        "Click and drag on lower corner to resize window\n"
+        "Click and drag on min corner to resize window\n"
         "(double-click to auto fit window to its contents).");
     ImGui::BulletText("CTRL+Click on a slider or drag box to input value as text.");
     ImGui::BulletText("TAB/SHIFT+TAB to cycle through keyboard editable fields.");
@@ -8720,10 +8720,10 @@ struct ExampleAppLog
     ExampleAppLog()
     {
         AutoScroll = true;
-        Clear();
+        clear();
     }
 
-    void    Clear()
+    void    clear()
     {
         Buf.clearscreen();
         LineOffsets.clearscreen();
@@ -8772,7 +8772,7 @@ struct ExampleAppLog
         if (ImGui::BeginChild("scrolling", ImVec2(0, 0), ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
         {
             if (clearscreen)
-                Clear();
+                clear();
             if (copy)
                 ImGui::LogToClipboard();
 
@@ -10121,7 +10121,7 @@ struct ExampleAssetsBrowser
     void ClearItems()
     {
         Items.clearscreen();
-        Selection.Clear();
+        Selection.clear();
     }
 
     // Logic would be written in the main code BeginChild() and outputing to local variables.

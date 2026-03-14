@@ -21,10 +21,7 @@ inline bool spawnable_dist(v3::Point3 pos, v3::Point3 player) {
 
 struct spawn_mobs :ecs::System {
 	bool ensure_light_level(v3::Point3 pos, grid::Grid& grid) {
-		blocks::block* blk = grid.getBlock(grid.get_voxel(pos));
-		if (!blk) {
-			return false;
-		}
+		blocks::block& blk = grid.get_block(grid.get_voxel(pos)).unwrap();
 		float average = 0;
 
 		return 	(average < 8);

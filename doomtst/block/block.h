@@ -25,10 +25,10 @@ namespace blocks {
 
 
 	struct block_emmision :ecs::component {
-		block_emmision(size_t emmited_light) :emmision(emmited_light) {
+		block_emmision(std::uint16_t emmited_light) :emmision(emmited_light) {
 
 		}
-		size_t emmision;
+		std::uint16_t emmision;
 
 	};
 	struct block : ecs::component {
@@ -37,21 +37,23 @@ namespace blocks {
 		std::uint16_t light_passing_through;
 
 		block_id id;
-		face& operator[](size_t index) {
+		MeshFace operator[](size_t index) {
 			return mesh[index];
+		}
+		MeshFace operator[](math::Direction3d index) {
+			return mesh[index.index()];
 		}
 		bool solid() const{
 			return info().solid;
 		}
 		Point3 center() const {
-			return mesh.box.center;
+			return bounds().center;
 		}
-
 		Scale3 scale() const {
-			return mesh.box.scale;
+			return bounds().scale;
 		}
 		geo::Box bounds() const {
-			return mesh.box;
+			return mesh.bounds();
 		}
 		template<BlockLike T>
 		const bool is() const {
@@ -61,8 +63,8 @@ namespace blocks {
 		const BlockRegistry& registry() const {
 			return world().get_resource<BlockRegistry>();
 		}
-		BlockTraits info() const{
-			return registry().block_for(id)->traits();
+		BlockTraits& info() const{
+			return registry().traits_for(id);
 		}
 		const stn::box<BlockType>&  type() const {
 			return registry().block_for(id);

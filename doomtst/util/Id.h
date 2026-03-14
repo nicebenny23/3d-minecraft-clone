@@ -19,14 +19,14 @@ namespace stn {
 		constexpr explicit operator bool() const { return valid(); }
 	};
 
-	template<typename T>
+	template<typename T,typename Backing=std::uint32_t>
 	struct typed_id {
-		uint32_t id;
-		constexpr explicit typed_id(uint32_t val) : id(val) {}
+		Backing id;
+		constexpr explicit typed_id(Backing val) : id(val) {}
 		constexpr bool operator==(const typed_id& other) const { return id == other.id; }
 		constexpr bool operator!=(const typed_id& other) const { return id != other.id; }
 		typed_id() = delete;
-		constexpr explicit operator uint32_t() const { return id; }
+		constexpr explicit operator Backing() const { return id; }
 		constexpr explicit operator size_t() const { return static_cast<size_t>(id); }
 	};
 	//nonmovable id type
@@ -45,50 +45,6 @@ namespace stn {
 
 		constexpr explicit operator uint32_t() const { return id; }
 		constexpr explicit operator size_t() const { return static_cast<size_t>(id); }
-	};
-	//special option type for an id
-	template<typename T>
-	struct default_id {
-	
-		constexpr explicit default_id(uint32_t val) : id(val) {}
-		constexpr bool operator==(const default_id& other) const { return id == other.id; }
-		constexpr bool operator!=(const default_id& other) const { return id != other.id; }
-		constexpr default_id() :id(none_id) {};
-		constexpr default_id(const typed_id<T>& ty_id) :id(ty_id.id){ };
-		explicit operator bool() {
-			return bounded();
-		}
-		constexpr bool bounded() const noexcept { return id != none_id; }
-		constexpr bool unbounded() const noexcept { return id == none_id; }
-		typed_id<T> as_id() const { 
-			if (unbounded())
-			{
-				throw std::logic_error("an unbounded block_id cannot be transformed into an block_id");
-			}
-			return typed_id<T>(id);
-		}
-		 uint32_t get() const {
-			if (unbounded())
-			{
-				throw std::logic_error("an unbounded block_id has no value");
-			}
-			return id;
-		}
-		constexpr uint32_t get_unchecked() const {
-			return id;
-		}
-		void assert_bounded(const char* msg) const {
-			if (unbounded())
-			{
-				throw std::logic_error(msg);
-			}
-		}
-		constexpr void reset() {
-			id = none_id;
-		}
-		
-	private:
-		uint32_t id;
 	};
 
 }

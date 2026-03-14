@@ -232,10 +232,10 @@ namespace ecs {
 
 		template<typename Tag, ComponentType T, typename ...Args>
 		T& spawn_with_component_tagged(Args&&... args)   requires std::constructible_from<T, Args&&...> {
-			stn::insertion<entity> new_entity = entities.allocate_entity<Tag>();
+			entity new_entity = entities.allocate_entity<Tag>();
 			component_id spawn_id = components.insert_id<T>();
-			archetypes.spawn_at(new_entity.value.id(), spawn_id);
-			return components.unchecked_at(spawn_id).emplace<T>(new_entity.value, std::forward<Args>(args)...).value;
+			archetypes.spawn_at(new_entity.id(), spawn_id);
+			return components.unchecked_at(spawn_id).emplace<T>(new_entity, std::forward<Args>(args)...).value;
 		}
 		template<ComponentType T, typename ...Args>
 		T& spawn_with_component(Args&&... args)   requires std::constructible_from<T, Args&&...> {
@@ -243,7 +243,7 @@ namespace ecs {
 		}
 		template<typename T>
 		ecs::entity spawn_tagged() {
-			entity new_entity = entities.allocate_entity<T>().value;
+			entity new_entity = entities.allocate_entity<T>();
 			archetypes.add_to_empty(new_entity.id());
 			return new_entity;
 		}

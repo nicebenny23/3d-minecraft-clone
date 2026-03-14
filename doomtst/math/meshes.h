@@ -2,15 +2,15 @@
 #include "geometry.h"
 #pragma once
 namespace math {
-	const Vec3 cube_mesh[] = {
-		Vec3(0, 0, 0), // vertex 0
-		Vec3(1, 0, 0), // vertex 1
-		Vec3(1, 1, 0), // vertex 2
-		Vec3(0, 1, 0), // vertex 3
-		Vec3(0, 0, 1), // vertex 4
-		Vec3(1, 0, 1), // vertex 5
-		Vec3(1, 1, 1), // vertex 6
-		Vec3(0, 1, 1)  // vertex 7
+	const v3::Coord cube_mesh[] = {
+		v3::Coord(0, 0, 0), // vertex 0
+		v3::Coord(1, 0, 0), // vertex 1
+		v3::Coord(1, 1, 0), // vertex 2
+		v3::Coord(0, 1, 0), // vertex 3
+		v3::Coord(0, 0, 1), // vertex 4
+		v3::Coord(1, 0, 1), // vertex 5
+		v3::Coord(1, 1, 1), // vertex 6
+		v3::Coord(0, 1, 1)  // vertex 7
 	};
 
 	const v2::Vec2 square_mesh[] = {

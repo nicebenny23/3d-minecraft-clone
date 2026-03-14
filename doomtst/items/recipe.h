@@ -11,7 +11,7 @@ namespace items {
 			if (cell.fits_in(size)) {
 				return item_list[cell.index_in(size)];
 			}
-			stn::throw_logic_error("cell {} out of range in {}", cell.coord , size);
+			stn::throw_logic_error("cell {} out of bounds in {}", cell.coord , size);
 		}
 		ItemRecipe(v2::Coord2 grid_size, stn::array<stn::Option<item_entry>> input_entries, item_entry output_entry) :
 			size(grid_size), item_list(input_entries), output(output_entry) {

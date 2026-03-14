@@ -1,11 +1,12 @@
 #pragma once
-#include "../math/vector3.h"
-#include "../game/ecs/game_object.h"
-#include "../util/dynamicarray.h"
-#include "../math/geometry.h"
 #include "../block/block.h"
-#include "../util/SparseSet.h"
+#include "../game/ecs/game_object.h"
+#include "../math/geometry.h"
+#include "../math/Scale3.h"
 #include "../math/transform.h"
+#include "../math/vector3.h"
+#include "../util/Option.h"
+#include "ecs/component.h"
 
 namespace aabb {
 
@@ -23,7 +24,7 @@ namespace aabb {
 			}
 			if (owner().has_component<blocks::block>()) {
 				blocks::block& blk = owner().get_component<blocks::block>();
-				return blk.mesh.box.transform(box);
+				return blk.bounds().transform(box);
 			}
 		}
 		v3::Scale3 scale() const {
@@ -48,7 +49,7 @@ namespace aabb {
 		DynamicColliderRecipe(geo::Box aabb, bool is_effector = false) :effector(is_effector), box(aabb) {
 
 		}
-		void apply(ecs::obj& object)  {
+		void apply(ecs::obj& object) {
 			object.add_component<DynamicCollider>();
 			object.add_component<Collider>(box, effector);
 

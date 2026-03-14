@@ -17,10 +17,12 @@ namespace vertice {
 			
 		}
 	};
+
 	struct vertex {
 		vertex() :total_size(), total_entries(), attributes() {
 
 		}
+		
 		size_t length() const{
 		return attributes.length();
 		}
@@ -43,7 +45,7 @@ namespace vertice {
 		vertex_attribute& operator[](size_t index) {
 			return attributes[index];
 
-		}void Clear() {
+		}void clear() {
 			total_entries = 0;
 			total_size = 0;
 			attributes.clear();

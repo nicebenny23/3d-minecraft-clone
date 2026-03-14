@@ -59,7 +59,7 @@ namespace renderer {
 		}
 		static constexpr bool immortal = true;
 		void unload(stn::box<Frame>&& frame) {
-			//idk;
+			
 		}
 	};
 }

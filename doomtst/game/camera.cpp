@@ -21,7 +21,7 @@ namespace camera {
 	}
 	math::Transform GetCam()
 	{
-		player::CameraComp* cam = player::goblin.get_component_ptr<player::CameraComp>();
+		renderer::CameraComponent* cam = player::goblin.get_component_ptr<renderer::CameraComponent>();
 		if (cam == nullptr) {
 			throw std::logic_error("Attempted to access Camera before it was created");
 		}

@@ -4,6 +4,7 @@
 #include "../math/geometry.h"
 #include "../util/cached.h"
 #include "block_registry.h"
+#include "../math/cube_vertex.h"
 namespace blocks {
 
 	struct block_mesh;
@@ -13,6 +14,7 @@ namespace blocks {
 		Uncomputed = 2
 
 	};
+
 	struct face {
 
 
@@ -25,38 +27,58 @@ namespace blocks {
 		bool covered() const {
 			return cover == cover_state::Covered;
 		}
-		
-		block_mesh* mesh;
-		face(block_textures texval, math::Direction3d num, block_mesh* owner)
-		:face_direction(math::Direction3d(num)),mesh(owner),tex(texval),cover(cover_state::Uncomputed),light(0){}
-		inline Point3 center() const;
-		size_t get_light() const{
-			return light;
+
+		face(block_textures texval, math::Direction3d num)
+			:face_direction(math::Direction3d(num)), tex(texval), cover(cover_state::Uncomputed) {
 		}
-
-		void set_cover(cover_state new_state);
-		void set_light(std::uint8_t  value);
-
 		block_textures tex;
 		math::Direction3d face_direction;
-	private:
 		cover_state cover;
-		std::uint8_t light;
 	};
+	struct MeshFace {
 
+		face& face();
+		v3::Point3 center();
+		bool uncovered() {
+			return face().uncovered();
+		}
+		bool uncomputed() {
+			return face().uncomputed();
+		}
+		bool covered() {
+			return face().covered();
+		}
+
+		block_mesh& mesh();
+		math::Direction3d direction() const{
+			return face_direction;
+		}
+		MeshFace(block_mesh& mesh, math::Direction3d face) :face_mesh(mesh), face_direction(face) {
+			
+		}
+	private:
+		stn::non_null<block_mesh> face_mesh;
+		math::Direction3d face_direction;
+	};
+	
 	struct block_mesh {
-		stn::List<face, 6> faces;
+	private:
 		geo::Box box;
+
+	public:
+		//the vertex at the lowest corner of the world
+		stn::List<face, 6> faces;
 		math::Direction3d attached_direction;
 		math::Direction2d direction;
-		v3::Point3 center() const {
-			return box.center;
-		}
-		Scale3 scale() const {
-			return box.scale;
-		}
+
 		geo::Box bounds() const {
 			return box;
+		}
+		v3::Point3 center() const {
+			return bounds().center;
+		}
+		v3::Scale3 scale() const {
+			return bounds().scale;
 		}
 		bool is_transparent() const {
 			return transparent;
@@ -65,29 +87,24 @@ namespace blocks {
 		bool invisible() const {
 			return air_like;
 		}
-		block_mesh(const BlockMeshTraits& textures,stn::dirty_flag& d_flag,v3::Coord position,math::Direction3d attachment_direction,math::Direction2d facing_direction) :
-			flag(d_flag), box(position + unitv / 2, textures.size),transparent(false),faces([&](size_t index) {
-				return face(textures.faces[index],math::Direction3d(math::DirectionIndex3d(index)), this);
-			}), attached_direction(attachment_direction)
-			,direction(facing_direction), air_like(textures.invisible)
-		{
-			box.center -= attached_direction.vec()*box.scale.shrunk(.5f);
+		bool visible() const {
+			return !invisible();
+		}
+		block_mesh(const BlockMeshTraits& textures, stn::dirty_flag& d_flag, v3::Coord position, math::Direction3d attachment_direction, math::Direction2d facing_direction) :
+			flag(d_flag), box(position + unitv / 2, textures.size), transparent(false), faces([&](size_t index) {
+			return face(textures.faces[index], math::Direction3d(math::DirectionIndex3d(index)));
+				}), attached_direction(attachment_direction)
+					, direction(facing_direction), air_like(textures.invisible) {
+			box.center -= attached_direction.vec() * box.scale.shrunk(.5f);
+		}
+		MeshFace operator[](math::Direction3d index) {
+			return MeshFace(*this, index);
 		}
 
-			
-		face& operator[](size_t index) {
-			return faces[index];
-		}
-		const face& operator[](size_t index) const {
-			return faces[index];
+		MeshFace operator[](size_t index) {
+			return MeshFace(*this, math::Direction3d(math::DirectionIndex3d(index)));
 		}
 
-		face& operator[](math::AxisIndex3d index) {
-			return faces.unchecked_at(static_cast<size_t>(index));
-		}
-		const face& operator[](math::AxisIndex3d index) const{
-			return faces.unchecked_at(static_cast<size_t>(index));
-		}
 		using iterator = decltype(faces)::iterator;
 		iterator begin() {
 			return faces.begin();
@@ -97,23 +114,26 @@ namespace blocks {
 		}
 		bool transparent;
 		bool air_like;
+
+		void mark_dirty(math::Direction3d index_face) {
+				face& face = faces[index_face.index()];
+				flag.mark_dirty();
+				face.cover = cover_state::Uncomputed;
+		}
+		
 		friend struct face;
 		stn::dirty_flag& flag;
 
 	};
-	inline v3::Point3 face::center() const {
-		return face_direction.vec() * mesh->box.scale + mesh->box.center;
+	inline face& MeshFace::face() {
+		return mesh().faces.unchecked_at(face_direction.index());
+
 	}
-	inline void face::set_cover(cover_state new_state) {
-		if (new_state!=cover) {
-			mesh->flag.mark_dirty();
-			cover = new_state;
-		}
+
+	inline v3::Point3 MeshFace::center() {
+		return face_direction.vec() * mesh().bounds().scale + mesh().bounds().center;
 	}
-	inline void face::set_light(std::uint8_t value) {
-		if (value!=light) {
-			mesh->flag.mark_dirty();
-			light = value;
-		}
+	inline block_mesh& MeshFace::mesh() {
+		return *face_mesh;
 	}
 }

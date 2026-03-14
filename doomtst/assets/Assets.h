@@ -20,9 +20,7 @@ namespace assets {
 			inc();
 		}
 		bool operator==(const AssetHandle& other) const noexcept {
-			return id == other.id 
-				//&& AssetManager == other.AssetManager
-				;
+			return id == other.id;
 		}
 
 		bool operator!=(const AssetHandle& other) const noexcept {
@@ -77,7 +75,9 @@ namespace assets {
 		stn::Option<AssetHandle<DescriptorAssetType<T>>> load(const T& info) {
 			stn::Option<asset_id> id = map.get_or_try(BoxedLoadDescriptor(stn::construct_derived<ConcreteDescriptor<T>>(), info),
 				[this](const BoxedLoadDescriptor& load_description, const asset_id& mapped_id) -> stn::Option<AssetSlot> {
-					names.emplace(std::string(stn::name(load_description)), mapped_id);
+					if constexpr (stn::Namable<T>) {
+						names.emplace(std::string(stn::name(load_description)), mapped_id);
+					}
 					stn::Option<stn::box<Asset>> mabye_asset = loaders.load(load_description,*this);
 					if (mabye_asset) {
 						return AssetSlot(std::move(mabye_asset.unwrap()), BoxedLoadDescriptor(load_description));

@@ -25,6 +25,7 @@ namespace math {
 		double length() const {
 			return dist(start, end);
 		}
+		//returns a ray from its start and an offset
 		static ray from_offset(v3::Point3 start, v3::Vec3 offset) {
 			return ray(start, start + offset);
 		}

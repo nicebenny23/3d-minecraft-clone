@@ -17,7 +17,7 @@
 
 void endframe() {
 	Core::game.Ecs.get_resource<window::Window>().SwapBuffers();
-	Core::game.Ecs.get_resource<renderer::Renderer>().Clear();
+	Core::game.Ecs.get_resource<renderer::Renderer>().clear();
 }
 
 void update() {

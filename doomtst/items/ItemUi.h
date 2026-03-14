@@ -59,7 +59,7 @@ namespace items {
 					double dur_progress = icon.value.unwrap();
 					geo::Box2d& box = icon.bar.get_component<ui::UiBounds>().local;
 					box.scale.x = icon.full_box.scale.x * dur_progress;
-					box.center.x = stn::lerp(icon.full_box.lower().x, icon.full_box.center.x, dur_progress);
+					box.center.x = stn::lerp(icon.full_box.min().x, icon.full_box.center.x, dur_progress);
 				}
 			}
 		}

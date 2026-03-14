@@ -1,58 +1,110 @@
 #include "mathutil.h"
+#include <utility>
 #pragma once
 namespace math {
 	//closed interval
-	struct range {
-		range(double minimum, double maximum) :min(minimum), max(maximum) {
+	struct bounds {
 
-			if (max < min) {
-				std::swap(min, max);
+		constexpr bounds(double min, double max) :minimum(min), maximum(max) {
+			if (maximum < minimum) {
+				std::swap(minimum, maximum);
 			}
 		}
-		range operator+(const range& oth)const {
-			return range(min + oth.min, max + oth.max);
+		static constexpr bounds unchecked_bounds(double min,double max) {
+			return bounds(min, max, unchecked_tag{});
 		}
-		range& operator+=(const range& oth) {
-			min += oth.min;
-			max += oth.max;
+
+		static constexpr bounds from_midpoint_length(double midpoint, double length) {
+			return bounds(midpoint - length/2, midpoint + length/2);
+		}
+		constexpr bounds operator+(const bounds& oth)const {
+			return unchecked_bounds(minimum + oth.minimum, maximum + oth.maximum);
+		}
+		constexpr bounds operator-()const {
+			return unchecked_bounds(-maximum,minimum);
+		}
+		constexpr bounds& operator+=(const bounds& oth) {
+			minimum += oth.minimum;
+			maximum += oth.maximum;
 			return *this;
 		}
-		range operator*(double scale) const{
-			if (scale < 0) {
-				return range(max * scale, min * scale);
-			}
-			else {
-				return range(min * scale, max * scale);
-			}
+		
+		constexpr bounds operator*(double scale) const{
+			return bounds(maximum * scale, minimum * scale);
 		}
-		range& operator*=(double scale) {
-			if (scale < 0) {
-				*this = range(max * scale, min * scale);
-			}
-			else {
-				*this = range(min * scale, max * scale);
-			}
+		constexpr bounds& operator*=(double scale) {
+			*this = (*this) * scale;
 			return *this;
 		}
-		double length() const {
 
-			return max - min;
+		constexpr bounds operator-(const bounds& oth) const {
+			return *this+(-oth);
 		}
-
-		double lower() const {
-			return min;
+		constexpr bounds& operator-=(const bounds& oth) {
+			*this = *this - oth;
+			return *this;
 		}
-		double upper() const {
-			return max;
-		}
-		bool contains(double val) const {
-			return in_range_apx(val, min, max);
-		}
-		bool contains(const range& other) const{
-			return contains(other.max) && contains(other.min);
+		
+		constexpr bounds operator/(double scale) const {
+			return *this * (1 / scale);
 		}
 
+		constexpr bounds& operator/=(double scale) {
+			return *this *= (1/scale);
+		}
+		constexpr double length() const {
+			return maximum - minimum;
+		}
+		constexpr double midpoint() const {
+			return (maximum + minimum)/ 2;
+		}
+		constexpr double min() const {
+			return minimum;
+		}
+		constexpr double max() const {
+			return maximum;
+		}
+		constexpr double lerp(double selector) const{
+			return minimum+(maximum-minimum)* selector;
+		}
+		
+		constexpr bool contains(double val) const {
+			return in_range(val, minimum, maximum);
+		}
+		constexpr bool contains(const bounds& other) const{
+			return contains(other.maximum) && contains(other.minimum);
+		}
+		constexpr double clamp(double value) const {
+			if (value < minimum) {
+				return minimum;
+			}
+			if (value > maximum) {
+				return maximum;
+			}
+			return value;
+		}
+		
+
+		constexpr bounds intersect(const bounds& other) const {
+			return bounds(
+				stn::max(minimum, other.minimum),
+				stn::min(maximum, other.maximum)
+			);
+		}
+		constexpr bounds unite(const bounds& other) const {
+			return bounds(
+				stn::min(minimum, other.minimum),
+				stn::max(maximum, other.maximum)
+			);
+		}
 	private:
-		double min, max;
-	};
+		struct unchecked_tag {
+
+		};
+		constexpr bounds(double min, double max, unchecked_tag tag) :minimum(min), maximum(max) {
+
+		}
+		double minimum, maximum;
+	}; 
+	inline constexpr bounds unit_bounds = bounds::unchecked_bounds(0.0, 1.0);
 }

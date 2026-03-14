@@ -13,7 +13,7 @@ namespace ecs {
 			}
 			return stn::None;
 		}
-		stn::Option<const ecs::obj> get() const {
+		stn::Option<const ecs::obj&> get() const {
 			if (element.exists()) {
 				return element;
 

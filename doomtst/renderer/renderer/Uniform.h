@@ -1,7 +1,6 @@
 #pragma once
 #include <variant>
 #include <string>
-#include "../../util/SparseSet.h"
 #include "texture.h"
 #include "../../util/Id.h"
 #include "../HandleMap.h"
@@ -11,7 +10,7 @@
 namespace renderer {
 
 	using uniform_value = std::variant<
-		int,            
+		GLint,            
 		float,          
 		GLuint,           
 		v2::Vec2,      

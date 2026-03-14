@@ -236,7 +236,7 @@ namespace std {
 	auto get(stn::Tuple<Ts...>& t) -> decltype(stn::get<I>(t)) {
 		return stn::get<I>(t);
 	}
-
+	
 	template <std::size_t I, typename... Ts>
 	auto get(const stn::Tuple<Ts...>& t) -> decltype(stn::get<I>(t)) {
 		return stn::get<I>(t);

@@ -44,9 +44,9 @@ void player::initplayer(ecs::obj& player) {
 	player.add_component<PlayerCursor>();
 	player.add_component<playerattackcomp>();
 	player.add_component<playerdaggercomp>();
-	player.add_component<CameraComp>();
+	player.add_component<renderer::CameraComponent>();
 	
-	player.world().insert_resource<camera_resource>(ecs::Constrained<CameraComp>(player));
+	player.world().insert_resource<renderer::camera_resource>(ecs::Constrained<renderer::CameraComponent>(player));
 	player.add_component<playermovement>();
 	player.add_component<playercamcontrols>();
 }

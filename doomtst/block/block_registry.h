@@ -3,7 +3,7 @@
 #include "../util/List.h"
 #pragma once
 namespace blocks {
-	enum block_textures :short {
+	enum block_textures :std::uint8_t {
 		treestonetex = 0,
 		grasstex = 1,
 		stonetex = 2,
@@ -35,18 +35,18 @@ namespace blocks {
 	};
 	struct block_tag;
 
-	using block_id = stn::typed_id<block_tag>;
+	using block_id = stn::typed_id<block_tag,std::uint16_t>;
 
 	struct block;
 	struct BlockMeshTraits {
-		constexpr BlockMeshTraits(v3::Scale3 mesh_size, bool is_transparent, block_textures left_face, block_textures right_face, block_textures up_face, block_textures down_face, block_textures front_face, block_textures back_face,bool is_invisible=false)
+		BlockMeshTraits(v3::Scale3 mesh_size, bool is_transparent, block_textures left_face, block_textures right_face, block_textures up_face, block_textures down_face, block_textures front_face, block_textures back_face,bool is_invisible=false)
 			:faces(left_face, right_face, up_face, down_face, front_face, back_face), 
 			size(mesh_size),
 			transparent(is_transparent),
 			invisible(is_invisible)
 		{
 		}
-		constexpr BlockMeshTraits(v3::Scale3 mesh_size, bool is_transparent, block_textures only_texture, bool is_invisible = false)
+		BlockMeshTraits(v3::Scale3 mesh_size, bool is_transparent, block_textures only_texture, bool is_invisible = false)
 			:faces(only_texture, only_texture, only_texture, only_texture, only_texture, only_texture),
 			size(mesh_size),
 			transparent(is_transparent),
@@ -65,7 +65,7 @@ namespace blocks {
 	inline constexpr bool non_solid_block = false;
 
 	struct BlockTraits {
-		constexpr BlockTraits(BlockMeshTraits block_mesh, bool is_solid = true, size_t light_emmision = 0)
+		BlockTraits(BlockMeshTraits block_mesh, bool is_solid = true, size_t light_emmision = 0)
 			:mesh(block_mesh), solid(is_solid), emmited_light(light_emmision) {
 		}
 		BlockMeshTraits mesh;
@@ -81,12 +81,12 @@ namespace blocks {
 			return SolidBlockTraits();
 		}
 		//we catch the traits to speed up;
-		BlockTraits& traits_for() {
+		BlockTraits& traits_for() const{
 			if (!catched) {
 				catched = traits();
 			}
 			return catched.unwrap_unchecked();
-		};
+		}
 		virtual BlockTraits traits() const= 0;
 		virtual void apply(ecs::obj& blk) const {
 
@@ -108,7 +108,7 @@ namespace blocks {
 
 	struct BlockRegistry :ecs::resource {
 		stn::array<stn::Option<size_t>> to_id;
-		BlockTraits& traits_for(block_id id) {
+		BlockTraits& traits_for(block_id id) const {
 			return blocks[id.id]->traits_for();
 		}
 		SolidBlockTraits solid_traits_for(block_id id) {
@@ -138,7 +138,7 @@ namespace blocks {
 		block_id get_id(std::string_view name) const {
 			for (size_t i = 0; i < blocks.length();i++) {
 				if (name==blocks[i]->name()) {
-					return block_id(std::uint32_t(i));
+					return block_id(std::uint16_t(i));
 				}
 			}
 			stn::throw_logic_error("block with name {} does not exist", name);

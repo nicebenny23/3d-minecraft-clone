@@ -41,7 +41,7 @@ bool normaltestfunc(Coord pos, int dir)
 }
 
 array<navnode> astarpathfinding(navnode start, navnode goal, array<navnode> (*getconnected)(navnode& pos),ecs::Ecs& world) {
-    if (world.get_resource<grid::Grid>().GetChunk(goal.pos) == nullptr)
+    if (world.get_resource<grid::Grid>().get_chunk(goal.pos).is_none())
     {
 return        array<navnode>();
     }

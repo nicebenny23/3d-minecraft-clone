@@ -188,7 +188,7 @@ namespace stn {
 		size_t count(Pred&& pred) const {
 			size_t cnt = 0;
 			for (auto&& element : stored_range) {
-				if (pred(element)) {
+				if (std::forward<Pred>(pred)(element)) {
 					cnt++;
 				};
 			}
