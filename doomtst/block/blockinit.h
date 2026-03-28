@@ -14,7 +14,6 @@ namespace blocks {
 		math::Direction3d direction;
 		Chunk::chunkmesh& mesh;
 		stn::Option<stn::file_handle&> handle;
-		
 		//it cannot be a recipe due to its optimizations mechanics
 		Chunk::block_object spawn(ecs::Ecs& world) {
 			BlockRegistry& registry =world.get_resource<BlockRegistry>();
@@ -37,7 +36,7 @@ namespace blocks {
 				object.add_component<block_emmision>(traits.emmited_light);
 			}
 			if (traits.solid) {
-				object.add_component<aabb::Collider>(geo::Box(v3::Point3(0,0,0), traits.mesh.size),!traits.solid);
+				object.add_component<aabb::Collider>(!traits.solid);
 			}
 			if (traits.mesh.transparent) {
 				blk.mesh.transparent = true;

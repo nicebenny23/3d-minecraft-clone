@@ -268,20 +268,20 @@ namespace stn {
 			}
 			return None;
 		}
-		template<std::predicate<T> Pred>
+		template<std::predicate<T&> Pred>
 		Option<T&> such_that(Pred&& pred) {
 			for (size_t i = 0; i < len; i++) {
-				if (pred(ptr[i])) {
+				if (std::invoke(std::forward<Pred>(pred),ptr[i])) {
 					return ptr[i];
 				}
 			}
 			return None;
 		}
 
-		template<std::predicate<const T> Pred>
+		template<std::predicate<const T&> Pred>
 		Option<const T&> such_that(Pred&& pred) const {
 			for (size_t i = 0; i < len; i++) {
-				if (pred(ptr[i])) {
+				if (std::invoke(std::forward<Pred>(pred), ptr[i])) {
 					return ptr[i];
 				}
 			}

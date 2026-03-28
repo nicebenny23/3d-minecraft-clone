@@ -91,7 +91,7 @@ namespace items {
 	};
 	template<LootTableType T>
 	void loot_table_recipe(ecs::obj& entity) {
-		entity.add_component<loot_dropper>(entity.world().ensure_resource<loot_tables>().insert<T>());
+		entity.add_component<loot_dropper>(entity.world().insert_resource<loot_tables>().insert<T>());
 	}
 
 }

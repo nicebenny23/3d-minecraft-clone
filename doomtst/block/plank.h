@@ -18,7 +18,7 @@ namespace blocks {
 		}
 		BlockTraits traits() const {
 			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale / 2, false, planktex, planktex, planktex, planktex, planktex, planktex));
+				BlockMeshTraits(v3::unit_scale, false, planktex, planktex, planktex, planktex, planktex, planktex));
 		}
 	};
 }

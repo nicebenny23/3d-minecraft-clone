@@ -24,19 +24,19 @@ namespace collision {
 			if (query.matches(collider)) {
 				continue;
 			}
-			if (search_ray.point_lies_in_sphere(collider.global_box().center)) {
 				geointersect::boxRayCollision blkinter = geointersect::intersection(collider.global_box(), search_ray);
-				stn::Option<float> test_dist = blkinter.member(&geointersect::RayHit::dist);
-				stn::Option<float> current_dist = closest.member_ref(&voxtra::RayWorldHit::Hit).member(&geointersect::RayHit::dist);
-				if (test_dist < current_dist) {
-					closest = voxtra::RayWorldHit(blkinter.unwrap(), collider);
+				stn::Option<double> test_dist = blkinter.map_member(&geointersect::RayHit::length);
+				stn::Option<double> current_dist = closest.map_member(&voxtra::RayWorldHit::dist);
+				if (test_dist.unwrap_or(std::numeric_limits<double>().infinity()) < current_dist.unwrap_or(std::numeric_limits<double>().infinity())) {
+					if (test_dist.unwrap()<=search_ray.length()) {
+						closest = voxtra::RayWorldHit(blkinter.unwrap(), collider);
+					}
 				}
 			}
-		}
 		return closest;
 	}
 	inline voxtra::WorldRayCollision raycast(math::ray nray, HitQuery query, voxtra::GridTraverseMode travmode=voxtra::GridTraverseMode::countnormal) {
-		voxtra::WorldRayCollision closest_on_grid = voxtra::travvox(nray, travmode,query.world.get_resource<grid::Grid>());
+		voxtra::WorldRayCollision closest_on_grid = voxtra::grid_cast(nray, travmode,query.world.get_resource<grid::Grid>());
 		voxtra::WorldRayCollision closest_entity = raycast_dynamic(nray, query);
 		return stn::min_some_on_map(closest_entity, closest_on_grid,
 		[&](const voxtra::RayWorldHit& col) {return col.dist(); });

@@ -13,7 +13,7 @@ namespace math {
 		static constexpr bounds unchecked_bounds(double min,double max) {
 			return bounds(min, max, unchecked_tag{});
 		}
-
+		  
 		static constexpr bounds from_midpoint_length(double midpoint, double length) {
 			return bounds(midpoint - length/2, midpoint + length/2);
 		}
@@ -83,14 +83,18 @@ namespace math {
 			}
 			return value;
 		}
-		
-
-		constexpr bounds intersect(const bounds& other) const {
-			return bounds(
-				stn::max(minimum, other.minimum),
-				stn::min(maximum, other.maximum)
-			);
+		stn::Option<bounds> intersect(const bounds& other) const {
+			double new_min = stn::max(minimum, other.minimum);
+			double new_max = stn::min(maximum, other.maximum);
+			if (new_max<new_min) {
+				return stn::None;
+			}
+			return bounds::unchecked_bounds(new_min, new_max);
 		}
+		bool intersects(const bounds& other) const {
+			return intersect(other).is_some();
+		}
+
 		constexpr bounds unite(const bounds& other) const {
 			return bounds(
 				stn::min(minimum, other.minimum),
@@ -106,5 +110,8 @@ namespace math {
 		}
 		double minimum, maximum;
 	}; 
+
+	inline constexpr bounds all_reals= bounds::unchecked_bounds(-std::numeric_limits<double>::infinity(),
+		std::numeric_limits<double>::infinity());
 	inline constexpr bounds unit_bounds = bounds::unchecked_bounds(0.0, 1.0);
 }

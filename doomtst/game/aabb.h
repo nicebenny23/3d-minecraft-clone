@@ -15,25 +15,19 @@ namespace aabb {
 	struct Collider : ecs::component {
 		bool effector;
 		//local box
-		geo::Box box;
-		//world box
-		geo::Box global_box() const {
-			if (owner().has_component<ecs::transform_comp>()) {
-				math::Transform transform = owner().get_component<ecs::transform_comp>().transform;
-				return geo::Box(box.center * transform.scale * 2 + v3::Vec3(transform.position.x, transform.position.y, transform.position.z), box.scale * transform.scale * 2);
+		math::Box global_box() const {
+			if (owner().has_component<ecs::world_transform>()) {
+				return owner().get_component<ecs::world_transform>().transform.unrotated_box();
 			}
 			if (owner().has_component<blocks::block>()) {
-				blocks::block& blk = owner().get_component<blocks::block>();
-				return blk.bounds().transform(box);
+				return owner().get_component<blocks::block>().bounds();
 			}
 		}
-		v3::Scale3 scale() const {
-			return global_box().scale;
-		}
+		
 		v3::Point3 center() const {
 			return global_box().center;
 		}
-		Collider(geo::Box aabb, bool iseffector = false) :box(aabb), effector(iseffector) {
+		Collider(bool iseffector = false) : effector(iseffector) {
 
 		}
 	};
@@ -45,24 +39,23 @@ namespace aabb {
 
 	struct DynamicColliderRecipe {
 		bool effector;
-		geo::Box box;
-		DynamicColliderRecipe(geo::Box aabb, bool is_effector = false) :effector(is_effector), box(aabb) {
+
+		DynamicColliderRecipe(bool is_effector = false) :effector(is_effector){
 
 		}
 		void apply(ecs::obj& object) {
 			object.add_component<DynamicCollider>();
-			object.add_component<Collider>(box, effector);
-
+			object.add_component<Collider>(effector);
 		}
 	};
 
-	inline	bool  box_intersects_aabb(geo::Box p1, Collider& p2) {
-		return geo::boxes_intersect(p1, p2.global_box());
+	inline	bool  box_intersects_aabb(math::Box p1, Collider& p2) {
+		return math::boxes_intersect(p1, p2.global_box());
 	}
 
 	//cannot consify until global box is const
 	inline Option<v3::Vec3> collide_aabb(Collider& p1, Collider& p2) {
-		return geo::collide_box(p1.global_box(), p2.global_box());
+		return math::collide_box(p1.global_box(), p2.global_box());
 
 	}
 

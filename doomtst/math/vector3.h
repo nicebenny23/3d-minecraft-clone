@@ -32,10 +32,10 @@ namespace v3 {
 			x = p1.x; y = p1.y; z = p1.z;
 		}
 		bool operator==(const Vec3& p1) {
-			return apx(x, p1.x) && apx(y, p1.y) && apx(z, p1.z);
+			return math::approximate_equals(x, p1.x) && math::approximate_equals(y, p1.y) && math::approximate_equals(z, p1.z);
 		}
 		bool operator!=(const Vec3& p1) {
-			return !apx(x, p1.x) || !apx(y, p1.y) || !apx(z, p1.z);
+			return !math::approximate_equals(x, p1.x) || !math::approximate_equals(y, p1.y) || !math::approximate_equals(z, p1.z);
 		}
 		Vec3 operator-() const {
 			return Vec3(-x,-y,-z);
@@ -154,6 +154,9 @@ namespace v3 {
 			return (*this / mt);
 
 		}
+		inline Vec3 with_magnitude(double mag) const {
+			return normal() * mag;
+		}
 		double x;
 		double y;
 		double z;
@@ -192,6 +195,7 @@ namespace v3 {
 		}
 		return (p / mt);
 	}
+
 	inline Vec3 zero_fixed_normal(const Vec3& p) {
 		double mt = p.length();
 		if (mt == 0) {
@@ -307,10 +311,10 @@ namespace v3 {
 			x = p1.x; y = p1.y; z = p1.z;
 		}
 		bool operator==(const Point3& p1) {
-			return apx(x, p1.x) && apx(y, p1.y) && apx(z, p1.z);
+			return math::approximate_equals(x, p1.x) && math::approximate_equals(y, p1.y) && math::approximate_equals(z, p1.z);
 		}
 		bool operator!=(const Point3& p1) {
-			return !apx(x, p1.x) || !apx(y, p1.y) || !apx(z, p1.z);
+			return !math::approximate_equals(x, p1.x) || !math::approximate_equals(y, p1.y) || !math::approximate_equals(z, p1.z);
 		}
 
 		Point3 operator+(const Vec3& p1) const {
@@ -478,3 +482,20 @@ struct std::formatter<v3::Point3> : std::formatter<std::string> {
 		return std::format_to(ctx.out(), "({:.3f}, {:.3f}, {:.3f})", v.x, v.y, v.z);
 	}
 };
+#include <functional>
+
+namespace std {
+	template<>
+	struct hash<v3::Coord> {
+		size_t operator()(const v3::Coord& c) const noexcept {
+			size_t h1 = std::hash<int>{}(c.x);
+			size_t h2 = std::hash<int>{}(c.y);
+			size_t h3 = std::hash<int>{}(c.z);
+			size_t seed = h1;
+			seed ^= h2 + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+			seed ^= h3 + 0x9e3779b9 + (seed << 6) + (seed >> 2);
+
+			return seed;
+		}
+	};
+}

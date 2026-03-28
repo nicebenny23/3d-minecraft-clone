@@ -28,8 +28,8 @@ struct worm: ecs::component
 		aabb::Collider& col = owner().get_component<aabb::Collider>();
 	
 
-			ModelMeshName::ModelMesh* meshatpos= owner().get_component<model>().meshlist[i];
-			Transform& local = col.get_component<ecs::transform_comp>().transform;
+			renderer::ModelMesh* meshatpos= owner().get_component<model>().meshlist[i];
+			Transform& local = col.get_component<ecs::world_transform>().transform;
 			local.position += currtransform.normal_dir() * speed;
 
 			

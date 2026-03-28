@@ -259,7 +259,7 @@ namespace ecs {
 		template<ComponentType... Components>
 		bool has_components(entity object) {
 			entities.assert_valid(object);
-			return archetypes.archetype_of(object.id()).has_components(components.get_ids<Components...>());
+			return archetypes.archetype_of(object.id()).has_components(components.insert_ids<Components...>());
 		}
 
 		template<ComponentType T>

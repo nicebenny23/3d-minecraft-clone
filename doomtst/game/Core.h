@@ -12,8 +12,11 @@ namespace Core {
 	using plugin_id = stn::typed_id<Plugin>;
 	template<typename T>
 	concept PluginType = std::derived_from<T, Plugin>&&std::is_default_constructible_v<T>||stn::void_invokable<const T&,App&>;
+	
+	
+
 	template<PluginType T>
-	void build_plugin(T& plugin,App& app) {
+	void build_plugin(T&& plugin,App& app) {
 		if constexpr(stn::void_invokable<const T&, App&>) {
 			plugin(app);
 		}
@@ -21,21 +24,25 @@ namespace Core {
 			plugin.build(app);
 		}
 	}
+	template<PluginType T>
+	struct PluginWrapper {
+		PluginWrapper(T& built_plugin) :plugin(built_plugin) {
+
+		}
+		T plugin;
+		void build(App& app) {
+			plugin.build(app);
+		}
+	};
 	struct Plugins {
 		stn::type_indexer<plugin_id> plugin_list;
 
 		template<PluginType T>
-		void insert(T& plugin) {
-			if (plugin_list.insert<T>()) {
-				build_plugin(plugin,*engine);
+		void insert(T&& plugin) {
+			if (plugin_list.insert<PluginWrapper<T>>()) {
+				build_plugin(std::forward<T>(plugin),*engine);
 			}
 		}
-		template<PluginType T>
-		void insert() {
-			T plugin= T();
-			insert<T>(plugin);
-		}
-
 		void inject_engine(App& eng) {
 			engine = &eng;
 		}
@@ -53,11 +60,10 @@ namespace Core {
     {
 
         void createWindow();
-        void InitOC();
-       Plugins plugin_list;
+        Plugins plugin_list;
 		template<PluginType T>
 		void insert_plugin() {
-			plugin_list.insert<T>();
+			plugin_list.insert<T>(T());
 		}
 
 		template<PluginType T>
@@ -107,8 +113,8 @@ namespace Core {
 	};
 	struct GamePlugin :Core::Plugin {
 		void build(App& app) {
-			app.ensure_resource < GameState>();
-			app.emplace_system< GameCloser>();
+			app.ensure_resource <GameState>();
+			app.emplace_system<GameCloser>();
 		}
 	};
 }

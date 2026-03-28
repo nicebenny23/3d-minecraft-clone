@@ -4,7 +4,7 @@
 #include "../game/ecs/game_object.h"
 #include <conio.h>
 #include "../items/block_definitions.h"
-#include "../game/entitystate.h"
+#include "../game/entityutil.h"
 #include "playerinventory.h"
 #include "../util/cached.h"
 
@@ -12,64 +12,39 @@ struct playerhealth: ecs::component
 {
 	
 	stn::Option<ui::ui_image> damage_decal;
-	timename::Duration damage_decal_duration;
 	
 	bool dmgimmune = false;
 	void killplayer() {
-		system("cls");
-		glfwTerminate();
-		std::exit(0);
-	
+		world().write_command<>(Core::CloseGameCommand());
 	
 	}
 
 	array<ui::ui_image>healthboxes;
 	void start(){
-		damage_decal= std::move(ui::ui_image(world(),"images\\red_back.png", "on_dmg_texture", geo::Box2d::origin_centered(v2::zerov), -3));
-		damage_decal_duration=world().ensure_resource<timename::TimeManager>().current_time();
-		size_t max_health = owner().get_component<estate>().maxhealth;
+		damage_decal= std::move(ui::ui_image(world(),"images\\red_back.png", "on_dmg_texture", math::Box2d::origin_centered(v2::zerov), -3));
+		size_t max_health = owner().get_component<Health::EntityHealth>().max_health;
 		v2::Vec2 scale = v2::unitv / 100;
 		healthboxes = array<ui::ui_image>();
 		for (int i = 0; i < max_health; i++) {
 			v2::Vec2 pos = v2::Vec2(i / 40.f-.4f, -.45);
 
-			healthboxes.push(ui::ui_image(world(), "images\\health.png", "HealthTexture", geo::Box2d(pos, scale), 55));
+			healthboxes.push(ui::ui_image(world(), "images\\health.png", "HealthTexture", math::Box2d(pos, scale), 55));
 		}
 	}
 	
 	void update() {
+		Health::EntityHealth& health = owner().get_component<Health::EntityHealth>();
+			size_t max_health = health.max_health;
 		
-		damage_decal.unwrap().enable_if(owner().get_component<estate>().model_red_dur.is_active());
-		size_t max_health = owner().get_component<estate>().maxhealth;
-		float dmgmul = 1;
-		for (int i = 0; i < 2; i++)
-		{
-			// items::item_stack& itm = owner().get_component<inventory>().playermenu.armor->at(i).helditem;
-			
-		}
-		owner().get_component<estate>().damagemultiplyer = dmgmul;
-		int health = owner().get_component<estate>().health;
-		if (health <= 0)
-		{
-
-			killplayer();
-
-
-		}
-		if (owner().get_component<estate>().invincablilitymax != owner().get_component<estate>().timetilldmg)
-		{
-			{
-				dmgimmune = false;
-			}
-			for (int i = 0; i < health; i++) {
+			for (int i = 0; i < health.current_health; i++) {
 
 				healthboxes[i].enable();
 			}
-			for (int i = health; i < max_health; i++) {
+			for (int i = health.current_health; i < max_health; i++) {
 
 				healthboxes[i].disable();
 			}
-		}
+	
 	}
 };
 

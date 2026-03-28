@@ -9,7 +9,7 @@
 #include "../math/meshes.h"
 #include "../game/ecs/unique_object.h"
 using namespace stn;
-using namespace geo;
+using namespace math;
 #pragma once
 namespace ui {
 
@@ -48,11 +48,11 @@ namespace ui {
 		UiSpawner ui_spawn;
 		colors::Color color;
 		stn::Option<renderer::TexturePath> path;
-		ui_image_spawner(const renderer::TexturePath& spawn_path,geo::Box2d box, size_t priority, colors::Color spawn_color=colors::White)
+		ui_image_spawner(const renderer::TexturePath& spawn_path,math::Box2d box, size_t priority, colors::Color spawn_color=colors::White)
 		:path(spawn_path),ui_spawn(box,priority), color(spawn_color) {
 			
 		}
-		ui_image_spawner(geo::Box2d box, size_t priority,colors::Color spawn_color = colors::White)
+		ui_image_spawner(math::Box2d box, size_t priority,colors::Color spawn_color = colors::White)
 		:path(stn::None),ui_spawn(box, priority),color(spawn_color){
 
 		}
@@ -66,7 +66,7 @@ namespace ui {
 		}
 	};
 	struct ui_image{
-		ui_image(ecs::Ecs& world,const char* texloc, const char* texture, geo::Box2d bounds, size_t prio) :object(ecs::spawn_emplaced<ui_image_spawner>(world,renderer::TexturePath(std::string(texloc),std::string(texture)),bounds,prio)){
+		ui_image(ecs::Ecs& world,const char* texloc, const char* texture, math::Box2d bounds, size_t prio) :object(ecs::spawn_emplaced<ui_image_spawner>(world,renderer::TexturePath(std::string(texloc),std::string(texture)),bounds,prio)){
 		}
 		ecs::object_handle object;
 		void enable_if(bool should_enable) {

@@ -19,15 +19,15 @@ namespace player {
 	struct PlayerCursorCaster:ecs::System{
 		void run(ecs::Ecs& world) {
 			
-			ecs::View<ecs::With<ecs::transform_comp>, ecs::With<PlayerCursor>,ecs::Owner>look_view(world);
-			for (stn::TupleSet<ecs::transform_comp&,PlayerCursor&,ecs::obj> view: look_view) {
+			ecs::View<ecs::With<ecs::world_transform>, ecs::With<PlayerCursor>,ecs::Owner>look_view(world);
+			for (stn::TupleSet<ecs::world_transform&,PlayerCursor&,ecs::obj> view: look_view) {
 				
 				PlayerCursor& cursor=view.get<PlayerCursor&>();
 				if (world.get_resource<ui::MenuState>().menu_open()) {
 					cursor.Hit = stn::None;
 					continue;
 				}
-				math::Transform& transform= view.get<ecs::transform_comp&>().transform;
+				math::Transform& transform= view.get<ecs::world_transform&>().transform;
 				math::ray look_ray=transform.forward_ray().dialate_from_start(cursor.look_range.max());
 
 				cursor.Hit = collision::raycast(look_ray, collision::HitQuery(view.get<ecs::obj>()));

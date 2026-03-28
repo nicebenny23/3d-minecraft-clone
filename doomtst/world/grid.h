@@ -136,7 +136,7 @@ namespace grid {
 			return get_object(pos)
 				.map([](Chunk::block_object& block_object)->block& {return block_object.get_unchecked<block>(); });
 		}
-		array<ecs::obj > voxel_in_range(geo::Box span) {
+		array<ecs::obj > voxel_in_range(math::Box span) {
 			array<ecs::obj> blocks;
 			v3::Coord lowest = get_voxel(span.min());
 			v3::Coord highest = get_voxel(span.max());

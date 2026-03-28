@@ -45,7 +45,9 @@ namespace math {
 		double distance(v3::Point3 vector) const {
 			return dist(vector, project(vector));
 		}
-
+		ray with_length(double length) const{
+			return normalize().dialate_from_start(length);
+		}
 		Point3 point_at(double distance) const {
 			return start + dir() * distance;
 		}

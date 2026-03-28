@@ -38,18 +38,19 @@ namespace collision {
 	}
 
 	inline void distribute_collision_force(ecs::obj p1, ecs::obj p2, Vec3 force) {
-		stn::Option<float> p1_mass = p1.get_component_opt<rigidbody>().member(&rigidbody::mass);
-		stn::Option<float> p2_mass = p2.get_component_opt<rigidbody>().member(&rigidbody::mass);
+		stn::Option<float> p1_mass = p1.get_component_opt<physics::rigidbody>().member(&physics::rigidbody::mass);
+		stn::Option<float> p2_mass = p2.get_component_opt<physics::rigidbody>().member(&physics::rigidbody::mass);
 		double total_mass = p1_mass.unwrap_or(0) + p2_mass.unwrap_or(0);
-		
+		if (force.mag2()>1) {
+			int l = 3;
+		}
 		if (p1_mass) {
 			v3::Vec3 p1_force = force * p2_mass.unwrap_or(total_mass)/ total_mass;
-
-			p1.get_component<ecs::transform_comp>().transform.position += p1_force;
+			p1.get_component<ecs::world_transform>().transform.position += p1_force;
 		}
 		if (p2_mass) {
 			v3::Vec3 p2_force = -force * p1_mass.unwrap_or(total_mass) / total_mass;
-			p2.get_component<ecs::transform_comp>().transform.position += p2_force;
+			p2.get_component<ecs::world_transform>().transform.position += p2_force;
 		}
 	}
 
@@ -89,11 +90,12 @@ namespace collision {
 		}
 	};
 	struct StaticCollsionSystem :ecs::System {
+		
 		void run(ecs::Ecs& world) {
 			for (int iters = 0; iters < iterations; iters++) {
 				ecs::View<ecs::With<DynamicCollider>, ecs::With<Collider>> colliders(world);
 				for (auto&& [dynamic_tag, collider] : colliders) {
-					geo::Box entity_box = collider.global_box();
+					math::Box entity_box = collider.global_box();
 					array<ecs::obj> blocks = collider.world().get_resource<grid::Grid>().voxel_in_range(entity_box);
 					stn::Option<Vec3> max_force;
 					stn::Option<block&> max_block;
@@ -132,7 +134,7 @@ namespace collision {
 
 	
 	//casting
-	inline bool boxcast_dynamic(geo::Box blk, HitQuery query) {
+	inline bool boxcast_dynamic(math::Box blk, HitQuery query) {
 		ecs::View<ecs::With<Collider>,ecs::With< DynamicCollider>> colliders(query.world);
 		for (auto [collider, dynamic_tag] : colliders) {
 			if (query.matches(collider)) {
@@ -145,7 +147,7 @@ namespace collision {
 		}
 		return false;
 	}
-	inline bool boxcast(geo::Box box, HitQuery query) {
+	inline bool boxcast(math::Box box, HitQuery query) {
 		return voxtra::boxcast_grid(box,query.world.get_resource<grid::Grid>()) || boxcast_dynamic(box, query);
 	}
 

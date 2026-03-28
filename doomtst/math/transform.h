@@ -7,6 +7,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include "ray.h"
 #include <glm/gtx/euler_angles.hpp>
+#include "geometry.h"
 namespace math {
 	inline glm::mat4 lookRotationMatrix(v3::Vec3 vec) {
 		v3::Vec3 forward = vec;
@@ -26,17 +27,19 @@ namespace math {
 	struct Transform {
 		Transform() :yaw(90), pitch(0), scale(v3::unit_scale) {
 		}
-		Transform(v3::Point3 pos, double newyaw, double newpitch, v3::Scale3 newscale) {
+		Transform(v3::Point3 pos, double newyaw, double newpitch, v3::Scale3 scl) {
 			position = pos;
 			yaw = newyaw;
 			pitch = newpitch;
-			scale = newscale;
+			scale = scl;
 		}
 		v3::Point3 position;
 		double yaw;
 		double pitch;
 		v3::Scale3 scale;
-
+		math::Box unrotated_box() const{
+			return math::Box(position, scale);
+		}
 		void rotate(double ptch, double yw) {
 			pitch += ptch;
 			yaw += yw;
@@ -53,15 +56,15 @@ namespace math {
 		v3::Vec3 up_dir() const{
 			return v3::Cross(right_dir(), normal_dir());
 		}
-		void look_towards(v3::Vec3 Direction) {
-			Direction = v3::zero_fixed_normal(Direction);
-			pitch = glm::degrees(std::asin(Direction.y));
-			yaw = glm::degrees(std::atan2(Direction.z, Direction.x));
+		void look_towards(v3::Vec3 direction) {
+			direction = v3::zero_fixed_normal(direction);
+			pitch = glm::degrees(std::asin(direction.y));
+			yaw = glm::degrees(std::atan2(direction.z, direction.x));
 		}
 		void look_at(v3::Point3 LookTowards) {
 			look_towards(LookTowards - position);
 		}
-		glm::mat4 ToMatrix() {
+		glm::mat4 as_matrix() {
 			glm::mat4 rotation = lookRotationMatrix(normal_dir());
 			glm::mat4 scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(scale.x, scale.y, scale.z));
 			glm::mat4 translation = glm::translate(glm::mat4(1.0f), position.glm());
@@ -92,8 +95,8 @@ namespace math {
 	}
 
 	inline Transform Compose(Transform& t1, Transform& t2) {
-		glm::mat4 mat1 = t1.ToMatrix();
-		glm::mat4 mat2 = t2.ToMatrix();
+		glm::mat4 mat1 = t1.as_matrix();
+		glm::mat4 mat2 = t2.as_matrix();
 		glm::mat4 composed = mat2 * mat1;
 		return Decompose(composed);
 	}

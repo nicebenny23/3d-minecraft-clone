@@ -5,30 +5,41 @@
 #include "Core.h"
 #pragma once
 namespace timename {
+	using time_delay = double;
 	struct time {
 		double value;
 
-		explicit time(double val) : value(val) {}
-		time() 
-			{
-				value = 0;
-			}
+		explicit time(double val) : value(val) {
+		}
+		time() {
+			value = 0;
+		}
 		double dist(const time& oth) const {
 			return std::fabs(oth.value - value);
 		}
 
-		bool operator<(const time& oth) const { return value < oth.value; }
-		bool operator==(const time& oth) const { return value == oth.value; }
+		bool operator<(const time& oth) const {
+			return value < oth.value;
+		}
+		bool operator==(const time& oth) const {
+			return value == oth.value;
+		}
 
-		time operator+(double offset) const { return time(value + offset); }
-		time operator-(double offset) const { return time(value - offset); }
+		time operator+(double offset) const {
+			return time(value + offset);
+		}
+		time operator-(double offset) const {
+			return time(value - offset);
+		}
 
-		double operator-(time offset) const { return (value - offset.value); }
+		time_delay operator-(time offset) const {
+			return value - offset.value;
+		}
 
 	};
+
 	struct Duration;
-	struct TimeManager:ecs::resource
-	{
+	struct TimeManager :ecs::resource {
 		double real_dt;
 
 		double dt;
@@ -40,40 +51,39 @@ namespace timename {
 			dt = 0;
 			elapsed_time = glfwGetTime();
 			real_dt = 1 / 60.f;
-			smooth_fps=0;
+			smooth_fps = 0;
 			fps_counter = 0;
 		}
-			
-		
-		
+
+
+
 		void calculate_fps() {
 
-			double CurrentTime= glfwGetTime();
-			 real_dt = CurrentTime - elapsed_time;
+			double CurrentTime = glfwGetTime();
+			real_dt = CurrentTime - elapsed_time;
 			elapsed_time = CurrentTime;
-			
+
 
 			double fps = 1.f / real_dt;
 			double inter_rate = 1;
-			dt = clamp(real_dt,0.f, 1.0f / min_frames);
-			
-			
+			dt = math::clamp(real_dt, 0.L, 1.0L / min_frames);
+
+
 			double fps_change_rate = .2;
 			fps_counter += real_dt;
-			if (fps_change_rate <fps_counter)
-			{
+			if (fps_change_rate < fps_counter) {
 				fps_counter = 0;
-				double fps_inter_rate =1;
+				double fps_inter_rate = 1;
 				smooth_fps = stn::lerp(smooth_fps, fps, fps_inter_rate);
 
 			}
 		}
 		Duration current_time();
 
-		time now() {
+		time now() const{
 			return time(elapsed_time);
 		}
-		
+
 	private:
 		double fps_counter;
 		const int min_frames = 20;
@@ -92,77 +102,53 @@ namespace timename {
 		}
 	};
 	enum class DurationState {
-		active=0,
-		ending=1,
-		inactive=2
+		active = 0,
+		ending = 1,
+		inactive = 2
 	};
 	struct Duration {
-		Duration() :tm(nullptr), active(false) {
 
-		}
-		Duration(double waiting_time, TimeManager* tman):tm(tman),active(true) {
+		Duration(double waiting_time, TimeManager& tman) :tm(tman){
 			set(waiting_time);
 		}
-		Duration(TimeManager* tman) :tm(tman), active(false) {
-			
+		Duration(TimeManager& tman) :tm(tman){
+
 		}
-		double remaining() {
-			if (!active)
-			{
-				throw std::logic_error("cannot compute the remaining time of a Duration");
+		stn::Option<time_delay> remaining() {
+			if (end) {
+				return stn::max(0, end.unwrap() - tm->now());
 			}
-			if (!tm)
-			{
-				throw std::logic_error("cant use unitilized Duration");
-			}
-			return stn::max(0, end-tm->now());
+			return stn::None;
 		}
 		void disable() {
-			active = false;
+			end= stn::None;
 		}
-		void set(double dur) {
-			if (dur<=0)
-			{
-				throw std::logic_error("Duration must wait for a positive number of time");
+		void set(time_delay dur) {
+			if (dur <= 0) {
+				disable();
 			}
-
-			if (!tm)
-			{
-				throw std::logic_error("cant use unitilized Duration");
+			else {
+				end = tm->now() + dur;
 			}
-			end = tm->now() + dur;
-			active = true;
-			
 		}
-		bool is_active() const{
+		bool is_active() const {
 
-			if (!tm)
-			{
-				throw std::logic_error("cant use unitilized Duration");
+			return end.is_some();
+		}
+		DurationState state() const{
+
+			if (!end) {
+				return DurationState::inactive;
 			}
-			return active;
-		}
-		DurationState state() {
+			if (tm->now() < end.unwrap()) {
+				return DurationState::active;
+			}
+			end = stn::None;
+			return DurationState::ending;
 
-		if (!tm)
-		{
-			throw std::logic_error("cant use unitilized Duration");
 		}
-		if (!active)
-		{
-		return DurationState::inactive;
-		}
-		if (tm->now()< end )
-		{
-		return DurationState::active;
-		}
-		active = false;
-		return DurationState::ending;
-
-	}
 	private:
-		time end;
-		TimeManager* tm;
-		bool active;
+		mutable stn::Option<time> end;
+		stn::non_null<TimeManager> tm;
 	};
 }

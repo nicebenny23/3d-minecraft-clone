@@ -8,11 +8,8 @@ namespace grid {
 
 	template<grid::WorldAccessor Accessor>
 	inline void compute_mesh_cover(block_mesh& mesh, Accessor& grid) {
-		if (mesh.invisible()) {
-			return;
-			//we can skip all covering in this case
-		}
-		if (mesh.scale() != blockscale) {
+		
+		if (mesh.bounds().scale != blockscale) {
 			for (math::Direction3d dir : math::Directions3d) {
 				mesh[dir].face().cover = cover_state::Uncovered;
 			}

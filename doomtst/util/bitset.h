@@ -120,7 +120,7 @@ namespace stn {
 		void expand(size_t new_bit_count) {
 			if (bits < new_bit_count) {
 				bits = new_bit_count;
-				bit_list.expand(bits_to_words(new_bit_count));
+				bit_list.geometric_expand(bits_to_words(new_bit_count));
 			}
 		}
 		void set_unchecked(size_t bit, bool value) {
@@ -147,7 +147,6 @@ namespace stn {
 			}
 		}
 		void reaching_set(size_t bit, bool value) {
-
 			expand(bit + 1);
 			size_t idx = calc_full_words(bit);
 			size_t off = calc_leftover_bits(bit);
@@ -158,7 +157,6 @@ namespace stn {
 				bit_list.unchecked_at(idx) &= ~(bit_at(off));
 			}
 		}
-
 		void enable(size_t bit) {
 			set(bit, true);
 		}
@@ -168,6 +166,7 @@ namespace stn {
 		void reaching_enable(size_t bit) {
 			reaching_set(bit, true);
 		}
+		
 		void reaching_disable(size_t bit) {
 			reaching_set(bit, false);
 		}

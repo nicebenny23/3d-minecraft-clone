@@ -25,8 +25,6 @@ struct playermovement : ecs::component
 
 struct PlayerMovementSys : ecs::System
 {
-    using Dependencies = TypeList::TypeList<RigidbodySystem>;
-
     const float coyoteDuration = 0.15f;
     const float bufferDuration = 0.10f;
     const float jumpStrength = 150.0f * 12.0f / 200.0f;
@@ -38,16 +36,11 @@ struct PlayerMovementSys : ecs::System
 			return;
 		}
 
-        auto view = ecs::View<ecs::With<rigidbody>, ecs::With<playermovement>, ecs::With<playerclimb>>(ecs);
+        auto view = ecs::View<ecs::With<physics::rigidbody>, ecs::With<playermovement>, ecs::With<playerclimb>>(ecs);
 
         for (auto [body, movement, climb] : view)
         {
 			userinput::InputManager& man=ecs.get_resource<userinput::InputManager>();
-
-            if (isnan(body.owner().get_component<rigidbody>().velocity.x))
-            {
-                int l = 2;
-            }
             float dt = ecs.ensure_resource<timename::TimeManager>().dt;
             timename::time now = ecs.ensure_resource<timename::TimeManager>().now();
             // — horizontal movement unchanged —
@@ -128,10 +121,10 @@ struct PlayerMovementSys : ecs::System
                     body.velocity.y -= effSpeed;
                 }
 				if (man.key('z').held) {
-					body.owner().get_component<ecs::transform_comp>().transform.position.y = 4;
+					body.owner().get_component<ecs::world_transform>().transform.position.y = 4;
 				}
 					if (man.key('f').held) {
-					body.owner().get_component<ecs::transform_comp>().transform.position += Vec3(4, 0, 0);
+					body.owner().get_component<ecs::world_transform>().transform.position += Vec3(4, 0, 0);
 				
 				}
 					

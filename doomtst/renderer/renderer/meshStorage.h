@@ -64,6 +64,7 @@ namespace renderer {
 		vertice::vertex layout;
 		stn::array<float> points;
 		stn::array<std::uint32_t> indices;
+		
 	private:
 		inline void push_single(const v3::Point3& v) {
 			points.push({ float(v.x),float(v.y),float(v.z) });
@@ -90,6 +91,7 @@ namespace renderer {
 			for (size_t i = 0; i < meshes.length();i++) {
 				mesh_id& id = meshes[i];
 				if (id.use_count()==1) {
+					ctx->destroy(*id);
 					meshes.swap_drop(i);
 				}
 			}

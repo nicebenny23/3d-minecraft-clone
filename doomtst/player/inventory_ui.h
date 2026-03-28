@@ -68,7 +68,7 @@ namespace player {
 		void apply(ecs::obj& ent) const{
 			ui::MenuRecipe().apply(ent);
 			inventory_slots_pannel_recipe().apply(ent);
-			ecs::obj bg = ent.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\menutex.png", "menu_texture"), geo::Box2d(v2::Vec2(.24f, .15f), v2::Vec2(.33f, .25f)), 0);
+			ecs::obj bg = ent.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\menutex.png", "menu_texture"), math::Box2d(v2::Vec2(.24f, .15f), v2::Vec2(.33f, .25f)), 0);
 			
 			ent.spawn_child<items::ContainerDisplayRecipe>(v2::Coord2(4, 3), input);
 ecs::Constrained<items::crafter> crafter = ent

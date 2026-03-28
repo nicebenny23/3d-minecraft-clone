@@ -28,7 +28,7 @@ namespace math {
 			return *this;
 		}
 		bool operator==(const Angle& other) const{
-			return apx(other.rad, rad);
+			return math::approximate_equals(other.rad, rad);
 		}
 		bool operator!=(const Angle& other) const {
 			return !(*this==other);

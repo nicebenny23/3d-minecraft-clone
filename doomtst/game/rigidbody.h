@@ -11,171 +11,132 @@
 #include "ecs/query.h"
 using namespace v3;
 #pragma once 
+namespace physics {
+	struct Implulse {
+		Vec3 impulse;
+	};
+	struct Force {
+		Vec3 force;
+	};
+	struct Gravity :ecs::component {
+		Gravity() :strength{ .force{0,-9.8f,0} } {
 
-struct rigid_force {
-    Vec3 force;
-    std::string tag;
-    stn::Option<timename::time> end_time;
-    bool has_ended(timename::TimeManager& manager) {
-        if (!end_time)
-        {
-            return true;
-        }
+		}
 
-        return manager.now()<end_time.unwrap();
-        
-    }
-    
-    rigid_force(Vec3 frc, float Duration,timename::TimeManager& manager, std::string_view tg) :force(frc), end_time(manager.now() + Duration), tag(tg) {
-    }
-    rigid_force(Vec3 frc, std::string_view tg) :force(frc), end_time(stn::None), tag(tg) {
+		Force strength;
+	};
+	struct FrictionDamping :ecs::component {
+		double strength = 4.f;
+	};
 
-    }
-    rigid_force():end_time(stn::None),force(zerov) {
+	struct rigidbody : ecs::component {
+		Vec3 velocity;
+		Vec3 acceleration;
+		float mass = 1.0f;
+		bool isonground;
+		bool isonceil;
+		bool inliquid;
+		void add_force(const Force& force) {
+			acceleration += force.force / mass;
+		}
+		void add_impluse(const Implulse& impulse) {
+			velocity += impulse.impulse / mass;
+		}
+		void calculateonground() {
 
+			inliquid = false;
+			Point3 boxcenter = owner().get_component<aabb::Collider>().global_box().in_direction(math::down_3d);
+			math::Box checkbox = math::Box(boxcenter, owner().get_component<aabb::Collider>().global_box().scale.with_y(.005) * .96f);
+			isonground = voxtra::boxcast_grid(checkbox, world().get_resource<grid::Grid>());
+		}
+		bool calculateonceil() {
 
-    }
-};
-struct rigidbody : ecs::component{
-    Vec3 velocity;
-    Vec3 oldvelocity;
-    Vec3 acceleration;
-    float mass = 1.0f;
-    array<rigid_force> forces;
-    aabb::Collider* boundingbox;
-    bool isonground;
-    bool isonceil;
-    bool inliquid;
-    float  gravityscale;
-    float friction;
+			Point3 boxcenter = owner().get_component<aabb::Collider>().global_box().in_direction(math::up_3d);
+			math::Box checkbox = math::Box(boxcenter, owner().get_component<aabb::Collider>().global_box().scale.with_y(.005) * .96f);
+			isonceil = voxtra::boxcast_grid(checkbox, world().get_resource<grid::Grid>());
+			return isonceil;
+		}
+		// Constructor
+		rigidbody() : velocity(zerov), acceleration(zerov) {
 
-    void calculateonground() {
+		}
+		~rigidbody() = default;
+	};
+	struct RigidbodySystem :ecs::System {
 
-        inliquid = false;
-        Point3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position - Vec3(0, boundingbox->global_box().scale.y + .01, 0);
-        geo::Box checkbox = geo::Box(boxcenter, Scale3(boundingbox->global_box().scale.x, .005, boundingbox->global_box().scale.z*.9f) * .92);
-        isonground = voxtra::boxcast_grid(checkbox, world().get_resource<grid::Grid>());
-    }
-    void calculateonceil() {
-		Point3 boxcenter = owner().get_component<ecs::transform_comp>().transform.position + Vec3(0, boundingbox->global_box().scale.y + .01, 0);
-        geo::Box checkbox = geo::Box(boxcenter, Scale3(boundingbox->global_box().scale.x, .005, boundingbox->global_box().scale.z) * .9);
-        isonceil = voxtra::boxcast_grid(checkbox,world().get_resource<grid::Grid>());
-    }
-    // Constructor
-    rigidbody() : velocity(zerov), oldvelocity(zerov), acceleration(zerov), boundingbox(nullptr) {
-        friction = 1;
-        gravityscale =1;
-    } 
-	rigidbody(float fric,float gravenabled=1  ) : velocity(zerov), oldvelocity(zerov), acceleration(zerov), boundingbox(nullptr) {
-        gravityscale = 1;
-        friction = fric;
+		void run(ecs::Ecs& ecs) override {
+			double deltaTime = ecs.ensure_resource<timename::TimeManager>().dt;
 
-    }
-    ~rigidbody() = default;
-    // Start function to initialize the rigidbody component
-    void start() {
-        forces.push(rigid_force(v3::Vec3(0,-10,0), "gravity"));
-        acceleration = zerov;
-        oldvelocity = zerov;
-        boundingbox = &owner().get_component<aabb::Collider>();  
-    }
+			ecs::View<ecs::With< Gravity>, ecs::With<rigidbody>> fallers(ecs);
+			for (auto [grav, body] : fallers) {
+				body.add_force(grav.strength);
+			}
+			ecs::View<ecs::With< FrictionDamping>, ecs::With<rigidbody>> friction_query(ecs);
+			for (auto [friction, body] : friction_query) {
+				body.add_force(Force{ .force = -body.velocity * friction.strength * v3::Scale3(1.0f,.2f,1.0f) });
+			}
 
+			ecs::View<ecs::With< ecs::world_transform>, ecs::With<rigidbody>, ecs::With<aabb::Collider>, ecs::Owner> rigids(ecs);
+			for (auto [pos, body, collider, object] : rigids) {
 
-    void add_force(const rigid_force& frc) {
-        forces.push(frc);
-    }
-    stn::Option<rigid_force&> get_force(const std::string& name) {
-        for (rigid_force& frc : forces)
-        {
-            if (frc.tag == name)
-            {
-                return stn::Option<rigid_force&>(frc);
-            }
-        }
-        return stn::None;
-    }
+				body.calculateonground();
 
-    void apply_forces() {
-		timename::TimeManager& time = world().get_resource<timename::TimeManager>();
-       forces = forces.filter([&time](rigid_force val) {return val.has_ended(time); }).into<stn::array>();
-        for (rigid_force& frc : forces)
-        {
-             acceleration += frc.force / mass;
-        }
+				if (body.calculateonceil()) {
 
-    }
-    // Integrate the acceleration to update velocity and position
-    //should definitly clamp
-    void integrate() {
-      
-        double deltaTime = world().ensure_resource<timename::TimeManager>().dt;
-        velocity += acceleration * deltaTime;
-       
-        if (isonground||isonceil)
-        {
-            double zero_set_speed = 7;
-            velocity.y *= clamp(1 - deltaTime * zero_set_speed, 0.0, 1.0);
-        }
-        if (gravityscale!=0)
-        {
-
-            velocity.y *= clamp(1 - deltaTime*.1f,0.0,1.0);
-
-        }velocity.x *= clamp(1 - deltaTime*friction, 0.0, 1.0);  // Adjust damping factor to prevent excessive damping
-
-        velocity.z *= clamp(1 - deltaTime * friction, 0.0, 1.0);  // Adjust damping factor to prevent excessive damping
-        size_t mini_steps = 5;
-        for (int j = 0; j < mini_steps; j++)
-        {
+				}
+				double deltaTime = ecs.ensure_resource<timename::TimeManager>().dt;
 
 
-            for (int i = 0; i < 3; i++)
-            {
-                v3::Point3 curr_pos = owner().get_component<ecs::transform_comp>().transform.position;
-                v3::Point3 new_pos = curr_pos + v3::Vec3(velocity[i]/mini_steps, i) * deltaTime;
-                int sgn = sign(velocity[i]);
-                double scale_in_dir = owner().get_component<aabb::Collider>().global_box().scale[i];
-                v3::Vec3 max_dir_rel = Vec3(sgn * scale_in_dir, i);
-				math::ray dir_ray(owner().get_component<ecs::transform_comp>().transform.position + max_dir_rel, max_dir_rel + new_pos);
-                  voxtra::WorldRayCollision coll = collision::raycast(dir_ray, collision::HitQuery(owner()));
-                if (!coll)
-                {
-                    //we can move completly
-                    owner().get_component<ecs::transform_comp>().transform.position[i] = new_pos[i];
-                }
-                else
-                {
-                   v3::Point3 new_posdiff= coll.unwrap().Hit.intersectionpoint - max_dir_rel-v3::Vec3(1e-4* sgn, i);
-                   Coord pos = coll.unwrap().owner().get_component<block>().pos;
-                   owner().get_component<ecs::transform_comp>().transform.position = new_posdiff;
+				size_t mini_steps = 5;
+				for (int j = 0; j < mini_steps; j++) {
 
-                }
-            }
-        }
-       // owner().get_component<ecs::transform_comp>().transform.position += velocity * deltaTime;
-        acceleration = Vec3(0, 0, 0);  
-    }
 
-};
-struct RigidbodySystem :ecs::System {
+					for (int i = 0; i < 3; i++) {
+						v3::Point3 curr_pos = pos.transform.position;
+						v3::Point3 new_pos = curr_pos + v3::Vec3(body.velocity[i] / mini_steps, i) * deltaTime;
+						int sgn = sign(body.velocity[i]);
+						double scale_in_dir = collider.global_box().half_size()[i];
+						v3::Vec3 max_dir_rel = Vec3(sgn * scale_in_dir, i);
+						math::ray dir_ray(curr_pos + max_dir_rel, max_dir_rel + new_pos);
+						if (dir_ray.length() == 0) {
+							continue;
+						}
+						voxtra::WorldRayCollision coll = collision::raycast(dir_ray, collision::HitQuery(object));
+						if (!coll) {
+							pos.transform.position[i] = new_pos[i];
+						}
+						else {
 
-    void run(ecs::Ecs& ecs) override {
-        ecs::View<ecs::With< ecs::transform_comp>, ecs::With<rigidbody>> rigids(ecs);
-        for (auto [pos,body] : rigids) {
-            body.oldvelocity = body.velocity;
-            body.calculateonground();
-            body.calculateonceil();
-            body.apply_forces();
-            body.integrate();
-         //   pos->transform.position = Coord(0, 0, 0); 
-        }
+							v3::Point3 new_posdiff = coll.unwrap().intersection() - max_dir_rel + v3::Vec3(1e-4 * (-sgn), i);
+							v3::Vec3 fall_difrence = coll.unwrap().ray().diff();
+							if (fall_difrence.mag2() > 1) {
+								int l = 4;
+							}
+							body.add_force(Force{ .force = -fall_difrence * .4f });
+							pos.transform.position = new_posdiff;
 
-    }
+						}
+					}
+				}
+				body.velocity += body.acceleration * deltaTime;
+				body.acceleration = Vec3(0, 0, 0);
+			}
 
-};
+		}
+
+	};
+	inline void PhysicsPlugin(Core::App& world) {
+		world.emplace_system< RigidbodySystem>();
+	}
+	inline void Spawner(ecs::obj& object) {
+		object.add_component<rigidbody>();
+		object.add_component<FrictionDamping>();
+		object.add_component<Gravity>();
+	}
+}
 namespace ecs {
 	template<>
-	inline constexpr ComponentInfo ComponentTraits<rigidbody> = {
-		.priority=-111
+	inline constexpr ComponentInfo ComponentTraits<physics::rigidbody> = {
+		.priority = -111
 	};
 }

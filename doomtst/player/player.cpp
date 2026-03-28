@@ -22,15 +22,15 @@ void player::initplayer(ecs::obj& player) {
 	player.add_component<player_tag>();
 	player.world().insert_resource<player_resource>(player);
 
-	player.add_component<ecs::transform_comp>(v3::Point3(0,2,0));
-	player.add_component<estate>(10, true);
-	player.get_component<ecs::transform_comp>().transform.scale = unit_scale/ 2;
+	player.add_component<ecs::world_transform>(v3::Point3(0,2,0));
+	player.apply_recipe(Health::HealthSpawner(10));
+	player.get_component<ecs::world_transform>().transform.scale = unit_scale;
 	Core::game.insert_plugin<PlayerModificationPlugin>();
 	Core::game.insert_plugin<PlayerPlacePlugin>();
 	Core::game.insert_plugin<player::CrosshairPlugin>();
 	Core::game.insert_plugin<PlayerInventoryPlugin>();
-	aabb::DynamicColliderRecipe(geo::Box(v3::Point3(0, 0, 0), unit_scale / 2.3f)).apply(player);
-	player.add_component<rigidbody>(playerfric);
+	aabb::DynamicColliderRecipe().apply(player);
+	player.apply_recipe(physics::Spawner);
 
 	player.add_component<playereat>();
 	player.add_component<playerhealth>();

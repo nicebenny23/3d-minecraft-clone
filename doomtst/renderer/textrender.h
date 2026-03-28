@@ -10,7 +10,7 @@
 
 namespace ui {
 	
-	inline void write_letter(renderer::MeshData& mesh_data, geo::Box2d location, int letter) {
+	inline void write_letter(renderer::MeshData& mesh_data, math::Box2d location, int letter) {
 
 		const std::uint32_t baselocation = static_cast<size_t>(mesh_data.vertex_count());
 		for (int j = 0; j < 4; j++) {
@@ -54,11 +54,11 @@ namespace ui {
 					ui_text.set_handle();
 					ui_text.handle.enable();
 					double char_offset = 1.5f;
-					geo::Box2d bounds = style.final_size;
+					math::Box2d bounds = style.final_size;
 					v2::Vec2 min = bounds.center - v2::Vec2(char_offset * ui_text.word.length(), 1.f) * bounds.half_size();
 					v2::Vec2 boxoffset = v2::Vec2(char_offset, 1) * bounds.half_size();
 					v2::Vec2 increse = v2::Vec2(char_offset, 0) * bounds.scale;
-					geo::Box2d charlocation = geo::Box2d(min + boxoffset, bounds.scale);
+					math::Box2d charlocation = math::Box2d(min + boxoffset, bounds.scale);
 					renderer::MeshData mesh_data = ui_text.handle.create_mesh(vertice::vertex().push<float, 2>().push<float, 3>());
 					for (int i = 0; i < ui_text.word.length(); i++) {
 						write_letter(mesh_data, charlocation, int(ui_text.word[i] - '0'));
@@ -80,7 +80,7 @@ namespace ui {
 	struct ui_text_spawner {
 		UiSpawner ui_spawn;
 		colors::Color color;
-		ui_text_spawner(geo::Box2d box, size_t priority,colors::Color initial_color) :ui_spawn(geo::Box2d(box.center, box.scale), priority),color(initial_color){
+		ui_text_spawner(math::Box2d box, size_t priority,colors::Color initial_color) :ui_spawn(math::Box2d(box.center, box.scale), priority),color(initial_color){
 			
 		}
 		void apply(ecs::obj& object) const{

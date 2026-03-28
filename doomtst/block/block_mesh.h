@@ -63,7 +63,7 @@ namespace blocks {
 	
 	struct block_mesh {
 	private:
-		geo::Box box;
+		math::Box box;
 
 	public:
 		//the vertex at the lowest corner of the world
@@ -71,14 +71,11 @@ namespace blocks {
 		math::Direction3d attached_direction;
 		math::Direction2d direction;
 
-		geo::Box bounds() const {
+		math::Box bounds() const {
 			return box;
 		}
 		v3::Point3 center() const {
-			return bounds().center;
-		}
-		v3::Scale3 scale() const {
-			return bounds().scale;
+			return box.center;
 		}
 		bool is_transparent() const {
 			return transparent;
@@ -95,7 +92,7 @@ namespace blocks {
 			return face(textures.faces[index], math::Direction3d(math::DirectionIndex3d(index)));
 				}), attached_direction(attachment_direction)
 					, direction(facing_direction), air_like(textures.invisible) {
-			box.center -= attached_direction.vec() * box.scale.shrunk(.5f);
+			box.center -= attached_direction.vec() * box.scale.shrunk(1)/2;
 		}
 		MeshFace operator[](math::Direction3d index) {
 			return MeshFace(*this, index);

@@ -244,7 +244,6 @@
     <ClCompile Include="game\Core.cpp" />
     <ClCompile Include="game\ecs\component.cpp" />
     <ClCompile Include="game\ecs\ecs.cpp" />
-    <ClCompile Include="game\navigation.cpp" />
     <ClCompile Include="game\particles.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
@@ -260,10 +259,8 @@
     <ClCompile Include="renderer\guirender.cpp" />
     <ClCompile Include="renderer\renderer\renderable.cpp" />
     <ClCompile Include="Source.cpp" />
-    <ClCompile Include="renderer\ModelMesh.cpp" />
     <ClCompile Include="player\player.cpp" />
     <ClCompile Include="player\playerinventory.cpp" />
-    <ClCompile Include="renderer\model.cpp" />
     <ClCompile Include="renderer\ui.cpp" />
     <ClCompile Include="block\block.cpp" />
     <ClCompile Include="math\intersection.cpp" />
@@ -304,6 +301,7 @@
     <ClInclude Include="entities\rotatetovelocity.h" />
     <ClInclude Include="entities\slime.h" />
     <ClInclude Include="entities\wisp.h" />
+    <ClInclude Include="game\brain.h" />
     <ClInclude Include="game\casts.h" />
     <ClInclude Include="game\ecs\archetypes.h" />
     <ClInclude Include="game\ecs\archtype.h" />
@@ -326,6 +324,7 @@
     <ClInclude Include="game\ecs\resources.h" />
     <ClInclude Include="game\ecs\spawner.h" />
     <ClInclude Include="game\ecs\system.h" />
+    <ClInclude Include="game\ecs\system_builder.h" />
     <ClInclude Include="game\ecs\traversal.h" />
     <ClInclude Include="game\ecs\unique_object.h" />
     <ClInclude Include="game\ecs\weak_object.h" />
@@ -434,7 +433,6 @@
     <ClInclude Include="renderer\guirender.h" />
     <ClInclude Include="renderer\renderer\meshStorage.h" />
     <ClInclude Include="renderer\ModelMesh.h" />
-    <ClInclude Include="renderer\model.h" />
     <ClInclude Include="game\particles.h" />
     <ClInclude Include="game\entitystate.h" />
     <ClInclude Include="player\player.h" />

@@ -31,7 +31,7 @@ namespace Chunk {
 		Point3 center() const {
 			return location.center();
 		}
-		geo::Box bounds() const {
+		math::Box bounds() const {
 			return location.bounds();
 		}
 		block_object& operator[](size_t index) {

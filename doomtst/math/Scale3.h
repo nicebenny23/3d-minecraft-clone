@@ -16,12 +16,20 @@ namespace v3 {
 			x = p1.x; y = p1.y; z = p1.z;
 		}
 		bool operator==(const Scale3& p1) {
-			return apx(x, p1.x) && apx(y, p1.y) && apx(z, p1.z);
+			return math::approximate_equals(x, p1.x) && math::approximate_equals(y, p1.y) && math::approximate_equals(z, p1.z);
 		}
 		bool operator!=(const Scale3& p1) {
-			return !apx(x, p1.x) || !apx(y, p1.y) || !apx(z, p1.z);
+			return !math::approximate_equals(x, p1.x) || !math::approximate_equals(y, p1.y) || !math::approximate_equals(z, p1.z);
 		}
-
+		Scale3 with_x(double new_x) const {
+			return Scale3(new_x, y, z);
+		}
+		Scale3 with_y(double new_y) const {
+			return Scale3(x, new_y, z);
+		}
+		Scale3 with_z(double new_z) const {
+			return Scale3(x, y, new_z);
+		}
 		Scale3 operator-() const {
 			return Scale3(-x, -y, -z);
 		}

@@ -29,6 +29,7 @@ struct MinecraftPlugin :Core::Plugin {
 
 		app.insert_plugin<Core::GamePlugin>();
 		app.createWindow();
+		app.insert_plugin< timename::TimePlugin>();
 		app.insert_plugin<renderer::RendererPlugin>();
 		app.insert_plugin<ui::MenuPlugin>();
 		app.insert_plugin<items::ItemUiPlugin>();
@@ -41,13 +42,15 @@ struct MinecraftPlugin :Core::Plugin {
 		ecs::spawn(app.Ecs, player::initplayer);
 		glfwSwapInterval(0);
 		app.insert_plugin<timename::TimePlugin>();
-		app.Ecs.emplace_system<RigidbodySystem>();
-		app.Ecs.emplace_system<spawn_mobs>();
+		app.insert_plugin(physics::PhysicsPlugin);
+		app.insert_plugin<MobSpawnerPlugin>();
+		app.insert_plugin(Health::entity_health_plugin);
 		app.Ecs.emplace_system<PlayerMovementSys>();
 		app.insert_plugin<blockrender::BlockRenderPlugin>();
 		app.insert_plugin<player::PlayerInventoryPlugin>();
 		app.insert_plugin<decals::decal_plugin>();
 		app.insert_plugin<guirender::ConsolePlugin>();
+		app.insert_plugin<renderer::ModelPlugin>();
 
 	}
 

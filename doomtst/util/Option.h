@@ -242,6 +242,10 @@ namespace stn {
 		T unwrap_or(U&& default_val) const requires std::constructible_from<T, U&&> {
 			return has_value ? unwrap_unchecked() : default_val;
 		}
+
+		T unwrap_or_default() const requires std::constructible_from<T> {
+			return has_value ? T(unwrap_unchecked()) : T();
+		}
 		template<typename DefaultFunc>
 		auto unwrap_or_else(this auto&& self, DefaultFunc&& default_func) -> stn::forward_as_member_t<decltype(self), T>
 			requires std::invocable<DefaultFunc>&& std::same_as<std::invoke_result_t<DefaultFunc>, T> {

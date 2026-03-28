@@ -29,12 +29,6 @@ struct liquidprop : ecs::component {
 		//utype = ecs::updatetick;
 
 	}
-	void oncollision(ecs::obj* collidedwith) {
-		if (collidedwith->has_component<rigidbody>()) {
-			collidedwith->get_component<rigidbody>().inliquid = true;
-			collidedwith->get_component<rigidbody>().velocity *= 1 -world().ensure_resource<timename::TimeManager>().dt * 5;
-		}
-	}
 	void updateinface(math::Direction3d face) {
 
 		if (liqval <= 1) {

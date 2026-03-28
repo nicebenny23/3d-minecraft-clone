@@ -29,8 +29,8 @@ namespace Chunk {
 		Point3 center() const {
 			return (position + unitv / 2.f) * chunk_length;
 		}
-		geo::Box bounds() const {
-			return geo::Box(center(), v3::Scale3(chunk_length) / 2);
+		math::Box bounds() const {
+			return math::Box(center(), v3::Scale3(chunk_length) / 2);
 		}
 		bool contains_block(v3::Coord block_position) const {
 			return from_block_pos(block_position).position==position;
@@ -64,7 +64,7 @@ namespace Chunk {
 		Point3 center() const {
 			return loc.center();
 		}
-		geo::Box bounds() const {
+		math::Box bounds() const {
 			return loc.bounds();
 		}
 		void sort_faces() {

@@ -171,5 +171,16 @@ namespace handle {
 			}
 		
 	};
+	struct handle {
+
+	};
+
+	template<typename T>
+	struct assets {
+	
+		handle load() {
+
+		}
+	};
 
 }

@@ -209,7 +209,14 @@ namespace stn {
 				throw std::runtime_error("can't write to a file that was not initialized in writing mode");
 			}
 		}
-
+		bool at_end() {
+			int c = fgetc(fp);
+			if (c == EOF) {
+				return true;  
+			}
+			ungetc(c, fp); 
+			return false;
+		}
 
 		template <typename T>
 		stn::array<T> read(size_t count) {

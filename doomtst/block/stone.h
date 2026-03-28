@@ -32,7 +32,7 @@ namespace blocks {
 		}
 		BlockTraits traits()const {
 			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale / 2, false, stonetex));
+				BlockMeshTraits(v3::unit_scale, false, stonetex));
 		}
 	};
 }

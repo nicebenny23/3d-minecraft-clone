@@ -18,7 +18,7 @@ namespace blocks {
 		}
 		BlockTraits traits() const {
 			return BlockTraits(
-				BlockMeshTraits(v3::Scale3(1/16.f, .375, 1/ 16.f), true, torchtex, torchtex, torchtoptex, torchtex, torchtex, torchtex)
+				BlockMeshTraits(v3::Scale3(1/8.f,.75f, 1/ 8.f), true, torchtex, torchtex, torchtoptex, torchtex, torchtex, torchtex)
 				, true, 14);
 		}
 	};

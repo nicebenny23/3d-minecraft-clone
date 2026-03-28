@@ -110,9 +110,9 @@ namespace statistics {
 		// Maps a double value to a bucket index
 		inline int get_bucket(double value) const {
 			double normalized = (value - minvalue) / (maxvalue - minvalue);
-			normalized = clamp(normalized, 0.0f, 1.0f);
+			normalized = math::clamp(normalized, 0.0L, 1.0L);
 			int index = int(normalized * (point_count -1));
-			return clamp(index, 0, (point_count-1));
+			return math::clamp(index, 0, (point_count-1));
 		}
 
 		// Float comparison function for qsort

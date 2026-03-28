@@ -205,8 +205,8 @@ namespace renderer {
 			window::Window& window = world.get_resource<window::Window>();
 			ren.set_uniform("aspect_ratio", window.AspectRatio());
 			ren.set_uniform("fov", float(cam.fov));
-			ren.set_uniform("view_matrix", LookAt(camera_object.get_component<ecs::transform_comp>().transform));
-			ren.set_uniform("camera_pos", v3::Vec3(camera_object.get_component<ecs::transform_comp>().transform.position.glm()));
+			ren.set_uniform("view_matrix", LookAt(camera_object.get_component<ecs::world_transform>().transform));
+			ren.set_uniform("camera_pos", v3::Vec3(camera_object.get_component<ecs::world_transform>().transform.position.glm()));
 
 			ren.set_uniform(
 				"proj_matrix", glm::perspective(float(glm::radians(cam.fov)), window.AspectRatio(), float(cam.viewport.min()), float(cam.viewport.max())

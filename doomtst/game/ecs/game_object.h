@@ -4,9 +4,9 @@
 #include "commands.h"
 #include "Parent.h"
 namespace ecs {
-	struct transform_comp : component {
+	struct world_transform : component {
 		math::Transform transform;
-		transform_comp(v3::Point3 pos) {
+		world_transform(v3::Point3 pos) {
 			transform.position = pos;
 		}
 	};

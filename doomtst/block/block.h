@@ -16,7 +16,7 @@
 constexpr double blocksize = 1.f;
 
 using namespace v3;
-constexpr float unitaxis = 1.0f / 2.00005f;
+constexpr float unitaxis = 1.0f /1.00005f;
 constexpr v3::Scale3 unitscale = unit_scale * unitaxis;
 namespace blocks {
 	const double block_axis_scale = unitaxis * blocksize;
@@ -49,10 +49,7 @@ namespace blocks {
 		Point3 center() const {
 			return bounds().center;
 		}
-		Scale3 scale() const {
-			return bounds().scale;
-		}
-		geo::Box bounds() const {
+		math::Box bounds() const {
 			return mesh.bounds();
 		}
 		template<BlockLike T>

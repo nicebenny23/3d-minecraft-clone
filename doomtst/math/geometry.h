@@ -4,75 +4,51 @@
 #include "mathutil.h"
 #include "vector2.h"
 #include "../util/Option.h"
+#include "dir.h"
 using namespace v3;
 
-namespace geo {
-	struct LocalBox {
-		Vec3 center;
-		Scale3 scale;
-
-
-		LocalBox(Vec3 cent, Scale3 scl) : center(cent), scale(scl) {
-		}
-		bool contains_orgin() const {
-			if (abs(-center.x) <= scale.x) {
-				if (abs(-center.y) <= scale.y) {
-					if (abs(-center.z) <= scale.z) {
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-
-	};
+namespace math {
 	struct Box {
 		Point3 center;
 		Scale3 scale;
 
 		Box(Point3 cent, Scale3 scl) : center(cent), scale(scl) {
+			int l = 3;
 		}
 
 		Point3 max() const {
-			return center + Vec3(scale);
+			return center + Vec3(half_size());
 		}
 		Point3 min() const {
-			return center - Vec3(scale);
+			return center - Vec3(half_size());
 		}
-
-		bool contains(Point3 pos) const {
+		
+		bool contains_point(Point3 pos) const {
 			Vec3 shifted = center - pos;
-			if (abs(shifted.x) <= scale.x) {
-				if (abs(shifted.y) <= scale.y) {
-					if (abs(shifted.z) <= scale.z) {
+			Scale3 bounds = half_size();
+			if (abs(shifted.x) <= bounds.x) {
+				if (abs(shifted.y) <= bounds.y) {
+					if (abs(shifted.z) <= bounds.z) {
 						return true;
 					}
 				}
 			}
 			return false;
 		}
-
+		v3::Point3 in_direction(math::Direction3d direction) {
+			return direction.vec()* half_size() + center;
+		}
 
 		bool contains_box(Box b) const {
-			Vec3 sub = b.center - center;
-			if (abs(sub.x) + b.scale.x < scale.x) {
-				if (abs(sub.y) + b.scale.y < scale.y) {
-					if (abs(sub.z) + b.scale.z < scale.z) {
-						return true;
-					}
-
-				}
-
-			}
-			return false;
+			return contains_point(b.max()) && contains_point(b.min());
 		}
 		Scale3 half_size() const {
 			return scale / 2;
 		}
 		// Minkowski difference operator
-		LocalBox operator-(const Box& other) const {
+		Box operator-(const Box& other) const {
 			//minkoski diffrence changes affinity
-			return LocalBox(center - other.center, scale.expanded(other.scale));
+			return Box(center .offset_local(other.center*-1), scale.expanded(other.scale));
 		}
 		Box translate(Vec3 translation_vector) const {
 			return Box(center + translation_vector, scale);
@@ -80,13 +56,10 @@ namespace geo {
 		Box scale_from_center(float dialation) const {
 			return Box(center, scale * dialation);
 		}
-		Box transform(LocalBox local_transform) const {
-			return Box(local_transform.center * scale + center, local_transform.scale * scale);
-		}
+		
 		Box transform(Box other_transform) const {
-			return Box(center.offset_local(other_transform.center * scale), other_transform.scale * scale * 2);
+			return Box(center.offset_local(other_transform.center * half_size()), other_transform.scale * scale);
 		}
-		bool rayintersects(math::ray fray);
 	};
 
 
@@ -174,7 +147,7 @@ namespace geo {
 		}
 
 		Sphere(Box bx)
-			: radius(Vec3(bx.scale).length()), center(bx.center) {
+			: radius(Vec3(bx.half_size()).length()), center(bx.center) {
 		}
 
 		//returns the closest point on the spheres surface to the point 
@@ -229,20 +202,21 @@ namespace geo {
 		}
 	};
 
-	inline bool boxes_intersect(geo::Box p1, geo::Box p2) {
-		return (p1 - p2).contains_orgin();
+	inline bool boxes_intersect(math::Box p1, math::Box p2) {
+		return (p1 - p2).contains_point(v3::Point3(0,0,0));
 
 	}
 	inline 	stn::Option<v3::Vec3> collide_box(Box p1, Box p2) {
-		if (!geo::boxes_intersect(p1, p2)) {
+		if (!math::boxes_intersect(p1, p2)) {
 			return stn::None;
 
 		}
 		Vec3 min_vector = zerov;
+
 		double min_depth = std::numeric_limits<double>().infinity();
 		for (int i = 0; i < 3; i++) {
 			int sgn = p1.center[i] > p2.center[i] ? 1 : -1;
-			double depth = sgn * (p1.scale[i] + p2.scale[i]) - (p1.center[i] - p2.center[i]);
+			double depth = sgn * (p1.half_size()[i] + p2.half_size()[i]) - (p1.center[i] - p2.center[i]);
 			if (abs(depth) <= min_depth) {
 				min_depth = abs(depth);
 				min_vector = Vec3(depth, i);

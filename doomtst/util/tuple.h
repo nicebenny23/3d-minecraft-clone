@@ -180,7 +180,7 @@ namespace stn {
 			return values != other.values;
 		};
 		template<ReducerType Other> requires TupleSetType<reducer_held_type<Other>>&&TupleSuperset<reducer_held_type<Other>, TupleSet>
-			TupleSet(Other&& other) :values(get<Types>(std::forward<typename Other::tuple_set_type >(other.reduction.values))...) {
+			TupleSet(Other&& other) :values((std::forward<reducer_held_type<Other>>(other.reduction.values).template get<Types>())...) {
 		}
 		SetReducer<TupleSet> reduce(this auto&& self) {
 			return SetReducer<TupleSet>(std::forward<decltype(self)>(self));

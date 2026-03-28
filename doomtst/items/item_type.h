@@ -61,9 +61,8 @@ namespace items {
 		item_types(const ecs::Ecs& Ecs) :world(Ecs) {
 
 		}
-		template<std::convertible_to<std::string_view> T>
-		item_id from_name(const T& name) const {
-			auto iter = ids.find<T>(name);
+		item_id from_name(const std::string_view& name) const {
+			auto iter = ids.find(name);
 			if (iter == ids.end()) {
 				stn::throw_invalid_argument("items does not contain name {}", static_cast<std::string_view>(name));
 			}

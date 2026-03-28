@@ -22,14 +22,14 @@ namespace renderer {
 		math::Transform CamTransform;
 		void start() {
 	
-			CamTransform = owner().get_component<ecs::transform_comp>().transform;
+			CamTransform = owner().get_component<ecs::world_transform>().transform;
 
 		}
 		void update() {
-			owner().get_component<ecs::transform_comp>().transform.yaw = wrap_angle(owner().get_component<ecs::transform_comp>().transform.yaw);
+			owner().get_component<ecs::world_transform>().transform.yaw = wrap_angle(owner().get_component<ecs::world_transform>().transform.yaw);
 
-			owner().get_component<ecs::transform_comp>().transform.pitch = wrap_to_range(owner().get_component<ecs::transform_comp>().transform.pitch, -90, 90);
-			CamTransform = owner().get_component<ecs::transform_comp>().transform;
+			owner().get_component<ecs::world_transform>().transform.pitch = wrap_to_range(owner().get_component<ecs::world_transform>().transform.pitch, -90, 90);
+			CamTransform = owner().get_component<ecs::world_transform>().transform;
 
 		}
 	};

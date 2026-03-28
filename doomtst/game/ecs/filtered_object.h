@@ -34,7 +34,7 @@ namespace ecs {
 				return self.object().template get_component<T>();
 			}
 		}
-
+		using tuple_set_type = stn::TupleSet<Types*...>;
 
 		void validate() const {
 			if (*last_checked_ticks != ticks) {
@@ -52,7 +52,7 @@ namespace ecs {
 			validate();
 		}
 
-
+		using tuple_set_elem_type = stn::TupleSet<Types*...>;
 		template<stn::ReducerType T> requires stn::TupleSuperset<typename stn::reducer_held_type<T>::tuple_set_type, tuple_set_type>
 		ConstrainedObject(T&& value) :
 			ticks(value.reduction.ticks),
@@ -104,7 +104,6 @@ namespace ecs {
 	private:
 
 
-		using tuple_set_type = stn::TupleSet<Types*...>;
 		ConstrainedObject(stn::non_null < ecs::archetype_ticks> last_checked, Object object, tuple_set_type components)
 			:ticks(*last_checked), last_checked_ticks(last_checked), entity(object), contained(components) {
 

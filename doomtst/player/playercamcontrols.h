@@ -36,11 +36,11 @@ struct playercamcontrols : ecs::component
 			xoffset *= sensitivity;
 			yoffset *= sensitivity;
 
-			owner().get_component<ecs::transform_comp>().transform.pitch += yoffset;
+			owner().get_component<ecs::world_transform>().transform.pitch += yoffset;
 
-			owner().get_component<ecs::transform_comp>().transform.yaw += xoffset;
+			owner().get_component<ecs::world_transform>().transform.yaw += xoffset;
 
-			owner().get_component<ecs::transform_comp>().transform.pitch = clamp(owner().get_component<ecs::transform_comp>().transform.pitch, -89.99, 89.99);
+			owner().get_component<ecs::world_transform>().transform.pitch = clamp(owner().get_component<ecs::world_transform>().transform.pitch, -89.99, 89.99);
 
 		}
 		else
@@ -48,7 +48,7 @@ struct playercamcontrols : ecs::component
 			Core::game.Ecs.get_resource<window::Window>().EnableCursor();
 		}
 		double max_interact_range = 5;
-		math::ray cameraray = math::ray::from_offset(owner().get_component<ecs::transform_comp>().transform.position,owner().get_component<ecs::transform_comp>().transform.normal_dir() * max_interact_range);
+		math::ray cameraray = owner().get_component<ecs::world_transform>().transform.forward_ray().with_length(max_interact_range);
 		voxtra::WorldRayCollision closest = collision::raycast(cameraray, collision::HitQuery(world()));
 		if (closest)
 		{

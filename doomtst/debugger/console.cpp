@@ -39,7 +39,7 @@ namespace console {
 				ImGui::Text("Debug:");
 				ImGui::Text(std::format("Fps: {:.3f}", player::goblin.world().ensure_resource<timename::TimeManager>().smooth_fps).c_str());
 
-				Point3 pos = player::goblin.get_component<ecs::transform_comp>().transform.position;
+				Point3 pos = player::goblin.get_component<ecs::world_transform>().transform.position;
 				ImGui::Text(std::format("position: {}", pos).c_str());
 				grid::Grid& grid = player::goblin.world().get_resource<grid::Grid>();
 				ImGui::Text(std::format("yaw:{:.3f},pitch:{:.3f}", player::goblin.get_component<renderer::CameraComponent>().CamTransform.yaw, player::goblin.get_component<renderer::CameraComponent>().CamTransform.pitch).c_str());

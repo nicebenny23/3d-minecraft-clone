@@ -71,7 +71,7 @@ namespace ecs {
 
 		//returns the new archetype location
 		archetype_location add(const entity_id& element) {
-			return archetype_location(id(), archetype_index(static_cast<std::uint32_t>(elems.push_index(element))));
+			return archetype_location(Id, archetype_index(static_cast<std::uint32_t>(elems.push_index(element))));
 		}
 
 		void remove(archetype_index index) {

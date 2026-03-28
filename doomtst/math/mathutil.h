@@ -2,15 +2,26 @@
 #include <cmath>
 #include <limits.h>
 #include <stdexcept>
+#include <concepts>
 #include <type_traits>
 #include "../util/pair.h"
 #define NaNf std::numeric_limits<double>::max()
-__forceinline bool apx(double a, double b) {
-	constexpr double EPS = 1e-8f;
-	double diff = a - b;
-	return (diff*diff<EPS);
+namespace math {
+	
+	inline bool approximate_equals(double a, double b, double eps = 1e-4f) {
+		return std::abs(a-b) < eps;
+	}
+	template<typename A,typename B,typename C> requires std::is_arithmetic_v<std::common_type_t<A, B, C>>
+		std::common_type_t<A,B,C> clamp(const A& value, const B& low, const C& high) {
+		if (value > high) {
+			return high;
+		}
+		if (value < low) {
+			return low;
+		}
+		return value;
+	}
 }
-
 
 inline double  interoplate_quintic(double t) {
 
@@ -22,30 +33,11 @@ inline constexpr double lerp(double start, double end, double selector) {
 	return end * selector + start * (1 - selector);
 }
 
-inline double clamp(double val, double low, double high) {
-	if (val > high) {
-		return high;
-	}
-	if (val < low) {
-		return low;
-	}
-	return val;
-}
 
-
-inline int clamp(int val, int low, int high) {
-	if (val > high) {
-		return high;
-	}
-	if (val < low) {
-		return low;
-	}
-	return val;
-}
 
 
 inline constexpr bool in_range(double val, double low, double high) {
-	return val >= low && val <= high || apx(val, low) || apx(val, high);
+	return val >= low && val <= high || math::approximate_equals(val, low) || math::approximate_equals(val, high);
 }
 inline  double sigmoid(double v1) {
 
@@ -74,7 +66,7 @@ namespace stn {
 	}
 
 	template<typename T1, typename T2, typename... Ts>
-	constexpr auto min(T1 a, T2 b, Ts... rest) -> typename std::common_type<T1, T2, Ts...>::type {
+	constexpr auto min(const T1& a, const T2& b, const Ts&... rest) -> typename std::common_type<T1, T2, Ts...>::type {
 		using Common = typename std::common_type<T1, T2, Ts...>::type;
 		const Common min_ab = (a < b) ? static_cast<Common>(a) : static_cast<Common>(b);
 		if constexpr (sizeof...(Ts) == 0) {
@@ -85,7 +77,7 @@ namespace stn {
 		}
 	}
 	template<typename T>
-	constexpr void set_min(T& value_to_set, T other) {
+	constexpr void set_min(T& value_to_set, const T& other) {
 		value_to_set = min(value_to_set, other);
 	}
 }
@@ -108,7 +100,7 @@ inline stn::pair<int, int> extended_range(double x) {
 	int low = static_cast<int>(std::floorl(x));
 	int high = low;
 	int rnd = std::lround(x);
-	if (apx(rnd, x)) {
+	if (math::approximate_equals(rnd, x)) {
 		if (rnd == low) {
 			low--;
 		}
@@ -161,7 +153,7 @@ inline int sign(double x) {
 }
 
 //Zero is mapped to zero
-inline int z_sign(double x) {
+inline int zero_sign(double x) {
 
 	return (x < 0) ? -1 : ((x > 0) ? 1 : 0);
 }

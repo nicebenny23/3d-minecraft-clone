@@ -67,7 +67,7 @@ namespace items {
 			}
 			return stn::None;
 		}
-		Option<const ecs::obj> element() const{
+		Option<const ecs::obj&> element() const{
 			if (occupied()) {
 				return current_item.unwrap().get();
 			}

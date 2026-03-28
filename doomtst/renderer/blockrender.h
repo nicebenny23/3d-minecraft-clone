@@ -76,11 +76,13 @@ namespace blockrender {
 
 
 	inline bool chunk_viewable(Chunk::chunk& chk) {
+		return true;
+		//does not seem to be working
 		float slope = tan(chk.world().get_resource<renderer::camera_resource>().camera.get<renderer::CameraComponent>().fov / 2);
-		geo::Box chkb = chk.bounds();
+		math::Box chkb = chk.bounds();
 		math::ray camray = math::ray::from_offset(camera::campos(), camera::GetCamFront());
-		geo::cone ncone = geo::cone(camray, slope);
-		geo::Plane pln = geo::Plane(camera::GetCamFront(), camray.start);
+		math::cone ncone = math::cone(camray, slope);
+		math::Plane pln = math::Plane(camera::GetCamFront(), camray.start);
 		bool srf = false;
 		for (int i = 0; i < 8; i++) {
 			Point3 vertex = chk.center().offset_local((math::cube_mesh[i] - unitv / 2.f) * float(Chunk::chunk_length));
@@ -92,13 +94,13 @@ namespace blockrender {
 		if (!srf) {
 			return false;
 		}
-		return geointersect::intersects(ncone, geo::Sphere(chkb));
+		return geointersect::intersects(ncone, math::Sphere(chkb));
 
 	}
 
 	// Calculate UV coordinates for a face centered at the mesh
 	v2::Vec2 face_to_uv_coords(const block_mesh& mesh, const size_t index, size_t uv_index) {
-		const v3::Scale3& meshscale = mesh.scale();
+		const v3::Scale3& meshscale = mesh.bounds().half_size();
 		size_t facetype = index / 2;
 		v2::Vec2 offset;
 
@@ -117,7 +119,7 @@ namespace blockrender {
 		}
 
 		v2::Vec2 uvCoord = math::square_mesh[uv_index];
-		v2::Vec2 ret = v2::unitv / 2 + offset * (v2::unitv-uvCoord*2);
+		v2::Vec2 ret = v2::unitv / 2 + offset * (v2::unitv - uvCoord * 2);
 		return ret;
 	}
 	template<WorldAccessor Accesor>
@@ -127,7 +129,7 @@ namespace blockrender {
 
 			const int baselocation = render_mesh.vertex_count();
 			const int* uniqueInds = &math::cube_mesh_face_indices[4 * face.face_direction.index()];
-			Scale3 scale = mesh_face.mesh().scale();
+			Scale3 scale = mesh_face.mesh().bounds().half_size();
 			Point3 position = mesh_face.mesh().center();
 			const int textureNumber = face.tex;
 			for (size_t j = 0; j < 4; j++) {
@@ -156,8 +158,12 @@ namespace blockrender {
 
 			cnk_mesh.faces.clear();
 			renderer::MeshData mesh = cnk_mesh.SolidGeo.create_mesh(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
-			for (int ind = 0; ind < Chunk::chunk_elements; ind++) {
-				block_mesh& mesh_at = (cnk.block_list[ind].get_unchecked<block>().mesh);//g
+			for (Chunk::block_object& obj: cnk) {
+				block_mesh& mesh_at = (obj.get_unchecked<block>().mesh);//g
+
+				if (mesh_at.invisible()) {
+					continue;
+				}
 				compute_mesh_cover(mesh_at, chunk_getter);
 				if (!mesh_at.is_transparent()) {
 					for (math::Direction3d dir : math::Directions3d) {
@@ -165,11 +171,9 @@ namespace blockrender {
 					}
 				}
 				else {
-					if (mesh_at.visible()) {
-						for (math::Direction3d dir : math::Directions3d) {
-							if (mesh_at[dir].uncovered()) {
-								cnk_mesh.faces.push(mesh_at[dir]);
-							}
+					for (math::Direction3d dir : math::Directions3d) {
+						if (mesh_at[dir].uncovered()) {
+							cnk_mesh.faces.push(mesh_at[dir]);
 						}
 					}
 				}
@@ -178,7 +182,7 @@ namespace blockrender {
 				std::unique_lock lck(fill_lock);
 				cnk_mesh.SolidGeo.fill(std::move(mesh));
 			}
-		});
+			});
 	}
 
 
@@ -216,7 +220,9 @@ namespace blockrender {
 			size_t max_recomputes = 4;
 			for (auto&& [mesh, object] : meshes) {
 				if (mesh.recreate_mesh.is_dirty()) {
-					reloads.push(object);
+					if (chunk_viewable(object.get_component<Chunk::chunk>())) {
+						reloads.push(object);
+					}
 				}
 				if (reloads.length() == max_recomputes) {
 					break;

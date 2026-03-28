@@ -14,10 +14,10 @@ namespace colors {
 		double b;
 		double a;
 		Color clamped() const{
-		return Color(clamp(r, 0.0, 1.0),
-				clamp(g, 0.0, 1.0),
-				clamp(b, 0.0, 1.0),
-				clamp(a, 0.0, 1.0));
+		return Color(math::clamp(r, 0.0, 1.0),
+			math::clamp(g, 0.0, 1.0),
+			math::clamp(b, 0.0, 1.0),
+			math::clamp(a, 0.0, 1.0));
 		}
 		Color clamp_self() {
 			*this = clamped();

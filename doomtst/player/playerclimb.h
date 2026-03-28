@@ -10,28 +10,6 @@ struct playerclimb: ecs::component
 	playerclimb() {
 		//priority = 111;
 		onrope = false;
-	}	
-	void oncollision(ecs::obj* collidedwith) {
-		if (collidedwith->has_component<blocks::block>())
-		{
-			blocks::block* potrope =collidedwith->get_component_ptr<blocks::block>();
-	//used too be potrope->block_id==minecraftrope
-			if (false)
-			{
-				onrope = true;
-				owner().get_component<rigidbody>().gravityscale= 0;
-			}
-		}
-	}
-
-
-	void update() {
-		if (onrope==false)
-		{
-
-			owner().get_component<rigidbody>().gravityscale = 1;
-
-		}onrope = false;
 	}
 };
 

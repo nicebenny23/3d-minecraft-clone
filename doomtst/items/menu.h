@@ -23,7 +23,7 @@ namespace ui {
 		}
 		void apply(ecs::obj& object) const{
 			object.add_component<menu_component>();
-			UiSpawner(geo::Box2d(v2::zerov, v2::unitv), 1).apply(object);
+			UiSpawner(math::Box2d(v2::zerov, v2::unitv), 1).apply(object);
 		}
 	};
 	struct MenuState :ecs::resource {

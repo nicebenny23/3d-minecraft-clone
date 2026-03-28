@@ -128,7 +128,7 @@ namespace player {
 				// Show progress decal
 				float prog = (break_start_time - timeuntilbreak) / break_start_time;
 				size_t phase = clamp(size_t(prog * 7.f), 0, 6);
-				if (currmining&&currmining.unwrap().get_component<block>().scale() == blockscale) {
+				if (currmining&&currmining.unwrap().get_component<block>().bounds().scale == blockscale) {
 					spawn_decal(phase,cursor);
 				}
 				if (timeuntilbreak <= 0.f) {

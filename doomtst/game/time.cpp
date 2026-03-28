@@ -2,5 +2,5 @@
 
 timename::Duration timename::TimeManager::current_time()
 {
-    return Duration(this);
+    return Duration(*this);
 }

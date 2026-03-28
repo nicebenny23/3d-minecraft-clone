@@ -4,12 +4,12 @@
 namespace stn {
 	template<typename T>
 	concept LifetimeEligible =
-		std::is_object_v<T> &&                 
-		!std::is_array_v<T> &&                 
-		std::is_class_v<T> &&  
-		std::destructible<T>&&
-		std::is_standard_layout_v<T> &&        
-		std::is_nothrow_move_constructible_v<T>; 
+		std::is_object_v<T> &&
+		!std::is_array_v<T> &&
+		std::is_class_v<T> &&
+		std::destructible<T> &&
+		std::is_standard_layout_v<T> &&
+		std::is_nothrow_move_constructible_v<T>;
 
 	template<typename T>
 	concept LifetimeTrackable = stn::CalledWhileIncomplete<T>;
@@ -65,9 +65,9 @@ namespace stn {
 	};
 	template<LifetimeTrackable T>
 	struct lifetime_source {
-		lifetime_source(T& object) :value(object),owner_delta(reinterpret_cast<std::byte*>(this)-reinterpret_cast<std::byte*>(&object)) {
+		lifetime_source(T& object) :value(object), owner_delta(reinterpret_cast<std::byte*>(this) - reinterpret_cast<std::byte*>(&object)) {
 		}
-		T* real_owner_location(){
+		T* real_owner_location() {
 			return reinterpret_cast<T*>(reinterpret_cast<std::byte*>(this) - owner_delta);
 		}
 		~lifetime_source() {
@@ -75,8 +75,8 @@ namespace stn {
 				value->kill();
 			}
 		}
-	
-		lifetime_source(lifetime_source&& other) :value(std::move(other.value)),owner_delta(std::move(other.owner_delta)) {
+
+		lifetime_source(lifetime_source&& other) :value(std::move(other.value)), owner_delta(std::move(other.owner_delta)) {
 			if (value) {
 				value->move(*real_owner_location());
 			}

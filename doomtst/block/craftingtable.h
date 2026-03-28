@@ -41,7 +41,7 @@ namespace blocks {
 			ecs::obj menu_object= ecs::spawn_emplaced<ui::MenuRecipe>(ent.world());
 			menu_object.apply_recipe(player::inventory_slots_pannel_recipe());
 			ecs::obj bg = menu_object.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\menutex.png", "menu_texture"),
-			geo::Box2d(v2::Vec2(.27f, .15f), v2::Vec2(.35f, .29f))
+			math::Box2d(v2::Vec2(.27f, .15f), v2::Vec2(.35f, .29f))
 			,0);
 			ent.add_component<player::OpenMenuOnClick>(ecs::ConstrainedHandle<ui::menu_component>(menu_object));
 			menu_object.spawn_child<items::ContainerDisplayRecipe>(v2::Coord2(4, 3), input_slots);
@@ -63,7 +63,7 @@ namespace blocks {
 		}
 		BlockTraits traits() const{
 			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale / 2, false, crafting_table_side, crafting_table_side, mosstex, mosstex, crafting_table_side, crafting_table_side)
+				BlockMeshTraits(v3::unit_scale, false, crafting_table_side, crafting_table_side, mosstex, mosstex, crafting_table_side, crafting_table_side)
 			);
 		}
 	};
