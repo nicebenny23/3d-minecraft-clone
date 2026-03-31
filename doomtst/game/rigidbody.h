@@ -6,7 +6,6 @@
 #include "../world/voxeltraversal.h"
 #include "ecs/query.h"
 #include "../util/pipeline.h"
-#include "../util/tag.h"
 #include "casts.h"
 #include "ecs/query.h"
 using namespace v3;

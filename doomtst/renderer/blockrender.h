@@ -11,8 +11,8 @@
 #include "../block/block_mesh.h"
 #include "../block/block_registry.h"
 #include "../block/block_registry.h"
-#include "../game/camera.h"
-#include "../game/camera.h"
+
+
 #include "../game/ecs/ecs.h"
 #include "../game/ecs/ecs.h"
 #include "../game/ecs/game_object.h"

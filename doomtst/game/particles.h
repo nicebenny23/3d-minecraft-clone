@@ -6,7 +6,6 @@
 
 #include "../game/time.h"
 #include "../renderer/renderer.h"
-#include "camera.h"
 
 using namespace v3;
 using namespace stn;

@@ -1,6 +1,5 @@
 #include "../game/ecs/game_object.h"
 #include <string>
-#include "../util/String.h"
 #include "../block/block_registry.h"
 #include "../renderer/renderer.h"
 #pragma once
@@ -62,7 +61,7 @@ namespace items {
 
 		}
 		item_id from_name(const std::string_view& name) const {
-			auto iter = ids.find(name);
+			auto iter = ids.find(std::string(name));
 			if (iter == ids.end()) {
 				stn::throw_invalid_argument("items does not contain name {}", static_cast<std::string_view>(name));
 			}
@@ -95,7 +94,7 @@ namespace items {
 		const ecs::Ecs& world;
 		stn::type_map<item_id> type_id_map;
 		stn::array<item_traits> trait_list;
-		std::unordered_map<std::string, item_id, stn::StringHasher,std::equal_to<>> ids;
+		std::unordered_map<std::string, item_id> ids;
 	};
 
 

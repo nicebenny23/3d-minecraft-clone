@@ -6,11 +6,11 @@
 
 namespace ai {
 	struct BrainAiTag{ };
-	using brain_node_id = stn::typed_id<BrainAiTag>;
+	using BrainNodeId = stn::typed_id<BrainAiTag>;
 	struct Brain:ecs::component {
 		stn::array<stn::Option<double>> utilities;
-		stn::Option<brain_node_id> active_node;
-		stn::type_indexer<brain_node_id> node_map;
+		stn::Option<BrainNodeId> active_node;
+		stn::type_indexer<BrainNodeId> node_map;
 		template<typename T>
 		bool active() const{
 			return active_node == node_map.get_opt<T>();
@@ -20,10 +20,10 @@ namespace ai {
 			utilities.reach(node_map.insert<T>(),stn::None) = utility;
 		}
 
-		stn::Option<double&> operator[](brain_node_id id) {
+		stn::Option<double&> operator[](BrainNodeId id) {
 			return utilities[id.id].as_ref();
 		}
-		stn::Option<const double&> operator[](brain_node_id id) const{
+		stn::Option<const double&> operator[](BrainNodeId id) const{
 			return utilities[id.id].as_ref();
 		}
 	};
@@ -39,8 +39,8 @@ namespace ai {
 					if (!utility) {
 						continue;
 					}
-					if (brain.active_node.is_none_or([&](brain_node_id id) {return brain[id].copied()<utility;})) {
-						brain.active_node = brain_node_id(i);
+					if (brain.active_node.is_none_or([&](BrainNodeId id) {return brain[id].copied()<utility;})) {
+						brain.active_node = BrainNodeId(i);
 					}
 				}
 

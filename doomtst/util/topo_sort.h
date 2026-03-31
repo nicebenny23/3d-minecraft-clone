@@ -8,7 +8,6 @@
 #include "Option.h"        // Assume stn::Option<T>
 #include "queue.h"
 
-// Templated DAG node with static npos for "none"
 template<typename T>
 struct DagNode {
     static constexpr size_t npos = static_cast<size_t>(-1);

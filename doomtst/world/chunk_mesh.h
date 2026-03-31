@@ -1,7 +1,7 @@
 #include "../renderer/renderer.h"
 #include "../block/block_mesh.h"
 #include "../util/cached.h"
-#include "../game/camera.h"
+
 #include "../math/geometry.h"
 #include "../math/Scale3.h"
 #include "../block/block.h"

@@ -450,7 +450,6 @@
     <ClInclude Include="game\rigidbody.h" />
     <ClInclude Include="renderer\uibox.h" />
     <ClInclude Include="tests\ecs_tests.h" />
-    <ClInclude Include="util\Any.h" />
     <ClInclude Include="util\bitset.h" />
     <ClInclude Include="util\bit_mask.h" />
     <ClInclude Include="util\cached.h" />
@@ -460,7 +459,6 @@
     <ClInclude Include="util\deque.h" />
     <ClInclude Include="math\dir.h" />
     <ClInclude Include="util\dynamicarray.h" />
-    <ClInclude Include="util\dynpool.h" />
     <ClInclude Include="util\erased.h" />
     <ClInclude Include="util\exception.h" />
     <ClInclude Include="util\fileloader.h" />
@@ -495,8 +493,6 @@
     <ClInclude Include="util\stack.h" />
     <ClInclude Include="math\stats.h" />
     <ClInclude Include="util\stbiload.h" />
-    <ClInclude Include="util\String.h" />
-    <ClInclude Include="util\tag.h" />
     <ClInclude Include="tests\test.h" />
     <ClInclude Include="util\thread_pool.h" />
     <ClInclude Include="util\thread_split.h" />

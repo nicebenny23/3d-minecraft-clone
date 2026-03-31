@@ -1,6 +1,7 @@
 #include "../game/ecs/ecs.h"
 #include "../math/Scale3.h"
 #include "../util/List.h"
+#include "../util/fileloader.h"
 #pragma once
 namespace blocks {
 	enum block_textures :std::uint8_t {

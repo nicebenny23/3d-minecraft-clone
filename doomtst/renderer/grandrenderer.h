@@ -1,5 +1,5 @@
 #pragma once
-#include "../game/camera.h"
+
 #include "../renderer/ModelMesh.h"
 #include "../renderer/Window.h"
 #include "../renderer/renderer.h"

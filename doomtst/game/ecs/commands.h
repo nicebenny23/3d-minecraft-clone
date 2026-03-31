@@ -1,7 +1,6 @@
 #pragma once
 #include "../../util/queue.h"
 #include "../../util/type_index.h"
-#include "../../util/dynpool.h"
 #include "../../util/pipeline.h"
 #include "resources.h"
 namespace ecs {
@@ -13,7 +12,7 @@ namespace ecs {
 		}
 
 		template<typename ...Args>
-		void emplace(Args&&... args) requires std::constructible_from<T, Args...> {
+		void emplace(Args&&... args) requires std::constructible_from<T, Args&&...> {
 			commands.emplace(std::forward<Args>(args)...);
 		}
 	private:

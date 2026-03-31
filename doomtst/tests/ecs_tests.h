@@ -8,7 +8,7 @@ struct TestComponent :ecs::component {
 };
 static test::register_test ecs_basic_test("ECS Basic Functionality", []() -> test::test_result {
 	// Create a small ECS
-	ecs::Ecs ecs(10);
+	ecs::Ecs ecs();
 
 	// 1) Spawn an empty entity
 	ecs::obj entity = ecs.spawn_empty();

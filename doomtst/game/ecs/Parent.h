@@ -40,6 +40,5 @@ namespace ecs {
 	using Parent = ecs::Relationship<ParentArrayAdapter, parent_child_tag >;
 	using Child = ecs::Target<ParentArrayAdapter, parent_child_tag>;
 
-	//should make recip
 	
 }
