@@ -4,9 +4,9 @@
 #include "../game/ecs/game_object.h"
 #include <conio.h>
 #include "../items/block_definitions.h"
-#include "../game/entityutil.h"
 #include "playerinventory.h"
 #include "../util/cached.h"
+#include "../game/health.h"
 
 struct playerhealth: ecs::component
 {
@@ -15,20 +15,19 @@ struct playerhealth: ecs::component
 	
 	bool dmgimmune = false;
 	void killplayer() {
-		world().write_command<>(Core::CloseGameCommand());
 	
 	}
 
-	array<ui::ui_image>healthboxes;
+	array<ui::ui_image> healthboxes;
 	void start(){
-		damage_decal= std::move(ui::ui_image(world(),"images\\red_back.png", "on_dmg_texture", math::Box2d::origin_centered(v2::zerov), -3));
+		damage_decal= std::move(ui::ui_image(world(),"images\\red_back.png", "on_dmg_texture", geo::Box2d::origin_centered(v2::zerov), -3));
 		size_t max_health = owner().get_component<Health::EntityHealth>().max_health;
 		v2::Vec2 scale = v2::unitv / 100;
 		healthboxes = array<ui::ui_image>();
 		for (int i = 0; i < max_health; i++) {
 			v2::Vec2 pos = v2::Vec2(i / 40.f-.4f, -.45);
 
-			healthboxes.push(ui::ui_image(world(), "images\\health.png", "HealthTexture", math::Box2d(pos, scale), 55));
+			healthboxes.push(ui::ui_image(world(), "images\\health.png", "HealthTexture", geo::Box2d(pos, scale), 55));
 		}
 	}
 	

@@ -8,7 +8,7 @@
 #include "../block/stone.h"
 #include "../block/air.h"
 #pragma once 
-namespace Chunk {
+namespace Chunks {
 	enum biometype {
 		mossybiome = 0,
 		normalbiome = 1,
@@ -142,12 +142,12 @@ namespace Chunk {
 		const BlockRegistry& registry;
 		blocks::block_id id_at(Coord pos) {
 
-			pos -= loc * Chunk::chunk_axis;
-			if (in_range(int(pos.x), 0, Chunk::chunk_axis - 1)) {
-				if (in_range(int(pos.y), 0, Chunk::chunk_axis - 1)) {
+			pos -= loc * Chunks::chunk_axis;
+			if (in_range(int(pos.x), 0, Chunks::chunk_axis - 1)) {
+				if (in_range(int(pos.y), 0, Chunks::chunk_axis - 1)) {
 
-					if (in_range(int(pos.z), 0, Chunk::chunk_axis - 1)) {
-						return ids[Chunk::chunk_axis * Chunk::chunk_axis * pos.x + Chunk::chunk_axis * pos.y + pos.z].block_id;
+					if (in_range(int(pos.z), 0, Chunks::chunk_axis - 1)) {
+						return ids[Chunks::chunk_axis * Chunks::chunk_axis * pos.x + Chunks::chunk_axis * pos.y + pos.z].block_id;
 					}
 				}
 			}
@@ -155,10 +155,10 @@ namespace Chunk {
 
 		}
 		void iterate(int x, std::mutex& mtx) {
-			int ind = Chunk::chunk_axis * Chunk::chunk_axis * x;
-			for (int y = 0; y < Chunk::chunk_axis; y++) {
-				for (int z = 0; z < Chunk::chunk_axis; z++) {
-					Coord idpos = loc * Chunk::chunk_axis + Coord(x, y, z);
+			int ind = Chunks::chunk_axis * Chunks::chunk_axis * x;
+			for (int y = 0; y < Chunks::chunk_axis; y++) {
+				for (int z = 0; z < Chunks::chunk_axis; z++) {
+					Coord idpos = loc * Chunks::chunk_axis + Coord(x, y, z);
 
 					blocks::block_id neid = generatechunkvalfromnoise(idpos, map, crazy, slow, registry);
 					mtx.lock();
@@ -186,7 +186,7 @@ namespace Chunk {
 			middle_map(maps.register_map<slow_map>(math::NoiseParameters(2, 1, .005, 1.2))), registry(block_registry) {
 
 			array<int> x_index_list;
-			for (size_t i = 0; i < Chunk::chunk_axis; i++) {
+			for (size_t i = 0; i < Chunks::chunk_axis; i++) {
 				x_index_list.push(i);
 			}
 
@@ -214,8 +214,8 @@ namespace Chunk {
 
 		}
 		void apply(ecs::obj& chunk_object) {
-			Chunk::chunk& newchunk = chunk_object.add_component<Chunk::chunk>(spawn_location);
-			chunk_object.add_component<Chunk::chunkmesh>(spawn_location);
+			Chunks::chunk& newchunk = chunk_object.add_component<Chunks::chunk>(spawn_location);
+			chunk_object.add_component<Chunks::chunkmesh>(spawn_location);
 		}
 		ChunkLocation spawn_location;
 	};
@@ -227,13 +227,13 @@ namespace Chunk {
 
 		void apply(ecs::obj& chunk_object) {
 			CreateEmptyChunk(location).apply(chunk_object);
-			Chunk::chunk& newchunk = chunk_object.get_component<Chunk::chunk>();
-			Chunk::chunkmesh& mesh = chunk_object.get_component<Chunk::chunkmesh>();
+			Chunks::chunk& newchunk = chunk_object.get_component<Chunks::chunk>();
+			Chunks::chunkmesh& mesh = chunk_object.get_component<Chunks::chunkmesh>();
 			idmap statemap = idmap(location.position, chunk_object.world().get_resource<BlockRegistry>(), chunk_object.world().insert_resource<NoiseMaps>());
 			size_t ind = 0;
-			for (int x = 0; x < Chunk::chunk_axis; x++) {
-				for (int y = 0; y < Chunk::chunk_axis; y++) {
-					for (int z = 0; z < Chunk::chunk_axis; z++) {
+			for (int x = 0; x < Chunks::chunk_axis; x++) {
+				for (int y = 0; y < Chunks::chunk_axis; y++) {
+					for (int z = 0; z < Chunks::chunk_axis; z++) {
 						Coord pos = statemap.ids[ind].pos;
 						blocks::block_id block_id = statemap.ids[ind].block_id;
 						newchunk.block_list.push(GenerateBlock{ .id = block_id,
@@ -254,22 +254,22 @@ namespace Chunk {
 		LoadChunkFromFile(ChunkLocation chunk_location) :location(chunk_location) {
 		}
 		void apply(ecs::obj& chunk_object) {
-			stn::file_handle file = stn::file_handle(Chunk::file_name(location, chunk_object.world().get_resource<grid::world>()), stn::FileMode::ReadBinary);
+			stn::file_handle file = stn::file_handle(Chunks::file_name(location, chunk_object.world().get_resource<grid::world>()), stn::FileMode::ReadBinary);
 
 			CreateEmptyChunk(location).apply(chunk_object);
-			Chunk::chunk& newchunk = chunk_object.get_component<Chunk::chunk>();
-			for (int x = 0; x < Chunk::chunk_axis; x++) {
-				for (int y = 0; y < Chunk::chunk_axis; y++) {
-					for (int z = 0; z < Chunk::chunk_axis; z++) {
+			Chunks::chunk& newchunk = chunk_object.get_component<Chunks::chunk>();
+			for (int x = 0; x < Chunks::chunk_axis; x++) {
+				for (int y = 0; y < Chunks::chunk_axis; y++) {
+					for (int z = 0; z < Chunks::chunk_axis; z++) {
 						block_id block_id_for = stn::file_serializer<block_id>().read(file);
 						math::Direction2d dir = stn::file_serializer<math::Direction2d>().read(file);
 						math::Direction3d align = stn::file_serializer<math::Direction3d>().read(file);
-						Coord pos = Coord(x, y, z) + location.position * Chunk::chunk_axis;
+						Coord pos = Coord(x, y, z) + location.position * Chunks::chunk_axis;
 						newchunk.block_list.push(GenerateBlock{ .id = block_id_for,
 						.loc = pos,
 						.face = dir,
 						.direction = align,
-						.mesh = chunk_object.get_component<Chunk::chunkmesh>(),
+						.mesh = chunk_object.get_component<Chunks::chunkmesh>(),
 						.handle = file } .spawn(chunk_object.world()));
 
 					}
@@ -279,11 +279,11 @@ namespace Chunk {
 
 	};
 	struct chunk_loaded {
-		chunk_loaded(Chunk::ChunkLocation loaded_position) :pos(loaded_position) {
+		chunk_loaded(Chunks::ChunkLocation loaded_position) :pos(loaded_position) {
 
 		}
 
-		Chunk::ChunkLocation pos;
+		Chunks::ChunkLocation pos;
 	};
 	struct CreateChunk {
 		ChunkLocation location;
@@ -291,7 +291,7 @@ namespace Chunk {
 
 		}
 		void apply(ecs::obj& object) const {
-			if (fileexists(Chunk::file_name(location, object.world().get_resource<grid::world>()))) {
+			if (fileexists(Chunks::file_name(location, object.world().get_resource<grid::world>()))) {
 				LoadChunkFromFile(location).apply(object);
 			}
 			else {

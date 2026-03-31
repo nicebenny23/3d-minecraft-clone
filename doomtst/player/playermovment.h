@@ -5,7 +5,6 @@
 #include "../game/time.h"
 #include "../game/rigidbody.h"
 #include "../world/voxeltraversal.h"
-#include "../game/entitystate.h"
 #include "playerclimb.h"
 
 struct playermovement : ecs::component
@@ -36,9 +35,9 @@ struct PlayerMovementSys : ecs::System
 			return;
 		}
 
-        auto view = ecs::View<ecs::With<physics::rigidbody>, ecs::With<playermovement>, ecs::With<playerclimb>>(ecs);
+        auto view = ecs::View<physics::rigidbody,playermovement,playerclimb,ecs::world_transform>(ecs);
 
-        for (auto [body, movement, climb] : view)
+        for (auto [body, movement, climb,transform] : view)
         {
 			userinput::InputManager& man=ecs.get_resource<userinput::InputManager>();
             float dt = ecs.ensure_resource<timename::TimeManager>().dt;
@@ -46,11 +45,9 @@ struct PlayerMovementSys : ecs::System
             // — horizontal movement unchanged —
             float slowdown = 2.0f;
             float speed = 16.0f;
-            float effSpeed = dt * speed * slowdown;
-
-            Vec3 forward = normal({ camera::GetCamFront().x, 0, camera::GetCamFront().z });
-            Vec3 right = normal({ camera::GetCamRight().x,   0, camera::GetCamRight().z });
-
+            float effSpeed = dt * speed * slowdown; 
+            Vec3 forward = transform.transform.normal_dir().with_y(0).normal();
+			Vec3 right = transform.transform.right_dir().with_y(0).normal();
             if (man.key('w').held) body.velocity += forward * effSpeed;
             if (man.key('s').held) body.velocity -= forward * effSpeed;
             if (man.key('d').held) body.velocity += right * effSpeed;

@@ -31,23 +31,18 @@ namespace items {
 		return stn::None;
 	}
 
-	inline stn::Option<give_stack_plan> transfer_stack_some(item_stack& from_stack, item_stack& to_stack, size_t /*amount*/) {
-		ecs::obj from = from_stack.owner();
-		ecs::obj to = to_stack.owner();
-
-		size_t fit = from_stack.max_fit(to_stack);
+	inline stn::Option<give_stack_plan> transfer_stack_some(ecs::Constrained<item_stack> from_stack, ecs::Constrained<item_stack> to_stack) {
+	
+		size_t fit = from_stack.get<item_stack>().max_fit(to_stack.get<item_stack>());
 		if (fit != 0) {
-			return give_stack_plan(from, to, fit);
+			return give_stack_plan(from_stack.object(), to_stack.object(), fit);
 		}
 		return stn::None;
 	}
 
-	inline stn::Option<give_stack_plan> transfer_stack_all(item_stack& from_stack, item_stack& to_stack, size_t /*amount*/) {
-		ecs::obj from = from_stack.owner();
-		ecs::obj to = to_stack.owner();
-
-		if (from_stack.can_transfer(to_stack)) {
-			return give_stack_plan(from, to, from_stack.count());
+		inline stn::Option<give_stack_plan> transfer_stack_all(ecs::Constrained<item_stack> from_stack, ecs::Constrained<item_stack> to_stack) {
+		if (from_stack.get<item_stack>().can_transfer(to_stack.get<item_stack>())) {
+			return give_stack_plan(from_stack.object(), to_stack.object(), from_stack.get<item_stack>().count());
 		}
 		return stn::None;
 	}

@@ -10,6 +10,6 @@ uniform vec4 color;
 void main()
 {
  
-    FragColor = color*texture(tex,ourcoord);
+    FragColor = color*texture(tex,vec2(ourcoord.x,1-ourcoord.y));
      
 } 

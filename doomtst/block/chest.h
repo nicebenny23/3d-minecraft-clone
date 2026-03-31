@@ -34,7 +34,7 @@ namespace blocks {
 
 		void apply(ecs::obj& ent) const {
 			ecs::obj menu_object = ecs::spawn_emplaced<ui::MenuRecipe>(ent.world());
-			menu_object.apply_recipe(player::inventory_slots_pannel_recipe()); ecs::obj bg = menu_object.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\menutex.png", "menu_texture"), math::Box2d(v2::Vec2(.2f, .2f), v2::Vec2(.5f, .35f)), 0);
+			menu_object.apply_recipe(player::inventory_slots_pannel_recipe()); ecs::obj bg = menu_object.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\menutex.png", "menu_texture"), geo::Box2d(v2::Vec2(.2f, .2f), v2::Vec2(.5f, .35f)), 0);
 			ent.add_component<player::OpenMenuOnClick>(ecs::ConstrainedHandle<ui::menu_component>(menu_object));
 			menu_object.spawn_child<items::ContainerDisplayRecipe>(v2::Coord2(-4, 3), chest_slots);
 

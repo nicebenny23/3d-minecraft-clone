@@ -1,7 +1,7 @@
 #include "../math/vector3.h"
+#include "box.h"
 #pragma once 
-using namespace v3;
-namespace math {
+namespace geo {
 	struct ray {
 		v3::Point3 start;
 		v3::Point3 end;
@@ -17,7 +17,13 @@ namespace math {
 			return end - start;
 		}
 		v3::Vec3 dir() const {
+			if (degenerate()) {
+				return v3::zerov;
+			}
 			return diff() / length();
+		}
+		Box bounding_box() const{
+			return Box::from_min_max(start, end);
 		}
 		bool point_lies_in_sphere(v3::Point3 pnt)	const {
 			return v3::dist(start, pnt) < length();
@@ -31,14 +37,14 @@ namespace math {
 		}
 
 
-		Point3 project(Point3 vector) const {
+		v3::Point3 project(v3::Point3 vector) const {
 
 
-			Vec3 aoffset = vector - start;
+			v3::Vec3 aoffset = vector - start;
 			if (degenerate()) {
 				return start;
 			}
-			Vec3 normed = dir();
+			v3::Vec3 normed = dir();
 			double t = dot(aoffset, normed);
 			return start + normed * t;
 		}
@@ -48,14 +54,14 @@ namespace math {
 		ray with_length(double length) const{
 			return normalize().dialate_from_start(length);
 		}
-		Point3 point_at(double distance) const {
+		v3::Point3 point_at(double distance) const {
 			return start + dir() * distance;
 		}
-		Point3 lerp(double t) const {
+		v3::Point3 lerp(double t) const {
 			return start + diff() * t;
 		}
 
-		ray translate(Vec3 translation_vector) const {
+		ray translate(v3::Vec3 translation_vector) const {
 			return ray(start + translation_vector, end + translation_vector);
 		}
 		ray normalize() const {

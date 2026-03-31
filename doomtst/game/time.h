@@ -115,11 +115,13 @@ namespace timename {
 
 		}
 		stn::Option<time_delay> remaining() {
+			check_if_dead();
 			if (end) {
-				return stn::max(0, end.unwrap() - tm->now());
+				return end.unwrap() - tm->now();
 			}
 			return stn::None;
 		}
+
 		void disable() {
 			end= stn::None;
 		}
@@ -132,22 +134,20 @@ namespace timename {
 			}
 		}
 		bool is_active() const {
-
+			check_if_dead();
 			return end.is_some();
 		}
-		DurationState state() const{
-
-			if (!end) {
-				return DurationState::inactive;
-			}
-			if (tm->now() < end.unwrap()) {
-				return DurationState::active;
-			}
-			end = stn::None;
-			return DurationState::ending;
-
+		bool is_inactive() const {
+			return !is_active();
 		}
 	private:
+
+		void check_if_dead() const {
+			if (end.is_some_and([&](time end) {
+				return end < tm->now();})) {
+				end = stn::None;
+			}
+		}
 		mutable stn::Option<time> end;
 		stn::non_null<TimeManager> tm;
 	};

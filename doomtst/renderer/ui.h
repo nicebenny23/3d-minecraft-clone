@@ -36,8 +36,8 @@ namespace ui {
 		}
 	};
 	struct UiBounds :ecs::component {
-		math::Box2d local;
-		UiBounds(math::Box2d local_bounds, bool global_bounds) :local(local_bounds) {
+		geo::Box2d local;
+		UiBounds(geo::Box2d local_bounds, bool global_bounds) :local(local_bounds) {
 		};
 		v2::Vec2 local_center() const {
 			return local.center;
@@ -55,9 +55,9 @@ namespace ui {
 	};
 	struct ComputedStyle :ecs::component {
 		size_t priority;
-		math::Box2d final_size;
+		geo::Box2d final_size;
 		bool enabled;
-		ComputedStyle(size_t precedence, math::Box2d size, bool is_enabled) :final_size(size), priority(precedence), enabled(is_enabled) {
+		ComputedStyle(size_t precedence, geo::Box2d size, bool is_enabled) :final_size(size), priority(precedence), enabled(is_enabled) {
 
 		}
 
@@ -65,7 +65,7 @@ namespace ui {
 	struct ComputePrioritySystem :ecs::System {
 
 		void run(ecs::Ecs& world) {
-			auto query = ecs::View<ecs::With<ComputedStyle>>(world);
+			auto query = ecs::View< ComputedStyle>(world);
 			//disabled all styles allowing us to skip prossesing later on
 			for (stn::TupleSet<ComputedStyle&> style:query) {
 				style.get<ComputedStyle&>().enabled = false;
@@ -84,9 +84,9 @@ namespace ui {
 				bool computed_enabled = next.get_component<UiEnabled>().local_enabled;
 				//if we are not enabled their is no need to do write its properties and children out
 				if (computed_enabled) {
-					math::Box2d local_size = next.get_component<UiBounds>().local;
-					math::Box2d computed_size = prior_style.member(&ComputedStyle::final_size)
-						.unwrap_or(math::Box2d(v2::zerov, v2::unitv)).transform(local_size);
+					geo::Box2d local_size = next.get_component<UiBounds>().local;
+					geo::Box2d computed_size = prior_style.member(&ComputedStyle::final_size)
+						.unwrap_or(geo::Box2d(v2::zerov, v2::unitv)).transform(local_size);
 					next.set_emplace_component<ComputedStyle>(current_assignment++, computed_size, computed_enabled);
 					stn::array<ecs::obj> children;
 					for (ecs::entity ent : ecs::HierarchyView(next).children_entities()) {
@@ -125,7 +125,7 @@ namespace ui {
 			v2::Vec2 pos = man.mouse_position;
 			bool has_clicked_left = man.left_mouse().pressed;
 			bool has_clicked_right = man.right_mouse().pressed;
-			ecs::View<ecs::With<ComputedStyle>, ecs::With<InteractionState>> bounds_view(world);
+			ecs::View<ComputedStyle,InteractionState> bounds_view(world);
 			for (auto&& [style, ui_interaction] : bounds_view) {
 				if (style.enabled) {
 					bool cursor_touching = style.final_size.contains(pos);
@@ -140,18 +140,18 @@ namespace ui {
 		}
 	};
 	struct UiSpawner {
-		math::Box2d bounds;
+		geo::Box2d bounds;
 		size_t priority;
 		bool bounds_type;
-		UiSpawner(math::Box2d box, size_t priority, bool global_bounds = false)
-			:bounds(math::Box2d(box.center, box.scale)), priority(priority), bounds_type(global_bounds) {
+		UiSpawner(geo::Box2d box, size_t priority, bool global_bounds = false)
+			:bounds(geo::Box2d(box.center, box.scale)), priority(priority), bounds_type(global_bounds) {
 		}
 		void apply(ecs::obj& object) const{
 			object.set_emplace_component<UiBounds>(bounds, bounds_type);
 			object.set_emplace_component<UiEnabled>();
 			object.set_emplace_component<InteractionState>();
 			object.set_emplace_component<UiPriority>(priority);
-			object.set_emplace_component<ComputedStyle>(0, math::Box2d(v2::zerov, v2::unitv), false);
+			object.set_emplace_component<ComputedStyle>(0, geo::Box2d(v2::zerov, v2::unitv), false);
 			
 			object
 				.world()
@@ -165,7 +165,7 @@ namespace ui {
 		void build(Core::App& app) {
 			app.emplace_system< UiInteractionSystem>();
 			app.emplace_system< ComputePrioritySystem>();
-			ecs::obj entity = ecs::spawn_emplaced<UiSpawner>(app.Ecs, math::Box2d::origin_centered(v2::unitv), 2);
+			ecs::obj entity = ecs::spawn_emplaced<UiSpawner>(app.Ecs, geo::Box2d::origin_centered(v2::unitv), 2);
 			app.emplace_resource<BaseUiNode>(entity);
 		}
 

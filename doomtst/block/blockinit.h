@@ -12,10 +12,10 @@ namespace blocks {
 		v3::Coord loc;
 		math::Direction2d face;
 		math::Direction3d direction;
-		Chunk::chunkmesh& mesh;
+		Chunks::chunkmesh& mesh;
 		stn::Option<stn::file_handle&> handle;
 		//it cannot be a recipe due to its optimizations mechanics
-		Chunk::block_object spawn(ecs::Ecs& world) {
+		Chunks::block_object spawn(ecs::Ecs& world) {
 			BlockRegistry& registry =world.get_resource<BlockRegistry>();
 			BlockTraits traits=registry.traits_for(id);
 			block* blk_ptr;
@@ -47,7 +47,7 @@ namespace blocks {
 			else {
 				registry.block_for(id)->apply(object);
 			}
-			return Chunk::block_object::make_unchecked(object,*blk_ptr);
+			return Chunks::block_object::make_unchecked(object,*blk_ptr);
 		}
 	};
 

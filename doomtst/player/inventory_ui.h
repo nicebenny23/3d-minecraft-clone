@@ -16,7 +16,7 @@ namespace player {
 		void run(ecs::Ecs& world) {
 
 			userinput::InputManager& input = world.get_resource<userinput::InputManager>();
-			auto view = ecs::View< ecs::With<inventory>, ecs::With<inventory_ui>>(world);
+			auto view = ecs::View< inventory, inventory_ui>(world);
 			for (auto [player_inv, ui_menu] : view) {
 				if (input.key('1').pressed) {
 
@@ -68,7 +68,7 @@ namespace player {
 		void apply(ecs::obj& ent) const{
 			ui::MenuRecipe().apply(ent);
 			inventory_slots_pannel_recipe().apply(ent);
-			ecs::obj bg = ent.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\menutex.png", "menu_texture"), math::Box2d(v2::Vec2(.24f, .15f), v2::Vec2(.33f, .25f)), 0);
+			ecs::obj bg = ent.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\menutex.png", "menu_texture"), geo::Box2d(v2::Vec2(.24f, .15f), v2::Vec2(.33f, .25f)), 0);
 			
 			ent.spawn_child<items::ContainerDisplayRecipe>(v2::Coord2(4, 3), input);
 ecs::Constrained<items::crafter> crafter = ent
@@ -98,7 +98,7 @@ ecs::Constrained<items::crafter> crafter = ent
 		void run(ecs::Ecs& world) {
 			//replace
 
-			for (auto [inventory_slot] : ecs::View<ecs::With<inventory>>(world)) {
+			for (auto [inventory_slot] : ecs::View< inventory>(world)) {
 				//we need some sort of wa
 				stn::Option<items::container_index> index = inventory_slot.selected_ind;
 				items::ContainerDisplay& hotbar_container = inventory_slot.hotbar_display.get_component<items::ContainerDisplay>();

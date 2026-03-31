@@ -6,12 +6,12 @@
 #include "../math/Scale3.h"
 #include "../block/block.h"
 #pragma once
-namespace Chunk {
+namespace Chunks {
 	constexpr size_t chunk_length = 16;
 	constexpr size_t chunk_axis = size_t(chunk_length / blocksize);
 	constexpr size_t chunk_elements = chunk_axis * chunk_axis * chunk_axis;
 
-	constexpr int chunk_shift = std::countr_zero(Chunk::chunk_axis);
+	constexpr int chunk_shift = std::countr_zero(Chunks::chunk_axis);
 	struct ChunkLocation {
 
 		explicit ChunkLocation(v3::Coord pos) :position(pos) {
@@ -29,8 +29,8 @@ namespace Chunk {
 		Point3 center() const {
 			return (position + unitv / 2.f) * chunk_length;
 		}
-		math::Box bounds() const {
-			return math::Box(center(), v3::Scale3(chunk_length) / 2);
+		geo::Box bounds() const {
+			return geo::Box(center(), v3::Scale3(chunk_length) / 2);
 		}
 		bool contains_block(v3::Coord block_position) const {
 			return from_block_pos(block_position).position==position;
@@ -64,13 +64,13 @@ namespace Chunk {
 		Point3 center() const {
 			return loc.center();
 		}
-		math::Box bounds() const {
+		geo::Box bounds() const {
 			return loc.bounds();
 		}
 		void sort_faces() {
-
-			std::sort(faces.begin(), faces.end(), [](blocks::MeshFace& a, blocks::MeshFace& b) {
-				return  v3::dist2(b.center(), camera::campos()) < v3::dist2(a.center(), camera::campos());
+			v3::Point3 point = world().get_resource<renderer::camera_resource>().world_camera().center();
+			std::sort(faces.begin(), faces.end(), [&](blocks::MeshFace& a, blocks::MeshFace& b) {
+				return  v3::dist2(b.center(), point) < v3::dist2(a.center(), point);
 				});
 		}
 		void destroy_hook() {

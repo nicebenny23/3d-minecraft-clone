@@ -44,23 +44,23 @@ namespace grid {
 	}
 
 	struct GridCoverer :ecs::System {
-		GridCoverer(ecs::Ecs& world) :event_key(world.make_reader<Chunk::chunk_loaded>()) {
+		GridCoverer(ecs::Ecs& world) :event_key(world.make_reader<Chunks::chunk_loaded>()) {
 
 		}
 
 		void run(ecs::Ecs& world) {
 			grid::Grid& world_grid = world.get_resource<grid::Grid>();
-			for (Chunk::chunk_loaded& cmd : event_key.read()) {
+			for (Chunks::chunk_loaded& cmd : event_key.read()) {
 				for (math::Direction3d direction : math::Directions3d) {
-					Chunk::ChunkLocation pos = Chunk::ChunkLocation(direction.coord() + cmd.pos.position);
+					Chunks::ChunkLocation pos = Chunks::ChunkLocation(direction.coord() + cmd.pos.position);
 					world_grid.get_chunk_object(pos)
 					.then([](grid::ChunkObject& chunk) {
-						chunk.get<Chunk::chunkmesh>().recreate_mesh.mark_dirty();
+						chunk.get<Chunks::chunkmesh>().recreate_mesh.mark_dirty();
 					});
 				}
 			}
 		}
 	private:
-		ecs::EventReader<Chunk::chunk_loaded> event_key;
+		ecs::EventReader<Chunks::chunk_loaded> event_key;
 	};
 }

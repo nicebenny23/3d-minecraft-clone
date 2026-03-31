@@ -27,7 +27,7 @@ namespace items {
 			}
 			ecs::obj cursor_obj = world.get_resource<cursor_container>().primary_slot();
 			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
-			for (auto&& [interaction_state, container_slot,decl] : ecs::View<ecs::With<ui::InteractionState>, ecs::With<items::RefrencedSlot>, ecs::With<items::ItemSlotDecal>>(world)) {
+			for (auto&& [interaction_state, container_slot,decl] : ecs::View<ui::InteractionState,items::RefrencedSlot, items::ItemSlotDecal>(world)) {
 				if (!interaction_state.left_clicked) {
 					continue;
 				}
@@ -67,7 +67,7 @@ namespace items {
 			ElementSlot& cursor_slot = world.get_resource<cursor_container>().primary_slot().get_component<ElementSlot>();
 			cursor_display.get_component<ui::UiBounds>().local.center = world.get_resource<userinput::InputManager>().mouse_position;
 			debug(cursor_display.get_component<ui::ComputedStyle>().enabled);
-			for (auto&& [interaction_state, container_slot,decl] : ecs::View<ecs::With< ui::InteractionState>, ecs::With<items::RefrencedSlot>, ecs::With<items::ItemSlotDecal>>(world)) {
+			for (auto&& [interaction_state, container_slot,decl] : ecs::View< ui::InteractionState, items::RefrencedSlot,   items::ItemSlotDecal>(world)) {
 				if (!interaction_state.right_clicked) {
 					continue;
 				}
@@ -103,7 +103,7 @@ namespace items {
 			.get_component<ui::ComputedStyle>();
 
 			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
-			for (auto [item_decal, interaction_state] : ecs::View<ecs::With<ItemSlotDecal>, ecs::With<ui::InteractionState>>(world)) {
+			for (auto [item_decal, interaction_state] : ecs::View< ItemSlotDecal, ui::InteractionState>(world)) {
 				if (interaction_state.hovered) {
 					if (world.get_resource<ui::MenuState>().menu_open()) {
 						item_decal.set_decal(renderer::TexturePath("images\\importantblockholder.png", "important_block_holder"));

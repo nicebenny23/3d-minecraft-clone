@@ -227,13 +227,13 @@ namespace items {
 	//clears all empty items
 	struct ItemClear :ecs::System {
 		void run(ecs::Ecs& world) {
-			ecs::View<ecs::With<item_stack>> stack_query(world);
+			ecs::View< item_stack> stack_query(world);
 			for (const auto& [slot] : stack_query) {
 				if (slot.count() == 0) {
 					slot.owner().destroy();
 				}
 			}
-			ecs::View<ecs::With<item_durability>> dur_query(world);
+			ecs::View< item_durability> dur_query(world);
 			for (const auto& [slot] : dur_query) {
 				if (slot.is_broken()) {
 					slot.owner().destroy();

@@ -46,7 +46,7 @@ namespace items {
 		v2::Coord2 pos;
 		ecs::Constrained<crafter> crafter;
 		void apply(ecs::obj& entity) const {
-			entity.apply_recipe(ui::UiSpawner(math::unit_box_2d, 1));
+			entity.apply_recipe(ui::UiSpawner(geo::unit_box_2d, 1));
 			ecs::Constrained<ui::InteractionState, ItemIcon, ItemCountDisplay> display = entity.spawn_child<FakeItemSlotDispaySpawner>(pos);
 			entity.add_component <crafting_slot_displayer>(crafter, display);
 		}
@@ -61,12 +61,12 @@ namespace items {
 			ecs::obj cursor_obj = world.get_resource<items::cursor_container>().primary_slot();
 			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
 			//		cursor_obj.get_component<ui::UiBounds>().local.center = world.ensure_resource<userinput::InputManager>().mouse_position;
-			for (auto&& [crafting_slot_display] : ecs::View<ecs::With<items::crafting_slot_displayer>>(world)) {
+			for (auto&& [crafting_slot_display] : ecs::View< items::crafting_slot_displayer>(world)) {
 				stn::Option<item_entry> entry = crafting_slot_display.crafter_comp.get_component<crafter>().wanted.member(&ItemRecipe::output);
 				crafting_slot_display.display.get<ItemCountDisplay>().count = entry.member(&item_entry::count);
 				crafting_slot_display.display.get<ItemIcon>().displayed_id = entry.member(&item_entry::id);
 			}
-			for (auto&& [crafting_slot_display] : ecs::View<ecs::With<items::crafting_slot_displayer>>(world)) {
+			for (auto&& [crafting_slot_display] : ecs::View< items::crafting_slot_displayer>(world)) {
 				
 				if (crafting_slot_display.display.get_component<ui::InteractionState>().left_clicked) {
 					crafter& crafter_comp = crafting_slot_display.crafter_comp.get_component<crafter>();
@@ -81,7 +81,7 @@ namespace items {
 
 	struct run_crafts :ecs::System {
 		void run(ecs::Ecs& world) {
-			ecs::View<ecs::With<crafter>> craft_view(world);
+			ecs::View< crafter> craft_view(world);
 			for (auto&& [crafter_component] : craft_view) {
 				crafter_component.set_state();
 			}

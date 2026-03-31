@@ -4,9 +4,9 @@
 #pragma once
 namespace items {
 	inline constexpr v2::Coord2 grid_size = v2::Coord2(30, 30);
-	inline Box2d inventory_transform_floating(v2::Vec2 center) {
+	inline geo::Box2d inventory_transform_floating(v2::Vec2 center) {
 		v2::Vec2 scale = v2::Vec2(1.0f / grid_size.x, 1.0f / grid_size.y);
-		return Box2d(center, scale);
+		return geo::Box2d(center, scale);
 	}
 	inline v2::Vec2 inventory_center(v2::Coord2 location) {
 		float xval = (2 * location.x + 1.0f) / float(grid_size.x);

@@ -17,7 +17,7 @@ inline ecs::obj spawndagger(v3::Point3 pos,v3::Vec3 velocity,float gravscale=.4f
 
   aabb::DynamicColliderRecipe().apply(refmodel);
     
-    refmodel.add_component<DamageOnHit>(3,  7);
+    refmodel.add_component<Health::DamageOnHit>(3,  7);
     //refmodel.add_component<rigidbody>().velocity=velocity;
   
     refmodel.add_component<rotate_to_velocity>();

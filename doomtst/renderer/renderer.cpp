@@ -4,9 +4,9 @@
 
 #include "decal.h"
 namespace renderer {
-	MeshData RenderableHandle::create_mesh(vertice::vertex& vertex,indice_mode auto_ind)
+	MeshBuilder RenderableHandle::create_mesh(vertice::vertex& vertex,indice_mode auto_ind)
 	{
-		return MeshData(mesh(),vertex, auto_ind);
+		return MeshBuilder(mesh(),vertex, auto_ind);
 	}
 	mesh_id RenderableHandle::mesh() {
 		

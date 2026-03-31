@@ -75,18 +75,19 @@ namespace blockrender {
 
 
 
-	inline bool chunk_viewable(Chunk::chunk& chk) {
+	inline bool chunk_viewable(Chunks::chunk& chk) {
 		return true;
 		//does not seem to be working
-		float slope = tan(chk.world().get_resource<renderer::camera_resource>().camera.get<renderer::CameraComponent>().fov / 2);
-		math::Box chkb = chk.bounds();
-		math::ray camray = math::ray::from_offset(camera::campos(), camera::GetCamFront());
-		math::cone ncone = math::cone(camray, slope);
-		math::Plane pln = math::Plane(camera::GetCamFront(), camray.start);
+		renderer::CameraComponent& camera = chk.world().get_resource< renderer::camera_resource>().world_camera();
+		float slope = tan(camera.fov / 2);
+		geo::Box chkb = chk.bounds();
+		geo::ray camray = camera.CamTransform.forward_ray();
+		geo::cone ncone = geo::cone(camray, slope);
+		geo::Plane pln = geo::Plane(camera.CamTransform.normal_dir(), camray.start);
 		bool srf = false;
 		for (int i = 0; i < 8; i++) {
-			Point3 vertex = chk.center().offset_local((math::cube_mesh[i] - unitv / 2.f) * float(Chunk::chunk_length));
-			if (dot(camera::campos() - vertex, camera::GetCamFront()) > 0) {
+			Point3 vertex = chk.center().offset_local((math::cube_mesh[i] - unitv / 2.f) * float(Chunks::chunk_length));
+			if (dot(camera.center() - vertex, camera.CamTransform.normal_dir()) > 0) {
 				srf = true;
 			}
 		}
@@ -94,7 +95,7 @@ namespace blockrender {
 		if (!srf) {
 			return false;
 		}
-		return geointersect::intersects(ncone, math::Sphere(chkb));
+		return geo::intersects(ncone, geo::Sphere(chkb));
 
 	}
 
@@ -123,7 +124,7 @@ namespace blockrender {
 		return ret;
 	}
 	template<WorldAccessor Accesor>
-	void emit_face(Accesor& world, blocks::MeshFace mesh_face, renderer::MeshData& render_mesh) {
+	void emit_face(Accesor& world, blocks::MeshFace mesh_face, renderer::MeshBuilder& render_mesh) {
 		blocks::face& face = mesh_face.face();
 		if (face.uncovered()) {
 
@@ -151,14 +152,14 @@ namespace blockrender {
 	// Recreate the mesh for a chunk
 	void recreate_chunk_mesh(grid::ChunkObject::ObjectType chunk_to_fill, std::mutex& fill_lock) {
 		grid::Grid& grid = chunk_to_fill.world().get_resource<grid::Grid>();
-		Chunk::chunk& cnk = chunk_to_fill.get<Chunk::chunk>();
-		Chunk::chunkmesh& cnk_mesh = chunk_to_fill.get<Chunk::chunkmesh>();
+		Chunks::chunk& cnk = chunk_to_fill.get<Chunks::chunk>();
+		Chunks::chunkmesh& cnk_mesh = chunk_to_fill.get<Chunks::chunkmesh>();
 		grid::FocusedGridAcessor chunk_getter(chunk_to_fill);
 		cnk_mesh.recreate_mesh.clean([&]() {
 
 			cnk_mesh.faces.clear();
-			renderer::MeshData mesh = cnk_mesh.SolidGeo.create_mesh(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
-			for (Chunk::block_object& obj: cnk) {
+			renderer::MeshBuilder mesh = cnk_mesh.SolidGeo.create_mesh(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
+			for (Chunks::block_object& obj: cnk) {
 				block_mesh& mesh_at = (obj.get_unchecked<block>().mesh);//g
 
 				if (mesh_at.invisible()) {
@@ -188,11 +189,11 @@ namespace blockrender {
 
 
 	// Render a chunk mesh
-	void render_chunk(grid::Grid& world, Chunk::chunkmesh& mesh) {
-		double distance = v3::dist(camera::GetCam().position, mesh.center());
+	void render_chunk(grid::Grid& world, Chunks::chunkmesh& mesh) {
+		double distance = v3::dist(mesh.world().get_resource<camera_resource>().world_camera().center(), mesh.center());
 		mesh.SolidGeo.set_order_key(distance);
 		mesh.sort_faces();
-		renderer::MeshData mesh_data = mesh.TransparentGeo.create_mesh(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
+		renderer::MeshBuilder mesh_data = mesh.TransparentGeo.create_mesh(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
 		for (int i = 0; i < mesh.faces.length(); i++) {
 
 			emit_face(world, mesh.faces[i], mesh_data);
@@ -216,11 +217,11 @@ namespace blockrender {
 				recreate_chunk_mesh(grid::ChunkObject::ObjectType(item), fill_mutex);
 				};
 			stn::array<grid::ChunkObject::ObjectType> reloads;
-			ecs::View<ecs::With<Chunk::chunkmesh>, ecs::Owner> meshes(ecs);
+			ecs::View< Chunks::chunkmesh, ecs::Owner> meshes(ecs);
 			size_t max_recomputes = 4;
 			for (auto&& [mesh, object] : meshes) {
 				if (mesh.recreate_mesh.is_dirty()) {
-					if (chunk_viewable(object.get_component<Chunk::chunk>())) {
+					if (chunk_viewable(object.get_component<Chunks::chunk>())) {
 						reloads.push(object);
 					}
 				}
@@ -238,7 +239,7 @@ namespace blockrender {
 		void run(ecs::Ecs& ecs) {
 			array<ecs::obj> to_render = array<ecs::obj>();
 			Grid& grid = ecs.get_resource<grid::Grid>();
-			ecs::View<ecs::With<Chunk::chunkmesh>> meshes(ecs);
+			ecs::View< Chunks::chunkmesh> meshes(ecs);
 			for (auto&& [mesh] : meshes) {
 				render_chunk(grid, mesh);
 

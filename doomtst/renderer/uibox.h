@@ -48,11 +48,11 @@ namespace ui {
 		UiSpawner ui_spawn;
 		colors::Color color;
 		stn::Option<renderer::TexturePath> path;
-		ui_image_spawner(const renderer::TexturePath& spawn_path,math::Box2d box, size_t priority, colors::Color spawn_color=colors::White)
+		ui_image_spawner(const renderer::TexturePath& spawn_path,geo::Box2d box, size_t priority, colors::Color spawn_color=colors::White)
 		:path(spawn_path),ui_spawn(box,priority), color(spawn_color) {
 			
 		}
-		ui_image_spawner(math::Box2d box, size_t priority,colors::Color spawn_color = colors::White)
+		ui_image_spawner(geo::Box2d box, size_t priority,colors::Color spawn_color = colors::White)
 		:path(stn::None),ui_spawn(box, priority),color(spawn_color){
 
 		}
@@ -66,7 +66,7 @@ namespace ui {
 		}
 	};
 	struct ui_image{
-		ui_image(ecs::Ecs& world,const char* texloc, const char* texture, math::Box2d bounds, size_t prio) :object(ecs::spawn_emplaced<ui_image_spawner>(world,renderer::TexturePath(std::string(texloc),std::string(texture)),bounds,prio)){
+		ui_image(ecs::Ecs& world,const char* texloc, const char* texture, geo::Box2d bounds, size_t prio) :object(ecs::spawn_emplaced<ui_image_spawner>(world,renderer::TexturePath(std::string(texloc),std::string(texture)),bounds,prio)){
 		}
 		ecs::object_handle object;
 		void enable_if(bool should_enable) {
@@ -80,7 +80,7 @@ namespace ui {
 			object.set_emplace_component<UiEnabled>().disable();
 		}
 		
-		void set_bounds(Box2d bounds) {
+		void set_bounds(geo::Box2d bounds) {
 			object.get_component<ui::UiBounds>().local = bounds;
 		}
 		void set_center(v2::Vec2 center) {
@@ -112,7 +112,7 @@ namespace ui {
 				ui_image_component& img= world.get_component<ui_image_component>(cmd.ui_entity);
 				if (!img.tex_handle) {
 					img.tex_handle = world.get_resource<renderer::Renderer>().gen_renderable("Ui");
-					renderer::MeshData mesh = img.tex_handle.create_mesh(vertice::vertex().push<float, 2>());
+					renderer::MeshBuilder mesh = img.tex_handle.create_mesh(vertice::vertex().push<float, 2>());
 					mesh.add_indices(math::square_mesh_triangle_indices);
 					array<float> databuf = array<float>();
 					for (int j = 0; j < 4; j++) {
@@ -126,7 +126,7 @@ namespace ui {
 				}
 			}
 
-			ecs::View<ecs::With<ui::ComputedStyle>, ecs::With<ui_image_component>> bounds_view(world);
+			ecs::View< ui::ComputedStyle, ui_image_component> bounds_view(world);
 			for (auto&& [style, ui_image] : bounds_view) {
 
 				if (ui_image.tex_handle) {

@@ -36,7 +36,7 @@ namespace items{
 			object.validate();
 		}
 		void apply(ecs::obj& object) const{
-			ui::UiSpawner(math::unit_box_2d, 1000).apply(object);
+			ui::UiSpawner(geo::unit_box_2d, 1000).apply(object);
 			ContainerDisplay& cont = object.add_component<ContainerDisplay>(container_object);
 			v2::Coord2 size = cont.displayed_container().size;
 			for (int y = 0; y < size.y; y++) {

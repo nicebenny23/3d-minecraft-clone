@@ -5,7 +5,7 @@
 #include "../math/dir.h"
 #pragma once 
 using namespace blocks;
-namespace Chunk {
+namespace Chunks {
 
 
 	inline std::string file_name(ChunkLocation pos, grid::world& world) {
@@ -21,9 +21,9 @@ namespace Chunk {
 	using block_object = ecs::Constrained<block>;
 	struct chunk :ecs::component {
 		stn::array<ecs::Constrained<block>> block_list;
-		Chunk::ChunkLocation location;
+		Chunks::ChunkLocation location;
 		bool modified;
-		chunk(Chunk::ChunkLocation chunk_location) :modified(false), location(chunk_location), block_list() {
+		chunk(Chunks::ChunkLocation chunk_location) :modified(false), location(chunk_location), block_list() {
 			block_list.reserve(chunk_elements);
 			chunk_access_offset = index_from_local_position(location.position * chunk_axis);
 		}
@@ -31,7 +31,7 @@ namespace Chunk {
 		Point3 center() const {
 			return location.center();
 		}
-		math::Box bounds() const {
+		geo::Box bounds() const {
 			return location.bounds();
 		}
 		block_object& operator[](size_t index) {

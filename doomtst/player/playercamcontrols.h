@@ -1,8 +1,8 @@
 
-#include "../game/entitystate.h"
+
 #include "../world/voxeltraversal.h"
 #include "../game/collision.h"
-#include "../game/entityutil.h"
+#include "../game/health.h"
 #include "../items/menu.h"
 #pragma once
 struct camera_event {
@@ -48,8 +48,8 @@ struct playercamcontrols : ecs::component
 			Core::game.Ecs.get_resource<window::Window>().EnableCursor();
 		}
 		double max_interact_range = 5;
-		math::ray cameraray = owner().get_component<ecs::world_transform>().transform.forward_ray().with_length(max_interact_range);
-		voxtra::WorldRayCollision closest = collision::raycast(cameraray, collision::HitQuery(world()));
+		geo::ray cameraray = owner().get_component<ecs::world_transform>().transform.forward_ray().with_length(max_interact_range);
+		voxtra::RayWorldCollision closest = collision::raycast(cameraray, collision::HitQuery(world()));
 		if (closest)
 		{
 			world().write_event<camera_event>(closest.unwrap().owner());

@@ -57,7 +57,7 @@ namespace renderer{
 	};
 	struct ColorSetter:ecs::System{
 		void run(ecs::Ecs& world) override{
-			ecs::View<ecs::With<color_component>,ecs::With<renderable_overides>> renderable_iter(world);
+			ecs::View<color_component, renderable_overides> renderable_iter(world);
 			for (auto&& [color, overrides] : renderable_iter) {
 				overrides.set(uniform(color.mesh_color.glm(), "color"));
 			}

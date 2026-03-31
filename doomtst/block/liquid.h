@@ -22,9 +22,6 @@ struct liquidprop : ecs::component {
 	}
 	float diffusetime;
 	void start() {
-		if (!owner().has_component<block>()) {
-			throw std::logic_error("all liquids must be blocks");
-		}
 		diffusetime = 0;
 		//utype = ecs::updatetick;
 

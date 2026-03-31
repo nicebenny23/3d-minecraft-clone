@@ -37,8 +37,8 @@ namespace math {
 		double yaw;
 		double pitch;
 		v3::Scale3 scale;
-		math::Box unrotated_box() const{
-			return math::Box(position, scale);
+		geo::Box unrotated_box() const{
+			return geo::Box(position, scale);
 		}
 		void rotate(double ptch, double yw) {
 			pitch += ptch;
@@ -50,8 +50,8 @@ namespace math {
 		v3::Vec3 right_dir() const {
 			return v3::zero_fixed_normal(v3::Cross(normal_dir(), v3::up));
 		}
-		ray forward_ray() const {
-			return ray::from_offset(position, normal_dir());
+		geo::ray forward_ray() const {
+			return geo::ray::from_offset(position, normal_dir());
 		}
 		v3::Vec3 up_dir() const{
 			return v3::Cross(right_dir(), normal_dir());

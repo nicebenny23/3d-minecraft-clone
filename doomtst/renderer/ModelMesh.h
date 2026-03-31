@@ -56,7 +56,7 @@ namespace renderer {
 				if (!loaded_model.handle) {
 					loaded_model.handle = world.get_resource<Renderer>().gen_renderable("Model");
 				}
-				MeshData mesh = loaded_model.handle.create_mesh(vertice::vertex().push<float, 3>().push<float, 2>(),renderer::indice_mode::generate_indices);
+				MeshBuilder mesh = loaded_model.handle.create_mesh(vertice::vertex().push<float, 3>().push<float, 2>(),renderer::indice_mode::generate_indices);
 				stn::array<v2::Vec2> tex_coords;
 				stn::array<v3::Point3> points;
 				while (true) {
@@ -90,7 +90,7 @@ namespace renderer {
 
 				loaded_model.handle.fill(std::move(mesh));
 			}
-			ecs::View<ecs::With<Model>, ecs::With<ecs::world_transform>> world_view(world);
+			ecs::View<Model,ecs::world_transform> world_view(world);
 			for (auto&& [model, transform] : world_view) {
 				if (model.handle) {
 					model.handle.set_color(model.color);

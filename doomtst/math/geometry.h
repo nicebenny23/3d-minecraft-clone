@@ -5,62 +5,11 @@
 #include "vector2.h"
 #include "../util/Option.h"
 #include "dir.h"
+#include "box.h"
 using namespace v3;
 
-namespace math {
-	struct Box {
-		Point3 center;
-		Scale3 scale;
-
-		Box(Point3 cent, Scale3 scl) : center(cent), scale(scl) {
-			int l = 3;
-		}
-
-		Point3 max() const {
-			return center + Vec3(half_size());
-		}
-		Point3 min() const {
-			return center - Vec3(half_size());
-		}
-		
-		bool contains_point(Point3 pos) const {
-			Vec3 shifted = center - pos;
-			Scale3 bounds = half_size();
-			if (abs(shifted.x) <= bounds.x) {
-				if (abs(shifted.y) <= bounds.y) {
-					if (abs(shifted.z) <= bounds.z) {
-						return true;
-					}
-				}
-			}
-			return false;
-		}
-		v3::Point3 in_direction(math::Direction3d direction) {
-			return direction.vec()* half_size() + center;
-		}
-
-		bool contains_box(Box b) const {
-			return contains_point(b.max()) && contains_point(b.min());
-		}
-		Scale3 half_size() const {
-			return scale / 2;
-		}
-		// Minkowski difference operator
-		Box operator-(const Box& other) const {
-			//minkoski diffrence changes affinity
-			return Box(center .offset_local(other.center*-1), scale.expanded(other.scale));
-		}
-		Box translate(Vec3 translation_vector) const {
-			return Box(center + translation_vector, scale);
-		}
-		Box scale_from_center(float dialation) const {
-			return Box(center, scale * dialation);
-		}
-		
-		Box transform(Box other_transform) const {
-			return Box(center.offset_local(other_transform.center * half_size()), other_transform.scale * scale);
-		}
-	};
+namespace geo {
+	
 
 
 	struct Box2d {
@@ -129,7 +78,7 @@ namespace math {
 			return 0 <= dot(normal, pnt - point);
 		}
 		//returns if it crosses a vector
-		bool crosses(math::ray potential_crossing) const {
+		bool crosses(geo::ray potential_crossing) const {
 			return above(potential_crossing.start) != above(potential_crossing.end);
 		}
 
@@ -168,10 +117,10 @@ namespace math {
 	};
 
 	struct cone {
-		math::ray direction;
+		geo::ray direction;
 		double slope;
 
-		cone(const math::ray newray, double cone_slope)
+		cone(const geo::ray newray, double cone_slope)
 			: direction(newray), slope(cone_slope) {
 		}
 
@@ -202,12 +151,12 @@ namespace math {
 		}
 	};
 
-	inline bool boxes_intersect(math::Box p1, math::Box p2) {
+	inline bool boxes_intersect(geo::Box p1, geo::Box p2) {
 		return (p1 - p2).contains_point(v3::Point3(0,0,0));
 
 	}
 	inline 	stn::Option<v3::Vec3> collide_box(Box p1, Box p2) {
-		if (!math::boxes_intersect(p1, p2)) {
+		if (!geo::boxes_intersect(p1, p2)) {
 			return stn::None;
 
 		}

@@ -10,6 +10,8 @@
 #include "game_object.h"
 namespace ecs {
 	// Views iterate over entities containing the specified Components.
+	
+	
 	template<typename T>
 	concept QueryFilter = requires(T t, const Archetype & archetype) {
 		{
@@ -17,7 +19,7 @@ namespace ecs {
 		} -> std::convertible_to<bool>;
 	};
 	template<typename T>
-	concept QueryMap = requires(T t, entity_id ent) {
+	concept QueryMap = requires(const T& t, entity_id ent) {
 		{
 			t.map(ent)
 		};
@@ -41,9 +43,7 @@ namespace ecs {
 		}
 		ecs::Ecs& world;
 	};
-
-	template<typename T>
-	concept QueryElement = QueryMap<T> || QueryFilter<T> && std::constructible_from<T, Ecs&>;
+	
 	template<ComponentType T>
 	struct With {
 		T& map(entity_id ent) const {
@@ -58,6 +58,26 @@ namespace ecs {
 		ecs::Ecs& world;
 		component_id id_for;
 	};
+	
+	template<typename T>
+	struct query_data_t {
+		using type = T;
+	};
+	template<ComponentType T>
+	struct query_data_t<T> {
+		using type =  ecs::With<T>;
+	};
+
+	
+	template<typename T>
+	concept QueryElement = QueryMap<T> || QueryFilter<T> && std::constructible_from<T, Ecs&>;
+
+	//special casing for components so that we can write View<Position,Velocity> instead of View<With<Position>, With<Velocity>>
+	template<typename T>
+	using query_data = typename query_data_t<T>::type;
+	template<typename T>
+	concept HasAssociatedQuery = QueryElement<query_data<T>>;
+
 	template<ComponentType T>
 	struct Mabye {
 		stn::Option<T&> map(entity_id ent) const {
@@ -79,7 +99,7 @@ namespace ecs {
 		component_id id_for;
 	};
 
-	template<QueryElement... Components>
+	template<HasAssociatedQuery... Components>
 	struct View {
 		Ecs& world() {
 			return ecs;
@@ -87,7 +107,7 @@ namespace ecs {
 		stn::span<archetype_id> view_archetypes() {
 			return archetypes.span();
 		}
-		using set_type = stn::TupleSet<Components...>;
+		using set_type = stn::TupleSet<query_data<Components>...>;
 		using filter_set = stn::subset_passing<set_type, query_filter_t>;
 		using map_set = stn::subset_passing<set_type, query_map_t>;
 		struct Iterator {

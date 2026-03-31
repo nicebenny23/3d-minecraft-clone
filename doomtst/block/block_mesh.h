@@ -63,7 +63,7 @@ namespace blocks {
 	
 	struct block_mesh {
 	private:
-		math::Box box;
+		geo::Box box;
 
 	public:
 		//the vertex at the lowest corner of the world
@@ -71,7 +71,7 @@ namespace blocks {
 		math::Direction3d attached_direction;
 		math::Direction2d direction;
 
-		math::Box bounds() const {
+		geo::Box bounds() const {
 			return box;
 		}
 		v3::Point3 center() const {
@@ -128,7 +128,7 @@ namespace blocks {
 	}
 
 	inline v3::Point3 MeshFace::center() {
-		return face_direction.vec() * mesh().bounds().scale + mesh().bounds().center;
+		return mesh().bounds().in_direction(face_direction);
 	}
 	inline block_mesh& MeshFace::mesh() {
 		return *face_mesh;

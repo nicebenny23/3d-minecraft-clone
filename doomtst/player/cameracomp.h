@@ -37,6 +37,12 @@ namespace renderer {
 		camera_resource(ecs::Constrained<CameraComponent> camera_object) :camera(camera_object) {
 
 		}
+		CameraComponent& world_camera() {
+			return camera.get<CameraComponent>();
+		}
+		const CameraComponent& world_camera() const{
+			return camera.get<CameraComponent>();
+		}
 		ecs::Constrained<CameraComponent> camera;
 	};
 	

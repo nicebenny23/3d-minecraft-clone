@@ -4,6 +4,7 @@
 #include "../../util/variant.h"
 #include "mesh.h"
 #include "Fbo.h"
+#include "vertex.h"
 #pragma once
 namespace renderer {
 	struct Renderer;
@@ -36,6 +37,15 @@ namespace renderer {
 		bool operator==(const RenderProperties& other) const = default;
 
 	};
+
+	using mesh_id = stn::rc<GpuMesh>;
+	struct CpuMesh {
+		mesh_id mesh;
+		vertice::vertex layout;
+		stn::array<float> points;
+		stn::array<std::uint32_t> indices;
+
+	};
 	struct Context {
 		void clear() {
 			glClearColor(0, 0, 0, 0.0f);
@@ -47,7 +57,7 @@ namespace renderer {
 		size_t frame_id() {
 			return bound_frame.map([](Fbo frame) {return frame.id; }).unwrap_or(0);
 		}
-		void bind(Mesh& mesh) {
+		void bind(GpuMesh& mesh) {
 			if (mesh.vao.id == 0) {
 				throw std::logic_error("mesh unitilized");
 			}
@@ -136,28 +146,50 @@ namespace renderer {
 
 
 
-		Mesh create_mesh() {
+		GpuMesh create_mesh() {
 
 			GLuint vao = 0, vbo = 0, ebo = 0;
 			glGenVertexArrays(1, &vao);
 			glGenBuffers(1, &vbo);
 			glGenBuffers(1, &ebo);
 			GlUtil::poll_errors();
-			return Mesh(
+			return GpuMesh(
 			0,
 			Vao(vao),
 			Ebo(ebo),
 			Vbo(vbo));
 		}
 
-		void destroy(Mesh& msh) {
+		void destroy(GpuMesh& msh) {
 			glDeleteBuffers(1, &msh.ebo.id);
 			glDeleteBuffers(1, &msh.vbo.id);
 			glDeleteVertexArrays(1, &msh.vao.id);
 			msh.length = 0;
 
 		}
+		void load(CpuMesh& data) {
 
+			GpuMesh& msh = *data.mesh;
+			if (data.points.length() % data.layout.components() != 0) {
+				throw std::logic_error("Vertex Data is corrupted");
+			}
+			if (msh.ebo.id) {
+				bind(msh);
+				glBufferData(GL_ELEMENT_ARRAY_BUFFER, data.indices.length() * sizeof(GLuint), data.indices.data(), GL_STATIC_DRAW);
+				glBufferData(GL_ARRAY_BUFFER, data.points.length() * sizeof(float), data.points.data(), GL_STATIC_DRAW);
+				size_t stride = data.layout.stride();
+				size_t offset = 0;
+				vertice::vertex& mesh_vertex = data.layout;
+				for (int i = 0; i < mesh_vertex.length(); i++) {
+					vertice::vertex_attribute& attribute = mesh_vertex[i];
+					GlUtil::set_attr(i, attribute.components, attribute.type, GLsizei(stride), offset);
+					glEnableVertexAttribArray(i);
+					offset += attribute.size;
+				}
+
+				msh.length = data.indices.length();
+			}
+		}
 		shader bound_shader() {
 			return BoundShader.unwrap();
 		}
@@ -178,7 +210,7 @@ namespace renderer {
 		stn::Option <Texture2D> BoundTexture2d;
 		stn::Option <TextureArray> BoundTextureArray;
 		stn::Option<Fbo> bound_frame;
-		stn::Option <Mesh> bound_mesh;
+		stn::Option <GpuMesh> bound_mesh;
 
 
 	};

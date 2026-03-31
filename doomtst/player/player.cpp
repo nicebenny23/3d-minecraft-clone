@@ -24,11 +24,13 @@ void player::initplayer(ecs::obj& player) {
 
 	player.add_component<ecs::world_transform>(v3::Point3(0,2,0));
 	player.apply_recipe(Health::HealthSpawner(10));
-	player.get_component<ecs::world_transform>().transform.scale = unit_scale;
+	player.get_component<ecs::world_transform>().transform.scale = unit_scale/1.02f;
 	Core::game.insert_plugin<PlayerModificationPlugin>();
 	Core::game.insert_plugin<PlayerPlacePlugin>();
 	Core::game.insert_plugin<player::CrosshairPlugin>();
 	Core::game.insert_plugin<PlayerInventoryPlugin>();
+	Core::game.emplace_system<PlayerAttacker>();
+	Core::game.emplace_system<PlayerMovementSys>();
 	aabb::DynamicColliderRecipe().apply(player);
 	player.apply_recipe(physics::Spawner);
 
@@ -42,7 +44,8 @@ void player::initplayer(ecs::obj& player) {
 	player.add_component< playerbreak>();
 	player.add_component< player_place>();
 	player.add_component<PlayerCursor>();
-	player.add_component<playerattackcomp>();
+	player.add_component<PlayerAttack>();
+	player.add_component<Health::FallDamageRecipient>();
 	player.add_component<playerdaggercomp>();
 	player.add_component<renderer::CameraComponent>();
 	

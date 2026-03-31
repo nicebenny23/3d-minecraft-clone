@@ -1,5 +1,4 @@
 
-#include "../game/entitystate.h"
 #include "../world/voxeltraversal.h"
 #include "../game/collision.h"
 #include "../entities/crystaldaggers.h"

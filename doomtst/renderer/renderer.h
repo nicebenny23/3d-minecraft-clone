@@ -39,7 +39,7 @@ namespace renderer {
 				id.unwrap().object().set_emplace_component<color_component>(color);
 			}
 		}
-		void fill(MeshData&& new_mesh) {
+		void fill(MeshBuilder&& new_mesh) {
 			if (id) {
 				id.unwrap().world().write_command(std::move(new_mesh));
 			}
@@ -73,7 +73,7 @@ namespace renderer {
 		void destroy();
 		bool operator==(const RenderableHandle& other) const = default;
 		Renderer& renderer();
-		MeshData create_mesh(vertice::vertex& mesh, indice_mode auto_ind = indice_mode::manual_generate);
+		MeshBuilder create_mesh(vertice::vertex& mesh, indice_mode auto_ind = indice_mode::manual_generate);
 		explicit operator bool() const noexcept {
 			return static_cast<bool>(id);
 		}
@@ -140,7 +140,7 @@ namespace renderer {
 			}
 			GlUtil::poll_errors();
 
-			Mesh& mesh = *ren.get<mesh_component>().msh.expect("all must have a mesh");
+			GpuMesh& mesh = *ren.get<mesh_component>().msh.expect("all must have a mesh");
 			if (!mesh.filled()) {
 				return;
 			}
@@ -155,14 +155,14 @@ namespace renderer {
 		}
 
 
-		void fill_mesh(MeshData& data) {
+		void fill_mesh(MeshBuilder& data) {
 			meshes.load_in(data);
 		}
 
 		MeshRegistry meshes;
 
-		Renderer(ecs::Ecs& spawn_world) :world(spawn_world), uniform_manager() {
-			meshes = MeshRegistry(&context);
+		Renderer(ecs::Ecs& spawn_world) :world(spawn_world), uniform_manager(), meshes(context) {
+			
 
 		}
 		mesh_id insert_mesh(renderer::renderable id) {
@@ -200,7 +200,7 @@ namespace renderer {
 	struct render_all :ecs::System {
 		void run(ecs::Ecs& world) {
 			ecs::Constrained<CameraComponent> camera_object = world.get_resource<renderer::camera_resource>().camera;
-			CameraComponent& cam = camera_object.get_component<CameraComponent>();
+			CameraComponent& cam = camera_object.get<CameraComponent>();
 			Renderer& ren = world.get_resource<Renderer>();
 			window::Window& window = world.get_resource<window::Window>();
 			ren.set_uniform("aspect_ratio", window.AspectRatio());
@@ -213,14 +213,14 @@ namespace renderer {
 				));
 			ren.set_uniform("near_plane", float(cam.viewport.min()));
 			ren.set_uniform("far_plane", float(cam.viewport.max()));
-			for (MeshData& mesh : world.read_commands<MeshData>()) {
+			for (MeshBuilder& mesh : world.read_commands<MeshBuilder>()) {
 
 				ren.fill_mesh(mesh);
 			}
 			std::unordered_map<phase_handle, render_pass> pass_map;
 			size_t cnt = 0;
 
-			ecs::View<ecs::With<material_component>, ecs::With<order_key>, ecs::With<is_enabled>, ecs::Owner> renderable_iter(world);
+			ecs::View<material_component, order_key,  is_enabled, ecs::Owner> renderable_iter(world);
 			for (auto [mat, order, should_render, object] : renderable_iter) {
 				if (should_render.enabled) {
 					phase_handle pass = mat.mat_id->pass;

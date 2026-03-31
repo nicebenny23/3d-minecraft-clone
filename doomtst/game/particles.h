@@ -16,7 +16,7 @@ struct particleemiter: ecs::component
 	v3::Point3 position;
 	renderer::Texture2D* tex;
 	int maxparticles = 1000;
-	Mesh ParticleMesh;
+	GpuMesh ParticleMesh;
 	array<ecs::obj> particlearray;
 	float particlespawntime;
 	float particlelifetime;

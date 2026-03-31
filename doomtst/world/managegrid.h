@@ -46,7 +46,7 @@ namespace grid {
 				.loc = position,
 				.face = math::up2d,
 				.direction = attach_direction,
-				.mesh= grid.get_chunk(position).unwrap().owner().get_component<Chunk::chunkmesh>()
+				.mesh= grid.get_chunk(position).unwrap().owner().get_component<Chunks::chunkmesh>()
 			}.spawn(blk.world());
 			
 			blk.destroy();
@@ -59,9 +59,9 @@ namespace grid {
 			grid::Grid& grid = world.get_resource<grid::Grid>();
 			for (set_block_command& cmd : world.read_commands<set_block_command>()) {
 
-				stn::Option<Chunk::block_object&> mabye_location = grid.get_object(cmd.pos);
+				stn::Option<Chunks::block_object&> mabye_location = grid.get_object(cmd.pos);
 				if (mabye_location) {
-					Chunk::block_object& location = mabye_location.unwrap();
+					Chunks::block_object& location = mabye_location.unwrap();
 					grid.get_chunk(cmd.pos).unwrap().modified = true;
 					size_t old_light = location.get<block>().light_passing_through;
 					world.write_command(grid::lighten_block_command(cmd.pos));

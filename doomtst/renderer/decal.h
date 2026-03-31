@@ -4,7 +4,6 @@
 #include "../game/ecs/unique_object.h"
 #include "../game/ecs/query.h"
 #include "../math/meshes.h"
-#include "../game/camera.h"
 #include "../game/ecs/filtered_object.h"
 #include "../player/cameracomp.h"
 #pragma once
@@ -91,23 +90,22 @@ namespace decals {
 					}
 				}
 			}
-			ecs::View<ecs::With<decal_component>> view = ecs::View<ecs::With<decal_component>>(world);
+			v3::Point3 camera_center = world.get_resource<camera_resource>().world_camera().center();
+			ecs::View<decal_component> view(world);
 			for (auto [dec] : view) {
 
 				if (dec.handle) {
-
-
-					renderer::MeshData mesh = dec.handle.create_mesh(vertice::vertex().push<float, 3>().push<float, 2>());
+					renderer::MeshBuilder mesh = dec.handle.create_mesh(vertice::vertex().push<float, 3>().push<float, 2>());
 					for (int i = 0; i < 4; i++) {
 						v2::Vec2 norm_uv = math::symetrical_square_mesh[i];
-						const double eps = .001;
+						const double eps = .001f;
 						//brings it above the surface
 						v3::Point3 point = dec.normal * eps + dec.center + dec.tangent * norm_uv.x + dec.bi_tangent * norm_uv.y;
 						mesh.add_point(point, math::square_mesh[i]);
 					}
 					mesh.add_indices(math::square_mesh_triangle_indices);
 					dec.handle.fill(std::move(mesh));
-					dec.handle.set_order_key(dist(camera::GetCam().position, dec.center));
+					dec.handle.set_order_key(dist(camera_center, dec.center));
 				}
 			}
 		}

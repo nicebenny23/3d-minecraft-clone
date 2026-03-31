@@ -25,9 +25,9 @@ namespace items {
 	};
 	struct ItemProgressDisplay :ecs::component {
 		stn::Option<double> value;
-		math::Box2d full_box;
+		geo::Box2d full_box;
 		ecs::Constrained<ui::ui_image_component> bar;
-		ItemProgressDisplay(ecs::Constrained<ui::ui_image_component> image_bar, math::Box2d box) :value(0), bar(image_bar), full_box(box){
+		ItemProgressDisplay(ecs::Constrained<ui::ui_image_component> image_bar, geo::Box2d box) :value(0), bar(image_bar), full_box(box){
 
 		}
 	};
@@ -37,11 +37,11 @@ namespace items {
 
 		}
 		void apply(ecs::obj& entity) const{
-			ecs::obj image= entity.spawn_child< ui::ui_image_spawner>(math::Box2d::origin_centered(v2::Vec2(item_size, item_size)), 1);
-			ecs::obj text= entity.spawn_child<ui::ui_text_spawner>(math::Box2d::Box2d(v2::Vec2(.4f,.4f),v2::Vec2(.4f,.4f)), 1,colors::White);
+			ecs::obj image= entity.spawn_child< ui::ui_image_spawner>(geo::Box2d::origin_centered(v2::Vec2(item_size, item_size)), 1);
+			ecs::obj text= entity.spawn_child<ui::ui_text_spawner>(geo::Box2d::Box2d(v2::Vec2(.4f,.4f),v2::Vec2(.4f,.4f)), 1,colors::White);
 			entity.set_emplace_component<ItemIcon>(ecs::Constrained<ui::ui_image_component>(image));
 			entity.set_emplace_component<ItemCountDisplay>(ecs::Constrained<ui::text_component>(text));
-				math::Box2d max_size(v2::Vec2(0, -.7f), v2::Vec2(item_size, item_size / 4));
+				geo::Box2d max_size(v2::Vec2(0, -.7f), v2::Vec2(item_size, item_size / 4));
 				ecs::obj bar= entity.spawn_child< ui::ui_image_spawner>(renderer::TexturePath("images\\default.png"), max_size, 1, colors::Green);
 				entity.set_emplace_component<ItemProgressDisplay>(bar,max_size);
 		}
@@ -49,7 +49,7 @@ namespace items {
 
 	struct ItemDuribilityBarSetter :ecs::System {
 		void run(ecs::Ecs& world) {
-			for (auto&& [icon] : ecs::View<ecs::With<ItemProgressDisplay>>(world)) {
+			for (auto&& [icon] : ecs::View<ItemProgressDisplay>(world)) {
 				if (!icon.value) {
 					icon.bar.get_component<ui::UiEnabled>().disable();
 				}
@@ -57,7 +57,7 @@ namespace items {
 					icon.bar.get_component<ui::UiEnabled>().enable();
 
 					double dur_progress = icon.value.unwrap();
-					math::Box2d& box = icon.bar.get_component<ui::UiBounds>().local;
+					geo::Box2d& box = icon.bar.get_component<ui::UiBounds>().local;
 					box.scale.x = icon.full_box.scale.x * dur_progress;
 					box.center.x = stn::lerp(icon.full_box.min().x, icon.full_box.center.x, dur_progress);
 				}
@@ -66,7 +66,7 @@ namespace items {
 	};
 	struct ItemIconSetter :ecs::System {
 		void run(ecs::Ecs& world) {
-			for (auto&& [icon] : ecs::View<ecs::With<ItemIcon>>(world)) {
+			for (auto&& [icon] : ecs::View<ItemIcon>(world)) {
 				if (!icon.displayed_id) {
 					icon.image_component.get_component<ui::UiEnabled>().disable();
 					continue;
@@ -81,7 +81,7 @@ namespace items {
 	struct ItemCountSetter :ecs::System {
 		void run(ecs::Ecs& world) {
 
-			for (auto&& [count] : ecs::View<ecs::With<ItemCountDisplay>>(world)) {
+			for (auto&& [count] : ecs::View< ItemCountDisplay>(world)) {
 				if (!count.count||count.count.unwrap()<=1) {
 					count.text_component.get_component<ui::UiEnabled>().disable();
 					continue;

@@ -11,25 +11,32 @@
 namespace voxtra {
 
 	struct RayWorldHit {
-		aabb::Collider& collider;
-		geointersect::RayHit hit;
-		RayWorldHit(geointersect::RayHit rayHit, aabb::Collider& WorldCollider) :hit(rayHit), collider(WorldCollider) {
+		ecs::Constrained<aabb::Collider> collider;
+		geo::RayHit hit;
+
+		RayWorldHit(geo::RayHit rayHit, ecs::Constrained<aabb::Collider> WorldCollider) :hit(rayHit), collider(WorldCollider) {
 		}
 		Point3 intersection() const {
-			return hit.end;
+			return ray().end;
 		}
 
 		ecs::obj owner() const {
-			return collider.owner();
+			return collider.object();
 		}
+
 		double dist() const {
-			return hit.length();
+			return ray().length();
 		}
-		math::ray ray() const {
-			return hit;
+		stn::Option<math::Direction3d> hit_direction() const {
+			return hit.hit_normal;
+		}
+
+		geo::ray ray() const {
+			return hit.ray;
 		}
 	};
-	using WorldRayCollision = stn::Option<RayWorldHit>;
+	
+	using RayWorldCollision = stn::Option<RayWorldHit>;
 	enum class GridTraverseMode {
 		countnormal = 0,
 		countall = 1,
@@ -38,12 +45,13 @@ namespace voxtra {
 	};
 
 
-	inline bool boxcast_grid(math::Box Box, grid::Grid& world) {
-		array<ecs::obj> blocks_in_range = world.voxel_in_range(Box);
-		for (ecs::obj PotentialCollision : blocks_in_range) {
+	inline bool boxcast_grid(geo::Box Box, grid::Grid& world) {
+		array<Chunks::block_object> blocks_in_range = world.voxel_in_range(Box);
+		for (Chunks::block_object& PotentialCollision : blocks_in_range) {
 
 			stn::Option<aabb::Collider&> Collider = PotentialCollision.get_component_opt<aabb::Collider>();
 			if (Collider && PotentialCollision.get_component<blocks::block>().solid() && !Collider.unwrap().effector) {
+				geo::Box coll_box = Collider.unwrap().global_box();
 				if (aabb::box_intersects_aabb(Box, Collider.unwrap())) {
 					return true;
 				}
@@ -62,7 +70,7 @@ namespace voxtra {
 		return true;
 	}
 
-	inline WorldRayCollision  grid_cast(math::ray nray, GridTraverseMode trav, grid::Grid& grid) {
+	inline RayWorldCollision  grid_cast(geo::ray nray, GridTraverseMode trav, grid::Grid& grid) {
 		if (nray.length() == 0) {
 			return stn::None;
 		}
@@ -81,22 +89,22 @@ namespace voxtra {
 			}
 			sgns[i] = zero_sign(norm_ray[i]);
 		}
-		v3::Point3 pos = nray.point_at(1e-4);
+		v3::Point3 pos = nray.point_at(0);
 		Coord curvox = grid.get_voxel(pos);
 		Coord Boundry;
 		for (size_t i = 0; i < 3; i++) {
 			Boundry[i] = next_boundary(pos[i], sgns[i] == 1);
 		}
 		while (travel_dist <= ray_length) {
-			
+
 			stn::Option<ecs::Constrained<block>&> blk = grid.get_object(curvox);
 			if (blk) {
 				stn::Option<aabb::Collider&> BlockCollider = blk.unwrap().get_component_opt<aabb::Collider>();
 				if (BlockCollider) {
 					if (counttablevoxel(blk.unwrap().get<block>(), trav)) {
-						geointersect::boxRayCollision PotentialCollision = geointersect::intersection(BlockCollider.unwrap().global_box(), nray);
+						geo::RayCollision PotentialCollision = geo::intersection(BlockCollider.unwrap().global_box(), nray);
 						if (PotentialCollision) {
-							return RayWorldHit(PotentialCollision.unwrap(), BlockCollider.unwrap());
+							return RayWorldHit(PotentialCollision.unwrap(), ecs::Constrained<aabb::Collider>(blk.unwrap().object()));
 						}
 					}
 				}
@@ -122,33 +130,73 @@ namespace voxtra {
 
 		return stn::None;
 	}
-	inline stn::Option<math::Box> findemptyspace(v3::Scale3 scale, grid::Grid& world) {
+	inline RayWorldCollision grid_cast(geo::RayBox ray_box, grid::Grid& world) {
+		//expand because of floating point
+		geo::Box bounding_box = ray_box.bounding_box().expanded(.01f);
+
+		stn::array<Chunks::block_object> boxes = world.voxel_in_range(bounding_box);
+		RayWorldCollision closest_hit;
+		for (Chunks::block_object& obj : boxes) {
+			stn::Option<aabb::Collider&> coll_mabye= obj.get_component_opt<aabb::Collider>();
+			if (!coll_mabye) {
+				continue;
+			}
+			geo::Box box = coll_mabye.unwrap().global_box();
+			geo::RayCollision hit = geo::intersection(ray_box, box);
+			if (!hit) {
+				continue;
+			}
+			geo::RayHit hit_ray = hit.unwrap();
+			if (closest_hit.is_none_or([hit_ray](const voxtra::RayWorldHit& coll){return hit_ray.length()< coll.dist();})) {
+				closest_hit = RayWorldHit(hit_ray, obj.object());
+			}
+		}
+
+		return closest_hit;
+	}
+	inline stn::Option<geo::Box> findemptyspace(v3::Scale3 scale, grid::Grid& world) {
 		size_t max_tst = 40;
 		for (size_t tst = 0; tst < max_tst; tst++) {
 			double ranx = (random::random() - .5) * 2;
 			double rany = (random::random() - .5) * 2;
 			double ranz = (random::random() - .5) * 2;
-			v3::Point3 test_pos = (Vec3(ranx, rany, ranz) * (world.dim_axis) / 2 + world.grid_pos.position) * Chunk::chunk_axis;
-			math::Box test_box = math::Box(test_pos, scale);
+			v3::Point3 test_pos = (Vec3(ranx, rany, ranz) * (world.dim_axis) / 2 + world.grid_pos.position) * Chunks::chunk_axis;
+			geo::Box test_box = geo::Box(test_pos, scale);
 			if (!boxcast_grid(test_box, world)) {
-				return stn::Option<math::Box>(test_box);
+				return stn::Option<geo::Box>(test_box);
 			}
 		}
 
 		return stn::None;
 	}
-	inline stn::Option<math::Box> findground(v3::Scale3 scale, grid::Grid& world) {
-		size_t max_checks = 100;
-		stn::Option<math::Box> test_box_opt = findemptyspace(scale, world);
-		if (!test_box_opt) {
-			return stn::None;
-		}
-		math::Box test_box = test_box_opt.unwrap();
-		math::ray box_ray = math::ray::from_offset(test_box.in_direction(math::down_3d), v3::Vec3(0, -100, 0));
-		WorldRayCollision col = grid_cast(box_ray, GridTraverseMode::countnormal, world);
-		if (col) {
-			return test_box.translate(col.unwrap().intersection() - col.unwrap().ray().start);
+	inline stn::Option<geo::Box> findground(v3::Scale3 scale, grid::Grid& world) {
+		size_t max_checks = 10;
+		for (size_t i = 0; i < max_checks; i++) {
 
+			stn::Option<geo::Box> test_box_opt = findemptyspace(scale, world);
+			if (!test_box_opt) {
+				continue;
+			}
+			geo::Box test_box = test_box_opt.unwrap();
+			geo::RayBox box_ray = geo::RayBox(geo::ray::from_offset(test_box.center, v3::Vec3(0, -100, 0)), scale);
+			RayWorldCollision col = grid_cast(box_ray, world);
+			if (!col) {
+				continue;
+			}
+			geo::Box hit_box = test_box.with_center(col.unwrap().hit.ray.end);
+			bool all_loaded = true;
+			if (boxcast_grid(hit_box.expanded(-1/2.0f), world)) {
+				int l = 3;
+			}
+			for ( cube_index index: cube_indices) {
+				int l = 3;
+				if (!world.get_chunk(world.get_voxel(hit_box.point_at_vertex(index)))) {
+					all_loaded = false;
+				}
+			}
+			if (all_loaded) {
+				return hit_box;
+			}
 		}
 		return stn::None;
 	}

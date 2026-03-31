@@ -14,8 +14,8 @@ namespace v3 {
 		}
 		constexpr Vec3(double X, double Y, double Z) noexcept : x(X), y(Y), z(Z) {
 		}
-	
-		explicit Vec3(Scale3 scale) : x(scale.x), y(scale.x), z(scale.x) {	}
+		
+		explicit Vec3(Scale3 scale) : x(scale.x), y(scale.y), z(scale.z) {	}
 
 		Vec3(glm::vec3 g) : x(g.x), y(g.y), z(g.z) {
 		}
@@ -40,7 +40,15 @@ namespace v3 {
 		Vec3 operator-() const {
 			return Vec3(-x,-y,-z);
 		}
-
+		Vec3 with_x(double value) const {
+			return Vec3(value, y, z);
+		}
+		Vec3 with_y(double value) const {
+			return Vec3(x,value, z);
+		}
+		Vec3 with_z(double value) const {
+			return Vec3(x, y, z);
+		}
 		Vec3 operator+(const Vec3& p1) const {
 			return Vec3(x + p1.x, y + p1.y, z + p1.z);
 		}
@@ -152,6 +160,16 @@ namespace v3 {
 				throw std::logic_error("Cannot Normalize the zero vector");
 			}
 			return (*this / mt);
+
+		}
+
+		inline Vec3 with_length_less_than(double max_length) const {
+
+			double mag = length();
+			if (mag<=max_length) {
+				return *this;
+			}
+			return (*this)*(max_length/mag);
 
 		}
 		inline Vec3 with_magnitude(double mag) const {
@@ -315,6 +333,20 @@ namespace v3 {
 		}
 		bool operator!=(const Point3& p1) {
 			return !math::approximate_equals(x, p1.x) || !math::approximate_equals(y, p1.y) || !math::approximate_equals(z, p1.z);
+		}
+		Point3 operator+(const Scale3& p1) const {
+			return Point3(x + p1.x, y + p1.y, z + p1.z);
+		}
+		Point3& operator+=(const Scale3& p1) {
+			x += p1.x; y += p1.y; z += p1.z; return *this;
+		}
+
+		Vec3 operator-(const Scale3& p1) const {
+			return Vec3(x - p1.x, y - p1.y, z - p1.z);
+		}
+
+		Point3& operator-=(const Scale3& p1) {
+			x -= p1.x; y -= p1.y; z -= p1.z; return *this;
 		}
 
 		Point3 operator+(const Vec3& p1) const {

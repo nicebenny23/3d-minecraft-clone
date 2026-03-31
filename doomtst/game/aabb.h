@@ -15,7 +15,7 @@ namespace aabb {
 	struct Collider : ecs::component {
 		bool effector;
 		//local box
-		math::Box global_box() const {
+		geo::Box global_box() const {
 			if (owner().has_component<ecs::world_transform>()) {
 				return owner().get_component<ecs::world_transform>().transform.unrotated_box();
 			}
@@ -23,7 +23,7 @@ namespace aabb {
 				return owner().get_component<blocks::block>().bounds();
 			}
 		}
-		
+
 		v3::Point3 center() const {
 			return global_box().center;
 		}
@@ -31,6 +31,15 @@ namespace aabb {
 
 		}
 	};
+	inline geo::Box global_box(ecs::Constrained<Collider> collider) {
+		stn::Option<math::Transform> transform = collider.get_component_opt< ecs::world_transform>().member(&ecs::world_transform::transform);
+		if (transform) {
+			return transform.unwrap().unrotated_box();
+		}
+		else {
+			return collider.get_component<blocks::block>().bounds();
+		}
+	}
 	struct DynamicCollider :ecs::component {
 
 
@@ -40,7 +49,7 @@ namespace aabb {
 	struct DynamicColliderRecipe {
 		bool effector;
 
-		DynamicColliderRecipe(bool is_effector = false) :effector(is_effector){
+		DynamicColliderRecipe(bool is_effector = false) :effector(is_effector) {
 
 		}
 		void apply(ecs::obj& object) {
@@ -49,13 +58,14 @@ namespace aabb {
 		}
 	};
 
-	inline	bool  box_intersects_aabb(math::Box p1, Collider& p2) {
-		return math::boxes_intersect(p1, p2.global_box());
+	inline	bool  box_intersects_aabb(geo::Box p1, Collider& p2) {
+		return geo::boxes_intersect(p1, p2.global_box());
 	}
 
 	//cannot consify until global box is const
 	inline Option<v3::Vec3> collide_aabb(Collider& p1, Collider& p2) {
-		return math::collide_box(p1.global_box(), p2.global_box());
+		//this is until i can get the effectors on the movment
+		return geo::collide_box(p1.global_box().expanded(v3::Scale3() / 100.f), p2.global_box());
 
 	}
 

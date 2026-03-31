@@ -349,7 +349,7 @@ namespace stn {
 		}
 
 		template<typename Func>
-		auto and_then(this auto&& self, Func&& f) -> std::invoke_result_t<Func, T>
+		auto and_then(this auto&& self, Func&& f) -> std::invoke_result_t<Func, stn::forward_as_member_t<decltype(self), T>>
 			requires stn::nonvoid_invokable<Func, stn::forward_as_member_t<decltype(self), T>>&& OptionType<std::invoke_result_t<Func, stn::forward_as_member_t<decltype(self), T>>> {
 			if (self.has_value) {
 				return std::invoke(std::forward<Func>(f), std::forward<decltype(self)>(self).unwrap_unchecked());

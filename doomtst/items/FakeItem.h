@@ -39,7 +39,7 @@ namespace items {
 			ui::UiSpawner(inventory_transform_floating(inventory_center(location)), 20).apply(object);
 			ItemUiSpawner().apply(object);
 
-			ecs::obj item_decal = object.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\blockholder.png", "item_decal_original"), math::unit_box_2d, 0);
+			ecs::obj item_decal = object.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\blockholder.png", "item_decal_original"), geo::unit_box_2d, 0);
 			object.add_component<ItemSlotDecal>(item_decal);
 		}
 	};
@@ -55,13 +55,13 @@ namespace items {
 	};
 	struct SyncDisplayIcon :ecs::System {
 		void run(ecs::Ecs& world) {
-			for (auto&& [item_count, refrence] : ecs::View<ecs::With<ItemCountDisplay>, ecs::With<RefrencedSlot>>(world)) {
+			for (auto&& [item_count, refrence] : ecs::View<ItemCountDisplay,RefrencedSlot>(world)) {
 				item_count.count = refrence.entry().member(&item_entry::count);
 			}
-			for (auto&& [item_icon, refrence] : ecs::View<ecs::With<ItemIcon>, ecs::With<RefrencedSlot>>(world)) {
+			for (auto&& [item_icon, refrence] : ecs::View<ItemIcon, RefrencedSlot>(world)) {
 				item_icon.displayed_id= refrence.entry().member(&item_entry::id);
 			}
-			for (auto&& [item_progress, refrence] : ecs::View<ecs::With<ItemProgressDisplay>, ecs::With<RefrencedSlot>>(world)) {
+			for (auto&& [item_progress, refrence] : ecs::View<ItemProgressDisplay, RefrencedSlot>(world)) {
 				if (refrence.displayed_object().is_some_and(&ecs::obj::has_component<item_durability>)) {
 					item_progress.value = refrence.displayed_object().unwrap().get_component<item_durability>().precent_left();
 				}

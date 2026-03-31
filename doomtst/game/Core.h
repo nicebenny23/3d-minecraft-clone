@@ -10,8 +10,9 @@ namespace Core {
 		}
 	};
 	using plugin_id = stn::typed_id<Plugin>;
+	//ill fix later
 	template<typename T>
-	concept PluginType = std::derived_from<T, Plugin>&&std::is_default_constructible_v<T>||stn::void_invokable<const T&,App&>;
+	concept PluginType = std::derived_from<T, Plugin>;//&&std::is_default_constructible_v<T>||stn::void_invokable<const T&,App&>;
 	
 	
 
@@ -67,8 +68,7 @@ namespace Core {
 		}
 
 		template<PluginType T>
-		void insert_plugin(T&& plugin) {
-			plugin_list.insert<T>(std::forward<T>(plugin));
+		void insert_plugin(T&& plugin) { 
 		}
 		template<ecs::ResourceType T,typename ...Args>
 		T& emplace_resource(Args&&... args) requires std::constructible_from<T,Args...>{

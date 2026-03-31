@@ -10,6 +10,9 @@ namespace math{
 		constexpr v3::Coord vertex() const {
 			return v3::Coord(index & 1, (index >> 1) & 1, (index >> 2) & 1);
 		}
+		constexpr v3::Vec3 vertex_vector() const {
+			return v3::Vec3(index & 1, (index >> 1) & 1, (index >> 2) & 1);
+		}
 		constexpr std::uint8_t ind() const {
 			return index;
 		}

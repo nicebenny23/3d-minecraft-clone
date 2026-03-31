@@ -1,54 +1,43 @@
 #pragma once 
 
-#include "../game/entitystate.h"
 #include "../world/voxeltraversal.h"
 #include "../game/collision.h"
-#include "../game/entityutil.h"
+#include "../game/health.h"
 #include "../debugger/console.h"
 #include "player_look.h"
-
-struct playerattackcomp : ecs::component {
-	void wearduribilty() {
-		stn::Option<items::item_stack&> select = owner().get_component<player::inventory>().selected();
-		if (select) {
-			if (select.unwrap().owner().has_component<items::item_durability>()) {
-				select.unwrap().owner().get_component<items::item_durability>().use();
+namespace player {
+	struct PlayerAttack : ecs::component {
+	};
+	struct PlayerAttacker :ecs::System {
+		void run(ecs::Ecs& world) {
+			if (!world.get_resource<userinput::InputManager>().left_mouse().pressed) {
+				return;
 			}
+			ecs::View < PlayerAttack, player::PlayerCursor,player::inventory> attack_query(world);
+			for (auto&&[attack,cursor,inventory]:attack_query) {
+
+				if (cursor.Hit) {
+					voxtra::RayWorldHit closest = cursor.Hit.unwrap();
+					ecs::obj object = closest.collider.object();
+					if (object.has_components<Health::EntityHealth, physics::rigidbody>()) {
+						stn::Option<ecs::obj> item = inventory.selected_object();
+						if (object.get_component<Health::EntityHealth>().damage_delay_timer.is_inactive()) {
+							size_t dmg = 1;
+
+							if (item) {
+								items::item_id id = item.unwrap().get_component<items::item_stack>().contained_id();
+								dmg = world.get_resource<items::item_types>().from_id(id)
+									.tool.member(&items::tool_traits::damage).unwrap_or_default();
+							}
+							world.write_command(Health::AttackCommand{ .knockback_multiplier = 1,.damage = dmg,.center = closest.ray().start,.body = object});
+							item.unwrap().get_component_opt<items::item_durability>().then([](items::item_durability& dur) {dur.use(); });
+						}
+						
+					}
+				}
+			}
+			
 		}
-	}
-	size_t computeattackdmg() {
-		return 1;
-	}
 
-	void update() {
-
-
-		math::ray cameraray = math::ray(camera::campos(), camera::campos() + camera::GetCamFront() * 7);
-
-		voxtra::WorldRayCollision Hit = owner().get_component<player::PlayerCursor>().Hit;
-		if (!Hit) {
-			return;
-		}
-		if (!world().get_resource<userinput::InputManager>().left_mouse().pressed) {
-			return;
-		}
-		voxtra::RayWorldHit closest = Hit.unwrap();
-		if (!closest.collider.owner().has_component<Health::EntityHealth>()) {
-			return;
-		}
-
-		size_t damage = computeattackdmg();
-		if (closest.owner().has_component<physics::rigidbody>()) {
-			world().write_command(Health::AttackCommand{.damage= damage,.center = cameraray.start,.body = closest.owner()});
-
-		}
-		wearduribilty();
-
-
-	}
-
-};
-
-
-
-// !ecs_HPP
+	};
+}

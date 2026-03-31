@@ -38,14 +38,15 @@ struct MinecraftPlugin :Core::Plugin {
 		app.emplace_system<userinput::InputPollingSystem>();
 		app.emplace_resource<grid::world>(0);
 		random::initilize_random();
-		app.emplace_resource<grid::Grid>(3);
-		ecs::spawn(app.Ecs, player::initplayer);
+
+		ecs::obj player= ecs::spawn(app.Ecs, player::initplayer);
+		app.emplace_resource<grid::Grid>(3, player);
+
 		glfwSwapInterval(0);
 		app.insert_plugin<timename::TimePlugin>();
-		app.insert_plugin(physics::PhysicsPlugin);
+		app.insert_plugin<physics::PhysicsPlugin>();
 		app.insert_plugin<MobSpawnerPlugin>();
-		app.insert_plugin(Health::entity_health_plugin);
-		app.Ecs.emplace_system<PlayerMovementSys>();
+		app.insert_plugin<Health::EntityHealthPlugin>();
 		app.insert_plugin<blockrender::BlockRenderPlugin>();
 		app.insert_plugin<player::PlayerInventoryPlugin>();
 		app.insert_plugin<decals::decal_plugin>();

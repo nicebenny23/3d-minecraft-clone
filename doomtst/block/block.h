@@ -1,7 +1,6 @@
 #include "../math/dir.h"
 #include "../renderer/renderer.h"
 #include <glm/glm.hpp>
-#include "../game/camera.h"
 #include "../game/ecs/game_object.h"
 #include "../math/geometry.h"
 #include "../math/geometry.h"
@@ -49,7 +48,7 @@ namespace blocks {
 		Point3 center() const {
 			return bounds().center;
 		}
-		math::Box bounds() const {
+		geo::Box bounds() const {
 			return mesh.bounds();
 		}
 		template<BlockLike T>

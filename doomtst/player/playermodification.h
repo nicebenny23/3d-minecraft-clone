@@ -162,7 +162,7 @@ namespace player {
 
 	struct PlayerUpdateSystem : ecs::System {
 		void run(ecs::Ecs& ecs) override {
-			for (auto [pb, look,inventory] : ecs::View<ecs::With<playerbreak>, ecs::With<player::PlayerCursor>, ecs::With<player::inventory>>(ecs)) {
+			for (auto [pb, look,inventory] : ecs::View< playerbreak, player::PlayerCursor, player::inventory>(ecs)) {
 				pb.try_modify(look,inventory.selected_object());
 			};
 		}

@@ -9,22 +9,6 @@ using namespace aabb;
 #pragma once 
 namespace collision {
 	struct collision_event {
-		template<ecs::ComponentType T>
-		bool source_has_component() {
-			return source.has_component<T>();
-		}
-		template<ecs::ComponentType T>
-		T& source_get_component() {
-			return source.get_component<T>();
-		}
-		template<ecs::ComponentType T>
-		bool target_has_component() {
-			return target.has_component<T>();
-		}
-		template<ecs::ComponentType T>
-		T& target_get_component() {
-			return target.get_component<T>();
-		}
 		//the target and source are abstrctions for dealing with events and for now each event wil lalso have a 
 		ecs::obj target;
 		ecs::obj source;
@@ -41,11 +25,11 @@ namespace collision {
 		stn::Option<float> p1_mass = p1.get_component_opt<physics::rigidbody>().member(&physics::rigidbody::mass);
 		stn::Option<float> p2_mass = p2.get_component_opt<physics::rigidbody>().member(&physics::rigidbody::mass);
 		double total_mass = p1_mass.unwrap_or(0) + p2_mass.unwrap_or(0);
-		if (force.mag2()>1) {
+		if (force.mag2() > 1) {
 			int l = 3;
 		}
 		if (p1_mass) {
-			v3::Vec3 p1_force = force * p2_mass.unwrap_or(total_mass)/ total_mass;
+			v3::Vec3 p1_force = force * p2_mass.unwrap_or(total_mass) / total_mass;
 			p1.get_component<ecs::world_transform>().transform.position += p1_force;
 		}
 		if (p2_mass) {
@@ -54,26 +38,15 @@ namespace collision {
 		}
 	}
 
-	inline stn::Option<Vec3> colide_dynamic_static(Collider& dynamic_collider, Collider& static_collider, bool is_trigger) {
-		Option<Vec3> force = aabb::collide_aabb(dynamic_collider, static_collider);
-		if (!force) {
-			return stn::None;
-		}
-		if (is_trigger) {
-			collision::write_collision_event(dynamic_collider.owner(), static_collider.owner());
-		}
-		return force.retain(!static_collider.effector && !dynamic_collider.effector);
-	}
-
 
 
 
 	struct DynamicCollisionSystem :ecs::System {
 		void run(ecs::Ecs& world) {
 
-			ecs::View<ecs::With<DynamicCollider>, ecs::With<Collider>,ecs::Owner> colliders(world);
-			for (auto&& [dynamic_tag_1, collider_1,obj_1] : colliders) {
-				for (auto&& [dynamic_tag_2, collider_2,obj_2] : colliders) {
+			ecs::View< DynamicCollider,Collider, ecs::Owner> colliders(world);
+			for (auto&& [dynamic_tag_1, collider_1, obj_1] : colliders) {
+				for (auto&& [dynamic_tag_2, collider_2, obj_2] : colliders) {
 					if (obj_1 != obj_2) {
 						Option<v3::Vec3> force = aabb::collide_aabb(collider_1, collider_2);
 						if (force.is_none()) {
@@ -83,59 +56,45 @@ namespace collision {
 						if (collider_1.effector || collider_2.effector) {
 							continue;
 						}
-						distribute_collision_force(obj_1,obj_2, force.unwrap());
 					}
 				}
 			}
 		}
 	};
 	struct StaticCollsionSystem :ecs::System {
-		
+
 		void run(ecs::Ecs& world) {
-			for (int iters = 0; iters < iterations; iters++) {
-				ecs::View<ecs::With<DynamicCollider>, ecs::With<Collider>> colliders(world);
-				for (auto&& [dynamic_tag, collider] : colliders) {
-					math::Box entity_box = collider.global_box();
-					array<ecs::obj> blocks = collider.world().get_resource<grid::Grid>().voxel_in_range(entity_box);
-					stn::Option<Vec3> max_force;
-					stn::Option<block&> max_block;
-					for (ecs::obj block : blocks) {
-						stn::Option<Collider&> aabb = block.get_component_opt<Collider>();
-						if (!aabb) {
-							continue;
-						}
-						stn::Option<Vec3> force = colide_dynamic_static(collider, aabb.unwrap(), iters==0);
-						if (max_force.map_member(&v3::Vec3::length) < force.map_member(&v3::Vec3::length)) {
-							max_block = block.get_component<blocks::block>();
-							max_force = force.unwrap();
-						}
+			ecs::View<DynamicCollider,Collider,ecs::Owner> colliders(world);
+			for (auto&& [dynamic_tag, collider, object] : colliders) {
+				geo::Box entity_box = collider.global_box().expanded(v3::Scale3() / 100.0f);
+				array<Chunks::block_object> blocks = collider.world().get_resource<grid::Grid>().voxel_in_range(entity_box);
+				for (Chunks::block_object& block : blocks) {
+					stn::Option<Collider&> aabb = block.get_component_opt<Collider>();
+					if (!aabb) {
+						continue;
 					}
-					if (max_block && !collider.effector) {
-						distribute_collision_force(collider.owner(), max_block.unwrap().owner(), max_force.unwrap());
+					Option<Vec3> force = aabb::collide_aabb(aabb.unwrap(), collider);
+					if (!force) {
+						collision::write_collision_event(block.object(), object);
 					}
 				}
 			}
 		}
-
-		StaticCollsionSystem(size_t phycics_iterations) :iterations(phycics_iterations) {
-
-		}
-		size_t iterations = 0;
 	};
 
 	struct CollsionPlugin :Core::Plugin {
 		void build(Core::App& app) {
-			app.emplace_system< StaticCollsionSystem>(5);
+			app.emplace_system< StaticCollsionSystem>();
 			app.emplace_system<DynamicCollisionSystem>();
 
 		}
 	};
 
 
-	
+
 	//casting
-	inline bool boxcast_dynamic(math::Box blk, HitQuery query) {
-		ecs::View<ecs::With<Collider>,ecs::With< DynamicCollider>> colliders(query.world);
+	inline bool boxcast_dynamic(geo::Box blk, HitQuery query) {
+		ecs::View< Collider,DynamicCollider> colliders(query.world);
 		for (auto [collider, dynamic_tag] : colliders) {
 			if (query.matches(collider)) {
 				continue;
@@ -147,8 +106,8 @@ namespace collision {
 		}
 		return false;
 	}
-	inline bool boxcast(math::Box box, HitQuery query) {
-		return voxtra::boxcast_grid(box,query.world.get_resource<grid::Grid>()) || boxcast_dynamic(box, query);
+	inline bool boxcast(geo::Box box, HitQuery query) {
+		return voxtra::boxcast_grid(box, query.world.get_resource<grid::Grid>()) || boxcast_dynamic(box, query);
 	}
 
 }
