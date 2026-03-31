@@ -20,7 +20,9 @@ A **C++ game engine** built from scratch featuring a **custom Entity Component S
 - **Voxel / Grid System**  
   - World representation inspired by Minecraft  
   - Efficient memory layout for dynamic grids  
-
+-
+- **Ccd physics engine**
+- 
+-  
 - **Mid Level Renderer**
-- Built on opengl and serves as a much higher level api.
 - Supports the usage of renderables
