@@ -5,37 +5,10 @@
 #pragma once
 namespace items {
 
-	struct container_index {
-		v2::Coord2 coord;
-		bool operator==(const container_index& other) const = default;
-		container_index(size_t x, size_t y) :coord(static_cast<int>(x), static_cast<int>(y)) {
-
-		}
-		container_index(v2::Coord2 location):coord(location) {
-			if (location.x<0||location.y<0) {
-				stn::throw_logic_error("container index {} may not be negitive", location);
-			}
-		}
-		size_t x() const{
-			return coord.x;
-		}
-		size_t y() const {
-			return coord.y;
-		}
-		bool fits_in(v2::Coord2 element_size) const{
-			return x() <= element_size.x && y() <= element_size.y;
-		}
-		size_t index_in(v2::Coord2 element_size) const {
-			if (!fits_in(element_size)) {
-				stn::throw_length_error("cell {} does not fit in size {}", coord, element_size);
-			}
-			return x()+element_size.x*y();
-		}
-	};
 	struct ElementSlot :ecs::component {
-		stn::Option<ecs::weak_object> current_item;
+		stn::Option<ecs::WeakObject> current_item;
 		bool occupied() const{
-			return current_item.is_some_and(&ecs::weak_object::alive);
+			return current_item.is_some_and(&ecs::WeakObject::alive);
 		}
 		bool empty() const{
 			return !occupied();
@@ -50,7 +23,7 @@ namespace items {
 			return false;
 		}
 		void set_element(ecs::obj elem) {
-			current_item = ecs::weak_object(elem);
+			current_item = ecs::WeakObject(elem);
 		}
 		void reset_element() {
 			current_item = stn::None;
@@ -61,15 +34,14 @@ namespace items {
 			}
 			current_item = stn::None;
 		}
-		Option<ecs::obj> element(){
-			if (occupied()) {
-				return current_item.unwrap().get();
+		void destroy_hook() {
+			if (element()) {
+				element().unwrap().destroy();
 			}
-			return stn::None;
 		}
-		Option<const ecs::obj&> element() const{
+		Option<ecs::Constrained<item_stack>> element() const{
 			if (occupied()) {
-				return current_item.unwrap().get();
+				return ecs::Constrained<item_stack>(current_item.unwrap().get().unwrap());
 			}
 			return stn::None;
 		}
