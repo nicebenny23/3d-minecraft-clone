@@ -14,22 +14,18 @@ namespace stn {
 
 		indexed() = default;
 
-		constexpr indexed(std::size_t i, const T& v)
+		constexpr indexed(const T& v,std::size_t i)
 			: index(i), value(v) {
 		}
 
-		constexpr indexed(std::size_t i, T&& v) noexcept(std::is_nothrow_move_constructible_v<T>)
+		constexpr indexed(T&& v,std::size_t i) noexcept(std::is_nothrow_move_constructible_v<T>)
 			: index(i), value(std::move(v)) {
 		}
 	};
-	template<typename T>
-	indexed(size_t, const T&) -> indexed<T>;
 
-	// For rvalues
-	template<typename T>
-	indexed(size_t, T&&) -> indexed<T>;
+	struct nothing {
 
-
+	};
 	template<typename T>
 	struct insertion {
 		T value;

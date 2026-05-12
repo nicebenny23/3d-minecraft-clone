@@ -21,16 +21,21 @@ namespace math {
 		}
 		return value;
 	}
-}
+		inline double ease_in_power(double x, double n) {
+			return std::pow(x, n);
+		}
 
-inline double  interoplate_quintic(double t) {
+		inline double ease_out_power(double x, double n) {
+			return 1 - ease_in_power(1 - x, n);
+		}
+		inline double ease_in_out_power(double x, double n) {
+			return ease_in_power(x,n)/(ease_in_power(x,n)+ ease_in_power(1 - x, n));
+		}
+		inline double  interoplate_quintic(double t) {
+			return (6 * t * t - 15 * t + 10) * t * t * t;
 
-	return (6 * t * t - 15 * t + 10) * t * t * t;
-
-}
-
-inline constexpr double lerp(double start, double end, double selector) {
-	return end * selector + start * (1 - selector);
+		}
+	
 }
 
 
@@ -44,9 +49,10 @@ inline  double sigmoid(double v1) {
 	return	1.0f / (1.0f + exp(-v1));
 }
 namespace stn {
-	
-	inline double lerp(double start, double end, double selector) {
-		return end * selector + start * (1 - selector);
+
+	template<typename T,typename U> requires std::common_with<T,U>
+	std::common_type_t<T, U> lerp(T start, U end, double selector) requires(!std::is_integral_v<T>&& !std::is_integral_v<U>){
+		return start+ (end -start)* selector;
 	}
 
 	template<typename T1, typename T2, typename... Ts>
@@ -81,84 +87,51 @@ namespace stn {
 		value_to_set = min(value_to_set, other);
 	}
 }
-inline int next_boundary(double x, bool positiveDirection) {
-	int i = static_cast<int>(std::floor(x));
-
-	if (positiveDirection) {
-		// Next boundary is always i + 1
-		return i + 1;
-	}
-	else {
-		if (x == i) {
+namespace math {
+	//if you take sign as [-1,1] this returns floor(x+sign*eps) 
+	inline int floor_with_infinitesimal_shift(double x, bool sign_rounding_up) {
+		int i = static_cast<int>(std::floor(x));
+		//we only actually need to apply the floor 
+		if (!sign_rounding_up && x == i) {
 			return i - 1;
 		}
 		return i;
+
 	}
-}
-//
-inline stn::pair<int, int> extended_range(double x) {
-	int low = static_cast<int>(std::floorl(x));
-	int high = low;
-	int rnd = std::lround(x);
-	if (math::approximate_equals(rnd, x)) {
-		if (rnd == low) {
-			low--;
-		}
-		else {
-			high++;
-		}
+	//mod(x,m) that is wrapped to [0,m)(ex mod(-3,2)=1!=-1)
+	__forceinline  int symmetric_mod(int x, int m) noexcept {
+
+		int r = x % m;              // r is in (−m, +m)
+
+		// If r is negative, shift it into [0, m) by adding m;
+		// otherwise return r unchanged.
+		return (r < 0) ? (r + m) : r;
 	}
-	return stn::pair(low, high);
-}
-//mod(x,m) that behaves intutiivlly (ex mod(-1,2)!=-1)
-__forceinline  int symmetric_mod(int x, int m) noexcept {
 
-	int r = x % m;              // r is in (−m, +m)
-
-	// If r is negative, shift it into [0, m) by adding m;
-	// otherwise return r unchanged.
-	return (r < 0) ? (r + m) : r;
-}
-
-__forceinline double symmetric_modf(double x, double m) noexcept {
-	double r = std::fmod(x, m);
-	return r < 0.0f ? r + m : r;
-}
-
-inline  int FastFloor(double f) {
-	return f >= 0 ? (int)f : (int)f - 1;
-}
-
-inline  double symmetric_floor(double x) {
-
-	if (x < 0) {
-		return -1 * floor(-1 * x);
+	__forceinline double symmetric_modf(double x, double m) noexcept {
+		double r = std::fmod(x, m);
+		return r < 0.0f ? r + m : r;
 	}
-	else {
-		return floor(x);
+
+	inline  int fast_floor(double f) {
+		return f >= 0 ? (int)f : (int)f - 1;
 	}
-}
-inline int symmetric_ceil(double x) {
-
-	if (x < 0) {
-		return int(-1 * ceil(-1 * x));
+	//sign function in which 0->1
+	inline int sign_rounding_up(double x) {
+		return (x < 0) ? -1 : 1;
 	}
-	else {
-		return int(ceil(x));
+
+	//sign function in which 0->0
+	inline int zero_preserving_sign(double x) {
+
+		return (x < 0) ? -1 : ((x > 0) ? 1 : 0);
 	}
-}
-
-inline int sign(double x) {
-	return (x < 0) ? -1 : 1;
-}
-
-//Zero is mapped to zero
-inline int zero_sign(double x) {
-
-	return (x < 0) ? -1 : ((x > 0) ? 1 : 0);
-}
 
 
-inline double wrap_to_range(double val, double low, double high) noexcept {
-	return symmetric_modf(val - low, high - low) + low;
+	inline double wrap_to_range(double val, double low, double high) noexcept {
+		return symmetric_modf(val - low, high - low) + low;
+	}
+	inline double abs(double value) {
+		return fabs(value);
+	}
 }

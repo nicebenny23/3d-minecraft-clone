@@ -18,8 +18,11 @@ namespace blocks {
 }
 namespace items {
 	struct air_item :item_type {
+		std::string name() const {
+			return "air";
+		}
 		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(std::string_view("air"), renderer::TexturePath("images\\airtex.png", "AirTexture"),world.get_resource<BlockRegistry>().get_id<blocks::AirBlock>());
+			return item_traits(renderer::TexturePath("images\\airtex.png"),world.get_resource<BlockRegistry>().get_id<blocks::AirBlock>());
 		}
 	};
 }

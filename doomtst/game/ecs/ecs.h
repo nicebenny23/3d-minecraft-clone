@@ -10,6 +10,7 @@
 #include "ComponentType.h"
 #include "../../util/tuple.h"
 #include "../../util/reference.h"
+#include "../../util/pair.h"
 namespace ecs {
 	struct Ecs {
 		Ecs() :entities(), archetypes() {
@@ -216,37 +217,54 @@ namespace ecs {
 			return components.set<T>(object, std::forward<Args>(args)...)
 				.on_insert([this, object](T& component) {
 				archetypes.transfer_entity_to_flipped_index(object.id(), components.get_id_unchecked<T>());
-					}).value;
+				}).value;
+		}
+		stn::type_map<archetype_id> archetype_from_constructor;
+		template<ComponentType ...Args>
+		archetype_id get_archetype_for() {
+			stn::Option<archetype_id>& id=archetype_from_constructor.reach<stn::Tuple<Args...>>();
+			if (!id) {
+				component_ids ids = components.insert_ids<Args...>();
+				id=archetypes.insert_archetype(ids);
+			}
+			return id.unwrap_unchecked();
+		}
+
+		template<ComponentType T, typename ...Args>
+		T& spawn_with_helper(entity object, stn::Constructor<T, Args...>&& args) {
+			component_id id = components.get_id_unchecked<T>();
+			return[&]<std::size_t... I>(std::index_sequence<I...>)->T&{
+				return components
+					.unchecked_at(id)
+					.emplace_unchecked<T>(
+						object,
+						args.args.template get<I>()...
+					);
+			}(std::make_index_sequence<sizeof...(Args)>{});
+		}
+		template<stn::ConstructorType ...Args> 
+		auto spawn_with(Args&&... args)-> stn::TupleSet<stn::ConstructedClass<Args>&...> {
+			entity new_entity = entities.allocate_entity<stn::Tuple<Args...>>();
+			archetypes.spawn_at(new_entity.id(), get_archetype_for< stn::ConstructedClass<Args>...>());
+			return stn::TupleSet<stn::ConstructedClass<Args>&...>(spawn_with_helper(new_entity, std::forward<Args>(args))...);
 		}
 		template<ComponentType T, typename ...Args>
-		T& add_component(entity object, Args&&... args)   requires std::constructible_from<T, Args&&...> {
-			entities.assert_valid(object);
+		T& add_component_unchecked(entity object, Args&&... args)   requires std::constructible_from<T, Args&&...> {
 			component_id id = components.insert_id<T>();
 			return components
 				.unchecked_at(id)
 				.emplace<T>(object, std::forward<Args>(args)...)
 				.on_insert([&](T& component) {
 				archetypes.transfer_entity_to_flipped_index(object.id(), id);
-					}).value;
+				}).value;
+		}
+		
+		template<ComponentType T, typename ...Args>
+		T& add_component(entity object, Args&&... args)   requires std::constructible_from<T, Args&&...> {
+			entities.assert_valid(object);
+			return add_component_unchecked<T>(object, std::forward<Args>(args)...);
 		}
 
-		template<typename Tag, ComponentType T, typename ...Args>
-		T& spawn_with_component_tagged(Args&&... args)   requires std::constructible_from<T, Args&&...> {
-			entity new_entity = entities.allocate_entity<Tag>();
-			component_id spawn_id = components.insert_id<T>();
-			archetypes.spawn_at(new_entity.id(), spawn_id);
-			return components.unchecked_at(spawn_id).emplace<T>(new_entity, std::forward<Args>(args)...).value;
-		}
-		template<ComponentType T, typename ...Args>
-		T& spawn_with_component(Args&&... args)   requires std::constructible_from<T, Args&&...> {
-			return spawn_with_component_tagged<T,T>(std::forward<Args>(args)...);
-		}
-		template<typename T>
-		ecs::entity spawn_tagged() {
-			entity new_entity = entities.allocate_entity<T>();
-			archetypes.add_to_empty(new_entity.id());
-			return new_entity;
-		}
 		bool has_component(entity ent, component_id id) const {
 			entities.assert_valid(ent);
 			return components.has_component(ent.id(), id);
@@ -339,7 +357,7 @@ namespace ecs {
 			for (component_id id : cached) {
 				components.unchecked_at(id).storage_erased().remove_at_unchecked(object.id());
 			}
-			//removes from both at the same time
+			//removes from both at the same timing
 			archetypes.remove_from_archetypes_unchecked(object.id());
 			entities.remove_entity(object);
 		}

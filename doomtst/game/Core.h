@@ -1,55 +1,27 @@
 #pragma once
-#include "../world/world.h"
 #include "../game/ecs/ecs.h"
+#include "../util/dynamicarray.h"
+#include <utility>
 //start of the application
 namespace Core {
 	struct App;
-	struct Plugin {
-		virtual void build(App& engine) = 0;
-		Plugin() {
-		}
-	};
-	using plugin_id = stn::typed_id<Plugin>;
-	//ill fix later
 	template<typename T>
-	concept PluginType = std::derived_from<T, Plugin>;//&&std::is_default_constructible_v<T>||stn::void_invokable<const T&,App&>;
+	concept PluginType = std::constructible_from<stn::Stateless<void(App&)>,T&&>;
 	
-	
-
-	template<PluginType T>
-	void build_plugin(T&& plugin,App& app) {
-		if constexpr(stn::void_invokable<const T&, App&>) {
-			plugin(app);
-		}
-		else {
-			plugin.build(app);
-		}
-	}
-	template<PluginType T>
-	struct PluginWrapper {
-		PluginWrapper(T& built_plugin) :plugin(built_plugin) {
-
-		}
-		T plugin;
-		void build(App& app) {
-			plugin.build(app);
-		}
-	};
+	using plugin_ty=stn::Stateless<void(App&)>;
 	struct Plugins {
-		stn::type_indexer<plugin_id> plugin_list;
+		stn::array<plugin_ty> plugin_list;
 
 		template<PluginType T>
 		void insert(T&& plugin) {
-			if (plugin_list.insert<PluginWrapper<T>>()) {
-				build_plugin(std::forward<T>(plugin),*engine);
+			if (!plugin_list.contains(plugin_ty(plugin))) {
+				plugin_list.push(plugin);
+				plugin(*engine);
 			}
 		}
-		void inject_engine(App& eng) {
-			engine = &eng;
-		}
-		Plugins() :engine() {}
+		Plugins(App& app) :engine(app) {}
 	private:
-		App* engine;
+		stn::non_null<App> engine;
 	};
 	
 	struct CloseGameCommand {
@@ -60,16 +32,12 @@ namespace Core {
     struct App
     {
 
-        void createWindow();
         Plugins plugin_list;
 		template<PluginType T>
-		void insert_plugin() {
-			plugin_list.insert<T>(T());
+		void insert_plugin(T&& plugin) {
+			plugin_list.insert(plugin);
 		}
 
-		template<PluginType T>
-		void insert_plugin(T&& plugin) { 
-		}
 		template<ecs::ResourceType T,typename ...Args>
 		T& emplace_resource(Args&&... args) requires std::constructible_from<T,Args...>{
 			return Ecs.insert_resource<T>(std::forward<Args>(args)...);
@@ -83,14 +51,14 @@ namespace Core {
 			Ecs.emplace_system<T>(std::forward<Args>(args)...);
 		}
 
-		App():Ecs() {
-			plugin_list.inject_engine(*this);
+		App():Ecs(),plugin_list(*this) {
+
 		}
         ecs::Ecs Ecs;
 		
     };
 	template<ecs::SystemType T>
-	struct AddSystemPlugin :Plugin {
+	struct AddSystemPlugin{
 		void build(App& engine) {
 			engine.emplace_system<T>();
 		};
@@ -111,8 +79,8 @@ namespace Core {
 		}
 
 	};
-	struct GamePlugin :Core::Plugin {
-		void build(App& app) {
+	struct GamePlugin {
+		void operator()(App& app) {
 			app.ensure_resource <GameState>();
 			app.emplace_system<GameCloser>();
 		}

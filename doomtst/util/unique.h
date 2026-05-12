@@ -186,6 +186,24 @@ namespace stn {
 	};
 	template<typename T>
 	concept BoxType = stn::TypeInstantiationOf<T,box>;
+	template <typename F>
+	struct ScopeGuard {
+		F func;
+		bool active = true;
+
+		ScopeGuard(F f) : func(f) {
+		}
+
+		void disarm() {
+			active = false;
+		}
+
+		~ScopeGuard() {
+			if (active) {
+				func();
+			}
+		}
+	};
 }
 
 namespace std {

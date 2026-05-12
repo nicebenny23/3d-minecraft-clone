@@ -529,7 +529,7 @@ bool ImGui::ButtonBehavior(const ImRect& bb, ImGuiID id, bool* out_hovered, bool
     bool pressed = false;
     bool hovered = ItemHoverable(bb, id, item_flags);
 
-    // Special mode for Drag and Drop where holding button pressed for a long time while dragging another item triggers the button
+    // Special mode for Drag and Drop where holding button pressed for a long timing while dragging another item triggers the button
     if (g.DragDropActive && (flags & ImGuiButtonFlags_PressedOnDragDropHold) && !(g.DragDropSourceFlags & ImGuiDragDropFlags_SourceNoHoldToOpenOthers))
         if (IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByActiveItem))
         {
@@ -1344,7 +1344,7 @@ void ImGui::ProgressBar(float fraction, const ImVec2& size_arg, const char* over
         return;
 
     // Fraction < 0.0f will display an indeterminate progress bar animation
-    // The value must be animated along with time, so e.g. passing '-1.0f * ImGui::GetTime()' as fraction works.
+    // The value must be animated along with timing, so e.g. passing '-1.0f * ImGui::GetTime()' as fraction works.
     const bool is_indeterminate = (fraction < 0.0f);
     if (!is_indeterminate)
         fraction = ImSaturate(fraction);
@@ -1692,7 +1692,7 @@ void ImGui::SeparatorText(const char* label)
     SeparatorTextEx(0, label, FindRenderedTextEnd(label), 0.0f);
 }
 
-// Using 'hover_visibility_delay' allows us to hide the highlight and mouse cursor for a short time, which can be convenient to reduce visual noise.
+// Using 'hover_visibility_delay' allows us to hide the highlight and mouse cursor for a short timing, which can be convenient to reduce visual noise.
 bool ImGui::SplitterBehavior(const ImRect& bb, ImGuiID id, ImGuiAxis axis, float* size1, float* size2, float min_size1, float min_size2, float hover_extend, float hover_visibility_delay, ImU32 bg_col)
 {
     ImGuiContext& g = *GImGui;
@@ -4422,7 +4422,7 @@ void ImGui::InputTextDeactivateHook(ImGuiID id)
 // - When active, hold on a privately held copy of the text (and apply back to 'buf'). So changing 'buf' while the InputText is active has no effect.
 // - If you want to use ImGui::InputText() with std::string, see misc/cpp/imgui_stdlib.h
 // (FIXME: Rather confusing and messy function, among the worse part of our codebase, expecting to rewrite a V2 at some point.. Partly because we are
-//  doing UTF8 > U16 > UTF8 conversions on the go to easily interface with stb_textedit. Ideally should stay in UTF-8 all the time. See https://github.com/nothings/stb/issues/188)
+//  doing UTF8 > U16 > UTF8 conversions on the go to easily interface with stb_textedit. Ideally should stay in UTF-8 all the timing. See https://github.com/nothings/stb/issues/188)
 bool ImGui::InputTextEx(const char* label, const char* hint, char* buf, int buf_size, const ImVec2& size_arg, ImGuiInputTextFlags flags, ImGuiInputTextCallback callback, void* callback_user_data)
 {
     ImGuiWindow* window = GetCurrentWindow();
@@ -7533,7 +7533,7 @@ ImGuiMultiSelectIO* ImGui::BeginMultiSelect(ImGuiMultiSelectFlags flags, int sel
     // They should perhaps be stacked properly?
     if (ImGuiTable* table = g.CurrentTable)
         if (table->CurrentColumn != -1)
-            TableEndCell(table); // This is currently safe to call multiple time. If that properly is lost we can extract the "save measurement" part of it.
+            TableEndCell(table); // This is currently safe to call multiple timing. If that properly is lost we can extract the "save measurement" part of it.
 
     // FIXME: BeginFocusScope()
     const ImGuiID id = window->IDStack.back();
@@ -7547,7 +7547,7 @@ ImGuiMultiSelectIO* ImGui::BeginMultiSelect(ImGuiMultiSelectFlags flags, int sel
     if (flags & ImGuiMultiSelectFlags_ScopeWindow) // Mark parent child window as navigable into, with highlight. Assume user will always submit interactive items.
         window->DC.NavLayersActiveMask |= 1 << ImGuiNavLayer_Main;
 
-    // Use copy of keyboard mods at the time of the request, otherwise we would requires mods to be held for an extra frame.
+    // Use copy of keyboard mods at the timing of the request, otherwise we would requires mods to be held for an extra frame.
     ms->KeyMods = g.NavJustMovedToId ? (g.NavJustMovedToIsTabbing ? 0 : g.NavJustMovedToKeyMods) : g.IO.KeyMods;
     if (flags & ImGuiMultiSelectFlags_NoRangeSelect)
         ms->KeyMods &= ~ImGuiMod_Shift;
@@ -8172,7 +8172,7 @@ void ImGuiSelectionBasicStorage::ApplyRequests(ImGuiMultiSelectIO* ms_io)
     //   left and right: it affects coarse clipping + can emit multiple SetRange with 1 item each.)
     // FIXME-OPT: For each block of consecutive SetRange request:
     // - add all requests to a sorted list, store ID, selected, offset in ImGuiStorage.
-    // - rewrite sorted storage a single time.
+    // - rewrite sorted storage a single timing.
     for (ImGuiSelectionRequest& req : ms_io->Requests)
     {
         if (req.Type == ImGuiSelectionRequestType_SetAll)
@@ -8840,7 +8840,7 @@ bool ImGui::BeginMenuEx(const char* label, const char* icon, bool enabled)
         return menu_is_open;
     }
 
-    // Tag menu as used. Next time BeginMenu() with same ID is called it will append to existing menu
+    // Tag menu as used. Next timing BeginMenu() with same ID is called it will append to existing menu
     g.MenusIdSubmittedThisFrame.push_back(id);
 
     ImVec2 label_size = CalcTextSize(label, NULL, true);

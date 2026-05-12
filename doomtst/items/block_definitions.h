@@ -5,269 +5,265 @@
 #include "../block/craftingtable.h"
 #include "../block/Chest.h"
 #include "../block/plank.h"
+#include "../block/crystal.h"
+
 #include "../block/air.h"
 #include "../block/torch.h"
 #include "../block/moss.h"
+#include "../block/glass.h"
 #include "../game/Core.h"
+
 #pragma once
 namespace items {
- struct glass_bottle_item : item_type {
+	struct glass_bottle_item : item_type {
+		std::string name() const {
+			return "glass_bottle";
+		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
-				"glass_bottle",
-				renderer::TexturePath("images\\glassbottle.png", "GlassBottleTexture")
+				renderer::TexturePath("images\\glassbottle.png")
 			);
 		}
 	};
 
 	struct iron_ore_item : item_type {
+		std::string name() const {
+			return "iron_ore";
+		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
-				"iron_ore",
-				renderer::TexturePath("images\\ironore.png", "IronOreTexture")
+				renderer::TexturePath("images\\ironore.png")
 			);
 		}
 	};
 
 	struct iron_item : item_type {
+		std::string name() const {
+			return "iron";
+		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
-				"iron",
-				renderer::TexturePath("images\\iron.png", "IronTexture")
+				renderer::TexturePath("images\\iron.png")
 			);
 		}
 	};
-	struct metal_rod_item : item_type {
+
+	struct stick_item : item_type {
+		std::string name() const {
+			return "stick";
+		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
-				"stick",
-				renderer::TexturePath("images\\metalrod.png", "MetalRodTexture")
+				renderer::TexturePath("images\\metalrod.png")
 			);
+		}
+	};
+
+	struct slime_item : item_type {
+		std::string name() const {
+			return "slime";
+		}
+		item_traits traits(const ecs::Ecs& world) const {
+			return item_traits(
+				renderer::TexturePath("images\\slime.png")
+			);
+		}
+	};
+
+	struct moss_pack_item : item_type {
+		std::string name() const {
+			return "moss_pack";
+		}
+		item_traits traits(const ecs::Ecs& world) const {
+			return item_traits::food_item(
+				renderer::TexturePath("images\\moss_pack.png"), 3);
 		}
 	};
 
 	struct moss_item : item_type {
-		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(
-				"moss",
-				renderer::TexturePath("images\\mossitem.png", "MossItemTexture")
-			);
+		std::string name() const {
+			return "moss";
 		}
-	}; struct crystal_bottom_item : item_type {
 		item_traits traits(const ecs::Ecs& world) const {
-			// Uses the old initcrystalbottomitem values
-			return item_traits(
-				"crystal_bottom",
-				renderer::TexturePath("images\\crystalbottom.png", "CrystalBottomTexture"),
-				64,
-				tool_traits({ .damage = 6,.pickaxe_speed = .8 }),
-				0.7f,   // armor
-				0.0f
-			);
-		}
-	};
-
-	struct crystal_item : item_type {
-		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(
-				"crystal",
-				renderer::TexturePath("images\\crystal.png", "CrystalTexture"),
-				64,
-				tool_traits({ .damage = 6,.pickaxe_speed = .8 }),
-				0.0f,
-				0.0f
-			);
+			return item_traits(renderer::TexturePath("images\\mossitem.png"));
 		}
 	};
 
 	struct crystal_pick_item : item_type {
+		std::string name() const {
+			return "crystal_pickaxe";
+		}
+		stn::Option<tool_traits> tool_info() const {
+			return tool_traits({ .damage = 3, .pickaxe_speed = 4 });
+		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
-				"crystal_pick",
-				renderer::TexturePath("images\\crystalpick.png", "CrystalPickaxeTexture"),
-				256,
-				tool_traits({ .damage = 6,.pickaxe_speed = 3 }),
-				0.0f,
-				12.f // pickaxe_speed from pickaxepower
+				renderer::TexturePath("images\\crystalpick.png"),
+				256
 			);
 		}
 	};
 
-	struct crystal_top_item : item_type {
-		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(
-				"crystal_top",
-				renderer::TexturePath("images\\crystaltop.png", "CrystalTopTexture"),
-				64,
-				tool_traits({ .damage = 6,.pickaxe_speed = .8 }),
-				0.0f,
-				0.0f
-			);
-		}
-	};
-
-	struct iron_bottom_item : item_type {
-		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(
-				"iron_bottom",
-				renderer::TexturePath("images\\ironbottom.png", "IronBottomTexture"),
-				64,
-				tool_traits({ .damage = 0,.pickaxe_speed = .8 }),
-				0.0f,
-				0.0f
-			);
-		}
-	};
 	struct stone_pickaxe_item : item_type {
+		std::string name() const {
+			return "stone_pickaxe";
+		}
+		stn::Option<tool_traits> tool_info() const {
+			return tool_traits({ .damage = 2, .pickaxe_speed = 3 });
+		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
-				"stone_pickaxe",
 				renderer::TexturePath("images\\stone_pickaxe.png"),
-				64,
-				tool_traits({ .damage = 3,.pickaxe_speed = 6 }),
-				0.0f,
-				0
+				64
 			);
 		}
 	};
 
 	struct iron_pick_item : item_type {
+		std::string name() const {
+			return "iron_pick";
+		}
+		stn::Option<tool_traits> tool_info() const {
+			return tool_traits({ .damage = 3, .pickaxe_speed = 8 });
+		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
-				"iron_pick",
-				renderer::TexturePath("images\\ironpick.png", "IronPickTexture"),
-				64,
-				tool_traits({ .damage = 3,.pickaxe_speed = 8 }),
-				0.0f,
-				4.9f // pickaxepower mapped to pickaxe_speed
+				renderer::TexturePath("images\\ironpick.png"),
+				64
 			);
 		}
 	};
 
 	struct iron_sword_item : item_type {
+		std::string name() const {
+			return "iron_sword";
+		}
+		stn::Option<tool_traits> tool_info() const {
+			return tool_traits({ .damage = 6, .pickaxe_speed = .8 });
+		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
-				"iron_sword",
-				renderer::TexturePath("images\\ironsword.png", "IronSwordTexture"),
-				64,
-				tool_traits({ .damage = 6,.pickaxe_speed = .8 }),
-				0.0f,
-				0.0f
+				renderer::TexturePath("images\\ironsword.png"),
+				64
 			);
 		}
 	};
 
-	struct iron_top_item : item_type {
-		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(
-				"iron_top",
-				renderer::TexturePath("images\\irontop.png", "IronTopTexture"),
-				64,
-				tool_traits({ .damage = 0,.pickaxe_speed = .8 }),
-				0.0f,
-				0.0f
-			);
-		}
-	};
-
-	struct lava_pick_item : item_type {
-		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(
-				"lava_pick",
-				renderer::TexturePath("images\\pikaxe.png", "PickaxeTexture"),
-				64,
-				tool_traits({ .damage = 0,.pickaxe_speed = 10 }),
-				0.0f,
-				3.0f
-			);
-		}
-	};
 
 	struct rock_item : item_type {
+		std::string name() const {
+			return "rock";
+		}
+		stn::Option<tool_traits> tool_info() const {
+			return tool_traits({ .damage = 1, .pickaxe_speed = 1 });
+		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
-				"rock",
-				renderer::TexturePath("images\\rock.png", "RockTexture"),
-				64,
-				tool_traits({ .damage = 1,.pickaxe_speed = 1}),
-				0.0f,
-				2.0f
+				renderer::TexturePath("images\\rock.png"),
+				64
 			);
 		}
 	};
 
 	struct sword_item : item_type {
+		std::string name() const {
+			return "stone_sword";
+		}
+		stn::Option<tool_traits> tool_info() const {
+			return tool_traits{
+				.damage = 3, .pickaxe_speed = 0
+			};
+		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
-				"sword",
-				renderer::TexturePath("images\\sword.png", "SwordTexture"),
-				64,
-				tool_traits({ .damage = 4,.pickaxe_speed=0}),
-				0.0f,
-				0.0f
+				renderer::TexturePath("images\\sword.png"), 16);
+		}
+	};
+
+	struct crystal_sword_item : item_type {
+		std::string name() const {
+			return "crystal_sword";
+		}
+		stn::Option<tool_traits> tool_info() const {
+			return tool_traits({ .damage = 5, .pickaxe_speed = 0 });
+		}
+		item_traits traits(const ecs::Ecs& world) const {
+			return item_traits(
+				renderer::TexturePath("images\\crystal_dagger.png"),
+				64
 			);
 		}
 	};
 
-	struct final_sword_item : item_type {
+	struct rope_item : item_type {
+		std::string name() const {
+			return "final_sword";
+		}
+		stn::Option<tool_traits> tool_info() const {
+			return tool_traits({ .damage = 4, .pickaxe_speed = 0 });
+		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
-				"final_sword",
-				renderer::TexturePath("images\\finalsword.png", "FinalSwordTexture"),
-				64,
-				tool_traits({ .damage = 4,.pickaxe_speed = 0 }),
-				0.0f,
-				0.0f
+				renderer::TexturePath("images\\finalsword.png"),
+				64
 			);
 		}
 	};
 
 
-	struct register_core_items :Core::Plugin {
-		void build(Core::App& app) {
-			BlockRegistry& registry = app.ensure_resource<BlockRegistry>();
-			item_types& item_register = app.ensure_resource<item_types>();
+	inline void register_core_items(Core::App& app) {
+		app.ensure_resource<loot_tables>();
+		BlockRegistry& registry = app.ensure_resource<BlockRegistry>();
+		ItemTypes& item_register = app.ensure_resource<ItemTypes>();
 
-			registry.register_block<PlankBlock>();
-			registry.register_block<MossBlock>();
-			registry.register_block<TorchBlock>();
-			registry.register_block<StoneBlock>();
-			registry.register_block<AirBlock>();
-			registry.register_block<ChestBlock>();
-			registry.register_block<CraftingTableBlock>();
+		registry.insert<LogBlock>();
+		registry.insert<PlankBlock>();
+		registry.insert<SeedBlock>();
+		registry.insert<TorchBlock>();
+		registry.insert<StoneBlock>();
 
-			item_register.register_item<items::chest_item>();
-			item_register.register_item<items::crafting_table_item>();
-			item_register.register_item<items::air_item>();
-			item_register.register_item<items::glass_bottle_item>();
-			item_register.register_item<items::iron_ore_item>();
-			item_register.register_item<items::iron_item>();
-			item_register.register_item<items::metal_rod_item>();
-			item_register.register_item<items::moss_item>();
-			item_register.register_item<items::plank_item>();
-			item_register.register_item<items::stone_item>();
-			item_register.register_item<items::stone_pickaxe_item>();
-			// Crystal items
-			item_register.register_item<items::crystal_bottom_item>();
-			item_register.register_item<items::crystal_item>();
-			item_register.register_item<items::crystal_pick_item>();
-			item_register.register_item<items::crystal_top_item>();
+		registry.insert<StoneBrickBlock>();
+		item_register.insert<stone_bricks_item>();
 
-			// Iron items
-			item_register.register_item<items::iron_bottom_item>();
-			item_register.register_item<items::iron_pick_item>();
-			item_register.register_item<items::iron_sword_item>();
-			item_register.register_item<items::iron_top_item>();
+		item_register.insert<items::stone_item>();
 
-			// Tools
-			item_register.register_item<items::lava_pick_item>();
-			item_register.register_item<items::rock_item>();
-			item_register.register_item<items::sword_item>();
+		registry.insert<CrystalBlock>();
+		item_register.insert<items::crystal_item>();
 
-			item_register.register_item<torch_item>();
-			app.insert_plugin<items::CursorContainerPlugin>();
-			item_register.register_item<items::final_sword_item>();
-		}
-	};
 
+		registry.insert<GlassBlock>();
+		item_register.insert<items::glass_item>();
+
+		registry.insert<AirBlock>();
+		registry.insert<ChestBlock>();
+		registry.insert<CraftingTableBlock>();
+		item_register.insert<items::slime_item>();
+
+		item_register.insert<items::torch_item>();
+		item_register.insert<items::chest_item>();
+		item_register.insert<items::crafting_table_item>();
+		item_register.insert<items::air_item>();
+		item_register.insert<items::glass_bottle_item>();
+		item_register.insert<items::iron_ore_item>();
+		item_register.insert<items::iron_item>();
+		item_register.insert<items::stick_item>();
+		item_register.insert<items::seed_item>();
+		item_register.insert<items::moss_item>();
+		item_register.insert<items::moss_pack_item >();
+		item_register.insert<items::plank_item>();
+		item_register.insert<items::stone_pickaxe_item>();
+		// Crystal items
+		item_register.insert<items::crystal_sword_item>();
+		item_register.insert<items::crystal_pick_item>();
+		// Iron items
+		item_register.insert<items::iron_pick_item>();
+		item_register.insert<items::iron_sword_item>();
+
+		// Tools
+		item_register.insert<items::rock_item>();
+		item_register.insert<items::sword_item>();
+		app.emplace_system<SeedGrower>();
+		app.insert_plugin(items::CursorContainerPlugin());
+		item_register.insert<items::rope_item>();
+	}
 }

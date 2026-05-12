@@ -3,31 +3,31 @@
 #include <GLFW/glfw3.h>
 namespace GlUtil {
 	template<typename T>
-	constexpr GLenum getGLType();
+	inline constexpr GLenum getGLType();
 
 	template<>
-	constexpr GLenum getGLType<float>() { return GL_FLOAT; }
+	inline constexpr GLenum getGLType<float>() { return GL_FLOAT; }
 
 	template<>
-	constexpr GLenum getGLType<int>() { return GL_INT; }
+	inline constexpr GLenum getGLType<int>() { return GL_INT; }
 
 	template<>
-	constexpr GLenum getGLType<unsigned int>() { return GL_UNSIGNED_INT; }
+	inline constexpr GLenum getGLType<unsigned int>() { return GL_UNSIGNED_INT; }
 
 	template<>
-	constexpr GLenum getGLType<double>() { return GL_DOUBLE; }
+	inline constexpr GLenum getGLType<double>() { return GL_DOUBLE; }
 
 	template<>
-	constexpr GLenum getGLType<short>() { return GL_SHORT; }
+	inline constexpr GLenum getGLType<short>() { return GL_SHORT; }
 
 	template<>
-	constexpr GLenum getGLType<unsigned short>() { return GL_UNSIGNED_SHORT; }
+	inline constexpr GLenum getGLType<unsigned short>() { return GL_UNSIGNED_SHORT; }
 
 	template<>
-	constexpr GLenum getGLType<char>() { return GL_BYTE; }
+	inline constexpr GLenum getGLType<char>() { return GL_BYTE; }
 
 	template<>
-	constexpr GLenum getGLType<unsigned char>() { return GL_UNSIGNED_BYTE; }
+	inline constexpr GLenum getGLType<unsigned char>() { return GL_UNSIGNED_BYTE; }
 	inline size_t Size(GLenum Type) {
 		// Calculate the size of the attribute in bytes
 		switch (Type) {

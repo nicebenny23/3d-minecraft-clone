@@ -44,9 +44,10 @@ namespace grid {
 			to_flip = GenerateBlock{
 				.id = new_id,
 				.loc = position,
-				.face = math::up2d,
+				.block_face = math::up2d,
 				.direction = attach_direction,
-				.mesh= grid.get_chunk(position).unwrap().owner().get_component<Chunks::chunkmesh>()
+				.mesh= grid.get_chunk(position).unwrap().owner().get_component<chunks::ChunkMesh>(),
+				.registry = blk.world().get_resource<blocks::BlockRegistry>()
 			}.spawn(blk.world());
 			
 			blk.destroy();
@@ -59,9 +60,9 @@ namespace grid {
 			grid::Grid& grid = world.get_resource<grid::Grid>();
 			for (set_block_command& cmd : world.read_commands<set_block_command>()) {
 
-				stn::Option<Chunks::block_object&> mabye_location = grid.get_object(cmd.pos);
+				stn::Option<chunks::block_object&> mabye_location = grid.get_object(cmd.pos);
 				if (mabye_location) {
-					Chunks::block_object& location = mabye_location.unwrap();
+					chunks::block_object& location = mabye_location.unwrap();
 					grid.get_chunk(cmd.pos).unwrap().modified = true;
 					size_t old_light = location.get<block>().light_passing_through;
 					world.write_command(grid::lighten_block_command(cmd.pos));
@@ -71,8 +72,10 @@ namespace grid {
 					blocks::block& blk = location.get<blocks::block>();
 					for (math::Direction3d block_dir : math::Directions3d) {
 						blk.mesh.mark_dirty(block_dir);
+
 						grid.get_block(cmd.pos+ block_dir.coord()).then([&](block& seen_block) {
 							seen_block.mesh.mark_dirty(-block_dir);
+							world.write_command(grid::lighten_block_command(seen_block.pos));
 						});
 					}
 				}

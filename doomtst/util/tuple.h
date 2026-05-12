@@ -229,7 +229,26 @@ namespace stn {
 			return (f(t.template get<Is>()) && ...);
 		}(std::index_sequence_for<Ts...>{});
 	}
+	template<typename T,typename ...Args> requires std::constructible_from<T,Args&&...>
+	struct Constructor {
+		Constructor(Args&&... argument_list) :args(std::forward<Args>(argument_list)...) {
 
+		}
+		using constructed= T;
+		using arguments = stn::Tuple<Args...>;
+		arguments args;
+	};
+	
+	template<typename T>
+	concept ConstructorType = TypeInstantiationOf<T, Constructor>;
+	template<ConstructorType T> 
+	using ConstructedClass = typename T::constructed;
+	template<ConstructorType T>
+	using ConstructedArguments = typename T::arguments;
+	template<typename T, typename... Args>
+	auto make_constructor(Args&&... args) {
+		return Constructor<T, Args...>(std::forward<Args>(args)...);
+	}
 }
 namespace std {
 	template <std::size_t I, typename... Ts>
@@ -276,4 +295,5 @@ namespace std {
 	struct tuple_element<N, stn::TupleSet<Args...>> {
 		using type = typename tuple_element<N,typename stn::TupleSet<Args...>::TupleTypeFor>::type;
 	};
+
 }

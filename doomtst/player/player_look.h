@@ -5,35 +5,56 @@
 #include "../game/casts.h"
 #include <utility>
 #include "../items/menu.h"
+#include "../renderer/renderer/wireframe_box.h"
+#include "../game/aabb.h"
+#include "../game/health.h"
 #pragma once
 namespace player {
 	struct CursorHit {
 		ecs::obj hit;
 	};
 	struct PlayerCursor:ecs::component {
+		ecs::Constrained<WireFrame, core::LocalTransform> frame;
+		PlayerCursor(ecs::Constrained<WireFrame,core::LocalTransform> wireframe) :frame(wireframe) {
 
-		voxtra::RayWorldCollision Hit;
-		math::bounds look_range= math::bounds(0,4);
+		}
+		bool hit_entity() const {
+			return hit && hit.unwrap().collider.has_component<Health::EntityHealth>();
+		}
+		bool hit_block() const {
+			return hit && hit.unwrap().collider.has_component<block>();
+		}
+		voxtra::RayWorldCollision hit;
+		math::bounds look_range= math::bounds(0,3);
 	};
 
 	struct PlayerCursorCaster:ecs::System{
 		void run(ecs::Ecs& world) {
 			
-			ecs::View< ecs::world_transform,PlayerCursor,ecs::Owner>look_view(world);
-			for (stn::TupleSet<ecs::world_transform&,PlayerCursor&,ecs::obj> view: look_view) {
+			ecs::View< core::LocalTransform,PlayerCursor,ecs::Owner>look_view(world);
+			for (stn::TupleSet<core::LocalTransform&,PlayerCursor&,ecs::obj> view: look_view) {
 				
 				PlayerCursor& cursor=view.get<PlayerCursor&>();
 				if (world.get_resource<ui::MenuState>().menu_open()) {
-					cursor.Hit = stn::None;
+					cursor.hit = stn::None;
 					continue;
 				}
-				math::Transform& transform= view.get<ecs::world_transform&>().transform;
+				math::Transform& transform= view.get<core::LocalTransform&>().transform;
 				geo::ray look_ray=transform.forward_ray().dialate_from_start(cursor.look_range.max());
-
-				cursor.Hit = collision::raycast(look_ray, collision::HitQuery(view.get<ecs::obj>()));
-				if (cursor.Hit) {
-					voxtra::RayWorldHit hit = cursor.Hit.unwrap();
+				
+				cursor.hit = collision::raycast(look_ray, collision::HitQuery(view.get<ecs::obj>()));
+				if (cursor.hit) {
+					voxtra::RayWorldHit hit = cursor.hit.unwrap();
+					
 					world.write_event(CursorHit{.hit=hit.owner() });
+					if (hit.owner().has_component<block>()) {
+						cursor.frame.get<WireFrame>().color = colors::Gray;
+						cursor.frame.get<WireFrame>().enabled = true;
+						cursor.frame.get<core::LocalTransform>().transform.from_box_unrotated(aabb::global_box(hit.collider));
+					}
+				}
+				else {
+					view.get<PlayerCursor&>().frame.get<WireFrame>().enabled = false;
 				}
 			}
 		}
@@ -63,8 +84,9 @@ namespace player {
 	private:
 		ecs::EventReader<player::CursorHit> hits;
 	};
-	struct PlayerClickablePlugin :Core::Plugin {
-		void build(Core::App& world) {
+	struct PlayerClickablePlugin {
+		void operator()(Core::App& world) {
+			world.insert_plugin(renderer::wireframe_plugin);
 			world.emplace_system<MenuClickSystem>();
 			world.emplace_system<PlayerCursorCaster>();
 		}

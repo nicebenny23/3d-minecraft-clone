@@ -4,19 +4,19 @@
 namespace items {
 	struct craft_recipe {
 
-		craft_recipe(const ItemRecipe& item_recipe, container& input_container, ElementSlot& output_slot) :input(input_container.owner()), output(output_slot.owner()), recipe(item_recipe) {
+		craft_recipe(const ItemRecipe& item_recipe, ecs::Constrained <container> input_container, ecs::Constrained <ElementSlot> output_slot) :input(input_container), output(output_slot), recipe(item_recipe) {
 
 		}
 		ItemRecipe recipe;
-		ecs::obj input;
-		ecs::obj output;
+		ecs::Constrained<container> input;
+		ecs::Constrained<ElementSlot> output;
 
 		void apply(ecs::Ecs& world) {
-			AddToSlotPlan(output, recipe.output).apply(world);
+			AddToSlotPlan::build(AddToSlotRequest{ .entry = recipe.output,.slot = output}).unwrap().apply();
 			container& cont = input.get_component<container>();
 			for (size_t i = 0; i < cont.slots.length(); i++) {
 				if (recipe.item_list[i]) {
-					TakeFromSlot(recipe.item_list[i].unwrap(), cont.slots[i].get()).apply(world);
+					RemoveFromSlotRequest{.slot= cont.slots[i].object(),.count = recipe.item_list[i].unwrap().count}.build().unwrap().apply();
 				}
 			}
 		}
@@ -27,12 +27,13 @@ namespace items {
 
 
 
-	inline	bool can_build(const ItemRecipe& item_recipe, const container& input_container, stn::Option<items::item_entry> output_slot) {
-		if (input_container.size != item_recipe.size) {
-			stn::throw_logic_error("recipe size {} must match container size {}", item_recipe.size, input_container.size);
+	inline	bool can_build(const ItemRecipe& item_recipe, ecs::Constrained <container> input_container, stn::Option<items::item_entry> output_slot) {
+		container& input = input_container.get<container>();
+		if (input.size != item_recipe.size) {
+			stn::throw_logic_error("recipe size {} must match container size {}", item_recipe.size, input.size);
 		}
-		for (size_t index = 0; index < input_container.slots.length(); index++) {
-			const ElementSlot& element = input_container.slots[index].get_component<ElementSlot>();
+		for (size_t index = 0; index < input.slots.length(); index++) {
+			const ElementSlot& element = input.slots[index].get_component<ElementSlot>();
 			bool should_be_empty = item_recipe.item_list[index].is_none();
 			if (should_be_empty != element.empty()) {
 				return false;
@@ -43,20 +44,20 @@ namespace items {
 					return false;
 				}
 				const item_stack& stck = element.element().unwrap().get_component<item_stack>();
-				if (!stck.can_accept(item)) {
+				if (!stck.contained_entry().can_produce(item)) {
 					return false;
 				}
 			}
 		}
 		if (output_slot) {
 			
-			return output_slot.unwrap().can_accept(item_recipe.output, input_container.types());
+			return output_slot.unwrap().can_accept(item_recipe.output, input.types());
 		}
 		return true;
 	}
 
-	inline stn::Option<ItemRecipe> best_booklet_recipe(ItemRecipes recipes, const container& input, stn::Option<item_entry> output) {
-
+	inline stn::Option<ItemRecipe> best_booklet_recipe(ItemRecipes recipes, const ecs::Constrained <container>& input, stn::Option<item_entry> output) {
+		const ItemTypes& types = input.world().get_resource<ItemTypes>();
 		for (const ItemRecipe& recipe : recipes) {
 			if (can_build(recipe, input, output)) {
 				return recipe;
@@ -65,9 +66,9 @@ namespace items {
 		return stn::None;
 	}
 
-	inline stn::Option<craft_recipe> build_recipe_from_booklet(ItemRecipes recipes, container& input, ElementSlot& output) {
+	inline stn::Option<craft_recipe> build_recipe_from_booklet(ItemRecipes recipes, ecs::Constrained < container> input, ecs::Constrained <ElementSlot> output) {
 
-		stn::Option<ItemRecipe> recipe = best_booklet_recipe(recipes, input, output.entry());
+		stn::Option<ItemRecipe> recipe = best_booklet_recipe(recipes, input, output.get<ElementSlot>().entry());
 		if (!recipe) {
 			return stn::None;
 		}

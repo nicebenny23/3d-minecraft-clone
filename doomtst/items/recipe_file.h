@@ -5,24 +5,24 @@ namespace items {
 	inline v2::Coord2 ParseVector2(const json::Value& value) {
 		return v2::Coord2(value.get_subobject_as<int64_t>("x").unwrap(), value.get_subobject_as<int64_t>("y").unwrap());
 	}
+	inline v2::UVec2 ParseUVector2(const json::Value& value) {
+		return v2::UVec2(value.get_subobject_as<int64_t>("x").unwrap(), value.get_subobject_as<int64_t>("y").unwrap());
+	}
 	struct ParseItemEntry {
 		ecs::Ecs& world;
 		ParseItemEntry(ecs::Ecs& ecs) :world(ecs) {
 		}
 		item_entry operator()(const json::Value& item) {
-			item_types& item_register = world.insert_resource<item_types>();
+			ItemTypes& item_register = world.insert_resource<ItemTypes>();
 			std::string item_name = item.get_subobject_as<std::string>("id").expect("item block_id should exist");
-			size_t count = item.get_subobject("count")
-				.expect("item count should exist")
-				.as_unsigned()
-				.expect("item count should not be negitive");
+			size_t count = item.get_subobject_as<json::Integer>("count").copied().unwrap_or(1);
 			return item_entry(item_register.from_name(item_name), count, item_register);
 		}
 	};
 	struct ItemRecipeFromJson {
 		stn::array<ItemRecipe> operator()(const json::Value& value) {
 			const json::Object& obj = value.extract<json::Object>().expect("json must be an object");
-			v2::Coord2 coord = ParseVector2(obj.get("size").expect("size must exist in a recipe"));
+			v2::UVec2 coord = ParseUVector2(obj.get("size").expect("size must exist in a recipe"));
 			const json::Array& arr = value.get_subobject_as<json::Array>("input").expect("recipe must have an input");
 			if (arr.length() != coord.x * coord.y) {
 				stn::throw_logic_error("json element list may not have {} while it has a recipe of size{}", arr.length(), coord.x * coord.y);
@@ -36,11 +36,11 @@ namespace items {
 			return spread_out(ItemRecipe(coord, std::move(crafting_list), output),size);
 		}
 		ecs::Ecs& world;
-		ItemRecipeFromJson(ecs::Ecs& ecs,v2::Coord2 expand_to) :world(ecs),size(expand_to){
+		ItemRecipeFromJson(ecs::Ecs& ecs, ui::TableBounds expand_to) :world(ecs),size(expand_to){
 		}
-		v2::Coord2 size;
+		ui::TableBounds size;
 	};
-	inline ItemRecipes recipe_booklet_from_path(v2::Coord2 size,const json::Value& value, ecs::Ecs& world) {
+	inline ItemRecipes recipe_booklet_from_path(ui::TableBounds size,const json::Value& value, ecs::Ecs& world) {
 		return ItemRecipes(json::ComposeArray<ItemRecipeFromJson>(ItemRecipeFromJson(world,size))(value));
 	}
 }

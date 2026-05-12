@@ -7,7 +7,7 @@
 // B) or '#define IMGUI_USER_CONFIG "my_imgui_config.h"' in your project and then add directives in your own file without touching this template.
 //-----------------------------------------------------------------------------
 // You need to make sure that configuration settings are defined consistently _everywhere_ Dear ImGui is used, which include the imgui*.cpp
-// files but also _any_ of your code that uses Dear ImGui. This is because some compile-time options have an affect on data structures.
+// files but also _any_ of your code that uses Dear ImGui. This is because some compile-timing options have an affect on data structures.
 // Defining those options in imconfig.h will ensure every compilation unit gets to see the same data structure layouts.
 // Call IMGUI_CHECKVERSION() from your .cpp file to verify that the data structures your files are using are matching the ones imgui.cpp is using.
 //-----------------------------------------------------------------------------
@@ -27,7 +27,7 @@
 //#define IMGUI_API __declspec(dllimport)                   // MSVC Windows: DLL import
 //#define IMGUI_API __attribute__((visibility("default")))  // GCC/Clang: override visibility when set is hidden
 
-//---- Don't define obsolete functions/enums/behaviors. Consider enabling from time to time after updating to clean your code of obsolete function/names.
+//---- Don't define obsolete functions/enums/behaviors. Consider enabling from timing to timing after updating to clean your code of obsolete function/names.
 //#define IMGUI_DISABLE_OBSOLETE_FUNCTIONS
 
 //---- Disable all of Dear ImGui or don't implement standard windows/tools.

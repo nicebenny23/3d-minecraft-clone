@@ -46,8 +46,8 @@ namespace voxtra {
 
 
 	inline bool boxcast_grid(geo::Box Box, grid::Grid& world) {
-		array<Chunks::block_object> blocks_in_range = world.voxel_in_range(Box);
-		for (Chunks::block_object& PotentialCollision : blocks_in_range) {
+		array<chunks::block_object> blocks_in_range = world.voxel_in_range(Box);
+		for (chunks::block_object& PotentialCollision : blocks_in_range) {
 
 			stn::Option<aabb::Collider&> Collider = PotentialCollision.get_component_opt<aabb::Collider>();
 			if (Collider && PotentialCollision.get_component<blocks::block>().solid() && !Collider.unwrap().effector) {
@@ -76,28 +76,20 @@ namespace voxtra {
 		}
 		double ray_length = nray.length();
 		double travel_dist = 0;
-		Vec3 norm_ray = nray.dir();
-		Vec3 conv_each;
+		Vec3 ray_direction = nray.dir();
 		v3::Coord sgns;
 		for (size_t i = 0; i < 3; i++) {
-			//if its empty we set the direction to none
-			if (norm_ray[i] == 0) {
-				conv_each[i] = 0;
-			}
-			else {
-				conv_each[i] = abs(1 / norm_ray[i]);
-			}
-			sgns[i] = zero_sign(norm_ray[i]);
+			sgns[i] = zero_preserving_sign(ray_direction[i]);
 		}
 		v3::Point3 pos = nray.point_at(0);
-		Coord curvox = grid.get_voxel(pos);
-		Coord Boundry;
+		v3::Coord current_voxel;
 		for (size_t i = 0; i < 3; i++) {
-			Boundry[i] = next_boundary(pos[i], sgns[i] == 1);
+			//this essentially shifts it into the voxel we are going to be in removing the ambiguity of the starting position of a number like 0
+			current_voxel[i] = floor_with_infinitesimal_shift(pos[i], sgns[i] == 1);
 		}
 		while (travel_dist <= ray_length) {
 
-			stn::Option<ecs::Constrained<block>&> blk = grid.get_object(curvox);
+			stn::Option<ecs::Constrained<block>&> blk = grid.get_object(current_voxel);
 			if (blk) {
 				stn::Option<aabb::Collider&> BlockCollider = blk.unwrap().get_component_opt<aabb::Collider>();
 				if (BlockCollider) {
@@ -112,31 +104,35 @@ namespace voxtra {
 			double min_dist = std::numeric_limits<double>::infinity();
 			size_t min_ind = 0;
 			for (size_t i = 0; i < 3; i++) {
+				//check to avoid a division by zero
 				if (sgns[i] == 0) {
 					continue;
 				}
-				double new_val = abs(Boundry[i] - pos[i]) * conv_each[i];
+				// Compute the next voxel boundary along this axis
+				// For positive rays, the next boundary is current_voxel + 1
+				// For negative rays, the next boundary is current_voxel
+				//if you think about it currvox represents the immediate voxel we are in(note the use of the shift prevents us from_being at a integer), if we are going forard we should add one else we are above currvox, so we dont do anything
+				int boundry= current_voxel[i] + (sgns[i] == 1);
+				double new_val = math::abs((boundry - pos[i])/ray_direction[i]);
 				if (new_val < min_dist) {
 					min_dist = new_val;
 					min_ind = i;
-
 				}
 			}
 			travel_dist += min_dist;
 			pos = nray.point_at(travel_dist);
-			curvox += Coord(sgns[min_ind], min_ind);
-			Boundry += Coord(sgns[min_ind], min_ind);
+			current_voxel += Coord(sgns[min_ind], min_ind);
 		}
 
 		return stn::None;
 	}
-	inline RayWorldCollision grid_cast(geo::RayBox ray_box, grid::Grid& world) {
+	inline RayWorldCollision grid_ray_box_cast(geo::RayBox ray_box, grid::Grid& world) {
 		//expand because of floating point
 		geo::Box bounding_box = ray_box.bounding_box().expanded(.01f);
 
-		stn::array<Chunks::block_object> boxes = world.voxel_in_range(bounding_box);
+		stn::array<chunks::block_object> boxes = world.voxel_in_range(bounding_box);
 		RayWorldCollision closest_hit;
-		for (Chunks::block_object& obj : boxes) {
+		for (chunks::block_object& obj : boxes) {
 			stn::Option<aabb::Collider&> coll_mabye= obj.get_component_opt<aabb::Collider>();
 			if (!coll_mabye) {
 				continue;
@@ -154,13 +150,12 @@ namespace voxtra {
 
 		return closest_hit;
 	}
-	inline stn::Option<geo::Box> findemptyspace(v3::Scale3 scale, grid::Grid& world) {
-		size_t max_tst = 40;
-		for (size_t tst = 0; tst < max_tst; tst++) {
+	inline stn::Option<geo::Box> find_empty_space(v3::Scale3 scale, grid::Grid& world,size_t max_trials=40) {
+		for (size_t tst = 0; tst < max_trials; tst++) {
 			double ranx = (random::random() - .5) * 2;
 			double rany = (random::random() - .5) * 2;
 			double ranz = (random::random() - .5) * 2;
-			v3::Point3 test_pos = (Vec3(ranx, rany, ranz) * (world.dim_axis) / 2 + world.grid_pos.position) * Chunks::chunk_axis;
+			v3::Point3 test_pos = (Vec3(ranx, rany, ranz) * (world.dim_axis) / 2 + world.grid_pos.position) * chunks::chunk_axis;
 			geo::Box test_box = geo::Box(test_pos, scale);
 			if (!boxcast_grid(test_box, world)) {
 				return stn::Option<geo::Box>(test_box);
@@ -169,17 +164,39 @@ namespace voxtra {
 
 		return stn::None;
 	}
-	inline stn::Option<geo::Box> findground(v3::Scale3 scale, grid::Grid& world) {
-		size_t max_checks = 10;
-		for (size_t i = 0; i < max_checks; i++) {
+	inline geo::Box move_left_until_air(geo::Box box,grid::Grid& world,blocks::BlockRegistry& registry) {
+		while (true) {
+			v3::Coord lowest= world.get_voxel(box.min());
+			v3::Coord highest= world.get_voxel(box.max());
+			bool only_air = true;
+			for (int x = lowest.x; x <= highest.x; x++) {
+				for (int y = lowest.y; y <= highest.y; y++) {
+					for (int z = lowest.z; z <= highest.z; z++) {
+						if (!registry.is<blocks::AirBlock>(world.generator->generate(v3::Coord(x,y,z)))) {
+							only_air = false;	
+						}
+					}
 
-			stn::Option<geo::Box> test_box_opt = findemptyspace(scale, world);
+				}
+			}
+			if (only_air) {
+				break;
+			}
+			box.center.x += 1;
+
+		}
+		return box;
+	}
+	inline stn::Option<geo::Box> find_ground(v3::Scale3 scale, grid::Grid& world,size_t max_ground_checks=200,size_t max_box_trials=200) {
+		for (size_t i = 0; i < max_ground_checks; i++) {
+
+			stn::Option<geo::Box> test_box_opt = find_empty_space(scale, world,max_box_trials);
 			if (!test_box_opt) {
 				continue;
 			}
 			geo::Box test_box = test_box_opt.unwrap();
 			geo::RayBox box_ray = geo::RayBox(geo::ray::from_offset(test_box.center, v3::Vec3(0, -100, 0)), scale);
-			RayWorldCollision col = grid_cast(box_ray, world);
+			RayWorldCollision col = grid_ray_box_cast(box_ray, world);
 			if (!col) {
 				continue;
 			}
@@ -189,13 +206,12 @@ namespace voxtra {
 				int l = 3;
 			}
 			for ( cube_index index: cube_indices) {
-				int l = 3;
 				if (!world.get_chunk(world.get_voxel(hit_box.point_at_vertex(index)))) {
 					all_loaded = false;
 				}
 			}
 			if (all_loaded) {
-				return hit_box;
+ 				return hit_box;
 			}
 		}
 		return stn::None;

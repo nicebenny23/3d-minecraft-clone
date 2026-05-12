@@ -5,7 +5,7 @@
 #include "../math/mathutil.h"
 namespace v3 {
 	struct Scale3 {
-
+		
 		constexpr Scale3() : x(1), y(1), z(1) {
 		}
 		constexpr Scale3(double X, double Y, double Z) noexcept : x(X), y(Y), z(Z) {
@@ -20,6 +20,9 @@ namespace v3 {
 		}
 		bool operator!=(const Scale3& p1) {
 			return !math::approximate_equals(x, p1.x) || !math::approximate_equals(y, p1.y) || !math::approximate_equals(z, p1.z);
+		}
+		double volume() const {
+			return x * y * z;
 		}
 		Scale3 with_x(double new_x) const {
 			return Scale3(new_x, y, z);

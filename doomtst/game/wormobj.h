@@ -29,7 +29,7 @@ struct worm: ecs::component
 	
 
 			renderer::ModelMesh* meshatpos= owner().get_component<model>().meshlist[i];
-			Transform& local = col.get_component<ecs::world_transform>().transform;
+			Transform& local = col.get_component<core::LocalTransform>().transform;
 			local.position += currtransform.normal_dir() * speed;
 
 			

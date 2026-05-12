@@ -25,6 +25,7 @@ namespace ecs {
 		uint32_t gen_count;
 		entity_metadata(entity_id id_for):id(id_for) {
 			gen_count = 0;
+			is_alive = false;
 		}
 		void clear() {
 			gen_count++;
@@ -38,8 +39,25 @@ namespace ecs {
 		entity_id id;
 	};
 	
+	struct TrivialEntityAllocator {
+		stn::insertion<ecs::entity_id> allocate() {
+			if (free_ids.empty()) {
+
+				return stn::insertion(ecs::entity_id(count++),true);
+			}
+			return stn::insertion(free_ids.pop(),false);
+		}
+		void free(entity_id id) {
+			free_ids.push(id);
+		}
+		size_t count;
+		stn::array<ecs::entity_id> free_ids;
+	};
 
 	struct Entities {
+		entity get_entity_unchecked(entity_id id) const {
+			return entity(id,entity_list.unchecked_at(id.id).gen_count);
+		}
 		Entities() :entity_list(),free_ids() {
 
 		}
@@ -56,19 +74,6 @@ namespace ecs {
 		bool contains(entity_id entity) const {
 			return entity_list.contains_index(entity.id)&&entity_list[entity.id].is_alive;
 		}
-		//for more expressive 
-		entity_metadata& at(entity_id entity) {
-			return entity_list[entity.id];
-		}
-		const entity_metadata& at(entity_id entity) const {
-			return entity_list[entity.id];
-		}
-		entity_metadata& at(entity entity) {
-			return entity_list[entity.id().id];
-		}
-		const entity_metadata& at(entity entity) const {
-			return entity_list[entity.id().id];
-		}
 		void assert_valid(entity entity) const{
 			if (!contains(entity))
 			{
@@ -76,16 +81,16 @@ namespace ecs {
 			}
 		}
 		entity_metadata& operator[](entity_id entity) {
-			return at(entity);
+			return entity_list[entity.id];
 		}
 		const entity_metadata& operator[](entity_id entity) const {
-			return at(entity);
+			return entity_list[entity.id];
 		}
 		entity_metadata& operator[](entity entity) {
-			return at(entity.id());
+			return entity_list[entity.id().id];
 		}
 		const entity_metadata& operator[](entity entity) const {
-			return at(entity.id());
+			return entity_list[entity.id().id];
 		}
 		
 		size_t length() const{
@@ -96,7 +101,7 @@ namespace ecs {
 		}
 		template<typename A= default_allocator>
 		entity allocate_entity() {
-			stn::insertion<entity_id> id= free_ids.allocate<A>();
+			stn::insertion<entity_id> id= free_ids.allocate();
 			if (id.is_new) {
 				//expands to the index
 				entity_list.geometric_expand_with(max_sharing_page(id.value).id + 1,
@@ -105,15 +110,15 @@ namespace ecs {
 					}
 				);
 			}
-			return at(id.value).make_live_handle();
+			return entity_list[id.value.id].make_live_handle();
 		}
 		void remove_entity(entity entity) {
-			at(entity.id()).clear();
+			entity_list[entity.id().id].clear();
 			free_ids.free(entity.id());
 		}
 	private:
 
-		EntityIds free_ids;
+		TrivialEntityAllocator free_ids;
 		stn::array<entity_metadata> entity_list;
 	};
 }

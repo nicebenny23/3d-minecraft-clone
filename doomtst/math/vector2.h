@@ -7,6 +7,7 @@
 
 #include <glm/glm.hpp>
 #include <format>
+#include "../util/Option.h"
 namespace v2 {
 	struct Vec2;
 	struct Coord2 {
@@ -15,9 +16,7 @@ namespace v2 {
 		}
 		constexpr Coord2() : x(0), y(0) {
 		}
-		bool operator==(const Coord2& p1) const {
-			return (p1.x == x && p1.y == y);
-		}
+		bool operator==(const Coord2& p1) const = default;
 		bool operator!=(const Coord2& p1) const{
 			return(p1.x != x || p1.y != y);
 		}
@@ -163,11 +162,41 @@ namespace v2 {
 	inline double slope(const Vec2& p, const Vec2& p1) {
 		return (p1.y - p.y) / (p1.x - p.x);
 	}
+	struct UVec2 {
+		bool operator ==(const UVec2& value) const = default;
+
+		bool operator !=(const UVec2& value) const = default;
+		UVec2(size_t x, size_t y) :x(x), y(y) {
+		}
+		stn::Option< UVec2> operator-(const UVec2& value) const{
+			if (x<value.x||y<value.y) {
+				return stn::None;
+			}
+			return UVec2(x - value.x, y - value.y);
+		}
+		UVec2 operator+(const UVec2& value) const {
+			return UVec2(x+value.x, y+value.y);
+		}
+		UVec2() :x(0), y(0) {
+
+		}
+		size_t x;
+		size_t y;
+	};
 }
-template <>
-struct std::formatter<v2::Coord2> : std::formatter<std::string> {
-	template <typename FormatContext>
-	auto format(const v2::Coord2& v, FormatContext& ctx) const {
-		return std::format_to(ctx.out(), "({}, {})", v.x, v.y);
-	}
-};
+namespace std {
+	template <>
+	struct formatter<v2::Coord2> : formatter<string> {
+		template <typename FormatContext>
+		auto format(const v2::Coord2& v, FormatContext& ctx) const {
+			return format_to(ctx.out(), "({}, {})", v.x, v.y);
+		}
+	};
+	template <>
+	struct formatter<v2::UVec2> : formatter<string> {
+		template <typename FormatContext>
+		auto format(const v2::UVec2& v, FormatContext& ctx) const {
+			return format_to(ctx.out(), "({}, {})", v.x, v.y);
+		}
+	};
+}

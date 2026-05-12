@@ -20,6 +20,9 @@ namespace collision {
 		ecs::View< aabb::Collider,aabb::DynamicCollider,ecs::Owner> colliders(query.world);
 		voxtra::RayWorldCollision closest = stn::None;
 		for (auto [collider, dynamic_tag,object] : colliders) {
+			if (collider.effector) {
+				continue;
+			}
 			if (query.matches(collider)) {
 				continue;
 			}
@@ -37,6 +40,9 @@ namespace collision {
 		ecs::View< aabb::Collider,  aabb::DynamicCollider,ecs::Owner> colliders(query.world);
 		voxtra::RayWorldCollision closest = stn::None;
 		for (auto [collider, dynamic_tag,object] : colliders) {
+			if (collider.effector) {
+				continue;
+			}
 			static_assert(std::same_as<aabb::Collider&, decltype(collider)>);
 			if (query.matches(collider)) {
 				continue;
@@ -51,7 +57,7 @@ namespace collision {
 		return closest;
 	}
 	inline voxtra::RayWorldCollision ray_box_cast(geo::RayBox ray_box, HitQuery query, voxtra::GridTraverseMode travmode = voxtra::GridTraverseMode::countnormal) {
-		voxtra::RayWorldCollision closest_on_grid = voxtra::grid_cast(ray_box, query.world.get_resource<grid::Grid>());
+		voxtra::RayWorldCollision closest_on_grid = voxtra::grid_ray_box_cast(ray_box, query.world.get_resource<grid::Grid>());
 		voxtra::RayWorldCollision closest_entity = raybox_cast_dynamic(ray_box, query);
 		return stn::min_some_on_map(closest_entity, closest_on_grid,
 			[&](const voxtra::RayWorldHit& col) {return col.dist(); });

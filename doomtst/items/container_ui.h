@@ -1,32 +1,45 @@
 #include "Container.h"
+#include "../renderer/ui_table.h"
 #include "SlotUi.h"
 #pragma once
 namespace items{
+	using slot_type = ecs::Constrained<ItemSlotDecal, RefrencedSlot>;
 	struct ContainerDisplay:ecs::component {
 		ContainerDisplay(ecs::Constrained<items::container> object) :container_object(object), slots(){
 		}
 		ecs::Constrained<items::container> container_object;
-		stn::array<ecs::ConstrainedHandle<ItemSlotDecal,RefrencedSlot>> slots;
+		stn::array<slot_type> slots;
+		
 		const container& displayed_container() const {
 			return container_object.get_component<container>();
 		}
 		container& displayed_container(){
 			return container_object.get_component<container>();
 		}
-		v2::Coord2 size() const {
+
+		ui::TableBounds size() const {
 			return displayed_container().size;
 		}
-		ecs::ConstrainedHandle<ItemSlotDecal, RefrencedSlot>& operator[](container_index ind) {
-			if (!ind.fits_in(size())) {
-				stn::throw_logic_error("index {} does not fit into size {}", ind.coord, size());
-			}
-			return slots[ind.index_in(size())];
+		slot_type operator[](v2::UVec2 ind) {
+			return slots[size().index(ind)];
 		}
-		const ecs::ConstrainedHandle<ItemSlotDecal, RefrencedSlot>& operator[](container_index ind) const {
-			if (!ind.fits_in(size())) {
-				stn::throw_logic_error("index {} does not fit into size {}", ind.coord, size());
+		const slot_type& operator[](v2::UVec2 ind) const {
+			if (!size().contains(ind)) {
+//				stn::throw_logic_error("index {} does not fit into size {}", ind.coord, size());
 			}
-			return slots[ind.index_in(size())];
+			return slots[size().index(ind)];
+		}
+	};
+
+	struct ContainerDisplayedRecipe {
+		ecs::Constrained<items::container> container_object;
+		v2::Coord2 offset;
+		void apply(ecs::obj& object) const {
+			v2::UVec2 index = object.get_component<ui::TableEntry>().entry;
+			ecs::Constrained< ElementSlot> slot_object(container_object.get<items::container>()[index].object());
+			object.apply_recipe(ItemSlotDisplaySpawner(slot_object, offset + v2::Coord2(index.x, index.y)));
+			ecs::obj parent = ecs::parent(object).unwrap();
+			parent.get_component<items::ContainerDisplay>().slots.push(slot_type(object));
 		}
 	};
 	struct ContainerDisplayRecipe {
@@ -35,18 +48,12 @@ namespace items{
 		ContainerDisplayRecipe(v2::Coord2 position, ecs::Constrained<items::container> object):offset(position),container_object(object){
 			object.validate();
 		}
-		void apply(ecs::obj& object) const{
-			ui::UiSpawner(geo::unit_box_2d, 1000).apply(object);
+		void apply(ecs::obj& object) const {
 			ContainerDisplay& cont = object.add_component<ContainerDisplay>(container_object);
-			v2::Coord2 size = cont.displayed_container().size;
-			for (int y = 0; y < size.y; y++) {
-				for (int x = 0; x < size.x; x++) {
-					v2::Coord2 pos = v2::Coord2(x, y);
-					v2::Coord2 display_pos = offset + pos;
-					ecs::Constrained< ElementSlot> slot_at(cont.displayed_container()[pos].object());
-					cont.slots.emplace(object.spawn_child<ItemSlotDisplaySpawner>(slot_at, display_pos));
-				}
-			}
+			
+			ui::UiSpawner element_spawner = ui::UiSpawner::with_default_size(111);
+			ui::UiTableRecipe< ContainerDisplayedRecipe>(ui::UiSpawner(geo::unit_box_2d,100),ContainerDisplayedRecipe{.container_object=container_object,.offset=offset},cont.displayed_container().size, element_spawner).apply(object);
+			
 		}
 	};
 }

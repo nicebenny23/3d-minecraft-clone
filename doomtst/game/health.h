@@ -7,12 +7,12 @@ namespace Health {
 		float timetilllavaover;
 	};
 	struct EntityHealth :ecs::component {
-		EntityHealth(size_t max, size_t current, timename::Duration duration) :max_health(max), current_health(current), damage_delay_timer(duration) {
+		EntityHealth(size_t max, size_t current, timing::Duration duration) :max_health(max), current_health(current), damage_delay_timer(duration) {
 
 		}
 		size_t max_health;
 		size_t current_health;
-		timename::Duration damage_delay_timer;
+		timing::Duration damage_delay_timer;
 	};
 
 	struct DamageCommand {
@@ -25,11 +25,12 @@ namespace Health {
 			for (DamageCommand& cmd : world.read_commands<DamageCommand>()) {
 				EntityHealth& current_entity_health = cmd.target.get<EntityHealth>();
 				if (!current_entity_health.damage_delay_timer.is_active()) {
-					current_entity_health.damage_delay_timer.set(4.0f);
+					current_entity_health.damage_delay_timer.set(1.0f);
 					current_entity_health.current_health -= stn::min(current_entity_health.current_health, cmd.damage);
 				}
 			}
-			ecs::View< EntityHealth, ecs::Owner> objects(world);
+			//not flexable enough to exclude the player yet
+			ecs::View< EntityHealth, ecs::Owner,ecs::Not<player::player_tag>> objects(world);
 			for (auto&& [health, object] : objects) {
 				if (health.current_health == 0) {
 					object.destroy();
@@ -44,7 +45,7 @@ namespace Health {
 
 		}
 		void apply(ecs::obj& object) const {
-			object.add_component<EntityHealth>(spawn_health, spawn_health, object.world().get_resource<timename::TimeManager>().current_time());
+			object.add_component<EntityHealth>(spawn_health, spawn_health, object.world().get_resource<timing::WorldClock>().make_duration());
 		}
 	};
 
@@ -52,7 +53,7 @@ namespace Health {
 		double knockback_multiplier;
 		size_t damage;
 		v3::Point3 center;
-		ecs::Constrained<ecs::world_transform, physics::rigidbody,EntityHealth> body;
+		ecs::Constrained<core::LocalTransform, physics::rigidbody,EntityHealth> body;
 	};
 	struct KbSystem :ecs::System {
 		void run(ecs::Ecs& world) {
@@ -60,9 +61,9 @@ namespace Health {
 				EntityHealth& health = kb.body.get<EntityHealth>();
 				if (health.damage_delay_timer.is_inactive()) {
 
-					Vec3 forceval = kb.body.get<ecs::world_transform>().transform.position - kb.center;
+					Vec3 forceval = kb.body.get<core::LocalTransform>().transform.position - kb.center;
 					if (mag2(forceval)!=0) {
-						forceval = forceval.with_magnitude(kb.knockback_multiplier * kb.damage);
+						forceval = forceval.with_magnitude(kb.knockback_multiplier * kb.damage).with_length_less_than(10);
 					}
 					kb.body.get<physics::rigidbody>().add_impluse(physics::Implulse{ forceval });
 					world.write_command(DamageCommand{ .damage = kb.damage,.target = kb.body.reduce() });
@@ -72,48 +73,56 @@ namespace Health {
 		}
 	};
 	struct FallDamageRecipient:ecs::component{
+		FallDamageRecipient(double mag) :damage_magnitude(mag) {
+
+		}
 		stn::Option<double> fall_velocity;
 		double damage_magnitude;
 	};
 
 	struct FallDamageSystem:ecs::System {
+
 		void run(ecs::Ecs& world) {
+			return;
 			ecs::View< physics::rigidbody, physics::Gravity, FallDamageRecipient, EntityHealth,ecs::Owner> query(world);
 			for (auto&& [rigid,gravity,faller,health,object]: query) {
 				if (rigid.isonground) {
 					if (faller.fall_velocity) {
 						int dmg(faller.damage_magnitude * faller.fall_velocity.unwrap());
-						if (0 < dmg) {
+						if (1 < dmg) {
 							world.write_command(DamageCommand{ .damage = size_t(dmg),.target = object});;
 						}
 					}
-					faller.fall_velocity = v3::dot(rigid.velocity, gravity.strength.force);
 				}
-				else {
-					faller.fall_velocity = stn::None;
-				}
+
+				faller.fall_velocity = v3::dot(rigid.velocity, gravity.strength.force.normal());
 			}
 		}
 	};
 	struct FlashOnHit:ecs::component{
 		colors::Color flash_color = colors::Color(1,.5f,.5f,1);
-
+		bool on;
 	};
 	struct DamageDisplaySystem :ecs::System {
 		void run(ecs::Ecs& world) {
 			ecs::View< Model,EntityHealth,FlashOnHit> query(world);
 			for (auto&& [model,health,flash]:query) {
 				if (health.damage_delay_timer.is_active()) {
-					model.color = flash.flash_color;
+					if (!flash.on) {
+						model.color = model.color * flash.flash_color;
+						flash.on = true;
+					}
 				}
 				else {
-					model.color = colors::White;
+					if (flash.on) {
+						model.color /= flash.flash_color;
+					}
 				}
 			}
 		}
 	};
-	struct EntityHealthPlugin:Core::Plugin {
-		void build(Core::App& app) {
+	struct EntityHealthPlugin{
+		void operator()(Core::App& app) {
 			app.emplace_system<KbSystem>();
 			app.emplace_system<EntityKiller>();
 			app.emplace_system<FallDamageSystem>();

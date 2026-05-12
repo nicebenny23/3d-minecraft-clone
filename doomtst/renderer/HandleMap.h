@@ -36,7 +36,7 @@ namespace handle {
 
 		//returns whether handle_id has an element assosiated with it 
 		bool bound(const Handle& handle) const {
-			return handle_to_index.contains(handle) &&elems[handle_to_index.at(handle)].is_some();
+			return generated(handle) &&elems[handle_to_index.at(handle)].is_some();
 		}
 
 		//returns whether handle is reserved but not bound
@@ -48,24 +48,12 @@ namespace handle {
 			return generated(handle) && reserved(HandleID(handle_to_index.at(handle)));
 		}
 		
-		stn::Option<const T&> operator[](HandleID handle) const {
-			if (!generated(handle)) {
-				return stn::None;
-			}
-			if (!bound(handle)) {
-				return stn::None;
-			}
-			return elems[handle.id].as_ref();
+		stn::Option<const T&> operator[](HandleID handle_id) const {
+			return elems.get_flat_ref(handle_id.id);
 		}
 
 		stn::Option<T&> operator[](HandleID handle_id) {
-			if (!generated(handle_id)) {
-				return stn::None;
-			}
-			if (!bound(handle_id)) {
-				return stn::None;
-			}
-			return elems[handle_id.id].as_ref();
+			return elems.get_flat_ref(handle_id.id);
 		}
 
 		HandleID reserve(const Handle& handle) {

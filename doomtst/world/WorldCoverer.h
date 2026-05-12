@@ -7,7 +7,7 @@ namespace grid {
 
 
 	template<grid::WorldAccessor Accessor>
-	inline void compute_mesh_cover(block_mesh& mesh, Accessor& grid) {
+	inline void compute_mesh_cover(BlockMesh& mesh, Accessor& grid) {
 		
 		if (mesh.bounds().scale != blockscale) {
 			for (math::Direction3d dir : math::Directions3d) {
@@ -15,14 +15,16 @@ namespace grid {
 			}
 			return;
 		}
-		for (face& blkface : mesh.faces) {
+		Coord center = grid.get_voxel(mesh.center());
+		for (math::Direction3d& direction:math::Directions3d) {
+			blocks::BlockFace& blkface = mesh.faces[direction.index()];
 			if (!blkface.uncomputed()) {
 				continue;
 			}
-			Coord pos = grid.get_voxel(mesh.center()) + blkface.face_direction.coord();
+			Coord pos = center+direction.coord();
 			grid.get_block(pos).then([&](block& adjacent_block) {
 				if (mesh.is_transparent()) {
-					if (adjacent_block.mesh.is_transparent() && (adjacent_block.mesh[blkface.face_direction.inverse_index()].face().tex == blkface.tex)) {
+					if (adjacent_block.mesh.is_transparent() && (adjacent_block.mesh[direction.inverse_index()].face().tex == blkface.tex)) {
 
 						blkface.cover = cover_state::Covered;
 					}
@@ -44,23 +46,23 @@ namespace grid {
 	}
 
 	struct GridCoverer :ecs::System {
-		GridCoverer(ecs::Ecs& world) :event_key(world.make_reader<Chunks::chunk_loaded>()) {
+		GridCoverer(ecs::Ecs& world) :event_key(world.make_reader<world::ChunkLoaded>()) {
 
 		}
 
 		void run(ecs::Ecs& world) {
 			grid::Grid& world_grid = world.get_resource<grid::Grid>();
-			for (Chunks::chunk_loaded& cmd : event_key.read()) {
+			for (world::ChunkLoaded& cmd : event_key.read()) {
 				for (math::Direction3d direction : math::Directions3d) {
-					Chunks::ChunkLocation pos = Chunks::ChunkLocation(direction.coord() + cmd.pos.position);
+					chunks::ChunkLocation pos = chunks::ChunkLocation(direction.coord() + cmd.pos.position);
 					world_grid.get_chunk_object(pos)
-					.then([](grid::ChunkObject& chunk) {
-						chunk.get<Chunks::chunkmesh>().recreate_mesh.mark_dirty();
+					.then([](grid::ChunkObject& Chunk) {
+						Chunk.get<chunks::ChunkMesh>().recreate_mesh.mark_dirty();
 					});
 				}
 			}
 		}
 	private:
-		ecs::EventReader<Chunks::chunk_loaded> event_key;
+		ecs::EventReader<world::ChunkLoaded> event_key;
 	};
 }

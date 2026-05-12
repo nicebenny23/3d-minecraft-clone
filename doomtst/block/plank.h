@@ -3,15 +3,15 @@
 #pragma once 
 namespace blocks {
 
-	struct crafting_table_loot_table :items::LootTable {
-		items::LootDrops drops_for(items::item_types& types) {
+	struct plank_loot_table :items::LootTable {
+		items::LootDrops drops_for(items::ItemTypes& types) {
 			return items::LootDrops({ items::loot_element("plank",1,types) });
 		};
 	};
 	struct PlankBlock :BlockType {
 		void apply(ecs::obj& block)  const override 
 		{
-			block.apply_recipe(items::loot_table_recipe<items::crafting_table_loot_table>);
+			block.apply_recipe(items::loot_table_recipe<plank_loot_table>);
 		}
 		std::string name() const{
 			return std::string("plank");
@@ -21,13 +21,36 @@ namespace blocks {
 				BlockMeshTraits(v3::unit_scale, false, planktex, planktex, planktex, planktex, planktex, planktex));
 		}
 	};
+	struct log_loot_table :items::LootTable {
+		items::LootDrops drops_for(items::ItemTypes& types) {
+			return items::LootDrops({ items::loot_element("plank",4,types)});
+		};
+	};
+	struct LogBlock :BlockType {
+		void apply(ecs::obj& block)  const override {
+			block.apply_recipe(items::loot_table_recipe<log_loot_table>);
+		}
+		std::string name() const {
+			return std::string("log");
+		}
+		SolidBlockTraits mining_traits() const override {
+			return SolidBlockTraits(6,0);
+		}
+		BlockTraits traits() const {
+			return BlockTraits(
+				BlockMeshTraits(v3::unit_scale, false, log_side, log_side,logtoppng, logtoppng, log_side, log_side));
+		}
+	};
 }
 namespace items {
 	struct plank_item : item_type {
+		std::string name() const {
+
+			return "plank";
+		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
-				std::string_view("plank"),
-				renderer::TexturePath("images\\treestoneblock.png", "PlankTexture")
+				renderer::TexturePath("images\\treestoneblock.png")
 			,world.get_resource<BlockRegistry>().get_id<blocks::PlankBlock>());
 		}
 	};

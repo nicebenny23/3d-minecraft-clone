@@ -58,6 +58,9 @@ namespace ecs {
 		entity_id& last() {
 			return elems.last();
 		}
+		entity_id& last_unchecked() {
+			return elems.last_unchecked();
+		}
 		bool has_component(component_id id) const {
 			return id_set[id];
 		}

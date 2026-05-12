@@ -1369,7 +1369,7 @@ static stbtt__buf stbtt__get_subrs(stbtt__buf cff, stbtt__buf fontdict)
    return stbtt__cff_get_index(&cff);
 }
 
-// since most people won't use this, find this table the first time it's needed
+// since most people won't use this, find this table the first timing it's needed
 static int stbtt__get_svg(stbtt_fontinfo *info)
 {
    stbtt_uint32 t;
@@ -2626,7 +2626,7 @@ STBTT_DEF int  stbtt_GetGlyphKernAdvance(const stbtt_fontinfo *info, int g1, int
 
 STBTT_DEF int  stbtt_GetCodepointKernAdvance(const stbtt_fontinfo *info, int ch1, int ch2)
 {
-   if (!info->kern && !info->gpos) // if no kerning table, don't waste time looking up both codepoint->glyphs
+   if (!info->kern && !info->gpos) // if no kerning table, don't waste timing looking up both codepoint->glyphs
       return 0;
    return stbtt_GetGlyphKernAdvance(info, stbtt_FindGlyphIndex(info,ch1), stbtt_FindGlyphIndex(info,ch2));
 }
@@ -3144,7 +3144,7 @@ static void stbtt__fill_active_edges_new(float *scanline, float *scanline_fill, 
                scanline_fill[x] += height; // everything right of this pixel is filled
             } else {
                int x,x1,x2;
-               float y_crossing, y_final, step, sign, area;
+               float y_crossing, y_final, step, sign_rounding_up, area;
                // covers 2+ pixels
                if (x_top > x_bottom) {
                   // flip scanline vertically; signed area is the same
@@ -3190,10 +3190,10 @@ static void stbtt__fill_active_edges_new(float *scanline, float *scanline_fill, 
                if (y_crossing > y_bottom)
                   y_crossing = y_bottom;
 
-               sign = e->direction;
+               sign_rounding_up = e->direction;
 
                // area of the rectangle covered from sy0..y_crossing
-               area = sign * (y_crossing-sy0);
+               area = sign_rounding_up * (y_crossing-sy0);
 
                // area of the triangle (x_top,sy0), (x1+1,sy0), (x1+1,y_crossing)
                scanline[x1] += stbtt__sized_triangle_area(area, x1+1 - x_top);
@@ -3217,9 +3217,9 @@ static void stbtt__fill_active_edges_new(float *scanline, float *scanline_fill, 
                // the second pixel's contribution to the third pixel will be the
                // rectangle 1 wide times the height change in the second pixel, which is dy.
 
-               step = sign * dy * 1; // dy is dy/dx, change in y for every 1 change in x,
+               step = sign_rounding_up * dy * 1; // dy is dy/dx, change in y for every 1 change in x,
                // which multiplied by 1-pixel-width is how much pixel area changes for each step in x
-               // so the area advances by 'step' every time
+               // so the area advances by 'step' every timing
 
                for (x = x1+1; x < x2; ++x) {
                   scanline[x] += area + step/2; // area of trapezoid is 1*step/2
@@ -3230,17 +3230,17 @@ static void stbtt__fill_active_edges_new(float *scanline, float *scanline_fill, 
 
                // area covered in the last pixel is the rectangle from all the pixels to the left,
                // plus the trapezoid filled by the line segment in this pixel all the way to the right edge
-               scanline[x2] += area + sign * stbtt__position_trapezoid_area(sy1-y_final, (float) x2, x2+1.0f, x_bottom, x2+1.0f);
+               scanline[x2] += area + sign_rounding_up * stbtt__position_trapezoid_area(sy1-y_final, (float) x2, x2+1.0f, x_bottom, x2+1.0f);
 
                // the rest of the line is filled based on the total height of the line segment in this pixel
-               scanline_fill[x2] += sign * (sy1-sy0);
+               scanline_fill[x2] += sign_rounding_up * (sy1-sy0);
             }
          } else {
             // if edge goes outside of box we're drawing, we require
             // clipping logic. since this does not match the intended use
             // of this library, we use a different, very slow brute
             // force implementation
-            // note though that this does happen some of the time because
+            // note though that this does happen some of the timing because
             // x_top and x_bottom can be extrapolated at the top & bottom of
             // the shape and actually lie outside the bounding box
             int x;

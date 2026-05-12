@@ -1,19 +1,17 @@
 #include "Item.h"
 #include "Container.h"
+#include "../renderer/ui_table.h"
 #pragma once
 namespace items {
 
 	struct ItemRecipe {
-		v2::Coord2 size;
+		ui::TableBounds size;
 		stn::array<stn::Option<item_entry>> item_list;
 		item_entry output;
-		stn::Option<item_entry> from_cell(container_index cell) {
-			if (cell.fits_in(size)) {
-				return item_list[cell.index_in(size)];
-			}
-			stn::throw_logic_error("cell {} out of bounds in {}", cell.coord , size);
+		stn::Option<item_entry> from_cell(v2::UVec2 cell) {
+			return item_list[size.index(cell)];
 		}
-		ItemRecipe(v2::Coord2 grid_size, stn::array<stn::Option<item_entry>> input_entries, item_entry output_entry) :
+		ItemRecipe(ui::TableBounds grid_size, stn::array<stn::Option<item_entry>> input_entries, item_entry output_entry) :
 			size(grid_size), item_list(input_entries), output(output_entry) {
 
 		}
@@ -43,69 +41,62 @@ namespace items {
 	};
 
 
-	inline stn::array<ItemRecipe> spread_out(ItemRecipe recipe,v2::Coord2 spread_size) {
+	inline stn::array<ItemRecipe> spread_out(ItemRecipe recipe, ui::TableBounds spread_size) {
 
-		if (spread_size.x < recipe.size.x || spread_size.y < recipe.size.y) {
+		if (recipe.size.contains(spread_size)) {
 			stn::throw_logic_error("cannot spread out to {} from {}", recipe.size, spread_size);
 		}
-		v2::Coord2 positions = spread_size - recipe.size;
+		ui::TableBounds positions((spread_size.table - recipe.size.table).unwrap() + v2::UVec2(1, 1));
 		stn::array<ItemRecipe> recipes;
-		for (int x = 0; x <= positions.x; x++) {
-			for (int y = 0; y <= positions.y; y++) {
-				v2::Coord2 shift_offset = v2::Coord2(x, y);
-				stn::array < stn::Option<item_entry>> entries(spread_size.x*spread_size.y);
-				for (int container_y = 0; container_y < recipe.size.y; container_y++) {
-					for (int container_x = 0; container_x < recipe.size.x; container_x++) {
-						
-						v2::Coord2 real_location(container_x, container_y);
-						container_index shifted(real_location + shift_offset);
-						size_t real_index=shifted.index_in(spread_size);
-						//all non_initilized ones will be set to None
-						entries.reach(real_index) = recipe.from_cell(container_index(real_location));
-					}
-				}
-				recipes.push(ItemRecipe(spread_size, std::move(entries), recipe.output));
+		for (v2::UVec2 shift_offset:positions) {
+			stn::array < stn::Option<item_entry>> entries(spread_size.entries());
+			for (v2::UVec2 real_location : recipe.size) {
+				v2::UVec2 shifted(real_location + shift_offset);
+				size_t real_index = spread_size.index(shifted);
+				//all non_initilized ones will be set to None
+				entries[real_index] = recipe.from_cell(real_location);
 			}
+			recipes.push(ItemRecipe(spread_size, std::move(entries), recipe.output));
+
 		}
 		return recipes;
 	}
 
 
 
-	struct ItemRecipes {
-		v2::Coord2 size;
-		stn::array<ItemRecipe> recipe_list;
-		ItemRecipes() {
+struct ItemRecipes {
+	ui::TableBounds size;
+	stn::array<ItemRecipe> recipe_list;
+	ItemRecipes(stn::array<ItemRecipe>&& recipes) :recipe_list(std::move(recipes)), size(recipes.first().size) {
 
-		}
+	}
+	ItemRecipes(const stn::array<ItemRecipe>& recipes) :recipe_list(recipes), size(recipes.first().size) {
 
-		ItemRecipes(stn::array<ItemRecipe>&& recipes) :recipe_list(std::move(recipes)), size(recipes.first().size) {
+	}
+	ItemRecipes() {
 
-		}
-		ItemRecipes(const stn::array<ItemRecipe>& recipes) :recipe_list(recipes), size(recipes.first().size) {
+	}
+	using iterator = decltype(recipe_list)::iterator;
+	using const_iterator = decltype(recipe_list)::const_iterator;
+	iterator begin() {
+		return recipe_list.begin();
+	}
+	iterator end() {
+		return recipe_list.end();
+	}
+	const_iterator begin() const {
+		return recipe_list.begin();
+	}
+	const_iterator end() const {
+		return recipe_list.end();
+	}
+};
 
-		}
-		using iterator = decltype(recipe_list)::iterator;
-		using const_iterator = decltype(recipe_list)::const_iterator;
-		iterator begin() {
-			return recipe_list.begin();
-		}
-		iterator end() {
-			return recipe_list.end();
-		}
-		const_iterator begin() const {
-			return recipe_list.begin();
-		}
-		const_iterator end() const {
-			return recipe_list.end();
-		}
-	};
+struct RecipeBinder {
+	ecs::obj input;
+	ItemRecipes list;
+	RecipeBinder(ecs::obj in, ItemRecipes list) :input(in), list(list) {
 
-	struct RecipeBinder {
-		ecs::obj input;
-		ItemRecipes list;
-		RecipeBinder(ecs::obj in, ItemRecipes list) :input(in), list(list) {
-
-		}
-	};
+	}
+};
 }

@@ -17,9 +17,14 @@ namespace ai {
 		}
 		template<typename T>
 		void set(double utility){
-			utilities.reach(node_map.insert<T>(),stn::None) = utility;
+			utilities.reach(node_map.insert<T>().value.id,stn::None) = utility;
 		}
-
+		template<typename T> 
+		void relinquish_control() {
+			if (active<T>()) {
+				active_node = stn::None;
+			}
+		}
 		stn::Option<double&> operator[](BrainNodeId id) {
 			return utilities[id.id].as_ref();
 		}
@@ -33,7 +38,9 @@ namespace ai {
 			ecs::View<Brain> brain_query(world);
 			
 			for (auto&& [brain]:brain_query) {
-				brain.active_node = stn::None;
+				if (brain.active_node == stn::None) {
+					continue;
+				}
 				for (size_t i = 0; i < brain.utilities.length();i++) {
 					stn::Option<double> utility= brain.utilities[i];
 					if (!utility) {
@@ -51,8 +58,8 @@ namespace ai {
 		}
 	};
 
-	struct BrainPlugin:Core::App {
-		void build(Core::App& world) {
+	struct BrainPlugin{
+		void operator()(Core::App& world) {
 			world.emplace_system< BrainSystem>();
 		}
 	};

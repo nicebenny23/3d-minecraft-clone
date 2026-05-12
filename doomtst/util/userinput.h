@@ -7,6 +7,8 @@
 #include "dynamicarray.h"
 #include "../math/vector2.h"
 #include <glm/glm.hpp>
+#include <GLFW/glfw3.h>
+#include "../renderer/Window.h"
 #pragma once 
 namespace userinput {
 
@@ -76,14 +78,7 @@ namespace userinput {
 				stn::throw_logic_error("key code {} has not been mapped", code);
 			}
 		}
-		void endupdate() {
-			mouse_position_dt = v2::Vec2(0, 0);
-			for (int i = 0; i < keys.length(); i++) {
-				keys[i].pressed = false;
-				keys[i].released = false;
-			}
-
-		}
+	
 
 		InputKey key(const size_t key_index) {
 			return keys[convertchartoglfwkey(key_index)];
@@ -92,11 +87,43 @@ namespace userinput {
 	};
 	struct InputPollingSystem :ecs::System {
 		void run(ecs::Ecs& world) {
-			world.get_resource<userinput::InputManager>().endupdate();
+			userinput::InputManager& manager=world.get_resource<userinput::InputManager>();
+			manager.mouse_position_dt = v2::Vec2(0, 0);
+			for (InputKey& key: manager.keys) {
+				key.pressed = false;
+				key.released = false;
+			}
 			glfwPollEvents();
 		}
 	};
 
+	inline void key_callback(GLFWwindow* /*window*/, int key, int /*scancode*/, int action, int /*mods*/) {
+		Core::game.Ecs.get_resource<userinput::InputManager>().update_key(key, action);
+	}
+
+	inline void mouse_button_callback(GLFWwindow* /*window*/, int button, int action, int /*mods*/) {
+		if (button < 2) {
+			Core::game.Ecs.get_resource<userinput::InputManager>().update_key(GLFW_KEY_LAST + button, action);
+		}
+	}
+
+	inline void cursor_position_callback(GLFWwindow* /*window*/, double xpos, double ypos) {
+		v2::Vec2 new_mouse_position(Core::game.Ecs.get_resource<renderer::Window>().fit_to_aspect_ratio(v2::Vec2(xpos, ypos)));
+		userinput::InputManager& manager = Core::game.ensure_resource<userinput::InputManager>();
+		manager.mouse_position_dt = new_mouse_position - manager.mouse_position;
+		manager.mouse_position = new_mouse_position;
+	}
+
+	inline void user_input_plugin(Core::App& app) {
+		app.insert_plugin(renderer::window_plugin);
+
+		renderer::Window& window=app.Ecs.get_resource<renderer::Window>();
+		app.emplace_system< InputPollingSystem>();
+		app.emplace_resource< InputManager>();
+		window.set_cursor_callback(cursor_position_callback);
+		window.set_key_callback(key_callback);
+		window.set_mouse_callback(mouse_button_callback);
+	}
 }
 
 

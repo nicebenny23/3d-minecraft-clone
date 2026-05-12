@@ -36,7 +36,7 @@ namespace ecs {
 	struct Owner {
 
 		ecs::obj map(entity_id ent) const {
-			return ecs::obj(ecs::entity(ent,world.entities.at(ent).gen_count),world);
+			return ecs::obj(world.entities.get_entity_unchecked(ent),world);
 		}
 		Owner(ecs::Ecs& world) :world(world) {
 
@@ -58,7 +58,18 @@ namespace ecs {
 		ecs::Ecs& world;
 		component_id id_for;
 	};
+	template<ComponentType T>
+	struct Not {
 	
+		bool filter(const Archetype& archetype) const {
+			return !archetype.has_component(id_for);
+		}
+		Not(ecs::Ecs& world) :world(world), id_for(world.insert_component_id<T>()) {
+
+		}
+		ecs::Ecs& world;
+		component_id id_for;
+	};
 	template<typename T>
 	struct query_data_t {
 		using type = T;

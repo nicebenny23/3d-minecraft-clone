@@ -4,35 +4,36 @@
 #include "../util/fileloader.h"
 #pragma once
 namespace blocks {
-	enum block_textures :std::uint8_t {
-		treestonetex = 0,
-		grasstex = 1,
-		stonetex = 2,
-		altartex = 3,
-		glasstex = 4,
-		watertex = 5,
-		torchtex = 6,
-		torchtoptex = 7,
-		crystaloretex = 8,
-		crafting_table_front = 9,
-		crafting_table_side = 10,
-		chest_sides = 11,
-		crystaltorchtoptex = 12,
-		mosstex = 13,
-		ropetex = 14,
-		lavatex = 15,
-		obsidiantex = 16,
-		chest_front = 17,
-		chest_top = 18,
-		furnaceside = 19,
-		furnacefront = 20,
-		ironoretex = 21,
-		furnacefronton = 22,
-		furnacesideon = 23,
-		logtoppng = 24,
-		ultraaltarpngultrapng = 25,
-		sandtex = 26,
-		planktex = 27,
+	enum block_texture :std::uint8_t {
+		treestonetex,
+		stonetex,
+		altartex,
+		glasstex,
+		watertex,
+		torchtex,
+		torchtoptex,
+		crystaloretex,
+		crafting_table_bottom,
+		crafting_table_top,
+		crafting_table_side,
+		stone_brick_tex,
+		chest_sides,
+		crystaltorchtoptex,
+		mosstex,
+		ropetex,
+		lavatex,
+		obsidiantex,
+		chest_front,
+		chest_top,
+		furnaceside,
+		furnacefront,
+		ironoretex,
+		log_side,
+		furnacesideon,
+		logtoppng,
+		ultraaltarpngultrapng,
+		sandtex,
+		planktex,
 	};
 	struct block_tag;
 
@@ -40,34 +41,45 @@ namespace blocks {
 
 	struct block;
 	struct BlockMeshTraits {
-		BlockMeshTraits(v3::Scale3 mesh_size, bool is_transparent, block_textures left_face, block_textures right_face, block_textures up_face, block_textures down_face, block_textures front_face, block_textures back_face,bool is_invisible=false)
+		BlockMeshTraits(v3::Scale3 mesh_size, bool is_transparent, block_texture left_face, block_texture right_face, block_texture up_face, block_texture down_face, block_texture front_face, block_texture back_face,bool is_invisible=false)
 			:faces(left_face, right_face, up_face, down_face, front_face, back_face), 
 			size(mesh_size),
 			transparent(is_transparent),
 			invisible(is_invisible)
 		{
 		}
-		BlockMeshTraits(v3::Scale3 mesh_size, bool is_transparent, block_textures only_texture, bool is_invisible = false)
+		BlockMeshTraits(v3::Scale3 mesh_size, bool is_transparent, block_texture only_texture, bool is_invisible = false)
 			:faces(only_texture, only_texture, only_texture, only_texture, only_texture, only_texture),
 			size(mesh_size),
 			transparent(is_transparent),
 			invisible(is_invisible) {
 		}
-		stn::List<block_textures, 6> faces;
+		stn::List<block_texture, 6> faces;
 		bool transparent;
 		bool invisible = false;
 		v3::Scale3 size = v3::unit_scale;
 	};
 	struct SolidBlockTraits {
 		size_t time_to_mine = 1;
+		size_t power_level=0;
+		bool pick_speedup=true;
+		SolidBlockTraits(size_t mining_level):time_to_mine(mining_level),power_level(time_to_mine) {
+
+		}
+		SolidBlockTraits() {
+			
+		}
+		SolidBlockTraits(size_t mining_time,size_t power,bool pick_speedup=true) :time_to_mine(mining_time), power_level(power), pick_speedup(pick_speedup){
+
+		}
 
 	};
 	inline constexpr bool solid_block = true;
 	inline constexpr bool non_solid_block = false;
 
 	struct BlockTraits {
-		BlockTraits(BlockMeshTraits block_mesh, bool is_solid = true, size_t light_emmision = 0)
-			:mesh(block_mesh), solid(is_solid), emmited_light(light_emmision) {
+		BlockTraits(BlockMeshTraits BlockMesh, bool is_solid = true, size_t light_emmision = 0)
+			:mesh(BlockMesh), solid(is_solid), emmited_light(light_emmision) {
 		}
 		BlockMeshTraits mesh;
 		size_t emmited_light;
@@ -77,35 +89,43 @@ namespace blocks {
 	struct BlockType {
 		virtual ~BlockType() = default;
 		BlockType() = default;
+		BlockType(ecs::Ecs& blocks) {
+		};
 		virtual std::string name() const = 0;
 		virtual SolidBlockTraits mining_traits() const {
 			return SolidBlockTraits();
 		}
 		//we catch the traits to speed up;
-		BlockTraits& traits_for() const{
+		BlockTraits& traits_for() const {
 			if (!catched) {
 				catched = traits();
 			}
 			return catched.unwrap_unchecked();
 		}
-		virtual BlockTraits traits() const= 0;
+		virtual BlockTraits traits() const = 0;
 		virtual void apply(ecs::obj& blk) const {
 
 		};
 		//this sucks but i need to simplify my components to remove it
-		virtual void read_from_bytes(ecs::obj blk,stn::file_handle& handle) const {
-
+		virtual void read_from_bytes(ecs::obj blk, stn::file_handle& handle) const {
+			apply(blk);
 		};
-		virtual void write_into_bytes(ecs::obj blk, stn::file_handle& handle) const {
-
+		virtual void write_to_bytes(ecs::obj blk, stn::file_handle& handle) const {
+			
 		};
-		private:
+	private:
 		mutable stn::Option<BlockTraits> catched;
 
 	};
+	//you have to both write and read to bytes
 	template<typename T>
-	concept BlockLike = std::derived_from<T, BlockType>;
-
+	concept BlockLike =std::derived_from<T, BlockType> &&
+	!((& T::read_from_bytes != &BlockType::read_from_bytes)^(& T::write_to_bytes != &BlockType::write_to_bytes));
+	enum BlockRecipeModes {
+		serialize,
+		no_serialize,
+		none,
+	};
 
 	struct BlockRegistry :ecs::resource {
 		stn::array<stn::Option<size_t>> to_id;
@@ -123,9 +143,15 @@ namespace blocks {
 			return ids.get_opt<T>() == id;
 		}
 		template<BlockLike T>
-		block_id register_block() {
+		block_id insert() {
 			return ids.insert<T>().on_insert([&](block_id id) {
-				blocks.emplace(stn::construct_derived<T>());
+				if constexpr (std::constructible_from<T,ecs::Ecs&>) {
+					blocks.emplace(stn::construct_derived<T>(), ecs);
+				}
+				else {
+
+					blocks.emplace(stn::construct_derived<T>());
+				}
 				}).value;
 		}
 		template<BlockLike T>

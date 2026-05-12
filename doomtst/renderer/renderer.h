@@ -22,6 +22,8 @@
 #include "../game/Settings.h"
 #include "../player/cameracomp.h"
 #include "renderer/meshStorage.h"
+#include "Window.h"
+#include <string>
 using namespace renderer;
 //Fix
 
@@ -29,58 +31,55 @@ namespace renderer {
 
 	struct Renderer;
 	struct RenderableHandle {
-		RenderableHandle() :id() {
-		}
 		RenderableHandle(renderable id)
 			: id(id) {
 		}
 		void set_color(colors::Color color) {
-			if (id) {
-				id.unwrap().object().set_emplace_component<color_component>(color);
-			}
+			id.object().set_emplace_component<color_component>(color);
 		}
-		void fill(MeshBuilder&& new_mesh) {
-			if (id) {
-				id.unwrap().world().write_command(std::move(new_mesh));
-			}
-			else {
-				stn::throw_logic_error("cannot fill uninitialized mesh");
-			}
-		}
-
+		
 		void set_uniform(const renderer::uniform& value) {
-			if (id) {
-				id.unwrap().get<renderable_overides>().set(value);
-			}
-		}
+				id.get<renderable_overides>().set(value);
+		}		
 
+		void enable_if(bool should_enable) {
+			id.get<is_enabled>().enabled=should_enable;
+		}
 		void enable() {
-			if (id) {
-				id.unwrap().get<is_enabled>().enable();
-			}
+			id.get<is_enabled>().enable();
 		}
 		void disable() {
-			if (id) {
-				id.unwrap().get<is_enabled>().disable();
-			}
+				id.get<is_enabled>().disable();
 		}
 		void set_order_key(float key) {
-			if (id) {
-				id.unwrap().object().set_emplace_component<order_key>(key);
-			}
+			id.object().set_emplace_component<order_key>(key);
 		}
-		mesh_id mesh();
 		void destroy();
 		bool operator==(const RenderableHandle& other) const = default;
 		Renderer& renderer();
-		MeshBuilder create_mesh(vertice::vertex& mesh, indice_mode auto_ind = indice_mode::manual_generate);
-		explicit operator bool() const noexcept {
-			return static_cast<bool>(id);
+		void set_mesh(MeshId msh_id) {
+			id.get<mesh_component>().msh = msh_id;
 		}
+
+		stn::Option<MeshId> mesh() const {
+			return id.get<mesh_component>().msh;
+		} 
+		bool has_mesh() const {
+			return mesh().is_some();
+		}
+		ecs::Ecs& world() {
+			return id.world();
+		}
+		void give_owned_mesh();
+		MeshBuilder insert_builder_for(const vertex& vertex,indice_mode auto_ind = indice_mode::manual_generate);
+	
 	private:
-		Option<renderable> id;
+		renderable id;
 
 	};
+	inline void fill(MeshBuilder&& new_mesh,ecs::Ecs& world) {
+		world.write_command(std::move(new_mesh).built_mesh());
+	}
 
 	struct remove_render_object {
 		ecs::obj object;
@@ -93,7 +92,7 @@ namespace renderer {
 
 			if (current_material != material) {
 				Material& mat = *material;
-				context.bind(*mat.shader);			
+				context.bind(*mat.Shader);			
 
 				for (auto& elem : mat.handles) {
 					context.apply_uniform(uniform_manager.get(elem), std::string_view(elem.shader_alias));
@@ -103,19 +102,13 @@ namespace renderer {
 
 			}
 		}
-
-		void Bind_texture(texture_2d_id Handle) {
-			context.bind(*Handle);
-		}
-		void Bind_texture(texture_array_id Handle) {
-			context.bind(*Handle);
-		}
 		renderer::Context context;
 		//stored the currently bound uniforms
 		renderer::UniformRegistry uniform_manager;
-		template<typename val_type>
+		template<typename val_type> requires stn::OneOf<val_type, GLint,float,GLuint,v2::Vec2,v3::Vec3,glm::vec4,glm::mat3,glm::mat4,assets::AssetHandle<Texture2D>,assets::AssetHandle<TextureArray>>
 		void set_uniform(const char* name, const val_type& val) {
-			uniform_manager.set(name, renderer::uniform_value(std::in_place_type<val_type>, val));
+			renderer::uniform_value value(val);
+			uniform_manager.set(std::string(name), value);
 		}
 
 
@@ -128,35 +121,25 @@ namespace renderer {
 			material_handle handle = world.from_name<Material>(material).expect("material should exist");
 			return RenderableHandle((ecs::spawn_emplaced<renderable_recipe>(world, handle)));
 		}
-		void remove(renderable ren) {
-			ren.world().write_command(remove_render_object(ren.object()));
-		}
 
 		void render(renderer::renderable& ren) {
-
 			bind_material(ren.get<material_component>().mat_id);
 			for (auto& uniform : ren.get<renderable_overides>().view()) {
 				context.apply_uniform(uniform.value, uniform.name);
 			}
 			GlUtil::poll_errors();
 
-			GpuMesh& mesh = *ren.get<mesh_component>().msh.expect("all must have a mesh");
-			if (!mesh.filled()) {
+			mesh_component& mesh_comp=ren.get<mesh_component>();
+			if (!mesh_comp.msh) {
 				return;
 			}
-			context.bind(mesh);
-			if (world.ensure_resource<settings::GlobalSettings>().viewmode) {
-				glDrawElements(GL_LINES, mesh.length, GL_UNSIGNED_INT, 0);
-			}
-			else {
-				glDrawElements(GL_TRIANGLES, mesh.length, GL_UNSIGNED_INT, 0);
-			};		
+			context.draw(*mesh_comp.msh.unwrap());
 
 		}
 
 
-		void fill_mesh(MeshBuilder& data) {
-			meshes.load_in(data);
+		void fill_mesh(CpuMesh& data) {
+			context.load(data);
 		}
 
 		MeshRegistry meshes;
@@ -165,20 +148,22 @@ namespace renderer {
 			
 
 		}
-		mesh_id insert_mesh(renderer::renderable id) {
-			stn::Option<mesh_id>& msh_id= id.get_component<mesh_component>().msh;
-			msh_id.fallback_on([&]() {
-				return meshes.create_mesh_data(); });
-			return msh_id.unwrap();
+		MeshBuilder make_mesh_with_builder(renderer::vertex& vertex,renderer::indice_mode auto_ind=renderer::indice_mode::manual_generate) {
+			return MeshBuilder(meshes.create_mesh_data(), vertex, auto_ind);
 		}
+		MeshId make_mesh() {
+			return meshes.create_mesh_data();
+		}
+	
 	private:
 		stn::Option<material_handle> current_material;
 		ecs::Ecs& world;
 
 
 	};
+
 	inline Renderer& RenderableHandle::renderer() {
-		return id.unwrap().world().get_resource<Renderer>();
+		return id.world().get_resource<Renderer>();
 	}
 	struct render_pass {
 		phase_handle pass;
@@ -199,33 +184,32 @@ namespace renderer {
 	};
 	struct render_all :ecs::System {
 		void run(ecs::Ecs& world) {
-			ecs::Constrained<CameraComponent> camera_object = world.get_resource<renderer::camera_resource>().camera;
+			ecs::Constrained<CameraComponent,core::LocalTransform> camera_object = world.get_resource<renderer::CameraResource>().camera;
 			CameraComponent& cam = camera_object.get<CameraComponent>();
 			Renderer& ren = world.get_resource<Renderer>();
-			window::Window& window = world.get_resource<window::Window>();
-			ren.set_uniform("aspect_ratio", window.AspectRatio());
-			ren.set_uniform("fov", float(cam.fov));
-			ren.set_uniform("view_matrix", LookAt(camera_object.get_component<ecs::world_transform>().transform));
-			ren.set_uniform("camera_pos", v3::Vec3(camera_object.get_component<ecs::world_transform>().transform.position.glm()));
-
+			renderer::Window& window = world.get_resource<renderer::Window>();
+			ren.set_uniform("aspect_ratio", float(window.aspect_ratio()));
+			ren.set_uniform("fov", float(cam.fov.radians()));
+			ren.set_uniform("view_matrix", LookAt(camera_object.get<core::LocalTransform>().transform));
+			ren.set_uniform("camera_pos", v3::Vec3(camera_object.get<core::LocalTransform>().transform.position.glm()));
+		
 			ren.set_uniform(
-				"proj_matrix", glm::perspective(float(glm::radians(cam.fov)), window.AspectRatio(), float(cam.viewport.min()), float(cam.viewport.max())
+				"proj_matrix", glm::perspective(float(cam.fov.radians()), float(window.aspect_ratio()), float(cam.viewport.min()), float(cam.viewport.max())
 				));
 			ren.set_uniform("near_plane", float(cam.viewport.min()));
 			ren.set_uniform("far_plane", float(cam.viewport.max()));
-			for (MeshBuilder& mesh : world.read_commands<MeshBuilder>()) {
+			for (CpuMesh& mesh : world.read_commands<CpuMesh>()) {
 
 				ren.fill_mesh(mesh);
 			}
 			std::unordered_map<phase_handle, render_pass> pass_map;
 			size_t cnt = 0;
 
-			ecs::View<material_component, order_key,  is_enabled, ecs::Owner> renderable_iter(world);
-			for (auto [mat, order, should_render, object] : renderable_iter) {
-				if (should_render.enabled) {
-					phase_handle pass = mat.mat_id->pass;
-					pass_map.try_emplace(pass, render_pass(pass));
-					pass_map.at(pass).phase_elements.push(object);
+			ecs::View<renderable> renderable_iter(world);
+			for (auto&& [object] : renderable_iter) {
+				if (object.get<renderer::is_enabled>().enabled) {
+					phase_handle pass = object.get<renderer::material_component>().mat_id->pass;
+					pass_map.try_emplace(pass, render_pass(pass)).first->second.phase_elements.push(object);
 					cnt++;
 				}
 
@@ -250,33 +234,22 @@ namespace renderer {
 			}
 		}
 	};
-	struct RendererPlugin :Core::Plugin {
-		void build(Core::App& game) {
-
+	struct RendererPlugin {
+		void operator()(Core::App& game) {
+			game.insert_plugin(renderer::window_plugin);
 			ecs::Ecs& world = game.Ecs;
 
 			world.emplace_asset_loader<renderer::TextureLoader>();
 			world.emplace_asset_loader<renderer::TextureArrayLoader>();
-			world.emplace_asset_loader<shader_loader>();
+			world.emplace_asset_loader<ShaderLoader>();
 			world.emplace_asset_loader<assets::SelfDescriptorLoader<renderer::render_phase>>();
 			Renderer& renderer = world.insert_resource<Renderer>();
 			world.emplace_asset_loader<MaterialManager>();
-			renderer::shader_id ui_shader = world.load_asset_emplaced<renderer::shader_descriptor>("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs").unwrap();
 			world.load_asset(render_phase(12, true, "ui_phase"));
 			world.load_asset(render_phase(0, false, "solid_phase"));
 			world.load_asset(render_phase(1, true, "transparent_phase"));
 			world.emplace_system<ColorSetter>();
-			world.load_asset_emplaced<MaterialDescriptor>("Ui", "ui_phase", "UiShader", RenderProperties(false, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-				stn::array{ renderer::UniformRefrence("aspect_ratio", "aspectratio") }
-			);
 			world.emplace_system<renderer::render_all>();
-			renderer::shader_id model_shader = world.load_asset_emplaced<renderer::shader_descriptor>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
-			world.load_asset_emplaced<MaterialDescriptor>("Model", "solid_phase", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-				stn::array<renderer::UniformRefrence>{
-				renderer::UniformRefrence("aspect_ratio", "aspectratio"),
-					renderer::UniformRefrence("proj_matrix", "projection"),
-					renderer::UniformRefrence("view_matrix", "view")
-			});
 
 		}
 

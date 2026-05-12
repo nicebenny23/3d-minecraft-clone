@@ -20,25 +20,25 @@ namespace player {
 			for (auto [player_inv, ui_menu] : view) {
 				if (input.key('1').pressed) {
 
-					player_inv.selected_ind = items::container_index(0, 0);
+					player_inv.selected_ind = v2::UVec2(0, 0);
 				}
 				if (input.key('2').pressed) {
 
-					player_inv.selected_ind = items::container_index(1, 0);
+					player_inv.selected_ind =v2::UVec2(1, 0);
 				}
 				if (input.key('3').pressed) {
 
-					player_inv.selected_ind = items::container_index(2, 0);
+					player_inv.selected_ind = v2::UVec2(2, 0);
 				}if (input.key('4').pressed) {
 
-					player_inv.selected_ind = items::container_index(3, 0);
+					player_inv.selected_ind = v2::UVec2(3, 0);
 				}
 				if (input.key('5').pressed) {
 
-					player_inv.selected_ind = items::container_index(4, 0);
+					player_inv.selected_ind = v2::UVec2(4, 0);
 				}
 				if (input.key('6').pressed) {
-					player_inv.selected_ind = items::container_index(5, 0);
+					player_inv.selected_ind = v2::UVec2(5, 0);
 
 				}
 				if (input.key('e').pressed) {
@@ -68,7 +68,7 @@ namespace player {
 		void apply(ecs::obj& ent) const{
 			ui::MenuRecipe().apply(ent);
 			inventory_slots_pannel_recipe().apply(ent);
-			ecs::obj bg = ent.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\menutex.png", "menu_texture"), geo::Box2d(v2::Vec2(.24f, .15f), v2::Vec2(.33f, .25f)), 0);
+			ecs::obj bg = ent.spawn_child<ui::UiImageSpawner>(renderer::TexturePath("images\\menutex.png"), geo::Box2d(v2::Vec2(.24f, .15f)/2.0, v2::Vec2(.33f, .25f)), 0);
 			
 			ent.spawn_child<items::ContainerDisplayRecipe>(v2::Coord2(4, 3), input);
 ecs::Constrained<items::crafter> crafter = ent
@@ -82,13 +82,13 @@ ecs::Constrained<items::crafter> crafter = ent
 
 	struct PlayerInventoryRecipe {
 		void apply(ecs::obj& object) const{
-			ecs::Constrained<items::container>  slots = object.spawn_child<items::container_recipe>(v2::Coord2(6, 3));
-			ecs::Constrained<items::container> hotbar = ecs::spawn(object.world(), items::container_recipe(v2::Coord2(6, 1)));
-			ecs::Constrained<items::ContainerDisplay>	hotbar_display = ecs::spawn(object.world(), items::ContainerDisplayRecipe(v2::Coord2(0, -4), hotbar));
-			stn::array<std::string> items({ "plank","torch","chest" });
+			ecs::Constrained<items::container>  slots = object.spawn_child<items::container_recipe>(ui::TableBounds(6, 2));
+			ecs::Constrained<items::container> hotbar = ecs::spawn(object.world(), items::container_recipe(ui::TableBounds(6, 1)));
+			ecs::Constrained<items::ContainerDisplay>	hotbar_display = ecs::spawn(object.world(), items::ContainerDisplayRecipe(v2::Coord2(0, -7), hotbar));
+			stn::array<std::string> items({ "plank","crystal_sword"});
 			object.add_component<inventory>(slots, hotbar, hotbar_display).
 				givestartitems(items);
-			ecs::obj input_slots = ecs::spawn(object.world(),items::container_recipe(v2::Coord2(2, 2)));
+			ecs::obj input_slots = ecs::spawn(object.world(),items::container_recipe(ui::TableBounds(2, 2)));
 			ecs::Constrained<ui::menu_component> inventory_menu = ecs::spawn(object.world(), inventory_menu_recipe(slots,input_slots));
 			object.add_component<inventory_ui>(inventory_menu);
 		}
@@ -100,11 +100,11 @@ ecs::Constrained<items::crafter> crafter = ent
 
 			for (auto [inventory_slot] : ecs::View< inventory>(world)) {
 				//we need some sort of wa
-				stn::Option<items::container_index> index = inventory_slot.selected_ind;
+				stn::Option<v2::UVec2> index = inventory_slot.selected_ind;
 				items::ContainerDisplay& hotbar_container = inventory_slot.hotbar_display.get_component<items::ContainerDisplay>();
 				if (index) {
 					hotbar_container[index.unwrap()].get_component<items::ItemSlotDecal>().set_decal(
-						renderer::TexturePath("images\\importantblockholder.png", "important_block_holder")
+						renderer::TexturePath("images\\importantblockholder.png")
 					);
 				}
 
@@ -113,8 +113,8 @@ ecs::Constrained<items::crafter> crafter = ent
 		}
 	};
 
-	struct PlayerInventoryPlugin :Core::Plugin {
-		void build(Core::App& world) {
+	struct PlayerInventoryPlugin {
+		void operator()(Core::App& world) {
 			player::player_for(world.Ecs).apply_recipe(PlayerInventoryRecipe());
 			world.emplace_system< InventoryUiSystem>();
 			world.emplace_system<player::LoadHotbarSlots>();

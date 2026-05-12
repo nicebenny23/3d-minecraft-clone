@@ -10,22 +10,17 @@
 #include "pass.h"
 #include "RenderContext.h"
 namespace renderer {
-	struct  Renderer;
-
-
-	struct material_tag {
-	};
+	
 	struct Material:assets::Asset {
 		std::string name;
-
 		phase_handle pass;
 		RenderProperties prop;
 		array<renderer::UniformRefrence> handles;
-		assets::AssetHandle<shader> shader;
+		assets::AssetHandle<Shader> Shader;
 		bool operator==(const Material& other) const = default;
 		
 		Material(const std::string& name, phase_handle phase_handle, shader_id shade_handle, const RenderProperties& props, const stn::array<renderer::UniformRefrence>& renderer) :
-			pass(phase_handle), shader(shade_handle), name(name), prop(props), handles(renderer)
+			pass(phase_handle), Shader(shade_handle), name(name), prop(props), handles(renderer)
 		{
 		}
 	};
@@ -36,7 +31,7 @@ namespace renderer {
 			elements = renderer;
 			name = material_name;
 			phase = phase_name;
-			shader = shader_name;
+			Shader = shader_name;
 			properties = props;
 		}
 		bool operator==(const MaterialDescriptor& other) const = default;
@@ -44,7 +39,7 @@ namespace renderer {
 		stn::array<renderer::UniformRefrence> elements;
 		std::string name;
 		std::string phase;
-		std::string shader;
+		std::string Shader;
 		RenderProperties properties;
 	};
 }
@@ -69,7 +64,7 @@ namespace renderer {
 	
 		stn::box<Material> load(const MaterialDescriptor& descriptor,assets::Assets& assets) {
 			phase_handle phase = assets.from_name<render_phase>(descriptor.phase).expect("phase should exist");
-			shader_id shader_handle = assets.from_name<shader>(descriptor.shader).expect("shader should exist");
+			shader_id shader_handle = assets.from_name<Shader>(descriptor.Shader).expect("shader should exist");
 			return stn::box<Material>(descriptor.name, phase, shader_handle, descriptor.properties, descriptor.elements);
 		}
 

@@ -1,147 +1,171 @@
 #include "ItemSlot.h"
 #include "item_transactions.h"
 #include "FakeItem.h"
+#include "Item.h"
 #pragma once
 namespace items {
-
-	struct SetItemSlot {
-		ecs::obj slot;
+	struct AddToSlotPlan; 
+	struct AddToSlotRequest {
+		bool want_complete=false;
 		item_entry entry;
-		SetItemSlot(ecs::obj item_slot,item_entry new_entry) :entry(new_entry), slot(item_slot) {
-		}
-		void apply(ecs::Ecs& world) {
-			ElementSlot& element_slot=slot.get_component<ElementSlot>();
-			if (element_slot.empty()) {
-				element_slot.current_item = slot.spawn_child<ItemSpawner>(entry);
-			}
-			else {
-				element_slot.element().unwrap().get_component<item_stack>().set(entry);
-			}
-		}
+		ecs::Constrained<ElementSlot> slot;
+		stn::Option<AddToSlotPlan> build();
 	};
 
-	struct AddToSlotPlan {
-		ecs::obj slot;
-		item_entry entry;
-		AddToSlotPlan(ecs::obj item_slot, item_entry new_entry) :entry(new_entry), slot(item_slot) {
-		}
-		void apply(ecs::Ecs& world) {
+	inline void swap_slot_plans(ecs::Constrained<ElementSlot> from, ecs::Constrained<ElementSlot> to) {
+		stn::Option<ecs::Constrained<item_stack>> to_child = to.get <ElementSlot>().element();
+		stn::Option<ecs::Constrained<item_stack>> from_child = from.get<ElementSlot>().element();
 
+		to.get<ElementSlot>().reset_element();
+		from.get<ElementSlot>().reset_element();
+
+		if (to_child) {
+			from.get<ElementSlot>().set_element(to_child.unwrap().object());
+		}
+		if (from_child) {
+			to.get<ElementSlot>().set_element(from_child.unwrap().object());
+		}
+	}
+	struct AddToSlotPlan {
+		ecs::Constrained<ElementSlot> slot;
+		item_entry entry;
+		
+		bool will_initialize() const {
+			return slot.get<ElementSlot>().empty();
+		}
+		void apply() {
 			if (slot.get_component<ElementSlot>().empty()) {
-				SetItemSlot(slot, entry).apply(world);
+				slot.get_component<ElementSlot>().set_element(ecs::spawn(slot.world(), ItemSpawner(entry)));
 			}
 			else {
-				item_stack& stack = slot.get_component<ElementSlot>().element().expect("item should exist").get_component<item_stack>();
+				item_stack& stack = slot.get<ElementSlot>().stack().unwrap();
 				if (!item_entry::can_interact(stack.contained_entry(), entry)) {
 					stn::throw_logic_error("AddToSlot was not validated");
 				}
 				stack.add(entry.count);
 			}
 		}
-	};
-
-	struct TakeFromSlot {
-		ecs::obj slot;
-		item_entry entry;
-		TakeFromSlot(item_entry new_entry, ecs::obj item_slot) :entry(new_entry), slot(item_slot) {
-		}
-		void apply(ecs::Ecs& world) {
-
-			item_stack& stack = slot.get_component<ElementSlot>().element().expect("slot must not be empty").get_component<item_stack>();
-			if (!item_entry::can_interact(stack.contained_entry(), entry)) {
-				stn::throw_logic_error("AddToSlot was not validated");
-			}
-			stack.remove(entry.count);
-		}
-	};
-
-	struct GiveToSlot {
-		//element slot
-		ecs::obj from_slot;
-		//element slot
-		ecs::obj to_slot;
-		size_t count;
-		bool will_initialize()  {
-			return to_slot.get_component<ElementSlot>().empty();
-		}
-		GiveToSlot(ElementSlot& from, ElementSlot& to, size_t cnt) :from_slot(from.owner()), to_slot(to.owner()), count(cnt) {
-		}
-		void apply(ecs::Ecs& world) {
-
-			ecs::obj item_entity = from_slot.get_component<ElementSlot>().element().expect("plan should have been validated");
-
-			ecs::obj to_entity = to_slot.get_component<ElementSlot>().element().unwrap_or_else([&] {
-				item_id id = item_entity.get_component<item_stack>().contained_id();
-				SetItemSlot( to_slot, item_entry(id, 0,world.insert_resource<item_types>())).apply(world);
-				return to_slot.get_component<ElementSlot>().element().unwrap();
-				});
-			give_stack_plan(item_entity, to_entity, count).apply(world);
-		}
-	};
-
-
-	inline stn::Option<AddToSlotPlan> AddToSlot(ElementSlot& to, item_entry amount) {
-			stn::Option<ecs::obj> element = to.element();
+		static stn::Option<AddToSlotPlan> build(AddToSlotRequest request) {
+			stn::Option<item_stack&> element = request.slot.get<ElementSlot>().stack();
+			size_t new_count = request.entry.count;
 			if (element) {
-				if (!element.unwrap().get_component<item_stack>().can_accept(amount)) {
-					return stn::None;
-				}
+				stn::set_min(new_count,element.unwrap().max_fit(request.entry));
 			}
-			return AddToSlotPlan(to.owner(), amount);
-		}
-	
-
-		inline stn::Option<GiveToSlot> give_slot_some(ElementSlot& from_slot, ElementSlot& to_slot, size_t amount) {
-			if (from_slot.empty()) {
+			if (request.entry.count!= new_count&&request.want_complete) {
 				return stn::None;
 			}
-			const item_stack& from_stack = from_slot.element().unwrap().get_component<item_stack>();
-			amount = stn::min(amount,from_stack.count());
-			
-			stn::Option<ecs::obj> mabye_slot = to_slot.element();
-			if (!mabye_slot) {
-				return GiveToSlot(from_slot, to_slot, amount);
+			request.entry.count = new_count;
+			if (new_count==0) {
+				return stn::None;
 			}
-			const item_stack& other = mabye_slot.unwrap().get_component<item_stack>();
-			amount =stn::min(amount,other.max_fit(from_stack));
-			if (amount!=0) {
-				return GiveToSlot(from_slot, to_slot,amount );
-			}
-			return stn::None;
+			return AddToSlotPlan(request.slot, request.entry);
 		}
-	
-	inline stn::Option<GiveToSlot> transfer_slot_some(ElementSlot& to_slot,ElementSlot& from_slot){
-		if (from_slot.occupied()) {
-			return give_slot_some(from_slot,to_slot,from_slot.entry().unwrap().count);
-		}
-		return stn::None;
-	}
-	struct swap_slot_plan{
-		//element slot
-		ecs::obj from;
-		//element slot
-		ecs::obj to;
-		swap_slot_plan(ecs::obj from_obj, ecs::obj to_obj) :from(from_obj), to(to_obj) {
-
-		}
-		void apply(ecs::Ecs& world) {
-			stn::Option<ecs::obj> to_child = to.get_component <ElementSlot>().element();
-			stn::Option<ecs::obj> from_child = from.get_component <ElementSlot>().element();
-
-			to.get_component<ElementSlot>().reset_element();
-			from.get_component<ElementSlot>().reset_element();
-
-			if (to_child) {
-				from.add_child(to_child.unwrap());
-				from.get_component <ElementSlot>().set_element(to_child.unwrap());
-			}
-			if (from_child) {
-				to.add_child(from_child.unwrap());
-				to.get_component <ElementSlot>().set_element(from_child.unwrap());
-			}
+	private:
+		AddToSlotPlan(ecs::Constrained<ElementSlot> item_slot, item_entry new_entry) :entry(new_entry), slot(item_slot) {
 		}
 	};
-	inline swap_slot_plan swap_slot(ElementSlot& from_slot, ElementSlot& to_slot) {
-		return swap_slot_plan(from_slot.owner(), to_slot.owner());
+	inline stn::Option<AddToSlotPlan> items::AddToSlotRequest::build() {
+		return AddToSlotPlan::build(*this);
 	}
+	struct RemoveFromSlotPlan;
+	struct RemoveFromSlotRequest {
+		bool want_complete = false;
+		ecs::Constrained<ElementSlot> slot;
+		size_t count;
+		stn::Option<RemoveFromSlotPlan> build();
+	};
+	struct RemoveFromSlotPlan {
+		ecs::Constrained<ElementSlot> slot;
+		size_t count;
+
+		void apply() {
+			item_stack& stack = slot.get_component<ElementSlot>().element().expect("slot must not be empty").get<item_stack>();
+			stack.remove(count);
+		}
+		static stn::Option<RemoveFromSlotPlan> build(RemoveFromSlotRequest request) {
+			stn::Option<item_stack&> stack= request.slot.get<ElementSlot>().stack();
+			if (!stack) {
+				return stn::None;
+			}
+			size_t max_remove =stn::min(stack.unwrap().count(),request.count);
+			if (request.want_complete&&max_remove!=request.count) {
+				return stn::None;
+			}
+			return RemoveFromSlotPlan(request.slot, request.count);
+		}
+	private:
+		RemoveFromSlotPlan(ecs::Constrained<ElementSlot> elem_slot, size_t remove_count) :slot(elem_slot), count(remove_count) {
+		}
+	};
+
+	inline stn::Option<RemoveFromSlotPlan> RemoveFromSlotRequest::build() {
+		return RemoveFromSlotPlan::build(*this);
+	}
+	struct TransferSlotsPlan;
+	static constexpr stn::NoneType max_transfer = stn::None;
+	struct TransferSlotsRequest {
+		ecs::Constrained<ElementSlot> from_slot;
+		ecs::Constrained<ElementSlot> to_slot;
+		stn::Option<size_t> count= max_transfer;
+		bool want_complete = false;
+		stn::Option<TransferSlotsPlan> build();
+	};
+
+	struct TransferSlotsPlan {
+		AddToSlotPlan add;
+		RemoveFromSlotPlan take;
+		bool will_initialize() {
+			return add.will_initialize();
+		}
+		
+		void apply() {
+			add.apply();
+			take.apply();
+		}
+		static stn::Option<TransferSlotsPlan> build(TransferSlotsRequest request) {
+			stn::Option<item_stack&> from_object = request.from_slot.get<ElementSlot>().stack();
+			if (!from_object) {
+				return stn::None;
+			}
+
+			size_t wanted_transfer_amount = request.count.unwrap_or(from_object.unwrap().count());
+			size_t transfer_amount = wanted_transfer_amount;
+			stn::set_min(transfer_amount, from_object.unwrap().count());
+			item_id id = from_object.unwrap().contained_id();
+			stn::Option<items::item_stack&> mabye_to_slot = request.to_slot.get<ElementSlot>().stack();
+			if (mabye_to_slot) {
+				if (mabye_to_slot.unwrap().contained_id()!=id) {
+					return stn::None;
+				}
+				stn::set_min(transfer_amount, mabye_to_slot.unwrap().rem_capacity());
+			}
+			if (request.want_complete&& wanted_transfer_amount!=transfer_amount) {
+				return stn::None;
+			}
+			item_entry req_amt(id,transfer_amount,request.from_slot.world().get_resource<ItemTypes>());
+			stn::Option<AddToSlotPlan> add=AddToSlotPlan::build(AddToSlotRequest{ .entry = req_amt,.slot = request.to_slot });
+			stn::Option<RemoveFromSlotPlan> remove=RemoveFromSlotPlan::build(RemoveFromSlotRequest{ .slot = request.from_slot,.count = transfer_amount });
+			if (add&&remove) {
+				return TransferSlotsPlan(add.unwrap(), remove.unwrap());
+			}
+			return stn::None;
+			
+		}
+		private: 
+			TransferSlotsPlan(AddToSlotPlan add, RemoveFromSlotPlan take):add(add),take(take){
+		}
+	};
+	inline stn::Option<TransferSlotsPlan> items::TransferSlotsRequest::build() {
+		return TransferSlotsPlan::build(*this);
+	}
+	template<typename T>
+	inline bool apply_plan(T request) {
+		auto plan = request.build();
+		if (plan) {
+			
+			plan.unwrap().apply();
+		}
+		return plan.is_some();
+	}
+	
 }

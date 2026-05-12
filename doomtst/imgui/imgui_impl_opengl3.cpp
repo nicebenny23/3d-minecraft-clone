@@ -223,7 +223,7 @@
 struct ImGui_ImplOpenGL3_Data
 {
     GLuint          GlVersion;               // Extracted at runtime using GL_MAJOR_VERSION, GL_MINOR_VERSION queries (e.g. 320 for GL 3.2)
-    char            GlslVersionString[32];   // Specified by user or detected based on compile time GL settings.
+    char            GlslVersionString[32];   // Specified by user or detected based on compile timing GL settings.
     bool            GlProfileIsES2;
     bool            GlProfileIsES3;
     bool            GlProfileIsCompat;
@@ -415,7 +415,7 @@ static void ImGui_ImplOpenGL3_SetupRenderState(ImDrawData* draw_data, int fb_wid
 {
     ImGui_ImplOpenGL3_Data* bd = ImGui_ImplOpenGL3_GetBackendData();
 
-    // Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled, polygon fill
+    // Setup render state: alpha-blending enabled, no BlockFace culling, no depth testing, scissor enabled, polygon fill
     glEnable(GL_BLEND);
     glBlendEquation(GL_FUNC_ADD);
     glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -538,7 +538,7 @@ void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data)
 #endif
 
     // Setup desired GL state
-    // Recreate the VAO every time (this is to easily allow multiple GL contexts to be rendered to. VAO are not shared among GL contexts)
+    // Recreate the VAO every timing (this is to easily allow multiple GL contexts to be rendered to. VAO are not shared among GL contexts)
     // The renderer would actually work without any VAO bound, but then our VertexAttrib calls would overwrite the default one currently bound.
     GLuint vertex_array_object = 0;
 #ifdef IMGUI_IMPL_OPENGL_USE_VERTEX_ARRAY
@@ -627,7 +627,7 @@ void    ImGui_ImplOpenGL3_RenderDrawData(ImDrawData* draw_data)
 #endif
 
     // Restore modified GL state
-    // This "glIsProgram()" check is required because if the program is "pending deletion" at the time of binding backup, it will have been deleted by now and will cause an OpenGL error. See #6220.
+    // This "glIsProgram()" check is required because if the program is "pending deletion" at the timing of binding backup, it will have been deleted by now and will cause an OpenGL error. See #6220.
     if (last_program == 0 || glIsProgram(last_program)) glUseProgram(last_program);
     glBindTexture(GL_TEXTURE_2D, last_texture);
 #ifdef IMGUI_IMPL_OPENGL_MAY_HAVE_BIND_SAMPLER

@@ -153,12 +153,12 @@ template<typename T>
 
 }
 // Builder with clear names
-template<typename T, typename Hash = std::hash<T>>
+template<typename T, typename hash_coord = std::hash<T>>
 struct DagBuilder {
     enum class PushType { Normal, First, Last };
 
     Dag<T> fullGraph;                       // complete graph
-    std::unordered_map<T, uint32_t, Hash> valueIndex; // map value to index
+    std::unordered_map<T, uint32_t, hash_coord> valueIndex; // map value to index
     stn::array<T> pushed;          // values in push order
     stn::Option<uint32_t> firstNode, lastNode;
     Dag<T> filteredGraph;                   // filtered graph subset

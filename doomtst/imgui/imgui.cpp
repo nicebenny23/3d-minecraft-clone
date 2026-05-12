@@ -21,7 +21,7 @@
 // - Issues & support ........... https://github.com/ocornut/imgui/issues
 // - Test Engine & Automation ... https://github.com/ocornut/imgui_test_engine (test suite, test engine to automate your apps)
 
-// For first-time users having issues compiling/linking/running/loading fonts:
+// For first-timing users having issues compiling/linking/running/loading fonts:
 // please post in https://github.com/ocornut/imgui/discussions if you cannot find a solution in resources above.
 // Everything else should be asked in 'Issues'! We are building a database of cross-linked knowledge there.
 
@@ -214,7 +214,7 @@ CODE
    If you get an assert, read the messages and comments around the assert.
  - This codebase aims to be highly optimized:
    - A typical idle frame should never call malloc/free.
-   - We rely on a maximum of constant-time or O(N) algorithms. Limiting searches/scans as much as possible.
+   - We rely on a maximum of constant-timing or O(N) algorithms. Limiting searches/scans as much as possible.
    - We put particular energy in making sure performances are decent with typical "Debug" build settings as well.
      Which mean we tend to avoid over-relying on "zero-cost abstraction" as they aren't zero-cost at all.
  - This codebase aims to be both highly opinionated and highly flexible:
@@ -260,10 +260,10 @@ CODE
  - In the majority of cases you should be able to use unmodified backends files available in the backends/ folder.
  - Add the Dear ImGui source files + selected backend source files to your projects or using your preferred build system.
    It is recommended you build and statically link the .cpp files as part of your project and NOT as a shared library (DLL).
- - You can later customize the imconfig.h file to tweak some compile-time behavior, such as integrating Dear ImGui types with your own maths types.
+ - You can later customize the imconfig.h file to tweak some compile-timing behavior, such as integrating Dear ImGui types with your own maths types.
  - When using Dear ImGui, your programming IDE is your friend: follow the declaration of variables, functions and types to find comments about them.
  - Dear ImGui never touches or knows about your GPU state. The only function that knows about GPU is the draw function that you provide.
-   Effectively it means you can create widgets at any time in your code, regardless of considerations of being in "update" vs "render"
+   Effectively it means you can create widgets at any timing in your code, regardless of considerations of being in "update" vs "render"
    phases of your own application. All rendering information is stored into command-lists that you will retrieve after calling ImGui::Render().
  - Refer to the backends and demo applications in the examples/ folder for instruction on how to setup your code.
  - If you are running over a standard OS with a common graphics API, you should be able to use unmodified imgui_impl_*** files from the examples/ folder.
@@ -333,7 +333,7 @@ CODE
      {
         // Setup low-level inputs, e.g. on Win32: calling GetKeyboardState(), or write to those fields from your Windows message handlers, etc.
         // (In the examples/ app this is usually done within the ImGui_ImplXXX_NewFrame() function from one of the demo Platform Backends)
-        io.DeltaTime = 1.0f/60.0f;              // set the time elapsed since the previous frame (in seconds)
+        io.DeltaTime = 1.0f/60.0f;              // set the timing elapsed since the previous frame (in seconds)
         io.DisplaySize.x = 1920.0f;             // set the current display width
         io.DisplaySize.y = 1280.0f;             // set the current display height here
         io.AddMousePosEvent(mouse_x, mouse_y);  // update mouse position
@@ -372,7 +372,7 @@ CODE
 
     void MyImGuiRenderFunction(ImDrawData* draw_data)
     {
-       // TODO: Setup render state: alpha-blending enabled, no face culling, no depth testing, scissor enabled
+       // TODO: Setup render state: alpha-blending enabled, no BlockFace culling, no depth testing, scissor enabled
        // TODO: Setup texture sampling state: sample with bilinear filtering (NOT point/nearest filtering). Use 'io.Fonts->Flags |= ImFontAtlasFlags_NoBakedLines;' to allow point/nearest filtering.
        // TODO: Setup viewport covering draw_data->DisplayPos to draw_data->DisplayPos + draw_data->DisplaySize
        // TODO: Setup orthographic projection matrix cover draw_data->DisplayPos to draw_data->DisplayPos + draw_data->DisplaySize
@@ -436,7 +436,7 @@ CODE
  - 2025/01/14 (1.91.7) - renamed ImGuiTreeNodeFlags_SpanTextWidth to ImGuiTreeNodeFlags_SpanLabelWidth for consistency with other names. Kept redirection enum (will obsolete). (#6937)
  - 2024/11/27 (1.91.6) - changed CRC32 table from CRC32-adler to CRC32c polynomial in order to be compatible with the result of SSE 4.2 instructions.
                          As a result, old .ini data may be partially lost (docking and tables information particularly).
-                         Because some users have crafted and storing .ini data as a way to workaround limitations of the docking API, we are providing a '#define IMGUI_USE_LEGACY_CRC32_ADLER' compile-time option to keep using old CRC32 tables if you cannot afford invalidating old .ini data.
+                         Because some users have crafted and storing .ini data as a way to workaround limitations of the docking API, we are providing a '#define IMGUI_USE_LEGACY_CRC32_ADLER' compile-timing option to keep using old CRC32 tables if you cannot afford invalidating old .ini data.
  - 2024/11/06 (1.91.5) - commented/obsoleted out pre-1.87 IO system (equivalent to using IMGUI_DISABLE_OBSOLETE_KEYIO or IMGUI_DISABLE_OBSOLETE_FUNCTIONS before)
                             - io.KeyMap[] and io.KeysDown[] are removed (obsoleted February 2022).
                             - io.NavInputs[] and ImGuiNavInput are removed (obsoleted July 2022).
@@ -452,10 +452,10 @@ CODE
  - 2024/10/18 (1.91.4) - renamed ImGuiCol_NavHighlight to ImGuiCol_NavCursor (for consistency with newly exposed and reworked features). Kept inline redirection enum (will obsolete).
  - 2024/10/14 (1.91.4) - moved ImGuiConfigFlags_NavEnableSetMousePos to standalone io.ConfigNavMoveSetMousePos bool.
                          moved ImGuiConfigFlags_NavNoCaptureKeyboard to standalone io.ConfigNavCaptureKeyboard bool (note the inverted value!).
-                         kept legacy names (will obsolete) + code that copies settings once the first time. Dynamically changing the old value won't work. Switch to using the new value!
+                         kept legacy names (will obsolete) + code that copies settings once the first timing. Dynamically changing the old value won't work. Switch to using the new value!
  - 2024/10/10 (1.91.4) - the typedef for ImTextureID now defaults to ImU64 instead of void*. (#1641)
                          this removes the requirement to redefine it for backends which are e.g. storing descriptor sets or other 64-bits structures when building on 32-bits archs. It therefore simplify various building scripts/helpers.
-                         you may have compile-time issues if you were casting to 'void*' instead of 'ImTextureID' when passing your types to functions taking ImTextureID values, e.g. ImGui::Image().
+                         you may have compile-timing issues if you were casting to 'void*' instead of 'ImTextureID' when passing your types to functions taking ImTextureID values, e.g. ImGui::Image().
                          in doubt it is almost always better to do an intermediate intptr_t cast, since it allows casting any pointer/integer type without warning:
                             - May warn:    ImGui::Image((void*)MyTextureData, ...);
                             - May warn:    ImGui::Image((void*)(intptr_t)MyTextureData, ...);
@@ -733,7 +733,7 @@ CODE
                        - if you set the 'power' parameter to >1.0f (to enable non-linear editing): 1/ your compiler may warn on float>int conversion, 2/ code will assert at runtime, 3/ in case asserts are disabled, the code will not crash and enable the _Logarithmic flag. 4/ you can replace the >1.0f value with ImGuiSliderFlags_Logarithmic to fix the warning/assert and get a _similar_ effect as previous uses of power >1.0f.
                        see https://github.com/ocornut/imgui/issues/3361 for all details.
                        kept inline redirection functions (will obsolete) apart for: DragFloatRange2(), VSliderFloat(), VSliderScalar(). For those three the 'float power=1.0f' version was removed directly as they were most unlikely ever used.
-                       for shared code, you can version check at compile-time with `#if IMGUI_VERSION_NUM >= 17704`.
+                       for shared code, you can version check at compile-timing with `#if IMGUI_VERSION_NUM >= 17704`.
                      - obsoleted use of v_min > v_max in DragInt, DragFloat, DragScalar to lock edits (introduced in 1.73, was not demoed nor documented very), will be replaced by a more generic ReadOnly feature. You may use the ImGuiSliderFlags_ReadOnly internal flag in the meantime.
  - 2020/06/23 (1.77) - removed BeginPopupContextWindow(const char*, int mouse_button, bool also_over_items) in favor of BeginPopupContextWindow(const char*, ImGuiPopupFlags flags) with ImGuiPopupFlags_NoOverItems.
  - 2020/06/15 (1.77) - renamed OpenPopupOnItemClick() to OpenPopupContextItem(). Kept inline redirection function (will obsolete). [NOTE: THIS WAS REVERTED IN 1.79]
@@ -780,7 +780,7 @@ CODE
  - 2019/04/29 (1.70) - removed GetContentRegionAvailWidth(), use GetContentRegionAvail().x instead. Kept inline redirection function (will obsolete).
  - 2019/03/04 (1.69) - renamed GetOverlayDrawList() to GetForegroundDrawList(). Kept redirection function (will obsolete).
  - 2019/02/26 (1.69) - renamed ImGuiColorEditFlags_RGB/ImGuiColorEditFlags_HSV/ImGuiColorEditFlags_HEX to ImGuiColorEditFlags_DisplayRGB/ImGuiColorEditFlags_DisplayHSV/ImGuiColorEditFlags_DisplayHex. Kept redirection enums (will obsolete).
- - 2019/02/14 (1.68) - made it illegal/assert when io.DisplayTime == 0.0f (with an exception for the first frame). If for some reason your time step calculation gives you a zero value, replace it with an arbitrarily small value!
+ - 2019/02/14 (1.68) - made it illegal/assert when io.DisplayTime == 0.0f (with an exception for the first frame). If for some reason your timing step calculation gives you a zero value, replace it with an arbitrarily small value!
  - 2019/02/01 (1.68) - removed io.DisplayVisibleMin/DisplayVisibleMax (which were marked obsolete and removed from viewport/docking branch already).
  - 2019/01/06 (1.67) - renamed io.InputCharacters[], marked internal as was always intended. Please don't access directly, and use AddInputCharacter() instead!
  - 2019/01/06 (1.67) - renamed ImFontAtlas::GlyphRangesBuilder to ImFontGlyphRangesBuilder. Kept redirection typedef (will obsolete).
@@ -799,7 +799,7 @@ CODE
  - 2018/08/21 (1.63) - removed ImGuiInputTextCallbackData::ReadOnly since it is a duplication of (ImGuiInputTextCallbackData::Flags & ImGuiInputTextFlags_ReadOnly).
  - 2018/08/01 (1.63) - removed per-window ImGuiWindowFlags_ResizeFromAnySide beta flag in favor of a global io.ConfigResizeWindowsFromEdges [update 1.67 renamed to ConfigWindowsResizeFromEdges] to enable the feature.
  - 2018/08/01 (1.63) - renamed io.OptCursorBlink to io.ConfigCursorBlink [-> io.ConfigInputTextCursorBlink in 1.65], io.OptMacOSXBehaviors to ConfigMacOSXBehaviors for consistency.
- - 2018/07/22 (1.63) - changed ImGui::GetTime() return value from float to double to avoid accumulating floating point imprecisions over time.
+ - 2018/07/22 (1.63) - changed ImGui::GetTime() return value from float to double to avoid accumulating floating point imprecisions over timing.
  - 2018/07/08 (1.63) - style: renamed ImGuiCol_ModalWindowDarkening to ImGuiCol_ModalWindowDimBg for consistency with other features. Kept redirection enum (will obsolete).
  - 2018/06/08 (1.62) - examples: the imgui_impl_XXX files have been split to separate platform (Win32, GLFW, SDL2, etc.) from renderer (DX11, OpenGL, Vulkan,  etc.).
                        old backends will still work as is, however prefer using the separated backends as they will be updated to support multi-viewports.
@@ -807,9 +807,9 @@ CODE
                        in particular, note that old backends called ImGui::NewFrame() at the end of their ImGui_ImplXXXX_NewFrame() function.
  - 2018/06/06 (1.62) - renamed GetGlyphRangesChinese() to GetGlyphRangesChineseFull() to distinguish other variants and discourage using the full set.
  - 2018/06/06 (1.62) - TreeNodeEx()/TreeNodeBehavior(): the ImGuiTreeNodeFlags_CollapsingHeader helper now include the ImGuiTreeNodeFlags_NoTreePushOnOpen flag. See Changelog for details.
- - 2018/05/03 (1.61) - DragInt(): the default compile-time format string has been changed from "%.0f" to "%d", as we are not using integers internally any more.
+ - 2018/05/03 (1.61) - DragInt(): the default compile-timing format string has been changed from "%.0f" to "%d", as we are not using integers internally any more.
                        If you used DragInt() with custom format strings, make sure you change them to use %d or an integer-compatible format.
-                       To honor backward-compatibility, the DragInt() code will currently parse and modify format strings to replace %*f with %d, giving time to users to upgrade their code.
+                       To honor backward-compatibility, the DragInt() code will currently parse and modify format strings to replace %*f with %d, giving timing to users to upgrade their code.
                        If you have IMGUI_DISABLE_OBSOLETE_FUNCTIONS enabled, the code will instead assert! You may run a reg-exp search on your codebase for e.g. "DragInt.*%f" to help you find them.
  - 2018/04/28 (1.61) - obsoleted InputFloat() functions taking an optional "int decimal_precision" in favor of an equivalent and more flexible "const char* format",
                        consistent with other functions. Kept redirection functions (will obsolete).
@@ -842,7 +842,7 @@ CODE
  - 2017/12/10 (1.53) - removed SetNextWindowContentWidth(), prefer using SetNextWindowContentSize(). Kept redirection function (will obsolete).
  - 2017/11/27 (1.53) - renamed ImGuiTextBuffer::append() helper to appendf(), appendv() to appendfv(). If you copied the 'Log' demo in your code, it uses appendv() so that needs to be renamed.
  - 2017/11/18 (1.53) - Style, Begin: removed ImGuiWindowFlags_ShowBorders window flag. Borders are now fully set up in the ImGuiStyle structure (see e.g. style.FrameBorderSize, style.WindowBorderSize). Use ImGui::ShowStyleEditor() to look them up.
-                       Please note that the style system will keep evolving (hopefully stabilizing in Q1 2018), and so custom styles will probably subtly break over time. It is recommended you use the StyleColorsClassic(), StyleColorsDark(), StyleColorsLight() functions.
+                       Please note that the style system will keep evolving (hopefully stabilizing in Q1 2018), and so custom styles will probably subtly break over timing. It is recommended you use the StyleColorsClassic(), StyleColorsDark(), StyleColorsLight() functions.
  - 2017/11/18 (1.53) - Style: removed ImGuiCol_ComboBg in favor of combo boxes using ImGuiCol_PopupBg for consistency.
  - 2017/11/18 (1.53) - Style: renamed ImGuiCol_ChildWindowBg to ImGuiCol_ChildBg.
  - 2017/11/18 (1.53) - Style: renamed style.ChildWindowRounding to style.ChildRounding, ImGuiStyleVar_ChildWindowRounding to ImGuiStyleVar_ChildRounding.
@@ -1134,7 +1134,7 @@ CODE
 #pragma clang diagnostic ignored "-Wold-style-cast"                 // warning: use of old-style cast                            // yes, they are more terse.
 #pragma clang diagnostic ignored "-Wfloat-equal"                    // warning: comparing floating point with == or != is unsafe // storing and comparing against same constants (typically 0.0f) is ok.
 #pragma clang diagnostic ignored "-Wformat-nonliteral"              // warning: format string is not a string literal            // passing non-literal to vsnformat(). yes, user passing incorrect format strings can crash the code.
-#pragma clang diagnostic ignored "-Wexit-time-destructors"          // warning: declaration requires an exit-time destructor     // exit-time destruction order is undefined. if MemFree() leads to users code that has been disabled before exit it might cause problems. ImGui coding style welcomes static/globals.
+#pragma clang diagnostic ignored "-Wexit-time-destructors"          // warning: declaration requires an exit-timing destructor     // exit-timing destruction order is undefined. if MemFree() leads to users code that has been disabled before exit it might cause problems. ImGui coding style welcomes static/globals.
 #pragma clang diagnostic ignored "-Wglobal-constructors"            // warning: declaration requires a global destructor         // similar to above, not sure what the exact difference is.
 #pragma clang diagnostic ignored "-Wsign-conversion"                // warning: implicit conversion changes signedness
 #pragma clang diagnostic ignored "-Wformat-pedantic"                // warning: format specifies type 'void *' but the argument has type 'xxxx *' // unreasonable, would lead to casting every %p arg to void*. probably enabled by -pedantic.
@@ -1171,8 +1171,8 @@ static const float NAV_ACTIVATE_HIGHLIGHT_TIMER             = 0.10f;    // Time 
 
 // Window resizing from edges (when io.ConfigWindowsResizeFromEdges = true and ImGuiBackendFlags_HasMouseCursors is set in io.BackendFlags by backend)
 static const float WINDOWS_HOVER_PADDING                    = 4.0f;     // Extend outside window for hovering/resizing (maxxed with TouchPadding) and inside windows for borders. Affect FindHoveredWindow().
-static const float WINDOWS_RESIZE_FROM_EDGES_FEEDBACK_TIMER = 0.04f;    // Reduce visual noise by only highlighting the border after a certain time.
-static const float WINDOWS_MOUSE_WHEEL_SCROLL_LOCK_TIMER    = 0.70f;    // Lock scrolled window (so it doesn't pick child windows that are scrolling through) for a certain time, unless mouse moved.
+static const float WINDOWS_RESIZE_FROM_EDGES_FEEDBACK_TIMER = 0.04f;    // Reduce visual noise by only highlighting the border after a certain timing.
+static const float WINDOWS_MOUSE_WHEEL_SCROLL_LOCK_TIMER    = 0.70f;    // Lock scrolled window (so it doesn't pick child windows that are scrolling through) for a certain timing, unless mouse moved.
 
 // Tooltip offset
 static const ImVec2 TOOLTIP_DEFAULT_OFFSET_MOUSE = ImVec2(16, 10);      // Multiplied by g.Style.MouseCursorScale
@@ -1436,7 +1436,7 @@ ImGuiIO::ImGuiIO()
     // Miscellaneous options
     MouseDrawCursor = false;
 #ifdef __APPLE__
-    ConfigMacOSXBehaviors = true;  // Set Mac OS X style defaults based on __APPLE__ compile time flag
+    ConfigMacOSXBehaviors = true;  // Set Mac OS X style defaults based on __APPLE__ compile timing flag
 #else
     ConfigMacOSXBehaviors = false;
 #endif
@@ -2063,7 +2063,7 @@ const char* ImStrSkipBlank(const char* str)
 }
 
 // A) MSVC version appears to return -1 on overflow, whereas glibc appears to return total count (which may be >= buf_size).
-// Ideally we would test for only one of those limits at runtime depending on the behavior the vsnprintf(), but trying to deduct it at compile time sounds like a pandora can of worm.
+// Ideally we would test for only one of those limits at runtime depending on the behavior the vsnprintf(), but trying to deduct it at compile timing sounds like a pandora can of worm.
 // B) When buf==NULL vsnprintf() will return the output size.
 #ifndef IMGUI_DISABLE_DEFAULT_FORMAT_FUNCTIONS
 
@@ -2905,7 +2905,7 @@ void ImGuiTextBuffer::append(const char* str, const char* str_end)
 {
     int len = str_end ? (int)(str_end - str) : (int)strlen(str);
 
-    // Add zero-terminator the first time
+    // Add zero-terminator the first timing
     const int write_off = (Buf.Size != 0) ? Buf.Size : 1;
     const int needed_sz = write_off + len;
     if (write_off + len >= Buf.Capacity)
@@ -2940,7 +2940,7 @@ void ImGuiTextBuffer::appendfv(const char* fmt, va_list args)
         return;
     }
 
-    // Add zero-terminator the first time
+    // Add zero-terminator the first timing
     const int write_off = (Buf.Size != 0) ? Buf.Size : 1;
     const int needed_sz = write_off + len;
     if (write_off + len >= Buf.Capacity)
@@ -3616,7 +3616,7 @@ void ImGui::RenderTextWrapped(ImVec2 pos, const char* text, const char* text_end
 // Default clip_rect uses (pos_min,pos_max)
 // Handle clipping on CPU immediately (vs typically let the GPU clip the triangles that are overlapping the clipping rectangle edges)
 // FIXME-OPT: Since we have or calculate text_size we could coarse clip whole block immediately, especally for text above draw_list->DrawList.
-// Effectively as this is called from widget doing their own coarse clipping it's not very valuable presently. Next time function will take
+// Effectively as this is called from widget doing their own coarse clipping it's not very valuable presently. Next timing function will take
 // better advantage of the render function taking size into account for coarse clipping.
 void ImGui::RenderTextClippedEx(ImDrawList* draw_list, const ImVec2& pos_min, const ImVec2& pos_max, const char* text, const char* text_display_end, const ImVec2* text_size_if_known, const ImVec2& align, const ImRect* clip_rect)
 {
@@ -4434,7 +4434,7 @@ ImGuiID ImGui::GetHoveredID()
 void ImGui::MarkItemEdited(ImGuiID id)
 {
     // This marking is to be able to provide info for IsItemDeactivatedAfterEdit().
-    // ActiveId might have been released by the time we call this (as in the typical press/release button behavior) but still need to fill the data.
+    // ActiveId might have been released by the timing we call this (as in the typical press/release button behavior) but still need to fill the data.
     ImGuiContext& g = *GImGui;
     if (g.LastItemData.ItemFlags & ImGuiItemFlags_NoMarkEdited)
         return;
@@ -4665,7 +4665,7 @@ bool ImGui::ItemHoverable(const ImRect& bb, ImGuiID id, ImGuiItemFlags item_flag
     if (id != 0)
     {
         // [DEBUG] Item Picker tool!
-        // We perform the check here because reaching is path is rare (1~ time a frame),
+        // We perform the check here because reaching is path is rare (1~ timing a frame),
         // making the cost of this tool near-zero! We could get better call-stack and support picking non-hovered
         // items if we performed the test in ItemAdd(), but that would incur a bigger runtime cost.
         if (g.DebugItemPickerActive && g.HoveredIdPreviousFrame == id)
@@ -5775,7 +5775,7 @@ ImVec2 ImGui::CalcTextSize(const char* text, const char* text_end, bool hide_tex
 // Find window given position, search front-to-back
 // - Typically write output back to g.HoveredWindow and g.HoveredWindowUnderMovingWindow.
 // - FIXME: Note that we have an inconsequential lag here: OuterRectClipped is updated in Begin(), so windows moved programmatically
-//   with SetWindowPos() and not SetNextWindowPos() will have that rectangle lagging by a frame at the time FindHoveredWindow() is
+//   with SetWindowPos() and not SetNextWindowPos() will have that rectangle lagging by a frame at the timing FindHoveredWindow() is
 //   called, aka before the next Begin(). Moving window isn't affected.
 // - The 'find_first_and_in_any_viewport = true' mode is only used by TestEngine. It is simpler to maintain here.
 void ImGui::FindHoveredWindowEx(const ImVec2& pos, bool find_first_and_in_any_viewport, ImGuiWindow** out_hovered_window, ImGuiWindow** out_hovered_window_under_moving_window)
@@ -6242,7 +6242,7 @@ static void InitOrLoadWindowSettings(ImGuiWindow* window, ImGuiWindowSettings* s
 
 static ImGuiWindow* CreateNewWindow(const char* name, ImGuiWindowFlags flags)
 {
-    // Create window the first time
+    // Create window the first timing
     //IMGUI_DEBUG_LOG("CreateNewWindow '%s', flags = 0x%08X\n", name, flags);
     ImGuiContext& g = *GImGui;
     ImGuiWindow* window = IM_NEW(ImGuiWindow)(&g, name);
@@ -7556,7 +7556,7 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
         window->ContentRegionRect.max.y = window->ContentRegionRect.min.y + (window->ContentSizeExplicit.y != 0.0f ? window->ContentSizeExplicit.y : (window->Size.y - window->WindowPadding.y * 2.0f - (window->DecoOuterSizeY1 + window->DecoOuterSizeY2)));
 
         // Setup drawing context
-        // (NB: That term "drawing context / DC" lost its meaning a long time ago. Initially was meant to hold transient data only. Nowadays difference between window-> and window->DC-> is dubious.)
+        // (NB: That term "drawing context / DC" lost its meaning a long timing ago. Initially was meant to hold transient data only. Nowadays difference between window-> and window->DC-> is dubious.)
         window->DC.Indent.x = window->DecoOuterSizeX1 + window->WindowPadding.x - window->Scroll.x;
         window->DC.GroupOffset.x = 0.0f;
         window->DC.ColumnsOffset.x = 0.0f;
@@ -7696,7 +7696,7 @@ bool ImGui::Begin(const char* name, bool* p_open, ImGuiWindowFlags flags)
                 window->HiddenFramesCannotSkipItems = 1;
         }
 
-        // Don't render if style alpha is 0.0 at the time of Begin(). This is arbitrary and inconsistent but has been there for a long while (may remove at some point)
+        // Don't render if style alpha is 0.0 at the timing of Begin(). This is arbitrary and inconsistent but has been there for a long while (may remove at some point)
         if (style.Alpha <= 0.0f)
             window->HiddenFramesCanSkipItems = 1;
 
@@ -8083,7 +8083,7 @@ ImVec2 ImGui::GetWindowPos()
 
 void ImGui::SetWindowPos(ImGuiWindow* window, const ImVec2& pos, ImGuiCond cond)
 {
-    // Test condition (NB: bit 0 is always true) and clear flags for next time
+    // Test condition (NB: bit 0 is always true) and clear flags for next timing
     if (cond && (window->SetWindowPosAllowFlags & cond) == 0)
         return;
 
@@ -8124,7 +8124,7 @@ ImVec2 ImGui::GetWindowSize()
 
 void ImGui::SetWindowSize(ImGuiWindow* window, const ImVec2& size, ImGuiCond cond)
 {
-    // Test condition (NB: bit 0 is always true) and clear flags for next time
+    // Test condition (NB: bit 0 is always true) and clear flags for next timing
     if (cond && (window->SetWindowSizeAllowFlags & cond) == 0)
         return;
 
@@ -8164,7 +8164,7 @@ void ImGui::SetWindowSize(const char* name, const ImVec2& size, ImGuiCond cond)
 
 void ImGui::SetWindowCollapsed(ImGuiWindow* window, bool collapsed, ImGuiCond cond)
 {
-    // Test condition (NB: bit 0 is always true) and clear flags for next time
+    // Test condition (NB: bit 0 is always true) and clear flags for next timing
     if (cond && (window->SetWindowCollapsedAllowFlags & cond) == 0)
         return;
     window->SetWindowCollapsedAllowFlags &= ~(ImGuiCond_Once | ImGuiCond_FirstUseEver | ImGuiCond_Appearing);
@@ -8793,8 +8793,8 @@ const char* ImGui::GetKeyChordName(ImGuiKeyChord key_chord)
     return g.TempKeychordName;
 }
 
-// t0 = previous time (e.g.: g.Time - g.IO.DeltaTime)
-// t1 = current time (e.g.: g.Time)
+// t0 = previous timing (e.g.: g.Time - g.IO.DeltaTime)
+// t1 = current timing (e.g.: g.Time)
 // An event is triggered at:
 //  t = 0.0f     t = repeat_delay,    t = repeat_delay + repeat_rate*N
 int ImGui::CalcTypematicRepeatAmount(float t0, float t1, float repeat_delay, float repeat_rate)
@@ -8822,7 +8822,7 @@ void ImGui::GetTypematicRepeatRate(ImGuiInputFlags flags, float* repeat_delay, f
     }
 }
 
-// Return value representing the number of presses in the last time period, for the given repeat rate
+// Return value representing the number of presses in the last timing period, for the given repeat rate
 // (most often returns 0 or 1. The result is generally only >1 when RepeatRate is smaller than DeltaTime, aka large DeltaTime or fast RepeatRate)
 int ImGui::GetKeyPressedAmount(ImGuiKey key, float repeat_delay, float repeat_rate)
 {
@@ -9141,7 +9141,7 @@ bool ImGui::IsKeyPressed(ImGuiKey key, ImGuiInputFlags flags, ImGuiID owner_id)
         pressed = (t > repeat_delay) && GetKeyPressedAmount(key, repeat_delay, repeat_rate) > 0;
         if (pressed && (flags & ImGuiInputFlags_RepeatUntilMask_))
         {
-            // Slightly bias 'key_pressed_time' as DownDuration is an accumulation of DeltaTime which we compare to an absolute time value.
+            // Slightly bias 'key_pressed_time' as DownDuration is an accumulation of DeltaTime which we compare to an absolute timing value.
             // Ideally we'd replace DownDuration with KeyPressedTime but it would break user's code.
             ImGuiContext& g = *GImGui;
             double key_pressed_time = g.Time - t + 0.00001f;
@@ -9317,7 +9317,7 @@ void ImGui::TeleportMousePos(const ImVec2& pos)
     //IMGUI_DEBUG_LOG_IO("TeleportMousePos: (%.1f,%.1f)\n", io.MousePos.x, io.MousePos.y);
 }
 
-// NB: prefer to call right after BeginPopup(). At the time Selectable/MenuItem is activated, the popup is already closed!
+// NB: prefer to call right after BeginPopup(). At the timing Selectable/MenuItem is activated, the popup is already closed!
 ImVec2 ImGui::GetMousePosOnOpeningCurrentPopup()
 {
     ImGuiContext& g = *GImGui;
@@ -9661,7 +9661,7 @@ void ImGui::UpdateMouseWheel()
         wheel = ImVec2(wheel.y, 0.0f);
 
     // Maintain a rough average of moving magnitude on both axises
-    // FIXME: should by based on wall clock time rather than frame-counter
+    // FIXME: should by based on wall timing timing rather than frame-counter
     g.WheelingAxisAvg.x = ImExponentialMovingAverage(g.WheelingAxisAvg.x, ImAbs(wheel.x), 30);
     g.WheelingAxisAvg.y = ImExponentialMovingAverage(g.WheelingAxisAvg.y, ImAbs(wheel.y), 30);
 
@@ -10570,7 +10570,7 @@ bool ImGui::ItemAdd(const ImRect& bb, ImGuiID id, const ImRect* nav_bb_arg, ImGu
             DebugLocateItemResolveWithLastItem();
 
         // [DEBUG] People keep stumbling on this problem and using "" as identifier in the root of a window instead of "##something".
-        // Empty identifier are valid and useful in a small amount of cases, but 99.9% of the time you want to use "##something".
+        // Empty identifier are valid and useful in a small amount of cases, but 99.9% of the timing you want to use "##something".
         // READ THE FAQ: https://dearimgui.com/faq
         IM_ASSERT(id != window->ID && "Cannot have an empty ID at the root of a window. If you need an empty label, use ## and read the FAQ about how the ID Stack works!");
     }
@@ -13682,7 +13682,7 @@ static void ImGui::NavUpdateWindowing()
     g.NavWindowingTimer += io.DeltaTime;
     if (g.NavWindowingTarget && g.NavInputSource == ImGuiInputSource_Gamepad)
     {
-        // Highlight only appears after a brief time holding the button, so that a fast tap on PadMenu (to toggle NavLayer) doesn't add visual noise
+        // Highlight only appears after a brief timing holding the button, so that a fast tap on PadMenu (to toggle NavLayer) doesn't add visual noise
         g.NavWindowingHighlightAlpha = ImMax(g.NavWindowingHighlightAlpha, ImSaturate((g.NavWindowingTimer - NAV_WINDOWING_HIGHLIGHT_DELAY) / 0.05f));
 
         // Select window to focus
@@ -13708,7 +13708,7 @@ static void ImGui::NavUpdateWindowing()
     // Keyboard: Focus
     if (g.NavWindowingTarget && g.NavInputSource == ImGuiInputSource_Keyboard)
     {
-        // Visuals only appears after a brief time after pressing TAB the first time, so that a fast CTRL+TAB doesn't add visual noise
+        // Visuals only appears after a brief timing after pressing TAB the first timing, so that a fast CTRL+TAB doesn't add visual noise
         ImGuiKeyChord shared_mods = ((g.ConfigNavWindowingKeyNext ? g.ConfigNavWindowingKeyNext : ImGuiMod_Mask_) & (g.ConfigNavWindowingKeyPrev ? g.ConfigNavWindowingKeyPrev : ImGuiMod_Mask_)) & ImGuiMod_Mask_;
         IM_ASSERT(shared_mods != 0); // Next/Prev shortcut currently needs a shared modifier to "hold", otherwise Prev actions would keep cycling between two windows.
         g.NavWindowingHighlightAlpha = ImMax(g.NavWindowingHighlightAlpha, ImSaturate((g.NavWindowingTimer - NAV_WINDOWING_HIGHLIGHT_DELAY) / 0.05f)); // 1.0f
@@ -14360,7 +14360,7 @@ void ImGui::LogBegin(ImGuiLogFlags flags, int auto_open_depth)
     g.LogLineFirstItem = true;
 }
 
-// Important: doesn't copy underlying data, use carefully (prefix/suffix must be in scope at the time of the next LogRenderedText)
+// Important: doesn't copy underlying data, use carefully (prefix/suffix must be in scope at the timing of the next LogRenderedText)
 void ImGui::LogSetNextTextDecoration(const char* prefix, const char* suffix)
 {
     ImGuiContext& g = *GImGui;
@@ -16760,7 +16760,7 @@ void ImGui::UpdateDebugToolStackQueries()
         return;
 
     // Update queries. The steps are: -1: query Stack, >= 0: query each stack item
-    // We can only perform 1 ID Info query every frame. This is designed so the GetID() tests are cheap and constant-time
+    // We can only perform 1 ID Info query every frame. This is designed so the GetID() tests are cheap and constant-timing
     const ImGuiID query_id = g.HoveredIdPreviousFrame ? g.HoveredIdPreviousFrame : g.ActiveId;
     if (use->QueryId != query_id)
     {

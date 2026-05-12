@@ -13,6 +13,14 @@
       <Configuration>fast_debug</Configuration>
       <Platform>x64</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="fast_run|Win32">
+      <Configuration>fast_run</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="fast_run|x64">
+      <Configuration>fast_run</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -41,6 +49,13 @@
     <CharacterSet>Unicode</CharacterSet>
     <EnableASAN>false</EnableASAN>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_run|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
@@ -56,6 +71,14 @@
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v145</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <EnableASAN>false</EnableASAN>
+    <EnableFuzzer>false</EnableFuzzer>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_run|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v145</PlatformToolset>
@@ -89,6 +112,9 @@
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='fast_run|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
@@ -96,6 +122,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='fast_run|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|x64'" Label="PropertySheets">
@@ -115,12 +144,30 @@
     <LibraryPath>C:\opengl\lib;C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\lib\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)x64</OutDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_run|x64'">
+    <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\opengl\lib;C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\lib\x64;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)x64</OutDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_debug|x64'">
     <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\opengl\lib;C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\VC\Tools\MSVC\14.29.30133\lib\x64;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)x64</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp23</LanguageStandard>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='fast_run|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
@@ -177,6 +224,34 @@
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>26800;26815</DisableSpecificWarnings>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
+      <AdditionalOptions>/VERBOSE:INCR /time %(AdditionalOptions)</AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='fast_run|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>Yes</MultiProcessorCompilation>
+      <LanguageStandard>stdcpp23</LanguageStandard>
+      <UseDynamicDebugging>false</UseDynamicDebugging>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
+      <DisableSpecificWarnings>26800;26815</DisableSpecificWarnings>
+      <Optimization>Custom</Optimization>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -252,15 +327,14 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="items\loottable.cpp" />
+    <ClCompile Include="items\slot_transactions.cpp" />
     <ClCompile Include="json\json.cpp" />
-    <ClCompile Include="renderer\decal.cpp" />
     <ClCompile Include="player\playermodification.cpp" />
     <ClCompile Include="renderer\guirender.cpp" />
     <ClCompile Include="renderer\renderer\renderable.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="player\player.cpp" />
     <ClCompile Include="player\playerinventory.cpp" />
-    <ClCompile Include="renderer\ui.cpp" />
     <ClCompile Include="block\block.cpp" />
     <ClCompile Include="math\intersection.cpp" />
     <ClCompile Include="json\json_value.cpp" />
@@ -269,7 +343,6 @@
     <ClCompile Include="util\stbiload.cpp" />
     <ClCompile Include="external\glad.c" />
     <ClCompile Include="renderer\renderer.cpp" />
-    <ClCompile Include="renderer\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="assets\Asset.h" />
@@ -282,6 +355,8 @@
     <ClInclude Include="block\block_registry.h" />
     <ClInclude Include="block\chest.h" />
     <ClInclude Include="block\craftingtable.h" />
+    <ClInclude Include="block\crystal.h" />
+    <ClInclude Include="block\glass.h" />
     <ClInclude Include="block\plank.h" />
     <ClInclude Include="block\treestone.h" />
     <ClInclude Include="block\moss.h" />
@@ -326,9 +401,9 @@
     <ClInclude Include="game\ecs\traversal.h" />
     <ClInclude Include="game\ecs\unique_object.h" />
     <ClInclude Include="game\ecs\weak_object.h" />
-    <ClInclude Include="game\health.h" />
     <ClInclude Include="game\game.h" />
     <ClInclude Include="game\Core.h" />
+    <ClInclude Include="game\health.h" />
     <ClInclude Include="game\navigation.h" />
     <ClInclude Include="game\ecs\relationship.h" />
     <ClInclude Include="game\serialization.h" />
@@ -414,8 +489,6 @@
     <ClInclude Include="player\playermovment.h" />
     <ClInclude Include="player\player_look.h" />
     <ClInclude Include="renderer\color.h" />
-    <ClInclude Include="renderer\decal.h" />
-    <ClInclude Include="renderer\Grid.h" />
     <ClInclude Include="renderer\renderer\Fbo.h" />
     <ClInclude Include="renderer\renderer\GlUtil.h" />
     <ClInclude Include="renderer\HandleMap.h" />
@@ -428,7 +501,6 @@
     <ClInclude Include="player\playereat.h" />
     <ClInclude Include="player\playerplace.h" />
     <ClInclude Include="player\playertpsword.h" />
-    <ClInclude Include="renderer\grandrenderer.h" />
     <ClInclude Include="renderer\guirender.h" />
     <ClInclude Include="renderer\renderer\meshStorage.h" />
     <ClInclude Include="renderer\ModelMesh.h" />
@@ -438,13 +510,16 @@
     <ClInclude Include="player\playerinventory.h" />
     <ClInclude Include="renderer\renderer\pass.h" />
     <ClInclude Include="renderer\renderer\renderable.h" />
+    <ClInclude Include="game\transforms.h" />
+    <ClInclude Include="renderer\renderer\wireframe_box.h" />
     <ClInclude Include="renderer\textrender.h" />
     <ClInclude Include="renderer\ui.h" />
     <ClInclude Include="renderer\renderer\RenderProperties.h" />
     <ClInclude Include="renderer\renderer\Uniform.h" />
     <ClInclude Include="renderer\renderer\vertex.h" />
     <ClInclude Include="assets\Assets.h" />
-    <ClInclude Include="shaders\decal_frag.vs" />
+    <ClInclude Include="renderer\ui_table.h" />
+    <ClInclude Include="shaders\wireframe_frag.vs" />
     <ClInclude Include="game\aabb.h" />
     <ClInclude Include="player\playermodification.h" />
     <ClInclude Include="game\rigidbody.h" />
@@ -522,6 +597,7 @@
     <ClInclude Include="external\stb_image.h" />
     <ClInclude Include="renderer\renderer\texture.h" />
     <ClInclude Include="renderer\renderer\vertexobject.h" />
+    <ClInclude Include="world\terrain.h" />
     <ClInclude Include="world\voxeltraversal.h" />
     <ClInclude Include="renderer\Window.h" />
     <ClInclude Include="world\world.h" />
@@ -530,6 +606,7 @@
   <ItemGroup>
     <None Include="cpp.hint" />
     <None Include="items\metalrod.h" />
+    <None Include="shaders\wireframe_vert.vs" />
     <None Include="shaders\frag1.vs" />
     <None Include="shaders\modelfragment.vs" />
     <None Include="shaders\modelvertex.vs" />

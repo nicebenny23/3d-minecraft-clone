@@ -19,20 +19,20 @@ namespace player {
 			for (auto [pb, look, inventory] : ecs::View< player_place, player::PlayerCursor, player::inventory>(ecs)) {
 			
 
-				if (!inventory.selected() || !look.Hit) {
+				if (!inventory.selected() || !look.hit) {
 					continue;
 				}
 				items::item_stack& stack = inventory.selected().unwrap();
-				if (!stack.types().from_id(stack.contained_id()).blk_id) {
+				if (!stack.types().from_id(stack.contained_id()).traits(ecs).blk_id) {
 					continue;
 				}
 				if (!stack.can_remove(1)) {
 					continue;
 				}
-				block_id spawn_id = stack.types().from_id(stack.contained_id()).blk_id.unwrap();
+				block_id spawn_id = stack.types().from_id(stack.contained_id()).traits(ecs).blk_id.unwrap();
 
 				grid::Grid& grid = ecs.get_resource<grid::Grid>();
-				voxtra::RayWorldHit hit = look.Hit.unwrap();
+				voxtra::RayWorldHit hit = look.hit.unwrap();
 				if (!hit.owner().has_component<block>()) {
 					continue;
 				}
@@ -50,7 +50,7 @@ namespace player {
 				}
 				block& block_at = mabye_block_at.unwrap();
 				math::Direction3d attach_direction = math::greatest_aligned_direction( block_hit_at.center()- block_at.center());
-				v3::Scale3 mesh_scale = block_at.registry().block_for(spawn_id)->traits().mesh.size;
+				v3::Scale3 mesh_scale = block_at.registry->block_for(spawn_id)->traits().mesh.size;
 				geo::Box new_block_box = geo::Box(block_at.pos+unitv/2, mesh_scale);
 				new_block_box.center -= attach_direction.vec() * mesh_scale.shrunk(1)/2;
 
@@ -65,9 +65,9 @@ namespace player {
 			}
 		}
 	};
-	struct PlayerPlacePlugin :Core::Plugin {
-		void build(Core::App& world) {
-			world.insert_plugin<player::PlayerClickablePlugin>();
+	struct PlayerPlacePlugin {
+		void operator()(Core::App& world) {
+			world.insert_plugin(player::PlayerClickablePlugin());
 			world.emplace_system<PlayerPlaceSystem>();
 
 		}

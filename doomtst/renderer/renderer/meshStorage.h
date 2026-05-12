@@ -26,10 +26,10 @@ namespace renderer {
 		size_t vertex_count() const {
 			return mesh.points.length()/ mesh.layout.components();
 		}
-		MeshBuilder(mesh_id msh, const vertice::vertex& vertex_layout, indice_mode indices) :mesh{ .mesh=msh,.layout=vertex_layout }, generate_trivial(indices){
+		MeshBuilder(MeshId msh,const vertex& vertex,indice_mode indices=indice_mode::manual_generate) :mesh{ .mesh=msh,.layout=vertex}, generate_trivial(indices){
 		}
-		CpuMesh& built_mesh() {
-			return mesh;
+		CpuMesh built_mesh() &&{
+			return std::move(mesh);
 		}
 		template<typename ...Args>
 		inline void add_point(const Args& ...values) {
@@ -63,7 +63,9 @@ namespace renderer {
 			}
 		}
 		indice_mode generate_trivial;
-
+		MeshId id() const {
+			return mesh.mesh;
+		}
 		CpuMesh mesh;
 	private:
 		inline void push_single(const v3::Point3& v) {
@@ -81,24 +83,21 @@ namespace renderer {
 		MeshRegistry(renderer::Context& context) :ctx(context) {
 
 		}
-		stn::non_null<renderer::Context> ctx;
-		stn::array<mesh_id> meshes;
+		renderer::Context& ctx;
+		stn::array<MeshId> meshes;
 		void remove_empty() {
 			for (size_t i = 0; i < meshes.length();i++) {
-				mesh_id& id = meshes[i];
-				if (id.use_count()==1) {
-					ctx->destroy(*id);
+				MeshId& id = meshes[i];
+				if (id.sole_owner()) {
+					ctx.destroy(*id);
 					meshes.swap_drop(i);
 				}
 			}
 		}
-		mesh_id create_mesh_data() {
-			return meshes.emplace(ctx->create_mesh());
+		MeshId create_mesh_data() {
+			return meshes.emplace(ctx.insert_builder_for());
 		}
 
-		void load_in(MeshBuilder& data) {
-			ctx->load(data.built_mesh());
-		}
 
 	};
 }

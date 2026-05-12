@@ -1,5 +1,6 @@
 #include "game_object.h"
 #include "unique_object.h"
+#include "query.h"
 #pragma once
 namespace ecs {
 	//we may want too merge this with the query filter
@@ -23,7 +24,11 @@ namespace ecs {
 		stn::Option<const T&> get_component_opt() const {
 			return object().get_component_opt<T>();
 		}
-
+		template<ComponentType T>
+		bool has_component() const {
+			return object().has_component<T>();
+		}
+	
 		template<ComponentType T>
 		auto get_component(this auto&& self) -> stn::apply_const_like_t<decltype(self), T>& {
 			if constexpr (stn::OneOf<T, Types...>) {
@@ -34,8 +39,13 @@ namespace ecs {
 				return self.object().template get_component<T>();
 			}
 		}
-		using tuple_set_type = stn::TupleSet<Types*...>;
 
+		using tuple_set_type = stn::TupleSet<Types...>;
+		using tuple_set_ptr_type = stn::TupleSet<Types*...>;
+		//needed for weak
+		bool is_valid() const {
+			return world().contains(object().inner())&&object().has_components<Types...>();
+		}
 		void validate() const {
 			if (*last_checked_ticks != ticks) {
 				stn::TupleSet<Types&...> as_refs = world().get_components<Types...>(object().inner());
@@ -52,8 +62,7 @@ namespace ecs {
 			validate();
 		}
 
-		using tuple_set_elem_type = stn::TupleSet<Types*...>;
-		template<stn::ReducerType T> requires stn::TupleSuperset<typename stn::reducer_held_type<T>::tuple_set_type, tuple_set_type>
+		template<stn::ReducerType T> requires stn::TupleSuperset<typename stn::reducer_held_type<T>::tuple_set_ptr_type, tuple_set_ptr_type>
 		ConstrainedObject(T&& value) :
 			ticks(value.reduction.ticks),
 			entity(std::move(value.reduction.entity)),
@@ -104,14 +113,14 @@ namespace ecs {
 	private:
 
 
-		ConstrainedObject(stn::non_null < ecs::archetype_ticks> last_checked, Object object, tuple_set_type components)
+		ConstrainedObject(stn::non_null < ecs::archetype_ticks> last_checked, Object object, tuple_set_ptr_type components)
 			:ticks(*last_checked), last_checked_ticks(last_checked), entity(object), contained(components) {
 
 		}
 		Object entity;
 		mutable ecs::archetype_ticks ticks;
 		stn::non_null < ecs::archetype_ticks> last_checked_ticks;
-		mutable tuple_set_type contained;
+		mutable tuple_set_ptr_type contained;
 		template<ObjectLike U, ComponentType... others>
 		friend struct ConstrainedObject;
 	};
@@ -120,8 +129,31 @@ namespace ecs {
 	using Constrained = ConstrainedObject<ecs::obj, Types...>;
 	template<ComponentType... Types>
 	using ConstrainedHandle = ConstrainedObject<ecs::object_handle, Types...>;
+	
+	template<typename T,typename ... Types>
+	concept ConstrainedBy = (ComponentType<Types>&&...)&&requires{
+		typename T::tuple_set_type;
+	}&&stn::TupleSuperset<typename T::tuple_set_type,stn::TupleSet<Types...>>;
 
 
+	template<ComponentType ...Types>
+	struct ConstrainedGetter {
+		ConstrainedGetter(ecs::Ecs& ecs) :world(ecs) {
 
+		}
+		bool filter(const Archetype& archetype) const {
+			return archetype.has_components(world.components.insert_ids<Types...>());
+		}
+		
+		Ecs& world;
+		using return_type = Constrained<Types...>;
+		return_type map(ecs::entity_id id) const {
+			return return_type(world.object_from_entity(world.entities.get_entity_unchecked(id)));
+		}
+	};
 
+	template<ComponentType ...Args> requires (sizeof...(Args)!=0)
+	struct query_data_t<Constrained<Args...>> {
+		using type = ConstrainedGetter<Args...>;
+	};
 }

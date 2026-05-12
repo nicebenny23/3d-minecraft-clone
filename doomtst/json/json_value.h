@@ -53,6 +53,7 @@ namespace json {
 		
 		std::map<std::string, stn::box<Value>> map;
 	};
+	using Integer = std::int64_t;
 	template<typename T>
 	concept ValidJsonType =stn::OneOf<T, bool, double, std::int64_t, std::string, Array, Object, stn::NoneType>;
 

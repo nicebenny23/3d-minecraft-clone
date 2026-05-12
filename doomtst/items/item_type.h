@@ -18,46 +18,54 @@ namespace items {
 		std::string item_name;
 		stn::Option<size_t> duribility;
 		renderer::TexturePath image_path;
-		stn::Option<tool_traits> tool;
-		float armor = 0;
-		float food=0;
+		size_t capacity = 16;
+		size_t food=0;
 		stn::Option <blocks::block_id> blk_id = stn::None;
 		bool operator==(const item_traits& other) const = default;
-		item_traits(std::string_view name, renderer::TexturePath image, size_t initial_duribility, tool_traits traits, float protection, float food_value)
-			: item_name(name),
+
+		static item_traits food_item(renderer::TexturePath image, size_t food_value) {
+			item_traits  traits = item_traits( image);
+			traits.food = food_value;
+			traits.capacity = 1;
+			return traits;
+
+		}
+		item_traits(renderer::TexturePath image, size_t initial_duribility):
 			duribility(initial_duribility),
-			image_path(std::move(image)),
-			armor(protection),
-			tool(traits),
-			food(food_value),
-			blk_id(stn::None) {
+			image_path(std::move(image))
+			,blk_id(stn::None) {
+			capacity = 1;
 		}
-		item_traits(std::string_view name, renderer::TexturePath image,blocks::block_id blk_id)
-			: item_name(name),
-			duribility(),
-			image_path(std::move(image)),
-			armor(0),
-			blk_id(blk_id) {
+		item_traits(renderer::TexturePath image,blocks::block_id block_id)
+			: item_traits(image){
+			blk_id = block_id;
+
 		}
-		item_traits(std::string_view name, renderer::TexturePath image)
-			: item_name(name),
-			duribility(),
+		item_traits(renderer::TexturePath image)
+			:duribility(),
 			image_path(std::move(image)),
-			armor(0),
 			blk_id(stn::None) {
 		}
 	};
 
 	struct item_type {
+		item_type() = default;
+		virtual ~item_type() = default;
+		virtual std::string name() const = 0;
 		virtual item_traits traits(const ecs::Ecs& world) const = 0;
+		
+		virtual stn::Option<tool_traits> tool_info() const {
+			return stn::None;
+		}
+
 	};
 	using item_id = stn::typed_id<item_type>;
 
 	//this will be removed later once we get it to work well
 	template<typename T>
 	concept ItemType = std::derived_from<T, item_type>&& std::is_default_constructible_v<T>;
-	struct item_types :ecs::resource {
-		item_types(const ecs::Ecs& Ecs) :world(Ecs) {
+	struct ItemTypes :ecs::resource {
+		ItemTypes(const ecs::Ecs& Ecs) :world(Ecs) {
 
 		}
 		item_id from_name(const std::string_view& name) const {
@@ -67,33 +75,33 @@ namespace items {
 			}
 			return iter->second;
 		}
-		template<ItemType T>
-		item_id from_type() const {
-			return type_id_map.at<T>().expect("item should be initialized");
-		}
-		item_traits from_id(item_id id) const {
-			return trait_list[id.id];
+		const item_type& from_id(item_id id) const {
+			return *item_types[id.id];
 		}
 		size_t capacity_for(item_id id) const{
-			return 64;
+			return from_id(id).traits(world).capacity;
 		}
 		template<ItemType T>
-		void register_item() {
-			item_traits traits = T().traits(world);
-			if (trait_list.contains(traits)) {
-				if (traits != from_id(from_name(traits.item_name))) {
-					stn::throw_logic_error("items already contains a diffrent item_type with the same name as {}", traits.item_name);
-				}
+		item_id insert() {
+			stn::box<item_type> instance{ stn::construct_derived<T>() };
+			std::string name = instance->name();
+			if (type_id_map.contains<T>()) {
+					return type_id_map.get<T>();
 			}
-			ids.emplace(traits.item_name, ids.size());
-			trait_list.push(traits);
-			type_id_map.set<T>(item_id(trait_list.last_index()));
+			if (ids.contains(name)) {
+				stn::throw_logic_error("items already contains a diffrent item_type with the same name as {}", instance->name());
+			}
+			
+			item_id id = type_id_map.insert<T>().value;
+			ids.emplace(instance->name(), ids.size());
+			item_types.push(std::move(instance));
+			return id;
 		}
 		
 	private:
 		const ecs::Ecs& world;
-		stn::type_map<item_id> type_id_map;
-		stn::array<item_traits> trait_list;
+		stn::type_indexer<item_id> type_id_map;
+		stn::array<stn::box<item_type>> item_types;
 		std::unordered_map<std::string, item_id> ids;
 	};
 

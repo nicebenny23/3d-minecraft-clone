@@ -67,7 +67,16 @@ namespace ecs {
 				});
 		}
 
-
+		//assumes the object does not have the component
+		template<ComponentType T, typename...Args>
+		T& emplace_unchecked(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
+			T& comp=storage_unchecked<T>().emplace_unchecked(ent.id(), std::forward<Args>(args)...);
+			comp.ent = ent;
+			comp.ecs = ecs_instance;
+			comp.start();
+			return comp;
+		}
+		// replaces if exists
 		template<ComponentType T, typename...Args>
 		stn::insertion<T&> set_emplace(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
 			stn::insertion<T&> element=storage_unchecked<T>().set_at(ent.id(), std::forward<Args>(args)...);

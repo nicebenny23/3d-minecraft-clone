@@ -3,115 +3,72 @@
 #include <GLFW/glfw3.h>
 #include "../math/mathutil.h"
 #include "Core.h"
+#include <chrono>
+
 #pragma once
-namespace timename {
+namespace timing {
 	using time_delay = double;
-	struct time {
-		double value;
-
-		explicit time(double val) : value(val) {
-		}
-		time() {
-			value = 0;
-		}
-		double dist(const time& oth) const {
-			return std::fabs(oth.value - value);
-		}
-
-		bool operator<(const time& oth) const {
-			return value < oth.value;
-		}
-		bool operator==(const time& oth) const {
-			return value == oth.value;
-		}
-
-		time operator+(double offset) const {
-			return time(value + offset);
-		}
-		time operator-(double offset) const {
-			return time(value - offset);
-		}
-
-		time_delay operator-(time offset) const {
-			return value - offset.value;
-		}
-
-	};
 
 	struct Duration;
-	struct TimeManager :ecs::resource {
-		double real_dt;
+	struct WorldClock :ecs::resource {
 
 		double dt;
-		double smooth_fps;
 		double elapsed_time;
+		double smooth_dt;
+		WorldClock() {
+			dt = 1 / 60.f;
 
-		TimeManager() {
-
-			dt = 0;
+			smooth_dt = 1 / 60.0f;
 			elapsed_time = glfwGetTime();
-			real_dt = 1 / 60.f;
-			smooth_fps = 0;
-			fps_counter = 0;
 		}
-
+		double fps() const {
+			return 1 / smooth_dt;
+		}
 
 
 		void calculate_fps() {
 
-			double CurrentTime = glfwGetTime();
-			real_dt = CurrentTime - elapsed_time;
-			elapsed_time = CurrentTime;
-
-
-			double fps = 1.f / real_dt;
-			double inter_rate = 1;
-			dt = math::clamp(real_dt, 0.L, 1.0L / min_frames);
-
-
-			double fps_change_rate = .2;
-			fps_counter += real_dt;
-			if (fps_change_rate < fps_counter) {
-				fps_counter = 0;
-				double fps_inter_rate = 1;
-				smooth_fps = stn::lerp(smooth_fps, fps, fps_inter_rate);
-
+			double current_time = glfwGetTime();
+			dt = stn::min(current_time - elapsed_time, 1.0f / min_frames);
+			double update_speed = .2f;
+			if (.05<dt) {
+				int l = 3;
 			}
-		}
-		Duration current_time();
+			if (std::floor(elapsed_time / update_speed) != std::floor(current_time / update_speed)) {
+				smooth_dt = dt;
+			}
+			elapsed_time = current_time;
 
-		time now() const{
-			return time(elapsed_time);
+		}
+		Duration make_duration();
+
+		double now() const {
+			return elapsed_time;
 		}
 
 	private:
-		double fps_counter;
-		const int min_frames = 20;
+		const int min_frames = 2;
 	};
 	struct FpsTimer :ecs::System {
 
 		void run(ecs::Ecs& world) {
-			world.ensure_resource<TimeManager>().calculate_fps();
+			world.ensure_resource<WorldClock>().calculate_fps();
 		}
 
 	};
-	struct TimePlugin :Core::Plugin {
-		void build(Core::App& App) {
-			App.emplace_resource<timename::TimeManager>();
-			App.emplace_system<FpsTimer>();
+	struct TimePlugin {
+		void operator()(Core::App& app) {
+			app.emplace_resource<timing::WorldClock>();
+			app.emplace_system<FpsTimer>();
 		}
-	};
-	enum class DurationState {
-		active = 0,
-		ending = 1,
-		inactive = 2
 	};
 	struct Duration {
 
-		Duration(double waiting_time, TimeManager& tman) :tm(tman){
+		Duration(double waiting_time, WorldClock& tman) :tm(tman) {
 			set(waiting_time);
 		}
-		Duration(TimeManager& tman) :tm(tman){
+
+		Duration(WorldClock& clock) :tm(clock) {
 
 		}
 		stn::Option<time_delay> remaining() {
@@ -121,9 +78,14 @@ namespace timename {
 			}
 			return stn::None;
 		}
-
+		WorldClock& clock() {
+			return *tm;
+		}
+		const WorldClock& clock() const {
+			return *tm;
+		}
 		void disable() {
-			end= stn::None;
+			end = stn::None;
 		}
 		void set(time_delay dur) {
 			if (dur <= 0) {
@@ -140,15 +102,39 @@ namespace timename {
 		bool is_inactive() const {
 			return !is_active();
 		}
+		stn::Option<double> end_time() const {
+			return end;
+		}
 	private:
 
 		void check_if_dead() const {
-			if (end.is_some_and([&](time end) {
-				return end < tm->now();})) {
+			if (end.is_some_and([&](double end) {
+				return end < tm->now(); })) {
 				end = stn::None;
 			}
 		}
-		mutable stn::Option<time> end;
-		stn::non_null<TimeManager> tm;
+		mutable stn::Option<double> end;
+		stn::non_null<WorldClock> tm;
+	};
+	
+	struct TimeProfiler {
+		using clock = std::chrono::high_resolution_clock;
+		std::chrono::time_point<clock> start;
+
+		TimeProfiler() {
+			reset();
+		}
+
+		double seconds() const{
+			auto now = clock::now();
+			std::chrono::duration<double> elapsed = now - start;
+			return elapsed.count();
+		}
+		void reset() {
+			start = clock::now();
+		}
+		double milliseconds() const {
+			return 1000 * seconds();
+		}
 	};
 }

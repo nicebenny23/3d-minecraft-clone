@@ -4,7 +4,7 @@
 namespace blocks {
 
 	struct torch_loot_table :items::LootTable {
-		items::LootDrops drops_for(items::item_types& types) {
+		items::LootDrops drops_for(items::ItemTypes& types) {
 			return items::LootDrops({ items::loot_element("torch",1,types) });
 		}
 	};
@@ -26,10 +26,12 @@ namespace blocks {
 }
 namespace items {
 	struct torch_item : item_type {
+		std::string name() const {
+			return "torch";
+		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
-				"torch",
-				renderer::TexturePath("images\\torch.png", "TorchTexture"),
+				renderer::TexturePath("images\\torch.png"),
 				world.get_resource<BlockRegistry>().get_id<blocks::TorchBlock>()
 			);
 		}

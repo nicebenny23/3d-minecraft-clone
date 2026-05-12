@@ -39,6 +39,7 @@ namespace ecs {
 		}
 		explicit Target(entity parent)
 			: parent_entity(parent) {
+			int l = 3;
 		}
 
 		using parent_type = Relationship<T, Tag>;

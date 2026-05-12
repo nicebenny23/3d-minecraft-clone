@@ -6,14 +6,18 @@
 namespace items {
 	struct RefrencedSlot :ecs::component {
 		stn::Option<item_entry> entry() {
-			return displayed()
+			return displayed().get<ElementSlot>()
 				.entry();
 		}
-		ElementSlot& displayed() {
-			return slot.get_component<ElementSlot>();
+		
+		ecs::Constrained<ElementSlot> displayed() {
+			return slot;
 		}
-		stn::Option<ecs::obj> displayed_object() {
-			return displayed().element();
+		ElementSlot& displayed_slot() {
+			return slot.get<ElementSlot>();
+		}
+		stn::Option<ecs::Constrained<item_stack>> displayed_object() {
+			return displayed().get<ElementSlot>().element();
 		}
 		ecs::Constrained<ElementSlot> slot;
 		RefrencedSlot(ecs::Constrained< ElementSlot> to_refrence) :slot(to_refrence) {
@@ -26,7 +30,7 @@ namespace items {
 		}
 		void apply(ecs::obj& entity) const{
 			ui::UiSpawner(inventory_transform_floating(v2::zerov), 31000).apply(entity);
-			ItemUiSpawner().apply(entity);
+			entity.apply_recipe(ItemUiSpawner);
 			entity.add_component<RefrencedSlot>(refrence_to);
 		}
 	};
@@ -37,9 +41,8 @@ namespace items {
 		}
 		void apply(ecs::obj& object) const{
 			ui::UiSpawner(inventory_transform_floating(inventory_center(location)), 20).apply(object);
-			ItemUiSpawner().apply(object);
-
-			ecs::obj item_decal = object.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\blockholder.png", "item_decal_original"), geo::unit_box_2d, 0);
+			object.apply_recipe(ItemUiSpawner);
+			ecs::obj item_decal = object.spawn_child<ui::UiImageSpawner>(renderer::TexturePath("images\\blockholder.png"), geo::unit_box_2d, 0);
 			object.add_component<ItemSlotDecal>(item_decal);
 		}
 	};
@@ -62,7 +65,7 @@ namespace items {
 				item_icon.displayed_id= refrence.entry().member(&item_entry::id);
 			}
 			for (auto&& [item_progress, refrence] : ecs::View<ItemProgressDisplay, RefrencedSlot>(world)) {
-				if (refrence.displayed_object().is_some_and(&ecs::obj::has_component<item_durability>)) {
+				if (refrence.displayed_object().is_some_and(&ecs::Constrained<item_stack>::has_component<item_durability>)) {
 					item_progress.value = refrence.displayed_object().unwrap().get_component<item_durability>().precent_left();
 				}
 				else{ 

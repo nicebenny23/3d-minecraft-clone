@@ -31,14 +31,14 @@ namespace grid {
 		size_t light;
 	};
 	inline void uncatche_light(v3::Coord pos, Grid& grid) {
-		Chunks::ChunkLocation min = grid.chunk_from_block_pos(pos - v3::Coord(1, 1, 1));
-		Chunks::ChunkLocation max = grid.chunk_from_block_pos(pos + v3::Coord(1, 1, 1));
+		chunks::ChunkLocation min = grid.chunk_from_block_pos(pos - v3::Coord(1, 1, 1));
+		chunks::ChunkLocation max = grid.chunk_from_block_pos(pos + v3::Coord(1, 1, 1));
 		for (int cx = min.position.x; cx <= max.position.x; cx++) {
 			for (int cy = min.position.y; cy <= max.position.y; cy++) {
 				for (int cz = min.position.z; cz <= max.position.z; cz++) {
-					grid.get_chunk_object(Chunks::ChunkLocation(v3::Coord(cx, cy, cz)))
+					grid.get_chunk_object(chunks::ChunkLocation(v3::Coord(cx, cy, cz)))
 						.then([](grid::ChunkObject& object) {
-						object.get_component < Chunks::chunkmesh>().mark_dirty();
+						object.get_component < chunks::ChunkMesh>().mark_dirty();
 							});
 
 				}
@@ -94,15 +94,16 @@ namespace grid {
 		v3::Coord location;
 	};
 	struct GridLighter :ecs::System {
-		ecs::EventReader<Chunks::chunk_loaded> chunk_loads;
-		GridLighter(ecs::Ecs& world) :chunk_loads(world.make_reader<Chunks::chunk_loaded>()) {
+		ecs::EventReader<world::ChunkLoaded> chunk_loads;
+		GridLighter(ecs::Ecs& world) :chunk_loads(world.make_reader<world::ChunkLoaded>()) {
 		}
 
-		void push_to_queue(Chunks::block_object& blk, stn::queue<stn::non_null<block>>& lighten_queue) {
+		void push_to_queue(chunks::block_object& blk, stn::queue<stn::non_null<block>>& lighten_queue) {
 			block& block_value = blk.get_unchecked<block>();
-			blk.get_component_opt<block_emmision>().then([&](block_emmision& emit) {
-				stn::set_max(block_value.light_passing_through, emit.emmision);
-			});
+			if (block_value.type()->traits_for().emmited_light!=0) {
+				stn::set_max(block_value.light_passing_through,blk.get_component<block_emmision>().emmision);
+			}
+			
 			if (block_value.light_passing_through != 0) {
 				lighten_queue.emplace(block_value);
 			}
@@ -110,17 +111,17 @@ namespace grid {
 		void run(ecs::Ecs& world) {
 			grid::Grid& grid = world.get_resource<grid::Grid>();
 			stn::queue<stn::non_null<block>> lightening_queue;
-			for (Chunks::chunk_loaded& load : chunk_loads.read()) {
+			for (world::ChunkLoaded& load : chunk_loads.read()) {
 
-				Chunks::chunk& chnk = grid.get_chunk(load.pos).expect("chunk should exist");
-				for (Chunks::block_object& block : chnk) {
+				chunks::Chunk& chnk = grid.get_chunk(load.pos).expect("chunk should exist");
+				for (chunks::block_object& block : chnk) {
 					push_to_queue(block, lightening_queue);
 
 				}
 				for (math::Direction3d dir : math::Directions3d) {
-					grid.get_chunk(Chunks::ChunkLocation(load.pos.position + dir.coord()))
-						.then([&](Chunks::chunk& cnk) {
-						for (Chunks::block_object& object : cnk.on_face(-dir)) {
+					grid.get_chunk(chunks::ChunkLocation(load.pos.position + dir.coord()))
+						.then([&](chunks::Chunk& cnk) {
+						for (chunks::block_object& object : cnk.on_face(-dir)) {
 							push_to_queue(object, lightening_queue);
 						}});
 				}
@@ -128,7 +129,7 @@ namespace grid {
 
 			for (lighten_block_command& cmd : world.read_commands<lighten_block_command>()) {
 				grid.get_object(cmd.location)
-					.then([&](Chunks::block_object& next_block) {push_to_queue(next_block, lightening_queue); }
+					.then([&](chunks::block_object& next_block) {push_to_queue(next_block, lightening_queue); }
 					);
 			}
 			while (!lightening_queue.empty()) {
@@ -159,7 +160,7 @@ namespace grid {
 	inline float get_vertex_light(v3::Coord pos, Grid& accesor) {
 		std::uint16_t max = 0;
 		for (math::cube_index index : math::cube_indices) {
-			v3::Coord next_look_pos = pos + index.vertex();
+			v3::Coord next_look_pos = pos-index.vertex();
 			stn::Option<block&> blk_mabye_look = accesor.get_block(next_look_pos);
 			if (blk_mabye_look) {
 				block& blk(blk_mabye_look.unwrap());

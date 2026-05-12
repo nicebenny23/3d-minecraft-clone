@@ -5,11 +5,15 @@
 #include <string>
 #include "../util/exception.h"
 #include "Scale3.h"
+#include "angle.h"
 #pragma once
 
 namespace v3 {
 	//todo transfer from vector being a point in local space
 	struct Vec3 {
+		static Vec3 from_yaw_pitch(double yaw, double pitch) {
+
+		}
 		Vec3() : x(0), y(0), z(0) {
 		}
 		constexpr Vec3(double X, double Y, double Z) noexcept : x(X), y(Y), z(Z) {
@@ -434,12 +438,12 @@ namespace v3 {
 		return (sqrt(dist2(p, p1)));
 	}
 
-	inline Vec3 yaw_pitch(double yaw, double pitch) {
+	inline Vec3 yaw_pitch(math::Look3 direction) {
 		v3::Vec3 dir = v3::zerov;
-		dir.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-		dir.y = sin(glm::radians(pitch));
-		dir.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-		return normal(dir);
+		dir.x = direction.yaw.cos() * direction.pitch.cos();
+		dir.y = direction.pitch.sin();
+		dir.z = direction.yaw.sin() * direction.pitch.cos();
+		return dir;
 	}
 	inline Vec3 Cross(const Vec3& p, const Vec3& p1) {
 		Vec3 crosspoint;
@@ -449,9 +453,14 @@ namespace v3 {
 		return crosspoint;
 	}
 	inline Point3 lerp(const Point3& p, const Point3& p1, double t) {
-		return Point3(p.x*t+p1.x*(1-t), p.y * t + p1.y * (1 - t), p.z * t + p1.z * (1 - t));
+		return Point3(p+(p1-p)*t);
 	}
-	
+	inline Point3 midpoint(const Point3& p, const Point3& p1) {
+		return Point3(p + (p1 - p) * 1/2.0f);
+	}
+	inline Vec3 lerp(const Vec3& p, const Vec3& p1, double t) {
+		return Vec3(p+(p1-p)*t);
+	}
 	inline Point3 operator+(const Vec3& a, const Point3& b) {
 		return Point3(a.x + b.x, a.y + b.y, a.z + b.z);
 	}

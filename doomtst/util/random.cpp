@@ -4,7 +4,7 @@
 
 uint64_t seed64 = 0;
 namespace random {
-	inline void randomize_64(uint64_t seed_64) {
+	inline void randomize_64(uint64_t& seed_64) {
 
 		seed64 ^= seed64 << 13;
 		seed64 ^= seed64 >> 7;
@@ -41,22 +41,24 @@ namespace random {
 		}
 
 		seeded_directions = stn::array<v3::Vec3>();
-		for (int i = 0; i < USHRT_MAX; i++) {
+		size_t ushort_amt = (1 + std::numeric_limits<unsigned short>().max());
+		for (int u = 0; u < ushort_amt; u++) {
 
 			v3::Vec3 PointOnCircle;
 			do {
 
-				randomcoord(noiseval);
-				randomcoord(noiseval);
-				randomcoord(noiseval);
+				for (size_t i = 0; i < 10; i++) {
+					randomcoord(noiseval);
+				}
 				PointOnCircle.x = noiseval;
-				randomcoord(noiseval);
-				randomcoord(noiseval);
-				randomcoord(noiseval);
+				for (size_t i = 0; i < 10; i++) {
+					randomcoord(noiseval);
+				}
 				PointOnCircle.y = noiseval;
-				randomcoord(noiseval);
-				randomcoord(noiseval);
-				randomcoord(noiseval);
+				for (size_t i = 0; i < 10; i++) {
+
+					randomcoord(noiseval);
+				}
 				PointOnCircle.z = noiseval;
 				PointOnCircle /= static_cast<float>(MAXUINT32);
 				PointOnCircle -= v3::unitv / 2;
@@ -65,10 +67,11 @@ namespace random {
 			seeded_directions.push(normal(PointOnCircle));
 		}
 	}
-	int Hash(int seed, int xPrimed, int yPrimed, int zPrimed) {
-		int hash = seed ^ xPrimed ^ yPrimed ^ zPrimed;
-		hash *= 0x27d4eb2d;
-		return hash;
+	
+
+	v3::Vec3 spherical() {
+		randomize_64(seed64);
+		return seeded_directions.unchecked_at(seed64&std::numeric_limits<unsigned short>().max());
 	}
 
 	void initilize_random() {

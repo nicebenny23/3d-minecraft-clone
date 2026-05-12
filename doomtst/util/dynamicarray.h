@@ -127,17 +127,25 @@ namespace stn {
 			}
 			return None;
 		}
-		[[nodiscard]] T get_flat(size_t index) requires stn::OptionType<T>{
+
+		[[nodiscard]] auto get_flat_ref(size_t index) requires stn::OptionType<T>{
 			if (contains_index(index)) {
-				return ptr[index];
+				return ptr[index].as_ref();
 			}
-			return stn::None;
+			return decltype(ptr[index].as_ref())();
 		} 
-		const [[nodiscard]] T get_flat(size_t index) const requires stn::OptionType<T> {
+		[[nodiscard]] auto get_flat_ref(size_t index) const requires stn::OptionType<T> {
 			if (index<len) {
+				return ptr[index].as_ref();
+			}
+			return decltype(ptr[index].as_ref())();
+		}
+
+		[[nodiscard]] auto get_flat(size_t index) const requires stn::OptionType<T> {
+			if (index < len) {
 				return ptr[index];
 			}
-			return stn::None;
+			return T();
 		}
 		[[nodiscard]] T& operator[](typed_index<T> index) {
 			return (*this)[index.index];
@@ -575,7 +583,15 @@ namespace stn {
 				len = length;
 			}
 		}
-
+		//for multithreading
+		void unsafe_set_length(size_t length) {
+			geometric_reserve(length);
+			len = length;
+		}
+		template<typename ...Args>
+		void construct_at_unchecked(size_t index, Args&&... args) requires std::constructible_from<T, Args&&...> {
+			new (ptr + index) T(std::forward<Args>(args)...);
+		}
 		template<std::ranges::forward_range Range> 
 			requires std::constructible_from<T, std::ranges::range_value_t<InputIt>>
 		explicit array(Range&& Rng) : array(Rng.begin(), Rng.end()) {
@@ -812,7 +828,7 @@ namespace stn {
 			ptr = newlist;
 			capacity = new_size;
 		}
-
+		
 
 	private:
 		template<typename ...Args>
@@ -898,7 +914,7 @@ namespace std {
 
 		template<typename FormatContext>
 		auto format(const stn::array<T>& arr, FormatContext& ctx) const {
-			// Compile-time check
+			// Compile-timing check
 			static_assert(
 				std::is_arithmetic_v<T> || requires(T t, FormatContext & ctx2) {
 					{

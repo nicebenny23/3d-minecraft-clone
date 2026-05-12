@@ -1,22 +1,17 @@
 #include "renderer.h"
 #include "../game/Core.h"
 #include "../game/Settings.h"
-
-#include "decal.h"
 namespace renderer {
-	MeshBuilder RenderableHandle::create_mesh(vertice::vertex& vertex,indice_mode auto_ind)
-	{
-		return MeshBuilder(mesh(),vertex, auto_ind);
+	void RenderableHandle::give_owned_mesh() {
+		id.get_component<mesh_component>().msh = renderer().make_mesh();
+
 	}
-	mesh_id RenderableHandle::mesh() {
-		
-		return renderer().insert_mesh(id.unwrap());
+	MeshBuilder RenderableHandle::insert_builder_for(const renderer::vertex& vertex, indice_mode auto_ind)
+	{
+		give_owned_mesh();
+		return MeshBuilder(id.get<mesh_component>().msh.unwrap(),vertex,auto_ind);
 	}
 	void RenderableHandle::destroy() {
-		if (id) {
-			renderer().remove(id.unwrap());
-			id = None;
-
-		}
+		world().write_command(remove_render_object(id.object()));
 	}
 }

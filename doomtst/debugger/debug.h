@@ -1,16 +1,19 @@
 #pragma once 
 
 #include <iostream>
-#include "../renderer/Window.h"
 #include <process.h>
 #include "console.h"
 #include "../util/dynamicarray.h"// For _beginthread
 #include <cstdlib>
 #include <csignal>
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <Windows.h>
 //good
 constexpr bool debuggeneral = true;
 constexpr bool debugrender = false;
-constexpr bool generateflat = true;
+constexpr bool generateflat = false;
 constexpr bool debugnodeath = false;
 
 constexpr bool debug_slow = false;

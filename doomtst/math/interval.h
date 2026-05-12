@@ -17,6 +17,9 @@ namespace math {
 		static constexpr bounds from_midpoint_length(double midpoint, double length) {
 			return bounds(midpoint - length/2, midpoint + length/2);
 		}
+		static constexpr bounds from_center_radius(double center, double radius) {
+			return bounds(center-radius, center+radius);
+		}
 		constexpr bounds operator+(const bounds& oth)const {
 			return unchecked_bounds(minimum + oth.minimum, maximum + oth.maximum);
 		}
@@ -65,7 +68,26 @@ namespace math {
 			return maximum;
 		}
 		constexpr double lerp(double selector) const{
-			return minimum+(maximum-minimum)* selector;
+			return minimum+ length()* selector;
+		}
+		double distance_to(double value) const{
+			return abs(clamp(value) - value);
+		}
+		double signed_distance_to(double value) const {
+			if (contains(value)) {
+				return -stn::min(value - minimum, maximum - value);
+			}
+			return distance_to(value);
+		}
+		constexpr double unlerp(double result) const {
+			double len = length();
+			if (len == 0) {
+				return 0;
+			}
+			return (result-minimum)/len;
+		}
+		constexpr double unlerp_clamped(double result) const {
+			return unlerp(clamp(result));
 		}
 		
 		constexpr bool contains(double val) const {
@@ -114,4 +136,6 @@ namespace math {
 	inline constexpr bounds all_reals= bounds::unchecked_bounds(-std::numeric_limits<double>::infinity(),
 		std::numeric_limits<double>::infinity());
 	inline constexpr bounds unit_bounds = bounds::unchecked_bounds(0.0, 1.0);
+
+	inline constexpr bounds centered_unit_bounds = bounds::unchecked_bounds(-.5f,.5f);
 }

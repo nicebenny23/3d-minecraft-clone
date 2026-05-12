@@ -6,68 +6,38 @@
 #include "../util/thread_split.h"
 
 #include "../block/block.h"
-#include "../block/block.h"
-#include "../block/block_mesh.h"
 #include "../block/block_mesh.h"
 #include "../block/block_registry.h"
-#include "../block/block_registry.h"
-
-
 #include "../game/ecs/ecs.h"
 #include "../game/ecs/ecs.h"
 #include "../game/ecs/game_object.h"
-#include "../game/ecs/game_object.h"
-#include "../game/ecs/system.h"
 #include "../game/ecs/system.h"
 #include "../math/cube_vertex.h"
-#include "../math/cube_vertex.h"
-#include "../math/dir.h"
 #include "../math/dir.h"
 #include "../math/meshes.h"
 #include "../math/ray.h"
-#include "../math/ray.h"
 #include "../math/Scale3.h"
-#include "../math/Scale3.h"
-#include "../math/vector2.h"
 #include "../math/vector2.h"
 #include "../math/vector3.h"
 #include "../math/vector3.h"
 #include "../player/cameracomp.h"
-#include "../player/cameracomp.h"
-#include "../util/dynamicarray.h"
 #include "../util/dynamicarray.h"
 #include "../util/exception.h"
-#include "../util/exception.h"
-#include "../world/chunk.h"
 #include "../world/chunk.h"
 #include "../world/chunk_mesh.h"
-#include "../world/chunk_mesh.h"
-#include "../world/grid.h"
 #include "../world/grid.h"
 #include "../world/Lighter.h"
-#include "../world/Lighter.h"
-#include "../world/WorldCoverer.h"
 #include "../world/WorldCoverer.h"
 #include "renderer.h"
-#include "renderer.h"
-#include "renderer/RenderContext.h"
 #include "renderer/RenderContext.h"
 #include "renderer/RenderProperties.h"
-#include "renderer/RenderProperties.h"
-#include "renderer/shader.h"
 #include "renderer/shader.h"
 #include "renderer/texture.h"
-#include "renderer/texture.h"
-#include "renderer/Uniform.h"
 #include "renderer/Uniform.h"
 #include <cmath>
-#include <cmath>
-#include <glad/glad.h>
 #include <glad/glad.h>
 #include <mutex>
 #include <string>
-#include <string>
-#include <utility>
 #include <utility>
 #pragma once 
 namespace blockrender {
@@ -75,32 +45,14 @@ namespace blockrender {
 
 
 
-	inline bool chunk_viewable(Chunks::chunk& chk) {
-		return true;
-		//does not seem to be working
-		renderer::CameraComponent& camera = chk.world().get_resource< renderer::camera_resource>().world_camera();
-		float slope = tan(camera.fov / 2);
-		geo::Box chkb = chk.bounds();
-		geo::ray camray = camera.CamTransform.forward_ray();
-		geo::cone ncone = geo::cone(camray, slope);
-		geo::Plane pln = geo::Plane(camera.CamTransform.normal_dir(), camray.start);
-		bool srf = false;
-		for (int i = 0; i < 8; i++) {
-			Point3 vertex = chk.center().offset_local((math::cube_mesh[i] - unitv / 2.f) * float(Chunks::chunk_length));
-			if (dot(camera.center() - vertex, camera.CamTransform.normal_dir()) > 0) {
-				srf = true;
-			}
-		}
-
-		if (!srf) {
-			return false;
-		}
-		return geo::intersects(ncone, geo::Sphere(chkb));
+	inline bool chunk_viewable(chunks::Chunk& chk) {
+		geo::Frustum view= renderer::world_camera_frustum(chk.world());
+		return geo::frustum_box_intersection(view, chk.bounds());
 
 	}
 
-	// Calculate UV coordinates for a face centered at the mesh
-	v2::Vec2 face_to_uv_coords(const block_mesh& mesh, const size_t index, size_t uv_index) {
+	// Calculate UV coordinates for a BlockFace centered at the mesh
+	v2::Vec2 face_to_uv_coords(const BlockMesh& mesh, const size_t index, size_t uv_index) {
 		const v3::Scale3& meshscale = mesh.bounds().half_size();
 		size_t facetype = index / 2;
 		v2::Vec2 offset;
@@ -125,21 +77,24 @@ namespace blockrender {
 	}
 	template<WorldAccessor Accesor>
 	void emit_face(Accesor& world, blocks::MeshFace mesh_face, renderer::MeshBuilder& render_mesh) {
-		blocks::face& face = mesh_face.face();
+		blocks::BlockFace& face = mesh_face.face();
 		if (face.uncovered()) {
 
 			const int baselocation = render_mesh.vertex_count();
-			const int* uniqueInds = &math::cube_mesh_face_indices[4 * face.face_direction.index()];
+			const int* uniqueInds = &math::cube_mesh_face_indices[4 * mesh_face.direction().index()];
 			Scale3 scale = mesh_face.mesh().bounds().half_size();
+			if (mesh_face.mesh().transparent) {
+				scale[size_t(mesh_face.direction().axis())] *= .999;
+			}
 			Point3 position = mesh_face.mesh().center();
 			const int textureNumber = face.tex;
 			for (size_t j = 0; j < 4; j++) {
-				int uniqueind = uniqueInds[j];
-				v3::Coord cube_ind = math::cube_mesh[uniqueind];
+				int unique_ind = uniqueInds[j];
+				v3::Coord cube_ind = math::cube_mesh[unique_ind];
 				v3::Point3 offset_from_center = (v3::Point3(cube_ind) - unitv / 2) * scale * 2;
 				Point3 offset = position.offset_local(offset_from_center);
 
-				v2::Vec2 uv_coords = face_to_uv_coords(mesh_face.mesh(), face.face_direction.index(), j);
+				v2::Vec2 uv_coords = face_to_uv_coords(mesh_face.mesh(), mesh_face.direction().index(), j);
 
 				math::cube_index face_cube = math::cube_index::from_coord(cube_ind).expect("cube ind should be valid");
 				float light_value = grid::get_vertex_light(world.get_voxel(mesh_face.mesh().center() + face_cube.vertex()), world);
@@ -151,20 +106,25 @@ namespace blockrender {
 	}
 	// Recreate the mesh for a chunk
 	void recreate_chunk_mesh(grid::ChunkObject::ObjectType chunk_to_fill, std::mutex& fill_lock) {
+
+		timing::TimeProfiler profiler = timing::TimeProfiler();
+
 		grid::Grid& grid = chunk_to_fill.world().get_resource<grid::Grid>();
-		Chunks::chunk& cnk = chunk_to_fill.get<Chunks::chunk>();
-		Chunks::chunkmesh& cnk_mesh = chunk_to_fill.get<Chunks::chunkmesh>();
+		chunks::Chunk& cnk = chunk_to_fill.get<chunks::Chunk>();
+		chunks::ChunkMesh& cnk_mesh = chunk_to_fill.get<chunks::ChunkMesh>();
 		grid::FocusedGridAcessor chunk_getter(chunk_to_fill);
+
 		cnk_mesh.recreate_mesh.clean([&]() {
 
 			cnk_mesh.faces.clear();
-			renderer::MeshBuilder mesh = cnk_mesh.SolidGeo.create_mesh(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
-			for (Chunks::block_object& obj: cnk) {
-				block_mesh& mesh_at = (obj.get_unchecked<block>().mesh);//g
+			renderer::MeshBuilder mesh(cnk_mesh.solid.mesh().unwrap(), renderer::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
+			for (chunks::block_object& obj: cnk) {
+				BlockMesh& mesh_at = (obj.get_unchecked<block>().mesh);//g
 
 				if (mesh_at.invisible()) {
 					continue;
 				}
+				
 				compute_mesh_cover(mesh_at, chunk_getter);
 				if (!mesh_at.is_transparent()) {
 					for (math::Direction3d dir : math::Directions3d) {
@@ -181,25 +141,28 @@ namespace blockrender {
 			}
 			{
 				std::unique_lock lck(fill_lock);
-				cnk_mesh.SolidGeo.fill(std::move(mesh));
+				renderer::fill(std::move(mesh), cnk_mesh.world());
 			}
 			});
+
+		double val = profiler.milliseconds();
 	}
 
 
 
 	// Render a chunk mesh
-	void render_chunk(grid::Grid& world, Chunks::chunkmesh& mesh) {
-		double distance = v3::dist(mesh.world().get_resource<camera_resource>().world_camera().center(), mesh.center());
-		mesh.SolidGeo.set_order_key(distance);
+	void render_chunk(grid::Grid& world, chunks::ChunkMesh& mesh) {
+		double distance = v3::dist(mesh.world().get_resource<CameraResource>().center(), mesh.center());
+		mesh.solid.set_order_key(distance);
 		mesh.sort_faces();
-		renderer::MeshBuilder mesh_data = mesh.TransparentGeo.create_mesh(vertice::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
+		grid::FocusedGridAcessor accesor(mesh.owner(),world);
+		renderer::MeshBuilder mesh_data = mesh.transparent.insert_builder_for(renderer::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
 		for (int i = 0; i < mesh.faces.length(); i++) {
 
-			emit_face(world, mesh.faces[i], mesh_data);
+			emit_face(accesor, mesh.faces[i], mesh_data);
 		}
-		mesh.TransparentGeo.set_order_key(-distance);
-		mesh.TransparentGeo.fill(std::move(mesh_data));
+		mesh.transparent.set_order_key(-distance);
+		renderer::fill(std::move(mesh_data),mesh.world());
 	}
 
 	struct ChunkPreMesher :ecs::System {
@@ -208,8 +171,8 @@ namespace blockrender {
 		}
 
 		void run(ecs::Ecs& ecs) {
-			grid::Grid& world_grid = ecs.get_resource<grid::Grid>();			GlUtil::poll_errors();
 
+			grid::Grid& world_grid = ecs.get_resource<grid::Grid>();
 			ecs.get_resource<renderer::Renderer>().set_uniform("render_dist", int(world_grid.rad));
 			std::mutex fill_mutex;
 			auto recompute_for = [&fill_mutex](grid::ChunkObject::ObjectType& item) {
@@ -217,11 +180,11 @@ namespace blockrender {
 				recreate_chunk_mesh(grid::ChunkObject::ObjectType(item), fill_mutex);
 				};
 			stn::array<grid::ChunkObject::ObjectType> reloads;
-			ecs::View< Chunks::chunkmesh, ecs::Owner> meshes(ecs);
+			ecs::View< chunks::ChunkMesh, ecs::Owner> meshes(ecs);
 			size_t max_recomputes = 4;
 			for (auto&& [mesh, object] : meshes) {
 				if (mesh.recreate_mesh.is_dirty()) {
-					if (chunk_viewable(object.get_component<Chunks::chunk>())) {
+					if (chunk_viewable(object.get_component<chunks::Chunk>())) {
 						reloads.push(object);
 					}
 				}
@@ -229,7 +192,13 @@ namespace blockrender {
 					break;
 				}
 			}
-			thread_util::par_iter(reloads.begin(), reloads.end(), recompute_for, reloads.length());
+			timing::TimeProfiler profiler{};
+			thread_util::par_iter_rng(reloads, recompute_for, reloads.length());
+			double value = profiler.milliseconds();
+			int l = 2;
+			if (25 < value) {
+				int l = 3;
+			}
 		};
 	};
 
@@ -237,19 +206,20 @@ namespace blockrender {
 		ChunkRenderer() {
 		}
 		void run(ecs::Ecs& ecs) {
-			array<ecs::obj> to_render = array<ecs::obj>();
+			size_t total_render_count = 0;
 			Grid& grid = ecs.get_resource<grid::Grid>();
-			ecs::View< Chunks::chunkmesh> meshes(ecs);
-			for (auto&& [mesh] : meshes) {
-				render_chunk(grid, mesh);
-
+			ecs::View< chunks::ChunkMesh,chunks::Chunk> meshes(ecs);
+			for (auto&& [mesh,Chunk] : meshes) {
+				if (chunk_viewable(Chunk)) {
+					total_render_count++;
+					render_chunk(grid, mesh);
+				}
 			}
-
 		}
 	};
-	struct BlockRenderPlugin :Core::Plugin {
+	struct BlockRenderPlugin {
 
-		void build(Core::App& engine) {
+		void operator()(Core::App& engine) {
 			engine.emplace_system<grid::GridManager>();
 			engine.emplace_system<grid::GridCoverer>();
 			engine.emplace_system<grid::LightRemover>();
@@ -282,7 +252,6 @@ namespace blockrender {
 
 			array<std::string> texlist = array<std::string>();
 			texlist.reach(treestonetex) = "images\\treestone.png";
-			texlist.reach(grasstex) = "images\\grass.png";
 			texlist.reach(stonetex) = "images\\stone.png";
 			texlist.reach(altartex) = "images\\crystalaltarside.png";
 			texlist.reach(glasstex) = "images\\glass.png";
@@ -298,19 +267,21 @@ namespace blockrender {
 			texlist.reach(ropetex) = "images\\rope.png";
 			texlist.reach(lavatex) = "images\\lava.png";
 			texlist.reach(obsidiantex) = "images\\obb.png";
-			texlist.reach(crafting_table_front) = "images\\craftingtable.png";
+
+			texlist.reach(stone_brick_tex) = "images\\stone_brick.png";
+			texlist.reach(crafting_table_bottom) = "images\\craftingtable.png";
+			texlist.reach(crafting_table_top) = "images\\craftingtabletop.png";
 			texlist.reach(crafting_table_side) = "images\\craftingtableside.png";
 			texlist.reach(furnacefront) = "images\\furnacetop.png";
 			texlist.reach(furnaceside) = "images\\furnace.png";
 			texlist.reach(ironoretex) = "images\\ironore.png";
 			texlist.reach(furnacesideon) = "images\\furnaceon.png";
-			texlist.reach(furnacefronton) = "images\\furnacetopon.png";
+			texlist.reach(log_side) = "images\\treestone.png";
 			texlist.reach(logtoppng) = "images\\log.png";
 			texlist.reach(ultraaltarpngultrapng) = "images\\ultraaltar.png";
 			texlist.reach(sandtex) = "images\\sand.png";
 			texlist.reach(planktex) = "images\\treestoneblock.png";
 			renderer::texture_array_id texarray = ecs.load_asset_emplaced<renderer::TextureArrayPath>(texlist, "BlockTextures").unwrap();
-			renderer.Bind_texture(texarray);
 			renderer.set_uniform("bind_block_texture", texarray);
 		}
 	};

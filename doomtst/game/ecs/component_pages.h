@@ -14,38 +14,35 @@ namespace ecs {
 			return element_count == 0;
 		}
 		//index is unchecked
+		static constexpr size_t index_wrap = (1 << chunk_exp)-1;
 		T& operator[](size_t index) {
-			return *reinterpret_cast<T*>(element_offset_ptr + sizeof(T) * index);
+			return elems[index & index_wrap];
 		}
 
-		//index is unchecked
 		const T& operator[](size_t index) const {
-			return *reinterpret_cast<const T*>(element_offset_ptr + sizeof(T) * index);
+			return elems[index & index_wrap];
 		}
 
 		//index is unchecked
 		T* get_ptr(size_t index) {
-			return reinterpret_cast<T*>(element_offset_ptr + sizeof(T) * index);
+			return elems+(index & index_wrap);
 		}
 		//index is unchecked
 		const T* get_ptr(size_t index) const {
-			return reinterpret_cast<const T*>(element_offset_ptr + sizeof(T) * index);
+			return elems+(index & index_wrap);
 		}
 
 		component_page(const component_page&) = delete;
 		component_page& operator=(const component_page&) = delete;
 		component_page() {
 			elems = nullptr;
-			element_offset_ptr = 0;
 			element_count = 0;
 		}
 		
 		component_page(component_page&& other) noexcept
 			: elems(other.elems),
-			element_offset_ptr(other.element_offset_ptr),
 			element_count(other.element_count) {
 			other.elems = nullptr;
-			other.element_offset_ptr = 0;
 			other.element_count = 0;
 		}
 
@@ -53,10 +50,8 @@ namespace ecs {
 			if (this != &other) {
 				clear_unchecked();
 				elems = other.elems;
-				element_offset_ptr = other.element_offset_ptr;
 				element_count = other.element_count;
 				other.elems = nullptr;
-				other.element_offset_ptr = 0;
 				other.element_count = 0;
 			}
 			return *this;
@@ -71,8 +66,7 @@ namespace ecs {
 		T& insert_at_unchecked(size_t index, Args&&... args) {
 			if (empty()) {
 				elems = static_cast<T*>(::operator new(chunk_size() * sizeof(T)));
-				//we move element_offset back so we can save some cycles
-				element_offset_ptr = reinterpret_cast<uintptr_t>(elems) - ((index >> chunk_exp) << chunk_exp) * sizeof(T);
+			
 			}
 			T* ptr = get_ptr(index);
 			::new (ptr) T(std::forward<Args>(args)...);
@@ -104,7 +98,6 @@ namespace ecs {
 			}
 			elems = nullptr;
 			element_count = 0;
-			element_offset_ptr = 0;
 		}
 		//terminates if it is non empty, since the component page is an implmentation detail and component pages is safe this will never happen
 		~component_page() {
@@ -113,8 +106,6 @@ namespace ecs {
 	private:
 		size_t element_count;
 		T* elems;
-		// element_offset_ptr is shifted so we can just add the index*sizeof(T) to it instaid of having to do a bitwise and
-		uintptr_t element_offset_ptr;
 	};
 
 	template<typename T, size_t chunk_exp>
@@ -170,9 +161,7 @@ namespace ecs {
 		}
 		template<typename ...Args>
 		stn::insertion<T&> insert_at(size_t index, Args&&... args) {
-			if (!contains(index)) {
-				
-				element_filter.reaching_enable(index);
+			if (element_filter.reaching_insertion_enable(index)) {
 				return stn::insertion(pages.reach(index >> chunk_exp).insert_at_unchecked(index, std::forward<Args>(args)...),true);
 			}
 			return stn::insertion<T&>(pages.unchecked_at(index >> chunk_exp)[index],false);
@@ -180,7 +169,7 @@ namespace ecs {
 		//replace_at_unchecked assumes the element exists and  will not modify the adress of an element 
 		template<typename ...Args>
 		T& replace_at_unchecked(size_t index, Args&&... args) {
-	return pages.unchecked_at(index >> chunk_exp).replace_at_unchecked(index, std::forward<Args>(args)...);
+			return pages.unchecked_at(index >> chunk_exp).replace_at_unchecked(index, std::forward<Args>(args)...);
 		}
 
 		//does not check if this slot is also occupied or exists

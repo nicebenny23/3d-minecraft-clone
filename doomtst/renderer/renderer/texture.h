@@ -41,12 +41,11 @@ namespace renderer {
 			return path;
 		};
 		//we should get rid of this as soon as possible
-		TexturePath(const std::string& path, const std::string& name) :path(path) {
+		TexturePath(const std::string& path) :path(path) {
 		
 		}
-		TexturePath(const std::string& path) :path(path) {
-		}
-		TexturePath(const char* path, const char* name) :path(path){
+		
+		TexturePath(const char* path) :path(path){
 		}
 		bool operator==(const TexturePath& other) const noexcept {
 			return path == other.path;
@@ -64,14 +63,18 @@ namespace std {
 	};
 }
 namespace renderer {
-	inline void settextureparams(GLint texturetype, bool with_minmaps = true) {
+	inline void set_default_texture_paramaters(GLint texturetype, bool with_minmaps = true) {
 
 		if (with_minmaps) {
 			glGenerateMipmap(texturetype);
 		}
+		glEnable(GL_MULTISAMPLE);
 		glTexParameteri(texturetype, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+		glTexParameteri(texturetype, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(texturetype, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(texturetype, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-
+		glEnable(GL_LINE_SMOOTH);
+		glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
 	}
 	struct TextureLoader {
 		TextureLoader() {
@@ -87,7 +90,7 @@ namespace renderer {
 			GLint type = GL_RGBA;
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, size.x, size.y, 0, type, GL_UNSIGNED_BYTE, data);
 			stbi_image_free(data);
-			settextureparams(GL_TEXTURE_2D);
+			set_default_texture_paramaters(GL_TEXTURE_2D);
 			return stn::box<Texture2D>(size, id);
 		}
 		void unload(stn::box<Texture2D> texture) {
@@ -187,7 +190,7 @@ namespace renderer {
 
 				stbi_image_free(datatoappend);
 			}
-			settextureparams(GL_TEXTURE_2D_ARRAY);
+			set_default_texture_paramaters(GL_TEXTURE_2D_ARRAY);
 			return stn::box<TextureArray>(path.count(), size, id);
 		}
 		void unload(stn::box<TextureArray> texture) {
@@ -254,7 +257,7 @@ namespace renderer {
 			}
 
 			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, desc.size.x, desc.size.y, 0, format, type, nullptr);
-			settextureparams(id, false);
+			set_default_texture_paramaters(id, false);
 			return stn::box<Texture2D>(desc.size, id);
 		}
 

@@ -1,39 +1,34 @@
 #include "dynamicarray.h"
 #include "thread_pool.h"
 #include "../debugger/debug.h"
+#include "../game/time.h"
 #pragma once
 namespace thread_util {
-
-    //creates range represnetation of a thread split it is inclusive exclusiv
-    inline stn::array<size_t> split_many(size_t length, size_t threads) {
-        stn::array<size_t> res;
-        size_t total = 0;
-        for (size_t i = 0; i < threads; i++) {
-            res.push(total);
-            total += length / threads;
-        }
-        res.push(length);
-        return res;
-    }
     template<typename Iterator, typename Func>
-    void par_iter(Iterator begin, Iterator end, Func& func, size_t threads) {
+    void par_iter(Iterator begin, Iterator end,Func func, size_t threads) {
         size_t length = std::distance(begin, end);
-        if (length == 0) return;
+		if (length == 0) {
+			return;
+		}
+		if (threads > length) {
+			threads = length;
+		};
 
-        if (threads > length) threads = length;
-        thread::thread_pool thread_pool = thread::thread_pool(threads);
-        stn::array<size_t> size_of_each = thread_util::split_many(length, thread_pool.length());
-        Iterator range_start = begin;
+		thread::thread_pool thread_pool = thread::thread_pool(threads);
+		Iterator range_start = begin;
         for (size_t i = 0; i < thread_pool.length(); i++) {
-            Iterator range_next = Iterator(range_start);
-            std::advance(range_next, size_of_each[i + 1] - size_of_each[i]);
-            thread_pool.push([range_start, range_next, &func]() {
+			size_t skip_count = std::floor(length / threads);
+			if (i==thread_pool.length()-1) {
+				skip_count = std::distance(range_start,end);
+			}
+			Iterator range_next = range_start;
+			std::advance(range_next, skip_count);
+            thread_pool.push([range_start, range_next, func]() {
                 for (auto it = Iterator(range_start); it != Iterator(range_next); it++) {
                     func(*it);
                 }
-                });
+            });
             range_start = range_next;
-
         }
     }
 	template<std::ranges::range Rng, typename Func>

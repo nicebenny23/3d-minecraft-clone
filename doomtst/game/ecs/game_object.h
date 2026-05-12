@@ -1,15 +1,9 @@
 #pragma once
 #include "ecs.h"
-#include "../../math/transform.h"
 #include "commands.h"
 #include "Parent.h"
 namespace ecs {
-	struct world_transform : component {
-		math::Transform transform;
-		world_transform(v3::Point3 pos) {
-			transform.position = pos;
-		}
-	};
+	
 	struct obj {
 
 		entity_id id() const {
@@ -76,6 +70,10 @@ namespace ecs {
 		template<ComponentType T, typename ...Args > requires std::constructible_from<T, Args&&...>
 		T& add_component(Args&&... args) {
 			return ecs->add_component<T>(ent, std::forward<Args>(args)...);
+		}
+		template<ComponentType T, typename ...Args > requires std::constructible_from<T, Args&&...>
+		T& add_component_unchecked(Args&&... args) {
+			return ecs->add_component_unchecked<T>(ent, std::forward<Args>(args)...);
 		}
 		template<ComponentType T, typename ...Args > requires std::constructible_from<T, Args&&...>
 		T& set_emplace_component(Args&&... args) {

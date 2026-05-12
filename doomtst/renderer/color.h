@@ -19,6 +19,9 @@ namespace colors {
 			math::clamp(b, 0.0, 1.0),
 			math::clamp(a, 0.0, 1.0));
 		}
+		Color with_opacity(double opacity) const {
+			return Color(r, g, b, opacity);
+		}
 		Color clamp_self() {
 			*this = clamped();
 		}
@@ -27,12 +30,36 @@ namespace colors {
 		}
 		Color& operator*=(double v) {
 			*this = *this * v;
+			return *this;
+		}
+		Color operator*(const Color& other) const {
+			return Color(r * other.r, g * other.g, b * other.b, a* other.a).clamped();
+		}
+		Color& operator*=(const Color& other) {
+			*this = *this * other;		
+			return *this;
+		}
+		Color operator/(const Color& other) const {
+			return Color(r / other.r, g / other.g, b / other.b, a / other.a).clamped();
+		}
+		Color& operator/=(const Color& other) {
+			*this = *this / other;
+			return *this;
+		}
+
+		Color operator+(const Color& other) const {
+			return Color(r +other.r, g +other.g, b +other.b, a+other.a).clamped();
 		}
 		glm::vec4 glm() const {
 			return glm::vec4(r, g, b, a);
 		}
-	};
+		bool operator==(const Color& color) const = default;
+		bool operator!=(const Color& color) const = default;
 
+	};
+	inline Color lerp(Color c1, Color c2,double t) {
+		return c1 * (1 - t) + c2 * t;
+	}
 	static inline const Color White{1, 1, 1, 1 };
 	static inline const Color Black{ 0, 0, 0, 1 };
 	static inline const Color Red{ 1, 0, 0, 1 };

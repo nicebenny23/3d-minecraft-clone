@@ -8,6 +8,7 @@
 #include "ray.h"
 #include <glm/gtx/euler_angles.hpp>
 #include "geometry.h"
+#include "angle.h"
 namespace math {
 	inline glm::mat4 lookRotationMatrix(v3::Vec3 vec) {
 		v3::Vec3 forward = vec;
@@ -25,27 +26,32 @@ namespace math {
 	}
 
 	struct Transform {
-		Transform() :yaw(90), pitch(0), scale(v3::unit_scale) {
+		Transform() :look(), scale(v3::unit_scale) {
 		}
-		Transform(v3::Point3 pos, double newyaw, double newpitch, v3::Scale3 scl) {
+		Transform(v3::Point3 pos, Look3 look_dir, v3::Scale3 scl):look(look_dir){
 			position = pos;
-			yaw = newyaw;
-			pitch = newpitch;
 			scale = scl;
 		}
 		v3::Point3 position;
-		double yaw;
-		double pitch;
+		math::Look3 look;
 		v3::Scale3 scale;
+		void from_box_unrotated(geo::Box box) {
+			position = box.center;
+			scale = box.scale;
+		}
 		geo::Box unrotated_box() const{
 			return geo::Box(position, scale);
 		}
-		void rotate(double ptch, double yw) {
-			pitch += ptch;
-			yaw += yw;
+		void rotate(math::Look3 offset) {
+			look.pitch+= offset.pitch;
+			look.yaw += offset.yaw;
+
+		}
+		static double distance(const Transform& t1, const Transform& t2) {
+			return v3::dist(t1.position, t2.position);
 		}
 		v3::Vec3 normal_dir() const{
-			return v3::yaw_pitch(yaw, pitch);
+			return v3::yaw_pitch(look);
 		}
 		v3::Vec3 right_dir() const {
 			return v3::zero_fixed_normal(v3::Cross(normal_dir(), v3::up));
@@ -58,8 +64,8 @@ namespace math {
 		}
 		void look_towards(v3::Vec3 direction) {
 			direction = v3::zero_fixed_normal(direction);
-			pitch = glm::degrees(std::asin(direction.y));
-			yaw = glm::degrees(std::atan2(direction.z, direction.x));
+			look.pitch = Angle::from_radians(std::asin(direction.y));
+			look.yaw = Angle::from_radians(std::atan2(direction.z, direction.x));
 		}
 		void look_at(v3::Point3 LookTowards) {
 			look_towards(LookTowards - position);
@@ -77,27 +83,4 @@ namespace math {
 		return glm::lookAt(transform.position.glm(), transform.position.glm() + transform.normal_dir().glm(), transform.up_dir().glm());
 	}
 
-	inline Transform Decompose(const glm::mat4& matrix) {
-		glm::vec3 scale, pos, skew;
-		glm::quat quatRotation;
-		glm::vec4 perspective;
-		bool success = glm::decompose(matrix, scale, quatRotation, pos, skew, perspective);
-		if (!success) {
-			throw std::logic_error("decomposition did not succeed");
-		}
-		glm::vec3 eulerRotation = glm::eulerAngles(quatRotation);
-		Transform transform;
-		transform.position = v3::Point3(pos.x, pos.y, pos.z);
-		transform.yaw = glm::degrees(eulerRotation.y);
-		transform.pitch = glm::degrees(eulerRotation.x);
-		transform.scale = v3::Scale3(scale.x, scale.y, scale.z);
-		return transform;
-	}
-
-	inline Transform Compose(Transform& t1, Transform& t2) {
-		glm::mat4 mat1 = t1.as_matrix();
-		glm::mat4 mat2 = t2.as_matrix();
-		glm::mat4 composed = mat2 * mat1;
-		return Decompose(composed);
-	}
 }

@@ -2,7 +2,7 @@
 out vec4 FragColor;
 
 
-in vec2 texcoord;
+in vec2 frag_coord;
 uniform vec4 color;
 uniform sampler2D tex;
 
@@ -11,5 +11,8 @@ uniform sampler2D tex;
 void main()
 {
  
-    FragColor =texture(tex,  texcoord)*color;
+    vec2 coord=frag_coord;
+    coord.y*=-1;
+
+    FragColor =texture(tex,  coord/2+vec2(.5,.5))*color;
 } 

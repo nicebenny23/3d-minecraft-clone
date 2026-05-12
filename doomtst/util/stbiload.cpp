@@ -2,7 +2,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "../external/stb_image.h"
 
-
+ 
 unsigned char* texdata::texture_for(int* width, int* height, const char* name) {
 	int colchannel = 0;
 	unsigned char* data = stbi_load(name, width, height, &colchannel, STBI_rgb_alpha);

@@ -37,5 +37,10 @@ namespace math {
 	0, 1, 5, 4,  // bottom (-y)
 	4, 5, 6, 7,  // south (+z)
 	0, 1, 2, 3   // north (-z)
+	}; 
+	const unsigned int cube_edge_indices[] = {
+	0,1, 1,2, 2,3, 3,0,
+	4,5, 5,6, 6,7, 7,4,
+	0,4, 1,5, 2,6, 3,7
 	};
 }

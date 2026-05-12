@@ -7,7 +7,7 @@ struct rotate_to_velocity: ecs::component
 
 		Vec3 vel = owner().get_component<physics::rigidbody>().velocity;
 		vel= normal(vel);
-		owner().get_component<ecs::world_transform>().transform.look_towards(vel);
+		owner().get_component<core::LocalTransform>().transform.look_towards(vel);
 	}
 };
 

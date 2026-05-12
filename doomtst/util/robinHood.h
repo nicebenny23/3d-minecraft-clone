@@ -459,7 +459,7 @@ namespace robin_hood {
 
         private:
             // iterates the list of allocated memory to calculate how many to alloc next.
-            // Recalculating this each time saves us a size_t member.
+            // Recalculating this each timing saves us a size_t member.
             // This ignores the fact that memory blocks might have been added manually with addOrFree. In
             // practice, this should not matter much.
             ROBIN_HOOD(NODISCARD) size_t calcNumElementsToAlloc() const noexcept {
@@ -915,10 +915,10 @@ namespace robin_hood {
         // According to STL, order of templates has effect on throughput. That's why I've moved the
         // boolean to the front.
         // https://www.reddit.com/r/cpp/comments/ahp6iu/compile_time_binary_size_reductions_and_cs_future/eeguck4/
-        template <bool IsFlat, size_t MaxLoadFactor100, typename Key, typename T, typename Hash,
+        template <bool IsFlat, size_t MaxLoadFactor100, typename Key, typename T, typename hash_coord,
             typename KeyEqual>
         class Table
-            : public WrapHash<Hash>,
+            : public WrapHash<hash_coord>,
             public WrapKeyEqual<KeyEqual>,
             detail::NodeAllocator<
             typename std::conditional<
@@ -930,7 +930,7 @@ namespace robin_hood {
             static constexpr bool is_map = !std::is_void<T>::value;
             static constexpr bool is_set = !is_map;
             static constexpr bool is_transparent =
-                has_is_transparent<Hash>::value && has_is_transparent<KeyEqual>::value;
+                has_is_transparent<hash_coord>::value && has_is_transparent<KeyEqual>::value;
 
             using key_type = Key;
             using mapped_type = T;
@@ -938,7 +938,7 @@ namespace robin_hood {
                 is_set, Key,
                 robin_hood::pair<typename std::conditional<is_flat, Key, Key const>::type, T>>::type;
             using size_type = size_t;
-            using hasher = Hash;
+            using hasher = hash_coord;
             using key_equal = KeyEqual;
             using Self = Table<IsFlat, MaxLoadFactor100, key_type, mapped_type, hasher, key_equal>;
 
@@ -946,7 +946,7 @@ namespace robin_hood {
             static_assert(MaxLoadFactor100 > 10 && MaxLoadFactor100 < 100,
                 "MaxLoadFactor100 needs to be >10 && < 100");
 
-            using WHash = WrapHash<Hash>;
+            using WHash = WrapHash<hash_coord>;
             using WKeyEqual = WrapKeyEqual<KeyEqual>;
 
             // configuration defaults
@@ -1511,7 +1511,7 @@ namespace robin_hood {
             using iterator = Iter<false>;
             using const_iterator = Iter<true>;
 
-            Table() noexcept(noexcept(Hash()) && noexcept(KeyEqual()))
+            Table() noexcept(noexcept(hash_coord()) && noexcept(KeyEqual()))
                 : WHash()
                 , WKeyEqual() {
                 ROBIN_HOOD_TRACE(this)
@@ -1523,8 +1523,8 @@ namespace robin_hood {
             // because everybody points to DummyInfoByte::b. parameter bucket_count is dictated by the
             // standard, but we can ignore it.
             explicit Table(
-                size_t ROBIN_HOOD_UNUSED(bucket_count) /*unused*/, const Hash& h = Hash{},
-                const KeyEqual& equal = KeyEqual{}) noexcept(noexcept(Hash(h)) && noexcept(KeyEqual(equal)))
+                size_t ROBIN_HOOD_UNUSED(bucket_count) /*unused*/, const hash_coord& h = hash_coord{},
+                const KeyEqual& equal = KeyEqual{}) noexcept(noexcept(hash_coord(h)) && noexcept(KeyEqual(equal)))
                 : WHash(h)
                 , WKeyEqual(equal) {
                 ROBIN_HOOD_TRACE(this)
@@ -1532,7 +1532,7 @@ namespace robin_hood {
 
             template <typename Iter>
             Table(Iter first, Iter last, size_t ROBIN_HOOD_UNUSED(bucket_count) /*unused*/ = 0,
-                const Hash& h = Hash{}, const KeyEqual& equal = KeyEqual{})
+                const hash_coord& h = hash_coord{}, const KeyEqual& equal = KeyEqual{})
                 : WHash(h)
                 , WKeyEqual(equal) {
                 ROBIN_HOOD_TRACE(this)
@@ -1540,7 +1540,7 @@ namespace robin_hood {
             }
 
             Table(std::initializer_list<value_type> initlist,
-                size_t ROBIN_HOOD_UNUSED(bucket_count) /*unused*/ = 0, const Hash& h = Hash{},
+                size_t ROBIN_HOOD_UNUSED(bucket_count) /*unused*/ = 0, const hash_coord& h = hash_coord{},
                 const KeyEqual& equal = KeyEqual{})
                 : WHash(h)
                 , WKeyEqual(equal) {
@@ -2526,38 +2526,38 @@ namespace robin_hood {
 
     // map
 
-    template <typename Key, typename T, typename Hash = hash<Key>,
+    template <typename Key, typename T, typename hash_coord = hash<Key>,
         typename KeyEqual = std::equal_to<Key>, size_t MaxLoadFactor100 = 80>
-    using unordered_flat_map = detail::Table<true, MaxLoadFactor100, Key, T, Hash, KeyEqual>;
+    using unordered_flat_map = detail::Table<true, MaxLoadFactor100, Key, T, hash_coord, KeyEqual>;
 
-    template <typename Key, typename T, typename Hash = hash<Key>,
+    template <typename Key, typename T, typename hash_coord = hash<Key>,
         typename KeyEqual = std::equal_to<Key>, size_t MaxLoadFactor100 = 80>
-    using unordered_node_map = detail::Table<false, MaxLoadFactor100, Key, T, Hash, KeyEqual>;
+    using unordered_node_map = detail::Table<false, MaxLoadFactor100, Key, T, hash_coord, KeyEqual>;
 
-    template <typename Key, typename T, typename Hash = hash<Key>,
+    template <typename Key, typename T, typename hash_coord = hash<Key>,
         typename KeyEqual = std::equal_to<Key>, size_t MaxLoadFactor100 = 80>
     using unordered_map =
         detail::Table<sizeof(robin_hood::pair<Key, T>) <= sizeof(size_t) * 6 &&
         std::is_nothrow_move_constructible<robin_hood::pair<Key, T>>::value&&
         std::is_nothrow_move_assignable<robin_hood::pair<Key, T>>::value,
-        MaxLoadFactor100, Key, T, Hash, KeyEqual>;
+        MaxLoadFactor100, Key, T, hash_coord, KeyEqual>;
 
     // set
 
-    template <typename Key, typename Hash = hash<Key>, typename KeyEqual = std::equal_to<Key>,
+    template <typename Key, typename hash_coord = hash<Key>, typename KeyEqual = std::equal_to<Key>,
         size_t MaxLoadFactor100 = 80>
-    using unordered_flat_set = detail::Table<true, MaxLoadFactor100, Key, void, Hash, KeyEqual>;
+    using unordered_flat_set = detail::Table<true, MaxLoadFactor100, Key, void, hash_coord, KeyEqual>;
 
-    template <typename Key, typename Hash = hash<Key>, typename KeyEqual = std::equal_to<Key>,
+    template <typename Key, typename hash_coord = hash<Key>, typename KeyEqual = std::equal_to<Key>,
         size_t MaxLoadFactor100 = 80>
-    using unordered_node_set = detail::Table<false, MaxLoadFactor100, Key, void, Hash, KeyEqual>;
+    using unordered_node_set = detail::Table<false, MaxLoadFactor100, Key, void, hash_coord, KeyEqual>;
 
-    template <typename Key, typename Hash = hash<Key>, typename KeyEqual = std::equal_to<Key>,
+    template <typename Key, typename hash_coord = hash<Key>, typename KeyEqual = std::equal_to<Key>,
         size_t MaxLoadFactor100 = 80>
     using unordered_set = detail::Table<sizeof(Key) <= sizeof(size_t) * 6 &&
         std::is_nothrow_move_constructible<Key>::value&&
         std::is_nothrow_move_assignable<Key>::value,
-        MaxLoadFactor100, Key, void, Hash, KeyEqual>;
+        MaxLoadFactor100, Key, void, hash_coord, KeyEqual>;
 
 } // namespace robin_hood
 

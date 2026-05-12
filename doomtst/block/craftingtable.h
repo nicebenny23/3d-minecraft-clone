@@ -12,22 +12,25 @@
 #include "../player/player_look.h"
 #include "../player/playerinventory.h"
 #include "../player/inventory_ui.h"
+#include "chest.h"
 #pragma once 
 
 namespace items {
 
 	struct crafting_table_item : item_type {
+		std::string name() const {
+			return ("crafting_table");
+		}
 		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(
-				std::string_view("crafting_table"),
-				renderer::TexturePath("images\\craftingtabletop.png", "CraftingTableTextureTop"),
+				return item_traits(
+				renderer::TexturePath("images\\craftingtabletop.png"),
 				world.get_resource<BlockRegistry>().get_id("crafting_table")
 			);
 		}
 	};
 	struct crafting_table_loot_table :items::LootTable {
-		items::LootDrops drops_for(items::item_types& types) {
-			return items::LootDrops({ items::loot_element(types.from_type<crafting_table_item>(),1,types) });
+		items::LootDrops drops_for(items::ItemTypes& types) {
+			return items::LootDrops({ items::loot_element(types.insert<crafting_table_item>(),1,types) });
 		}
 	};
 }
@@ -40,21 +43,21 @@ namespace blocks {
 		void apply(ecs::obj& ent) const {
 			ecs::obj menu_object= ecs::spawn_emplaced<ui::MenuRecipe>(ent.world());
 			menu_object.apply_recipe(player::inventory_slots_pannel_recipe());
-			ecs::obj bg = menu_object.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\menutex.png", "menu_texture"),
-			geo::Box2d(v2::Vec2(.27f, .15f), v2::Vec2(.35f, .29f))
+			ecs::obj bg = menu_object.spawn_child<ui::UiImageSpawner>(renderer::TexturePath("images\\menutex.png"),
+			geo::Box2d(v2::Vec2(.27f, .15f)/2, v2::Vec2(.35f, .29f))
 			,0);
 			ent.add_component<player::OpenMenuOnClick>(ecs::ConstrainedHandle<ui::menu_component>(menu_object));
 			menu_object.spawn_child<items::ContainerDisplayRecipe>(v2::Coord2(4, 3), input_slots);
 			ecs::Constrained<items::crafter> crafter = ent
 				.spawn_child< items::CrafterRecipe>(input_slots.object(), stn::array({std::filesystem::path("crafting\\2x2craft.txt"), std::filesystem::path("crafting\\3x3craft.txt")}));
 			menu_object.spawn_child<items::CraftingSlotDisplaySpawner>(v2::Coord2(8, 4), crafter);
-			menu_object.get_component<ui::UiEnabled>().disable();
 		}
 	};
 
 	struct CraftingTableBlock:BlockType {
 		void apply(ecs::obj& block) const override {
-			ecs::Constrained<items::container> input_slots(block.spawn_child<items::container_recipe>(v2::Coord2(3, 3)));
+			ecs::Constrained<items::container> input_slots(ecs::spawn(block.world(), items::container_recipe(ui::TableBounds(3,3))));
+			block.add_component<stored_container>(input_slots);
 			block.apply_recipe(CraftingTableMenuRecipe{ .input_slots = input_slots});
 			block.apply_recipe<>(items::loot_table_recipe<items::crafting_table_loot_table>);
 		}
@@ -63,8 +66,20 @@ namespace blocks {
 		}
 		BlockTraits traits() const{
 			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, crafting_table_side, crafting_table_side, mosstex, mosstex, crafting_table_side, crafting_table_side)
+				BlockMeshTraits(v3::unit_scale, false, crafting_table_side, crafting_table_side, crafting_table_top, crafting_table_bottom, crafting_table_side, crafting_table_side)
 			);
+		}
+		void read_from_bytes(ecs::obj block, stn::file_handle& handle)const  override {
+			items::container_id id = stn::file_serializer<items::container_id>().read(handle);
+			ecs::Constrained<items::container> container_slot(block.world().get_resource<items::WorldContainers>()[id]);
+			block.add_component<stored_container>(container_slot);
+			block.apply_recipe(CraftingTableMenuRecipe{ .input_slots= container_slot });
+			block.apply_recipe(items::loot_table_recipe<items::crafting_table_loot_table>);
+		}
+		void write_to_bytes(ecs::obj block, stn::file_handle& handle) const override {
+			items::container_id id = block.get_component<stored_container>().stored.get<items::container>().id;
+			stn::file_serializer<items::container_id>().write(id, handle);
+
 		}
 	};
 

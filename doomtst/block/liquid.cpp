@@ -7,7 +7,7 @@ float liquidtick=.1;
 
 void updateltick()
 {
-	//liquidtick -= CtxName::ctx.Ecs->ensure_resource<timename::TimeManager>().dt;
+	//liquidtick -= CtxName::ctx.Ecs->ensure_resource<timing::TimeManager>().dt;
 	if (liquidtick<0)
 	{
 		liquidtick = .16;

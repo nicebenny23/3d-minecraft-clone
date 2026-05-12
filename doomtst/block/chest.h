@@ -17,10 +17,12 @@
 namespace items {
 
 	struct chest_item : item_type {
+		std::string name() const {
+			return "chest";
+		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(
-				std::string_view("chest"),
-				renderer::TexturePath("images\\chest.png", "chest_image"),
+				renderer::TexturePath("images\\chest.png"),
 				world.get_resource<BlockRegistry>().get_id("chest")
 			);
 		}
@@ -34,11 +36,9 @@ namespace blocks {
 
 		void apply(ecs::obj& ent) const {
 			ecs::obj menu_object = ecs::spawn_emplaced<ui::MenuRecipe>(ent.world());
-			menu_object.apply_recipe(player::inventory_slots_pannel_recipe()); ecs::obj bg = menu_object.spawn_child<ui::ui_image_spawner>(renderer::TexturePath("images\\menutex.png", "menu_texture"), geo::Box2d(v2::Vec2(.2f, .2f), v2::Vec2(.5f, .35f)), 0);
+			menu_object.apply_recipe(player::inventory_slots_pannel_recipe()); ecs::obj bg = menu_object.spawn_child<ui::UiImageSpawner>(renderer::TexturePath("images\\menutex.png"), geo::Box2d(v2::Vec2(.2f, .1f)/2, v2::Vec2(.26f, .2f)), 0);
 			ent.add_component<player::OpenMenuOnClick>(ecs::ConstrainedHandle<ui::menu_component>(menu_object));
-			menu_object.spawn_child<items::ContainerDisplayRecipe>(v2::Coord2(-4, 3), chest_slots);
-
-			menu_object.get_component<ui::UiEnabled>().disable();
+			menu_object.spawn_child<items::ContainerDisplayRecipe>(v2::Coord2(0,2), chest_slots);
 		}
 	};
 	struct stored_container:ecs::component {
@@ -48,8 +48,8 @@ namespace blocks {
 		}
 	};
 	struct chest_loot_table :items::LootTable {
-		items::LootDrops drops_for(items::item_types& types) {
-			return items::LootDrops({ items::loot_element(types.from_type<items::chest_item>(),1,types)});
+		items::LootDrops drops_for(items::ItemTypes& types) {
+			return items::LootDrops({ items::loot_element(types.insert<items::chest_item>(),1,types)});
 		}
 	};
 	struct ChestBlock :BlockType {
@@ -59,21 +59,24 @@ namespace blocks {
 			);
 		}
 		void apply(ecs::obj& block) const override {
-			ecs::Constrained<items::container> chest_slots(ecs::spawn(block.world(), items::container_recipe(v2::Coord2(8, 4))));
+			ecs::Constrained<items::container> chest_slots(ecs::spawn(block.world(), items::container_recipe(ui::TableBounds(6,2))));
 			block.add_component<stored_container>(chest_slots);
 			ecs::Constrained<items::container> player_main_slots(player::player_for(block.world()).get_component<player::inventory>().slots);
 			block.apply_recipe(ChestMenuRecipe{ .chest_slots = chest_slots });
 			block.apply_recipe(items::loot_table_recipe<chest_loot_table>);
 		}
 		void read_from_bytes(ecs::obj block,stn::file_handle& handle)const  override {
+			items::container_id id = stn::file_serializer<items::container_id>().read(handle);
 			ecs::Constrained<items::container> player_main_slots(player::player_for(block.world()).get_component<player::inventory>().slots);
-			ecs::Constrained<items::container> container_slot(block.world().get_resource<items::WorldContainers>()[stn::file_serializer<items::container_id>().read(handle)]);
+			ecs::Constrained<items::container> container_slot(block.world().get_resource<items::WorldContainers>()[id]);
 			block.add_component<stored_container>(container_slot);
 			block.apply_recipe(ChestMenuRecipe{.chest_slots = container_slot });
 			block.apply_recipe(items::loot_table_recipe<chest_loot_table>);
 		}
-		void write_to_bytes(ecs::obj block,stn::file_handle& handle) const {
-			stn::file_serializer<items::container_id>().write(block.get_component<stored_container>().stored.get<items::container>().id,handle);
+		void write_to_bytes(ecs::obj block,stn::file_handle& handle) const override {
+			items::container_id id = block.get_component<stored_container>().stored.get<items::container>().id;
+			stn::file_serializer<items::container_id>().write(id,handle);
+			int l = 3;
 		}
 		std::string name() const {
 			return std::string("chest");

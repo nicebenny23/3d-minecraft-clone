@@ -1,38 +1,33 @@
 #include "ItemSlot.h"
 #include "SlotUi.h"
+#include "../renderer/ui_table.h"
 #include "item_type.h"
 #pragma once
 namespace items {
 	struct container_id_tag {
 	};
 	using container_id =stn::typed_id<container_id_tag >;
-	
+	using container_element = ecs::ConstrainedHandle<ElementSlot>;
 	struct container :ecs::component {
-		stn::array <ecs::object_handle> slots;
-		v2::Coord2 size;
+		stn::array <container_element> slots;
+		ui::TableBounds size;
 		container_id id;
-		container(v2::Coord2 Size, container_id cont_id) :size(Size),id(cont_id){
+		container(ui::TableBounds Size, container_id cont_id) :size(Size),id(cont_id){
 		}
 		void start() {
 
 		}
-		ecs::object_handle& operator[](container_index ind) {
-			if (!ind.fits_in(size)) {
-				stn::throw_logic_error("index {} does not fit into size {}", ind.coord, size);
-			}
-			return slots[ind.index_in(size)];
+		container_element& operator[](v2::UVec2 ind) {
+			return slots[size.index(ind)];
 		}
-		const item_types& types() const{
-			return world().get_resource<item_types>();
+		const ItemTypes& types() const{
+			return world().get_resource<ItemTypes>();
 		}
-		const ecs::object_handle& operator[](container_index ind) const {
-			if (!ind.fits_in(size)) {
-				stn::throw_logic_error("index {} does not fit into size {}", ind.coord, size);
-			}
-			return slots[ind.index_in(size)];
+		const container_element& operator[](v2::UVec2 ind) const {
+			return slots[size.index(ind)];
 		}
-		const bool contains(container_index ind) const {
-			return ind.fits_in(size);
+		const bool contains(v2::UVec2 ind) const {
+			return size.contains(ind);
 		}
 		using iterator = decltype(slots)::iterator;
 		iterator begin() {
@@ -62,20 +57,18 @@ namespace items {
 	};
 
 	struct container_recipe {
-		v2::Coord2 offset;
-		container_recipe(v2::Coord2 off):offset(off) {
+		ui::TableBounds offset;
+		container_recipe(ui::TableBounds off):offset(off) {
 
 		}
 		void apply(ecs::obj& ent) const{
 			WorldContainers& containers=ent.world().ensure_resource<WorldContainers>();
 			container_id id = containers.gen_next();
-			container& cont = ent.add_component< container>(offset, id);
+			container& cont = ent.add_component<container>(offset, id);
 			containers.containers.emplace(ent);
-			for (int y = 0; y < offset.y; y++) {
-				for (int x = 0; x < offset.x; x++) {
-					cont.slots.emplace<ecs::object_handle>(ecs::spawn(ent.world(), ItemSlotSpawner()));
-					ent.add_child(cont.slots.last().get());
-				}
+			for (size_t i = 0; i < offset.entries();i++) {
+					cont.slots.emplace<items::container_element>(ecs::spawn(ent.world(), ItemSlotSpawner()));
+					ent.add_child(cont.slots.last().object());
 			}
 		}
 	};

@@ -6,12 +6,12 @@
 #include "../math/Scale3.h"
 #include "../block/block.h"
 #pragma once
-namespace Chunks {
+namespace chunks {
 	constexpr size_t chunk_length = 16;
 	constexpr size_t chunk_axis = size_t(chunk_length / blocksize);
 	constexpr size_t chunk_elements = chunk_axis * chunk_axis * chunk_axis;
 
-	constexpr int chunk_shift = std::countr_zero(Chunks::chunk_axis);
+	constexpr int chunk_shift = std::countr_zero(chunks::chunk_axis);
 	struct ChunkLocation {
 
 		explicit ChunkLocation(v3::Coord pos) :position(pos) {
@@ -26,11 +26,14 @@ namespace Chunks {
 		bool operator==(const ChunkLocation& other) const = default;
 		bool operator!=(const ChunkLocation& other) const = default;
 		v3::Coord position;
+		v3::Coord to_block_pos() const {
+			return position * chunk_length;
+		}
 		Point3 center() const {
 			return (position + unitv / 2.f) * chunk_length;
 		}
 		geo::Box bounds() const {
-			return geo::Box(center(), v3::Scale3(chunk_length) / 2);
+			return geo::Box(center(), v3::Scale3(chunk_length));
 		}
 		bool contains_block(v3::Coord block_position) const {
 			return from_block_pos(block_position).position==position;
@@ -40,20 +43,18 @@ namespace Chunks {
 		}
 	};
 
-	struct chunkmesh :ecs::component {
-		chunkmesh(ChunkLocation location) :loc(location), recreate_mesh(true) {
+	struct ChunkMesh :ecs::component {
+		ChunkMesh(ChunkLocation location,renderer::Renderer& ren) :loc(location), recreate_mesh(true), solid(ren.gen_renderable("SolidBlock")),
+			transparent(ren.gen_renderable("TransparentBlock")){
+		
 		};
 		void start() {
 			renderer::Renderer& ren = world().get_resource<renderer::Renderer>();
-			SolidGeo = ren.gen_renderable("SolidBlock");
-			
-			SolidGeo.mesh();
-			TransparentGeo = ren.gen_renderable("TransparentBlock");
-			TransparentGeo.mesh();
+			solid.give_owned_mesh();
 		}
 
-		renderer::RenderableHandle SolidGeo;
-		renderer::RenderableHandle TransparentGeo;
+		renderer::RenderableHandle solid;
+		renderer::RenderableHandle transparent;
 
 		array<blocks::MeshFace> faces;
 		ChunkLocation loc;
@@ -68,14 +69,14 @@ namespace Chunks {
 			return loc.bounds();
 		}
 		void sort_faces() {
-			v3::Point3 point = world().get_resource<renderer::camera_resource>().world_camera().center();
+			v3::Point3 point = world().get_resource<renderer::CameraResource>().center();
 			std::sort(faces.begin(), faces.end(), [&](blocks::MeshFace& a, blocks::MeshFace& b) {
 				return  v3::dist2(b.center(), point) < v3::dist2(a.center(), point);
 				});
 		}
 		void destroy_hook() {
-			SolidGeo.destroy();
-			TransparentGeo.destroy();
+			solid.destroy();
+			transparent.destroy();
 			faces.clear();
 		}
 	};

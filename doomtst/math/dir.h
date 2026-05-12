@@ -112,13 +112,13 @@ namespace math {
 		double max = stn::max(abs(point.x), abs(point.y), abs(point.z));
 		int ind = 0;
 		if (abs(point.x) == max) {
-			ind = ((1 - sign(point.x)) / 2);
+			ind = ((1 - sign_rounding_up(point.x)) / 2);
 		}
 		if (abs(point.y) == max) {
-			ind = (2 + ((1 - sign(point.y)) / 2));
+			ind = (2 + ((1 - sign_rounding_up(point.y)) / 2));
 		}
 		if (abs(point.z) == max) {
-			ind = 4 + ((1 - sign(point.z)) / 2);
+			ind = 4 + ((1 - sign_rounding_up(point.z)) / 2);
 		}
 		return Direction3d(static_cast<DirectionIndex3d>(ind));
 	}
@@ -175,10 +175,10 @@ namespace math {
 		double max = stn::max(abs(point.x), abs(point.z));
 		size_t index;
 		if (abs(point.x) == max) {
-			index = (1 - sign(point.x)) / 2;
+			index = (1 - sign_rounding_up(point.x)) / 2;
 		}
 		else{
-			index = 2 + (1 - sign(point.z)) / 2;
+			index = 2 + (1 - sign_rounding_up(point.z)) / 2;
 		}
 		return Direction2d(static_cast<DirectionIndex2d>(index));
 	}
@@ -194,10 +194,10 @@ namespace math {
 		size_t ind = 0;
 
 		if (abs(point.x) == max_val) {
-			ind = ((1 - sign(point.x)) / 2);
+			ind = ((1 - sign_rounding_up(point.x)) / 2);
 		}
 		if (abs(point.y) == max_val) {
-			ind = 2 + ((1 - sign(point.y)) / 2);
+			ind = 2 + ((1 - sign_rounding_up(point.y)) / 2);
 		}
 		return Direction2d(static_cast<DirectionIndex2d>(ind));
 	}

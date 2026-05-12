@@ -6,6 +6,7 @@
 #include "../player/playermodification.h"
 #include "../game/Settings.h"
 #include "../player/playerplace.h"
+#include "../game/time.h"
 
 namespace console {
 
@@ -37,14 +38,15 @@ namespace console {
 
 				ImGui::BeginChild("Debug Info", ImVec2(0, 150), true);
 				ImGui::Text("Debug:");
-				ImGui::Text(std::format("Fps: {:.3f}", player::goblin.world().ensure_resource<timename::TimeManager>().smooth_fps).c_str());
+				
+				ImGui::Text(std::format("Fps: {:.3f}", player::goblin.world().ensure_resource<timing::WorldClock>().fps()).c_str());
 
-				Point3 pos = player::goblin.get_component<ecs::world_transform>().transform.position;
+				Point3 pos = player::goblin.get_component<core::LocalTransform>().transform.position;
 				ImGui::Text(std::format("position: {}", pos).c_str());
 				grid::Grid& grid = player::goblin.world().get_resource<grid::Grid>();
-				ImGui::Text(std::format("yaw:{:.3f},pitch:{:.3f}", player::goblin.get_component<renderer::CameraComponent>().CamTransform.yaw, player::goblin.get_component<renderer::CameraComponent>().CamTransform.pitch).c_str());
+				ImGui::Text(std::format("look: {}", player::goblin.get_component<core::LocalTransform>().transform.look).c_str());
 				ImGui::Text(std::format("Chunk: {}", grid.chunk_from_block_pos(Coord(pos)).position).c_str());
-				std::string text_for_look = player::goblin.get_component<player::PlayerCursor>().Hit
+				std::string text_for_look = player::goblin.get_component<player::PlayerCursor>().hit
 					.filter([&](const voxtra::RayWorldHit& blk) {return blk.owner().exists(); })
 					.filter([](const voxtra::RayWorldHit& blk) {return blk.owner().has_component<block>(); })
 					.map([&](const voxtra::RayWorldHit& blk) {

@@ -37,7 +37,7 @@ namespace ui {
 	};
 	struct UiBounds :ecs::component {
 		geo::Box2d local;
-		UiBounds(geo::Box2d local_bounds, bool global_bounds) :local(local_bounds) {
+		UiBounds(geo::Box2d local_bounds) :local(local_bounds) {
 		};
 		v2::Vec2 local_center() const {
 			return local.center;
@@ -93,9 +93,6 @@ namespace ui {
 						if (world.has_component<UiPriority>(ent)) {
 							children.push(ecs::obj(ent, world));
 						}
-						else {
-							debug_fmt("missing priority component on {}", ent.id().id);
-						}
 					}
 						children | stn::sort([](ecs::obj object)->size_t {return object.get_component<UiPriority>().priority; });
 						children.reverse_in_place();
@@ -127,42 +124,43 @@ namespace ui {
 			bool has_clicked_right = man.right_mouse().pressed;
 			ecs::View<ComputedStyle,InteractionState> bounds_view(world);
 			for (auto&& [style, ui_interaction] : bounds_view) {
-				if (style.enabled) {
-					bool cursor_touching = style.final_size.contains(pos);
-					if (cursor_touching) {
-						ui_interaction.left_clicked = has_clicked_left;
-						ui_interaction.right_clicked = has_clicked_right;
-
-					}
+				bool cursor_touching = style.enabled&&style.final_size.contains(pos);
 					ui_interaction.hovered = cursor_touching;
-				}
+					ui_interaction.left_clicked = has_clicked_left&&ui_interaction.hovered;
+					ui_interaction.right_clicked= has_clicked_right && ui_interaction.hovered;
 			}
 		}
 	};
 	struct UiSpawner {
 		geo::Box2d bounds;
 		size_t priority;
-		bool bounds_type;
-		UiSpawner(geo::Box2d box, size_t priority, bool global_bounds = false)
-			:bounds(geo::Box2d(box.center, box.scale)), priority(priority), bounds_type(global_bounds) {
+		UiSpawner(geo::Box2d box, size_t priority)
+			:bounds(geo::Box2d(box.center, box.scale)), priority(priority){
+		}
+		static UiSpawner with_default_priority(geo::Box2d box) {
+			return UiSpawner(box, 0);
+		}
+		static UiSpawner with_default_size(size_t priority) {
+			return UiSpawner(geo::unit_box_2d,priority);
 		}
 		void apply(ecs::obj& object) const{
-			object.set_emplace_component<UiBounds>(bounds, bounds_type);
+			object.set_emplace_component<UiBounds>(bounds);
 			object.set_emplace_component<UiEnabled>();
 			object.set_emplace_component<InteractionState>();
 			object.set_emplace_component<UiPriority>(priority);
 			object.set_emplace_component<ComputedStyle>(0, geo::Box2d(v2::zerov, v2::unitv), false);
-			
-			object
-				.world()
-				.get_resource_opt<BaseUiNode>()
-				.member(&BaseUiNode::base_node)
-				.then([object](ecs::obj node) {node.add_child(object); });
-
+			//for idempotency
+			if (!object.has_component<ecs::Child>()) {
+				object
+					.world()
+					.get_resource_opt<BaseUiNode>()
+					.member(&BaseUiNode::base_node)
+					.then([object](ecs::obj node) {node.add_child(object); });
+			}
 		}
 	};
-	struct UiPlugin :Core::Plugin {
-		void build(Core::App& app) {
+	struct UiPlugin {
+		void operator()(Core::App& app) {
 			app.emplace_system< UiInteractionSystem>();
 			app.emplace_system< ComputePrioritySystem>();
 			ecs::obj entity = ecs::spawn_emplaced<UiSpawner>(app.Ecs, geo::Box2d::origin_centered(v2::unitv), 2);
@@ -170,6 +168,5 @@ namespace ui {
 		}
 
 	};
-
 
 }

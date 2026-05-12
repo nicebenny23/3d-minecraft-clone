@@ -13,6 +13,7 @@
 #include "daggerthrow.h"
 #include "playertpsword.h"
 #include "crosshair.h"
+#include "../renderer/ModelMesh.h"
 ecs::obj player::goblin;
 
 void player::initplayer(ecs::obj& player) {
@@ -22,34 +23,38 @@ void player::initplayer(ecs::obj& player) {
 	player.add_component<player_tag>();
 	player.world().insert_resource<player_resource>(player);
 
-	player.add_component<ecs::world_transform>(v3::Point3(0,2,0));
+	player.add_component<core::LocalTransform>(v3::Point3(0, 2, 0));
 	player.apply_recipe(Health::HealthSpawner(10));
-	player.get_component<ecs::world_transform>().transform.scale = unit_scale/1.02f;
-	Core::game.insert_plugin<PlayerModificationPlugin>();
-	Core::game.insert_plugin<PlayerPlacePlugin>();
-	Core::game.insert_plugin<player::CrosshairPlugin>();
-	Core::game.insert_plugin<PlayerInventoryPlugin>();
+	player.get_component<core::LocalTransform>().transform.scale = unit_scale / 1.2f;
+	Core::game.insert_plugin(PlayerModificationPlugin());
+	Core::game.insert_plugin(PlayerPlacePlugin());
+	Core::game.insert_plugin(player::CrosshairPlugin());
+	Core::game.insert_plugin(PlayerInventoryPlugin());
 	Core::game.emplace_system<PlayerAttacker>();
 	Core::game.emplace_system<PlayerMovementSys>();
-	aabb::DynamicColliderRecipe().apply(player);
-	player.apply_recipe(physics::Spawner);
+	Core::game.emplace_system<PlayerHealthUi>();
+	Core::game.insert_plugin(ModelPlugin());
 
-	player.add_component<playereat>();
-	player.add_component<playerhealth>();
+	aabb::DynamicColliderRecipe().apply(player);
+	player.apply_recipe(physics::Spawner{.restitution=.6});
+	Core::game.emplace_system<player::PlayerEater>();
+	ecs::obj eater = ecs::spawn(player.world(),ui::UiImageSpawner(geo::Box2d::origin_centered(v2::Vec2(.4f, .4f)),1));
+	player.add_component<player::player_eat_behavior>(player.world().get_resource<timing::WorldClock>(),eater);
+	player.apply_recipe(player::player_health_spawner);  
 
 	player.add_component<playertpcomp>();
 	player.add_component<playerclimb>();
-
+	player.add_component<Health::FallDamageRecipient>(.19f);
 
 	player.add_component< playerbreak>();
 	player.add_component< player_place>();
-	player.add_component<PlayerCursor>();
-	player.add_component<PlayerAttack>();
-	player.add_component<Health::FallDamageRecipient>();
+	ecs::obj spawned = ecs::spawn(player.world(),wireframe_recipe);
+	player.add_component<PlayerCursor>(spawned);
+	player.add_component<PlayerAttack>(ecs::spawn(player.world(), renderer::ParticleEmmitterRecipe<PlayerAttackParticleSpawner>{.max_lifetime=2.0f}),player.world().get_resource<timing::WorldClock>());
 	player.add_component<playerdaggercomp>();
 	player.add_component<renderer::CameraComponent>();
-	
-	player.world().insert_resource<renderer::camera_resource>(ecs::Constrained<renderer::CameraComponent>(player));
+	ecs::spawn(player.world(), CameraSpawner()).add_component<renderer::CameraDirectFollower>(player);
+	Core::game.emplace_system<CameraFollowerSystem>();
 	player.add_component<playermovement>();
 	player.add_component<playercamcontrols>();
 }

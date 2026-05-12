@@ -4,9 +4,13 @@
 #include <glm/gtc/quaternion.hpp>
 #include "../math/mathutil.h"
 #include <cmath>
+#include <format>
 #pragma once
 namespace math {
 	struct Angle {
+		Angle() :rad(0) {
+
+		}
 		double cos() const {
 			return glm::cos(rad);
 		}
@@ -22,6 +26,9 @@ namespace math {
 		}
 		Angle operator-(const Angle& other) const {
 			return Angle(rad - other.rad);
+		}
+		Angle operator-() const {
+			return Angle(-rad);
 		}
 		Angle& operator-=(const Angle& other) {
 			*this = *this - other;
@@ -65,10 +72,59 @@ namespace math {
 		double rad;
 	};
 
-	struct YawPitch{
+	struct Look3{
+		Look3(Angle yaw, Angle pitch):yaw(yaw),pitch(pitch) {
 
+		}
+		static Look3 from_degrees(double yaw, double pitch){
+			return Look3(Angle::from_degrees(yaw), Angle::from_degrees(pitch));
+		}
+		static Look3 from_radians(double yaw, double pitch) {
+			return Look3(Angle::from_radians(yaw), Angle::from_radians(pitch));
+		}
+		Look3() :Look3(Angle::from_degrees(90), Angle()) {
+
+		}
+		Look3 operator-() {
+			return Look3(-yaw, -pitch);
+		}
 		Angle yaw;
 		Angle pitch;
 
+	};
+}
+namespace std {
+	template <>
+	struct formatter<math::Angle> {
+
+		constexpr auto parse(format_parse_context& ctx) {
+			return ctx.begin(); // no options
+		}
+
+		template <typename FormatContext>
+		auto format(const math::Angle& a, FormatContext& ctx) const {
+			return format_to(ctx.out(), "{:.2f}°", a.degrees());
+		}
+	}; 
+	template <>
+		struct formatter<math::Look3> {
+
+		constexpr auto parse(format_parse_context& ctx) {
+			return ctx.begin();
+		}
+
+		template <typename FormatContext>
+		auto format(const math::Look3& n, FormatContext& ctx) const {
+
+			double yaw = n.yaw.degrees();
+			double pitch= n.pitch.degrees_signed(); 
+
+			return format_to(
+				ctx.out(),
+				"(yaw={:.2f}°, pitch={:.2f}°)",
+				yaw,
+				pitch
+			);
+		}
 	};
 }

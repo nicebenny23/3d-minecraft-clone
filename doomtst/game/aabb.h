@@ -8,6 +8,7 @@
 #include "../util/Option.h"
 #include "ecs/component.h"
 
+#include "../game/transforms.h"
 namespace aabb {
 
 
@@ -16,8 +17,8 @@ namespace aabb {
 		bool effector;
 		//local box
 		geo::Box global_box() const {
-			if (owner().has_component<ecs::world_transform>()) {
-				return owner().get_component<ecs::world_transform>().transform.unrotated_box();
+			if (owner().has_component<core::LocalTransform>()) {
+				return owner().get_component<core::LocalTransform>().transform.unrotated_box();
 			}
 			if (owner().has_component<blocks::block>()) {
 				return owner().get_component<blocks::block>().bounds();
@@ -32,7 +33,7 @@ namespace aabb {
 		}
 	};
 	inline geo::Box global_box(ecs::Constrained<Collider> collider) {
-		stn::Option<math::Transform> transform = collider.get_component_opt< ecs::world_transform>().member(&ecs::world_transform::transform);
+		stn::Option<math::Transform> transform = collider.get_component_opt< core::LocalTransform>().member(&core::LocalTransform::transform);
 		if (transform) {
 			return transform.unwrap().unrotated_box();
 		}
@@ -52,7 +53,7 @@ namespace aabb {
 		DynamicColliderRecipe(bool is_effector = false) :effector(is_effector) {
 
 		}
-		void apply(ecs::obj& object) {
+		void apply(ecs::obj& object) const{
 			object.add_component<DynamicCollider>();
 			object.add_component<Collider>(effector);
 		}

@@ -3,12 +3,13 @@
 #include "../game/ecs/filtered_object.h"
 #include "chunk_mesh.h"
 #include "../math/dir.h"
+#include "world.h"
 #pragma once 
 using namespace blocks;
-namespace Chunks {
+namespace chunks {
 
 
-	inline std::string file_name(ChunkLocation pos, grid::world& world) {
+	inline std::string file_name(ChunkLocation pos, grid::World& world) {
 		std::string m = std::format("Chunk{}", pos.position);
 		std::filesystem::path path = world.get_path();
 		path = path / "Chunks" / m;
@@ -19,11 +20,11 @@ namespace Chunks {
 		return	chunk_axis * chunk_axis * pos.x + chunk_axis * pos.y + pos.z;
 	}
 	using block_object = ecs::Constrained<block>;
-	struct chunk :ecs::component {
+	struct Chunk :ecs::component {
 		stn::array<ecs::Constrained<block>> block_list;
-		Chunks::ChunkLocation location;
+		chunks::ChunkLocation location;
 		bool modified;
-		chunk(Chunks::ChunkLocation chunk_location) :modified(false), location(chunk_location), block_list() {
+		Chunk(chunks::ChunkLocation chunk_location) :modified(false), location(chunk_location), block_list() {
 			block_list.reserve(chunk_elements);
 			chunk_access_offset = index_from_local_position(location.position * chunk_axis);
 		}
@@ -57,9 +58,9 @@ namespace Chunks {
 		const_iterator end() const {
 			return block_list.end();
 		}
-		chunk() = delete;
+		Chunk() = delete;
 		//A range on the a Face(16-16) region a chunk 
-		template<typename T> requires std::same_as<std::remove_const_t<T>,chunk>
+		template<typename T> requires std::same_as<std::remove_const_t<T>,Chunk>
 		struct FaceRange {
 			size_t face_index(size_t x, size_t y) const {
 				switch (dir.direction()) {
@@ -105,34 +106,34 @@ namespace Chunks {
 		private:
 			friend struct iterator;
 
-			friend struct chunk;
-			FaceRange(T& chunk, math::Direction3d direction) :dir(direction), chnk(chunk) {
+			friend struct Chunk;
+			FaceRange(T& Chunk, math::Direction3d direction) :dir(direction), chnk(Chunk) {
 
 			}
 			T& chnk;
 			math::Direction3d dir;
 		};
 
-		using face_range = FaceRange<chunk>;
-		using const_face_range = FaceRange<const chunk>;
-		//returns the blocks on the 16-16 face matching the direction
+		using face_range = FaceRange<Chunk>;
+		using const_face_range = FaceRange<const Chunk>;
+		//returns the blocks on the 16-16 BlockFace matching the direction
 		face_range on_face(math::Direction3d direction) {
 			return face_range(*this, direction);
 		}
 
-		//returns the blocks on the 16-16 face matching the direction
+		//returns the blocks on the 16-16 BlockFace matching the direction
 		const_face_range on_face(math::Direction3d direction) const{
 			return const_face_range(*this, direction);
 		}
 		void destroy_hook() {
 			if (modified) {
-				file_handle file = file_handle(file_name(location, world().get_resource<grid::world>()), FileMode::ReadWriteBinary);
+				file_handle file = file_handle(file_name(location, world().get_resource<grid::World>()), FileMode::ReadWriteBinary);
 				for (int i = 0; i < chunk_elements; i++) {
 					block& block_at = block_list[i].get<block>();
 					stn::file_serializer<block_id>().write(block_at.id, file);
 					stn::file_serializer<math::Direction2d>().write(block_at.mesh.direction, file);
 					stn::file_serializer<math::Direction3d>().write(block_at.mesh.attached_direction, file);
-					block_at.type()->write_into_bytes(block_list[i].object(), file);
+					block_at.type()->write_to_bytes(block_list[i].object(), file);
 				}
 				file.close();
 			}

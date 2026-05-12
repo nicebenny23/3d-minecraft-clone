@@ -91,7 +91,7 @@ namespace navigation {
 		open.push(0);
 		nodes.push(MarkedNodeType{ .value = start,.g_cost = 0,.h_cost = NodeType::apx_distance(start,end) });
 
-		const int maxiter = 200;
+		const int maxiter = 600;
 		int iter = 0;
 		while (open.non_empty()) {
 			iter += 1;
@@ -113,12 +113,8 @@ namespace navigation {
 			MarkedNodeType current = nodes[current_index];
 			open.swap_drop(open_list_index);
 			if (iter == maxiter) {
+				//try it 
 				return stn::None;
-				for (size_t index:open) {
-					if (nodes[index].f_cost()< current.f_cost()) {
-						current = nodes[index];
-					}
-				}
 			}
 			if (current.value == end||iter==maxiter) {
 				using ResultType = NodeResult<NodeType, EdgeType>;
@@ -142,7 +138,7 @@ namespace navigation {
 
 				MarkedNodeType node{
 					.value = neighbor_node,.parent = current_index ,.parent_edge=edge,.g_cost = current.g_cost + edge.cost(),.h_cost = NodeType::apx_distance(end,neighbor_node)
-				};
+				}; 
 				stn::Option<size_t> found = nodes.index_such_that([&](const MarkedNodeType& other)
 					->bool {return neighbor_node == other.value; });
 				if (node.value != current.value) {
@@ -163,12 +159,7 @@ namespace navigation {
 		}
 		return stn::None;
 	}
-	template<NodeContextLike Context>
-	struct NavigationTape {
-
-		size_t current_index;
-		stn::array<ContextResultType<Context>> tape;
-	};
+	
 	struct GridCoord {
 		v3::Coord pos;
 		static double apx_distance(const GridCoord& c1, const GridCoord& c2) {

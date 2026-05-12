@@ -113,6 +113,17 @@ namespace stn {
 				return Option<inner_type>(stn::None);
 			}
 		}
+		auto strip_cv_ref(this auto&& self) -> Option<std::remove_cvref_t<T>>
+		{
+
+			using inner_type = std::remove_cvref_t<T>;
+			if (self.has_value) {
+				return Option<inner_type>(std::forward<decltype(self)>(self).unwrap_unchecked());
+			}
+			else {
+				return Option<inner_type>(stn::None);
+			}
+		}
 		Option<std::remove_cvref_t<T>> const copied() requires std::is_reference_v<T>&& std::is_copy_constructible_v<std::remove_cvref_t<T>> {
 			if (has_value) {
 				return Option<std::remove_cvref_t<T>>(unwrap_unchecked());
@@ -141,6 +152,9 @@ namespace stn {
 			}
 			return *this;
 		}
+		using refrence_type = Option<T&>;
+
+		using const_refrence_type = Option<T&>;
 		template<OptionType Opt>
 		Option& operator=(Opt&& other) requires std::constructible_from<storage_type, typename Opt::storage_type&&> {
 			assign_from(std::forward<Opt>(other));

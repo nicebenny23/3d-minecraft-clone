@@ -296,7 +296,7 @@ namespace stn {
 		}
 
 		bool contains(stn::type_id id) const {
-			return sparse_map.get_flat(id.id).has_value;
+			return sparse_map.get_flat_ref(id.id).has_value;
 		}
 
 		stn::Option<T> remove(stn::type_id id) {
@@ -305,10 +305,6 @@ namespace stn {
 			}
 		}
 		
-		
-		stn::Option<T> at(stn::type_id id) const {
-			return sparse_map.get_flat(id.id);
-		}
 		
 		template<typename U>
 		void set(const T& value) {
@@ -326,12 +322,20 @@ namespace stn {
 
 		template<typename U>
 		bool contains() const {
-			return sparse_map.get_flat(typeIndex<U>).is_some();
+			return sparse_map.get_flat_ref(typeIndex<U>).is_some();
+		}
+		template<typename U>
+		stn::Option<const T&> at() const{
+			return sparse_map.get_flat_ref(typeIndex<U>);
 		}
 
 		template<typename U>
-		stn::Option<T> at() const {
-			return sparse_map.get_flat(typeIndex<U>);
+		stn::Option<T>& reach() {
+			return sparse_map.reach(typeIndex<U>,stn::None);
+		}
+		template<typename U>
+		stn::Option<T&> at(){
+			return sparse_map.get_flat_ref(typeIndex<U>);
 		}
 		
 	};

@@ -1,6 +1,6 @@
 #include "time.h"
 
-timename::Duration timename::TimeManager::current_time()
+timing::Duration timing::WorldClock::make_duration()
 {
     return Duration(*this);
 }

@@ -12,7 +12,7 @@ namespace geo {
 		}
 		static Box from_min_max(v3::Point3 min, v3::Point3 max) {
 			v3::Vec3 scale = max - min;
-			return Box(v3::lerp(max,min,1/2.0f), v3::Scale3(abs(scale.x), abs(scale.y),abs(scale.z)));
+			return Box(v3::lerp(max,min,1/2.0f), v3::Scale3(std::abs(scale.x), std::abs(scale.y), std::abs(scale.z)));
 		}
 		v3::Point3 max() const {
 			return center + v3::Vec3(half_size());
@@ -27,9 +27,9 @@ namespace geo {
 		bool contains_point(v3::Point3 pos) const {
 			v3::Vec3 shifted = center - pos;
 			v3::Scale3 bounds = half_size();
-			if (abs(shifted.x) <= bounds.x) {
-				if (abs(shifted.y) <= bounds.y) {
-					if (abs(shifted.z) <= bounds.z) {
+			if (std::abs(shifted.x) <= bounds.x) {
+				if (std::abs(shifted.y) <= bounds.y) {
+					if (std::abs(shifted.z) <= bounds.z) {
 						return true;
 					}
 				}
@@ -45,6 +45,9 @@ namespace geo {
 		}
 		Box with_center(v3::Point3 new_center) const {
 			return Box(new_center, scale);
+		}
+		Box with_scale(v3::Scale3 new_scale) const {
+			return Box(center, new_scale);
 		}
 		v3::Scale3 half_size() const {
 			return scale / 2;
@@ -65,7 +68,7 @@ namespace geo {
 		}
 
 		Box transform(Box other_transform) const {
-			return Box(center.offset_local(other_transform.center * half_size()), other_transform.scale * scale);
+			return Box(center.offset_local(other_transform.center * scale), other_transform.scale * scale);
 		}
 	};
 }

@@ -137,7 +137,7 @@ Index of this file:
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"        // warning: 'xx' is deprecated: The POSIX name for this..   // for strdup used in demo code (so user can copy & paste the code)
 #pragma clang diagnostic ignored "-Wint-to-void-pointer-cast"       // warning: cast to 'void *' from smaller integer type
 #pragma clang diagnostic ignored "-Wformat-security"                // warning: format string is not a string literal
-#pragma clang diagnostic ignored "-Wexit-time-destructors"          // warning: declaration requires an exit-time destructor    // exit-time destruction order is undefined. if MemFree() leads to users code that has been disabled before exit it might cause problems. ImGui coding style welcomes static/globals.
+#pragma clang diagnostic ignored "-Wexit-time-destructors"          // warning: declaration requires an exit-timing destructor    // exit-timing destruction order is undefined. if MemFree() leads to users code that has been disabled before exit it might cause problems. ImGui coding style welcomes static/globals.
 #pragma clang diagnostic ignored "-Wunused-macros"                  // warning: macro is not used                               // we define snprintf/vsnprintf on Windows so they are available, but not always used.
 #pragma clang diagnostic ignored "-Wzero-as-null-pointer-constant"  // warning: zero as null pointer constant                   // some standard header variations use #define NULL 0
 #pragma clang diagnostic ignored "-Wdouble-promotion"               // warning: implicit conversion from 'float' to 'double' when passing argument to function  // using printf() is a misery with this as C++ va_arg ellipsis changes float to double.
@@ -224,7 +224,7 @@ static void ShowExampleAppWindowTitles(bool* p_open);
 static void ShowExampleMenuFile();
 
 // We split the contents of the big ShowDemoWindow() function into smaller functions
-// (because the link time of very large functions tends to grow non-linearly)
+// (because the link timing of very large functions tends to grow non-linearly)
 static void ShowDemoWindowMenuBar(ImGuiDemoWindowData* demo_data);
 static void ShowDemoWindowWidgets(ImGuiDemoWindowData* demo_data);
 static void ShowDemoWindowMultiSelect(ImGuiDemoWindowData* demo_data);
@@ -1456,7 +1456,7 @@ static void ShowDemoWindowWidgets(ImGuiDemoWindowData* demo_data)
         HelpMarker("Flags above don't apply to this section.");
 
         // Simplified one-liner Combo() API, using values packed in a single constant string
-        // This is a convenience for when the selection set is small and known at compile-time.
+        // This is a convenience for when the selection set is small and known at compile-timing.
         static int item_current_2 = 0;
         ImGui::Combo("combo 2 (one-liner)", &item_current_2, "aaaa\0bbbb\0cccc\0dddd\0eeee\0\0");
 
@@ -3327,7 +3327,7 @@ static void ShowDemoWindowMultiSelect(ImGuiDemoWindowData* demo_data)
 
         // Demonstrate dynamic item list + deletion support using the BeginMultiSelect/EndMultiSelect API.
         // In order to support Deletion without any glitches you need to:
-        // - (1) If items are submitted in their own scrolling area, submit contents size SetNextWindowContentSize() ahead of time to prevent one-frame readjustment of scrolling.
+        // - (1) If items are submitted in their own scrolling area, submit contents size SetNextWindowContentSize() ahead of timing to prevent one-frame readjustment of scrolling.
         // - (2) Items needs to have persistent ID Stack identifier = ID needs to not depends on their index. PushID(index) = KO. PushID(item_id) = OK. This is in order to focus items reliably after a selection.
         // - (3) BeginXXXX process
         // - (4) Focus process
@@ -4312,7 +4312,7 @@ static void ShowDemoWindowLayout()
 
             // If your line starts with text, call AlignTextToFramePadding() to align text to upcoming widgets.
             // (because we don't know what's coming after the Text() statement, we need to move the text baseline
-            // down by FramePadding.y ahead of time)
+            // down by FramePadding.y ahead of timing)
             ImGui::AlignTextToFramePadding();
             ImGui::Text("OK Blahblah"); ImGui::SameLine();
             ImGui::Button("Some framed item##2"); ImGui::SameLine();
@@ -4551,7 +4551,7 @@ static void ShowDemoWindowLayout()
         for (int line = 0; line < lines; line++)
         {
             // Display random stuff. For the sake of this trivial demo we are using basic Button() + SameLine()
-            // If you want to create your own time line for a real application you may be better off manipulating
+            // If you want to create your own timing line for a real application you may be better off manipulating
             // the cursor position yourself, aka using SetCursorPos/SetCursorScreenPos to position the widgets
             // yourself. You may also want to use the lower-level ImDrawList API.
             int num_buttons = 10 + ((line & 1) ? line * 9 : line * 3);
@@ -4817,7 +4817,7 @@ static void ShowDemoWindowPopups()
     // (*) One can use IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup) to bypass it and detect hovering even
     //     when normally blocked by a popup.
     // Those three properties are connected. The library needs to hold their visibility state BECAUSE it can close
-    // popups at any time.
+    // popups at any timing.
 
     // Typical use for regular windows:
     //   bool my_tool_is_active = false; if (ImGui::Button("Open")) my_tool_is_active = true; [...] if (my_tool_is_active) Begin("My Tool", &my_tool_is_active) { [...] } End();
@@ -6461,7 +6461,7 @@ static void ShowDemoWindowTables()
                 ImGui::TableNextRow();
                 if (row == 0)
                 {
-                    // Setup ItemWidth once (instead of setting up every time, which is also possible but less efficient)
+                    // Setup ItemWidth once (instead of setting up every timing, which is also possible but less efficient)
                     ImGui::TableSetColumnIndex(0);
                     ImGui::PushItemWidth(TEXT_BASE_WIDTH * 3.0f); // Small
                     ImGui::TableSetColumnIndex(1);

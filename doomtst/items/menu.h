@@ -24,6 +24,7 @@ namespace ui {
 		void apply(ecs::obj& object) const{
 			object.add_component<menu_component>();
 			UiSpawner(geo::Box2d(v2::zerov, v2::unitv), 1).apply(object);
+			object.get_component<ui::UiEnabled>().disable();
 		}
 	};
 	struct MenuState :ecs::resource {
@@ -81,8 +82,8 @@ namespace ui {
 			}
 		}
 	};
-	struct MenuPlugin :Core::Plugin {
-		void build(Core::App& app) {
+	struct MenuPlugin {
+		void operator()(Core::App& app) {
 			app.ensure_resource< MenuState>();
 			app.emplace_system<MenuEnabler>();
 		}

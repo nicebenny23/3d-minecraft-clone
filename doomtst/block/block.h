@@ -3,7 +3,6 @@
 #include <glm/glm.hpp>
 #include "../game/ecs/game_object.h"
 #include "../math/geometry.h"
-#include "../math/geometry.h"
 #include <rpcndr.h>
 #include "../game/ecs/component.h"
 #include "../math/Scale3.h"
@@ -31,7 +30,8 @@ namespace blocks {
 
 	};
 	struct block : ecs::component {
-		block_mesh mesh;
+		BlockMesh mesh;
+		stn::non_null<BlockRegistry> registry;
 		v3::Coord pos;
 		std::uint16_t light_passing_through;
 
@@ -56,20 +56,15 @@ namespace blocks {
 			return world().get_resource<BlockRegistry>().is<T>(id);
 		}
 
-		const BlockRegistry& registry() const {
-			return world().get_resource<BlockRegistry>();
-		}
+		
 		BlockTraits& info() const{
-			return registry().traits_for(id);
+			return registry->traits_for(id);
 		}
 		const stn::box<BlockType>&  type() const {
-			return registry().block_for(id);
+			return registry->block_for(id);
 		}
-		block(const BlockMeshTraits& traits, dirty_flag& chunk_mesh_flag, v3::Coord location, blocks::block_id block_id, math::Direction3d attachment_face, math::Direction2d block_direction) 
-			:mesh(traits, chunk_mesh_flag, location, attachment_face, block_direction),
-			id(block_id){
-			light_passing_through = 0;
-			pos = location;
+		block(const BlockMeshTraits& traits, dirty_flag& chunk_mesh_flag, v3::Coord location, blocks::block_id block_id, math::Direction3d attachment_face, math::Direction2d block_direction,BlockRegistry& block_register) 
+			:mesh(traits, chunk_mesh_flag, location, attachment_face, block_direction),id(block_id),registry(block_register),light_passing_through(0),pos(location){
 		};
 
 	};

@@ -28,7 +28,7 @@ namespace items {
 		RecipeBinder binder;
 		stn::Option<ItemRecipe> wanted;
 		void set_state() {
-			wanted = best_booklet_recipe(binder.list, binder.input.get_component<container>(), stn::None);
+			wanted = best_booklet_recipe(binder.list, binder.input, stn::None);
 
 		}
 	};
@@ -58,7 +58,7 @@ namespace items {
 			if (world.get_resource<ui::MenuState>().no_menu_open()) {
 				return;
 			}
-			ecs::obj cursor_obj = world.get_resource<items::cursor_container>().primary_slot();
+			ecs::Constrained<ElementSlot> cursor_obj = world.get_resource<items::cursor_container>().primary_slot();
 			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
 			//		cursor_obj.get_component<ui::UiBounds>().local.center = world.ensure_resource<userinput::InputManager>().mouse_position;
 			for (auto&& [crafting_slot_display] : ecs::View< items::crafting_slot_displayer>(world)) {
@@ -70,7 +70,7 @@ namespace items {
 				
 				if (crafting_slot_display.display.get_component<ui::InteractionState>().left_clicked) {
 					crafter& crafter_comp = crafting_slot_display.crafter_comp.get_component<crafter>();
-					auto auto_val = build_recipe_from_booklet(crafter_comp.binder.list, crafter_comp.binder.input.get_component<container>(), cursor_slot);
+					auto auto_val = build_recipe_from_booklet(crafter_comp.binder.list, crafter_comp.binder.input, cursor_slot.owner());
 					if (auto_val) {
 						auto_val.unwrap().apply(world);
 					}

@@ -86,6 +86,7 @@ namespace stn {
 		using types = TypeList::EmptyList;
 	};
 
+	
 	template <template <typename...> class Template, typename... Args>
 	struct type_instantiation_parameters_impl<Template<Args...>, Template> {
 		using types = TypeList::TypeList<Args...>;

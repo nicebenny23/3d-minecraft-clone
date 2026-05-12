@@ -9,15 +9,15 @@
 
 struct playermovement : ecs::component
 {
-    timename::time lastGroundedTime;
-    timename::time jumpBufferTime;
+    double lastGroundedTime;
+    double jumpBufferTime;
     bool slamUsed;                  // track whether slam was already done this airtime
     bool has_jumped = false;
     void start()
     {
         has_jumped = false;
-        lastGroundedTime = world().ensure_resource<timename::TimeManager>().now();
-        jumpBufferTime = world().ensure_resource<timename::TimeManager>().now() - 1.0f;
+        lastGroundedTime = world().ensure_resource<timing::WorldClock>().now();
+        jumpBufferTime = world().ensure_resource<timing::WorldClock>().now() - 1.0f;
         slamUsed = false;
     }
 };
@@ -35,13 +35,13 @@ struct PlayerMovementSys : ecs::System
 			return;
 		}
 
-        auto view = ecs::View<physics::rigidbody,playermovement,playerclimb,ecs::world_transform>(ecs);
+        auto view = ecs::View<physics::rigidbody,playermovement,playerclimb,core::LocalTransform>(ecs);
 
         for (auto [body, movement, climb,transform] : view)
         {
 			userinput::InputManager& man=ecs.get_resource<userinput::InputManager>();
-            float dt = ecs.ensure_resource<timename::TimeManager>().dt;
-            timename::time now = ecs.ensure_resource<timename::TimeManager>().now();
+            float dt = ecs.ensure_resource<timing::WorldClock>().dt;
+            double now = ecs.ensure_resource<timing::WorldClock>().now();
             // — horizontal movement unchanged —
             float slowdown = 2.0f;
             float speed = 16.0f;
@@ -94,7 +94,7 @@ struct PlayerMovementSys : ecs::System
                 double sinceGround = (now - movement.lastGroundedTime);
                 float sinceBuffer = (now - movement.jumpBufferTime);
 
-                // slam: one-time hard downward thrust in mid-air
+                // slam: one-timing hard downward thrust in mid-air
                 if (!body.isonground
                     && man.key(userinput::shift_key).pressed
                     && !movement.slamUsed)
@@ -108,7 +108,6 @@ struct PlayerMovementSys : ecs::System
                 {
                     movement.has_jumped=true;
                     body.velocity.y = jumpStrength;
-                    alert("Hershel vs super luigi");
                     movement.jumpBufferTime = now - (bufferDuration + 1.0f); // expire buffer
                 }
                 // sneak-down on ground
@@ -117,13 +116,19 @@ struct PlayerMovementSys : ecs::System
                 {
                     body.velocity.y -= effSpeed;
                 }
+				if (ecs.get_resource<grid::Grid>().chunks_loaded()==343) {
+					//body.owner().get_component<core::LocalTransform>().transform.position += Vec3(32, 0, 0);
+
+				}
 				if (man.key('z').held) {
-					body.owner().get_component<ecs::world_transform>().transform.position.y = 4;
+					transform.transform.position.y = 4;
 				}
 					if (man.key('f').held) {
-					body.owner().get_component<ecs::world_transform>().transform.position += Vec3(4, 0, 0);
-				
+					transform.transform.position += transform.transform.normal_dir()*4;
 				}
+					if (man.key('h').held) {
+						transform.transform.position += transform.transform.normal_dir() * 10*dt;
+					}
 					
                 
             }

@@ -1,6 +1,6 @@
 #include "GlUtil.h"
 #pragma once
-namespace vertice {
+namespace renderer {
 	struct vertex_attribute {
 		size_t components; // Number of components (e.g., 3 for a vec3)
 		GLenum type;     // The OpenGL type (e.g., GL_FLOAT, GL_INT)

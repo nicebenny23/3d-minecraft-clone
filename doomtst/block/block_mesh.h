@@ -7,7 +7,7 @@
 #include "../math/cube_vertex.h"
 namespace blocks {
 
-	struct block_mesh;
+	struct BlockMesh;
 	enum class cover_state :char {
 		Covered = 0,
 		Uncovered = 1,
@@ -15,7 +15,7 @@ namespace blocks {
 
 	};
 
-	struct face {
+	struct BlockFace {
 
 
 		bool uncomputed() const {
@@ -28,16 +28,15 @@ namespace blocks {
 			return cover == cover_state::Covered;
 		}
 
-		face(block_textures texval, math::Direction3d num)
-			:face_direction(math::Direction3d(num)), tex(texval), cover(cover_state::Uncomputed) {
+		BlockFace(block_texture texval)
+			:tex(texval), cover(cover_state::Uncomputed) {
 		}
-		block_textures tex;
-		math::Direction3d face_direction;
+		block_texture tex;
 		cover_state cover;
 	};
 	struct MeshFace {
 
-		face& face();
+		BlockFace& face();
 		v3::Point3 center();
 		bool uncovered() {
 			return face().uncovered();
@@ -49,25 +48,25 @@ namespace blocks {
 			return face().covered();
 		}
 
-		block_mesh& mesh();
+		BlockMesh& mesh();
 		math::Direction3d direction() const{
 			return face_direction;
 		}
-		MeshFace(block_mesh& mesh, math::Direction3d face) :face_mesh(mesh), face_direction(face) {
+		MeshFace(BlockMesh& mesh, math::Direction3d BlockFace) :face_mesh(mesh), face_direction(BlockFace) {
 			
 		}
 	private:
-		stn::non_null<block_mesh> face_mesh;
+		stn::non_null<BlockMesh> face_mesh;
 		math::Direction3d face_direction;
 	};
 	
-	struct block_mesh {
+	struct BlockMesh {
 	private:
 		geo::Box box;
 
 	public:
 		//the vertex at the lowest corner of the world
-		stn::List<face, 6> faces;
+		stn::List<BlockFace, 6> faces;
 		math::Direction3d attached_direction;
 		math::Direction2d direction;
 
@@ -87,9 +86,9 @@ namespace blocks {
 		bool visible() const {
 			return !invisible();
 		}
-		block_mesh(const BlockMeshTraits& textures, stn::dirty_flag& d_flag, v3::Coord position, math::Direction3d attachment_direction, math::Direction2d facing_direction) :
+		BlockMesh(const BlockMeshTraits& textures, stn::dirty_flag& d_flag, v3::Coord position, math::Direction3d attachment_direction, math::Direction2d facing_direction) :
 			flag(d_flag), box(position + unitv / 2, textures.size), transparent(false), faces([&](size_t index) {
-			return face(textures.faces[index], math::Direction3d(math::DirectionIndex3d(index)));
+			return BlockFace(textures.faces[index]);
 				}), attached_direction(attachment_direction)
 					, direction(facing_direction), air_like(textures.invisible) {
 			box.center -= attached_direction.vec() * box.scale.shrunk(1)/2;
@@ -113,24 +112,24 @@ namespace blocks {
 		bool air_like;
 
 		void mark_dirty(math::Direction3d index_face) {
-				face& face = faces[index_face.index()];
+				BlockFace& face = faces[index_face.index()];
 				flag.mark_dirty();
 				face.cover = cover_state::Uncomputed;
 		}
 		
-		friend struct face;
+		friend struct BlockFace;
 		stn::dirty_flag& flag;
 
 	};
-	inline face& MeshFace::face() {
-		return mesh().faces.unchecked_at(face_direction.index());
+	inline BlockFace& MeshFace::face() {
+		return face_mesh->faces.unchecked_at(face_direction.index());
 
 	}
 
 	inline v3::Point3 MeshFace::center() {
 		return mesh().bounds().in_direction(face_direction);
 	}
-	inline block_mesh& MeshFace::mesh() {
+	inline BlockMesh& MeshFace::mesh() {
 		return *face_mesh;
 	}
 }

@@ -51,6 +51,7 @@ namespace ecs {
 		template<typename T>
 		friend struct component_storage;
 		friend struct component_type;
+
 	};
 	template<typename T>
 	concept ComponentType = std::derived_from<T, component>;
@@ -129,7 +130,7 @@ namespace ecs {
 		}
 
 		void remove_at_unchecked(entity_id ent) override {
-			static_cast<component&>(pages[ent.id]).destroy_hook();
+				static_cast<component&>(pages.unchecked_at(ent.id)).destroy_hook();
 			pages.remove_at_unchecked(ent.id);
 		}
 		template<typename...Args>
@@ -142,6 +143,8 @@ namespace ecs {
 			return stn::insertion<T&>(emplace_unchecked(ent, std::forward<Args>(args)...), true);
 		}
 	private:
+		
+
 		component_pages<T, ecs::page_size> pages;
 
 	};

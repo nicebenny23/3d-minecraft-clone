@@ -30,10 +30,10 @@ namespace ecs {
 		}
 
 		const Archetype& empty_archetype() const {
-			return archetypes[0];
+			return archetypes.first_unchecked();
 		}
 		Archetype& empty_archetype() {
-			return archetypes[0];
+			return archetypes.first_unchecked();
 		}
 
 		const Archetype& archetype_at_unchecked(archetype_id id) const {
@@ -65,23 +65,29 @@ namespace ecs {
 		ArchetypeEntity& archetype_entity_of(entity_id ent) {
 			return locations[ent.id];
 		}
+		const ArchetypeEntity& archetype_entity_of(entity_id ent) const {
+			return locations[ent.id];
+		}
+		ArchetypeEntity& archetype_entity_of_unchecked(entity_id ent) {
+			return locations.unchecked_at(ent.id);
+		}
+		const ArchetypeEntity& archetype_entity_of_unchecked(entity_id ent) const {
+			return locations.unchecked_at(ent.id);
+		}
 
 		Archetype& archetype_of(entity_id ent) {
 			return archetype_at(archetype_entity_of(ent).id());
 		}
 		Archetype& archetype_of_unchecked(entity_id ent) {
-			return archetype_at_unchecked(archetype_entity_of(ent).id());
+			return archetype_at_unchecked(archetype_entity_of_unchecked(ent).id());
 		}
-		void spawn_at(entity_id new_spawn, component_id component_id) {
-			archetype_id spawn_at = empty_archetype().arch_connection_at(component_id).unwrap_or_else([&]() {
-				//in this case we have not created an archetype connected to old_archetype at index yet
-				return add_archetype(empty_archetype().id_set.flipped(component_id));
-				});
-				reaching_archetype_entity_of(new_spawn).set(archetype_at(spawn_at).add(new_spawn));
+
+		void spawn_at(entity_id new_spawn, archetype_id id) {
+				reaching_archetype_entity_of(new_spawn).set(archetype_at_unchecked(id).add(new_spawn));
 		}
 		Archetypes(){
 			//empty archetype
-			add_archetype(component_ids(stn::None));
+			insert_archetype(component_ids(stn::None));
 		};
 		void add_page(page_index index) {
 			
@@ -90,15 +96,15 @@ namespace ecs {
 			reaching_archetype_entity_of(new_spawn).set(empty_archetype().add(new_spawn));
 		}
 
-		archetype_id add_archetype(const component_ids& Components) {
+		archetype_id insert_archetype(const component_ids& components) {
 			for (Archetype& arch : archetypes) {
-				if (arch.id_set == Components) {
-					stn::throw_logic_error("Archetypes cannot contain 2 archetypes with the same bitset");
+				if (arch.id_set == components) {
+					return arch.id();
 				}
 			}
-			archetypes.push(Archetype(Components, archetype_id(total_archetypes())));
+			archetypes.push(Archetype(components, archetype_id(total_archetypes())));
 			for (auto& arch : archetypes) {
-				component_ids component_links = arch.id_set.flipped(Components);
+				component_ids component_links = arch.id_set.flipped(components);
 				// If two archetypes differ by exactly one component, link their moves
 				if (component_links.total_ids() == 1) {
 					component_id other_index = component_links.into_list().first();
@@ -118,32 +124,31 @@ namespace ecs {
 				.into<stn::array>();
 		}
 		//internal method that does not satify the ticks invariant;
-		inline void remove_from_archetypes_storage_unchecked(archetype_location entity_location) {
-			Archetype& old_archetype = archetype_at(entity_location.id);
-			archetype_entity_of(old_archetype.last()).set_index(entity_location.index);
+		inline Archetype& remove_from_archetypes_storage_unchecked(archetype_location entity_location) {
+			Archetype& old_archetype = archetype_at_unchecked(entity_location.id);
+			archetype_entity_of_unchecked(old_archetype.last_unchecked()).set_index(entity_location.index);
 			old_archetype.remove_unchecked(entity_location.index);
-
+			return old_archetype;
 		}
 
 		inline void remove_from_archetypes_unchecked(entity_id ent) {
-			ArchetypeEntity& entity_location = reaching_archetype_entity_of(ent);
+			ArchetypeEntity& entity_location = archetype_entity_of_unchecked(ent);
 			entity_location.ticks.tick();
 			remove_from_archetypes_storage_unchecked(entity_location.location);
 		}
 
 		void transfer_entity_to_flipped_index(entity_id ent, component_id index) {
-			ArchetypeEntity& entity_location = reaching_archetype_entity_of(ent);
+			ArchetypeEntity& entity_location = archetype_entity_of(ent);
 			//get the archetype that is inverted at index
-			remove_from_archetypes_storage_unchecked(entity_location.location);
 			archetype_id new_id_opt =
-				archetype_at(entity_location.id())
+				remove_from_archetypes_storage_unchecked(entity_location.location)
 				.arch_connection_at(index)
 				.unwrap_or_else([&]() {
 				//in this case we have not created an archetype connected to old_archetype at index yet
 				component_ids new_arch = archetype_at(entity_location.id()).id_set.flipped(index);
-				return add_archetype(new_arch);
-					});
-			entity_location.set(archetype_at(new_id_opt).add(ent));
+				return insert_archetype(new_arch);
+			});
+			entity_location.set(archetype_at_unchecked(new_id_opt).add(ent));
 		}
 
 		using iterator = typename stn::array<Archetype>::iterator;
@@ -161,7 +166,6 @@ namespace ecs {
 		const const_iterator end() const {
 			return archetypes.end();
 		}
-
 	private:
 		stn::paged_array<ArchetypeEntity> locations;
 		stn::array<Archetype> archetypes;

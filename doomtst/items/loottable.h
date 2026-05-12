@@ -6,16 +6,17 @@
 #include "container_transactions.h"
 #include "../player/playerinventory.h"
 #include "../util/pair.h"
+#include "../game/time.h"
 #pragma once 
 namespace items {
 	struct loot_element {
 
-
+		double drop_probibility=1;
 		items::item_entry entry;
-		loot_element(item_id id, size_t count, items::item_types& types) :entry(id, count, types) {
+		loot_element(item_id id, size_t count, items::ItemTypes& types,double prob =1) :entry(id, count, types), drop_probibility(prob) {
 
 		}
-		loot_element(std::string id, size_t count, items::item_types& types) :entry(types.from_name(id), count, types) {
+		loot_element(std::string id, size_t count, items::ItemTypes& types) :entry(types.from_name(id), count, types) {
 
 		}
 		loot_element(items::item_entry item_entry) :entry(item_entry) {
@@ -36,7 +37,7 @@ namespace items {
 	};
 	struct LootTable {
 		LootTable() = default;
-		virtual LootDrops drops_for(items::item_types& types) = 0;
+		virtual LootDrops drops_for(items::ItemTypes& types) = 0;
 	};
 	template<typename T>
 	concept LootTableType = std::derived_from<T, LootTable>;
@@ -56,10 +57,10 @@ namespace items {
 		LootDrops get(loot_table_id id) const{
 			return drops[id.id];
 		}
-		loot_tables(ecs::Ecs& world):types(world.ensure_resource<item_types>()) {
+		loot_tables(ecs::Ecs& world):types(world.ensure_resource<ItemTypes>()) {
 
 		}
-		item_types& types;
+		ItemTypes& types;
 	};
 	struct  loot_dropper : ecs::component {
 		stn::Option<ecs::entity> drop_to;
@@ -73,17 +74,35 @@ namespace items {
 
 
 		};
+		void set(ecs::Constrained<player::inventory> object) {
+			drop_to = object.object().inner();
+			last_interaction_time = world().get_resource<timing::WorldClock>().elapsed_time;
+		}
+		double last_interaction_time;
 		loot_table_id table;
 		loot_tables& tables() {
 			return world().get_resource<loot_tables>();
 		}
 		void destroy_hook() {
 			if (drop_to) {
+				double time_diff = world().get_resource<timing::WorldClock>().elapsed_time-last_interaction_time;
+				if (1.0<time_diff) {
+					return;
+				}
 				for (const loot_element& element : tables().get(table).elements) {
-					player::inventory& inv = world().get_component< player::inventory>(drop_to.unwrap());
-					stn::Option<items::AddToSlotPlan> slot = items::give_container_entry(element.entry, inv.hotbar.get<items::container>());
-					if (slot) {
-						slot.unwrap().apply(world());
+					if (random::random()<element.drop_probibility) {
+						player::inventory& inv = world().get_component< player::inventory>(drop_to.unwrap());
+						stn::array<ecs::Constrained<items::ElementSlot>> slots;
+						for (items::container_element& elem: inv.hotbar.get<items::container>()) {
+							slots.push(elem);
+						}
+						for (items::container_element& elem : inv.slots.get<items::container>()) {
+							slots.push(elem);
+						}
+						stn::Option<items::AddContainerPlans>  give_action= items::give_container_entry(element.entry, slots);
+						if (give_action) {
+							give_action.unwrap().apply();
+						}
 					}
 				}
 			}
@@ -91,8 +110,9 @@ namespace items {
 	};
 	template<LootTableType T>
 	void loot_table_recipe(ecs::obj& entity) {
-		entity.add_component<loot_dropper>(entity.world().insert_resource<loot_tables>().insert<T>());
+		entity.add_component<loot_dropper>(entity.world().get_resource<loot_tables>().insert<T>());
 	}
+
 
 }
 

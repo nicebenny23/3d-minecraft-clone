@@ -9,15 +9,15 @@ namespace items {
 
 
 	struct cursor_container :ecs::resource {
-		ecs::obj primary_slot() {
+		ecs::Constrained<ElementSlot> primary_slot() {
 			return container_object;
 		}
 		cursor_container(ecs::Constrained<ElementSlot> container,ecs::obj cursor_display)
-		:container_object(container.object()),display(cursor_display) {
-
+		:container_object(container),display(cursor_display) {
+			int l = 1;
 		}
 		ecs::obj display;
-		ecs::obj container_object;
+		ecs::Constrained<ElementSlot>  container_object;
 	};
 
 	struct cursor_swapper :ecs::System {
@@ -25,33 +25,22 @@ namespace items {
 			if (world.get_resource<ui::MenuState>().no_menu_open()) {
 				return;
 			}
-			ecs::obj cursor_obj = world.get_resource<cursor_container>().primary_slot();
-			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
+			ecs::Constrained<ElementSlot> cursor_slot = world.get_resource<cursor_container>().primary_slot();
 			for (auto&& [interaction_state, container_slot,decl] : ecs::View<ui::InteractionState,items::RefrencedSlot, items::ItemSlotDecal>(world)) {
 				if (!interaction_state.left_clicked) {
 					continue;
 				}
-				if (container_slot.displayed().empty() && cursor_slot.empty()) {
+				if (container_slot.displayed().get<ElementSlot>().empty() && cursor_slot.get<ElementSlot>().element().is_none()) {
 					continue;
 				}
-				if (container_slot.displayed().can_interact(cursor_slot)) {
+				//hack because idk how to make items durbility work
+				if (!container_slot.displayed().get<ElementSlot>().empty()&&items::apply_plan(TransferSlotsRequest{ .from_slot = cursor_slot,.to_slot = container_slot.displayed(), .count = items::max_transfer })) {
 
-					if (cursor_slot.occupied()) {
-						auto cursor_slot_tranfer = transfer_slot_some(container_slot.displayed(), cursor_slot);
-						if (cursor_slot_tranfer) {
-							cursor_slot_tranfer.unwrap().apply(world);
-						}
-					}
-					else {
-						auto slot_cursor_tranfer = transfer_slot_some(cursor_slot, container_slot.displayed());
-						if (slot_cursor_tranfer) {
-							slot_cursor_tranfer.unwrap().apply(world);
-						}
-					}
 				}
 				else {
-					swap_slot(cursor_slot, container_slot.displayed()).apply(world);
-
+					ecs::Constrained < ElementSlot > slot = container_slot.displayed();
+					ElementSlot& sk = cursor_slot.get<ElementSlot>();
+					swap_slot_plans(cursor_slot, container_slot.displayed());
 				}
 				return;
 			}
@@ -64,30 +53,24 @@ namespace items {
 				return;
 			}
 			ecs::obj cursor_display = world.get_resource<cursor_container>().display;
-			ElementSlot& cursor_slot = world.get_resource<cursor_container>().primary_slot().get_component<ElementSlot>();
+			ecs::Constrained<ElementSlot> cursor_slot = world.get_resource<cursor_container>().primary_slot();
 			cursor_display.get_component<ui::UiBounds>().local.center = world.get_resource<userinput::InputManager>().mouse_position;
 			debug(cursor_display.get_component<ui::ComputedStyle>().enabled);
 			for (auto&& [interaction_state, container_slot,decl] : ecs::View< ui::InteractionState, items::RefrencedSlot,   items::ItemSlotDecal>(world)) {
 				if (!interaction_state.right_clicked) {
 					continue;
 				}
-				if (cursor_slot.empty() && container_slot.displayed().empty()) {
+				if (cursor_slot.get<ElementSlot>().empty() && container_slot.displayed_object().is_none()) {
 					continue;
 				}
 				//implies container_slot is nonempty;
-				if (cursor_slot.empty()) {
+				if (cursor_slot.get<ElementSlot>().empty()) {
 
-					auto give_cursor_half = give_slot_some(container_slot.displayed(), cursor_slot, container_slot.displayed().entry().unwrap().count / 2);
-					if (give_cursor_half) {
-						give_cursor_half.unwrap().apply(world);
-					}
-
+					items::apply_plan(TransferSlotsRequest{ .from_slot = container_slot.displayed(),.to_slot = cursor_slot, .count = container_slot.entry().unwrap().count / 2 });
+					
 				}
 				else {
-					auto give_slot_one = give_slot_some(cursor_slot, container_slot.displayed(), 1);
-					if (give_slot_one) {
-						give_slot_one.unwrap().apply(world);
-					}
+					items::apply_plan(TransferSlotsRequest{ .from_slot = cursor_slot,.to_slot = container_slot.displayed(), .count = 1 });
 				}
 				return;
 
@@ -97,17 +80,15 @@ namespace items {
 	struct cursor_highlighter :ecs::System {
 		void run(ecs::Ecs& world) {
 			world.get_resource<cursor_container>().display.get_component<ui::UiEnabled>().enable();
-			ecs::obj cursor_obj = world.get_resource<cursor_container>().primary_slot();
+			ecs::Constrained<ElementSlot> cursor_obj = world.get_resource<cursor_container>().primary_slot();
 			ui::ComputedStyle & style = ecs::parent(world.get_resource<cursor_container>().display)
 			.unwrap()
 			.get_component<ui::ComputedStyle>();
 
 			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
 			for (auto [item_decal, interaction_state] : ecs::View< ItemSlotDecal, ui::InteractionState>(world)) {
-				if (interaction_state.hovered) {
-					if (world.get_resource<ui::MenuState>().menu_open()) {
-						item_decal.set_decal(renderer::TexturePath("images\\importantblockholder.png", "important_block_holder"));
-					}
+				if (interaction_state.hovered&&world.get_resource<ui::MenuState>().menu_open()) {
+						item_decal.set_decal(renderer::TexturePath("images\\importantblockholder.png"));
 				}
 				else {
 					item_decal.reset_decal();
@@ -118,8 +99,8 @@ namespace items {
 
 
 
-	struct CursorContainerPlugin :Core::Plugin {
-		void build(Core::App& app) {
+	struct CursorContainerPlugin {
+		void operator()(Core::App& app) {
 			ecs::obj cursor_entity = ecs::spawn(app.Ecs, items::ItemSlotSpawner());
 			ecs::obj cursor_display = ecs::spawn(app.Ecs, items::ClearItemSlotSpawner(ecs::Constrained<items::ElementSlot>(cursor_entity)));
 				

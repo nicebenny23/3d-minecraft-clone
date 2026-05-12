@@ -38,7 +38,6 @@ namespace console {
     private:
         Console() = default;
         ~Console() = default;
-
         std::array<LogEntry, MaxEntries> buffer_;
         std::atomic<int> head_{ 0 };  
         std::atomic<int> count_{ 0 };     // Number of valid entries

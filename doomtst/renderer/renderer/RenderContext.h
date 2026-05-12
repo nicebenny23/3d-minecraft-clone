@@ -15,33 +15,33 @@ namespace renderer {
 	//Context For the Renderer which Controls Bindings And State
 	class RenderProperties {
 	public:
-		bool depthTestEnabled = true;     // Enable/Disable Depth Test
-		bool depthWriteEnabled = true;    // Enable/Disable Depth Write
-		bool blendingEnabled = false;     // Enable/Disable Blending
-		bool cullFaceEnabled = true;      // Enable/Disable Face Culling
-		GLenum blendFuncSrc = GL_SRC_ALPHA;   // Source blend function
-		GLenum blendFuncDst = GL_ONE_MINUS_SRC_ALPHA; // Destination blend function
 
+		bool depth_test = true;     // Enable/Disable Depth Test
+		bool depth_write = true;    // Enable/Disable Depth Write
+		bool blend = false;     // Enable/Disable Blending
+		bool cull = true;      // Enable/Disable Face Culling
+		GLenum blend_function_source = GL_SRC_ALPHA;   // Source blend function
+		GLenum blend_function_distance = GL_ONE_MINUS_SRC_ALPHA; // Destination blend function
+		GLenum draw_mode=GL_TRIANGLES;
 		// Default constructor
 		RenderProperties() = default;
 
 		// Constructor with parameters to set initial properties
-		RenderProperties(bool depthTest, bool depthWrite, bool Cull, bool Blending, GLenum BlendFunctionSrc, GLenum BlendFunctionDst)
-			: depthTestEnabled(depthTest),
-			depthWriteEnabled(depthWrite),
-			blendingEnabled(Blending),
-			cullFaceEnabled(Cull),
-			blendFuncSrc(BlendFunctionSrc),
-			blendFuncDst(BlendFunctionDst) {
+		RenderProperties(bool depthTest, bool depthWrite, bool Cull, bool Blending, GLenum BlendFunctionSrc, GLenum BlendFunctionDst, GLenum draw_shape_mode= GL_TRIANGLES)
+			: depth_test(depthTest),
+			depth_write(depthWrite),
+			blend(Blending),
+			cull(Cull),
+			blend_function_source(BlendFunctionSrc),
+			blend_function_distance(BlendFunctionDst), draw_mode(draw_shape_mode){
 		}
 		bool operator==(const RenderProperties& other) const = default;
 
 	};
-
-	using mesh_id = stn::rc<GpuMesh>;
+	using MeshId = stn::arc<GpuMesh>;
 	struct CpuMesh {
-		mesh_id mesh;
-		vertice::vertex layout;
+		MeshId mesh;
+		renderer::vertex layout;
 		stn::array<float> points;
 		stn::array<std::uint32_t> indices;
 
@@ -76,13 +76,13 @@ namespace renderer {
 			glBindTexture(GL_TEXTURE_2D_ARRAY, Tex.id);
 			BoundTextureArray = Tex;
 		}
-		void bind(const shader& Shader) {
-			if (Shader.id == 0) {
+		void bind(const Shader& shade) {
+			if (shade.id == 0) {
 				throw std::logic_error("cant attach invalid shader");
 			}
-			if (BoundShader.is_none_or([&Shader](const shader& shader_id) {return shader_id.id != Shader.id; })) {
-				glUseProgram(Shader.id);
-				BoundShader = stn::Option<shader>(Shader);
+			if (BoundShader.is_none_or([&shade](const Shader& shader_id) {return shader_id.id != shade.id; })) {
+				glUseProgram(shade.id);
+				BoundShader = stn::Option<Shader>(shade);
 			}
 		}
 
@@ -90,7 +90,10 @@ namespace renderer {
 			glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
 			bound_frame = fbo;
 		}
-
+		void draw(GpuMesh mesh) {
+			bind(mesh);
+			glDrawElements(properties.draw_mode, mesh.length, GL_UNSIGNED_INT, 0);
+		}
 
 		void unbind_mesh() {
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -146,9 +149,11 @@ namespace renderer {
 
 
 
-		GpuMesh create_mesh() {
+		GpuMesh insert_builder_for() {
 
 			GLuint vao = 0, vbo = 0, ebo = 0;
+
+			GlUtil::poll_errors();
 			glGenVertexArrays(1, &vao);
 			glGenBuffers(1, &vbo);
 			glGenBuffers(1, &ebo);
@@ -167,6 +172,7 @@ namespace renderer {
 			msh.length = 0;
 
 		}
+		
 		void load(CpuMesh& data) {
 
 			GpuMesh& msh = *data.mesh;
@@ -179,9 +185,9 @@ namespace renderer {
 				glBufferData(GL_ARRAY_BUFFER, data.points.length() * sizeof(float), data.points.data(), GL_STATIC_DRAW);
 				size_t stride = data.layout.stride();
 				size_t offset = 0;
-				vertice::vertex& mesh_vertex = data.layout;
+				renderer::vertex& mesh_vertex = data.layout;
 				for (int i = 0; i < mesh_vertex.length(); i++) {
-					vertice::vertex_attribute& attribute = mesh_vertex[i];
+					renderer::vertex_attribute& attribute = mesh_vertex[i];
 					GlUtil::set_attr(i, attribute.components, attribute.type, GLsizei(stride), offset);
 					glEnableVertexAttribArray(i);
 					offset += attribute.size;
@@ -190,23 +196,24 @@ namespace renderer {
 				msh.length = data.indices.length();
 			}
 		}
-		shader bound_shader() {
+		Shader bound_shader() {
 			return BoundShader.unwrap();
 		}
 
 		void bind_properties(const RenderProperties& props) {
-			glDepthMask(props.depthWriteEnabled);
-			GlUtil::SetProperty(GL_CULL_FACE, props.cullFaceEnabled);
-			GlUtil::SetProperty(GL_DEPTH_TEST, props.depthTestEnabled);
-			glBlendFunc(props.blendFuncSrc, props.blendFuncDst);
-			GlUtil::SetProperty(GL_BLEND, props.blendingEnabled);
+			properties = props;
+			glDepthMask(props.depth_write);
+			GlUtil::SetProperty(GL_CULL_FACE, props.cull);
+			GlUtil::SetProperty(GL_DEPTH_TEST, props.depth_test);
+			glBlendFunc(props.blend_function_source, props.blend_function_distance);
+			GlUtil::SetProperty(GL_BLEND, props.blend);
 		}
 		Context() :BoundShader(), BoundTexture2d(), BoundTextureArray(), bound_mesh() {
 		}
 
 	private:
 		RenderProperties properties;
-		stn::Option<shader> BoundShader;
+		stn::Option<Shader> BoundShader;
 		stn::Option <Texture2D> BoundTexture2d;
 		stn::Option <TextureArray> BoundTextureArray;
 		stn::Option<Fbo> bound_frame;

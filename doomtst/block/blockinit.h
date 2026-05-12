@@ -10,33 +10,29 @@ namespace blocks {
 	struct GenerateBlock{
 		blocks::block_id id;
 		v3::Coord loc;
-		math::Direction2d face;
+		math::Direction2d block_face;
 		math::Direction3d direction;
-		Chunks::chunkmesh& mesh;
+		chunks::ChunkMesh& mesh;
 		stn::Option<stn::file_handle&> handle;
+		BlockRegistry& registry;
 		//it cannot be a recipe due to its optimizations mechanics
-		Chunks::block_object spawn(ecs::Ecs& world) {
-			BlockRegistry& registry =world.get_resource<BlockRegistry>();
+		chunks::block_object spawn(ecs::Ecs& world) {
 			BlockTraits traits=registry.traits_for(id);
 			block* blk_ptr;
-			if (traits.solid) {
-				//best diffrerentiator
-				blk_ptr=&world.spawn_with_component<block>(traits.mesh, mesh.recreate_mesh, loc, id, direction, face);
+			using block_type= decltype(stn::make_constructor<block>(traits.mesh, mesh.recreate_mesh, loc, id, direction, block_face, registry));
+			block_type block_constructor = block_type(traits.mesh, mesh.recreate_mesh, loc, id, direction, block_face, registry);
+			if (!traits.solid) {
+				blk_ptr=&world.spawn_with(std::move(block_constructor)).get<block&>();
 			}
 			else {
-				struct air_tag {
-
-				};
-				blk_ptr=&world.spawn_with_component_tagged<air_tag,block>(traits.mesh, mesh.recreate_mesh, loc, id, direction, face);
+				blk_ptr=&world.spawn_with(std::move(block_constructor),stn::make_constructor<aabb::Collider>(!traits.solid)).get<block&>();
 			}
-			//stupid trick to save memory
 			block& blk = *blk_ptr;
+			
 			ecs::obj object = blk.owner();
+			ecs::entity ent_id = object.inner();
 			if (traits.emmited_light!=0) {
-				object.add_component<block_emmision>(traits.emmited_light);
-			}
-			if (traits.solid) {
-				object.add_component<aabb::Collider>(!traits.solid);
+				world.add_component_unchecked<block_emmision>(ent_id,traits.emmited_light);
 			}
 			if (traits.mesh.transparent) {
 				blk.mesh.transparent = true;
@@ -47,7 +43,7 @@ namespace blocks {
 			else {
 				registry.block_for(id)->apply(object);
 			}
-			return Chunks::block_object::make_unchecked(object,*blk_ptr);
+			return chunks::block_object::make_unchecked(object,blk);
 		}
 	};
 

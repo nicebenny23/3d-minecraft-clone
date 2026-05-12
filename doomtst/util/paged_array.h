@@ -95,8 +95,8 @@ namespace stn {
 			clear();
 		}
 		auto operator[](this auto&& self, size_t index)->stn::apply_const_like_t<decltype(self), T>& {
-			if (self.length() <= index) {
-				stn::throw_logic_error("cannot acess index {} in paged array of length {} ", index, self.length());
+			if (self.len <= index) {
+				stn::throw_logic_error("cannot acess index {} in paged array of length {} ", index, self.len);
 			}
 			return self.page_pointers.unchecked_at(index >> page_size)[index & page_elements_minus_one];
 		}

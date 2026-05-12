@@ -2,19 +2,52 @@
   {
     "size": {"x": 2, "y": 2},
     "input": [
-      {"id": "plank", "count": 1},
-      {"id": "plank", "count": 1},
-      {"id": "plank", "count": 1},
-      {"id": "plank", "count": 1}
+      {"id": "plank"},
+      {"id": "plank"},
+      {"id": "plank"},
+      {"id": "plank"}
     ],
     "output": {"id": "crafting_table", "count": 1}
   },
   {
     "size": {"x": 1, "y": 2},
     "input": [
-      {"id": "plank", "count": 1},
-      {"id": "plank", "count": 1}
+      {"id": "plank"},
+      {"id": "plank"}
     ],
     "output": {"id": "stick", "count": 4}
+  }
+,
+  {
+    "size": {"x": 1, "y": 2},
+    "input": [
+      {"id": "stick"},
+      {"id": "crystal"}
+    ],
+    "output": {"id": "torch", "count": 8}
+  }
+, {
+    "size": {"x": 1, "y": 1},
+    "input": [
+      {"id": "moss_pack"}
+    ],
+    "output": {"id": "moss", "count": 6}
+  }
+, {
+    "size": {"x": 1, "y": 1},
+    "input": [
+      {"id": "crystal"}
+    ],
+    "output": {"id": "glass", "count": 4}
+  }
+, {
+    "size": {"x": 2, "y": 2},
+    "input": [
+      {"id": "stone"},
+      {"id": "stone"},
+      {"id": "stone"},
+      {"id": "stone"}
+    ],
+    "output": {"id": "stone_brick", "count": 4}
   }
 ]

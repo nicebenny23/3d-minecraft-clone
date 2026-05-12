@@ -1,6 +1,8 @@
 #pragma once
 #include "dynamicarray.h"
 #include <tuple>
+#include "List.h"
+#include <bit>
 namespace stn {
 	
 	struct Context {
@@ -40,13 +42,20 @@ namespace stn {
 	template<ByteContext Ctx, typename T> requires std::is_trivially_copyable_v<T>
 	struct Serializer<Ctx,T> {
 		static void write(T val, Ctx& ctx) {
-			stn::span<std::byte> data(std::bit_cast<std::byte*>(&val), sizeof(T));
+			auto data = stn::span<const std::byte>(
+				reinterpret_cast<const std::byte*>(&val),
+				sizeof(T)
+			);
 			ctx.write_bytes(data);
+
 		}
 
 		static T read(Ctx& ctx) {
-			stn::array<std::byte> bytes=ctx.read_bytes(sizeof(T));
-			return *reinterpret_cast<T*>(bytes.data());
+			auto bytes = ctx.read_bytes(sizeof(T));
+			stn::List<std::byte, sizeof(T)> buffer;
+			std::memcpy(buffer.data(), bytes.data(), sizeof(T));
+
+			return std::bit_cast<T>(buffer);
 			
 		}
 	};

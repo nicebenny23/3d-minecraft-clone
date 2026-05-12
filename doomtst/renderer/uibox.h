@@ -18,10 +18,9 @@ namespace ui {
 		renderer::TexturePath path;
 		ecs::entity ui_entity;
 	};
-	struct prepare_ui_image;
-	struct ui_image_component:ecs::component
+	struct PrepareUiImage;
+	struct UiImage:ecs::component
 	{
-		ui_image_component() = default;
 		colors::Color current_color;
 		stn::Option<renderer::TexturePath> current_image() const{
 			return current_image_path;
@@ -29,7 +28,7 @@ namespace ui {
 		renderer::RenderableHandle tex_handle;
 		void start() {
 		}
-		ui_image_component(colors::Color col) :current_color(col) {
+		UiImage(colors::Color col, renderer::RenderableHandle handle) :current_color(col), tex_handle(handle){
 
 		}
 		void destroy_hook() {
@@ -37,117 +36,80 @@ namespace ui {
 
 		}
 		void set_image(const renderer::TexturePath& path) {
-			world().write_command(set_image_cmd(owner().inner(), path));
+			set_image_path=path;
 		}
 
 	private:
+		stn::Option< renderer::TexturePath> set_image_path;
+
 	stn::Option< renderer::TexturePath> current_image_path;
-	friend struct prepare_ui_image;
+	friend struct PrepareUiImage;
 	};
-	struct ui_image_spawner{
+	struct UiImageSpawner{
 		UiSpawner ui_spawn;
 		colors::Color color;
 		stn::Option<renderer::TexturePath> path;
-		ui_image_spawner(const renderer::TexturePath& spawn_path,geo::Box2d box, size_t priority, colors::Color spawn_color=colors::White)
+		UiImageSpawner(const renderer::TexturePath& spawn_path,geo::Box2d box, size_t priority, colors::Color spawn_color=colors::White)
 		:path(spawn_path),ui_spawn(box,priority), color(spawn_color) {
 			
 		}
-		ui_image_spawner(geo::Box2d box, size_t priority,colors::Color spawn_color = colors::White)
+		UiImageSpawner(geo::Box2d box, size_t priority,colors::Color spawn_color = colors::White)
 		:path(stn::None),ui_spawn(box, priority),color(spawn_color){
 
 		}
 		void apply(ecs::obj& object) const{
 			ui_spawn.apply(object);
-			object.add_component<ui_image_component>(color);
+			object.add_component<UiImage>(color, object.world().get_resource<Renderer>().gen_renderable("Ui"));
 			if (path) {
-				object.get_component<ui_image_component>().set_image(path.unwrap());
+				object.get_component<UiImage>().set_image(path.unwrap());
 
 			}
 		}
 	};
-	struct ui_image{
-		ui_image(ecs::Ecs& world,const char* texloc, const char* texture, geo::Box2d bounds, size_t prio) :object(ecs::spawn_emplaced<ui_image_spawner>(world,renderer::TexturePath(std::string(texloc),std::string(texture)),bounds,prio)){
-		}
-		ecs::object_handle object;
-		void enable_if(bool should_enable) {
-			object.get_component<UiEnabled>().set_enabled(should_enable);	
-		}
-		
-		void enable() {
-			object.set_emplace_component<UiEnabled>().enable();
-		}
-		void disable() {
-			object.set_emplace_component<UiEnabled>().disable();
-		}
-		
-		void set_bounds(geo::Box2d bounds) {
-			object.get_component<ui::UiBounds>().local = bounds;
-		}
-		void set_center(v2::Vec2 center) {
-			object.get_component<ui::UiBounds>().local.center = center;
-		}
+	struct PrepareUiImage :ecs::System {
+		PrepareUiImage(MeshId item_mesh) :id(item_mesh) {
 
-		void set_image(const char* texloc, const char* TextureName) {
-			object.get_component<ui_image_component>().set_image(renderer::TexturePath(texloc, TextureName));
 		}
-		void add_child(const ecs::obj &child) {
-			object.get().add_child(child);
-		}
-		void make_child_of(ecs::obj& parent) {
-			parent.add_child(object.get());
-		}
-		template<ecs::ComponentType T>
-		T& get_component() {
-			return object.get_component<T>();
-		}
-		
-
-	};
-	struct prepare_ui_image :ecs::System {
+		MeshId id;
 		void run(ecs::Ecs& world) {
-			for (const set_image_cmd& cmd:world.read_commands<set_image_cmd>()){
-				if (!world.contains(cmd.ui_entity)) {
-					continue;
-				}
-				ui_image_component& img= world.get_component<ui_image_component>(cmd.ui_entity);
-				if (!img.tex_handle) {
-					img.tex_handle = world.get_resource<renderer::Renderer>().gen_renderable("Ui");
-					renderer::MeshBuilder mesh = img.tex_handle.create_mesh(vertice::vertex().push<float, 2>());
-					mesh.add_indices(math::square_mesh_triangle_indices);
-					array<float> databuf = array<float>();
-					for (int j = 0; j < 4; j++) {
-						mesh.add_point(math::square_mesh[j]);
-					}
-					img.tex_handle.fill(std::move(mesh));
-				}
-				if (cmd.path!=img.current_image_path) {
-					img.tex_handle.set_uniform(renderer::uniform(world.load_asset(cmd.path).unwrap(), "tex"));
-					img.current_image_path = cmd.path;
-				}
-			}
-
-			ecs::View< ui::ComputedStyle, ui_image_component> bounds_view(world);
-			for (auto&& [style, ui_image] : bounds_view) {
-
-				if (ui_image.tex_handle) {
+			ecs::View< ui::ComputedStyle, UiImage,ui::UiBounds> bounds_view(world);
+			for (auto&& [style, img,bounds] : bounds_view) {
 					if (style.enabled) {
-						ui_image.tex_handle.enable();
-						ui_image.tex_handle.set_order_key(style.priority);
-						ui_image.tex_handle.set_uniform(renderer::uniform(style.final_size.scale, "scale"));
-						ui_image.tex_handle.set_uniform(renderer::uniform(style.final_size.center, "center"));
-						ui_image.tex_handle.set_color(ui_image.current_color);
+						img.tex_handle.set_mesh(id);
+						if (img.set_image_path!= img.current_image_path) {
+							if (img.set_image_path) {
+								img.tex_handle.set_uniform(renderer::uniform(world.load_asset(img.set_image_path.unwrap()).unwrap(), "tex"));
+							}
+							img.current_image_path = img.set_image_path;
+						}
+						img.tex_handle.set_order_key(style.priority);
+						img.tex_handle.set_uniform(renderer::uniform(style.final_size.scale, "scale"));
+						img.tex_handle.set_uniform(renderer::uniform(style.final_size.center, "center"));
+						if (style.final_size.min().x == 0.087500000838190317) {
+							int l = 0;
+						}
+						img.tex_handle.set_color(img.current_color);
 					}
-					else {
-						ui_image.tex_handle.disable();
-					}
-				}
+					img.tex_handle.enable_if(style.enabled);
 			}
 		}
 	};
-	struct UiImagePlugin :Core::Plugin {
-		void build(Core::App& app) {
-			app.insert_plugin<UiPlugin>();
-			app.emplace_system<prepare_ui_image>();
+	struct UiImagePlugin {
+		void operator()(Core::App& app) {
+			renderer::shader_id ui_shader = app.Ecs.load_asset_emplaced<renderer::shader_descriptor>("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs").unwrap();
+
+			app.Ecs.load_asset_emplaced<MaterialDescriptor>("Ui", "ui_phase", "UiShader", RenderProperties(false, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+				stn::array{ renderer::UniformRefrence("aspect_ratio", "aspectratio") }
+			);	
+			renderer::MeshBuilder mesh = app.Ecs.get_resource<Renderer>().make_mesh_with_builder(renderer::vertex().push<float, 2>());
+			mesh.add_indices(math::square_mesh_triangle_indices);
+			array<float> databuf = array<float>();
+			for (int j = 0; j < 4; j++) {
+				mesh.add_point(math::symetrical_square_mesh[j]);
+			}
+			renderer::fill(std::move(mesh),app.Ecs);
+			app.insert_plugin(UiPlugin());
+			app.emplace_system<PrepareUiImage>(mesh.id());
 		}
 
 	};

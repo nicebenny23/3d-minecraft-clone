@@ -146,7 +146,22 @@ namespace stn {
 				bit_list.unchecked_at(idx) &= ~(bit_at(off));
 			}
 		}
+		//returns whether the state was changed from its previos state
+		//note NEVER USE Unless you have mapped out exactly what you are doing
+		bool reaching_insertion_enable(size_t bit) {
+			expand(bit + 1);
+			size_t idx = calc_full_words(bit);
+			size_t off = calc_leftover_bits(bit);
+			size_t bit_at_off = bit_at(off);
+			bool is_new = (bit_list.unchecked_at(idx) & bit_at_off) == false;
+			if (is_new) {
+				bit_list.unchecked_at(idx) |= bit_at_off;
+			}
+			return is_new;
+		}
+
 		void reaching_set(size_t bit, bool value) {
+			
 			expand(bit + 1);
 			size_t idx = calc_full_words(bit);
 			size_t off = calc_leftover_bits(bit);
@@ -251,9 +266,9 @@ namespace stn {
 		}
 
 		bitset operator^(const bitset& oth) const {
-			size_t max_size = max(bit_list.length(), oth.bit_list.length());
-			size_t min_size = min(bit_list.length(), oth.bit_list.length());
-			bitset result(max(bits, oth.bits));
+			size_t max_size = std::max(bit_list.length(), oth.bit_list.length());
+			size_t min_size = std::min(bit_list.length(), oth.bit_list.length());
+			bitset result(std::max(bits, oth.bits));
 			for (size_t i = 0; i < min_size; i++) {
 				result.bit_list[i] = (bit_list[i] ^ oth.bit_list[i]);
 			}

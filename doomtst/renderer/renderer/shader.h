@@ -9,10 +9,10 @@
 #include "../../assets/Assets.h"
 #include "GlUtil.h"
 namespace renderer {
-	struct shader :assets::Asset {
+	struct Shader :assets::Asset {
 
 		GLint id;
-		shader() {
+		Shader() {
 			id = 0;
 		}
 		GLint uniformlocation(const char* name) const {
@@ -28,13 +28,12 @@ namespace renderer {
 			return location;
 
 		}
-		shader(GLint shader_id) :id(shader_id) {
-			int l = 4;
+		Shader(GLint shader_id) :id(shader_id) {
 		}
 	};
 
 	struct shader_descriptor {
-		using asset_type = shader;
+		using asset_type = Shader;
 		shader_descriptor(const std::string& name, const std::string& vertex, const std::string& fragment)
 			: shader_name(name), vertex_path(vertex), fragment_path(fragment) {
 		}
@@ -66,6 +65,7 @@ namespace std {
 #include <fstream>
 #include <iostream>
 namespace renderer {
+	
 	inline int compile_shader(const char* name, GLint shadertype) {
 		std::ifstream shaderstream(name);
 		if (shaderstream.fail()) {
@@ -81,16 +81,16 @@ namespace renderer {
 		return shaderid;
 	}
 
-	struct shader_loader {
+	struct ShaderLoader {
 		using load_descriptor = shader_descriptor;
-		shader_loader() {
+		ShaderLoader() {
 
 		}
-		void unload(stn::box<shader> shader) {
+		void unload(stn::box<Shader> Shader) {
 
 		}
 		static constexpr bool immortal = true;
-		stn::box<shader> load(const shader_descriptor& load_info) {
+		stn::box<Shader> load(const shader_descriptor& load_info) {
 			int VertexShader = compile_shader(load_info.vertex_path.c_str(), GL_VERTEX_SHADER);
 			int FragmentShader = compile_shader(load_info.fragment_path.c_str(), GL_FRAGMENT_SHADER);
 			GLint id = glCreateProgram();
@@ -102,9 +102,9 @@ namespace renderer {
 			glDeleteShader(FragmentShader);
 			glValidateProgram(id);
 			GlUtil::poll_errors();
-			return stn::box<shader>(id);
+			return stn::box<Shader>(id);
 		}
 	};
-	using shader_id = assets::AssetHandle<shader>;
+	using shader_id = assets::AssetHandle<Shader>;
 
 }

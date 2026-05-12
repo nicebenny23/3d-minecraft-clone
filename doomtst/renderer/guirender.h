@@ -26,8 +26,8 @@ namespace guirender{
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		}
 	};
-	struct ConsolePlugin :Core::Plugin {
-		void build(Core::App& app) {
+	struct ConsolePlugin {
+		void operator()(Core::App& app) {
 			initgui();
 			app.emplace_system<GuiSystem>();
 		}

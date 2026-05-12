@@ -21,26 +21,20 @@ namespace ui {
 
 	}
 
-	struct text_component :ecs::component {
+	struct Text :ecs::component {
 
-		void set_handle() {
-			if (!handle) {
-				handle = world().get_resource<renderer::Renderer>().gen_renderable("Text");
-			}
-		}
-		text_component(colors::Color color) :word(""),text_color(color) {
+		Text(colors::Color color,renderer::RenderableHandle handle) :word(""),text_color(color), handle(handle){
 		}
 		colors::Color text_color;
 		renderer::RenderableHandle handle;
 		std::string word;
+
 		template<typename... Args>
 		void format(const std::format_string<Args...>& fmt, Args&&... args) {
 			word = std::format(fmt, std::forward<Args>(args)...);
 		}
 		void destroy_hook() {
-			if (handle) {
 				handle.destroy();
-			}
 		}
 
 	};
@@ -48,31 +42,27 @@ namespace ui {
 	struct UiTextMesher:ecs::System{
 		void run(ecs::Ecs& world) {
 
-			ecs::View<ui::ComputedStyle,text_component> bounds_view(world);
+			ecs::View<ui::ComputedStyle,Text> bounds_view(world);
 			for (auto [style, ui_text] : bounds_view) {
 				if (style.enabled) {
-					ui_text.set_handle();
-					ui_text.handle.enable();
 					double char_offset = 1.5f;
 					geo::Box2d bounds = style.final_size;
-					v2::Vec2 min = bounds.center - v2::Vec2(char_offset * ui_text.word.length(), 1.f) * bounds.half_size();
+					v2::Vec2 min = bounds.center*2 - v2::Vec2(char_offset * ui_text.word.length(), 1.f) * bounds.half_size();
 					v2::Vec2 boxoffset = v2::Vec2(char_offset, 1) * bounds.half_size();
 					v2::Vec2 increse = v2::Vec2(char_offset, 0) * bounds.scale;
 					geo::Box2d charlocation = geo::Box2d(min + boxoffset, bounds.scale);
-					renderer::MeshBuilder mesh_data = ui_text.handle.create_mesh(vertice::vertex().push<float, 2>().push<float, 3>());
+
+					renderer::MeshBuilder mesh_data = ui_text.handle.insert_builder_for(renderer::vertex().push<float, 2>().push<float, 3>());
 					for (int i = 0; i < ui_text.word.length(); i++) {
 						write_letter(mesh_data, charlocation, int(ui_text.word[i] - '0'));
 						charlocation.center += increse;
 					}
 					ui_text.handle.set_color(ui_text.text_color);
-					ui_text.handle.fill(std::move(mesh_data));
+					renderer::fill(std::move(mesh_data), world);
 					ui_text.handle.set_order_key(style.priority);
 				}
-				else {
-					if (ui_text.handle) {
-						ui_text.handle.disable();
-					}
-				}
+				ui_text.handle.enable_if(style.enabled);
+
 			}
 		}
 	};
@@ -85,13 +75,13 @@ namespace ui {
 		}
 		void apply(ecs::obj& object) const{
 			ui_spawn.apply(object);
-			object.add_component<text_component>(color);
+			object.add_component<Text>(color,object.world().get_resource<renderer::Renderer>().gen_renderable("Text"));
 		}
 	};
 
-	struct UiTextPlugin :Core::Plugin {
-		void build(Core::App& app) {
-			app.insert_plugin<UiPlugin>();
+	struct UiTextPlugin {
+		void operator()(Core::App& app) {
+			app.insert_plugin(UiPlugin());
 			array<std::string> texlist = array<std::string>();
 			for (size_t i = 0; i < 10; i++) {
 				texlist.push(std::format("bitmaptext\\char_{}.png", i));

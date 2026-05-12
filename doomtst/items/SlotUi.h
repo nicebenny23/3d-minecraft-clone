@@ -11,7 +11,7 @@ namespace items {
 	inline v2::Vec2 inventory_center(v2::Coord2 location) {
 		float xval = (2 * location.x + 1.0f) / float(grid_size.x);
 		float yval = (2 * location.y + 1.0f) / float(grid_size.y);
-		return v2::Vec2(xval, yval);
+		return v2::Vec2(xval, yval)/2;
 	}
 
 
@@ -19,13 +19,13 @@ namespace items {
 		ItemSlotDecal(ecs::obj decal_component) :item_decal_object(decal_component) {
 		}
 		void set_decal(const renderer::TexturePath& Path) {
-			item_decal_object.get<ui::ui_image_component>().set_image(Path);
+			item_decal_object.get<ui::UiImage>().set_image(Path);
 		}
 		void reset_decal() {
-			renderer::TexturePath path = renderer::TexturePath("images\\blockholder.png", "item_decal_original");
+			renderer::TexturePath path = renderer::TexturePath("images\\blockholder.png");
 				set_decal(path);			
 		}
-		ecs::Constrained<ui::ui_image_component> item_decal_object;
+		ecs::Constrained<ui::UiImage> item_decal_object;
 	};
 
 	

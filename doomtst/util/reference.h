@@ -15,6 +15,12 @@ namespace stn {
 		const T& operator*() const {
 			return *ptr;
 		};
+		T* get_ptr() {
+			return ptr;
+		}
+		const T* get_ptr() const {
+			return ptr;
+		}
 		non_null() = delete;
 		void observe(T& value) noexcept {
 			ptr = &value;

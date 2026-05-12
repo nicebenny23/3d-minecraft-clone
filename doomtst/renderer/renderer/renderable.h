@@ -38,7 +38,7 @@ namespace renderer{
 
 		void set(const renderer::uniform& value) {
 			size_t check=
-			owner().get_component<material_component>().mat_id->shader->uniformlocation(value.name.c_str());
+			owner().get_component<material_component>().mat_id->Shader->uniformlocation(value.name.c_str());
 			for (auto& val : overides) {
 				if (val.name == value.name) {
 					if (val.value.index() != value.value.index()) {
@@ -64,8 +64,8 @@ namespace renderer{
 		}
 	};
 	struct mesh_component:ecs::component {
-		stn::Option<mesh_id> msh;
-		mesh_component(mesh_id id) :msh(id) {
+		stn::Option<MeshId> msh;
+		mesh_component(MeshId id) :msh(id) {
 		}
 		mesh_component() :msh() {
 		}
@@ -85,10 +85,6 @@ namespace renderer{
 	};
 	
 
-	struct renderable_marker :ecs::component {
-	
-
-	};
 	struct renderable_recipe {
 		material_handle material;
 		renderable_recipe(material_handle mat):material(mat){
@@ -97,7 +93,6 @@ namespace renderer{
 		void apply(ecs::obj& object) const{
 			object.add_component<is_enabled>();
 			object.add_component<order_key>(0);
-			object.add_component<renderable_marker>();
 			object.add_component<material_component>(material);
 			object.add_component<renderable_overides>();
 			object.add_component<mesh_component>();
@@ -105,7 +100,7 @@ namespace renderer{
 
 	};
 	//todo remove
-	using  renderable = ecs::Constrained<is_enabled, order_key, renderable_marker, renderable_overides,mesh_component, material_component>;
+	using  renderable = ecs::Constrained<is_enabled, order_key, renderable_overides,mesh_component, material_component>;
 	
 
 }
