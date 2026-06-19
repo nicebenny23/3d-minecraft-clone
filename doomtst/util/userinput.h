@@ -54,7 +54,8 @@ namespace userinput {
 	}
 	struct  InputManager :ecs::resource {
 		stn::array<InputKey> keys;
-		v2::Vec2 mouse_position_dt;
+
+		v2::Vec2 adjusted_mouse_position_dt;
 		v2::Vec2 mouse_position;
 		InputKey left_mouse() {
 			return keys[mouse_left_index];
@@ -66,7 +67,7 @@ namespace userinput {
 
 		InputManager() {
 			mouse_position = v2::Vec2(0, 0);
-			mouse_position_dt = v2::Vec2(0, 0);
+			adjusted_mouse_position_dt = v2::Vec2(0, 0);
 			keys = stn::array<InputKey>(GLFW_KEY_LAST + extra_keys);
 		}
 
@@ -88,7 +89,7 @@ namespace userinput {
 	struct InputPollingSystem :ecs::System {
 		void run(ecs::Ecs& world) {
 			userinput::InputManager& manager=world.get_resource<userinput::InputManager>();
-			manager.mouse_position_dt = v2::Vec2(0, 0);
+			manager.adjusted_mouse_position_dt = v2::Vec2(0, 0);
 			for (InputKey& key: manager.keys) {
 				key.pressed = false;
 				key.released = false;
@@ -110,7 +111,7 @@ namespace userinput {
 	inline void cursor_position_callback(GLFWwindow* /*window*/, double xpos, double ypos) {
 		v2::Vec2 new_mouse_position(Core::game.Ecs.get_resource<renderer::Window>().fit_to_aspect_ratio(v2::Vec2(xpos, ypos)));
 		userinput::InputManager& manager = Core::game.ensure_resource<userinput::InputManager>();
-		manager.mouse_position_dt = new_mouse_position - manager.mouse_position;
+		manager.adjusted_mouse_position_dt = new_mouse_position - manager.mouse_position;
 		manager.mouse_position = new_mouse_position;
 	}
 

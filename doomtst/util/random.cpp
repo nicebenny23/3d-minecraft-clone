@@ -11,6 +11,7 @@ namespace random {
 		seed64 ^= seed64 << 17;
 
 	}
+	//random number from 0-1
 	float random() {
 		randomize_64(seed64);
 		return static_cast<double>(seed64) / UINT64_MAX;
@@ -20,7 +21,7 @@ namespace random {
 		return seed64 % 2;
 	}
 
-	void randomcoord(unsigned int& seed) {
+	void randomize_uint(unsigned int& seed) {
 		seed ^= seed << 13;
 		seed ^= seed >> 17;
 		seed ^= seed << 5;
@@ -32,39 +33,28 @@ namespace random {
 	}
 	stn::array<v3::Vec3> seeded_directions;
 
-	void InitRandomDirections() {
-		const int startingseed = 5;
-		const int randomizeiter = 10;
-		unsigned int noiseval = startingseed;
-		for (int i = 0; i < randomizeiter; i++) {
-			randomcoord(noiseval);
-		}
+	void init_random_direction_cache() {
+		
+		const int iters = 10;
+		unsigned int noiseval = 1;
 
 		seeded_directions = stn::array<v3::Vec3>();
 		size_t ushort_amt = (1 + std::numeric_limits<unsigned short>().max());
 		for (int u = 0; u < ushort_amt; u++) {
 
-			v3::Vec3 PointOnCircle;
+			v3::Vec3 point_on_circle;
 			do {
 
-				for (size_t i = 0; i < 10; i++) {
-					randomcoord(noiseval);
-				}
-				PointOnCircle.x = noiseval;
-				for (size_t i = 0; i < 10; i++) {
-					randomcoord(noiseval);
-				}
-				PointOnCircle.y = noiseval;
-				for (size_t i = 0; i < 10; i++) {
+				for (int ind = 0; ind < 3; ind++) {
 
-					randomcoord(noiseval);
+					for (size_t i = 0; i < iters; i++) {
+						randomize_uint(noiseval);
+					}
+					point_on_circle[ind] = (noiseval/ static_cast<double>(MAXUINT32))*2-1;
 				}
-				PointOnCircle.z = noiseval;
-				PointOnCircle /= static_cast<float>(MAXUINT32);
-				PointOnCircle -= v3::unitv / 2;
-				PointOnCircle * 2;
-			} while (mag2(PointOnCircle) > 1);
-			seeded_directions.push(normal(PointOnCircle));
+
+			} while (mag2(point_on_circle) > 1);
+			seeded_directions.push(normal(point_on_circle));
 		}
 	}
 	
@@ -75,7 +65,7 @@ namespace random {
 	}
 
 	void initilize_random() {
-		InitRandomDirections();
+		init_random_direction_cache();
 		seed64 = 1;
 	}
 }

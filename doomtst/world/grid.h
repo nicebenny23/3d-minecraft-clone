@@ -89,7 +89,8 @@ namespace grid {
 		Point3 to_block_pos(Point3 point) {
 			return Point3(point.x / blocksize, point.y / blocksize, point.z / blocksize);
 		}
-		chunks::ChunkLocation chunk_from_block_pos(Coord pos) {
+		//keeping here because I might make chunk locations assigned t oa unique world in the futurw
+		chunks::ChunkLocation chunk_from_block_pos(Coord pos) const {
 			return  chunks::ChunkLocation::from_block_pos(pos);
 		}
 		Coord get_voxel(Point3 pos) const {

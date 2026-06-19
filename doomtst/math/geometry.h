@@ -73,12 +73,6 @@ namespace geo {
 		HalfSpace(Vec3 positive_norm, Point3 pnt)
 			: normal(positive_norm.normal()), point(pnt) {
 		}
-		HalfSpace(Point3 p1, Point3 p2, Point3 p3) {
-			Vec3 v1 = p2 - p1;
-			Vec3 v2 = p3 - p1;
-			normal = v3::normal(Cross(v1, v2));
-			point = p1;
-		}
 		bool contains(Point3 pnt) const{
 			return 0 <= signed_distance_from_boundry_to_point(pnt);
 		}

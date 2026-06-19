@@ -46,13 +46,12 @@ namespace physics {
 		}
 		double density;
 	};
-	struct rigidbody : ecs::component {
+	struct RigidBody : ecs::component {
 		Vec3 velocity;
 		Vec3 acceleration;
 		double mass;
 
 		bool isonground;
-		bool inliquid;
 		void add_force(const Force& force) {
 			acceleration += force.force / mass;
 		}
@@ -60,31 +59,31 @@ namespace physics {
 			velocity += impulse.impulse / mass;
 		}
 		// Constructor
-		rigidbody() :mass(1), velocity(zerov), acceleration(zerov), inliquid(false) {
+		RigidBody() :mass(1), velocity(zerov), acceleration(zerov) {
 			isonground = true;
 		}
-		~rigidbody() = default;
+		~RigidBody() = default;
 	};
 
 	struct RigidbodySystem :ecs::System {
 
 		void run(ecs::Ecs& ecs) override {
 			double deltaTime = ecs.ensure_resource<timing::WorldClock>().dt;
-			ecs::View< rigidbody,Density,core::LocalTransform> densities(ecs);
+			ecs::View< RigidBody,Density,core::LocalTransform> densities(ecs);
 			for (auto [body, density,transform] : densities) {
 				body.mass=transform.transform.scale.volume()*density.density;
 			}
 
-			ecs::View< Gravity,  rigidbody> fallers(ecs);
+			ecs::View< Gravity,  RigidBody> fallers(ecs);
 			for (auto [grav, body] : fallers) {
 				body.add_force(grav.strength);
 			}
-			ecs::View< FrictionDamping, rigidbody> friction_query(ecs);
+			ecs::View< FrictionDamping, RigidBody> friction_query(ecs);
 			for (auto [friction, body] : friction_query) {
 				body.add_force(Force{ .force = -body.velocity * friction.strength * v3::Scale3(1.0f,0.f,1.0f) });
 			}
 
-			ecs::View<core::LocalTransform,rigidbody,PhycicsMaterial,ecs::Mabye<aabb::Collider>, ecs::Owner> rigids(ecs);
+			ecs::View<core::LocalTransform,RigidBody,PhycicsMaterial,ecs::Mabye<aabb::Collider>, ecs::Owner> rigids(ecs);
 			for (auto [pos, body, material, collider_mabye, object] : rigids) {
 				if (collider_mabye.is_some_and([&](aabb::Collider& collider){return !collider.effector;})) {
 				
@@ -122,7 +121,7 @@ namespace physics {
 							double restitution = 0;
 							double our_mass = body.mass;
 							double their_mass = std::numeric_limits<double>().infinity();
-							stn::Option<rigidbody&> other_body = hit.owner().get_component_opt<rigidbody>();
+							stn::Option<RigidBody&> other_body = hit.owner().get_component_opt<RigidBody>();
 							if (other_body) {
 								their_mass = other_body.unwrap().mass;
 							}
@@ -169,7 +168,7 @@ namespace physics {
 		double friction = 4.0f;
 		void apply(ecs::obj& object) const {
 			object.add_component<Density>(density);
-			object.add_component<rigidbody>();
+			object.add_component<RigidBody>();
 			object.add_component<FrictionDamping>(friction);
 			object.add_component<PhycicsMaterial>(restitution);
 			object.add_component<Gravity>(gravity);
@@ -178,7 +177,7 @@ namespace physics {
 }
 namespace ecs {
 	template<>
-	inline constexpr ComponentInfo ComponentTraits<physics::rigidbody> = {
+	inline constexpr ComponentInfo ComponentTraits<physics::RigidBody> = {
 		.priority = -111
 	};
 }

@@ -111,12 +111,20 @@ namespace blocks {
 		bool transparent;
 		bool air_like;
 
-		void mark_dirty(math::Direction3d index_face) {
+		void uncompute_face_cover(math::Direction3d index_face) {
 				BlockFace& face = faces[index_face.index()];
-				flag.mark_dirty();
-				face.cover = cover_state::Uncomputed;
+				if (face.cover!=cover_state::Uncomputed) {
+					flag.mark_dirty();
+					face.cover = cover_state::Uncomputed;
+				}
 		}
-		
+		void set_face_texture(math::Direction3d index_face,block_texture texture) {
+			BlockFace& face = faces[index_face.index()];
+			if (face.tex!=texture) {
+				face.tex = texture;
+				flag.mark_dirty();
+			}
+		}
 		friend struct BlockFace;
 		stn::dirty_flag& flag;
 

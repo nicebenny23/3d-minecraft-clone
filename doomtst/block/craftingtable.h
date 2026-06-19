@@ -69,6 +69,9 @@ namespace blocks {
 				BlockMeshTraits(v3::unit_scale, false, crafting_table_side, crafting_table_side, crafting_table_top, crafting_table_bottom, crafting_table_side, crafting_table_side)
 			);
 		}
+		SolidBlockTraits mining_traits() const override {
+			return SolidBlockTraits(3, 0);
+		}
 		void read_from_bytes(ecs::obj block, stn::file_handle& handle)const  override {
 			items::container_id id = stn::file_serializer<items::container_id>().read(handle);
 			ecs::Constrained<items::container> container_slot(block.world().get_resource<items::WorldContainers>()[id]);

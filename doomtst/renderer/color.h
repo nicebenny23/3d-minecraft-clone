@@ -1,4 +1,5 @@
 #include "../math/mathutil.h"
+#include "../math/interval.h"
 
 #pragma once
 namespace colors {
@@ -31,6 +32,10 @@ namespace colors {
 		Color& operator*=(double v) {
 			*this = *this * v;
 			return *this;
+		}
+		static Color monotone(double light) {
+			light = math::unit_bounds.clamp(light);
+			return Color(light, light, light, 1);
 		}
 		Color operator*(const Color& other) const {
 			return Color(r * other.r, g * other.g, b * other.b, a* other.a).clamped();

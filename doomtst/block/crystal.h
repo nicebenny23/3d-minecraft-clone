@@ -9,10 +9,7 @@ namespace items {
 			return "crystal";
 		}
 		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(
-				renderer::TexturePath("images\\crystal.png"),
-				world.get_resource<blocks::BlockRegistry>().get_id("crystal")
-			);
+			return item_traits(renderer::TexturePath("images\\crystal.png"));
 		}
 	};
 	struct crystal_loot_table :items::LootTable {
@@ -24,6 +21,7 @@ namespace items {
 namespace blocks {
 	struct CrystalBlock :BlockType {
 		void apply(ecs::obj& block) const {
+			
 			block.apply_recipe(items::loot_table_recipe<items::crystal_loot_table>);
 		}
 		std::string name() const override {
@@ -34,7 +32,7 @@ namespace blocks {
 		}
 		BlockTraits traits()const {
 			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, crystaloretex));
+				BlockMeshTraits(v3::unit_scale, false, crystaloretex),true,4);
 		}
 	};
 }

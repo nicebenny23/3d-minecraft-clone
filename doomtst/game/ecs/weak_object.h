@@ -7,15 +7,15 @@ namespace ecs {
 		using ConstrainedType = ecs::Constrained<Types...>;
 		template<ComponentType T> requires stn::OneOf<T,Types...>
 		auto get(this auto&& self) -> stn::Option<stn::apply_const_like_t<decltype(self), T>&> {
-			if (alive()) {
-				return element.unwrap().get_component_unchecked<T>();
+			if (self.alive()) {
+				return self.element.unwrap().get_unchecked<T>();
 			}
 			return stn::None;
 		}
 		auto constrained(this auto&& self) -> stn::Option<stn::apply_const_like_t<decltype(self), ConstrainedType>&>
 		{
-			if (alive()) {
-				return element;
+			if (self.alive()) {
+				return self.element;
 			}
 			return stn::None;
 
@@ -30,17 +30,19 @@ namespace ecs {
 		WeakConstrained() :element() {
 
 		}
-		WeakConstrained(ecs::obj object) :element(object) {
+		template<typename T> requires std::constructible_from<stn::Option<ConstrainedType>,T>
+ 		WeakConstrained(const T& object) :element(object) {
 
 		}
 		bool alive() const {
-			element.retain(element.unwrap().is_valid);
+			element.retain(element.unwrap().is_valid());
 			return element.is_some();
 		}
 		explicit operator bool() const {
 			return alive();
 		}
-		void set(ConstrainedType object) {
+		template<typename T> requires std::constructible_from<stn::Option<ConstrainedType>, T>
+		void set(const T& object) {
 			element = object;
 		}
 

@@ -3,10 +3,10 @@
     "size": {"x": 3, "y": 3},
     "input": [
       null,
-      {"id": "stick", "count": 1},
+      {"id": "plank", "count": 1},
       null,
       null,
-      {"id": "stick", "count": 1},
+      {"id": "plank", "count": 1},
       null,
       {"id": "crystal", "count": 1},
       {"id": "crystal", "count": 1},
@@ -18,10 +18,10 @@
     "size": {"x": 3, "y": 3},
     "input": [
       null,
-      {"id": "stick", "count": 1},
+      {"id": "plank", "count": 1},
       null,
       null,
-      {"id": "stick", "count": 1},
+      {"id": "plank", "count": 1},
       null,
       {"id": "stone", "count": 1},
       {"id": "stone", "count": 1},
@@ -33,7 +33,7 @@
     "size": {"x": 3, "y": 3},
     "input": [
       null,
-      {"id": "stick", "count": 1},
+      {"id": "plank", "count": 1},
       null,
       null,
       {"id": "stone", "count": 1},
@@ -48,7 +48,7 @@
     "size": {"x": 3, "y": 3},
     "input": [
       null,
-      {"id": "stick", "count": 1},
+      {"id": "plank", "count": 1},
       null,
       null,
       {"id": "crystal", "count": 1},

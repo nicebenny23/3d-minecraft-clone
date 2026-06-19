@@ -55,8 +55,7 @@ namespace items {
 			ecs::obj cursor_display = world.get_resource<cursor_container>().display;
 			ecs::Constrained<ElementSlot> cursor_slot = world.get_resource<cursor_container>().primary_slot();
 			cursor_display.get_component<ui::UiBounds>().local.center = world.get_resource<userinput::InputManager>().mouse_position;
-			debug(cursor_display.get_component<ui::ComputedStyle>().enabled);
-			for (auto&& [interaction_state, container_slot,decl] : ecs::View< ui::InteractionState, items::RefrencedSlot,   items::ItemSlotDecal>(world)) {
+		for (auto&& [interaction_state, container_slot,decl] : ecs::View< ui::InteractionState, items::RefrencedSlot,   items::ItemSlotDecal>(world)) {
 				if (!interaction_state.right_clicked) {
 					continue;
 				}

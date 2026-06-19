@@ -10,20 +10,26 @@ namespace ai {
 	struct Brain:ecs::component {
 		stn::array<stn::Option<double>> utilities;
 		stn::Option<BrainNodeId> active_node;
+		stn::Option<BrainNodeId> last_active;
+
 		stn::type_indexer<BrainNodeId> node_map;
 		template<typename T>
 		bool active() const{
 			return active_node == node_map.get_opt<T>();
 		}
 		template<typename T>
+		bool becoming_active() const {
+			stn::Option<BrainNodeId> id = node_map.get_opt<T>();
+			return active_node==id&& last_active!=id;
+		}
+		template<typename T>
+		bool becoming_inactive() const {
+			stn::Option < BrainNodeId> id = node_map.get_opt<T>();
+			return active_node != id && last_active == id;
+		}
+		template<typename T>
 		void set(double utility){
 			utilities.reach(node_map.insert<T>().value.id,stn::None) = utility;
-		}
-		template<typename T> 
-		void relinquish_control() {
-			if (active<T>()) {
-				active_node = stn::None;
-			}
 		}
 		stn::Option<double&> operator[](BrainNodeId id) {
 			return utilities[id.id].as_ref();
@@ -38,9 +44,7 @@ namespace ai {
 			ecs::View<Brain> brain_query(world);
 			
 			for (auto&& [brain]:brain_query) {
-				if (brain.active_node == stn::None) {
-					continue;
-				}
+				brain.last_active = brain.active_node;
 				for (size_t i = 0; i < brain.utilities.length();i++) {
 					stn::Option<double> utility= brain.utilities[i];
 					if (!utility) {
@@ -50,8 +54,9 @@ namespace ai {
 						brain.active_node = BrainNodeId(i);
 					}
 				}
-
-				brain.utilities.clear();
+				for (stn::Option<double>& util:brain.utilities) {
+					util.clear();
+				}
 			}
 
 

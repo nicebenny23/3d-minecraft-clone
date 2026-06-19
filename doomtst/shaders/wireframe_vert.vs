@@ -15,7 +15,6 @@ uniform mat4 projection;
 void main()
 {
     vec4 pos =  projection * view*model* vec4(aPos.x,aPos.y,aPos.z, 1.0);
-    pos.y=pos.y*aspectratio;
     pos.z-=.0004f;
     gl_Position=pos;
     

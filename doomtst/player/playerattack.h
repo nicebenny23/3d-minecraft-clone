@@ -16,7 +16,7 @@ namespace player {
 			transform.scale = v3::Scale3(1 / 3.0f);
 			entity.apply_recipe(DynamicColliderRecipe(true));
 			entity.apply_recipe(physics::Spawner{ .gravity = physics::Force{.force = v3::Vec3(0.0f,-.4f,0)} });
-			entity.get_component<physics::rigidbody>().add_impluse(physics::Implulse(v3::Vec3(0, .4, 0) + random::spherical().with_y(0) * 15.0f));
+			entity.get_component<physics::RigidBody>().add_impluse(physics::Implulse(v3::Vec3(0, .4, 0) + random::spherical().with_y(0) * 15.0f));
 			entity.get_component<physics::FrictionDamping>().strength = .2f;
 
 			//entity.add_component<Health::DestroyOnHit>();
@@ -53,7 +53,7 @@ namespace player {
 				if (cursor.hit) {
 					voxtra::RayWorldHit closest = cursor.hit.unwrap();
 					ecs::obj object = closest.collider.object();
-					if (object.has_components<Health::EntityHealth, physics::rigidbody>()) {
+					if (object.has_components<Health::EntityHealth, physics::RigidBody>()) {
 						if (object.get_component<Health::EntityHealth>().damage_delay_timer.is_inactive()) {
 							attack.last_time_seen.set(attack_lifetime);
 							attack.last_seen_entity = closest;
@@ -79,8 +79,8 @@ namespace player {
 					}
 					geo::ray ray = attack.last_seen_entity.unwrap().ray();
 					attack.emmiter.get_component<core::LocalTransform>().transform.position = ray.end;
-					world.write_command(Health::AttackCommand{ .knockback_multiplier = 6,.damage = dmg,.center = ray.start,.body = object });
-					double attack_cooldown = 1;
+					world.write_command(Health::AttackCommand{ .knockback_multiplier = 5,.damage = dmg,.center = ray.start,.body = object });
+					double attack_cooldown = .9;
 					attack.last_attack.set(attack_cooldown);
 					//no need to set the other ones
 					if (object.has_component<items::loot_dropper>()) {

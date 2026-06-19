@@ -215,6 +215,7 @@ namespace blockrender {
 					render_chunk(grid, mesh);
 				}
 			}
+			int l = 2;
 		}
 	};
 	struct BlockRenderPlugin {
@@ -234,7 +235,6 @@ namespace blockrender {
 			renderer::shader_id block_shader = ecs.load_asset_emplaced<renderer::shader_descriptor>("BlockShader", "shaders\\vert1.vs", "shaders\\frag1.vs").unwrap();
 			ecs.load_asset_emplaced<renderer::MaterialDescriptor>("SolidBlock", "solid_phase", "BlockShader", renderer::RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
 				stn::array{
-				renderer::UniformRefrence("aspect_ratio", "aspectratio"),
 				renderer::UniformRefrence("proj_matrix", "projection"),
 				renderer::UniformRefrence("view_matrix", "view"),
 				renderer::UniformRefrence("camera_pos", "camera_pos"),
@@ -244,7 +244,7 @@ namespace blockrender {
 				});
 
 			ecs.load_asset_emplaced<renderer::MaterialDescriptor>("TransparentBlock", "transparent_phase", "BlockShader", renderer::RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-				stn::array{ renderer::UniformRefrence("aspect_ratio", "aspectratio"),
+				stn::array{ 
 				renderer::UniformRefrence("proj_matrix", "projection"),
 				renderer::UniformRefrence("view_matrix", "view"),
 				renderer::UniformRefrence("bind_block_texture", "tex")
@@ -256,31 +256,34 @@ namespace blockrender {
 			texlist.reach(altartex) = "images\\crystalaltarside.png";
 			texlist.reach(glasstex) = "images\\glass.png";
 			texlist.reach(watertex) = "images\\water.png";
-			texlist.reach(torchtex) = "images\\torch.png";
-			texlist.reach(torchtoptex) = "images\\torchtop.png";
-			texlist.reach(crystaloretex) = "images\\crystalore.png";
 			texlist.reach(chest_top) = "images\\chest_top.png";
 			texlist.reach(chest_front) = "images\\chest.png";
 			texlist.reach(chest_sides) = "images\\chest_sides.png";
-			texlist.reach(crystaltorchtoptex) = "images\\crystaltorchtop.png";
 			texlist.reach(mosstex) = "images\\moss.png";
 			texlist.reach(ropetex) = "images\\rope.png";
 			texlist.reach(lavatex) = "images\\lava.png";
 			texlist.reach(obsidiantex) = "images\\obb.png";
-
+			texlist.reach(moss_one) = "images\\moss_one.png";
+			texlist.reach(moss_two) = "images\\moss_two.png";
+			texlist.reach(moss_three) = "images\\moss_three.png";
 			texlist.reach(stone_brick_tex) = "images\\stone_brick.png";
 			texlist.reach(crafting_table_bottom) = "images\\craftingtable.png";
 			texlist.reach(crafting_table_top) = "images\\craftingtabletop.png";
 			texlist.reach(crafting_table_side) = "images\\craftingtableside.png";
 			texlist.reach(furnacefront) = "images\\furnacetop.png";
-			texlist.reach(furnaceside) = "images\\furnace.png";
+			texlist.reach(moss_inactive_tex) = "images\\furnace.png";
 			texlist.reach(ironoretex) = "images\\ironore.png";
 			texlist.reach(furnacesideon) = "images\\furnaceon.png";
 			texlist.reach(log_side) = "images\\treestone.png";
 			texlist.reach(logtoppng) = "images\\log.png";
 			texlist.reach(ultraaltarpngultrapng) = "images\\ultraaltar.png";
-			texlist.reach(sandtex) = "images\\sand.png";
 			texlist.reach(planktex) = "images\\treestoneblock.png";
+
+			texlist.reach(sandtex) = "images\\sand.png";
+			texlist.reach(torchtex) = "images\\baked_torch.png";
+			texlist.reach(torchtoptex) = "images\\torchtop.png";
+			texlist.reach(crystaloretex) = "images\\crystalore.png";
+		
 			renderer::texture_array_id texarray = ecs.load_asset_emplaced<renderer::TextureArrayPath>(texlist, "BlockTextures").unwrap();
 			renderer.set_uniform("bind_block_texture", texarray);
 		}

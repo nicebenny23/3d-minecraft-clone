@@ -7,11 +7,13 @@
 #pragma once
 namespace random {
 
+	//random number from [0,1]
 	float random();
+	//random number from [0,max]
 	float random(float max);
 
 	bool randombool();
-	void randomcoord(unsigned int& seed);
+	void randomize_uint(unsigned int& seed);
 	extern stn::array<v3::Vec3> seeded_directions;
 	inline unsigned short hash_coord(int seed, int xprimed, int yprimed, int zprimed) {
 		unsigned int hash = seed ^ xprimed ^ yprimed ^ zprimed;

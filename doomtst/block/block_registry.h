@@ -4,6 +4,10 @@
 #include "../util/fileloader.h"
 #pragma once
 namespace blocks {
+	//todo replace
+	struct block_tag {
+
+	};
 	enum block_texture :std::uint8_t {
 		treestonetex,
 		stonetex,
@@ -18,25 +22,29 @@ namespace blocks {
 		crafting_table_side,
 		stone_brick_tex,
 		chest_sides,
-		crystaltorchtoptex,
 		mosstex,
+		moss_one,
+		moss_two,
+		moss_three,
+		planktex,
 		ropetex,
 		lavatex,
 		obsidiantex,
 		chest_front,
-		chest_top,
-		furnaceside,
+		moss_inactive_tex,
 		furnacefront,
 		ironoretex,
-		log_side,
-		furnacesideon,
-		logtoppng,
 		ultraaltarpngultrapng,
+		log_side,
+		chest_top,
 		sandtex,
-		planktex,
+		furnacesideon,
+		logtoppng
+	
 	};
 	struct block_tag;
 
+	using block_texture_id = stn::typed_id<block_tag, std::uint16_t>;
 	using block_id = stn::typed_id<block_tag,std::uint16_t>;
 
 	struct block;
@@ -52,7 +60,7 @@ namespace blocks {
 			:faces(only_texture, only_texture, only_texture, only_texture, only_texture, only_texture),
 			size(mesh_size),
 			transparent(is_transparent),
-			invisible(is_invisible) {
+			invisible(is_invisible) {   
 		}
 		stn::List<block_texture, 6> faces;
 		bool transparent;

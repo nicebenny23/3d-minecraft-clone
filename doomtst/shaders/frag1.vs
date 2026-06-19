@@ -5,7 +5,7 @@ out vec4 FragColor;
 in vec3 fragcoord;
 
 uniform sampler2DArray tex;
-in float Color;
+in float light;
 in vec3 rendered_pos; 
 uniform int render_distance;
 
@@ -13,13 +13,18 @@ uniform int render_distance;
 float world_depth(float depth){
 float modified_depth=length(rendered_pos);
 float dv=min(1,max(0,modified_depth/((render_distance)*16)));
-return 1-pow(dv,2.5f);
+return pow(dv,2.5f);
 }
 
 void main()
 {
-  float depth = world_depth(gl_FragCoord.z)*(.2+pow(Color,1.5f))/1.2; 
-  vec4 col= vec4(depth,depth,depth,1)*texture(tex,fragcoord);
-    FragColor =col;
+  float block_depth=min(1,length(rendered_pos)/4);
+  float depth=world_depth(gl_FragCoord.z);
+  float inv_depth=1-depth;
+  float ambient=.13;
+  ambient+=pow(1-block_depth,1.3)*.1;
+  float color=min(1.1,ambient+pow(light,1.2f))*inv_depth;
+  vec4 col= vec4(color,color,color,1)*texture(tex,fragcoord);
+    FragColor=col;
   
 } 

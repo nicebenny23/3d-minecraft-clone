@@ -25,7 +25,7 @@ namespace Health {
 			for (DamageCommand& cmd : world.read_commands<DamageCommand>()) {
 				EntityHealth& current_entity_health = cmd.target.get<EntityHealth>();
 				if (!current_entity_health.damage_delay_timer.is_active()) {
-					current_entity_health.damage_delay_timer.set(1.0f);
+					current_entity_health.damage_delay_timer.set(.5f);
 					current_entity_health.current_health -= stn::min(current_entity_health.current_health, cmd.damage);
 				}
 			}
@@ -53,7 +53,7 @@ namespace Health {
 		double knockback_multiplier;
 		size_t damage;
 		v3::Point3 center;
-		ecs::Constrained<core::LocalTransform, physics::rigidbody,EntityHealth> body;
+		ecs::Constrained<core::LocalTransform, physics::RigidBody,EntityHealth> body;
 	};
 	struct KbSystem :ecs::System {
 		void run(ecs::Ecs& world) {
@@ -61,11 +61,19 @@ namespace Health {
 				EntityHealth& health = kb.body.get<EntityHealth>();
 				if (health.damage_delay_timer.is_inactive()) {
 
+					physics::RigidBody& body= kb.body.get<physics::RigidBody>();
+					double power = kb.knockback_multiplier;
 					Vec3 forceval = kb.body.get<core::LocalTransform>().transform.position - kb.center;
+					
+					body.velocity -= v3::project(forceval, body.velocity)/2;
+
 					if (mag2(forceval)!=0) {
-						forceval = forceval.with_magnitude(kb.knockback_multiplier * kb.damage).with_length_less_than(10);
+						forceval = forceval.with_y(0).with_magnitude(power);
+						if (body.isonground) {
+							forceval.y = 1.0f;
+						}
 					}
-					kb.body.get<physics::rigidbody>().add_impluse(physics::Implulse{ forceval });
+					body.add_impluse(physics::Implulse{ forceval });
 					world.write_command(DamageCommand{ .damage = kb.damage,.target = kb.body.reduce() });
 				}
 
@@ -84,7 +92,7 @@ namespace Health {
 
 		void run(ecs::Ecs& world) {
 			return;
-			ecs::View< physics::rigidbody, physics::Gravity, FallDamageRecipient, EntityHealth,ecs::Owner> query(world);
+			ecs::View< physics::RigidBody, physics::Gravity, FallDamageRecipient, EntityHealth,ecs::Owner> query(world);
 			for (auto&& [rigid,gravity,faller,health,object]: query) {
 				if (rigid.isonground) {
 					if (faller.fall_velocity) {
@@ -116,6 +124,7 @@ namespace Health {
 				else {
 					if (flash.on) {
 						model.color /= flash.flash_color;
+						flash.on = false;
 					}
 				}
 			}

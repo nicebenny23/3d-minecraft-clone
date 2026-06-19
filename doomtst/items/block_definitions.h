@@ -185,7 +185,7 @@ namespace items {
 			return "crystal_sword";
 		}
 		stn::Option<tool_traits> tool_info() const {
-			return tool_traits({ .damage = 5, .pickaxe_speed = 0 });
+			return tool_traits({ .damage = 4, .pickaxe_speed = 0 });
 		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits(

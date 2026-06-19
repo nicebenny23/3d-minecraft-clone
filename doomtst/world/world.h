@@ -18,6 +18,10 @@ namespace grid {
 		std::filesystem::path get_path() {
 			return std::filesystem::path(world_path);
 		}
+		std::filesystem::path augment() {
+			return std::filesystem::path(world_path);
+		}
+
 	private:
 		std::filesystem::path world_path;
 

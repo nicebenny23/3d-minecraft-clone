@@ -203,9 +203,19 @@ namespace v3 {
 
 
 
+	inline Vec3 zero_fixed_normal(const Vec3& p) {
+		double mt = p.length();
+		if (mt == 0) {
+			return zerov;
+		}
+		return (p / mt);
+	}
 	// free functions that use Vec3 only:
 	inline double dot(const Vec3& p, const Vec3& p1) {
 		return (p.x * p1.x + p.y * p1.y + p.z * p1.z);
+	}
+	inline Vec3 project(const Vec3& p, const Vec3& p1) {
+		return p*v3::dot(zero_fixed_normal(p), p1);
 	}
 	inline double mag2(const Vec3& p) {
 		return ((p.x * p.x + p.y * p.y + p.z * p.z));
@@ -218,13 +228,6 @@ namespace v3 {
 		return (p / mt);
 	}
 
-	inline Vec3 zero_fixed_normal(const Vec3& p) {
-		double mt = p.length();
-		if (mt == 0) {
-			return zerov;
-		}
-		return (p / mt);
-	}
 
 
 
@@ -445,7 +448,7 @@ namespace v3 {
 		dir.z = direction.yaw.sin() * direction.pitch.cos();
 		return dir;
 	}
-	inline Vec3 Cross(const Vec3& p, const Vec3& p1) {
+	inline Vec3 cross(const Vec3& p, const Vec3& p1) {
 		Vec3 crosspoint;
 		crosspoint.x = p.y * p1.z - p.z * p1.y;
 		crosspoint.y = p.z * p1.x - p.x * p1.z;

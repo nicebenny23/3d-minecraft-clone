@@ -71,10 +71,10 @@ namespace grid {
 					location = grid.get_object(cmd.pos).unwrap();
 					blocks::block& blk = location.get<blocks::block>();
 					for (math::Direction3d block_dir : math::Directions3d) {
-						blk.mesh.mark_dirty(block_dir);
+						blk.mesh.uncompute_face_cover(block_dir);
 
 						grid.get_block(cmd.pos+ block_dir.coord()).then([&](block& seen_block) {
-							seen_block.mesh.mark_dirty(-block_dir);
+							seen_block.mesh.uncompute_face_cover(-block_dir);
 							world.write_command(grid::lighten_block_command(seen_block.pos));
 						});
 					}

@@ -136,7 +136,6 @@ namespace renderer {
 			renderer::shader_id model_shader = app.Ecs.load_asset_emplaced<renderer::shader_descriptor>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
 			app.Ecs.load_asset_emplaced<MaterialDescriptor>("Model", "solid_phase", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
 				stn::array<renderer::UniformRefrence>{
-				renderer::UniformRefrence("aspect_ratio", "aspectratio"),
 					renderer::UniformRefrence("proj_matrix", "projection"),
 					renderer::UniformRefrence("view_matrix", "view")
 			});

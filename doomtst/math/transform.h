@@ -13,11 +13,11 @@ namespace math {
 	inline glm::mat4 lookRotationMatrix(v3::Vec3 vec) {
 		v3::Vec3 forward = vec;
 		v3::Vec3 WorldUp = v3::up;
-		if (v3::Cross(forward, WorldUp) == v3::zerov) {
+		if (v3::cross(forward, WorldUp) == v3::zerov) {
 			WorldUp = v3::Vec3(1.0f, 0.0f, 0.0f);
 		}
-		v3::Vec3 right = v3::normal(v3::Cross(WorldUp, forward));
-		v3::Vec3 trueUp = v3::normal(v3::Cross(forward, right));
+		v3::Vec3 right = v3::normal(v3::cross(WorldUp, forward));
+		v3::Vec3 trueUp = v3::normal(v3::cross(forward, right));
 		glm::mat4 rotation = glm::mat4(1.0f);
 		rotation[0] = glm::vec4(right.glm(), 0.0f);
 		rotation[1] = glm::vec4(trueUp.glm(), 0.0f);
@@ -54,13 +54,13 @@ namespace math {
 			return v3::yaw_pitch(look);
 		}
 		v3::Vec3 right_dir() const {
-			return v3::zero_fixed_normal(v3::Cross(normal_dir(), v3::up));
+			return v3::zero_fixed_normal(v3::cross(normal_dir(), v3::up));
 		}
 		geo::ray forward_ray() const {
 			return geo::ray::from_offset(position, normal_dir());
 		}
 		v3::Vec3 up_dir() const{
-			return v3::Cross(right_dir(), normal_dir());
+			return v3::cross(right_dir(), normal_dir());
 		}
 		void look_towards(v3::Vec3 direction) {
 			direction = v3::zero_fixed_normal(direction);

@@ -24,13 +24,15 @@ namespace player {
 		bool hit_block() const {
 			return hit && hit.unwrap().collider.has_component<block>();
 		}
+		
+		ecs::WeakConstrained<block> backpedal;
 		voxtra::RayWorldCollision hit;
 		math::bounds look_range= math::bounds(0,3);
 	};
 
 	struct PlayerCursorCaster:ecs::System{
 		void run(ecs::Ecs& world) {
-			
+			grid::Grid& grid = world.get_resource<grid::Grid>();
 			ecs::View< core::LocalTransform,PlayerCursor,ecs::Owner>look_view(world);
 			for (stn::TupleSet<core::LocalTransform&,PlayerCursor&,ecs::obj> view: look_view) {
 				
@@ -48,7 +50,17 @@ namespace player {
 					
 					world.write_event(CursorHit{.hit=hit.owner() });
 					if (hit.owner().has_component<block>()) {
-						cursor.frame.get<WireFrame>().color = colors::Gray;
+
+						double light = .5f;
+						double eps = .0001;
+						v3::Point3 backpedal_point = hit.ray().point_at(hit.dist() - eps);
+						cursor.backpedal.set(grid.get_object(grid.get_voxel(backpedal_point)).copied());
+						if (cursor.backpedal) {
+							block& blk = cursor.backpedal.get<block>().unwrap();
+							light += blk.light_passing_through / 16.0;
+
+						}
+						cursor.frame.get<WireFrame>().color = colors::Color::monotone(light);
 						cursor.frame.get<WireFrame>().enabled = true;
 						cursor.frame.get<core::LocalTransform>().transform.from_box_unrotated(aabb::global_box(hit.collider));
 					}

@@ -48,23 +48,43 @@ namespace renderer {
 
 		Point3 pos = t.position;
 		Vec3 forward = t.normal_dir();
-		Vec3 right_dir = t.right_dir();
+		Vec3 right = t.right_dir();
 		Vec3 up = t.up_dir();
 
 		double halfV = fov.radians()* 0.5;
 		double halfH = atan(tan(halfV) * aspect);
+		Vec3 left_edge = normal(forward - right * tan(halfH));
+		Vec3 right_edge = normal(forward + right * tan(halfH));
+
+		Vec3 top_edge = normal(forward + up * tan(halfV));
+		Vec3 bottom_edge = normal(forward - up * tan(halfV));
+
 
 		// side planes
-		geo::HalfSpace left = geo::HalfSpace(forward - right_dir * tan(halfH), pos); // left
-		geo::HalfSpace right = geo::HalfSpace(forward + right_dir * tan(halfH), pos); // 
-		geo::HalfSpace top = geo::HalfSpace(forward + up * tan(halfV), pos);    // top
-		geo::HalfSpace down = geo::HalfSpace(forward - up * tan(halfV), pos);    // bottom
+		geo::HalfSpace left(
+			normal(v3::cross(left_edge,up)),
+			pos);
 
-		// near / far
+		geo::HalfSpace right_plane(
+			normal(v3::cross(up,right_edge)),
+			pos);
+
+		geo::HalfSpace top(
+			normal(v3::cross(top_edge,right)),
+			pos);
+
+		geo::HalfSpace bottom(
+			normal(v3::cross(right,bottom_edge)),
+			pos);
+
 		geo::HalfSpace near_plane = geo::HalfSpace(forward, pos + forward * frustum_bounds.min());
 		geo::HalfSpace far_plane = geo::HalfSpace(-forward, pos + forward * frustum_bounds.max());
-
-		return geo::Frustum{ .planes{left,right,top,down,near_plane,far_plane} };
+		geo::Frustum frustum{ .planes{left,right_plane,top,bottom,near_plane,far_plane} };
+		bool pnt = frustum.contains_point(pos+forward);
+		if (!pnt) {
+			stn::throw_logic_error("test failed, the frustum must always contain the pos+forward");
+		}
+		return frustum;
 	}
 	struct CameraResource :ecs::resource {
 		CameraResource(ecs::Constrained<CameraComponent,core::LocalTransform> camera_object) :camera(camera_object) {

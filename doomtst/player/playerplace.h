@@ -43,8 +43,7 @@ namespace player {
 				block& block_hit_at = hit.owner().get_component<block>();
 
 				double eps = .0001;
-				v3::Point3 backpedal_point = hit.ray().point_at(hit.dist()- eps);
-  				stn::Option<block&> mabye_block_at = grid.get_block(grid.get_voxel(backpedal_point));
+				stn::Option<block&> mabye_block_at = look.backpedal.get<block>();
 				if (!mabye_block_at) {
 					continue;
 				}

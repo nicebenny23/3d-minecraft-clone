@@ -35,7 +35,7 @@ struct PlayerMovementSys : ecs::System
 			return;
 		}
 
-        auto view = ecs::View<physics::rigidbody,playermovement,playerclimb,core::LocalTransform>(ecs);
+        auto view = ecs::View<physics::RigidBody,playermovement,playerclimb,core::LocalTransform>(ecs);
 
         for (auto [body, movement, climb,transform] : view)
         {
@@ -69,15 +69,6 @@ struct PlayerMovementSys : ecs::System
 
             // — liquid / rope vertical smoothing (unchanged) —
             bool normalState = true;
-
-            if (body.inliquid)
-            {
-                normalState = false;
-                float targetY = man.key(userinput::shift_key).held ? -10.0f
-                    : man.key(' ').held ? 10.0f
-                    : 0.0f;
-                body.velocity.y = stn::lerp(body.velocity.y, targetY, 0.1f);
-            }
 
             if (climb.onrope)
             {

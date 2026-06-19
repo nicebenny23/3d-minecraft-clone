@@ -16,8 +16,12 @@ namespace blocks {
 		std::string name() const{
 			return std::string("plank");
 		}
+		SolidBlockTraits mining_traits() const override {
+			return SolidBlockTraits(3, 0);
+		}
 		BlockTraits traits() const {
-			return BlockTraits(
+			int l = planktex;
+		return BlockTraits(
 				BlockMeshTraits(v3::unit_scale, false, planktex, planktex, planktex, planktex, planktex, planktex));
 		}
 	};
@@ -34,7 +38,7 @@ namespace blocks {
 			return std::string("log");
 		}
 		SolidBlockTraits mining_traits() const override {
-			return SolidBlockTraits(6,0);
+			return SolidBlockTraits(3,0);
 		}
 		BlockTraits traits() const {
 			return BlockTraits(

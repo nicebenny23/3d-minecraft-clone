@@ -374,11 +374,11 @@ namespace stn {
 
 		//constructs while not missing
 		template<typename ...Args> requires std::constructible_from<storage_type, Args&&...>
-		__forceinline inline void construct_pure(Args&&... args) {
+		inline void construct_pure(Args&&... args) {
 			new (&elem) storage_type(std::forward<Args>(args)...);
 		}
 		template<typename ...Args>
-		__forceinline inline void construct(Args&&... args)
+		inline void construct(Args&&... args)
 			requires std::constructible_from<T, Args&&...> {
 			if constexpr (is_refrence) {
 				new (&elem) storage_type(&std::forward<Args>(args)...);

@@ -36,10 +36,10 @@ namespace world {
 	}
 	inline stn::Option< blocks::block_id> chaotic_overide(double chaotic, double dist, biometype biome, const BlockRegistry& registry) {
 		double per_pick = 5;
-		double per_use = per_pick /(5*256);
+		double per_use = per_pick /(5*256)/2;
 
-		if (dist == 0) {
-			per_use /= 2;
+		if (dist != 0) {
+			per_use=0;
 		}
 
 		if (math::bounds(-per_use, per_use).contains(chaotic)) {
@@ -66,6 +66,11 @@ namespace world {
 		caveness = (caveness + 1) / 2;
 		caveness = math::ease_in_out_power(math::ease_in_power(caveness, 2.5), 3);
 		double big_carver_bound_size = math::bounds(.08, .16).lerp(caveness);
+
+		if (caveness <.000005f) {
+			big_carver_bound_size=0;
+		}
+	
 		math::bounds big_carver_bounds = math::bounds::from_center_radius(0, big_carver_bound_size);
 		return big_carver_bounds;
 	}
@@ -85,7 +90,7 @@ namespace world {
 		double big_carver_2 = map(pos / bit_carver_size, 5);
 		double global_dist_2 = big_carver_bounds.signed_distance_to(big_carver_2) * bit_carver_size;
 		stn::set_max(signed_distance, global_dist_2);
-		if (signed_distance < 16 && 0 < signed_distance) {
+		if (math::bounds(0,16).contains(signed_distance)) {
 			for (math::Direction3d dir : math::Directions3d) {
 				math::bounds big_carver_bounds = caveness(pos+dir.vec(), map);
 				if (global_distance > 0) {
@@ -109,6 +114,7 @@ namespace world {
 		}
 		double biome = slow(scaled_pos, 1);
 		double random_n = crazy(pos, 2);
+
 		return non_cave_id(biome, random_n, signed_distance, registry);
 
 
@@ -123,7 +129,7 @@ namespace world {
 		BlockRegistry& registry;
 		DefaultTerrainGenerator(BlockRegistry& blk_registry)
 			:slow(math::OctaveSeries{ .octaves = 2,.starting_period = 200,.period_factor = 1 / 2.f,.starting_amplifcation = 4,.amplification_factor = .5f }, 2000),
-			normal(math::OctaveSeries{ .octaves = 3,.starting_period = 1,.period_factor = .5f,.starting_amplifcation = 1,.amplification_factor = .5f }, 20000),
+			normal(math::OctaveSeries{ .octaves = 3,.starting_period = 1,.period_factor = .5f,.starting_amplifcation = 1,.amplification_factor = .5f }, 200000),
 			crazy(math::OctaveSeries{ .starting_period = 3 }, 20000),
 			axis(math::OctaveSeries{ .starting_period = 90}, 20000),
 			registry(blk_registry) {
@@ -134,6 +140,17 @@ namespace world {
 		}
 	};
 
+	struct FlatTerrainGenerator :world::TerrainGenerator {
+		block_id generate(v3::Coord pos) const {
+			if (-10 < pos.y) {
+				return registry.get_id<AirBlock>();
+			}
 
+			return registry.get_id<StoneBlock>();
+		}
+		BlockRegistry& registry;
+		FlatTerrainGenerator(BlockRegistry& blk_registry) :registry(blk_registry) {
 
+		}
+	};
 }
