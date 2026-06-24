@@ -78,6 +78,10 @@ namespace timing {
 			}
 			return stn::None;
 		}
+
+		double remaining_or_default() {
+			return remaining().unwrap_or_default();
+		}
 		WorldClock& clock() {
 			return *tm;
 		}

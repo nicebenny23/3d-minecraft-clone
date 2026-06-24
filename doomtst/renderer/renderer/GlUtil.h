@@ -1,36 +1,36 @@
 #pragma once
 #include "../../util/exception.h"
 #include <GLFW/glfw3.h>
-namespace GlUtil {
+namespace gl_util {
 	template<typename T>
-	inline constexpr GLenum getGLType();
+	inline constexpr GLenum get_gl_type();
 
 	template<>
-	inline constexpr GLenum getGLType<float>() { return GL_FLOAT; }
+	inline constexpr GLenum get_gl_type<float>() { return GL_FLOAT; }
 
 	template<>
-	inline constexpr GLenum getGLType<int>() { return GL_INT; }
+	inline constexpr GLenum get_gl_type<int>() { return GL_INT; }
 
 	template<>
-	inline constexpr GLenum getGLType<unsigned int>() { return GL_UNSIGNED_INT; }
+	inline constexpr GLenum get_gl_type<unsigned int>() { return GL_UNSIGNED_INT; }
 
 	template<>
-	inline constexpr GLenum getGLType<double>() { return GL_DOUBLE; }
+	inline constexpr GLenum get_gl_type<double>() { return GL_DOUBLE; }
 
 	template<>
-	inline constexpr GLenum getGLType<short>() { return GL_SHORT; }
+	inline constexpr GLenum get_gl_type<short>() { return GL_SHORT; }
 
 	template<>
-	inline constexpr GLenum getGLType<unsigned short>() { return GL_UNSIGNED_SHORT; }
+	inline constexpr GLenum get_gl_type<unsigned short>() { return GL_UNSIGNED_SHORT; }
 
 	template<>
-	inline constexpr GLenum getGLType<char>() { return GL_BYTE; }
+	inline constexpr GLenum get_gl_type<char>() { return GL_BYTE; }
 
 	template<>
-	inline constexpr GLenum getGLType<unsigned char>() { return GL_UNSIGNED_BYTE; }
-	inline size_t Size(GLenum Type) {
+	inline constexpr GLenum get_gl_type<unsigned char>() { return GL_UNSIGNED_BYTE; }
+	inline size_t size(GLenum type) {
 		// Calculate the size of the attribute in bytes
-		switch (Type) {
+		switch (type) {
 		case GL_FLOAT:
 			return sizeof(float);
 			break;
@@ -58,7 +58,7 @@ namespace GlUtil {
 			// Add any other types you need to support
 		default:
 			// Handle unexpected type or assert here
-			stn::throw_logic_error("Unknown type in VertexAttribute with block_id {}",Type);
+			stn::throw_logic_error("Unknown type in VertexAttribute with block_id {}",type);
 			break;
 		}
 
@@ -88,14 +88,14 @@ namespace GlUtil {
 			break;
 		}
 	}
-	inline void SetProperty(GLenum Prop, bool On) {
-		if (On)
+	inline void set_property(GLenum prop, bool on) {
+		if (on)
 		{
-			glEnable(Prop);
+			glEnable(prop);
 		}
 		else
 		{
-			glDisable(Prop);
+			glDisable(prop);
 		}
 	}
 	inline void poll_errors() {

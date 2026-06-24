@@ -92,7 +92,7 @@ namespace blockrender {
 				int unique_ind = uniqueInds[j];
 				v3::Coord cube_ind = math::cube_mesh[unique_ind];
 				v3::Point3 offset_from_center = (v3::Point3(cube_ind) - unitv / 2) * scale * 2;
-				Point3 offset = position.offset_local(offset_from_center);
+				Point3 offset = position+offset_from_center;
 
 				v2::Vec2 uv_coords = face_to_uv_coords(mesh_face.mesh(), mesh_face.direction().index(), j);
 

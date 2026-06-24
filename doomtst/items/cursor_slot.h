@@ -14,7 +14,6 @@ namespace items {
 		}
 		cursor_container(ecs::Constrained<ElementSlot> container,ecs::obj cursor_display)
 		:container_object(container),display(cursor_display) {
-			int l = 1;
 		}
 		ecs::obj display;
 		ecs::Constrained<ElementSlot>  container_object;

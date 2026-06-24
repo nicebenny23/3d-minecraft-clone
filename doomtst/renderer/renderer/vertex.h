@@ -12,7 +12,7 @@ namespace renderer {
 
 		vertex_attribute(GLenum Type, size_t Comps) {
 			type = Type;
-			size = Comps * GlUtil::Size(type);
+			size = Comps * gl_util::size(type);
 			components = Comps;
 			
 		}
@@ -40,7 +40,7 @@ namespace renderer {
 		}
 		template <typename T, size_t Comps>
 		vertex& push() {
-			return push(GlUtil::getGLType<T>(), Comps);
+			return push(gl_util::get_gl_type<T>(), Comps);
 		}
 		vertex_attribute& operator[](size_t index) {
 			return attributes[index];

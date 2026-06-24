@@ -14,7 +14,6 @@ namespace stn {
 		stn::array<T*> page_pointers;
 		std::size_t len;
 	public:
-		//can be a bit faster with the offset_ptr aproach
 
 		inline bool empty() const {
 			return len == 0;

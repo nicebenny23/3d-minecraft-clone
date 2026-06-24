@@ -53,7 +53,7 @@ namespace blocks {
 				block_texture side_tex = general_tex;
 				stn::List<block_texture, 4> tex_array{ mosstex,moss_one,moss_two,moss_three };
 				if (!stop) {
-					size_t tex_index =std::floor(math::bounds(0,300).unlerp_clamped(300-moss.clock.remaining().unwrap())*3.999f);
+					size_t tex_index =std::floor(math::bounds(0,300).unlerp_clamped(300-moss.clock.remaining_or_default())*3.999f);
 					side_tex = tex_array[tex_index];
 				}
 				for (Direction3d dir : math::Directions3d) {

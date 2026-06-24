@@ -24,7 +24,7 @@ namespace renderer {
 		}
 
 		void set_icon(const char* image) {
-			icon.pixels = texdata::texture_for(&icon.width, &icon.height, image); // Expects RGBA data.
+			icon.pixels = gl_util::texture_for(&icon.width, &icon.height, image); // Expects RGBA data.
 			glfwSetWindowIcon(window.get_ptr(), 1, &icon);
 		}
 		void set_name(std::string_view name) {

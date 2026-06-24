@@ -55,7 +55,7 @@ namespace game {
 			for (auto [slime, transform] : slimes) {
 				charge += 1 / (1 + v3::dist(transform.transform.position, pos));
 			}
-			double max_charge = .14f;
+			double max_charge = .16f;
 			if (max_charge<=charge) {
 				return false;
 			}
@@ -93,7 +93,7 @@ namespace game {
 				}
 				total_alive++;
 			}
-			const size_t max_alive =80;
+			const size_t max_alive =40;
 			if (max_alive <= total_alive) {
 				return;
 			}

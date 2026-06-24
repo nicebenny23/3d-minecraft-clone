@@ -1,5 +1,4 @@
 #pragma once
-#include "../debugger/debug.h"
 #include <stdexcept>
 #include "dynamicarray.h"
 namespace stn {

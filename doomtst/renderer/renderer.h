@@ -88,7 +88,7 @@ namespace renderer {
 	struct Renderer : ecs::resource {
 
 		void bind_material(material_handle material) {
-			GlUtil::poll_errors();
+			gl_util::poll_errors();
 
 			if (current_material != material) {
 				Material& mat = *material;
@@ -127,7 +127,7 @@ namespace renderer {
 			for (auto& uniform : ren.get<renderable_overides>().view()) {
 				context.apply_uniform(uniform.value, uniform.name);
 			}
-			GlUtil::poll_errors();
+			gl_util::poll_errors();
 
 			mesh_component& mesh_comp=ren.get<mesh_component>();
 			if (!mesh_comp.msh) {

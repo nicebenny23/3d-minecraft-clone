@@ -15,7 +15,7 @@ namespace console {
 		return instance;
 	}
 
-	void Console::Log(LogLevel level, std::string&& message) {
+	void Console::log(LogLevel level, std::string&& message) {
 		int idx = head_.fetch_add(1, std::memory_order_relaxed) % MaxEntries;
 		buffer_[idx] = { level, std::move(message) };
 		int c = count_.load(std::memory_order_relaxed);
@@ -28,7 +28,7 @@ namespace console {
 		head_.store(0, std::memory_order_relaxed);
 		count_.store(0, std::memory_order_relaxed);
 	}
-	void Console::Render() {
+	void Console::render() {
 		if (ImGui::IsWindowCollapsed()) {
 			ImGui::Text("Window is collapsed! Click arrow to expand.");
 		}
@@ -40,7 +40,7 @@ namespace console {
 				ImGui::Text("Debug:");
 				
 				ImGui::Text(std::format("Fps: {:.3f}", player::goblin.world().ensure_resource<timing::WorldClock>().fps()).c_str());
-
+				ImGui::Text(std::format("Elapsed Time: {:.0f}", player::goblin.world().ensure_resource<timing::WorldClock>().elapsed_time).c_str());
 				Point3 pos = player::goblin.get_component<core::LocalTransform>().transform.position;
 				ImGui::Text(std::format("position: {}", pos).c_str());
 				grid::Grid& grid = player::goblin.world().get_resource<grid::Grid>();

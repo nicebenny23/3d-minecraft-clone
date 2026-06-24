@@ -9,6 +9,7 @@
 #pragma once
 
 namespace v3 {
+	struct Coord;
 	//todo transfer from vector being a point in local space
 	struct Vec3 {
 		static Vec3 from_yaw_pitch(double yaw, double pitch) {
@@ -18,7 +19,8 @@ namespace v3 {
 		}
 		constexpr Vec3(double X, double Y, double Z) noexcept : x(X), y(Y), z(Z) {
 		}
-		
+
+		explicit Vec3(Coord scale);
 		explicit Vec3(Scale3 scale) : x(scale.x), y(scale.y), z(scale.z) {	}
 
 		Vec3(glm::vec3 g) : x(g.x), y(g.y), z(g.z) {
@@ -147,6 +149,23 @@ namespace v3 {
 		v2::Vec2 yz() const {
 			return v2::Vec2(y, z);
 		}
+	
+		Vec3 operator+(const Scale3& p1) const {
+			return Vec3(x +p1.x, y +p1.y, z +p1.z);
+		}
+		Vec3& operator+=(const Scale3& p1) {
+			*this = *this + p1;
+			return *this;
+		}
+
+		Vec3 operator-(const Scale3& p1) const {
+			return Vec3(x - p1.x, y - p1.y, z - p1.z);
+		}
+
+		Vec3& operator-=(const Scale3& p1) {
+			*this = *this - p1;
+			return *this;
+		}
 
 		glm::vec3 glm() {
 			return glm::vec3(x, y, z);
@@ -230,8 +249,7 @@ namespace v3 {
 
 
 
-
-	struct Point3;
+	using Point3 = Vec3;
 	struct Coord {
 		constexpr Coord(int X, int Y, int Z) noexcept : x(X), y(Y), z(Z) {
 		}
@@ -261,7 +279,9 @@ namespace v3 {
 		inline Coord& operator*=(int scale) {
 			x *= scale; y *= scale; z *= scale; return *this;
 		}
-
+		operator Vec3() const {
+			return Vec3(x, y, z);
+		}
 		Coord(int value, size_t index) {
 			x = 0;
 			y = 0;
@@ -305,135 +325,8 @@ namespace v3 {
 
 
 
-
-	struct Point3 {
-		Point3() : x(0), y(0), z(0) {
-		}
-
-		constexpr Point3(double X, double Y, double Z) noexcept : x(X), y(Y), z(Z){
-		}
-
-		inline Point3(Coord coord) {
-			x = coord.x; y = coord.y; z = coord.z;
-		}
-
-		Point3& operator=(const Coord& p1) {
-			x = p1.x; y = p1.y; z = p1.z;
-			return *this;
-		}
-
-		bool is_nan() const {
-			return isnan(x) || isnan(y) || isnan(z);
-		}
-
-		bool throw_if_nan() const {
-			if (is_nan()) {
-				throw std::logic_error("Point3 Must not be NaN");
-			}
-		}
-
-		void operator=(const Point3& p1) {
-			x = p1.x; y = p1.y; z = p1.z;
-		}
-		bool operator==(const Point3& p1) {
-			return math::approximate_equals(x, p1.x) && math::approximate_equals(y, p1.y) && math::approximate_equals(z, p1.z);
-		}
-		bool operator!=(const Point3& p1) {
-			return !math::approximate_equals(x, p1.x) || !math::approximate_equals(y, p1.y) || !math::approximate_equals(z, p1.z);
-		}
-		Point3 operator+(const Scale3& p1) const {
-			return Point3(x + p1.x, y + p1.y, z + p1.z);
-		}
-		Point3& operator+=(const Scale3& p1) {
-			x += p1.x; y += p1.y; z += p1.z; return *this;
-		}
-
-		Vec3 operator-(const Scale3& p1) const {
-			return Vec3(x - p1.x, y - p1.y, z - p1.z);
-		}
-
-		Point3& operator-=(const Scale3& p1) {
-			x -= p1.x; y -= p1.y; z -= p1.z; return *this;
-		}
-
-		Point3 operator+(const Vec3& p1) const {
-			return Point3(x + p1.x, y + p1.y, z + p1.z);
-		}
-		Point3& operator+=(const Vec3& p1) {
-			x += p1.x; y += p1.y; z += p1.z; return *this;
-		}
-		
-		Vec3 operator-(const Point3& p1) const {
-			return Vec3(x - p1.x, y - p1.y, z - p1.z);
-		}
-
-		Point3 operator-(const Vec3& p1) const {
-			return Point3(x - p1.x, y - p1.y, z - p1.z);
-		}
-
-		Point3& operator-=(const Vec3& p1) {
-			x -= p1.x; y -= p1.y; z -= p1.z; return *this;
-		}
-		
-		Point3 operator*(const Scale3& scale) const {
-			return Point3(x * scale.x, y * scale.y, z*scale.z);
-		}
-		//todo rename to change_space
-		Point3 operator/(const Scale3& inv_scale) const {
-			if (inv_scale.x == 0 || inv_scale.y == 0 || inv_scale.z == 0) {
-				throw std::logic_error("Unable to divide a Vec3 by zero");
-			}
-			return Point3(x / inv_scale.x, y / inv_scale.y, z / inv_scale.z);
-		}
-
-		Point3 operator*(double scale) const {
-			return Point3(x * scale, y * scale, z*scale);
-		}
-		Point3 operator/(double scale) const {
-			if (scale==0) {
-				throw std::logic_error("Unable to divide a Vec3 by zero");
-			}
-			return Point3(x/scale, y/scale, z/scale);
-		}
-
-		const double& operator[](size_t index) const {
-			switch (index) {
-			case 0: return x;
-			case 1: return y;
-			case 2: return z;
-			default:
-			throw std::invalid_argument(std::to_string(index) + " is not a valid index for a Point3 ");
-			}
-		}
-		double& operator[](size_t index) {
-			switch (index) {
-			case 0: return x;
-			case 1: return y;
-			case 2: return z;
-			default:
-			throw std::invalid_argument(std::to_string(index) + " is not a valid index for a Point3 ");
-			}
-		}
-		//this can somtimes be semanticcly usful
-		inline Point3 offset_local(const Point3& local) const{
-			return Point3(x + local.x, y + local.y, z + local.z);
-		}
-		Point3(double value, size_t index) {
-			x = 0;
-			y = 0;
-			z = 0;
-			(*this)[index] = value;
-		}
-
-		glm::vec3 glm() const{
-			return glm::vec3(x, y, z);
-		}
-		double x;
-		double y;
-		double z;
-	};
-
-
+	inline v3::Vec3::Vec3(Coord scale):x(scale.x),y(scale.y),z(scale.z) {
+	}
 	inline double dist2(const Point3& p, const Point3& p1) {
 		return mag2(p1 - p);
 	}
@@ -455,23 +348,11 @@ namespace v3 {
 		crosspoint.z = p.x * p1.y - p.y * p1.x;
 		return crosspoint;
 	}
-	inline Point3 lerp(const Point3& p, const Point3& p1, double t) {
-		return Point3(p+(p1-p)*t);
-	}
 	inline Point3 midpoint(const Point3& p, const Point3& p1) {
 		return Point3(p + (p1 - p) * 1/2.0f);
 	}
 	inline Vec3 lerp(const Vec3& p, const Vec3& p1, double t) {
 		return Vec3(p+(p1-p)*t);
-	}
-	inline Point3 operator+(const Vec3& a, const Point3& b) {
-		return Point3(a.x + b.x, a.y + b.y, a.z + b.z);
-	}
-	inline Point3 operator+(const Point3& a, const Coord& b) {
-		return Point3(a.x + b.x, a.y + b.y, a.z + b.z);
-	}
-	inline Point3 operator+(const Coord& a, const Point3& b) {
-		return Point3(a.x + b.x, a.y + b.y, a.z + b.z);
 	}
 	inline Point3 operator-(const Coord& a, const Point3& b) {
 		return Point3(a.x - b.x, a.y - b.y, a.z - b.z);
@@ -485,10 +366,6 @@ namespace v3 {
 	inline Point3 operator+(const Coord& a,const Vec3& b) {
 		return Point3(a.x + b.x, a.y + b.y, a.z + b.z);
 	}
-	inline Point3 operator-(const Coord& a, const Vec3& b) {
-		return Point3(a.x - b.x, a.y - b.y, a.z - b.z);
-	}
-
 
 	inline Coord::Coord(const Point3& p1) {
 		x = int(p1.x); y = int(p1.y); z = int(p1.z);
@@ -518,14 +395,6 @@ struct std::formatter<v3::Coord> : std::formatter<std::string> {
 	}
 };
 
-
-template <>
-struct std::formatter<v3::Point3> : std::formatter<std::string> {
-	template <typename FormatContext>
-	auto format(const v3::Point3& v, FormatContext& ctx) const {
-		return std::format_to(ctx.out(), "({:.3f}, {:.3f}, {:.3f})", v.x, v.y, v.z);
-	}
-};
 #include <functional>
 
 namespace std {

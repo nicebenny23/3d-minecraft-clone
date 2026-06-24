@@ -153,11 +153,11 @@ namespace renderer {
 
 			GLuint vao = 0, vbo = 0, ebo = 0;
 
-			GlUtil::poll_errors();
+			gl_util::poll_errors();
 			glGenVertexArrays(1, &vao);
 			glGenBuffers(1, &vbo);
 			glGenBuffers(1, &ebo);
-			GlUtil::poll_errors();
+			gl_util::poll_errors();
 			return GpuMesh(
 			0,
 			Vao(vao),
@@ -188,7 +188,7 @@ namespace renderer {
 				renderer::vertex& mesh_vertex = data.layout;
 				for (int i = 0; i < mesh_vertex.length(); i++) {
 					renderer::vertex_attribute& attribute = mesh_vertex[i];
-					GlUtil::set_attr(i, attribute.components, attribute.type, GLsizei(stride), offset);
+					gl_util::set_attr(i, attribute.components, attribute.type, GLsizei(stride), offset);
 					glEnableVertexAttribArray(i);
 					offset += attribute.size;
 				}
@@ -203,10 +203,10 @@ namespace renderer {
 		void bind_properties(const RenderProperties& props) {
 			properties = props;
 			glDepthMask(props.depth_write);
-			GlUtil::SetProperty(GL_CULL_FACE, props.cull);
-			GlUtil::SetProperty(GL_DEPTH_TEST, props.depth_test);
+			gl_util::set_property(GL_CULL_FACE, props.cull);
+			gl_util::set_property(GL_DEPTH_TEST, props.depth_test);
 			glBlendFunc(props.blend_function_source, props.blend_function_distance);
-			GlUtil::SetProperty(GL_BLEND, props.blend);
+			gl_util::set_property(GL_BLEND, props.blend);
 		}
 		Context() :BoundShader(), BoundTexture2d(), BoundTextureArray(), bound_mesh() {
 		}

@@ -58,7 +58,7 @@ namespace geo {
 		// Minkowski difference operator
 		Box operator-(const Box& other) const {
 			//minkoski diffrence changes affinity
-			return Box(center.offset_local(other.center * -1), scale.expanded(other.scale));
+			return Box(center-other.center, scale.expanded(other.scale));
 		}
 		Box translated(v3::Vec3 translation_vector) const {
 			return Box(center + translation_vector, scale);
@@ -68,7 +68,7 @@ namespace geo {
 		}
 
 		Box transform(Box other_transform) const {
-			return Box(center.offset_local(other_transform.center * scale), other_transform.scale * scale);
+			return Box(center+other_transform.center * scale, other_transform.scale * scale);
 		}
 	};
 }

@@ -3,7 +3,7 @@
 #include "../external/stb_image.h"
 
  
-unsigned char* texdata::texture_for(int* width, int* height, const char* name) {
+unsigned char* gl_util::texture_for(int* width, int* height, const char* name) {
 	int colchannel = 0;
 	unsigned char* data = stbi_load(name, width, height, &colchannel, STBI_rgb_alpha);
 
@@ -15,7 +15,7 @@ unsigned char* texdata::texture_for(int* width, int* height, const char* name) {
 
 }
 
-v2::Coord2 texdata::image_size(const char* Img_Path) {
+v2::Coord2 gl_util::image_size(const char* Img_Path) {
 	int channels;
 	v2::Coord2 size;
 	// Load image to get its info

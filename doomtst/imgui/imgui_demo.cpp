@@ -648,7 +648,7 @@ void ImGui::ShowDemoWindow(bool* p_open)
             HelpMarker(
                 "The logging API redirects all text output so you can easily capture the content of "
                 "a window or a block. Tree nodes can be automatically expanded.\n"
-                "Try opening any of the contents below in this window and then click one of the \"Log To\" button.");
+                "Try opening any of the contents below in this window and then click one of the \"log To\" button.");
             ImGui::LogButtons();
 
             HelpMarker("You can also call ImGui::LogText() to output directly to the log without a visual output.");
@@ -719,7 +719,7 @@ static void ShowDemoWindowMenuBar(ImGuiDemoWindowData* demo_data)
             ImGui::MenuItem("Console", NULL, &demo_data->ShowAppConsole);
             ImGui::MenuItem("Custom rendering", NULL, &demo_data->ShowAppCustomRendering);
             ImGui::MenuItem("Documents", NULL, &demo_data->ShowAppDocuments);
-            ImGui::MenuItem("Log", NULL, &demo_data->ShowAppLog);
+            ImGui::MenuItem("log", NULL, &demo_data->ShowAppLog);
             ImGui::MenuItem("Property editor", NULL, &demo_data->ShowAppPropertyEditor);
             ImGui::MenuItem("Simple layout", NULL, &demo_data->ShowAppLayout);
             ImGui::MenuItem("Simple overlay", NULL, &demo_data->ShowAppSimpleOverlay);
@@ -753,7 +753,7 @@ static void ShowDemoWindowMenuBar(ImGuiDemoWindowData* demo_data)
                 ImGui::TextDisabled("(see Demo->Configuration for details & more)");
                 ImGui::EndMenu();
             }
-            ImGui::MenuItem("Debug Log", NULL, &demo_data->ShowDebugLog, has_debug_tools);
+            ImGui::MenuItem("Debug log", NULL, &demo_data->ShowDebugLog, has_debug_tools);
             ImGui::MenuItem("ID Stack Tool", NULL, &demo_data->ShowIDStackTool, has_debug_tools);
             bool is_debugger_present = io.ConfigDebugIsDebuggerPresent;
             if (ImGui::MenuItem("Item Picker", NULL, false, has_debug_tools))// && is_debugger_present))
@@ -3254,7 +3254,7 @@ static void ShowDemoWindowMultiSelect(ImGuiDemoWindowData* demo_data)
             ImGui::BulletText("CTRL+A to select all.");
             ImGui::BulletText("Escape to clear selection.");
             ImGui::BulletText("Click and drag to box-select.");
-            ImGui::Text("Tip: Use 'Demo->Tools->Debug Log->Selection' to see selection requests as they happen.");
+            ImGui::Text("Tip: Use 'Demo->Tools->Debug log->Selection' to see selection requests as they happen.");
 
             // Use default selection.Adapter: Pass index to SetNextItemSelectionUserData(), store index in Selection
             const int ITEMS_COUNT = 50;
@@ -7397,7 +7397,7 @@ static void ShowDemoWindowInputs()
         HelpMarker(
             "This is a simplified view. See more detailed input state:\n"
             "- in 'Tools->Metrics/Debugger->Inputs'.\n"
-            "- in 'Tools->Debug Log->IO'.");
+            "- in 'Tools->Debug log->IO'.");
         if (inputs_opened)
         {
             if (ImGui::IsMousePosValid())
@@ -8842,8 +8842,8 @@ static void ShowExampleAppLog(bool* p_open)
     // We take advantage of a rarely used feature: multiple calls to Begin()/End() are appending to the _same_ window.
     // Most of the contents of the window will be added by the log.Draw() call.
     ImGui::SetNextWindowSize(ImVec2(500, 400), ImGuiCond_FirstUseEver);
-    ImGui::Begin("Example: Log", p_open);
-    IMGUI_DEMO_MARKER("Examples/Log");
+    ImGui::Begin("Example: log", p_open);
+    IMGUI_DEMO_MARKER("Examples/log");
     if (ImGui::SmallButton("[Debug] Add 5 entries"))
     {
         static int counter = 0;
@@ -8861,7 +8861,7 @@ static void ShowExampleAppLog(bool* p_open)
     ImGui::End();
 
     // Actually call in the regular Log helper (which will Begin() into the same window as we just did)
-    log.Draw("Example: Log", p_open);
+    log.Draw("Example: log", p_open);
 }
 
 //-----------------------------------------------------------------------------
@@ -9115,7 +9115,7 @@ static void ShowExampleAppLongText(bool* p_open)
             log.appendf("%i The quick brown fox jumps over the lazy dog\n", lines + i);
         lines += 1000;
     }
-    ImGui::BeginChild("Log");
+    ImGui::BeginChild("log");
     switch (test_type)
     {
     case 0:

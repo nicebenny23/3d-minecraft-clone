@@ -67,7 +67,7 @@ namespace renderer {
 			MeshBuilder mesh = renderer.make_mesh_with_builder(renderer::vertex().push<float, 3>(), indice_mode::manual_generate);
 			mesh.add_indices(math::cube_edge_indices);
 			for (v3::Coord point : math::cube_mesh) {
-				mesh.add_point(v3::Point3(point) - v3::unitv / 2.0);
+				mesh.add_point(point - v3::unitv / 2.0);
 			}
 			renderer::fill(std::move(mesh), app.Ecs);
 			app.emplace_system< WireFrameRenderer>(mesh.id());

@@ -12,7 +12,7 @@ namespace items {
 		stn::array <container_element> slots;
 		ui::TableBounds size;
 		container_id id;
-		container(ui::TableBounds Size, container_id cont_id) :size(Size),id(cont_id){
+		container(ui::TableBounds size, container_id cont_id) :size(size),id(cont_id){
 		}
 		void start() {
 

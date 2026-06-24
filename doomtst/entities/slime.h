@@ -91,9 +91,7 @@ namespace slimes {
 		using result_type = navigation::ContextResultType<SlimeNavigator>;
 		stn::Option<stn::array<result_type>> path;
 		SlimePathFinder(timing::Duration time, ecs::Constrained<core::LocalTransform> follow,double speed) :last_fix(time), build_time(time), following(follow), speed(speed){
-			offset = random::spherical().with_y(0).with_magnitude(2);
 		}
-		v3::Vec3 offset;
 		double speed;
 		timing::Duration build_time;
 		timing::Duration last_fix;
@@ -103,9 +101,6 @@ namespace slimes {
 	inline v3::Point3 slime_target(ecs::Constrained<SlimePathFinder, core::LocalTransform> finder) {
 		SlimePathFinder& path = finder.get<SlimePathFinder>();
 		v3::Point3 pnt = path.following.get_component<core::LocalTransform>().transform.position;
-		if (Transform::distance(path.following.get<core::LocalTransform>().transform,finder.get<core::LocalTransform>().transform)>=5) {
-			pnt += path.offset;
-		}
 		return pnt;
 	}
 	struct SlimeNavigation :ecs::System {

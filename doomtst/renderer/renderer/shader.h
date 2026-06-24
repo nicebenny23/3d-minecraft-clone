@@ -77,7 +77,7 @@ namespace renderer {
 		unsigned int shaderid = glad_glCreateShader(shadertype);
 		glShaderSource(shaderid, 1, &c_strcode, NULL);
 		glCompileShader(shaderid);
-		GlUtil::shaderstatuscheck(shaderid, GL_COMPILE_STATUS, name);
+		gl_util::shaderstatuscheck(shaderid, GL_COMPILE_STATUS, name);
 		return shaderid;
 	}
 
@@ -97,11 +97,11 @@ namespace renderer {
 			glAttachShader(id, VertexShader);
 			glAttachShader(id, FragmentShader);
 			glLinkProgram(id);
-			GlUtil::shaderstatuscheck(id, GL_LINK_STATUS, "shader program");
+			gl_util::shaderstatuscheck(id, GL_LINK_STATUS, "shader program");
 			glDeleteShader(VertexShader);
 			glDeleteShader(FragmentShader);
 			glValidateProgram(id);
-			GlUtil::poll_errors();
+			gl_util::poll_errors();
 			return stn::box<Shader>(id);
 		}
 	};
