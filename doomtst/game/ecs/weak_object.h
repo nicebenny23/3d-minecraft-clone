@@ -35,7 +35,7 @@ namespace ecs {
 
 		}
 		bool alive() const {
-			element.retain(element.unwrap().is_valid());
+			element.retain(element.is_some()&&element.unwrap().is_valid());
 			return element.is_some();
 		}
 		explicit operator bool() const {

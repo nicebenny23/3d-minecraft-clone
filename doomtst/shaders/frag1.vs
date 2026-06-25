@@ -21,9 +21,14 @@ void main()
   float block_depth=min(1,length(rendered_pos)/4);
   float depth=world_depth(gl_FragCoord.z);
   float inv_depth=1-depth;
-  float ambient=.13;
-  ambient+=pow(1-block_depth,1.3)*.1;
-  float color=min(1.1,ambient+pow(light,1.2f))*inv_depth;
+  float ambient=.16;
+  if(block_depth>.99){
+
+  }
+    else{
+    ambient+=pow(1-block_depth,1.3)*.1;
+  }
+  float color=min(1,ambient+light)*inv_depth;
   vec4 col= vec4(color,color,color,1)*texture(tex,fragcoord);
     FragColor=col;
   
