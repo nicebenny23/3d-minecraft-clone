@@ -55,7 +55,7 @@ namespace renderer {
 			};
 		};
 
-		inline void wireframe_plugin(Core::App& app) {
+		inline void wireframe_plugin(core::App& app) {
 
 			renderer::shader_id model_shader = app.Ecs.load_asset_emplaced<renderer::shader_descriptor>("WireframeShader", "shaders\\wireframe_vert.vs", "shaders\\wireframe_frag.vs").unwrap();
 			app.Ecs.load_asset_emplaced<MaterialDescriptor>("Wireframe", "solid_phase", "WireframeShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_LINES),

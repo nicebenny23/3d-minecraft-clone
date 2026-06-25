@@ -55,7 +55,7 @@ namespace renderer {
 		}
 	};
 	struct ParticlePlugin {
-		void operator()(Core::App& app) {
+		void operator()(core::App& app) {
 			app.emplace_system<ParticleEmmisionSystem>();
 		}
 	};

@@ -114,7 +114,7 @@ namespace game {
 		}
 	};
 
-	void MobSpawnerPlugin(Core::App& app) {
+	void MobSpawnerPlugin(core::App& app) {
 
 		app.insert_plugin(slimes::SlimeAiPlugin());
 		app.emplace_system< spawn_mobs>();

@@ -48,7 +48,11 @@ namespace ecs {
 			~EventRange() {
 				events.recieve(id);
 			}
+			bool nonempty() const {
+				size_t offset = events.counts[id.id].count;
+				return events.queue.begin() + offset==events.queue.end();
 
+			}
 		private:
 			Events& events;
 			reader_id id;

@@ -6,23 +6,23 @@ namespace ui {
 
 		};
 	};
-	struct menu_component :ecs::component {
+	struct MenuComponent :ecs::component {
 
 	};
 	
 
 	struct open_menu {
-		open_menu(ecs::Constrained<menu_component> menu_comp) :menu_ent(menu_comp) {
+		open_menu(ecs::Constrained<MenuComponent> menu_comp) :menu_ent(menu_comp) {
 
 		}
-		ecs::Constrained<menu_component> menu_ent;
+		ecs::Constrained<MenuComponent> menu_ent;
 	};
 	struct MenuRecipe {
 		MenuRecipe() {
 
 		}
 		void apply(ecs::obj& object) const{
-			object.add_component<menu_component>();
+			object.add_component<MenuComponent>();
 			UiSpawner(geo::Box2d(v2::zerov, v2::unitv), 1).apply(object);
 			object.get_component<ui::UiEnabled>().disable();
 		}
@@ -44,9 +44,12 @@ namespace ui {
 		MenuState() = default;
 		mutable stn::stack<ecs::obj> open_menu;
 	};
-	inline bool is_open(ecs::Constrained<menu_component> menu) {
+	inline bool is_open(ecs::Constrained<MenuComponent> menu) {
 		return menu.world().get_resource< MenuState>().top()==menu.object();
 	}
+	struct NoMenus {
+
+	};
 	struct MenuEnabler :ecs::System {
 		void run(ecs::Ecs& world) {
 			MenuState& state = world.ensure_resource<MenuState>();
@@ -77,13 +80,14 @@ namespace ui {
 					return;
 				}
 				else {
-					world.emplace_command<Core::CloseGameCommand>();
+
+					world.emplace_event<NoMenus>();
 				}
 			}
 		}
 	};
 	struct MenuPlugin {
-		void operator()(Core::App& app) {
+		void operator()(core::App& app) {
 			app.ensure_resource< MenuState>();
 			app.emplace_system<MenuEnabler>();
 		}

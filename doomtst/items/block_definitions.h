@@ -211,7 +211,7 @@ namespace items {
 	};
 
 
-	inline void register_core_items(Core::App& app) {
+	inline void register_core_items(core::App& app) {
 		app.ensure_resource<loot_tables>();
 		BlockRegistry& registry = app.ensure_resource<BlockRegistry>();
 		ItemTypes& item_register = app.ensure_resource<ItemTypes>();

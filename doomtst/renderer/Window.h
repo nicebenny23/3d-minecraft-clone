@@ -83,9 +83,9 @@ namespace renderer {
 	}
 	inline void frame_buffer_callback(GLFWwindow* window, int new_width, int new_height) {
 		glViewport(0, 0, new_width, new_height);
-		Core::game.Ecs.get_resource<renderer::Window>().screen = v2::Coord2(new_width, new_height);
+		core::game.Ecs.get_resource<renderer::Window>().screen = v2::Coord2(new_width, new_height);
 	}
-	inline void window_plugin(Core::App& app) {
+	inline void window_plugin(core::App& app) {
 		if (!glfwInit()) {
 			stn::throw_logic_error("Failed to initialize GLFW");
 		}

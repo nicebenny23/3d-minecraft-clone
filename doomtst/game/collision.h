@@ -68,7 +68,7 @@ namespace collision {
 	};
 
 	struct CollsionPlugin {
-		void operator()(Core::App& app) {
+		void operator()(core::App& app) {
 			app.emplace_system< StaticCollsionSystem>();
 			app.emplace_system<DynamicCollisionSystem>();
 

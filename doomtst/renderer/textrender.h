@@ -67,10 +67,10 @@ namespace ui {
 		}
 	};
 
-	struct ui_text_spawner {
+	struct UiTextSpawner {
 		UiSpawner ui_spawn;
 		colors::Color color;
-		ui_text_spawner(geo::Box2d box, size_t priority,colors::Color initial_color) :ui_spawn(geo::Box2d(box.center, box.scale), priority),color(initial_color){
+		UiTextSpawner(geo::Box2d box, size_t priority,colors::Color initial_color=colors::White) :ui_spawn(geo::Box2d(box.center, box.scale), priority),color(initial_color){
 			
 		}
 		void apply(ecs::obj& object) const{
@@ -80,7 +80,7 @@ namespace ui {
 	};
 
 	struct UiTextPlugin {
-		void operator()(Core::App& app) {
+		void operator()(core::App& app) {
 			app.insert_plugin(UiPlugin());
 			array<std::string> texlist = array<std::string>();
 			for (size_t i = 0; i < 10; i++) {

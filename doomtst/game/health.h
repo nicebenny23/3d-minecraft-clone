@@ -131,7 +131,7 @@ namespace Health {
 		}
 	};
 	struct EntityHealthPlugin{
-		void operator()(Core::App& app) {
+		void operator()(core::App& app) {
 			app.emplace_system<KbSystem>();
 			app.emplace_system<EntityKiller>();
 			app.emplace_system<FallDamageSystem>();

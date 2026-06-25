@@ -74,10 +74,10 @@ namespace player {
 	};
 
 	struct OpenMenuOnClick :ecs::component {
-		OpenMenuOnClick(ecs::ConstrainedHandle<ui::menu_component>&& hand) :handle(std::move(hand)) {
+		OpenMenuOnClick(ecs::ConstrainedHandle<ui::MenuComponent>&& hand) :handle(std::move(hand)) {
 
 		}
-		ecs::ConstrainedHandle<ui::menu_component> handle;
+		ecs::ConstrainedHandle<ui::MenuComponent> handle;
 	};
 	struct MenuClickSystem :ecs::System {
 		MenuClickSystem(ecs::Ecs& world) :hits(world.make_reader<player::CursorHit>()) {
@@ -97,7 +97,7 @@ namespace player {
 		ecs::EventReader<player::CursorHit> hits;
 	};
 	struct PlayerClickablePlugin {
-		void operator()(Core::App& world) {
+		void operator()(core::App& world) {
 			world.insert_plugin(renderer::wireframe_plugin);
 			world.emplace_system<MenuClickSystem>();
 			world.emplace_system<PlayerCursorCaster>();

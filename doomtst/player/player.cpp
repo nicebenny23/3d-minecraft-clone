@@ -26,18 +26,18 @@ void player::initplayer(ecs::obj& player) {
 	player.add_component<core::LocalTransform>(v3::Point3(0, 2, 0));
 	player.apply_recipe(Health::HealthSpawner(10));
 	player.get_component<core::LocalTransform>().transform.scale = unit_scale / 1.2f;
-	Core::game.insert_plugin(PlayerModificationPlugin());
-	Core::game.insert_plugin(PlayerPlacePlugin());
-	Core::game.insert_plugin(player::CrosshairPlugin());
-	Core::game.insert_plugin(PlayerInventoryPlugin());
-	Core::game.emplace_system<PlayerAttacker>();
-	Core::game.emplace_system<PlayerMovementSys>();
-	Core::game.emplace_system<PlayerHealthUi>();
-	Core::game.insert_plugin(ModelPlugin());
+	core::game.insert_plugin(PlayerModificationPlugin());
+	core::game.insert_plugin(PlayerPlacePlugin());
+	core::game.insert_plugin(player::CrosshairPlugin());
+	core::game.insert_plugin(PlayerInventoryPlugin());
+	core::game.emplace_system<PlayerAttacker>();
+	core::game.emplace_system<PlayerMovementSys>();
+	core::game.emplace_system<PlayerHealthUi>();
+	core::game.insert_plugin(ModelPlugin());
 
 	aabb::DynamicColliderRecipe().apply(player);
 	player.apply_recipe(physics::Spawner{.restitution=.6});
-	Core::game.emplace_system<player::PlayerEater>();
+	core::game.emplace_system<player::PlayerEater>();
 	ecs::obj eater = ecs::spawn(player.world(),ui::UiImageSpawner(geo::Box2d::origin_centered(v2::Vec2(.4f, .4f)),1));
 	player.add_component<player::player_eat_behavior>(player.world().get_resource<timing::WorldClock>(),eater);
 	player.apply_recipe(player::player_health_spawner);  
@@ -54,7 +54,7 @@ void player::initplayer(ecs::obj& player) {
 	player.add_component<playerdaggercomp>();
 	player.add_component<renderer::CameraComponent>();
 	ecs::spawn(player.world(), CameraSpawner()).add_component<renderer::CameraDirectFollower>(player);
-	Core::game.emplace_system<CameraFollowerSystem>();
+	core::game.emplace_system<CameraFollowerSystem>();
 	player.add_component<playermovement>();
 	player.add_component<playercamcontrols>();
 }

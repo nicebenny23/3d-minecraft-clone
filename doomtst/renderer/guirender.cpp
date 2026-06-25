@@ -14,7 +14,7 @@ namespace guirender {
         ImGuiIO& io = ImGui::GetIO();
         io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable keyboard controls
 
-        ImGui_ImplGlfw_InitForOpenGL(Core::game.Ecs.get_resource<renderer::Window>().window.get_ptr(), true);
+        ImGui_ImplGlfw_InitForOpenGL(core::game.Ecs.get_resource<renderer::Window>().window.get_ptr(), true);
         ImGui_ImplOpenGL3_Init("#version 330");
      
     }

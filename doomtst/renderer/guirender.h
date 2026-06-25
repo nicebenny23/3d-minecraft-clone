@@ -27,7 +27,7 @@ namespace guirender{
 		}
 	};
 	struct ConsolePlugin {
-		void operator()(Core::App& app) {
+		void operator()(core::App& app) {
 			initgui();
 			app.emplace_system<GuiSystem>();
 		}

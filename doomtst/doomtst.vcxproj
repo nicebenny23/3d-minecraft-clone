@@ -376,6 +376,7 @@
     <ClInclude Include="entities\wisp.h" />
     <ClInclude Include="game\brain.h" />
     <ClInclude Include="game\casts.h" />
+    <ClInclude Include="game\close.h" />
     <ClInclude Include="game\ecs\archetypes.h" />
     <ClInclude Include="game\ecs\archtype.h" />
     <ClInclude Include="game\ecs\commands.h" />

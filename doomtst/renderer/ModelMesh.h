@@ -132,7 +132,7 @@ namespace renderer {
 	
 
 	struct ModelPlugin{
-		void operator()(Core::App& app) {
+		void operator()(core::App& app) {
 			renderer::shader_id model_shader = app.Ecs.load_asset_emplaced<renderer::shader_descriptor>("ModelShader", "shaders\\modelvertex.vs", "shaders\\modelfragment.vs").unwrap();
 			app.Ecs.load_asset_emplaced<MaterialDescriptor>("Model", "solid_phase", "ModelShader", RenderProperties(true, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
 				stn::array<renderer::UniformRefrence>{

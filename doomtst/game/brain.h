@@ -64,7 +64,7 @@ namespace ai {
 	};
 
 	struct BrainPlugin{
-		void operator()(Core::App& world) {
+		void operator()(core::App& world) {
 			world.emplace_system< BrainSystem>();
 		}
 	};

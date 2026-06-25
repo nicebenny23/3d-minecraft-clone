@@ -19,12 +19,12 @@
 #pragma once 
 
 void endframe() {
-	Core::game.Ecs.get_resource<renderer::Window>().swap_buffers();
-	Core::game.Ecs.get_resource<renderer::Renderer>().clear();
+	core::game.Ecs.get_resource<renderer::Window>().swap_buffers();
+	core::game.Ecs.get_resource<renderer::Renderer>().clear();
 }
 
 void update() {
-	Core::game.Ecs.run_systems();
+	core::game.Ecs.run_systems();
 	endframe();
 }
 
@@ -33,9 +33,9 @@ void update() {
 
 
 struct MinecraftPlugin {
-	void operator()(Core::App& app) {
+	void operator()(core::App& app) {
 
-		app.insert_plugin(Core::GamePlugin());
+		app.insert_plugin(core::GamePlugin());
 
 		app.insert_plugin(userinput::user_input_plugin);
 		app.emplace_resource<userinput::InputManager>();
@@ -73,8 +73,8 @@ struct MinecraftPlugin {
 };
 
 void rungame() {
-	Core::game.insert_plugin(MinecraftPlugin());
-	while (!Core::game.Ecs.get_resource<Core::GameState>().should_close) {
+	core::game.insert_plugin(MinecraftPlugin());
+	while (!core::game.Ecs.get_resource<core::GameState>().should_close) {
 		update();
 	}
 	guirender::destroygui();

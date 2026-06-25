@@ -6,11 +6,11 @@
 namespace player {
 
 	struct inventory_ui :ecs::component {
-		inventory_ui(ecs::Constrained<ui::menu_component> inventory_menu) :menu(inventory_menu) {
+		inventory_ui(ecs::Constrained<ui::MenuComponent> inventory_menu) :menu(inventory_menu) {
 
 		}
 
-		ecs::Constrained<ui::menu_component> menu;
+		ecs::Constrained<ui::MenuComponent> menu;
 	};
 	struct InventoryUiSystem : ecs::System {
 		void run(ecs::Ecs& world) {
@@ -89,7 +89,7 @@ ecs::Constrained<items::crafter> crafter = ent
 			object.add_component<inventory>(slots, hotbar, hotbar_display).
 				givestartitems(items);
 			ecs::obj input_slots = ecs::spawn(object.world(),items::container_recipe(ui::TableBounds(2, 2)));
-			ecs::Constrained<ui::menu_component> inventory_menu = ecs::spawn(object.world(), inventory_menu_recipe(slots,input_slots));
+			ecs::Constrained<ui::MenuComponent> inventory_menu = ecs::spawn(object.world(), inventory_menu_recipe(slots,input_slots));
 			object.add_component<inventory_ui>(inventory_menu);
 		}
 	};
@@ -114,7 +114,7 @@ ecs::Constrained<items::crafter> crafter = ent
 	};
 
 	struct PlayerInventoryPlugin {
-		void operator()(Core::App& world) {
+		void operator()(core::App& world) {
 			player::player_for(world.Ecs).apply_recipe(PlayerInventoryRecipe());
 			world.emplace_system< InventoryUiSystem>();
 			world.emplace_system<player::LoadHotbarSlots>();

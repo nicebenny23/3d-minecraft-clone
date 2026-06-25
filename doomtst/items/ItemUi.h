@@ -35,7 +35,7 @@ namespace items {
 
 	inline void ItemUiSpawner(ecs::obj& entity){
 			ecs::obj image= entity.spawn_child< ui::UiImageSpawner>(geo::Box2d::origin_centered(v2::Vec2(item_size, item_size)), 1);
-			ecs::obj text= entity.spawn_child<ui::ui_text_spawner>(geo::Box2d::Box2d(v2::Vec2(.2f,.2f),v2::Vec2(.4f,.4f)), 1,colors::White);
+			ecs::obj text= entity.spawn_child<ui::UiTextSpawner>(geo::Box2d::Box2d(v2::Vec2(.2f,.2f),v2::Vec2(.4f,.4f)), 1,colors::White);
 			entity.set_emplace_component<ItemIcon>(ecs::Constrained<ui::UiImage>(image));
 			entity.set_emplace_component<ItemCountDisplay>(ecs::Constrained<ui::Text>(text));
 				geo::Box2d max_size(v2::Vec2(0, -.4f), v2::Vec2(item_size, item_size / 8));
@@ -99,7 +99,7 @@ namespace items {
 	};
 
 	struct ItemUiPlugin {
-		void operator()(Core::App& app) {
+		void operator()(core::App& app) {
 			app.insert_plugin(ui::UiImagePlugin());
 			app.insert_plugin(ui::UiTextPlugin());
 			app.emplace_system<ItemIconSetter>();

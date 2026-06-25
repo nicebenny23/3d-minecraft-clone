@@ -3,7 +3,7 @@
 #include "../util/dynamicarray.h"
 #include <utility>
 //start of the application
-namespace Core {
+namespace core {
 	struct App;
 	template<typename T>
 	concept PluginType = std::constructible_from<stn::Stateless<void(App&)>,T&&>;

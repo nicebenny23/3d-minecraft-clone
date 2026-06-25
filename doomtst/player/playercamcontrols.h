@@ -39,7 +39,7 @@ struct playercamcontrols : ecs::component
 		}
 		else
 		{
-			Core::game.Ecs.get_resource<renderer::Window>().enable_cursor();
+			core::game.Ecs.get_resource<renderer::Window>().enable_cursor();
 		}
 		
 	}

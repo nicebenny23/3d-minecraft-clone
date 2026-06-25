@@ -57,7 +57,7 @@ namespace timing {
 
 	};
 	struct TimePlugin {
-		void operator()(Core::App& app) {
+		void operator()(core::App& app) {
 			app.emplace_resource<timing::WorldClock>();
 			app.emplace_system<FpsTimer>();
 		}

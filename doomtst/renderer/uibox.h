@@ -95,7 +95,7 @@ namespace ui {
 		}
 	};
 	struct UiImagePlugin {
-		void operator()(Core::App& app) {
+		void operator()(core::App& app) {
 			renderer::shader_id ui_shader = app.Ecs.load_asset_emplaced<renderer::shader_descriptor>("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs").unwrap();
 
 			app.Ecs.load_asset_emplaced<MaterialDescriptor>("Ui", "ui_phase", "UiShader", RenderProperties(false, true, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),

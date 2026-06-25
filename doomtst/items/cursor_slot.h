@@ -98,7 +98,7 @@ namespace items {
 
 
 	struct CursorContainerPlugin {
-		void operator()(Core::App& app) {
+		void operator()(core::App& app) {
 			ecs::obj cursor_entity = ecs::spawn(app.Ecs, items::ItemSlotSpawner());
 			ecs::obj cursor_display = ecs::spawn(app.Ecs, items::ClearItemSlotSpawner(ecs::Constrained<items::ElementSlot>(cursor_entity)));
 				

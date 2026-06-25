@@ -154,7 +154,7 @@ namespace physics {
 	};
 
 	struct PhysicsPlugin {
-		void operator()(Core::App& world) {
+		void operator()(core::App& world) {
 
 			world.insert_plugin(timing::TimePlugin());
 			world.emplace_system< RigidbodySystem>();

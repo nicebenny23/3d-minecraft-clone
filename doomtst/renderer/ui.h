@@ -160,7 +160,7 @@ namespace ui {
 		}
 	};
 	struct UiPlugin {
-		void operator()(Core::App& app) {
+		void operator()(core::App& app) {
 			app.emplace_system< UiInteractionSystem>();
 			app.emplace_system< ComputePrioritySystem>();
 			ecs::obj entity = ecs::spawn_emplaced<UiSpawner>(app.Ecs, geo::Box2d::origin_centered(v2::unitv), 2);

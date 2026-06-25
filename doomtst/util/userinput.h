@@ -99,23 +99,23 @@ namespace userinput {
 	};
 
 	inline void key_callback(GLFWwindow* /*window*/, int key, int /*scancode*/, int action, int /*mods*/) {
-		Core::game.Ecs.get_resource<userinput::InputManager>().update_key(key, action);
+		core::game.Ecs.get_resource<userinput::InputManager>().update_key(key, action);
 	}
 
 	inline void mouse_button_callback(GLFWwindow* /*window*/, int button, int action, int /*mods*/) {
 		if (button < 2) {
-			Core::game.Ecs.get_resource<userinput::InputManager>().update_key(GLFW_KEY_LAST + button, action);
+			core::game.Ecs.get_resource<userinput::InputManager>().update_key(GLFW_KEY_LAST + button, action);
 		}
 	}
 
 	inline void cursor_position_callback(GLFWwindow* /*window*/, double xpos, double ypos) {
-		v2::Vec2 new_mouse_position(Core::game.Ecs.get_resource<renderer::Window>().fit_to_aspect_ratio(v2::Vec2(xpos, ypos)));
-		userinput::InputManager& manager = Core::game.ensure_resource<userinput::InputManager>();
+		v2::Vec2 new_mouse_position(core::game.Ecs.get_resource<renderer::Window>().fit_to_aspect_ratio(v2::Vec2(xpos, ypos)));
+		userinput::InputManager& manager = core::game.ensure_resource<userinput::InputManager>();
 		manager.adjusted_mouse_position_dt = new_mouse_position - manager.mouse_position;
 		manager.mouse_position = new_mouse_position;
 	}
 
-	inline void user_input_plugin(Core::App& app) {
+	inline void user_input_plugin(core::App& app) {
 		app.insert_plugin(renderer::window_plugin);
 
 		renderer::Window& window=app.Ecs.get_resource<renderer::Window>();

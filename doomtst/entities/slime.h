@@ -252,7 +252,7 @@ namespace slimes {
 
 	};
 	struct SlimeAiPlugin {
-		void operator()(Core::App& app) {
+		void operator()(core::App& app) {
 			app.insert_plugin(ai::BrainPlugin());
 			app.emplace_system< SlimeStunner>();
 			app.emplace_system<SlimePathFollower>();

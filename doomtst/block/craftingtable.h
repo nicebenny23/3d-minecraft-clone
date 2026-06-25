@@ -46,7 +46,7 @@ namespace blocks {
 			ecs::obj bg = menu_object.spawn_child<ui::UiImageSpawner>(renderer::TexturePath("images\\menutex.png"),
 			geo::Box2d(v2::Vec2(.27f, .15f)/2, v2::Vec2(.35f, .29f))
 			,0);
-			ent.add_component<player::OpenMenuOnClick>(ecs::ConstrainedHandle<ui::menu_component>(menu_object));
+			ent.add_component<player::OpenMenuOnClick>(ecs::ConstrainedHandle<ui::MenuComponent>(menu_object));
 			menu_object.spawn_child<items::ContainerDisplayRecipe>(v2::Coord2(4, 3), input_slots);
 			ecs::Constrained<items::crafter> crafter = ent
 				.spawn_child< items::CrafterRecipe>(input_slots.object(), stn::array({std::filesystem::path("crafting\\2x2craft.txt"), std::filesystem::path("crafting\\3x3craft.txt")}));

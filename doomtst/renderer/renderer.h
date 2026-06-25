@@ -235,7 +235,7 @@ namespace renderer {
 		}
 	};
 	struct RendererPlugin {
-		void operator()(Core::App& game) {
+		void operator()(core::App& game) {
 			game.insert_plugin(renderer::window_plugin);
 			ecs::Ecs& world = game.Ecs;
 

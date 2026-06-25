@@ -54,7 +54,7 @@ namespace player {
 					health_ui.health_boxes[i].get_component<ui::UiEnabled>().enable();
 				}
 				if (health.current_health==0) {
-					world.write_command(Core::CloseGameCommand());
+					world.write_command(core::CloseGameCommand());
 				}
 			}
 
@@ -69,7 +69,7 @@ namespace player {
 		ui::TableBounds bounds(player.get_component<Health::EntityHealth>().max_health, 1);
 		player.apply_recipe(ui::UiTableRecipe< HealthDisplayedRecipe >(ui, HealthDisplayedRecipe(), bounds, ui::UiSpawner(geo::Box2d::origin_centered(v2::unitv*.7f), 1)));
 	}
-	inline void player_health_plugin(Core::App& app) {
+	inline void player_health_plugin(core::App& app) {
 		app.emplace_system<PlayerHealthUi>();
 	}
 }

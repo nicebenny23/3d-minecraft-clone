@@ -220,7 +220,7 @@ namespace blockrender {
 	};
 	struct BlockRenderPlugin {
 
-		void operator()(Core::App& engine) {
+		void operator()(core::App& engine) {
 			engine.emplace_system<grid::GridManager>();
 			engine.emplace_system<grid::GridCoverer>();
 			engine.emplace_system<grid::LightRemover>();
