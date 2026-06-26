@@ -45,15 +45,15 @@ namespace ui {
 	stn::Option< renderer::TexturePath> current_image_path;
 	friend struct PrepareUiImage;
 	};
-	struct UiImageSpawner{
+	struct ImageSpawner{
 		UiSpawner ui_spawn;
 		colors::Color color;
 		stn::Option<renderer::TexturePath> path;
-		UiImageSpawner(const renderer::TexturePath& spawn_path,geo::Box2d box, size_t priority, colors::Color spawn_color=colors::White)
+		ImageSpawner(const renderer::TexturePath& spawn_path,geo::Box2d box, size_t priority, colors::Color spawn_color=colors::White)
 		:path(spawn_path),ui_spawn(box,priority), color(spawn_color) {
 			
 		}
-		UiImageSpawner(geo::Box2d box, size_t priority,colors::Color spawn_color = colors::White)
+		ImageSpawner(geo::Box2d box, size_t priority,colors::Color spawn_color = colors::White)
 		:path(stn::None),ui_spawn(box, priority),color(spawn_color){
 
 		}
@@ -85,16 +85,13 @@ namespace ui {
 						img.tex_handle.set_order_key(style.priority);
 						img.tex_handle.set_uniform(renderer::uniform(style.final_size.scale, "scale"));
 						img.tex_handle.set_uniform(renderer::uniform(style.final_size.center, "center"));
-						if (style.final_size.min().x == 0.087500000838190317) {
-							int l = 0;
-						}
 						img.tex_handle.set_color(img.current_color);
 					}
 					img.tex_handle.enable_if(style.enabled);
 			}
 		}
 	};
-	struct UiImagePlugin {
+	struct ImagePlugin {
 		void operator()(core::App& app) {
 			renderer::shader_id ui_shader = app.Ecs.load_asset_emplaced<renderer::shader_descriptor>("UiShader", "shaders\\uivertex.vs", "shaders\\uifragment.vs").unwrap();
 

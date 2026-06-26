@@ -92,7 +92,7 @@ namespace ui {
 			for (v2::UVec2 pos : size) {
 				v2::Vec2 point = v2::Vec2(math::centered_unit_bounds.lerp((.5f+pos.x) * inv_size.x), math::centered_unit_bounds.lerp((.5f + pos.y) * inv_size.y));
 				geo::Box2d child_box=geo::Box2d(point, inv_size).transform(element_spawner.bounds);
-				ecs::obj child= object.spawn_child<ui::UiSpawner>(child_box, element_spawner.priority);
+				ecs::obj child= object.spawn_child_emplaced<ui::UiSpawner>(child_box, element_spawner.priority);
 				child.add_component<TableEntry>(pos);
 				ecs::obj parent = ecs::parent(child).unwrap();
 				child.apply_recipe(recipe);

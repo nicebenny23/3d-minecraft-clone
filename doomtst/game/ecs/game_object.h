@@ -107,8 +107,11 @@ namespace ecs {
 			ecs::apply(recipe, *this);
 		}
 		template<RecipeType T, typename ...Args> requires std::constructible_from<T, Args&&...>
-		ecs::obj spawn_child(Args&&... args);
-		
+		ecs::obj spawn_child_emplaced(Args&&... args);
+		template<RecipeType T>
+		ecs::obj spawn_child(T&& recipe);
+
+
 	private:
 		Ecs* ecs;
 		entity ent;
@@ -128,11 +131,20 @@ namespace ecs {
 		return object;
 	}
 	template<RecipeType T, typename ...Args> requires std::constructible_from<T, Args&&...>
-	inline obj obj::spawn_child(Args && ...args) {
+	inline obj obj::spawn_child_emplaced(Args && ...args) {
 		ecs::obj child = spawn_emplaced<T>(world(), std::forward<Args>(args)...);
 		add_child(child);
 		return child;
 	}
+
+	template<RecipeType T> 
+	inline obj obj::spawn_child(T&& spawner) {
+		ecs::obj child = spawn<T>(world(), std::forward<T>(spawner));
+		add_child(child);
+		return child;
+	}
+
+
 	template<typename T>
 	concept ObjectLike = std::same_as<T, obj> || requires(const T & value) {
 		{

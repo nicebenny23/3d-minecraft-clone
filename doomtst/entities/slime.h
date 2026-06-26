@@ -225,7 +225,7 @@ namespace slimes {
 		v3::Point3 pos;
 		inline void apply(ecs::obj& slime) const {
 			slime.add_component<core::LocalTransform>(pos).transform.scale = v3::unit_scale / 1.3f;
-			slime.spawn_child<core::TransformRecipe>(pos);
+			slime.spawn_child_emplaced<core::TransformRecipe>(pos);
 
 			slime.apply_recipe(items::loot_table_recipe<slime_loot_table>);
 			double speed = 15;

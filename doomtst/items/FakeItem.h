@@ -42,7 +42,7 @@ namespace items {
 		void apply(ecs::obj& object) const{
 			ui::UiSpawner(inventory_transform_floating(inventory_center(location)), 20).apply(object);
 			object.apply_recipe(ItemUiSpawner);
-			ecs::obj item_decal = object.spawn_child<ui::UiImageSpawner>(renderer::TexturePath("images\\blockholder.png"), geo::unit_box_2d, 0);
+			ecs::obj item_decal = object.spawn_child_emplaced<ui::ImageSpawner>(renderer::TexturePath("images\\blockholder.png"), geo::unit_box_2d, 0);
 			object.add_component<ItemSlotDecal>(item_decal);
 		}
 	};

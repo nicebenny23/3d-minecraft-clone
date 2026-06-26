@@ -34,13 +34,13 @@ namespace items {
 	};
 
 	inline void ItemUiSpawner(ecs::obj& entity){
-			ecs::obj image= entity.spawn_child< ui::UiImageSpawner>(geo::Box2d::origin_centered(v2::Vec2(item_size, item_size)), 1);
-			ecs::obj text= entity.spawn_child<ui::UiTextSpawner>(geo::Box2d::Box2d(v2::Vec2(.2f,.2f),v2::Vec2(.4f,.4f)), 1,colors::White);
+			ecs::obj image= entity.spawn_child_emplaced< ui::ImageSpawner>(geo::Box2d::origin_centered(v2::Vec2(item_size, item_size)), 1);
+			ecs::obj text= entity.spawn_child_emplaced<ui::TextSpawner>(geo::Box2d::Box2d(v2::Vec2(.2f,.2f),v2::Vec2(.4f,.4f)), 1,colors::White);
 			entity.set_emplace_component<ItemIcon>(ecs::Constrained<ui::UiImage>(image));
 			entity.set_emplace_component<ItemCountDisplay>(ecs::Constrained<ui::Text>(text));
 				geo::Box2d max_size(v2::Vec2(0, -.4f), v2::Vec2(item_size, item_size / 8));
-				ecs::obj bar= entity.spawn_child< ui::UiImageSpawner>(renderer::TexturePath("images\\default.png"), max_size, 1, colors::Green);
-				ecs::obj under_bar = entity.spawn_child< ui::UiImageSpawner>(renderer::TexturePath("images\\default.png"), max_size, 0, colors::Black);
+				ecs::obj bar= entity.spawn_child_emplaced< ui::ImageSpawner>(renderer::TexturePath("images\\default.png"), max_size, 1, colors::Green);
+				ecs::obj under_bar = entity.spawn_child_emplaced< ui::ImageSpawner>(renderer::TexturePath("images\\default.png"), max_size, 0, colors::Black);
 				entity.set_emplace_component<ItemProgressDisplay>(bar, under_bar);
 	}
 
@@ -100,7 +100,7 @@ namespace items {
 
 	struct ItemUiPlugin {
 		void operator()(core::App& app) {
-			app.insert_plugin(ui::UiImagePlugin());
+			app.insert_plugin(ui::ImagePlugin());
 			app.insert_plugin(ui::UiTextPlugin());
 			app.emplace_system<ItemIconSetter>();
 			app.emplace_system<ItemDuribilityBarSetter>();

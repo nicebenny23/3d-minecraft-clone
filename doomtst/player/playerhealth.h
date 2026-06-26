@@ -62,7 +62,7 @@ namespace player {
 		}
 	};
 	inline void player_health_spawner(ecs::obj& player) { 
-		ecs::obj spawn = ecs::spawn(player.world(), ui::UiImageSpawner(renderer::TexturePath("images\\default.png"), geo::unit_box_2d, 0, colors::Red.with_opacity(.2f)));
+		ecs::obj spawn = ecs::spawn(player.world(), ui::ImageSpawner(renderer::TexturePath("images\\default.png"), geo::unit_box_2d, 0, colors::Red.with_opacity(.2f)));
 
 		player.add_component<PlayerHealth>(spawn);
 		ui::UiSpawner ui(geo::Box2d(v2::Vec2(.1f, -.35f)/2, v2::Vec2(.1f, .015f)), 12);

@@ -31,7 +31,7 @@ namespace player {
 	struct CrosshairPlugin {
 		void operator()(core::App& app) {
 			app.emplace_system< CrosshairSystem>();
-			ecs::Constrained<ui::UiImage> crosshair_handle(ecs::spawn(app.Ecs, ui::UiImageSpawner(geo::Box2d::origin_centered(v2::unitv / 32), -3)));
+			ecs::Constrained<ui::UiImage> crosshair_handle(ecs::spawn(app.Ecs, ui::ImageSpawner(geo::Box2d::origin_centered(v2::unitv / 32), -3)));
 			player_for(app.Ecs).add_component < crosshair_component>(crosshair_handle);
 
 		}

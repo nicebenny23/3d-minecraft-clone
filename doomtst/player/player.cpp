@@ -14,6 +14,7 @@
 #include "playertpsword.h"
 #include "crosshair.h"
 #include "../renderer/ModelMesh.h"
+#include "../game/close.h"
 ecs::obj player::goblin;
 
 void player::initplayer(ecs::obj& player) {
@@ -34,11 +35,12 @@ void player::initplayer(ecs::obj& player) {
 	core::game.emplace_system<PlayerMovementSys>();
 	core::game.emplace_system<PlayerHealthUi>();
 	core::game.insert_plugin(ModelPlugin());
-
+	core::game.insert_plugin(player::CloseMenuPlugin);
+	player.add_component<player::CloseMenuComponent>(ecs::spawn(player.world(),player::make_close_menu));
 	aabb::DynamicColliderRecipe().apply(player);
 	player.apply_recipe(physics::Spawner{.restitution=.6});
 	core::game.emplace_system<player::PlayerEater>();
-	ecs::obj eater = ecs::spawn(player.world(),ui::UiImageSpawner(geo::Box2d::origin_centered(v2::Vec2(.4f, .4f)),1));
+	ecs::obj eater = ecs::spawn(player.world(),ui::ImageSpawner(geo::Box2d::origin_centered(v2::Vec2(.4f, .4f)),1));
 	player.add_component<player::player_eat_behavior>(player.world().get_resource<timing::WorldClock>(),eater);
 	player.apply_recipe(player::player_health_spawner);  
 

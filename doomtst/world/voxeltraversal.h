@@ -167,8 +167,9 @@ namespace voxtra {
 	inline geo::Box move_left_until_air(geo::Box box,grid::Grid& world,blocks::BlockRegistry& registry) {
 		while (true) {
 			v3::Coord lowest= world.get_voxel(box.min());
-			v3::Coord highest= world.get_voxel(box.max());
+			v3::Coord highest= world.get_voxel(box.max()+v3::Vec3(1,1,1));
 			bool only_air = true;
+
 			for (int x = lowest.x; x <= highest.x; x++) {
 				for (int y = lowest.y; y <= highest.y; y++) {
 					for (int z = lowest.z; z <= highest.z; z++) {
@@ -182,7 +183,7 @@ namespace voxtra {
 			if (only_air) {
 				break;
 			}
-			box.center.x += 1;
+			box.center.x +=2;
 
 		}
 		return box;

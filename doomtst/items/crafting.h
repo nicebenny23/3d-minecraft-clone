@@ -47,7 +47,7 @@ namespace items {
 		ecs::Constrained<crafter> crafter;
 		void apply(ecs::obj& entity) const {
 			entity.apply_recipe(ui::UiSpawner(geo::unit_box_2d, 1));
-			ecs::Constrained<ui::InteractionState, ItemIcon, ItemCountDisplay> display = entity.spawn_child<FakeItemSlotDispaySpawner>(pos);
+			ecs::Constrained<ui::InteractionState, ItemIcon, ItemCountDisplay> display = entity.spawn_child_emplaced<FakeItemSlotDispaySpawner>(pos);
 			entity.add_component <crafting_slot_displayer>(crafter, display);
 		}
 

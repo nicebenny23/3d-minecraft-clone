@@ -55,7 +55,7 @@ namespace player {
 
 	struct inventory_slots_pannel_recipe {
 		void apply(ecs::obj& ent) const{
-			ent.spawn_child<items::ContainerDisplayRecipe>(v2::Coord2(0, -1), player_for(ent.world()).get_component<inventory>().slots);
+			ent.spawn_child_emplaced<items::ContainerDisplayRecipe>(v2::Coord2(0, -1), player_for(ent.world()).get_component<inventory>().slots);
 		}
 	};
 	struct inventory_menu_recipe {
@@ -68,12 +68,12 @@ namespace player {
 		void apply(ecs::obj& ent) const{
 			ui::MenuRecipe().apply(ent);
 			inventory_slots_pannel_recipe().apply(ent);
-			ecs::obj bg = ent.spawn_child<ui::UiImageSpawner>(renderer::TexturePath("images\\menutex.png"), geo::Box2d(v2::Vec2(.24f, .15f)/2.0, v2::Vec2(.33f, .25f)), 0);
+			ecs::obj bg = ent.spawn_child_emplaced<ui::ImageSpawner>(renderer::TexturePath("images\\menutex.png"), geo::Box2d(v2::Vec2(.24f, .15f)/2.0, v2::Vec2(.33f, .25f)), 0);
 			
-			ent.spawn_child<items::ContainerDisplayRecipe>(v2::Coord2(4, 3), input);
+			ent.spawn_child_emplaced<items::ContainerDisplayRecipe>(v2::Coord2(4, 3), input);
 ecs::Constrained<items::crafter> crafter = ent
-				.spawn_child< items::CrafterRecipe>(input.object(), stn::array({std::filesystem::path("crafting\\2x2craft.txt")}));			
-			ent.spawn_child<items::CraftingSlotDisplaySpawner>(v2::Coord2(7, 3), crafter);
+				.spawn_child_emplaced< items::CrafterRecipe>(input.object(), stn::array({std::filesystem::path("crafting\\2x2craft.txt")}));			
+			ent.spawn_child_emplaced<items::CraftingSlotDisplaySpawner>(v2::Coord2(7, 3), crafter);
 			ent.get_component<ui::UiEnabled>().disable();
 		}
 	};
@@ -82,7 +82,7 @@ ecs::Constrained<items::crafter> crafter = ent
 
 	struct PlayerInventoryRecipe {
 		void apply(ecs::obj& object) const{
-			ecs::Constrained<items::container>  slots = object.spawn_child<items::container_recipe>(ui::TableBounds(6, 2));
+			ecs::Constrained<items::container>  slots = object.spawn_child_emplaced<items::container_recipe>(ui::TableBounds(6, 2));
 			ecs::Constrained<items::container> hotbar = ecs::spawn(object.world(), items::container_recipe(ui::TableBounds(6, 1)));
 			ecs::Constrained<items::ContainerDisplay>	hotbar_display = ecs::spawn(object.world(), items::ContainerDisplayRecipe(v2::Coord2(0, -7), hotbar));
 			stn::array<std::string> items({ "plank"});

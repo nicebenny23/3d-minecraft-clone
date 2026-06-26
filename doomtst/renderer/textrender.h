@@ -53,8 +53,15 @@ namespace ui {
 					geo::Box2d charlocation = geo::Box2d(min + boxoffset, bounds.scale);
 
 					renderer::MeshBuilder mesh_data = ui_text.handle.insert_builder_for(renderer::vertex().push<float, 2>().push<float, 3>());
-					for (int i = 0; i < ui_text.word.length(); i++) {
-						write_letter(mesh_data, charlocation, int(ui_text.word[i] - '0'));
+					for (char symbol:ui_text.word) {
+						int key = 0;
+						if (std::isdigit(symbol)) {
+							key=symbol - '0';
+						}
+						else {
+							key = symbol - 'A'+10;
+						}
+						write_letter(mesh_data, charlocation, key);
 						charlocation.center += increse;
 					}
 					ui_text.handle.set_color(ui_text.text_color);
@@ -67,10 +74,10 @@ namespace ui {
 		}
 	};
 
-	struct UiTextSpawner {
+	struct TextSpawner {
 		UiSpawner ui_spawn;
 		colors::Color color;
-		UiTextSpawner(geo::Box2d box, size_t priority,colors::Color initial_color=colors::White) :ui_spawn(geo::Box2d(box.center, box.scale), priority),color(initial_color){
+		TextSpawner(geo::Box2d box, size_t priority,colors::Color initial_color=colors::White) :ui_spawn(geo::Box2d(box.center, box.scale), priority),color(initial_color){
 			
 		}
 		void apply(ecs::obj& object) const{

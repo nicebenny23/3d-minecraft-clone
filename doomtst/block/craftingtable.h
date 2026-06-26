@@ -43,14 +43,14 @@ namespace blocks {
 		void apply(ecs::obj& ent) const {
 			ecs::obj menu_object= ecs::spawn_emplaced<ui::MenuRecipe>(ent.world());
 			menu_object.apply_recipe(player::inventory_slots_pannel_recipe());
-			ecs::obj bg = menu_object.spawn_child<ui::UiImageSpawner>(renderer::TexturePath("images\\menutex.png"),
+			ecs::obj bg = menu_object.spawn_child_emplaced<ui::ImageSpawner>(renderer::TexturePath("images\\menutex.png"),
 			geo::Box2d(v2::Vec2(.27f, .15f)/2, v2::Vec2(.35f, .29f))
 			,0);
 			ent.add_component<player::OpenMenuOnClick>(ecs::ConstrainedHandle<ui::MenuComponent>(menu_object));
-			menu_object.spawn_child<items::ContainerDisplayRecipe>(v2::Coord2(4, 3), input_slots);
+			menu_object.spawn_child_emplaced<items::ContainerDisplayRecipe>(v2::Coord2(4, 3), input_slots);
 			ecs::Constrained<items::crafter> crafter = ent
-				.spawn_child< items::CrafterRecipe>(input_slots.object(), stn::array({std::filesystem::path("crafting\\2x2craft.txt"), std::filesystem::path("crafting\\3x3craft.txt")}));
-			menu_object.spawn_child<items::CraftingSlotDisplaySpawner>(v2::Coord2(8, 4), crafter);
+				.spawn_child_emplaced< items::CrafterRecipe>(input_slots.object(), stn::array({std::filesystem::path("crafting\\2x2craft.txt"), std::filesystem::path("crafting\\3x3craft.txt")}));
+			menu_object.spawn_child_emplaced<items::CraftingSlotDisplaySpawner>(v2::Coord2(8, 4), crafter);
 		}
 	};
 
