@@ -5,29 +5,27 @@
 namespace world {
 
 	enum biometype {
-		mossybiome = 0,
-		normalbiome = 1,
-		open_stone = 2,
+		normalbiome,
+		redland
 
 	};
 	inline biometype get_biome(double biome) {
 
-		if (math::bounds(0, 1).contains(biome)) {
+		if (math::bounds(-.85, 1).contains(biome)) {
 			return normalbiome;
 		}
-		if (math::bounds(-1, -.5).contains(biome)) {
-			return normalbiome;
+		if (math::bounds(-1, -.85).contains(biome)) {
+			return redland;
 		}
-		return mossybiome;
-
+		
 	}
 	inline blocks::block_id get_default_block(biometype biome, const BlockRegistry& registry) {
 
 		if (biome == normalbiome) {
 			return registry.get_id<blocks::StoneBlock>();
 		}
-		if (biome == mossybiome) {
-			return registry.get_id<blocks::StoneBlock>();
+		if (biome == redland) {
+			return registry.get_id<blocks::SoilBlock>();
 		}
 
 	}
@@ -75,7 +73,7 @@ namespace world {
 		return big_carver_bounds;
 	}
 
-	inline blocks::block_id generatechunkvalfromnoise(Point3 pos, const math::NoiseMap& map, const math::NoiseMap& crazy, const math::NoiseMap& slow, const math::NoiseMap& axis, const BlockRegistry& registry) {
+	inline blocks::block_id generatechunkvalfromnoise(Point3 pos, const math::NoiseMap& map, const math::NoiseMap& crazy,  const math::NoiseMap& axis, const BlockRegistry& registry) {
 		double speed_scale = 10;
 		v3::Vec3 warp(axis(pos, 10), axis(pos, 11), axis(pos, 12));
 
@@ -112,7 +110,7 @@ namespace world {
 
 			return registry.get_id<blocks::AirBlock>();
 		}
-		double biome = slow(scaled_pos, 1);
+		double biome = map(scaled_pos/40, 10);
 		double random_n = crazy(pos, 2);
 
 		return non_cave_id(biome, random_n, signed_distance, registry);
@@ -122,13 +120,11 @@ namespace world {
 	}
 
 	struct DefaultTerrainGenerator :world::TerrainGenerator {
-		NoiseMap slow;
 		NoiseMap normal;
 		NoiseMap crazy;
 		NoiseMap axis;
 		BlockRegistry& registry;
-		DefaultTerrainGenerator(BlockRegistry& blk_registry)
-			:slow(math::OctaveSeries{ .octaves = 2,.starting_period = 200,.period_factor = 1 / 2.f,.starting_amplifcation = 4,.amplification_factor = .5f }, 2000),
+		DefaultTerrainGenerator(BlockRegistry& blk_registry):
 			normal(math::OctaveSeries{ .octaves = 3,.starting_period = 1,.period_factor = .5f,.starting_amplifcation = 1,.amplification_factor = .5f }, 200000),
 			crazy(math::OctaveSeries{ .starting_period = 3 }, 20000),
 			axis(math::OctaveSeries{ .starting_period = 90}, 20000),
@@ -136,7 +132,7 @@ namespace world {
 
 		}
 		block_id generate(v3::Coord pos) const {
-			return generatechunkvalfromnoise(pos, normal, crazy, slow, axis, registry);
+			return generatechunkvalfromnoise(pos, normal, crazy, axis, registry);
 		}
 	};
 

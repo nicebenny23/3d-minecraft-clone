@@ -33,16 +33,20 @@ namespace blocks {
 		void run(ecs::Ecs& world) {
 			ecs::View<SeedLifetime,block> moss_clock(world);
 			grid::Grid& grid=world.get_resource<grid::Grid>();
-			for (auto&& [moss,block]: moss_clock) {
-				if (!grid::lights_loaded_at(grid, block.pos)) {
+			for (auto&& [moss,mblock]: moss_clock) {
+				if (!grid::lights_loaded_at(grid, mblock.pos)) {
 					continue;
 				}
 				bool stop = true;
 				for (math::Direction3d dir : math::Directions3d) {
-					stn::Option<blocks::block&> blk = world.get_resource<grid::Grid>().get_block(dir.coord() + block.pos);
+					stn::Option<blocks::block&> blk = grid.get_block(dir.coord() + mblock.pos);
 					if (blk && blk.unwrap().light_passing_through != 0) {
 						stop = false;
 					}
+				}
+				stn::Option<block&> blk_below = grid.get_block(mblock.pos - v3::Coord(0, 1, 0));
+				if (blk_below&&!blk_below.unwrap().is<SoilBlock>()) {
+					stop = true;
 				}
 				block_texture general_tex = mosstex;
 				if (stop) {
@@ -59,16 +63,16 @@ namespace blocks {
 				for (Direction3d dir : math::Directions3d) {
 					if (dir.axis()==math::AxisIndex3d::Up) {
 
-						block.mesh.set_face_texture(dir, general_tex);
+						mblock.mesh.set_face_texture(dir, general_tex);
 					}
 					else {
-						block.mesh.set_face_texture(dir,side_tex);
+						mblock.mesh.set_face_texture(dir,side_tex);
 					}
 					}
 			
 
 				if (moss.clock.is_inactive()) {
-					grid::set_block(world,block.pos,world.get_resource<BlockRegistry>().get_id<LogBlock>());
+					grid::set_block(world, mblock.pos,world.get_resource<BlockRegistry>().get_id<LogBlock>());
 				}
 			}
 		}

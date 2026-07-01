@@ -53,7 +53,7 @@ struct MinecraftPlugin {
 		random::initilize_random();
 		app.insert_plugin(renderer::ParticlePlugin());
 		ecs::obj player= ecs::spawn(app.Ecs, player::initplayer);
-		grid::Grid& world= app.emplace_resource<grid::Grid>(3  , player,stn::box<world::TerrainGenerator>(stn::construct_derived<world::DefaultTerrainGenerator>(),app.Ecs.get_resource<blocks::BlockRegistry>()));
+		grid::Grid& world= app.emplace_resource<grid::Grid>(3 , player,stn::box<world::TerrainGenerator>(stn::construct_derived<world::DefaultTerrainGenerator>(),app.Ecs.get_resource<blocks::BlockRegistry>()));
 		blocks::BlockRegistry& registry = app.Ecs.get_resource<blocks::BlockRegistry>();
 		math::Transform& transform = player.get_component<core::LocalTransform>().transform;
 		transform.position = voxtra::move_left_until_air(transform.unrotated_box(), world, registry).center;

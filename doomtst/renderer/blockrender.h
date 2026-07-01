@@ -278,7 +278,7 @@ namespace blockrender {
 			texlist.reach(logtoppng) = "images\\log.png";
 			texlist.reach(ultraaltarpngultrapng) = "images\\ultraaltar.png";
 			texlist.reach(planktex) = "images\\treestoneblock.png";
-
+			texlist.reach(soiltex) = "images\\dirt.png";
 			texlist.reach(sandtex) = "images\\sand.png";
 			texlist.reach(torchtex) = "images\\baked_torch.png";
 			texlist.reach(torchtoptex) = "images\\torchtop.png";

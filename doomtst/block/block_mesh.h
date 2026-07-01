@@ -110,7 +110,9 @@ namespace blocks {
 		}
 		bool transparent;
 		bool air_like;
-
+		void mark_dirty() {
+			flag.mark_dirty();
+		}
 		void uncompute_face_cover(math::Direction3d index_face) {
 				BlockFace& face = faces[index_face.index()];
 				if (face.cover!=cover_state::Uncomputed) {

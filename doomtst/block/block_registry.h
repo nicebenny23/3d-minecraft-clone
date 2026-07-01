@@ -36,6 +36,7 @@ namespace blocks {
 		ironoretex,
 		ultraaltarpngultrapng,
 		log_side,
+		soiltex,
 		chest_top,
 		sandtex,
 		furnacesideon,

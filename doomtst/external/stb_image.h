@@ -105,7 +105,7 @@ RECENT REVISION HISTORY:
     Janez Zemva             John Bartholomew   Michal Cichon        github:romigrou
     Jonathan Blow           Ken Hamada         Tero Hanninen        github:svdijk
     Eugene Golushkov        Laurent Gomila     Cort Stratton        github:snagar
-    Aruelien Pocheville     Sergio Gonzalez    Thibault Reuille     github:Zelex
+    Aruelien Pochsoille     Sergio Gonzalez    Thibault Reuille     github:Zelex
     Cass Everitt            Ryamond Barbiero                        github:grim210
     Paul Du Bois            Engin Manap        Aldo Culquicondor    github:sammyhw
     Philipp Wiesemann       Dale Weiler        Oriol Ferrer Mesia   github:phprus
@@ -7982,7 +7982,7 @@ STBIDEF int stbi_is_16_bit_from_callbacks(stbi_io_callbacks const* c, void* user
               error cases in bmp and tga give messages and don't leak (Raymond Barbiero, grisha)
               fix inefficiency in decoding 32-bit BMP (David Woo)
       1.29  (2010-08-16)
-              various warning fixes from Aurelien Pocheville
+              various warning fixes from Aurelien Pochsoille
       1.28  (2010-08-01)
               fix bug in GIF palette transparency (SpartanJ)
       1.27  (2010-08-01)

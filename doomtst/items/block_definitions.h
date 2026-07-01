@@ -6,7 +6,7 @@
 #include "../block/Chest.h"
 #include "../block/plank.h"
 #include "../block/crystal.h"
-
+#include "../block/soil.h"
 #include "../block/air.h"
 #include "../block/torch.h"
 #include "../block/moss.h"
@@ -236,6 +236,10 @@ namespace items {
 
 		registry.insert<AirBlock>();
 		registry.insert<ChestBlock>();
+
+		registry.insert<SoilBlock>();
+
+		item_register.insert<items::DirtItem>();
 		registry.insert<CraftingTableBlock>();
 		item_register.insert<items::slime_item>();
 

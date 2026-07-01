@@ -135,13 +135,13 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:\Users\User\Desktop\opengl\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\User\Desktop\opengl;C:\Users\User\source\repos\nicebenny23\3d-minecraft-clone\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\opengl\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)x64</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:\Users\User\Desktop\opengl\include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\User\Desktop\opengl;C:\Users\User\source\repos\nicebenny23\3d-minecraft-clone\x64;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\opengl\include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\opengl\lib;$(LibraryPath)</LibraryPath>
     <OutDir>$(SolutionDir)x64</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='fast_run|x64'">
@@ -231,7 +231,7 @@
       <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
       <AdditionalOptions>/VERBOSE:INCR /time %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalLibraryDirectories>C:\Users\User\Desktop\opengl\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='fast_run|x64'">
@@ -302,6 +302,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <EnableFiberSafeOptimizations>false</EnableFiberSafeOptimizations>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -310,7 +311,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>false</Profile>
-      <AdditionalLibraryDirectories>C:\Users\User\Desktop\opengl\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -358,6 +359,7 @@
     <ClInclude Include="block\chest.h" />
     <ClInclude Include="block\craftingtable.h" />
     <ClInclude Include="block\crystal.h" />
+    <ClInclude Include="block\soil.h" />
     <ClInclude Include="block\glass.h" />
     <ClInclude Include="block\plank.h" />
     <ClInclude Include="block\treestone.h" />
