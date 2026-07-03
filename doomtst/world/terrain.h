@@ -11,21 +11,24 @@ namespace world {
 	};
 	inline biometype get_biome(double biome) {
 
-		if (math::bounds(-.85, 1).contains(biome)) {
+		if (math::bounds(-.9, 1).contains(biome)) {
 			return normalbiome;
 		}
-		if (math::bounds(-1, -.85).contains(biome)) {
+		if (math::bounds(-1, -.9).contains(biome)) {
 			return redland;
 		}
 		
 	}
-	inline blocks::block_id get_default_block(biometype biome, const BlockRegistry& registry) {
-
+	inline blocks::block_id get_default_block(biometype biome,double dist, const BlockRegistry& registry) {
 		if (biome == normalbiome) {
 			return registry.get_id<blocks::StoneBlock>();
 		}
 		if (biome == redland) {
-			return registry.get_id<blocks::SoilBlock>();
+			if (dist==0) {
+				return registry.get_id<blocks::SoilBlock>();
+
+			}
+			return registry.get_id<blocks::StoneBlock>();
 		}
 
 	}
@@ -49,7 +52,7 @@ namespace world {
 	inline blocks::block_id non_cave_id(double biome, double chaotic, double dist, const BlockRegistry& registry) {
 
 		biometype biome_type = get_biome(biome);
-		blocks::block_id main_block = get_default_block(biome_type, registry);
+		blocks::block_id main_block = get_default_block(biome_type,dist, registry);
 
 		stn::Option< blocks::block_id> overload = chaotic_overide(chaotic, dist, biome_type, registry);
 		if (overload) {
@@ -73,12 +76,13 @@ namespace world {
 		return big_carver_bounds;
 	}
 
-	inline blocks::block_id generatechunkvalfromnoise(Point3 pos, const math::NoiseMap& map, const math::NoiseMap& crazy,  const math::NoiseMap& axis, const BlockRegistry& registry) {
+	inline v3::Vec3 warp_position(v3::Vec3 pos, const math::NoiseMap& axis) {
 		double speed_scale = 10;
 		v3::Vec3 warp(axis(pos, 10), axis(pos, 11), axis(pos, 12));
-
-		pos += warp * speed_scale;
-		Point3 scaled_pos = pos * blocksize;
+		return pos+warp * speed_scale;
+	}
+	inline blocks::block_id generatechunkvalfromnoise(Point3 position, const math::NoiseMap& map, const math::NoiseMap& smooth, const math::NoiseMap& crazy,  const math::NoiseMap& axis, const BlockRegistry& registry) {
+		v3::Vec3 pos = warp_position(position, axis);
 		double noise = 0;
 		double bit_carver_size = 100;
 		math::bounds big_carver_bounds = caveness(pos, map);
@@ -88,17 +92,18 @@ namespace world {
 		double big_carver_2 = map(pos / bit_carver_size, 5);
 		double global_dist_2 = big_carver_bounds.signed_distance_to(big_carver_2) * bit_carver_size;
 		stn::set_max(signed_distance, global_dist_2);
-		if (math::bounds(0,16).contains(signed_distance)) {
+		if (math::bounds(0,16).contains(signed_distance)||true) {
 			for (math::Direction3d dir : math::Directions3d) {
-				math::bounds big_carver_bounds = caveness(pos+dir.vec(), map);
+				v3::Vec3 neighbor_pos = warp_position(position + dir.vec(),axis);
+				math::bounds big_carver_bounds = caveness(neighbor_pos, map);
 				if (global_distance > 0) {
-					if (big_carver_bounds.contains(map((dir.vec() + pos) / bit_carver_size, 4))) {
+					if (big_carver_bounds.contains(map(neighbor_pos / bit_carver_size, 4))) {
 						signed_distance = 0;
 						break;
 					}
 				}
 				if (global_dist_2 > 0) {
-					if (big_carver_bounds.contains(map((dir.vec() + pos) / bit_carver_size, 5))) {
+					if (big_carver_bounds.contains(map(neighbor_pos / bit_carver_size, 5))) {
 						signed_distance = 0;
 						break;
 					}
@@ -110,7 +115,7 @@ namespace world {
 
 			return registry.get_id<blocks::AirBlock>();
 		}
-		double biome = map(scaled_pos/40, 10);
+		double biome = smooth (pos/40, 10);
 		double random_n = crazy(pos, 2);
 
 		return non_cave_id(biome, random_n, signed_distance, registry);
@@ -123,8 +128,11 @@ namespace world {
 		NoiseMap normal;
 		NoiseMap crazy;
 		NoiseMap axis;
+
+		NoiseMap smooth;
 		BlockRegistry& registry;
 		DefaultTerrainGenerator(BlockRegistry& blk_registry):
+			smooth(math::OctaveSeries{ .octaves = 1,.starting_period = 1.0f,.period_factor = 1.f,.starting_amplifcation = 1,.amplification_factor = .5f }, 200000),
 			normal(math::OctaveSeries{ .octaves = 3,.starting_period = 1,.period_factor = .5f,.starting_amplifcation = 1,.amplification_factor = .5f }, 200000),
 			crazy(math::OctaveSeries{ .starting_period = 3 }, 20000),
 			axis(math::OctaveSeries{ .starting_period = 90}, 20000),
@@ -132,7 +140,7 @@ namespace world {
 
 		}
 		block_id generate(v3::Coord pos) const {
-			return generatechunkvalfromnoise(pos, normal, crazy, axis, registry);
+			return generatechunkvalfromnoise(pos, normal,smooth, crazy, axis, registry);
 		}
 	};
 

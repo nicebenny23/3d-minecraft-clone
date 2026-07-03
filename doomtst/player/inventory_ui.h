@@ -85,7 +85,7 @@ ecs::Constrained<items::crafter> crafter = ent
 			ecs::Constrained<items::container>  slots = object.spawn_child_emplaced<items::container_recipe>(ui::TableBounds(6, 2));
 			ecs::Constrained<items::container> hotbar = ecs::spawn(object.world(), items::container_recipe(ui::TableBounds(6, 1)));
 			ecs::Constrained<items::ContainerDisplay>	hotbar_display = ecs::spawn(object.world(), items::ContainerDisplayRecipe(v2::Coord2(0, -7), hotbar));
-			stn::array<std::string> items({ "plank","dirt","torch","seed"});
+			stn::array<std::string> items({ "plank"});
 			object.add_component<inventory>(slots, hotbar, hotbar_display).
 				givestartitems(items);
 			ecs::obj input_slots = ecs::spawn(object.world(),items::container_recipe(ui::TableBounds(2, 2)));

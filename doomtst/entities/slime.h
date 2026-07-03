@@ -127,7 +127,7 @@ namespace slimes {
 					}
 					else {
 
-						if (v3::dist(transform.transform.position, goto_pos) < .2f) {
+						if (v3::dist(transform.transform.position, goto_pos) < .25f) {
 							path.path.unwrap().remove_at(0);
 							path.last_fix.set(1.5f);
 							if (path.path.unwrap().length()==0) {
@@ -197,7 +197,9 @@ namespace slimes {
 
 
  							v3::Vec3 d = goto_pos - transform.transform.position;
+							d.y = 0;
 							double dist = (d.length());
+						
 							v3::Point3 head(goto_pos.x, transform.transform.position.y, goto_pos.z);
 							if (dist > 0.1f) {
 								double speed = path.speed;

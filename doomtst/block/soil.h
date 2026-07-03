@@ -38,7 +38,7 @@ namespace blocks {
 		}
 		BlockTraits traits()const {
 			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, soiltex), true, 4);
+				BlockMeshTraits(v3::unit_scale, false, soiltex), true, 0);
 		}
 	};
 }

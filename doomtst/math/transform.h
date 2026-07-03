@@ -1,7 +1,6 @@
 #pragma once
 #include "vector3.h"
 #include <glm/mat4x4.hpp>
-#include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/rotate_vector.hpp> 
 #include <glm/gtc/quaternion.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -30,7 +29,7 @@ namespace math {
 		}
 		Transform(v3::Point3 pos, Look3 look_dir, v3::Scale3 scl):look(look_dir){
 			position = pos;
-			scale = scl;
+			scale = scl;	
 		}
 		v3::Point3 position;
 		math::Look3 look;
