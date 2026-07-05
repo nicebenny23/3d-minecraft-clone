@@ -16,7 +16,9 @@ namespace blocks {
 		std::string name() const {
 			return std::string("torch");
 		}
-		BlockTraits traits() const {
+		BlockTraits traits(BlockTextureRegistry& texture) const {
+			block_texture torchtex= texture.get_texture("images\\torch.png");
+			block_texture torchtoptex = texture.get_texture("images\\torchtop.png");
 			return BlockTraits(
 				BlockMeshTraits(v3::Scale3(1/8.f,.75f, 1/ 8.f), true, torchtex, torchtex, torchtoptex, torchtex, torchtex, torchtex)
 				, true, 14);

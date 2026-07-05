@@ -68,6 +68,9 @@ namespace renderer {
 			texture->id = 0;
 		}
 	};
+
+	
+
 	struct TextureArrayLoader {
 		renderer::Context& context;
 		TextureArrayLoader(renderer::Context& ctx) :context(ctx) {

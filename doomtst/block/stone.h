@@ -81,9 +81,9 @@ namespace blocks {
 		SolidBlockTraits mining_traits() const override {
 			return SolidBlockTraits(4,0);
 		}
-		BlockTraits traits()const {
+		BlockTraits traits(BlockTextureRegistry &registry)const {
 			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, stonetex));
+				BlockMeshTraits(v3::unit_scale, false, registry.get_texture("images\\stone.png")));
 		}
 	};
 }

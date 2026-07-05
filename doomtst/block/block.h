@@ -42,7 +42,7 @@ namespace blocks {
 		MeshFace operator[](math::Direction3d index) {
 			return mesh[index.index()];
 		}
-		bool solid() const{
+		bool solid() {
 			return info().solid;
 		}
 		Point3 center() const {
@@ -57,7 +57,7 @@ namespace blocks {
 		}
 
 		
-		BlockTraits& info() const{
+		BlockTraits& info() {
 			return registry->traits_for(id);
 		}
 		const stn::box<BlockType>&  type() const {

@@ -19,10 +19,10 @@ namespace blocks {
 		SolidBlockTraits mining_traits() const override {
 			return SolidBlockTraits(3, 0);
 		}
-		BlockTraits traits() const {
-			int l = planktex;
+		BlockTraits traits(BlockTextureRegistry& registry) const {
+			block_texture plank_texture= registry.get_texture("images\\plank.png");
 		return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, planktex, planktex, planktex, planktex, planktex, planktex));
+				BlockMeshTraits(v3::unit_scale, false, plank_texture));
 		}
 	};
 	struct log_loot_table :items::LootTable {
@@ -40,7 +40,10 @@ namespace blocks {
 		SolidBlockTraits mining_traits() const override {
 			return SolidBlockTraits(3,0);
 		}
-		BlockTraits traits() const {
+		BlockTraits traits(BlockTextureRegistry& textures) const {
+			block_texture log_side = textures.get_texture("images\\logside.png");
+			block_texture logtoppng = textures.get_texture("images\\logtop.png");
+
 			return BlockTraits(
 				BlockMeshTraits(v3::unit_scale, false, log_side, log_side,logtoppng, logtoppng, log_side, log_side));
 		}

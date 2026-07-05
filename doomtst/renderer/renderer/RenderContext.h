@@ -94,7 +94,7 @@ namespace renderer {
 				bound_shader = stn::Option<Shader>(shade);
 			}
 		}
-
+		
 		void bind(Fbo fbo) {
 			glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
 			bound_frame = fbo;

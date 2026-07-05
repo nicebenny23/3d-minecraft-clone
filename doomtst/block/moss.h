@@ -107,9 +107,9 @@ namespace blocks {
 			SeedLifetime& lifetime = block.get_component<SeedLifetime>();
 			stn::file_serializer<double>().write(lifetime.clock.end_time().unwrap_or(0), handle);
 		}
-		BlockTraits traits() const {
+		BlockTraits traits(BlockTextureRegistry& textures) const {
 			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, mosstex)
+				BlockMeshTraits(v3::unit_scale, false, textures.get_texture("images\\moss.png"))
 			);
 
 		}

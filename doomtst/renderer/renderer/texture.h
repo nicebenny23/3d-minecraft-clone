@@ -68,7 +68,7 @@ namespace renderer {
 	};
 
 	struct TextureArray :assets::Asset {
-		size_t length;
+		size_t length; 
 		v2::Coord2 size;
 		GLuint id;
 		

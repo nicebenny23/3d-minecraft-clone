@@ -250,7 +250,16 @@ namespace blockrender {
 				renderer::UniformRefrence("bind_block_texture", "tex")
 				});
 
-			array<std::string> texlist = array<std::string>();
+			BlockTextureRegistry& registry= ecs.insert_resource<blocks::BlockTextureRegistry>();
+			if (registry.need_sync()) {
+				array<std::string> texlist = array<std::string>();
+				for (auto&& value:registry.name_to_texture) {
+					texlist.push(value.first);
+				}
+				renderer::TextureArrayId texarray = ecs.load_asset_emplaced<renderer::TextureArrayPath>(texlist, "BlockTextures").unwrap();
+				renderer.set_uniform("bind_block_texture", texarray);
+			}
+			/*
 			texlist.reach(treestonetex) = "images\\treestone.png";
 			texlist.reach(stonetex) = "images\\stone.png";
 			texlist.reach(altartex) = "images\\crystalaltarside.png";
@@ -284,8 +293,7 @@ namespace blockrender {
 			texlist.reach(torchtoptex) = "images\\torchtop.png";
 			texlist.reach(crystaloretex) = "images\\crystalore.png";
 		
-			renderer::TextureArrayId texarray = ecs.load_asset_emplaced<renderer::TextureArrayPath>(texlist, "BlockTextures").unwrap();
-			renderer.set_uniform("bind_block_texture", texarray);
+			*/
 		}
 	};
 }

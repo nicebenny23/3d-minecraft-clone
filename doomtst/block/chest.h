@@ -53,9 +53,12 @@ namespace blocks {
 		}
 	};
 	struct ChestBlock :BlockType {
-		BlockTraits traits() const{
+		BlockTraits traits(BlockTextureRegistry& registry) const{
+			block_texture chest_side = registry.get_texture("images\\chest_sides.png");
+			block_texture chest_top = registry.get_texture("images\\chest_top.png");
+			block_texture chest_front = registry.get_texture("images\\chest_front.png");
 			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, blocks::chest_sides, blocks::chest_sides, blocks::chest_top, blocks::chest_top, blocks::chest_front, blocks::chest_sides)
+				BlockMeshTraits(v3::unit_scale, false, chest_side, chest_side, chest_top, chest_top, chest_front, chest_side)
 			);
 		}
 		void apply(ecs::obj& block) const override {

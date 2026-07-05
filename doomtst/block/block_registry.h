@@ -8,44 +8,24 @@ namespace blocks {
 	struct block_tag {
 
 	};
-	enum block_texture :std::uint8_t {
-		treestonetex,
-		stonetex,
-		altartex,
-		glasstex,
-		watertex,
-		torchtex,
-		torchtoptex,
-		crystaloretex,
-		crafting_table_bottom,
-		crafting_table_top,
-		crafting_table_side,
-		stone_brick_tex,
-		chest_sides,
-		mosstex,
-		moss_one,
-		moss_two,
-		moss_three,
-		planktex,
-		ropetex,
-		lavatex,
-		obsidiantex,
-		chest_front,
-		moss_inactive_tex,
-		furnacefront,
-		ironoretex,
-		ultraaltarpngultrapng,
-		log_side,
-		soiltex,
-		chest_top,
-		sandtex,
-		furnacesideon,
-		logtoppng
-	
+
+	using block_texture = std::uint8_t;
+	struct BlockTextureRegistry:ecs::resource{
+		std::unordered_map<std::string, block_texture> name_to_texture;
+		size_t last_saved;
+		BlockTextureRegistry() :last_saved(0) {
+			name_to_texture.reserve(32);
+		}
+		bool need_sync() const {
+			return last_saved != name_to_texture.size();
+		}
+		
+		block_texture get_texture(std::string_view name) {
+			 return name_to_texture.try_emplace(std::string(name), block_texture(name_to_texture.size())).second;
+		} 
 	};
 	struct block_tag;
 
-	using block_texture_id = stn::typed_id<block_tag, std::uint16_t>;
 	using block_id = stn::typed_id<block_tag,std::uint16_t>;
 
 	struct block;
@@ -105,13 +85,13 @@ namespace blocks {
 			return SolidBlockTraits();
 		}
 		//we catch the traits to speed up;
-		BlockTraits& traits_for() const {
+		BlockTraits& traits_for(BlockTextureRegistry& textures) const {
 			if (!catched) {
-				catched = traits();
+				catched = traits(textures);
 			}
 			return catched.unwrap_unchecked();
 		}
-		virtual BlockTraits traits() const = 0;
+		virtual BlockTraits traits(BlockTextureRegistry& textures) const = 0;
 		virtual void apply(ecs::obj& blk) const {
 
 		};
@@ -138,8 +118,8 @@ namespace blocks {
 
 	struct BlockRegistry :ecs::resource {
 		stn::array<stn::Option<size_t>> to_id;
-		BlockTraits& traits_for(block_id id) const {
-			return blocks[id.id]->traits_for();
+		BlockTraits& traits_for(block_id id) {
+			return blocks[id.id]->traits_for(textures);
 		}
 		SolidBlockTraits solid_traits_for(block_id id) {
 			return blocks[id.id]->mining_traits();
@@ -185,7 +165,7 @@ namespace blocks {
 		BlockRegistry(ecs::Ecs& world) :ecs(world) {
 
 		}
-
+		BlockTextureRegistry textures;
 	private:
 		ecs::Ecs& ecs;
 		stn::type_indexer<block_id> ids;

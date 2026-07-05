@@ -44,9 +44,9 @@ namespace blocks {
 		SolidBlockTraits mining_traits() const override {
 			return SolidBlockTraits(1,0,false);
 		}
-		BlockTraits traits()const {
+		BlockTraits traits(BlockTextureRegistry& textures)const {
 			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, soiltex), true, 0);
+				BlockMeshTraits(v3::unit_scale, false, textures.get_texture("images\\dirt.png"), true, 0);
 		}
 		void read_from_bytes(ecs::obj block, stn::file_handle& handle)const  override {
 			block.apply_recipe(items::loot_table_recipe<items::soil_loot_table>);

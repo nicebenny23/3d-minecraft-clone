@@ -8,9 +8,9 @@ namespace blocks {
 		std::string name() const {
 			return std::string("air");
 		}
-		BlockTraits traits() const{
+		BlockTraits traits(BlockTextureRegistry& registry) const{
 			return BlockTraits(
-				BlockMeshTraits(v3::Scale3(.5f), true, stonetex, mosstex, mosstex, mosstex, mosstex, mosstex,true)
+				BlockMeshTraits(v3::Scale3(.5f), true, registry.get_texture("images\\stone.png"), true)
 				, non_solid_block);
 		}
 	};
