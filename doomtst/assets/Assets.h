@@ -11,12 +11,12 @@ namespace assets {
 		AssetHandle() = delete;
 
 		AssetHandle(asset_id id, stn::lifetime_source<Assets>& assets)
-			: id(id), AssetManager(assets.view()) {
+			: id(id), asset_manager(assets.view()) {
 			inc();
 		}
 
 		AssetHandle(const AssetHandle& other)
-			: id(other.id), AssetManager(other.AssetManager) {
+			: id(other.id), asset_manager(other.asset_manager) {
 			inc();
 		}
 		bool operator==(const AssetHandle& other) const noexcept {
@@ -30,7 +30,7 @@ namespace assets {
 			if (id != other.id) {
 				dec();
 				id = other.id;
-				AssetManager = other.AssetManager;
+				asset_manager = other.asset_manager;
 				inc();
 			}
 
@@ -38,17 +38,17 @@ namespace assets {
 		}
 
 		const T& operator*() const {
-			return (*AssetManager).unwrap()[id].asset.ref_as_unchecked<T>();
+			return (*asset_manager).unwrap()[id].asset.ref_as_unchecked<T>();
 		}
 		T& operator*() {
-			return (*AssetManager).unwrap()[id].asset.ref_as_unchecked<T>();
+			return (*asset_manager).unwrap()[id].asset.ref_as_unchecked<T>();
 		}
 
 		const T* operator->() const {
-			return (*AssetManager).unwrap()[id].asset.get_as_unchecked<T>();
+			return (*asset_manager).unwrap()[id].asset.get_as_unchecked<T>();
 		}
 		T* operator->() {
-			return (*AssetManager).unwrap()[id].asset.get_as_unchecked<T>();
+			return (*asset_manager).unwrap()[id].asset.get_as_unchecked<T>();
 		}
 
 		~AssetHandle() {
@@ -60,14 +60,14 @@ namespace assets {
 	private:
 
 		asset_id id;
-		stn::lifetime_tracker<Assets> AssetManager;
+		stn::lifetime_tracker<Assets> asset_manager;
 		void dec() {
-			if (AssetManager.alive()) {
-				(*AssetManager).unwrap().dec(id);
+			if (asset_manager.alive()) {
+				(*asset_manager).unwrap().dec(id);
 			}
 		}
 		void inc() {
-			(*AssetManager).unwrap().inc(id);
+			(*asset_manager).unwrap().inc(id);
 		}
 	};
 	struct Assets :ecs::resource {
@@ -150,7 +150,7 @@ namespace assets {
 
 		stn::lifetime_source<Assets> us;
 	};
-	//use this for things that benifit from an asset registry naming but do not need an external loader
+	//use this for things that benefit from an asset registry naming but do not need an external loader
 	template<typename T> requires AssetType<T>&&LoadDescriptorType<T>&& std::same_as<DescriptorAssetType<T>,T>
 	struct SelfDescriptorLoader {
 		using load_descriptor = T; 

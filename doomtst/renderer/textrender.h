@@ -9,8 +9,16 @@
 #pragma once
 
 namespace ui {
-	
-	inline void write_letter(renderer::MeshBuilder& mesh_data, geo::Box2d location, int letter) {
+	inline const char* letters= "0123456789abcdefghijklmnopqrstuvABCDEFGHIJKLMNOPQRSTUVWXYZ.,-_?!+=/;: ";
+	inline size_t symbol_index_for(char index) {
+		for (size_t i = 0; i < std::strlen(letters); i++) {
+			if (index==letters[i]) {
+				return i;
+			}
+		}
+		stn::throw_logic_error("char {} does not have a symbol",index);
+	}
+	inline void write_letter(renderer::MeshBuilder& mesh_data, geo::Box2d location, size_t letter) {
 
 		const std::uint32_t baselocation = static_cast<size_t>(mesh_data.vertex_count());
 		for (int j = 0; j < 4; j++) {
@@ -28,7 +36,7 @@ namespace ui {
 		colors::Color text_color;
 		renderer::RenderableHandle handle;
 		std::string word;
-
+		v2::Vec2 spacing_gap=v2::Vec2(.2f,1.0f);
 		template<typename... Args>
 		void format(const std::format_string<Args...>& fmt, Args&&... args) {
 			word = std::format(fmt, std::forward<Args>(args)...);
@@ -39,35 +47,44 @@ namespace ui {
 
 	};
 
-	struct UiTextMesher:ecs::System{
+	struct TextMesher:ecs::System{
 		void run(ecs::Ecs& world) {
 
 			ecs::View<ui::ComputedStyle,Text> bounds_view(world);
 			for (auto [style, ui_text] : bounds_view) {
 				if (style.enabled) {
-					double char_offset = 1.5f;
-					geo::Box2d bounds = style.final_size;
-					v2::Vec2 min = bounds.center*2 - v2::Vec2(char_offset * ui_text.word.length(), 1.f) * bounds.half_size();
-					v2::Vec2 boxoffset = v2::Vec2(char_offset, 1) * bounds.half_size();
-					v2::Vec2 increse = v2::Vec2(char_offset, 0) * bounds.scale;
-					geo::Box2d charlocation = geo::Box2d(min + boxoffset, bounds.scale);
-
+					v2::Vec2 move_offset=ui_text.spacing_gap+v2::unitv;
+					v2::UVec2 size(0, 0);
+					size_t row_len=0;
 					renderer::MeshBuilder mesh_data = ui_text.handle.insert_builder_for(renderer::vertex().push<float, 2>().push<float, 3>());
+					if (!ui_text.word.empty()) {
+						size.y += 1;
+					}
 					for (char symbol:ui_text.word) {
-						int key = 0;
-						if (std::isdigit(symbol)) {
-							key=symbol - '0';
+						if (symbol=='\n') {
+							row_len = 0;
+							size.y += 1;
 						}
 						else {
-							key = symbol - 'A'+10;
+							v2::Vec2 point = v2::Vec2(.5 + row_len * move_offset.x, -.5- move_offset.y * (size.y-1));
+							int key = symbol_index_for(symbol);
+							write_letter(mesh_data, geo::Box2d(point,v2::unitv), key);
+							row_len++;
+							stn::set_max(size.x, row_len);
 						}
-						write_letter(mesh_data, charlocation, key);
-						charlocation.center += increse;
 					}
+					double x = size.x + (size.x - 1) * ui_text.spacing_gap.x;
+
+					double y= size.y + (size.y - 1) * ui_text.spacing_gap.y;
+					v2::Vec2 center = v2::Vec2(x,-y) / 2;
 					ui_text.handle.set_color(ui_text.text_color);
 					renderer::fill(std::move(mesh_data), world);
 					ui_text.handle.set_order_key(style.priority);
+					ui_text.handle.set_uniform(renderer::uniform(style.final_size.scale, "scale"));
+					ui_text.handle.set_uniform(renderer::uniform(style.final_size.center-center*style.final_size.scale/2, "center"));
+				
 				}
+				
 				ui_text.handle.enable_if(style.enabled);
 
 			}
@@ -86,21 +103,17 @@ namespace ui {
 		}
 	};
 
-	struct UiTextPlugin {
+	struct TextPlugin {
 		void operator()(core::App& app) {
 			app.insert_plugin(UiPlugin());
 			array<std::string> texlist = array<std::string>();
-			for (size_t i = 0; i < 10; i++) {
+			for (size_t i = 0; i < strlen(letters); i++) {
 				texlist.push(std::format("bitmaptext\\char_{}.png", i));
 			}
-			for (char i = 'A'; i <= 'Z';i++) {
-				texlist.push(std::format("bitmaptext\\char_{}.png", i));
-			}
-
 			ecs::Ecs& world = app.Ecs;
 
-			renderer::texture_array_id textarray = world.load_asset_emplaced<renderer::TextureArrayPath>(texlist, std::string("Letters")).unwrap();
-			app.emplace_system<UiTextMesher>();
+			renderer::TextureArrayId textarray = world.load_asset_emplaced<renderer::TextureArrayPath>(texlist, std::string("Letters")).unwrap();
+			app.emplace_system<TextMesher>();
 			world.get_resource<renderer::Renderer>().set_uniform("letters", textarray);
 			world.load_asset_emplaced<renderer::shader_descriptor>("TextShader", "shaders\\textvertex.vs", "shaders\\textfragment.vs").unwrap();
 			world.load_asset_emplaced<renderer::MaterialDescriptor>("Text", "ui_phase", "TextShader", renderer::RenderProperties(false, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),

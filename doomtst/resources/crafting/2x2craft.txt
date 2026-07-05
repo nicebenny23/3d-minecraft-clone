@@ -16,7 +16,7 @@
       {"id": "plank"},
       {"id": "crystal"}
     ],
-    "output": {"id": "torch", "count": 1}
+    "output": {"id": "torch", "count": 2}
   }
 , {
     "size": {"x": 1, "y": 1},

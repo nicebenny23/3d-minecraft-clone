@@ -93,6 +93,10 @@ namespace math {
 		constexpr bool contains(double val) const {
 			return in_range(val, minimum, maximum);
 		}
+
+		constexpr bool contains_exact(double val) const {
+			return minimum<=val&&val<=maximum;
+		}
 		constexpr bool contains(const bounds& other) const{
 			return contains(other.maximum) && contains(other.minimum);
 		}

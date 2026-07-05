@@ -21,47 +21,6 @@ namespace renderer {
 			: size(frame_size), descriptors(descs), name(name), samples(frame_samples) {
 		}
 	};
-
-	struct FrameLoader {
-
-		stn::box<Fbo> Load(const Frame& frame, assets::Assets& assets) {
-			Fbo fbo(0);
-			glGenFramebuffers(1, &fbo.id);
-			glBindFramebuffer(GL_FRAMEBUFFER, fbo.id);
-			int color_attachment_index = 0;
-			stn::array<GLenum> draw_buffers;
-			GLenum texTarget = (frame.samples > 1) ? GL_TEXTURE_2D_MULTISAMPLE : GL_TEXTURE_2D;
-
-			for (const FboTextureDescriptor& desc : frame.descriptors) {
-				assets::AssetHandle<Texture2D> tex = assets.load<FboTextureDescriptor>(desc).expect("asset should exist");
-
-				GLenum attachment;
-				switch (desc.type) {
-					case FboTextureDescriptor::Type::Color:
-					case FboTextureDescriptor::Type::Integer:
-					attachment = GL_COLOR_ATTACHMENT0 + color_attachment_index++;
-					draw_buffers.push(attachment);
-				break;
-
-					case FboTextureDescriptor::Type::Depth:
-					attachment = GL_DEPTH_ATTACHMENT;
-					break;
-				}
-				glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, texTarget, tex->id, 0);
-			}
-			if (!draw_buffers.empty()) {
-				glDrawBuffers(static_cast<GLsizei>(draw_buffers.length()), draw_buffers.data());
-			}
-			else {
-				glDrawBuffer(GL_NONE);
-			}
-			
-		}
-		static constexpr bool immortal = true;
-		void unload(stn::box<Frame>&& frame) {
-			
-		}
-	};
 }
 
 namespace std {

@@ -14,38 +14,33 @@ namespace items {
 		float pickaxe_speed;
 		bool operator==(const tool_traits& other) const = default;
 	};
+
 	struct item_traits {
 		std::string item_name;
 		stn::Option<size_t> duribility;
 		renderer::TexturePath image_path;
 		size_t capacity = 16;
 		size_t food=0;
+		size_t fertilizer = 0;
 		stn::Option <blocks::block_id> blk_id = stn::None;
 		bool operator==(const item_traits& other) const = default;
 
-		static item_traits food_item(renderer::TexturePath image, size_t food_value) {
-			item_traits  traits = item_traits( image);
-			traits.food = food_value;
+		static item_traits block_item(renderer::TexturePath image, blocks::block_id block_id) {
+			item_traits  traits = item_traits{ .image_path = image };
+			traits.blk_id=block_id;
+			traits.capacity = 16;
+			return traits;
+
+		}
+
+		static item_traits dur_item(renderer::TexturePath image, size_t initial_duribility) {
+			item_traits  traits = item_traits{ .image_path = image };
+			traits.duribility=initial_duribility;
 			traits.capacity = 1;
 			return traits;
 
 		}
-		item_traits(renderer::TexturePath image, size_t initial_duribility):
-			duribility(initial_duribility),
-			image_path(std::move(image))
-			,blk_id(stn::None) {
-			capacity = 1;
-		}
-		item_traits(renderer::TexturePath image,blocks::block_id block_id)
-			: item_traits(image){
-			blk_id = block_id;
 
-		}
-		item_traits(renderer::TexturePath image)
-			:duribility(),
-			image_path(std::move(image)),
-			blk_id(stn::None) {
-		}
 	};
 
 	struct item_type {

@@ -81,30 +81,6 @@ namespace renderer {
 		return shaderid;
 	}
 
-	struct ShaderLoader {
-		using load_descriptor = shader_descriptor;
-		ShaderLoader() {
-
-		}
-		void unload(stn::box<Shader> Shader) {
-
-		}
-		static constexpr bool immortal = true;
-		stn::box<Shader> load(const shader_descriptor& load_info) {
-			int VertexShader = compile_shader(load_info.vertex_path.c_str(), GL_VERTEX_SHADER);
-			int FragmentShader = compile_shader(load_info.fragment_path.c_str(), GL_FRAGMENT_SHADER);
-			GLint id = glCreateProgram();
-			glAttachShader(id, VertexShader);
-			glAttachShader(id, FragmentShader);
-			glLinkProgram(id);
-			gl_util::shaderstatuscheck(id, GL_LINK_STATUS, "shader program");
-			glDeleteShader(VertexShader);
-			glDeleteShader(FragmentShader);
-			glValidateProgram(id);
-			gl_util::poll_errors();
-			return stn::box<Shader>(id);
-		}
-	};
 	using shader_id = assets::AssetHandle<Shader>;
 
 }

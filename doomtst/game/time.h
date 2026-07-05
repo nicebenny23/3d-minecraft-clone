@@ -99,6 +99,14 @@ namespace timing {
 				end = tm->now() + dur;
 			}
 		}
+		//checks for inactivity then sets;
+		bool is_inactive_set(float amount) {
+			if (is_inactive()) {
+				set(amount);
+				return true;
+			}
+			return false;
+		}
 		bool is_active() const {
 			check_if_dead();
 			return end.is_some();

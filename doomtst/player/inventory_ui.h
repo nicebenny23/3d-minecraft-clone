@@ -42,7 +42,7 @@ namespace player {
 
 				}
 				if (input.key('e').pressed) {
-					world.write_command(ui::open_menu(ui_menu.menu));
+					world.write_command(ui::menu_stack(ui_menu.menu));
 				}
 			}
 

@@ -114,6 +114,12 @@ namespace items {
 		const ItemTypes& types() const{
 			return world().get_resource<ItemTypes>();
 		}
+		const item_type& type() const {
+			return types().from_id(entry.id);
+		}
+		const item_traits& traits() const {
+			return type().traits(world());
+		}
 		size_t count() const {
 			return entry.count;
 		}

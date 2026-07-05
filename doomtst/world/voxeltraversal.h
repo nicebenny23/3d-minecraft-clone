@@ -79,13 +79,13 @@ namespace voxtra {
 		Vec3 ray_direction = nray.dir();
 		v3::Coord sgns;
 		for (size_t i = 0; i < 3; i++) {
-			sgns[i] = zero_preserving_sign(ray_direction[i]);
+			sgns[i] = math::zero_preserving_sign(ray_direction[i]);
 		}
 		v3::Point3 pos = nray.point_at(0);
 		v3::Coord current_voxel;
 		for (size_t i = 0; i < 3; i++) {
 			//this essentially shifts it into the voxel we are going to be in removing the ambiguity of the starting position of a number like 0
-			current_voxel[i] = floor_with_infinitesimal_shift(pos[i], sgns[i] == 1);
+			current_voxel[i] =math::floor_with_infinitesimal_shift(pos[i], sgns[i] == 1);
 		}
 		while (travel_dist <= ray_length) {
 
@@ -206,7 +206,7 @@ namespace voxtra {
 			if (boxcast_grid(hit_box.expanded(-1/2.0f), world)) {
 				int l = 3;
 			}
-			for ( cube_index index: cube_indices) {
+			for (math::cube_index index: math::cube_indices) {
 				if (!world.get_chunk(world.get_voxel(hit_box.point_at_vertex(index)))) {
 					all_loaded = false;
 				}

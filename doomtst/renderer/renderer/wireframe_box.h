@@ -40,7 +40,6 @@ namespace renderer {
 						if (!model.handle.has_mesh()) {
 							model.handle.set_mesh(world_id);
 						}
-
 						model.handle.set_color(model.color);
 						v3::Point3 cam_pnt = world.get_resource<renderer::CameraResource>().center();
 						model.handle.enable();

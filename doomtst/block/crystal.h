@@ -4,17 +4,17 @@
 #include "../items/loottable.h"
 namespace items {
 
-	struct crystal_item : item_type {
+	struct CrystalItem : item_type {
 		std::string name() const{
 			return "crystal";
 		}
 		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(renderer::TexturePath("images\\crystal.png"));
+			return item_traits{ .image_path{renderer::TexturePath("images\\crystal.png")} };
 		}
 	};
 	struct crystal_loot_table :items::LootTable {
 		items::LootDrops drops_for(items::ItemTypes& types) {
-			return items::LootDrops({ items::loot_element(types.insert<crystal_item>(),1,types) });
+			return items::LootDrops({ items::loot_element(types.insert<CrystalItem>(),1,types) });
 		}
 	};
 }

@@ -19,13 +19,13 @@ namespace items {
 		ItemSlotDecal(ecs::obj decal_component) :item_decal_object(decal_component) {
 		}
 		void set_decal(const renderer::TexturePath& Path) {
-			item_decal_object.get<ui::UiImage>().set_image(Path);
+			item_decal_object.get<ui::Image>().set_image(Path);
 		}
 		void reset_decal() {
 			renderer::TexturePath path = renderer::TexturePath("images\\blockholder.png");
 				set_decal(path);			
 		}
-		ecs::Constrained<ui::UiImage> item_decal_object;
+		ecs::Constrained<ui::Image> item_decal_object;
 	};
 
 	

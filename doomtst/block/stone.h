@@ -4,13 +4,13 @@
 #pragma once 
 namespace items {
 
-	struct stone_item : item_type {
+	struct StoneItem : item_type {
 		std::string name() const {
 
 			return ("stone");
 		}
 		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(
+			return item_traits::block_item(
 				renderer::TexturePath("images\\stone.png"),
 				world.get_resource<BlockRegistry>().get_id("stone")
 			);
@@ -18,16 +18,16 @@ namespace items {
 	};
 	struct stone_loot_table :items::LootTable {
 		items::LootDrops drops_for(items::ItemTypes& types) {
-			return items::LootDrops({ items::loot_element(types.insert<stone_item>(),1,types) });
+			return items::LootDrops({ items::loot_element(types.insert<StoneItem>(),1,types) });
 		}
 	};
-	struct stone_bricks_item : item_type {
+	struct StoneBricksItem : item_type {
 		std::string name() const {
 
 			return ("stone_brick");
 		}
 		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(
+			return item_traits::block_item(
 				renderer::TexturePath("images\\stone_brick.png"),
 				world.get_resource<BlockRegistry>().get_id("stone_brick")
 			);
@@ -35,7 +35,7 @@ namespace items {
 	};
 	struct stone_brick_loot_table :items::LootTable {
 		items::LootDrops drops_for(items::ItemTypes& types) {
-			return items::LootDrops({ items::loot_element(types.insert<stone_bricks_item>(),1,types) });
+			return items::LootDrops({ items::loot_element(types.insert<StoneBricksItem>(),1,types) });
 		}
 	};
 }

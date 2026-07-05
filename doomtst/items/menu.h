@@ -1,8 +1,8 @@
 #pragma once
 #include "recipe_transactions.h"
 namespace ui {
-	struct close_menu {
-		close_menu() {
+	struct CloseMenu {
+		CloseMenu() {
 
 		};
 	};
@@ -10,9 +10,11 @@ namespace ui {
 
 	};
 	
+	struct NoMenus {
 
-	struct open_menu {
-		open_menu(ecs::Constrained<MenuComponent> menu_comp) :menu_ent(menu_comp) {
+	};
+	struct menu_stack {
+		menu_stack(ecs::Constrained<MenuComponent> menu_comp) :menu_ent(menu_comp) {
 
 		}
 		ecs::Constrained<MenuComponent> menu_ent;
@@ -29,51 +31,49 @@ namespace ui {
 	};
 	struct MenuState :ecs::resource {
 		bool menu_open() const {
-			return open_menu.non_empty();
+			return menu_stack.non_empty();
 		}
 		bool no_menu_open() const {
 			return !menu_open();
 		}
 		stn::Option<ecs::obj> top() const{
 			if (menu_open()) {
-				return open_menu.peek();
+				return menu_stack.peek();
 			}
 			return stn::None;
 
 		}
 		MenuState() = default;
-		mutable stn::stack<ecs::obj> open_menu;
+		mutable stn::stack<ecs::obj> menu_stack;
 	};
 	inline bool is_open(ecs::Constrained<MenuComponent> menu) {
 		return menu.world().get_resource< MenuState>().top()==menu.object();
 	}
-	struct NoMenus {
-
-	};
+	
 	struct MenuEnabler :ecs::System {
 		void run(ecs::Ecs& world) {
 			MenuState& state = world.ensure_resource<MenuState>();
 
 			if (world.get_resource<userinput::InputManager>().key(userinput::escape_key).pressed) {
-				world.write_command<close_menu>(close_menu());
+				world.write_command<CloseMenu>(CloseMenu());
 			}
 			//on expire
 		
 
-			for (open_menu menu : world.read_commands<open_menu>()) {
+			for (menu_stack menu : world.read_commands<menu_stack>()) {
 				if (state.top() != menu.menu_ent.object()) {
 	
 					if (state.menu_open()) {
 						state.top().unwrap().get_component<ui::UiEnabled>().disable();
 					}
 					menu.menu_ent.get_component<ui::UiEnabled>().enable();
-					state.open_menu.push(menu.menu_ent.object());
+					state.menu_stack.push(menu.menu_ent.object());
 				}
 			}
-			for (close_menu menu : world.read_commands<close_menu>()) {
+			for (CloseMenu menu : world.read_commands<CloseMenu>()) {
 				if (state.menu_open()) {
 					state.top().unwrap().get_component<ui::UiEnabled>().disable();
-					state.open_menu.pop();
+					state.menu_stack.pop();
 					if (state.menu_open()) {
 						state.top().unwrap().get_component<ui::UiEnabled>().enable();
 					}
@@ -86,6 +86,7 @@ namespace ui {
 			}
 		}
 	};
+
 	struct MenuPlugin {
 		void operator()(core::App& app) {
 			app.ensure_resource< MenuState>();

@@ -25,12 +25,12 @@ namespace blocks {
 
 }
 namespace items {
-	struct glass_item : item_type {
+	struct GlassItem : item_type {
 		std::string name() const {
 			return "glass";
 		}
 		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(
+			return item_traits::block_item(
 				renderer::TexturePath("images\\glass.png"),
 				world.get_resource<blocks::BlockRegistry>().get_id<blocks::GlassBlock>()
 			);

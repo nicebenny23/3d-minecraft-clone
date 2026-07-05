@@ -66,7 +66,7 @@ namespace geo {
 					return RayHit(ray.dialate_from_start(0), stn::None, box);
 				}
 				else {
-						math::Direction3d intersection_direction=math::Directions3d[(sign_rounding_up(ray.dir()[collision_axis]) == 1) + 2 * (collision_axis)];
+						math::Direction3d intersection_direction=math::Directions3d[(math::sign_rounding_up(ray.dir()[collision_axis]) == 1) + 2 * (collision_axis)];
 					return RayHit(ray.with_length(bounds.min()), intersection_direction,box);
 
 				}

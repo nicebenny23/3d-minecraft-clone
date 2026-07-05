@@ -6,6 +6,7 @@
 #include "../game/rigidbody.h"
 #include "../world/voxeltraversal.h"
 #include "playerclimb.h"
+#include "../game/close.h"
 
 struct playermovement : ecs::component
 {
@@ -31,7 +32,7 @@ struct PlayerMovementSys : ecs::System
     
     virtual void run(ecs::Ecs& ecs)
     {
-		if (ecs.get_resource<ui::MenuState>().menu_open()) {
+		if (!player::in_game(ecs)) {
 			return;
 		}
 

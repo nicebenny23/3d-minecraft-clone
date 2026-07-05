@@ -17,12 +17,12 @@
 
 namespace items {
 
-	struct crafting_table_item : item_type {
+	struct CraftingTableItem : item_type {
 		std::string name() const {
 			return ("crafting_table");
 		}
 		item_traits traits(const ecs::Ecs& world) const {
-				return item_traits(
+				return item_traits::block_item(
 				renderer::TexturePath("images\\craftingtabletop.png"),
 				world.get_resource<BlockRegistry>().get_id("crafting_table")
 			);
@@ -30,7 +30,7 @@ namespace items {
 	};
 	struct crafting_table_loot_table :items::LootTable {
 		items::LootDrops drops_for(items::ItemTypes& types) {
-			return items::LootDrops({ items::loot_element(types.insert<crafting_table_item>(),1,types) });
+			return items::LootDrops({ items::loot_element(types.insert<CraftingTableItem>(),1,types) });
 		}
 	};
 }

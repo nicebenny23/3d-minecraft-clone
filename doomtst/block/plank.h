@@ -47,13 +47,13 @@ namespace blocks {
 	};
 }
 namespace items {
-	struct plank_item : item_type {
+	struct PlankItem : item_type {
 		std::string name() const {
 
 			return "plank";
 		}
 		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(
+			return item_traits::block_item(
 				renderer::TexturePath("images\\treestoneblock.png")
 			,world.get_resource<BlockRegistry>().get_id<blocks::PlankBlock>());
 		}

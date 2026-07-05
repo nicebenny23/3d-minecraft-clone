@@ -88,7 +88,7 @@ namespace player {
 			for (player::CursorHit hit : hits.read()) {
 				if (world.get_resource<userinput::InputManager>().right_mouse().pressed) {
 					if (hit.hit.has_component<OpenMenuOnClick>()) {
-						world.write_command(ui::open_menu(hit.hit.get_component<OpenMenuOnClick>().handle.object()));
+						world.write_command(ui::menu_stack(hit.hit.get_component<OpenMenuOnClick>().handle.object()));
 					}
 				}
 			}

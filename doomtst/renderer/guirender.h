@@ -20,7 +20,7 @@ namespace guirender{
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 			// ... your other windows
-			console::Console::Instance().render();
+			ecs.insert_resource<console::Console>(ecs).render();
 			// 7. Render UI
 			ImGui::render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

@@ -40,7 +40,7 @@ namespace renderer {
 		}
 		renderer::RenderableHandle handle;
 		colors::Color color;
-		stn::Option<texture_2d_id> texture;
+		stn::Option<Texture2dId> texture;
 		void destroy_hook() override {
 			handle.destroy();
 		}

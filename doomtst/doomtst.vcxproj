@@ -305,13 +305,14 @@
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>glfw3.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <Profile>false</Profile>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <EntryPointSymbol>mainCRTStartup</EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -334,7 +335,6 @@
     <ClCompile Include="json\json.cpp" />
     <ClCompile Include="player\playermodification.cpp" />
     <ClCompile Include="renderer\guirender.cpp" />
-    <ClCompile Include="renderer\renderer\renderable.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="player\player.cpp" />
     <ClCompile Include="player\playerinventory.cpp" />
@@ -345,7 +345,6 @@
     <ClCompile Include="game\time.cpp" />
     <ClCompile Include="util\stbiload.cpp" />
     <ClCompile Include="external\glad.c" />
-    <ClCompile Include="renderer\renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="assets\Asset.h" />
@@ -492,6 +491,7 @@
     <ClInclude Include="player\crosshair.h" />
     <ClInclude Include="player\inventory_ui.h" />
     <ClInclude Include="player\playermovment.h" />
+    <ClInclude Include="player\player_fertilize.h" />
     <ClInclude Include="player\player_look.h" />
     <ClInclude Include="renderer\color.h" />
     <ClInclude Include="renderer\renderer\Fbo.h" />
@@ -516,6 +516,8 @@
     <ClInclude Include="renderer\renderer\pass.h" />
     <ClInclude Include="renderer\renderer\renderable.h" />
     <ClInclude Include="game\transforms.h" />
+    <ClInclude Include="renderer\renderer\RenderContext.h" />
+    <ClInclude Include="renderer\renderer\texture_loader.h" />
     <ClInclude Include="renderer\renderer\wireframe_box.h" />
     <ClInclude Include="renderer\textrender.h" />
     <ClInclude Include="renderer\ui.h" />

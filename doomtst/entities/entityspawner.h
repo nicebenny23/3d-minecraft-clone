@@ -55,7 +55,7 @@ namespace game {
 			for (auto [slime, transform] : slimes) {
 				charge += 1 / (1 + v3::dist(transform.transform.position, pos));
 			}
-			double max_charge = .16f;
+			double max_charge = .10f;
 			if (max_charge<=charge) {
 				return false;
 			}
@@ -83,7 +83,7 @@ namespace game {
 		void run(ecs::Ecs& ecs) {
 			SpawnTimer& spawn_timer= ecs.insert_resource<SpawnTimer>(ecs.get_resource<timing::WorldClock>());
 			timing::Duration& duration= spawn_timer.next_spawn;
-			double spawn_frequency=.05f;
+			double spawn_frequency=.2f;
 			size_t total_alive = 0;
 			ecs::View< slimes::Mob, core::LocalTransform> slimes(ecs);
 			for (auto [slime, transform] : slimes) {
@@ -97,7 +97,7 @@ namespace game {
 			if (max_alive <= total_alive) {
 				return;
 			}
-			ecs::View< player::player_tag> players(ecs);
+			ecs::View< player::PlayerTag> players(ecs);
 			for (auto [player] : players) {
 				{
 					if (duration.is_inactive()) {
@@ -105,7 +105,7 @@ namespace game {
 						if (!spawn_timer.next.try_spawn_many(10,ecs)) {
 							continue;
 						} 
-						int count = int(1.15*random::random())+1;
+						int count = int(3*math::ease_in_power(random::random(),5))+1;
 						spawn_timer.next = EntitySpawn(count);
 						duration.set(1/ spawn_frequency);
 					}

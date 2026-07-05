@@ -19,17 +19,17 @@
 #include "../game/health.h"
 namespace player {
 	struct PlayerHealth : ecs::component {
-		PlayerHealth(ecs::Constrained<ui::UiImage> image):health_damage_box(image){
+		PlayerHealth(ecs::Constrained<ui::Image> image):health_damage_box(image){
 
 		}
-		ecs::Constrained<ui::UiImage> health_damage_box;
-		array<ecs::Constrained<ui::UiImage>> health_boxes;
+		ecs::Constrained<ui::Image> health_damage_box;
+		array<ecs::Constrained<ui::Image>> health_boxes;
 	};
 	struct HealthDisplayedRecipe {
 		void apply(ecs::obj& object) const {
 			v2::UVec2 index = object.get_component<ui::TableEntry>().entry;
 			ecs::obj parent = ecs::parent(object).unwrap();
-			object.add_component< ui::UiImage>(colors::White,object.world().get_resource<Renderer>().gen_renderable("Ui"));
+			object.add_component< ui::Image>(colors::White,object.world().get_resource<Renderer>().gen_renderable("Ui"));
 			parent.get_component<PlayerHealth>().health_boxes.push(object);
 		}
 	};
@@ -44,12 +44,12 @@ namespace player {
 					health_ui.health_damage_box.get_component<ui::UiEnabled>().disable();
 				}
 				for (int i = 0; i < health.current_health; i++) {
-					health_ui.health_boxes[i].get<ui::UiImage>().set_image("images\\health.png");
+					health_ui.health_boxes[i].get<ui::Image>().set_image("images\\health.png");
 
 					health_ui.health_boxes[i].get_component<ui::UiEnabled>().enable();
 				}
 				for (int i = health.current_health; i < health.max_health; i++) {
-					health_ui.health_boxes[i].get<ui::UiImage>().set_image("images\\NoHealth.png");
+					health_ui.health_boxes[i].get<ui::Image>().set_image("images\\NoHealth.png");
 
 					health_ui.health_boxes[i].get_component<ui::UiEnabled>().enable();
 				}

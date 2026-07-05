@@ -63,7 +63,7 @@ namespace renderer {
 		}
 	
 		stn::box<Material> load(const MaterialDescriptor& descriptor,assets::Assets& assets) {
-			phase_handle phase = assets.from_name<render_phase>(descriptor.phase).expect("phase should exist");
+			phase_handle phase = assets.from_name<RenderPhase>(descriptor.phase).expect("phase should exist");
 			shader_id shader_handle = assets.from_name<Shader>(descriptor.Shader).expect("shader should exist");
 			return stn::box<Material>(descriptor.name, phase, shader_handle, descriptor.properties, descriptor.elements);
 		}

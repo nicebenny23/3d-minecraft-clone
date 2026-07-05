@@ -66,7 +66,7 @@ namespace ecs {
 		virtual	bool has(entity_id ent) const = 0;
 		virtual	component& unchecked_at(entity_id entity) = 0;
 		virtual	const component& unchecked_at(entity_id entity) const = 0;
-
+		
 		virtual	component& at(entity_id entity) = 0;
 		virtual	const component& at(entity_id entity) const = 0;
 		template<typename T>

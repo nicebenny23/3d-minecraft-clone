@@ -1,5 +1,6 @@
 #include "rigidbody.h"
 #include "../renderer/ModelMesh.h"
+#include "close.h"
 #pragma once 
 namespace Health {
 
@@ -22,15 +23,17 @@ namespace Health {
 	
 	struct EntityKiller :ecs::System {
 		void run(ecs::Ecs& world) {
+			if (!player::in_game(world)) {
+				return;
+			}
 			for (DamageCommand& cmd : world.read_commands<DamageCommand>()) {
 				EntityHealth& current_entity_health = cmd.target.get<EntityHealth>();
-				if (!current_entity_health.damage_delay_timer.is_active()) {
-					current_entity_health.damage_delay_timer.set(.5f);
+				if (current_entity_health.damage_delay_timer.is_inactive_set(.5)) {
 					current_entity_health.current_health -= stn::min(current_entity_health.current_health, cmd.damage);
 				}
 			}
 			//not flexable enough to exclude the player yet
-			ecs::View< EntityHealth, ecs::Owner,ecs::Not<player::player_tag>> objects(world);
+			ecs::View< EntityHealth, ecs::Owner,ecs::Not<player::PlayerTag>> objects(world);
 			for (auto&& [health, object] : objects) {
 				if (health.current_health == 0) {
 					object.destroy();
@@ -57,6 +60,9 @@ namespace Health {
 	};
 	struct KbSystem :ecs::System {
 		void run(ecs::Ecs& world) {
+			if (!player::in_game(world)) {
+				return;
+			}
 			for (AttackCommand& kb : world.read_commands< AttackCommand>()) {
 				EntityHealth& health = kb.body.get<EntityHealth>();
 				if (health.damage_delay_timer.is_inactive()) {
@@ -80,39 +86,15 @@ namespace Health {
 			}
 		}
 	};
-	struct FallDamageRecipient:ecs::component{
-		FallDamageRecipient(double mag) :damage_magnitude(mag) {
-
-		}
-		stn::Option<double> fall_velocity;
-		double damage_magnitude;
-	};
-
-	struct FallDamageSystem:ecs::System {
-
-		void run(ecs::Ecs& world) {
-			return;
-			ecs::View< physics::RigidBody, physics::Gravity, FallDamageRecipient, EntityHealth,ecs::Owner> query(world);
-			for (auto&& [rigid,gravity,faller,health,object]: query) {
-				if (rigid.isonground) {
-					if (faller.fall_velocity) {
-						int dmg(faller.damage_magnitude * faller.fall_velocity.unwrap());
-						if (1 < dmg) {
-							world.write_command(DamageCommand{ .damage = size_t(dmg),.target = object});;
-						}
-					}
-				}
-
-				faller.fall_velocity = v3::dot(rigid.velocity, gravity.strength.force.normal());
-			}
-		}
-	};
 	struct FlashOnHit:ecs::component{
 		colors::Color flash_color = colors::Color(1,.5f,.5f,1);
 		bool on;
 	};
 	struct DamageDisplaySystem :ecs::System {
 		void run(ecs::Ecs& world) {
+			if (!player::in_game(world)) {
+				return;
+			}
 			ecs::View< Model,EntityHealth,FlashOnHit> query(world);
 			for (auto&& [model,health,flash]:query) {
 				if (health.damage_delay_timer.is_active()) {
@@ -134,7 +116,6 @@ namespace Health {
 		void operator()(core::App& app) {
 			app.emplace_system<KbSystem>();
 			app.emplace_system<EntityKiller>();
-			app.emplace_system<FallDamageSystem>();
 			app.emplace_system<DamageDisplaySystem>();
 		}
 	};

@@ -259,7 +259,7 @@ namespace blockrender {
 			texlist.reach(chest_top) = "images\\chest_top.png";
 			texlist.reach(chest_front) = "images\\chest.png";
 			texlist.reach(chest_sides) = "images\\chest_sides.png";
-			texlist.reach(mosstex) = "images\\moss.png";
+			texlist.reach(mosstex) = "images\\moss  .png";
 			texlist.reach(ropetex) = "images\\rope.png";
 			texlist.reach(lavatex) = "images\\lava.png";
 			texlist.reach(obsidiantex) = "images\\obb.png";
@@ -284,7 +284,7 @@ namespace blockrender {
 			texlist.reach(torchtoptex) = "images\\torchtop.png";
 			texlist.reach(crystaloretex) = "images\\crystalore.png";
 		
-			renderer::texture_array_id texarray = ecs.load_asset_emplaced<renderer::TextureArrayPath>(texlist, "BlockTextures").unwrap();
+			renderer::TextureArrayId texarray = ecs.load_asset_emplaced<renderer::TextureArrayPath>(texlist, "BlockTextures").unwrap();
 			renderer.set_uniform("bind_block_texture", texarray);
 		}
 	};

@@ -25,12 +25,12 @@ namespace blocks {
 
 }
 namespace items {
-	struct torch_item : item_type {
+	struct TorchItem : item_type {
 		std::string name() const {
 			return "torch";
 		}
 		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(
+			return item_traits::block_item(
 				renderer::TexturePath("images\\torch.png"),
 				world.get_resource<BlockRegistry>().get_id<blocks::TorchBlock>()
 			);

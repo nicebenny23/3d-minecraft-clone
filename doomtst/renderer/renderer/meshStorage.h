@@ -11,7 +11,7 @@ namespace renderer {
 		generate_indices = 0,
 		manual_generate = 1,
 	};
-
+	//cpu side mesh builder
 	struct MeshBuilder {
 
 		size_t components() const {

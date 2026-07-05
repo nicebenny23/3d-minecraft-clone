@@ -10,8 +10,8 @@ namespace items {
 
 	struct ItemIcon:ecs::component {
 		stn::Option<item_id> displayed_id;
-		ecs::Constrained<ui::UiImage> image_component;
-		ItemIcon(ecs::Constrained<ui::UiImage> image) :displayed_id(stn::None), image_component(image) {
+		ecs::Constrained<ui::Image> image_component;
+		ItemIcon(ecs::Constrained<ui::Image> image) :displayed_id(stn::None), image_component(image) {
 
 		}
 	};
@@ -26,9 +26,9 @@ namespace items {
 	struct ItemProgressDisplay :ecs::component {
 		stn::Option<double> value;
 
-		ecs::Constrained<ui::UiImage> under_bar;
-		ecs::Constrained<ui::UiImage> bar;
-		ItemProgressDisplay(ecs::Constrained<ui::UiImage> image_bar, ecs::Constrained<ui::UiImage> under_bar) :value(stn::None), bar(image_bar), under_bar(under_bar){
+		ecs::Constrained<ui::Image> under_bar;
+		ecs::Constrained<ui::Image> bar;
+		ItemProgressDisplay(ecs::Constrained<ui::Image> image_bar, ecs::Constrained<ui::Image> under_bar) :value(stn::None), bar(image_bar), under_bar(under_bar){
 
 		}
 	};
@@ -36,7 +36,7 @@ namespace items {
 	inline void ItemUiSpawner(ecs::obj& entity){
 			ecs::obj image= entity.spawn_child_emplaced< ui::ImageSpawner>(geo::Box2d::origin_centered(v2::Vec2(item_size, item_size)), 1);
 			ecs::obj text= entity.spawn_child_emplaced<ui::TextSpawner>(geo::Box2d::Box2d(v2::Vec2(.2f,.2f),v2::Vec2(.4f,.4f)), 1,colors::White);
-			entity.set_emplace_component<ItemIcon>(ecs::Constrained<ui::UiImage>(image));
+			entity.set_emplace_component<ItemIcon>(ecs::Constrained<ui::Image>(image));
 			entity.set_emplace_component<ItemCountDisplay>(ecs::Constrained<ui::Text>(text));
 				geo::Box2d max_size(v2::Vec2(0, -.4f), v2::Vec2(item_size, item_size / 8));
 				ecs::obj bar= entity.spawn_child_emplaced< ui::ImageSpawner>(renderer::TexturePath("images\\default.png"), max_size, 1, colors::Green);
@@ -61,7 +61,7 @@ namespace items {
 					geo::Box2d under_bar_box= icon.under_bar.get_component<ui::UiBounds>().local;
 
 					geo::Box2d& final_box = icon.bar.get_component<ui::ComputedStyle>().final_size;
-					icon.bar.get_component<ui::UiImage>().current_color = colors::lerp(colors::Red, colors::Green, dur_progress);
+					icon.bar.get_component<ui::Image>().current_color = colors::lerp(colors::Red, colors::Green, dur_progress);
 					box.scale.x = under_bar_box.scale.x * dur_progress;
 					box.center.x = stn::lerp(under_bar_box.min().x, under_bar_box.center.x, dur_progress);
 					double min = final_box.min().x;
@@ -80,7 +80,7 @@ namespace items {
 				item_traits traits = world.get_resource<ItemTypes>()
 				.from_id(icon.displayed_id.unwrap()).traits(world);
 				icon.image_component.get_component<ui::UiEnabled>().enable();
-				icon.image_component.get_component<ui::UiImage>().set_image(traits.image_path);
+				icon.image_component.get_component<ui::Image>().set_image(traits.image_path);
 			}
 		}
 	};
@@ -101,7 +101,7 @@ namespace items {
 	struct ItemUiPlugin {
 		void operator()(core::App& app) {
 			app.insert_plugin(ui::ImagePlugin());
-			app.insert_plugin(ui::UiTextPlugin());
+			app.insert_plugin(ui::TextPlugin());
 			app.emplace_system<ItemIconSetter>();
 			app.emplace_system<ItemDuribilityBarSetter>();
 			app.emplace_system<ItemCountSetter>();

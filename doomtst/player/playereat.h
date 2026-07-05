@@ -8,10 +8,10 @@
 #pragma once 
 namespace player {
 	struct player_eat_behavior : ecs::component {
-		player_eat_behavior(timing::WorldClock& clock, ecs::Constrained<ui::UiImage> img) :duration(clock),food(img){
+		player_eat_behavior(timing::WorldClock& clock, ecs::Constrained<ui::Image> img) :duration(clock),food(img){
 
 		}
-		ecs::Constrained<ui::UiImage> food;
+		ecs::Constrained<ui::Image> food;
 		timing::Duration duration;
 	};
 
@@ -40,7 +40,7 @@ namespace player {
 						continue;
 					}
 
-					eater.food.get<ui::UiImage>().set_image(type.traits(world).image_path);
+					eater.food.get<ui::Image>().set_image(type.traits(world).image_path);
 					size_t health_after = stn::min(health.max_health, health.current_health + food);
 					if (health.current_health == health_after) {
 						continue;
@@ -52,7 +52,7 @@ namespace player {
 					double progress = eater.duration.remaining().unwrap_or(0)*2;
 					
 					eater.food.get_component<ui::UiBounds>().local.scale = v2::Vec2(progress, progress)*.1 + v2::Vec2(.3, .3);
-					eater.food.get_component<ui::UiImage>().current_color.a = progress;
+					eater.food.get_component<ui::Image>().current_color.a = progress;
 					eater.food.get_component<ui::UiEnabled>().enable();
 					if (eater.duration.is_inactive()) {
 							stack.unwrap().remove(1);

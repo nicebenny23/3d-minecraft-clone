@@ -16,13 +16,3 @@ namespace blocks {
 	};
 
 }
-namespace items {
-	struct air_item :item_type {
-		std::string name() const {
-			return "air";
-		}
-		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(renderer::TexturePath("images\\airtex.png"),world.get_resource<BlockRegistry>().get_id<blocks::AirBlock>());
-		}
-	};
-}

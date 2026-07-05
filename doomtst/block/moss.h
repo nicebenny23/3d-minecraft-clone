@@ -6,37 +6,36 @@
 #pragma once 
 namespace items {
 
-	struct seed_item : item_type {
+	struct SeedItem : item_type {
 		std::string name() const {
 			return "seed";
 		}
 		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(
-				renderer::TexturePath("images\\seed.png"),
-				world.get_resource<BlockRegistry>().get_id("seed"));
+			return item_traits{ .image_path =renderer::TexturePath("images\\seed.png"),.blk_id = world.get_resource<BlockRegistry>().get_id("seed")};
 		}
 	};
 
 }
 namespace blocks {
-
+	constexpr double moss_lifetime = 200;
 	struct SeedLifetime :ecs::component {
 		timing::Duration clock;
 		void prime() {
-			clock.set(300);
+			clock.set(moss_lifetime);
 		}
-		SeedLifetime(timing::WorldClock& world_clock,double lifetime) :clock(world_clock) {
+		SeedLifetime(timing::WorldClock& world_clock, double lifetime) :clock(world_clock) {
 			clock.set(lifetime);
 		}
 	};
-	struct SeedGrower:ecs::System {
+	struct SeedGrower :ecs::System {
 		void run(ecs::Ecs& world) {
-			ecs::View<SeedLifetime,block> moss_clock(world);
-			grid::Grid& grid=world.get_resource<grid::Grid>();
-			for (auto&& [moss,mblock]: moss_clock) {
+			ecs::View<SeedLifetime, block> moss_clock(world);
+			grid::Grid& grid = world.get_resource<grid::Grid>();
+			for (auto&& [moss, mblock] : moss_clock) {
 				if (!grid::lights_loaded_at(grid, mblock.pos)) {
 					continue;
 				}
+
 				bool stop = true;
 				for (math::Direction3d dir : math::Directions3d) {
 					stn::Option<blocks::block&> blk = grid.get_block(dir.coord() + mblock.pos);
@@ -44,35 +43,43 @@ namespace blocks {
 						stop = false;
 					}
 				}
-				stn::Option<block&> blk_below = grid.get_block(mblock.pos - v3::Coord(0, 1, 0));
-				if (blk_below&&!blk_below.unwrap().is<SoilBlock>()) {
-					stop = true;
+				stn::Option<ecs::Constrained<block>&> blk_below = grid.get_object(mblock.pos - v3::Coord(0, 1, 0));
+				if (blk_below) {
+					int seed = blk_below.unwrap().get_component_opt<Seedability>().member(&Seedability::seedable).unwrap_or(0);
+					if (seed<1) {
+
+						stop = true;
+					}
+				}
+				else {
+					stn::throw_logic_error("for lights to be loaded blk_below must be loaded thus it should be loaded");
 				}
 				block_texture general_tex = mosstex;
 				if (stop) {
 					general_tex = moss_inactive_tex;
-						moss.prime();
+					moss.prime();
 				}
-				
+
 				block_texture side_tex = general_tex;
 				stn::List<block_texture, 4> tex_array{ mosstex,moss_one,moss_two,moss_three };
 				if (!stop) {
-					size_t tex_index =std::floor(math::bounds(0,300).unlerp_clamped(300-moss.clock.remaining_or_default())*3.999f);
+					size_t tex_index = std::floor(math::bounds(0, moss_lifetime).unlerp_clamped(moss_lifetime - moss.clock.remaining_or_default()) * 3.999f);
 					side_tex = tex_array[tex_index];
 				}
-				for (Direction3d dir : math::Directions3d) {
-					if (dir.axis()==math::AxisIndex3d::Up) {
+				for (math::Direction3d dir : math::Directions3d) {
+					if (dir.axis() == math::AxisIndex3d::Up) {
 
 						mblock.mesh.set_face_texture(dir, general_tex);
 					}
 					else {
-						mblock.mesh.set_face_texture(dir,side_tex);
+						mblock.mesh.set_face_texture(dir, side_tex);
 					}
-					}
-			
+				}
+
 
 				if (moss.clock.is_inactive()) {
-					grid::set_block(world, mblock.pos,world.get_resource<BlockRegistry>().get_id<LogBlock>());
+					grid.get_object(mblock.pos - v3::Coord(0, 1, 0)).unwrap().get_component<Seedability>().seedable-=1;
+					grid::set_block(world, mblock.pos, world.get_resource<BlockRegistry>().get_id<LogBlock>());
 				}
 			}
 		}
@@ -80,12 +87,12 @@ namespace blocks {
 
 	struct seed_loot_table :items::LootTable {
 		items::LootDrops drops_for(items::ItemTypes& types) {
-			return items::LootDrops({ items::loot_element(types.insert<items::seed_item>(),1,types) });
+			return items::LootDrops({ items::loot_element(types.insert<items::SeedItem>(),1,types) });
 		}
 	};
-	struct SeedBlock :BlockType  {
+	struct SeedBlock :BlockType {
 		void apply(ecs::obj& block) const override {
-			block.add_component<SeedLifetime>(block.world().get_resource<timing::WorldClock>(),300);
+			block.add_component<SeedLifetime>(block.world().get_resource<timing::WorldClock>(), moss_lifetime);
 			block.apply_recipe(items::loot_table_recipe< seed_loot_table>);
 		}
 		std::string name() const {
@@ -93,11 +100,11 @@ namespace blocks {
 		}
 		void read_from_bytes(ecs::obj block, stn::file_handle& handle)const  override {
 			block.apply_recipe(items::loot_table_recipe< seed_loot_table>);
-			timing::WorldClock& clock= block.world().get_resource<timing::WorldClock>();
-			block.add_component<SeedLifetime>(clock, stn::file_serializer<double>().read(handle)- clock.elapsed_time);
+			timing::WorldClock& clock = block.world().get_resource<timing::WorldClock>();
+			block.add_component<SeedLifetime>(clock, stn::file_serializer<double>().read(handle) - clock.elapsed_time);
 		}
 		void write_to_bytes(ecs::obj block, stn::file_handle& handle)const  override {
-			SeedLifetime& lifetime=block.get_component<SeedLifetime>();
+			SeedLifetime& lifetime = block.get_component<SeedLifetime>();
 			stn::file_serializer<double>().write(lifetime.clock.end_time().unwrap_or(0), handle);
 		}
 		BlockTraits traits() const {
@@ -107,7 +114,7 @@ namespace blocks {
 
 		}
 		blocks::SolidBlockTraits mining_traits() const {
-			return blocks::SolidBlockTraits(2,0,false);
+			return blocks::SolidBlockTraits(2, 0, false);
 		}
 	};
 }

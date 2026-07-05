@@ -9,6 +9,7 @@
 #include "../items/item.h"
 #include "../items/loottable.h"
 #include "../game/brain.h"
+#include "../game/close.h"
 namespace slimes {
 	struct SlimeEdge {
 		stn::Option<size_t> jump_height;
@@ -89,49 +90,71 @@ namespace slimes {
 	struct SlimePathFinder :ecs::component {
 
 		using result_type = navigation::ContextResultType<SlimeNavigator>;
-		stn::Option<stn::array<result_type>> path;
-		SlimePathFinder(timing::Duration time, ecs::Constrained<core::LocalTransform> follow,double speed) :last_fix(time), build_time(time), following(follow), speed(speed){
+		stn::array<result_type> path;
+		SlimePathFinder(timing::Duration time, ecs::Constrained<core::LocalTransform> follow,double speed) :last_fix(time), build_time(time), following(follow), speed(speed),last_detection(time.clock()){
 		}
 		double speed;
+		//stops path stales
 		timing::Duration build_time;
+		//last time noticble progress was made in the path
 		timing::Duration last_fix;
-	
+		//tick for path check
+		timing::Duration last_detection;
+		stn::Option<v3::Vec3> last_position;
 		ecs::Constrained<core::LocalTransform> following;
+		void reset_fix() {
+			last_fix.set(.5f);
+		}
+		void force_repath() {
+			last_fix.disable();
+		}
 	};
 	inline v3::Point3 slime_target(ecs::Constrained<SlimePathFinder, core::LocalTransform> finder) {
 		SlimePathFinder& path = finder.get<SlimePathFinder>();
 		v3::Point3 pnt = path.following.get_component<core::LocalTransform>().transform.position;
 		return pnt;
 	}
+	struct Idler{
+	};
+
 	struct SlimeNavigation :ecs::System {
 		void run(ecs::Ecs& world) {
-			ecs::View<SlimePathFinder, core::LocalTransform,Mob,ecs::Owner,ai::Brain> slimes(world);
-			for (auto&& [path, transform,mob,object,brain] : slimes) {
+			
+			ecs::View<SlimePathFinder, core::LocalTransform, Mob, ecs::Owner, ai::Brain> slimes(world);
+			for (auto&& [path, transform, mob, object, brain] : slimes) {
+
+				double max_follow_distance = 26;
+				if (v3::dist(transform.transform.position, slime_target(object)) >= max_follow_distance) {
+					brain.set<Idler>(1);
+				}
 				if (!brain.active<SlimeNavigator>()) {
 					continue;
 				}
-				if (brain.becoming_active<SlimeNavigator>()) {
-					path.last_fix.disable();
+				if (path.last_detection.is_inactive_set(.1)) {
+					double min_dist = .1f;
+					//if their is no last position or we move to much we reset fix otherwise fix eventually becomes innactive
+					if (!path.last_position || v3::dist(path.last_position.unwrap(), transform.transform.position) >= min_dist) {
+						path.reset_fix();
+					}
+					path.last_position = transform.transform.position;
 				}
-				v3::Vec3 off=transform.transform.position-path.following.get<core::LocalTransform>().transform.position;
-				if (path.path.map_member(&stn::array<result_type>::non_empty).unwrap_or(false) == true) {
-					stn::array<result_type>& current_path = path.path.unwrap();
-					result_type current_node = current_path[0];
+				v3::Vec3 off = transform.transform.position - path.following.get<core::LocalTransform>().transform.position;
+				if (path.path.non_empty()) {
+					result_type current_node=path.path.first();
 					v3::Point3 goto_pos = v3::Point3(current_node.result().pos) + v3::Scale3(1 / 2.0f).with_y(transform.transform.scale.y / 2);
-					navigation::GridCoord endpoint = current_path.last().result();
+					navigation::GridCoord endpoint = path.path.last().result();
 					navigation::GridCoord real_endpoint(v3::Coord(slime_target(object)));
 					double apx_real_dist = navigation::GridCoord::apx_distance(current_node.result(), real_endpoint);
 					double apx_fake_dist = navigation::GridCoord::apx_distance(real_endpoint, endpoint);
-					if (apx_real_dist+1 <= apx_fake_dist) {
-						path.last_fix.disable();
+					if (apx_real_dist + 1 <= apx_fake_dist) {
+						path.force_repath();
 					}
 					else {
 
 						if (v3::dist(transform.transform.position, goto_pos) < .25f) {
-							path.path.unwrap().remove_at(0);
-							path.last_fix.set(1.5f);
-							if (path.path.unwrap().length()==0) {
-								path.last_fix.disable();
+							path.path.remove_at(0);
+							if (path.path.empty()) {
+								path.force_repath();
 							}
 						}
 
@@ -142,29 +165,24 @@ namespace slimes {
 				SlimeNavigator navigator{ .world = grid };
 
 				if (path.last_fix.is_inactive() || path.build_time.is_inactive()) {
-					double max_follow_distance=28;
-					if (v3::dist(transform.transform.position, slime_target(object))< max_follow_distance) {
 					navigation::GridCoord to(grid.get_voxel(slime_target(object)));
 					navigation::GridCoord current(grid.get_voxel(transform.transform.position));
-					path.path = navigation::a_star(current, to, navigator);
-					path.build_time.set(navigation::GridCoord::apx_distance(to, current) + 3);
-					path.last_fix.set(1.5f);
-					}
+					path.path = navigation::a_star(current, to, navigator).unwrap_or_default();
+					path.build_time.set(navigation::GridCoord::apx_distance(to, current) + 2);
+					path.reset_fix();
 				}
-
 			}
+
 		}
 	};
 	struct SlimeStunner :ecs::System {
 
 		void run(ecs::Ecs& world) {
-
 			ecs::View < SlimePathFinder, ai::Brain, Health::EntityHealth > slimes(world);
 				for (auto&& [path, brain, health] : slimes) {
 					if (.3f < health.damage_delay_timer.remaining().unwrap_or(0)) {
-						brain.set<SlimeStunner>(1);
+						brain.set<Idler>(1);
 					}
-
 				}
 		}
 
@@ -173,14 +191,16 @@ namespace slimes {
 	};
 	struct SlimePathFollower :ecs::System {
 		void run(ecs::Ecs& world) {
-
+			if (!player::in_game(world)) {
+				return;
+			}
 			ecs::View<SlimePathFinder, core::LocalTransform, physics::RigidBody,ecs::Owner,Health::EntityHealth,ai::Brain> slimes(world);
 			for (auto&& [path, transform, body,object,health,brain] : slimes) {
 				brain.set<SlimeNavigator>(0);
 				if (!brain.active<SlimeNavigator>()) {
 					continue;
 				}
-				stn::Option<result_type& > headed = path.path.and_then([](stn::array<result_type >& edge) {return edge.get(0); });
+				stn::Option<result_type& > headed = path.path.first_opt();
 					if (headed) {
 						result_type head = headed.unwrap();
 						if (head.move.jump_height != stn::None) {

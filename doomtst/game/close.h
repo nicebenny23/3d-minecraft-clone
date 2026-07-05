@@ -18,7 +18,7 @@ namespace player {
 		ui::UiSpawner::with_default_priority(geo::Box2d(v2::zerov, v2::unitv/4.0)).apply(object);
 		object.spawn_child_emplaced<ui::ImageSpawner>(renderer::TexturePath("images\\default.png"),geo::Box2d(v2::zerov, v2::unitv), 1);
 
-		object.spawn_child_emplaced<ui::TextSpawner>(geo::Box2d(v2::zerov,v2::unitv*.2f), 2,colors::Black).get_component<ui::Text>().format("{}", "CLOSE");
+		object.spawn_child_emplaced<ui::TextSpawner>(geo::Box2d(v2::zerov,v2::unitv*.2f), 2,colors::Black).get_component<ui::Text>().format("{}", "close");
 	}
 	inline void make_close_menu(ecs::obj& object) {
 		ui::MenuRecipe().apply(object);
@@ -30,7 +30,7 @@ namespace player {
 		ecs::EventReader<ui::NoMenus> reader;
 		void run(ecs::Ecs& world) {
 			if (reader.read().nonempty()) {
-				world.write_command(ui::open_menu(player::player_for(world).get_component<CloseMenuComponent>().button));
+				world.write_command(ui::menu_stack(player::player_for(world).get_component<CloseMenuComponent>().button));
 			}
 			ecs::View<ui::InteractionState, ecs::Has<CloseButton>> view(world);
 			for (auto [interaction] : view) {
@@ -42,6 +42,10 @@ namespace player {
 
 		}
 	};
+	inline bool in_game(const ecs::Ecs& world) {
+		return !world.get_resource<ui::MenuState>().top()
+		.is_some_and(&ecs::obj::has_component<CloseMenuComponent>);
+	}
 	inline void CloseMenuPlugin(core::App& app) {
 		app.emplace_system<CloseGameOnCloseButton>();
 	}

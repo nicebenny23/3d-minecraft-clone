@@ -16,12 +16,12 @@
 
 namespace items {
 
-	struct chest_item : item_type {
+	struct ChestItem : item_type {
 		std::string name() const {
 			return "chest";
 		}
 		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits(
+			return item_traits::block_item(
 				renderer::TexturePath("images\\chest.png"),
 				world.get_resource<BlockRegistry>().get_id("chest")
 			);
@@ -49,7 +49,7 @@ namespace blocks {
 	};
 	struct chest_loot_table :items::LootTable {
 		items::LootDrops drops_for(items::ItemTypes& types) {
-			return items::LootDrops({ items::loot_element(types.insert<items::chest_item>(),1,types)});
+			return items::LootDrops({ items::loot_element(types.insert<items::ChestItem>(),1,types)});
 		}
 	};
 	struct ChestBlock :BlockType {

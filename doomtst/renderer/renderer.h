@@ -1,25 +1,18 @@
 #pragma once
-#include "renderer/Vao.h"
-#include "renderer/vertexobject.h"
 #include "renderer/shader.h"
-#include <glm/mat4x4.hpp>
 #include "../math/vector3.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include "renderer/texture.h"
 #include "renderer/renderable.h"
-#include "renderer/Mesh.h"
 #include "renderer/RenderProperties.h"
-#include "../util/stack.h"
+#include "renderer/texture_loader.h"
 #include "renderer/RenderContext.h"
 #include "renderer/vertex.h"
 #include "../game/ecs/resources.h"
-#include "../util/Id.h"
 #include "../game/ecs/query.h"
 #include "renderer/pass.h"
 #include "../game/Core.h"
-#include "../util/Name.h"
 #include "../game/ecs/filtered_object.h"
-#include "../game/Settings.h"
 #include "../player/cameracomp.h"
 #include "renderer/meshStorage.h"
 #include "Window.h"
@@ -30,6 +23,10 @@ using namespace renderer;
 namespace renderer {
 
 	struct Renderer;
+	
+	struct remove_render_object {
+		ecs::obj object;
+	};
 	struct RenderableHandle {
 		RenderableHandle(renderable id)
 			: id(id) {
@@ -54,7 +51,9 @@ namespace renderer {
 		void set_order_key(float key) {
 			id.object().set_emplace_component<order_key>(key);
 		}
-		void destroy();
+		void destroy() {
+			world().write_command(remove_render_object(id.object()));
+		}
 		bool operator==(const RenderableHandle& other) const = default;
 		Renderer& renderer();
 		void set_mesh(MeshId msh_id) {
@@ -71,7 +70,10 @@ namespace renderer {
 			return id.world();
 		}
 		void give_owned_mesh();
-		MeshBuilder insert_builder_for(const vertex& vertex,indice_mode auto_ind = indice_mode::manual_generate);
+		MeshBuilder insert_builder_for(const vertex& vertex, indice_mode auto_ind = indice_mode::manual_generate) {
+			give_owned_mesh();
+			return MeshBuilder(id.get<mesh_component>().msh.unwrap(), vertex, auto_ind);
+		}
 	
 	private:
 		renderable id;
@@ -81,9 +83,6 @@ namespace renderer {
 		world.write_command(std::move(new_mesh).built_mesh());
 	}
 
-	struct remove_render_object {
-		ecs::obj object;
-	};
 
 	struct Renderer : ecs::resource {
 
@@ -161,7 +160,9 @@ namespace renderer {
 
 
 	};
-
+	inline void RenderableHandle::give_owned_mesh() {
+		id.get_component<mesh_component>().msh = renderer().make_mesh();
+	}
 	inline Renderer& RenderableHandle::renderer() {
 		return id.world().get_resource<Renderer>();
 	}
@@ -182,7 +183,7 @@ namespace renderer {
 
 		}
 	};
-	struct render_all :ecs::System {
+	struct RenderAll :ecs::System {
 		void run(ecs::Ecs& world) {
 			ecs::Constrained<CameraComponent,core::LocalTransform> camera_object = world.get_resource<renderer::CameraResource>().camera;
 			CameraComponent& cam = camera_object.get<CameraComponent>();
@@ -238,18 +239,19 @@ namespace renderer {
 		void operator()(core::App& game) {
 			game.insert_plugin(renderer::window_plugin);
 			ecs::Ecs& world = game.Ecs;
-
-			world.emplace_asset_loader<renderer::TextureLoader>();
-			world.emplace_asset_loader<renderer::TextureArrayLoader>();
-			world.emplace_asset_loader<ShaderLoader>();
-			world.emplace_asset_loader<assets::SelfDescriptorLoader<renderer::render_phase>>();
 			Renderer& renderer = world.insert_resource<Renderer>();
+			world.emplace_asset_loader<renderer::TextureLoader>(renderer.context);
+			world.emplace_asset_loader<renderer::TextureArrayLoader>(renderer.context);
+
+			world.emplace_asset_loader<ShaderLoader>(renderer.context);
+			world.emplace_asset_loader<assets::SelfDescriptorLoader<renderer::RenderPhase>>();
+			world.load_asset(RenderPhase(2, true, "ui_phase"));
+			world.load_asset(RenderPhase(0, false, "solid_phase"));
+			world.load_asset(RenderPhase(1, true, "transparent_phase"));
+
 			world.emplace_asset_loader<MaterialManager>();
-			world.load_asset(render_phase(12, true, "ui_phase"));
-			world.load_asset(render_phase(0, false, "solid_phase"));
-			world.load_asset(render_phase(1, true, "transparent_phase"));
 			world.emplace_system<ColorSetter>();
-			world.emplace_system<renderer::render_all>();
+			world.emplace_system<renderer::RenderAll>();
 
 		}
 

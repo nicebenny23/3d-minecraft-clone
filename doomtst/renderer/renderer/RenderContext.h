@@ -69,20 +69,29 @@ namespace renderer {
 		}
 		void bind(const Texture2D& Tex) {
 			glBindTexture(GL_TEXTURE_2D, Tex.id);
-			BoundTexture2d = Tex;
+			bound_texture_2d = Tex;
 		}
-
+		GLuint gen_texture() {
+			GLuint id = 0;
+			glGenTextures(1, &id);
+			return id;
+		}
+		Fbo gen_fbo() {
+			GLuint id = 0;
+			glGenFramebuffers(1, &id);
+			return Fbo(id);
+		}
 		void bind(const TextureArray& Tex) {
 			glBindTexture(GL_TEXTURE_2D_ARRAY, Tex.id);
-			BoundTextureArray = Tex;
+			bound_texture_array = Tex;
 		}
 		void bind(const Shader& shade) {
 			if (shade.id == 0) {
 				throw std::logic_error("cant attach invalid shader");
 			}
-			if (BoundShader.is_none_or([&shade](const Shader& shader_id) {return shader_id.id != shade.id; })) {
+			if (bound_shader.is_none_or([&shade](const Shader& shader_id) {return shader_id.id != shade.id; })) {
 				glUseProgram(shade.id);
-				BoundShader = stn::Option<Shader>(shade);
+				bound_shader = stn::Option<Shader>(shade);
 			}
 		}
 
@@ -104,23 +113,23 @@ namespace renderer {
 
 		void unbind_texture_2d() {
 			glBindTexture(GL_TEXTURE_2D, 0);
-			BoundTexture2d = stn::None;
+			bound_texture_2d = stn::None;
 		}
 
 		void unbind_texture_array() {
 			glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-			BoundTextureArray = stn::None;
+			bound_texture_array = stn::None;
 		}
 		void unbind_shader() {
 			glUseProgram(0);
-			BoundShader = stn::None;
+			bound_shader = stn::None;
 		}
 		void bind_to_screen() {
 			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 			bound_frame = 0;
 		}
 		void apply_uniform(const renderer::uniform_value& value, std::string_view name) {
-			GLint location = BoundShader.unwrap().uniformlocation(name.data());
+			GLint location = bound_shader.unwrap().uniformlocation(name.data());
 			auto visitor = stn::visitor(
 				[&](const int& val) {
 					glad_glUniform1i(location, val);
@@ -142,8 +151,8 @@ namespace renderer {
 				[&](const glm::mat4& val) {
 					glad_glUniformMatrix4fv(location, 1, GL_FALSE, &val[0][0]);
 				},
-				[&](const texture_2d_id& tex) {bind(*tex); },
-				[&](const texture_array_id& tex) {bind(*tex); });
+				[&](const Texture2dId& tex) {bind(*tex); },
+				[&](const TextureArrayId& tex) {bind(*tex); });
 			std::visit(visitor, value);
 		}
 
@@ -196,8 +205,8 @@ namespace renderer {
 				msh.length = data.indices.length();
 			}
 		}
-		Shader bound_shader() {
-			return BoundShader.unwrap();
+		Shader get_bound_shader() {
+			return bound_shader.unwrap();
 		}
 
 		void bind_properties(const RenderProperties& props) {
@@ -208,14 +217,14 @@ namespace renderer {
 			glBlendFunc(props.blend_function_source, props.blend_function_distance);
 			gl_util::set_property(GL_BLEND, props.blend);
 		}
-		Context() :BoundShader(), BoundTexture2d(), BoundTextureArray(), bound_mesh() {
+		Context() :bound_shader(), bound_texture_2d(), bound_texture_array(), bound_mesh() {
 		}
 
 	private:
 		RenderProperties properties;
-		stn::Option<Shader> BoundShader;
-		stn::Option <Texture2D> BoundTexture2d;
-		stn::Option <TextureArray> BoundTextureArray;
+		stn::Option<Shader> bound_shader;
+		stn::Option <Texture2D> bound_texture_2d;
+		stn::Option <TextureArray> bound_texture_array;
 		stn::Option<Fbo> bound_frame;
 		stn::Option <GpuMesh> bound_mesh;
 

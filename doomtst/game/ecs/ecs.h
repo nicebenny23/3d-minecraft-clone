@@ -113,7 +113,7 @@ namespace ecs {
 		void clear_resources() {
 			return resources.clear();
 		}
-
+	
 
 		template<assets::LoadDescriptorType T>
 		stn::Option<assets::AssetHandle<assets::DescriptorAssetType<T>>> load_asset(const T& descriptor) {
@@ -339,7 +339,15 @@ namespace ecs {
 			}
 			return types;
 		}
-
+		/*
+		ecs::obj copy(ecs::obj other) {
+			ecs::obj new_object = spawn_empty();
+			stn::array<stn::non_null<component_type>> types;
+			for (stn::non_null < component_type> type:types) {
+				
+			}
+		}
+		*/
 		stn::array<component_type*> component_types_for(const stn::span<const component_id>& indices) {
 			stn::array<component_type*> types;
 			for (component_id id : indices) {
