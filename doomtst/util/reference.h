@@ -38,7 +38,7 @@ namespace stn {
 		bool operator!=(const T& value) const requires std::equality_comparable<T> {
 			return *ptr != value;
 		}
-
+		
 		T* operator->() {
 			return ptr;
 		}

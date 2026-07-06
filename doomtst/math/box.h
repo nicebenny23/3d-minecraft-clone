@@ -23,7 +23,12 @@ namespace geo {
 		v3::Point3 min() const {
 			return center - v3::Vec3(half_size());
 		}
-
+		double diameter() const {
+			return v3::Vec3(scale.x,scale.y,scale.z).length();
+		}
+		double radius() const {
+			return diameter()/2.0;
+		}
 		bool contains_point(v3::Point3 pos) const {
 			v3::Vec3 shifted = center - pos;
 			v3::Scale3 bounds = half_size();
@@ -53,12 +58,15 @@ namespace geo {
 			return scale / 2;
 		}
 		Box expanded(v3::Scale3 size) const {
-			return Box(center, size.expanded(scale));
+			return Box(center, size+scale);
+		}
+		Box expanded(double size) const {
+			return Box(center, scale.expanded(size));
 		}
 		// Minkowski difference operator
 		Box operator-(const Box& other) const {
 			//minkoski diffrence changes affinity
-			return Box(center-other.center, scale.expanded(other.scale));
+			return Box(center-other.center, scale+other.scale);
 		}
 		Box translated(v3::Vec3 translation_vector) const {
 			return Box(center + translation_vector, scale);

@@ -28,14 +28,14 @@ namespace console {
 				ImGui::Text(std::format("position: {}", pos).c_str());
 				grid::Grid& grid = world.get_resource<grid::Grid>();
 				ImGui::Text(std::format("look: {}", goblin.get_component<core::LocalTransform>().transform.look).c_str());
-				ImGui::Text(std::format("Chunk: {}", grid.chunk_from_block_pos(Coord(pos)).position).c_str());
+				ImGui::Text(std::format("Chunk: {}", grid.chunk_from_block_pos(Coord::from_vec3(pos)).position).c_str());
 				std::string text_for_look = goblin.get_component<player::PlayerCursor>().hit
 					.filter([&](const voxtra::RayWorldHit& blk) {return blk.owner().exists(); })
 					.filter([](const voxtra::RayWorldHit& blk) {return blk.owner().has_component<block>(); })
 					.map([&](const voxtra::RayWorldHit& blk) {
 					block& blck = blk.owner().get_component<block>();
 
-					return std::format("looking at block with center {},name {}", blck.center(), blck.type()->name()); })
+					return std::format("looking at block with center {},name {}", blck.center(), blck.type().name()); })
 					.unwrap_or("not looking at a block");
 
 				ImGui::Text(text_for_look.c_str());

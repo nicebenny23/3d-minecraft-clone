@@ -2,7 +2,6 @@
 #include "../block/block.h"
 #include "../game/ecs/game_object.h"
 #include "../math/geometry.h"
-#include "../math/Scale3.h"
 #include "../math/transform.h"
 #include "../math/vector3.h"
 #include "../util/Option.h"

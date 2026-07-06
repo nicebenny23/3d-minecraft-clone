@@ -7,7 +7,7 @@ namespace player {
 		void apply(ecs::obj entity, v3::Point3 position) {
 			math::Transform& transform = entity.add_component<core::LocalTransform>(random::spherical()*2 + position).transform;
 			transform.look_towards(random::spherical());
-			transform.scale = v3::Scale3(1 / 3.0f);
+			transform.scale = v3::Scale3::from_scale(1 / 3.0f);
 			entity.apply_recipe(DynamicColliderRecipe(true));
 			entity.apply_recipe(physics::Spawner{ .gravity = physics::Force{.force = v3::Vec3(0.0f,-.4f,0)} });
 			entity.get_component<physics::RigidBody>().add_impluse(physics::Implulse(v3::Vec3(0, .4, 0) + random::spherical().with_y(0) * 15.0f));

@@ -42,25 +42,18 @@ namespace items {
 namespace blocks {
 	struct StoneBrickBlock :BlockType {
 		void apply(ecs::obj& block) const {
-			if (!catched_loot_id) {
-				catched_loot_id = block.world().get_resource<items::loot_tables>().insert<items::stone_brick_loot_table>();
-			}
-			block.add_component_unchecked<items::loot_dropper>(catched_loot_id.unwrap());
+			block.apply_recipe(items::loot_table_recipe<items::stone_brick_loot_table>);
 		}
 		//we can catche here for a preformance gain
-		mutable stn::Option<items::loot_table_id> catched_loot_id;
-		StoneBrickBlock(ecs::Ecs& world) {
-
-		}
+	
 		std::string name() const override {
 			return std::string("stone_brick");
 		}
 		SolidBlockTraits mining_traits() const override {
 			return SolidBlockTraits(4, 0);
 		}
-		BlockTraits traits()const {
-			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, stone_brick_tex));
+		BlockMeshTraits traits(BlockTextureRegistry& registry)const {
+			return  BlockMeshTraits(v3::unit_scale, false, registry.get_texture("images\\stone_brick.png"));
 		}
 	};
 	struct StoneBlock :BlockType {
@@ -81,9 +74,8 @@ namespace blocks {
 		SolidBlockTraits mining_traits() const override {
 			return SolidBlockTraits(4,0);
 		}
-		BlockTraits traits(BlockTextureRegistry &registry)const {
-			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, registry.get_texture("images\\stone.png")));
+		BlockMeshTraits traits(BlockTextureRegistry &registry)const {
+			return  BlockMeshTraits(v3::unit_scale, false, registry.get_texture("images\\stone.png"));
 		}
 	};
 }

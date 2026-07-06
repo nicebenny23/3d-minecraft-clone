@@ -3,7 +3,6 @@
 #include "../util/cached.h"
 
 #include "../math/geometry.h"
-#include "../math/Scale3.h"
 #include "../block/block.h"
 #pragma once
 namespace chunks {
@@ -33,7 +32,7 @@ namespace chunks {
 			return (position + unitv / 2.f) * chunk_length;
 		}
 		geo::Box bounds() const {
-			return geo::Box(center(), v3::Scale3(chunk_length));
+			return geo::Box(center(), v3::Scale3::from_scale(chunk_length));
 		}
 		bool contains_block(v3::Coord block_position) const {
 			return from_block_pos(block_position).position==position;

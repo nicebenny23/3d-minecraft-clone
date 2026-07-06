@@ -11,7 +11,7 @@ namespace items {
 		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits::block_item(renderer::TexturePath("images\\dirt.png"),
-				world.get_resource<BlockRegistry>().get_id("soil"));
+				world.get_resource<blocks::BlockRegistry>().get_id("soil"));
 		}
 
 	};
@@ -44,9 +44,8 @@ namespace blocks {
 		SolidBlockTraits mining_traits() const override {
 			return SolidBlockTraits(1,0,false);
 		}
-		BlockTraits traits(BlockTextureRegistry& textures)const {
-			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, textures.get_texture("images\\dirt.png"), true, 0);
+		BlockMeshTraits traits(BlockTextureRegistry& textures)const {
+			return  BlockMeshTraits(v3::unit_scale, false, textures.get_texture("images\\dirt.png"));
 		}
 		void read_from_bytes(ecs::obj block, stn::file_handle& handle)const  override {
 			block.apply_recipe(items::loot_table_recipe<items::soil_loot_table>);

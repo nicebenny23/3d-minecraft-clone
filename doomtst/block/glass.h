@@ -16,10 +16,9 @@ namespace blocks {
 		std::string name() const {
 			return std::string("glass");
 		}
-		BlockTraits traits() const {
-			return BlockTraits(
-				BlockMeshTraits(v3::Scale3(1), true, glasstex, glasstex, glasstex, glasstex, glasstex, glasstex)
-				, true);
+		BlockMeshTraits traits(BlockTextureRegistry& registry) const {
+			
+			return BlockMeshTraits(v3::Scale3::from_scale(1), true, registry.get_texture("images\\glass.png"));
 		}
 	};
 

@@ -133,7 +133,7 @@ namespace chunks {
 					stn::file_serializer<block_id>().write(block_at.id, file);
 					stn::file_serializer<math::Direction2d>().write(block_at.mesh.direction, file);
 					stn::file_serializer<math::Direction3d>().write(block_at.mesh.attached_direction, file);
-					block_at.type()->write_to_bytes(block_list[i].object(), file);
+					block_at.type().write_to_bytes(block_list[i].object(), file);
 				}
 				file.close();
 			}

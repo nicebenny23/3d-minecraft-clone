@@ -119,7 +119,7 @@ namespace player {
 				return false;
 			}
 
-			if (curr_mining_power(pick)<hit.owner().get_component<blocks::block>().type()->mining_traits().power_level ) {
+			if (curr_mining_power(pick)<hit.owner().get_component<blocks::block>().type().mining_traits().power_level ) {
 				return false;
 			}
 			engage_block(hit.owner());
@@ -133,8 +133,9 @@ namespace player {
 			if (ensure_engage(cursor,pick)) {
 				
 				PlayerBreaker& player_break = breaker.unwrap();
-				double power =1.0/ player_break.current_block().type()->mining_traits().time_to_mine;
-				if (player_break.current_block().type()->mining_traits().pick_speedup) {
+				blocks::SolidBlockTraits mining_traits = player_break.current_block().type().mining_traits();
+				double power =1.0/ mining_traits.time_to_mine;
+				if (mining_traits.pick_speedup) {
 					power*= curr_mining_power(pick);
 				}
 				player_break.amount_done+=power*world().ensure_resource<timing::WorldClock>().dt;

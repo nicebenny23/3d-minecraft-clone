@@ -113,7 +113,10 @@ namespace world {
 			math::bounds big_carver_bounds = caveness(pos);
 			double global_dist_1 = global_dist_one(pos, big_carver_bounds);
 			double signed_distance = global_dist_1;
-			double global_dist_2 = global_dist_two(pos, big_carver_bounds);
+			double global_dist_2 = 0;
+			if (signed_distance <12) 				{
+				global_dist_2=global_dist_two(pos, big_carver_bounds);
+			}
 			stn::set_max(signed_distance, global_dist_2);
 			if (math::bounds(0, 12).contains_exact(signed_distance)) {
 				for (math::Direction3d dir : math::Directions3d) {

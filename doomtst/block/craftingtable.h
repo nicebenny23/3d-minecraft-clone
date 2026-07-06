@@ -64,13 +64,11 @@ namespace blocks {
 		std::string name() const {
 			return std::string("crafting_table");
 		}
-		BlockTraits traits(BlockTextureRegistry& registry) const{
+		BlockMeshTraits traits(BlockTextureRegistry& registry) const{
 			block_texture crafting_table_top = registry.get_texture("images\\craftingtabletop.png"); 
-			block_texture crafting_table_bottom = registry.get_texture("images\\craftingtablebottom.png");
-			block_texture crafting_table_side = registry.get_texture("images\\craftingtable.png");	
-			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, crafting_table_side, crafting_table_side, crafting_table_top, crafting_table_bottom, crafting_table_side, crafting_table_side)
-			);
+			block_texture crafting_table_bottom = registry.get_texture("images\\craftingtable.png");
+			block_texture crafting_table_side = registry.get_texture("images\\craftingtableside.png");	
+			return BlockMeshTraits(v3::unit_scale, false, crafting_table_side, crafting_table_side, crafting_table_top, crafting_table_bottom, crafting_table_side, crafting_table_side);
 		}
 		SolidBlockTraits mining_traits() const override {
 			return SolidBlockTraits(3, 0);

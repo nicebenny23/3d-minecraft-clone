@@ -30,9 +30,11 @@ namespace blocks {
 		SolidBlockTraits mining_traits() const override {
 			return SolidBlockTraits(4,2);
 		}
-		BlockTraits traits(BlockTextureRegistry& registry)const {
-			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, registry.get_texture("images\\crystal.png"), true, 4));
+		BlockMeshTraits traits(BlockTextureRegistry& registry)const {
+			return BlockMeshTraits(v3::unit_scale, false, registry.get_texture("images\\crystalore.png"));
+		}
+		size_t emmited_light() const override {
+			return 4;
 		}
 	};
 }

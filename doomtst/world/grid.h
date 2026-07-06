@@ -14,8 +14,9 @@ namespace grid {
 		//how many chunks it spans from the center chunk 
 		size_t dim_axis;
 		size_t totalChunks;
+
 		geo::Box bounds() const {
-			return geo::Box(grid_pos.center(), dim_axis* chunks::chunk_length);
+			return geo::Box(grid_pos.center(), v3::Scale3::from_scale(dim_axis* chunks::chunk_length));
 		}
 		chunks::ChunkLocation grid_pos;
 		stn::array<stn::Option<ChunkObject>> chunklist;

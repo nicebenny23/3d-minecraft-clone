@@ -16,7 +16,6 @@
 #include "../math/dir.h"
 #include "../math/meshes.h"
 #include "../math/ray.h"
-#include "../math/Scale3.h"
 #include "../math/vector2.h"
 #include "../math/vector3.h"
 #include "../math/vector3.h"
@@ -250,14 +249,15 @@ namespace blockrender {
 				renderer::UniformRefrence("bind_block_texture", "tex")
 				});
 
-			BlockTextureRegistry& registry= ecs.insert_resource<blocks::BlockTextureRegistry>();
+			BlockTextureRegistry& registry= ecs.insert_resource<blocks::BlockRegistry>().textures;
 			if (registry.need_sync()) {
 				array<std::string> texlist = array<std::string>();
 				for (auto&& value:registry.name_to_texture) {
-					texlist.push(value.first);
+					texlist.reach(value.second)=value.first;
 				}
 				renderer::TextureArrayId texarray = ecs.load_asset_emplaced<renderer::TextureArrayPath>(texlist, "BlockTextures").unwrap();
 				renderer.set_uniform("bind_block_texture", texarray);
+				registry.last_saved = texarray->length;
 			}
 			/*
 			texlist.reach(treestonetex) = "images\\treestone.png";

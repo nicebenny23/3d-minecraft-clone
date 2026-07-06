@@ -5,7 +5,6 @@
 #include "../math/geometry.h"
 #include <rpcndr.h>
 #include "../game/ecs/component.h"
-#include "../math/Scale3.h"
 #include "../util/Option.h"
 #include "../math/vector3.h"
 #include "block_mesh.h"
@@ -15,10 +14,10 @@ constexpr double blocksize = 1.f;
 
 using namespace v3;
 constexpr float unitaxis = 1.0f /1.00005f;
-constexpr v3::Scale3 unitscale = unit_scale * unitaxis;
+constexpr v3::Scale3 unitscale = v3::unit_scale * unitaxis;
 namespace blocks {
 	const double block_axis_scale = unitaxis * blocksize;
-	const v3::Scale3 blockscale = v3::Scale3(block_axis_scale);
+	const v3::Scale3 blockscale = v3::Scale3::from_scale(block_axis_scale);
 
 
 
@@ -43,7 +42,7 @@ namespace blocks {
 			return mesh[index.index()];
 		}
 		bool solid() {
-			return info().solid;
+			return type().is_solid();
 		}
 		Point3 center() const {
 			return bounds().center;
@@ -57,14 +56,15 @@ namespace blocks {
 		}
 
 		
-		BlockTraits& info() {
-			return registry->traits_for(id);
+		BlockMeshTraits& mesh_info() const {
+			return type().mesh_traits_for();
 		}
-		const stn::box<BlockType>&  type() const {
-			return registry->block_for(id);
+		const BlockType&  type() const {
+			return registry->get_block(id);
 		}
 		block(const BlockMeshTraits& traits, dirty_flag& chunk_mesh_flag, v3::Coord location, blocks::block_id block_id, math::Direction3d attachment_face, math::Direction2d block_direction,BlockRegistry& block_register) 
 			:mesh(traits, chunk_mesh_flag, location, attachment_face, block_direction),id(block_id),registry(block_register),light_passing_through(0),pos(location){
+			int l = 3;
 		};
 
 	};

@@ -4,7 +4,6 @@
 #include <glm/glm.hpp>
 #include <string>
 #include "../util/exception.h"
-#include "Scale3.h"
 #include "angle.h"
 #pragma once
 
@@ -12,96 +11,110 @@ namespace v3 {
 	struct Coord;
 	//todo transfer from vector being a point in local space
 	struct Vec3 {
-		static Vec3 from_yaw_pitch(double yaw, double pitch) {
-
+		static Vec3 from_scale(double scale){
+			return Vec3(scale, scale, scale);
 		}
 		Vec3() : x(0), y(0), z(0) {
 		}
 		constexpr Vec3(double X, double Y, double Z) noexcept : x(X), y(Y), z(Z) {
 		}
 
-		explicit Vec3(Coord scale);
-		explicit Vec3(Scale3 scale) : x(scale.x), y(scale.y), z(scale.z) {	}
+		constexpr explicit Vec3(Coord scale);
 
-		Vec3(glm::vec3 g) : x(g.x), y(g.y), z(g.z) {
+		constexpr Vec3(glm::vec3 g) : x(g.x), y(g.y), z(g.z) {
 		}
-		bool is_nan() const {
+		constexpr bool is_nan() const {
 			return isnan(x) || isnan(y) || isnan(z);
 		}
-		bool throw_if_nan() const {
+		constexpr bool throw_if_nan() const {
 			if (is_nan()) {
 				throw std::logic_error("Vec3 Must not be NaN");
 			}
 		}
 
-		void operator=(const Vec3& p1) {
+		constexpr void operator=(const Vec3& p1) {
 			x = p1.x; y = p1.y; z = p1.z;
 		}
-		bool operator==(const Vec3& p1) {
+		constexpr bool operator==(const Vec3& p1) {
 			return math::approximate_equals(x, p1.x) && math::approximate_equals(y, p1.y) && math::approximate_equals(z, p1.z);
 		}
-		bool operator!=(const Vec3& p1) {
+		constexpr bool operator!=(const Vec3& p1) {
 			return !math::approximate_equals(x, p1.x) || !math::approximate_equals(y, p1.y) || !math::approximate_equals(z, p1.z);
 		}
-		Vec3 operator-() const {
+		constexpr Vec3 operator-() const {
 			return Vec3(-x,-y,-z);
 		}
-		Vec3 with_x(double value) const {
+		constexpr Vec3 with_x(double value) const {
 			return Vec3(value, y, z);
 		}
-		Vec3 with_y(double value) const {
+		constexpr Vec3 with_y(double value) const {
 			return Vec3(x,value, z);
 		}
-		Vec3 with_z(double value) const {
+		constexpr Vec3 with_z(double value) const {
 			return Vec3(x, y, z);
 		}
-		Vec3 operator+(const Vec3& p1) const {
+		constexpr Vec3 operator+(const Vec3& p1) const {
 			return Vec3(x + p1.x, y + p1.y, z + p1.z);
 		}
-		Vec3& operator+=(const Vec3& p1) {
+		constexpr Vec3& operator+=(const Vec3& p1) {
 			x += p1.x; y += p1.y; z += p1.z; return *this;
 		}
 
-		Vec3 operator-(const Vec3& p1) const {
+		constexpr Vec3 operator-(const Vec3& p1) const {
 			return Vec3(x - p1.x, y - p1.y, z - p1.z);
 		}
-
-		Vec3& operator-=(const Vec3& p1) {
+		constexpr double volume() const {
+			return x*y*z;
+		}
+		constexpr Vec3& operator-=(const Vec3& p1) {
 			x -= p1.x; y -= p1.y; z -= p1.z; return *this;
 		}
-
-		Vec3 operator*(double scale) const {
+		constexpr Vec3 shrunk(double size) const {
+			return Vec3(x - size, y - size, z - size);
+		}
+		constexpr Vec3 expanded(double size) const {
+			return Vec3(x + size, y + size, z + size);
+		}
+		constexpr Vec3& shink(double size) {
+			*this = shrunk(size);
+			return *this;
+		}
+		constexpr Vec3& expand(double size) {
+			*this = expanded(size);
+			return *this;
+		}
+		constexpr Vec3 operator*(double scale) const {
 			return Vec3(x * scale, y * scale, z * scale);
 		}
 
-		Vec3& operator*=(double scale) {
+		constexpr Vec3& operator*=(double scale) {
 			x *= scale; y *= scale; z *= scale; return *this;
 		}
 
-		Vec3 operator/(double scale) const {
+		constexpr Vec3 operator/(double scale) const {
 			if (scale == 0) {
 				throw std::logic_error("Unable to divide a Vec3 by zero");
 			}
 			return Vec3(x / scale, y / scale, z / scale);
 		}
 
-		Vec3& operator/=(double scale) {
+		constexpr Vec3& operator/=(double scale) {
 			if (scale == 0) {
 				throw std::logic_error("Unable to divide a Vec3 by zero");
 			}
 			x /= scale; y /= scale; z /= scale; return *this;
 		}
 
-		Vec3 operator*(const Scale3& scale) const {
+		constexpr Vec3 operator*(const Vec3& scale) const {
 			return Vec3(x * scale.x, y * scale.y, z * scale.z);
 		}
 		
-		Vec3& operator*=(const Scale3& scale) {
+		constexpr Vec3& operator*=(const Vec3& scale) {
 			*this=*this*scale;
 			return *this;
 		}
 
-		Vec3 operator/(const Scale3& inv_scale) const {
+		constexpr Vec3 operator/(const Vec3& inv_scale) const {
 			if (inv_scale.x == 0 || inv_scale.y == 0 || inv_scale.z == 0) {
 				throw std::logic_error("Unable to divide a Vec3 by zero");
 			}
@@ -109,12 +122,12 @@ namespace v3 {
 		}
 
 
-		Vec3& operator/=(const Scale3& scale) {
+		constexpr Vec3& operator/=(const Vec3& scale) {
 			*this = *this/scale;
 			return *this;
 		}
 
-		const double& operator[](size_t index) const {
+		constexpr const double& operator[](size_t index) const {
 			switch (index) {
 			case 0: return x;
 			case 1: return y;
@@ -123,7 +136,7 @@ namespace v3 {
 			stn::throw_logic_error("{} is not a valid index for a Vec3",index);
 			}
 		}
-		double& operator[](size_t index) {
+		constexpr double& operator[](size_t index) {
 			switch (index) {
 			case 0: return x;
 			case 1: return y;
@@ -133,50 +146,34 @@ namespace v3 {
 			}
 		}
 
-		Vec3(double value, size_t index) {
+		constexpr Vec3(double value, size_t index) {
 			x = 0;
 			y = 0;
 			z = 0;
 			(*this)[index] = value;
 		}
 
-		v2::Vec2 xy() const {
+		constexpr v2::Vec2 xy() const {
 			return v2::Vec2(x, y);
 		}
-		v2::Vec2 xz() const {
+		constexpr v2::Vec2 xz() const {
 			return v2::Vec2(x, z);
 		}
-		v2::Vec2 yz() const {
+		constexpr v2::Vec2 yz() const {
 			return v2::Vec2(y, z);
 		}
 	
-		Vec3 operator+(const Scale3& p1) const {
-			return Vec3(x +p1.x, y +p1.y, z +p1.z);
-		}
-		Vec3& operator+=(const Scale3& p1) {
-			*this = *this + p1;
-			return *this;
-		}
 
-		Vec3 operator-(const Scale3& p1) const {
-			return Vec3(x - p1.x, y - p1.y, z - p1.z);
-		}
-
-		Vec3& operator-=(const Scale3& p1) {
-			*this = *this - p1;
-			return *this;
-		}
-
-		glm::vec3 glm() {
+		constexpr glm::vec3 glm() {
 			return glm::vec3(x, y, z);
 		}
-		double mag2() const {
+		constexpr double mag2() const {
 			return x * x + y * y + z * z;
 		}
-		inline double length() const {
+		constexpr inline double length() const {
 			return sqrt(mag2());
 		}
-		inline Vec3 normal() const {
+		constexpr inline Vec3 normal() const {
 
 			double mt = length();
 			if (mt == 0) {
@@ -186,7 +183,7 @@ namespace v3 {
 
 		}
 
-		inline Vec3 with_length_less_than(double max_length) const {
+		constexpr inline Vec3 with_length_less_than(double max_length) const {
 
 			double mag = length();
 			if (mag<=max_length) {
@@ -195,7 +192,7 @@ namespace v3 {
 			return (*this)*(max_length/mag);
 
 		}
-		inline Vec3 with_magnitude(double mag) const {
+		constexpr inline Vec3 with_magnitude(double mag) const {
 			return normal() * mag;
 		}
 		double x;
@@ -250,13 +247,16 @@ namespace v3 {
 
 
 	using Point3 = Vec3;
+	using Scale3 = Vec3;
+	inline constexpr Scale3 unit_scale{ 1.0,1.0,1.0 };
 	struct Coord {
 		constexpr Coord(int X, int Y, int Z) noexcept : x(X), y(Y), z(Z) {
 		}
 		Coord() : x(0), y(0), z(0) {
 		}
-
-		explicit Coord(const Point3& p1);
+		static Coord from_vec3(const Vec3& vec) {
+			return Coord((int)vec.x, (int)vec.y, (int)vec.z);
+		}
 
 		inline bool operator==(const Coord& p1) const = default;
 		inline bool operator!=(const Coord& p1) const = default;
@@ -325,13 +325,16 @@ namespace v3 {
 
 
 
-	inline v3::Vec3::Vec3(Coord scale):x(scale.x),y(scale.y),z(scale.z) {
+	inline constexpr v3::Vec3::Vec3(Coord scale):x(scale.x),y(scale.y),z(scale.z) {
 	}
 	inline double dist2(const Point3& p, const Point3& p1) {
 		return mag2(p1 - p);
 	}
 	inline double dist(const Point3& p, const Point3& p1) {
 		return (sqrt(dist2(p, p1)));
+	}
+	inline double manhattan_distance(const Point3& p, const Point3& p1) {
+		return abs(p.x - p1.x) + abs(p.y - p1.y) + abs(p.z - p1.z);
 	}
 
 	inline Vec3 yaw_pitch(math::Look3 direction) {
@@ -367,9 +370,7 @@ namespace v3 {
 		return Point3(a.x + b.x, a.y + b.y, a.z + b.z);
 	}
 
-	inline Coord::Coord(const Point3& p1) {
-		x = int(p1.x); y = int(p1.y); z = int(p1.z);
-	}
+
 
 	inline bool operator==(const Point3& p1, const Coord& p2) {
 		return (p1.x == p2.x && p1.y == p2.y && p1.z == p2.z);

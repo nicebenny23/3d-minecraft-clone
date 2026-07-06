@@ -54,12 +54,12 @@ namespace slimes {
 					v3::Coord next_pos = xy_offset + current.pos + v3::Coord(0, i, 0);
 
 					geo::ray ray = geo::ray(current.pos, next_pos).translate(v3::unitv / 2);
-					geo::RayBox movment(ray, v3::Scale3(1 / 1.2f));
+					geo::RayBox movment(ray, v3::Scale3::from_scale(1 / 1.2f));
 
 					if (i != 0) {
 						//the jump is like an L
 						geo::ray jump = geo::ray(current.pos, current.pos + v3::Coord(0, i, 0)).translate(v3::unitv / 2);
-						geo::RayBox jump_movment(jump, v3::Scale3(1 / 1.2f));
+						geo::RayBox jump_movment(jump, v3::Scale3::from_scale(1 / 1.2f));
 						if (voxtra::grid_ray_box_cast(jump_movment, world).is_some()) {
 							continue;
 						}
@@ -141,9 +141,9 @@ namespace slimes {
 				v3::Vec3 off = transform.transform.position - path.following.get<core::LocalTransform>().transform.position;
 				if (path.path.non_empty()) {
 					result_type current_node=path.path.first();
-					v3::Point3 goto_pos = v3::Point3(current_node.result().pos) + v3::Scale3(1 / 2.0f).with_y(transform.transform.scale.y / 2);
+					v3::Point3 goto_pos = v3::Point3(current_node.result().pos) + v3::Scale3::from_scale(1 / 2.0f).with_y(transform.transform.scale.y / 2);
 					navigation::GridCoord endpoint = path.path.last().result();
-					navigation::GridCoord real_endpoint(v3::Coord(slime_target(object)));
+					navigation::GridCoord real_endpoint(v3::Coord::from_vec3(slime_target(object)));
 					double apx_real_dist = navigation::GridCoord::apx_distance(current_node.result(), real_endpoint);
 					double apx_fake_dist = navigation::GridCoord::apx_distance(real_endpoint, endpoint);
 					if (apx_real_dist + 1 <= apx_fake_dist) {
@@ -213,7 +213,7 @@ namespace slimes {
 						}
 						else {
 						
-							v3::Point3 goto_pos = v3::Point3(head.result().pos) + v3::Scale3(1 / 2.0f);
+							v3::Point3 goto_pos = v3::Point3(head.result().pos) + v3::Scale3::from_scale(1 / 2.0f);
 
 
  							v3::Vec3 d = goto_pos - transform.transform.position;

@@ -1,7 +1,7 @@
 #include "../game/ecs/ecs.h"
-#include "../math/Scale3.h"
 #include "../util/List.h"
 #include "../util/fileloader.h"
+#include "../math/vector3.h"
 #pragma once
 namespace blocks {
 	//todo replace
@@ -10,7 +10,7 @@ namespace blocks {
 	};
 
 	using block_texture = std::uint8_t;
-	struct BlockTextureRegistry:ecs::resource{
+	struct BlockTextureRegistry{
 		std::unordered_map<std::string, block_texture> name_to_texture;
 		size_t last_saved;
 		BlockTextureRegistry() :last_saved(0) {
@@ -21,7 +21,8 @@ namespace blocks {
 		}
 		
 		block_texture get_texture(std::string_view name) {
-			 return name_to_texture.try_emplace(std::string(name), block_texture(name_to_texture.size())).second;
+			block_texture bt= name_to_texture.try_emplace(std::string(name), block_texture(name_to_texture.size())).first->second;
+			return bt;
 		} 
 	};
 	struct block_tag;
@@ -66,32 +67,33 @@ namespace blocks {
 	inline constexpr bool solid_block = true;
 	inline constexpr bool non_solid_block = false;
 
-	struct BlockTraits {
-		BlockTraits(BlockMeshTraits BlockMesh, bool is_solid = true, size_t light_emmision = 0)
-			:mesh(BlockMesh), solid(is_solid), emmited_light(light_emmision) {
-		}
-		BlockMeshTraits mesh;
-		size_t emmited_light;
-		bool solid;
-		BlockTraits() = default;
-	};
+	
 	struct BlockType {
 		virtual ~BlockType() = default;
-		BlockType() = default;
 		BlockType(ecs::Ecs& blocks) {
+
+		};
+		BlockType() {
+
 		};
 		virtual std::string name() const = 0;
 		virtual SolidBlockTraits mining_traits() const {
 			return SolidBlockTraits();
 		}
 		//we catch the traits to speed up;
-		BlockTraits& traits_for(BlockTextureRegistry& textures) const {
-			if (!catched) {
-				catched = traits(textures);
-			}
+		void trait_cache(BlockTextureRegistry& registry) {
+			catched= traits(registry);
+		}
+		BlockMeshTraits& mesh_traits_for() const {
 			return catched.unwrap_unchecked();
 		}
-		virtual BlockTraits traits(BlockTextureRegistry& textures) const = 0;
+		virtual size_t emmited_light() const {
+			return 0;
+		}
+		virtual bool is_solid() const {
+			return true;
+		}
+		virtual BlockMeshTraits traits(BlockTextureRegistry& textures) const = 0;
 		virtual void apply(ecs::obj& blk) const {
 
 		};
@@ -103,7 +105,7 @@ namespace blocks {
 			
 		};
 	private:
-		mutable stn::Option<BlockTraits> catched;
+		mutable stn::Option<BlockMeshTraits> catched;
 
 	};
 	//you have to both write and read to bytes
@@ -118,8 +120,8 @@ namespace blocks {
 
 	struct BlockRegistry :ecs::resource {
 		stn::array<stn::Option<size_t>> to_id;
-		BlockTraits& traits_for(block_id id) {
-			return blocks[id.id]->traits_for(textures);
+		BlockMeshTraits& mesh_traits_for(block_id id) {
+			return blocks[id.id]->mesh_traits_for();
 		}
 		SolidBlockTraits solid_traits_for(block_id id) {
 			return blocks[id.id]->mining_traits();
@@ -134,22 +136,25 @@ namespace blocks {
 		template<BlockLike T>
 		block_id insert() {
 			return ids.insert<T>().on_insert([&](block_id id) {
+				
 				if constexpr (std::constructible_from<T,ecs::Ecs&>) {
 					blocks.emplace(stn::construct_derived<T>(), ecs);
 				}
 				else {
-
 					blocks.emplace(stn::construct_derived<T>());
 				}
+				blocks[id.id]->trait_cache(textures);
 				}).value;
 		}
 		template<BlockLike T>
 		block_id get_id() const {
 			return ids.get<T>();
 		}
-
-		const stn::box<BlockType>& block_for(block_id id) const {
-			return blocks[id.id];
+		const BlockType& get_block(block_id id) const {
+			return *blocks[id.id];
+		}
+		const BlockType& operator[](block_id id) const {
+			return *blocks[id.id];
 		}
 		block_id get_id(std::string_view name) const {
 			for (size_t i = 0; i < blocks.length();i++) {

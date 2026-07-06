@@ -100,7 +100,7 @@ namespace grid {
 
 		void push_to_queue(chunks::block_object& blk, stn::queue<stn::non_null<block>>& lighten_queue) {
 			block& block_value = blk.get_unchecked<block>();
-			if (block_value.type()->traits_for().emmited_light!=0) {
+			if (block_value.type().emmited_light()!=0) {
 				stn::set_max(block_value.light_passing_through,blk.get_component<block_emmision>().emmision);
 			}
 			

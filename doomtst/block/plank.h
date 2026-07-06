@@ -19,10 +19,9 @@ namespace blocks {
 		SolidBlockTraits mining_traits() const override {
 			return SolidBlockTraits(3, 0);
 		}
-		BlockTraits traits(BlockTextureRegistry& registry) const {
+		BlockMeshTraits traits(BlockTextureRegistry& registry) const {
 			block_texture plank_texture= registry.get_texture("images\\plank.png");
-		return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, plank_texture));
+		return BlockMeshTraits(v3::unit_scale, false, plank_texture);
 		}
 	};
 	struct log_loot_table :items::LootTable {
@@ -40,12 +39,11 @@ namespace blocks {
 		SolidBlockTraits mining_traits() const override {
 			return SolidBlockTraits(3,0);
 		}
-		BlockTraits traits(BlockTextureRegistry& textures) const {
-			block_texture log_side = textures.get_texture("images\\logside.png");
-			block_texture logtoppng = textures.get_texture("images\\logtop.png");
+		BlockMeshTraits traits(BlockTextureRegistry& textures) const {
+			block_texture log_side = textures.get_texture("images\\treestone.png");
+			block_texture logtoppng = textures.get_texture("images\\log.png");
 
-			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, log_side, log_side,logtoppng, logtoppng, log_side, log_side));
+			return BlockMeshTraits(v3::unit_scale, false, log_side, log_side,logtoppng, logtoppng, log_side, log_side);
 		}
 	};
 }
@@ -57,7 +55,7 @@ namespace items {
 		}
 		item_traits traits(const ecs::Ecs& world) const {
 			return item_traits::block_item(
-				renderer::TexturePath("images\\treestoneblock.png")
+				renderer::TexturePath("images\\plank.png")
 			,world.get_resource<BlockRegistry>().get_id<blocks::PlankBlock>());
 		}
 	};

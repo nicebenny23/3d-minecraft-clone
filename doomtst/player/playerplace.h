@@ -49,7 +49,7 @@ namespace player {
 				}
 				block& block_at = mabye_block_at.unwrap();
 				math::Direction3d attach_direction = math::greatest_aligned_direction( block_hit_at.center()- block_at.center());
-				v3::Scale3 mesh_scale = block_at.registry->block_for(spawn_id)->traits().mesh.size;
+				v3::Scale3 mesh_scale = block_at.registry->get_block(spawn_id).mesh_traits_for().size;
 				geo::Box new_block_box = geo::Box(block_at.pos+unitv/2, mesh_scale);
 				new_block_box.center -= attach_direction.vec() * mesh_scale.shrunk(1)/2;
 

@@ -10,7 +10,7 @@
 namespace game {
 	inline bool should_despawn(v3::Point3 pos, v3::Point3 player,grid::Grid& world) {
 		//todo improve
-		return !world.bounds().contains_point(pos)||40<v3::dist(pos, player);
+		return !world.bounds().contains_point(pos)||v3::manhattan_distance(world.bounds().half_size(),v3::zerov)<v3::manhattan_distance(pos, player);
 
 	}
 	inline bool spawnable_dist(v3::Point3 pos, v3::Point3 player, grid::Grid& world) {

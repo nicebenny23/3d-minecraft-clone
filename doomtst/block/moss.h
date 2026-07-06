@@ -3,6 +3,7 @@
 #include "../items/loottable.h"
 #include "plank.h"
 #include "../world/managegrid.h"
+#include "soil.h"
 #pragma once 
 namespace items {
 
@@ -54,14 +55,15 @@ namespace blocks {
 				else {
 					stn::throw_logic_error("for lights to be loaded blk_below must be loaded thus it should be loaded");
 				}
-				block_texture general_tex = mosstex;
+				BlockTextureRegistry& textures = world.get_resource<BlockRegistry>().textures;
+				block_texture general_tex = textures.get_texture("images\\moss.png");
 				if (stop) {
-					general_tex = moss_inactive_tex;
+					general_tex = textures.get_texture("images\\dead_moss.png");
 					moss.prime();
 				}
 
 				block_texture side_tex = general_tex;
-				stn::List<block_texture, 4> tex_array{ mosstex,moss_one,moss_two,moss_three };
+				stn::List<block_texture, 4> tex_array{ general_tex,textures.get_texture("images\\moss_one.png"),textures.get_texture("images\\moss_two.png"),textures.get_texture("images\\moss_three.png") };
 				if (!stop) {
 					size_t tex_index = std::floor(math::bounds(0, moss_lifetime).unlerp_clamped(moss_lifetime - moss.clock.remaining_or_default()) * 3.999f);
 					side_tex = tex_array[tex_index];
@@ -107,11 +109,8 @@ namespace blocks {
 			SeedLifetime& lifetime = block.get_component<SeedLifetime>();
 			stn::file_serializer<double>().write(lifetime.clock.end_time().unwrap_or(0), handle);
 		}
-		BlockTraits traits(BlockTextureRegistry& textures) const {
-			return BlockTraits(
-				BlockMeshTraits(v3::unit_scale, false, textures.get_texture("images\\moss.png"))
-			);
-
+		BlockMeshTraits traits(BlockTextureRegistry& textures) const {
+			return BlockMeshTraits(v3::unit_scale, false, textures.get_texture("images\\moss.png"));
 		}
 		blocks::SolidBlockTraits mining_traits() const {
 			return blocks::SolidBlockTraits(2, 0, false);

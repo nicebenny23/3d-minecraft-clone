@@ -487,7 +487,6 @@
     <ClInclude Include="items\torchitem.h" />
     <ClInclude Include="math\angle.h" />
     <ClInclude Include="math\meshes.h" />
-    <ClInclude Include="math\Scale3.h" />
     <ClInclude Include="player\crosshair.h" />
     <ClInclude Include="player\inventory_ui.h" />
     <ClInclude Include="player\playermovment.h" />
