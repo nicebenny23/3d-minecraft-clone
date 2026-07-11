@@ -20,8 +20,7 @@ namespace ui {
 			return current_image_path;
 		};
 		renderer::RenderableHandle tex_handle;
-		void start() {
-		}
+		
 		Image(colors::Color col, renderer::RenderableHandle handle) :current_color(col), tex_handle(handle) {
 
 		}

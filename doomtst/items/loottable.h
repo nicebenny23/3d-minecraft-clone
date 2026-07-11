@@ -11,9 +11,9 @@
 namespace items {
 	struct loot_element {
 
-		double drop_probibility=1;
+		double drop_probability=1;
 		items::item_entry entry;
-		loot_element(item_id id, size_t count, items::ItemTypes& types,double prob =1) :entry(id, count, types), drop_probibility(prob) {
+		loot_element(item_id id, size_t count, items::ItemTypes& types,double prob =1) :entry(id, count, types), drop_probability(prob) {
 
 		}
 		loot_element(std::string id, size_t count, items::ItemTypes& types) :entry(types.from_name(id), count, types) {
@@ -24,38 +24,33 @@ namespace items {
 		}
 
 	};
-
-	struct LootDrops {
-		LootDrops(const stn::array<loot_element>& drops) :elements(drops) {
-
-		};
-		LootDrops(const std::initializer_list<loot_element>& drops) :elements(drops) {
-
-		};
-
-		stn::array<loot_element> elements;
-	};
+	using LootDrops = stn::array<loot_element>;
 	struct LootTable {
 		LootTable() = default;
-		virtual LootDrops drops_for(items::ItemTypes& types) = 0;
+		LootDrops get(ecs::obj dropping) const {
+			items::ItemTypes& types = dropping.world().get_resource<items::ItemTypes>();
+			return drops_for(types, dropping);
+		}
+		virtual ~LootTable() = default;
+		virtual LootDrops drops_for(items::ItemTypes& types,ecs::obj dropping) const  = 0;
 	};
 	template<typename T>
 	concept LootTableType = std::derived_from<T, LootTable>;
 	using loot_table_id = stn::typed_id<LootDrops>;
 	
 	struct loot_tables:ecs::resource{
-		stn::array<LootDrops> drops;
+		stn::array<stn::box<LootTable>> drops;
 		stn::type_indexer<loot_table_id> tables;
 		template<LootTableType Type>
 		loot_table_id insert() {
 			stn::insertion<loot_table_id> id = tables.insert<Type>();
 			if (id.is_new) {
-				drops.push(Type().drops_for(types));
+				drops.emplace(stn::construct_derived<Type>());
 			}
 			return id.value;
 		}
-		LootDrops get(loot_table_id id) const{
-			return drops[id.id];
+		const LootTable& get(loot_table_id id) const{
+			return *drops[id.id];
 		}
 		loot_tables(ecs::Ecs& world):types(world.ensure_resource<ItemTypes>()) {
 
@@ -64,16 +59,10 @@ namespace items {
 	};
 	struct  loot_dropper : ecs::component {
 		stn::Option<ecs::entity> drop_to;
+		//idk any better ones currently 
+		ecs::obj self;
 		loot_dropper(loot_table_id id) :table(id) {
 		}
-		void start() {
-
-
-		}
-		~loot_dropper() {
-
-
-		};
 		void set(ecs::Constrained<player::inventory> object) {
 			drop_to = object.object().inner();
 			last_interaction_time = world().get_resource<timing::WorldClock>().elapsed_time;
@@ -86,11 +75,12 @@ namespace items {
 		void destroy_hook() {
 			if (drop_to) {
 				double time_diff = world().get_resource<timing::WorldClock>().elapsed_time-last_interaction_time;
-				if (1.0<time_diff) {
+				double get_diff_time = 1.0;
+				if (get_diff_time<time_diff) {
 					return;
 				}
-				for (const loot_element& element : tables().get(table).elements) {
-					if (random::random()<element.drop_probibility) {
+				for (const loot_element& element : tables().get(table).get(self)) {
+					if (random::random()<element.drop_probability) {
 						player::inventory& inv = world().get_component< player::inventory>(drop_to.unwrap());
 						stn::array<ecs::Constrained<items::ElementSlot>> slots;
 						for (items::container_element& elem: inv.hotbar.get<items::container>()) {
@@ -110,7 +100,7 @@ namespace items {
 	};
 	template<LootTableType T>
 	void loot_table_recipe(ecs::obj& entity) {
-		entity.add_component<loot_dropper>(entity.world().get_resource<loot_tables>().insert<T>());
+		entity.add_component<loot_dropper>(entity.world().get_resource<loot_tables>().insert<T>()).self= entity;
 	}
 
 

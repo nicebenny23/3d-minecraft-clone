@@ -38,11 +38,18 @@ namespace voxtra {
 	
 	using RayWorldCollision = stn::Option<RayWorldHit>;
 	enum class GridTraverseMode {
-		countnormal = 0,
-		countall = 1,
-		countsolid = 2,
-
+		countnormal = 0
 	};
+	inline bool solid_voxel(ecs::Constrained<block>& blk) {
+		if (!blk.get<block>().solid()) {
+			return false;
+
+		}
+		if (blk.get_component<aabb::Collider>().effector) {
+			return false;
+		}
+		return true;
+	}
 
 
 	inline bool boxcast_grid(geo::Box Box, grid::Grid& world) {
@@ -50,27 +57,16 @@ namespace voxtra {
 		for (chunks::block_object& PotentialCollision : blocks_in_range) {
 
 			stn::Option<aabb::Collider&> Collider = PotentialCollision.get_component_opt<aabb::Collider>();
-			if (Collider && PotentialCollision.get_component<blocks::block>().solid() && !Collider.unwrap().effector) {
-				geo::Box coll_box = Collider.unwrap().global_box();
-				if (aabb::box_intersects_aabb(Box, Collider.unwrap())) {
+			if (Collider && solid_voxel(PotentialCollision)) {
+				if (aabb::box_intersects_aabb(Box, PotentialCollision.object())) {
 					return true;
 				}
 			}
 		}
 		return false;
 	}
-	inline bool counttablevoxel(block& blk, GridTraverseMode trav) {
-		if ((trav == GridTraverseMode::countsolid || trav == GridTraverseMode::countnormal) && !blk.solid()) {
-			return false;
-
-		}
-		if (blk.owner().get_component<aabb::Collider>().effector) {
-			return trav != GridTraverseMode::countnormal;
-		}
-		return true;
-	}
-
-	inline RayWorldCollision  grid_cast(geo::ray nray, GridTraverseMode trav, grid::Grid& grid) {
+	
+	inline RayWorldCollision  grid_cast(geo::ray nray, grid::Grid& grid) {
 		if (nray.length() == 0) {
 			return stn::None;
 		}
@@ -93,10 +89,10 @@ namespace voxtra {
 			if (blk) {
 				stn::Option<aabb::Collider&> BlockCollider = blk.unwrap().get_component_opt<aabb::Collider>();
 				if (BlockCollider) {
-					if (counttablevoxel(blk.unwrap().get<block>(), trav)) {
-						geo::RayCollision PotentialCollision = geo::intersection(BlockCollider.unwrap().global_box(), nray);
+					if (solid_voxel(blk.unwrap())) {
+						geo::RayCollision PotentialCollision = geo::intersection(aabb::global_box(blk.unwrap().object()), nray);
 						if (PotentialCollision) {
-							return RayWorldHit(PotentialCollision.unwrap(), ecs::Constrained<aabb::Collider>(blk.unwrap().object()));
+							return RayWorldHit(PotentialCollision.unwrap(),blk.unwrap().object());
 						}
 					}
 				}
@@ -137,7 +133,7 @@ namespace voxtra {
 			if (!coll_mabye) {
 				continue;
 			}
-			geo::Box box = coll_mabye.unwrap().global_box();
+			geo::Box box =global_box(ecs::Constrained<aabb::Collider>(obj.object()));
 			geo::RayCollision hit = geo::intersection(ray_box, box);
 			if (!hit) {
 				continue;

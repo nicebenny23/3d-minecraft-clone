@@ -64,8 +64,6 @@ namespace blocks {
 		}
 
 	};
-	inline constexpr bool solid_block = true;
-	inline constexpr bool non_solid_block = false;
 
 	
 	struct BlockType {

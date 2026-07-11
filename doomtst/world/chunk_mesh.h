@@ -45,12 +45,8 @@ namespace chunks {
 	struct ChunkMesh :ecs::component {
 		ChunkMesh(ChunkLocation location,renderer::Renderer& ren) :loc(location), recreate_mesh(true), solid(ren.gen_renderable("SolidBlock")),
 			transparent(ren.gen_renderable("TransparentBlock")){
-		
-		};
-		void start() {
-			renderer::Renderer& ren = world().get_resource<renderer::Renderer>();
 			solid.give_owned_mesh();
-		}
+		}; 		
 
 		renderer::RenderableHandle solid;
 		renderer::RenderableHandle transparent;

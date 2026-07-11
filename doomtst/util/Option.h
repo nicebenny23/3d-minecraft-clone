@@ -351,7 +351,9 @@ namespace stn {
 		}
 		template<typename R, typename C>
 		stn::Option<R> member(R C::* member) && requires stn::decays_to<T, C> {
-			return map(member).copied();
+			auto ref = map(member);
+
+			return ref.copied();
 		}
 		template<typename Func>
 		auto then(this auto&& self, Func&& f) -> decltype(self)

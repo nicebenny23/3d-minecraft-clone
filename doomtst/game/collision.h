@@ -33,7 +33,7 @@ namespace collision {
 						if (collider_2.effector&&collider_1.effector) {
 							continue;
 						}
-						Option<v3::Vec3> force = aabb::collide_aabb(collider_1, collider_2);
+						Option<v3::Vec3> force = aabb::collide_aabb(obj_1,obj_2);
 						if (force.is_none()) {
 							continue;
 						}
@@ -49,16 +49,16 @@ namespace collision {
 	struct StaticCollsionSystem :ecs::System {
 
 		void run(ecs::Ecs& world) {
-			ecs::View<DynamicCollider,Collider,ecs::Owner> colliders(world);
+			ecs::View<DynamicCollider,ecs::Constrained<Collider>,ecs::Owner> colliders(world);
 			for (auto&& [dynamic_tag, collider, object] : colliders) {
-				geo::Box entity_box = collider.global_box().expanded(v3::Scale3() / 100.0f);
+				geo::Box entity_box = global_box(collider).expanded(v3::unit_scale/ 100.0f);
 				array<chunks::block_object> blocks = collider.world().get_resource<grid::Grid>().voxel_in_range(entity_box);
 				for (chunks::block_object& block : blocks) {
 					stn::Option<Collider&> aabb = block.get_component_opt<Collider>();
 					if (!aabb) {
 						continue;
 					}
-					Option<Vec3> force = aabb::collide_aabb(aabb.unwrap(), collider);
+					Option<Vec3> force = aabb::collide_aabb(block.object(), collider);
 					if (!force) {
 						collision::write_collision_event(block.object(), object);
 					}
@@ -79,7 +79,7 @@ namespace collision {
 
 	//casting
 	inline bool boxcast_dynamic(geo::Box blk, HitQuery query) {
-		ecs::View< Collider,DynamicCollider> colliders(query.world);
+		ecs::View< ecs::Constrained<Collider>,DynamicCollider> colliders(query.world);
 		for (auto [collider, dynamic_tag] : colliders) {
 			if (query.matches(collider)) {
 				continue;

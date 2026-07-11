@@ -16,7 +16,6 @@ namespace ecs {
 		Ecs() :entities(), archetypes() {
 			components.inject_ecs_instance(this);
 			ensure_resource<Systems>();
-			emplace_system<run_updates>();
 			emplace_system<delete_objects>();
 		}
 		bool deleting = false;
@@ -44,30 +43,7 @@ namespace ecs {
 			}
 
 		};
-		struct run_updates :System {
-			run_updates() {
-			};
-
-			void run(Ecs& ecs) {
-				stn::array<component_type*> types = ecs.components.component_types()
-					.map([](auto&& comp_type) {return &comp_type; })
-					.filter([](component_type* type) {return type->updates(); })
-					.into<stn::array>();
-
-				types | stn::sort([](component_type* a) {return a->priority(); });
-
-				for (component_type* mgr : types) {
-					for (Archetype& archetype : stn::range(ecs.archetypes).filter([&](auto&& archetype) {return archetype.has_component(mgr->id()); })) {
-
-						uint32_t originalCount = archetype.count();
-						for (uint32_t i = 0; i < originalCount; ++i) {
-							mgr->at(archetype[archetype_index(i)]).update();
-						}
-					}
-				}
-			}
-
-		};
+		
 		Archetypes archetypes;
 		Components components;
 		Entities entities;
@@ -243,10 +219,10 @@ namespace ecs {
 			}(std::make_index_sequence<sizeof...(Args)>{});
 		}
 		template<stn::ConstructorType ...Args> 
-		auto spawn_with(Args&&... args)-> stn::TupleSet<stn::ConstructedClass<Args>&...> {
+		auto spawn_with(Args&&... args)-> stn::TupleSet<ecs::entity,stn::ConstructedClass<Args>&...> {
 			entity new_entity = entities.allocate_entity<stn::Tuple<Args...>>();
 			archetypes.spawn_at(new_entity.id(), get_archetype_for< stn::ConstructedClass<Args>...>());
-			return stn::TupleSet<stn::ConstructedClass<Args>&...>(spawn_with_helper(new_entity, std::forward<Args>(args))...);
+			return stn::TupleSet<ecs::entity,stn::ConstructedClass<Args>&...>(new_entity,spawn_with_helper(new_entity, std::forward<Args>(args))...);
 		}
 		template<ComponentType T, typename ...Args>
 		T& add_component_unchecked(entity object, Args&&... args)   requires std::constructible_from<T, Args&&...> {
@@ -324,7 +300,7 @@ namespace ecs {
 		template<ComponentType... Components>
 		stn::TupleSet<Components&...> get_components(entity entity) {
 			entities.assert_valid(entity);
-			return stn::TupleSet(components.get_component<Components>(entity.id())...);
+			return stn::ref_set(components.get_component<Components>(entity.id())...);
 		}
 		component_type& component_type_for(component_id id) {
 			return components[id];

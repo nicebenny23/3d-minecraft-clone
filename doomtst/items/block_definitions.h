@@ -151,9 +151,12 @@ namespace items {
 		item_register.insert<CrystalSwordItem>();
 		item_register.insert<CrystalPickItem>();
 		// Iron items
+		item_register.insert<MulchItem>();
 		item_register.insert<SwordItem>();
 		app.emplace_system<SeedGrower>();
-		app.insert_plugin(CursorContainerPlugin());
+		app.insert_plugin(cursor_container_plugin);
+
+		app.insert_plugin(soil_plugin);
 		item_register.insert<RopeItem>();
 	}
 }

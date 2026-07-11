@@ -361,12 +361,10 @@
     <ClInclude Include="block\soil.h" />
     <ClInclude Include="block\glass.h" />
     <ClInclude Include="block\plank.h" />
-    <ClInclude Include="block\treestone.h" />
     <ClInclude Include="block\moss.h" />
     <ClInclude Include="block\liquid.h" />
     <ClInclude Include="block\stone.h" />
     <ClInclude Include="block\torch.h" />
-    <ClInclude Include="block\water.h" />
     <ClInclude Include="debugger\console.h" />
     <ClInclude Include="debugger\debug.h" />
     <ClInclude Include="entities\antifreezeboss.h" />
@@ -540,7 +538,6 @@
     <ClInclude Include="util\deque.h" />
     <ClInclude Include="math\dir.h" />
     <ClInclude Include="util\dynamicarray.h" />
-    <ClInclude Include="util\erased.h" />
     <ClInclude Include="util\exception.h" />
     <ClInclude Include="util\fileloader.h" />
     <ClInclude Include="math\geometry.h" />
@@ -578,14 +575,12 @@
     <ClInclude Include="util\thread_pool.h" />
     <ClInclude Include="util\thread_split.h" />
     <ClInclude Include="game\time.h" />
-    <ClInclude Include="util\topo_sort.h" />
     <ClInclude Include="util\tuple.h" />
     <ClInclude Include="util\typelist.h" />
     <ClInclude Include="util\traits.h" />
     <ClInclude Include="util\type_index.h" />
     <ClInclude Include="util\unique.h" />
     <ClInclude Include="util\userinput.h" />
-    <ClInclude Include="util\variant.h" />
     <ClInclude Include="math\vector2.h" />
     <ClInclude Include="math\vector3.h" />
     <ClInclude Include="world\chunkload.h" />
@@ -612,6 +607,7 @@
   <ItemGroup>
     <None Include="cpp.hint" />
     <None Include="items\metalrod.h" />
+    <None Include="resources\shaders\modelvertex.vs" />
     <None Include="shaders\wireframe_vert.vs" />
     <None Include="shaders\frag1.vs" />
     <None Include="shaders\modelfragment.vs" />

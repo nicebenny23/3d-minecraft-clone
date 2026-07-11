@@ -46,7 +46,7 @@ namespace grid {
 				.loc = position,
 				.block_face = math::up2d,
 				.direction = attach_direction,
-				.mesh= grid.get_chunk(position).unwrap().owner().get_component<chunks::ChunkMesh>(),
+				.mesh= grid.get_chunk_object(position).unwrap().get<chunks::ChunkMesh>(),
 				.registry = blk.world().get_resource<blocks::BlockRegistry>()
 			}.spawn(blk.world());
 			

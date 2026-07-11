@@ -23,7 +23,7 @@ namespace game {
 		return 	grid.get_block(grid.get_voxel(pos)).member(&blocks::block::light_passing_through).unwrap_or(0) < 1;
 	}
 	struct EntitySpawn {
-		int count=2;
+		int count;
 		EntitySpawn(size_t entities = 1):count(entities){
 
 		}
@@ -39,7 +39,7 @@ namespace game {
 		bool try_spawn_once(ecs::Ecs& world) {
 			grid::Grid& grid = world.get_resource<grid::Grid>();
 			v3::Scale3 scale = unit_scale.with_x(count);
-			stn::Option<geo::Box> spawn_loc = voxtra::find_ground(unit_scale, grid, 50, 200);
+			stn::Option<geo::Box> spawn_loc = voxtra::find_ground(unit_scale, grid, 50, 50);
 			if (!spawn_loc) {
 				return false;
 			}
@@ -53,7 +53,10 @@ namespace game {
 			double charge = 0;
 			ecs::View< slimes::Mob, core::LocalTransform> slimes(world);
 			for (auto [slime, transform] : slimes) {
-				charge += 1 / (1 + v3::dist(transform.transform.position, pos));
+				double dist = v3::dist(transform.transform.position, pos);
+				if (dist<32) {
+					charge += 1 / (1 + dist);
+				}
 			}
 			double max_charge = .10f;
 			if (max_charge<=charge) {
@@ -66,7 +69,7 @@ namespace game {
 				ecs::spawn(world, slimes::SlimeRecipe{ .pos{spawn_pos} });
 
 			}
-			return true;
+  			return true;
 			
 		}
 	};
@@ -85,15 +88,15 @@ namespace game {
 			timing::Duration& duration= spawn_timer.next_spawn;
 			double spawn_frequency=.2f;
 			size_t total_alive = 0;
-			ecs::View< slimes::Mob, core::LocalTransform> slimes(ecs);
-			for (auto [slime, transform] : slimes) {
+			ecs::View< slimes::Mob, core::LocalTransform,ecs::Owner> slimes(ecs);
+			for (auto [slime, transform,object] : slimes) {
 
 				if (should_despawn(transform.transform.position, player::player_for(ecs).get_component<core::LocalTransform>().transform.position,ecs.get_resource<grid::Grid>())) {
-					slime.owner().destroy();
+					object.destroy();
 				}
 				total_alive++;
 			}
-			const size_t max_alive =40;
+			const size_t max_alive =80;
 			if (max_alive <= total_alive) {
 				return;
 			}

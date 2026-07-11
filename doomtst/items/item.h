@@ -117,7 +117,7 @@ namespace items {
 		const item_type& type() const {
 			return types().from_id(entry.id);
 		}
-		const item_traits& traits() const {
+		item_traits traits() const {
 			return type().traits(world());
 		}
 		size_t count() const {
@@ -239,16 +239,16 @@ namespace items {
 	//clears all empty items
 	struct ItemClear :ecs::System {
 		void run(ecs::Ecs& world) {
-			ecs::View< item_stack> stack_query(world);
-			for (const auto& [slot] : stack_query) {
+			ecs::View< item_stack, ecs::Owner> stack_query(world);
+			for (auto [slot,owner] : stack_query) {
 				if (slot.count() == 0) {
-					slot.owner().destroy();
+					owner.destroy();
 				}
 			}
-			ecs::View< item_durability> dur_query(world);
-			for (const auto& [slot] : dur_query) {
+			ecs::View< item_durability,ecs::Owner> dur_query(world);
+			for ( auto [slot,object] : dur_query) {
 				if (slot.is_broken()) {
-					slot.owner().destroy();
+					object.destroy();
 				}
 			}
 

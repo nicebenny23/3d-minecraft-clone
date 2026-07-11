@@ -91,5 +91,20 @@
       {"id": "moss"}
     ],
     "output": {"id": "moss_pack"}
+  },
+  {
+    "size": {"x": 3, "y": 3},
+    "input": [
+      null,
+      {"id": "dirt"},
+      null,
+      {"id": "dirt"},
+      {"id": "moss"},
+      {"id": "dirt"},
+      null,
+      {"id": "dirt"},
+      null
+    ],
+    "output": {"id": "mulch","count":2}
   }
 ]

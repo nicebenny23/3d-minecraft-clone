@@ -14,8 +14,7 @@ namespace v3 {
 		static Vec3 from_scale(double scale){
 			return Vec3(scale, scale, scale);
 		}
-		Vec3() : x(0), y(0), z(0) {
-		}
+		
 		constexpr Vec3(double X, double Y, double Z) noexcept : x(X), y(Y), z(Z) {
 		}
 
@@ -345,7 +344,7 @@ namespace v3 {
 		return dir;
 	}
 	inline Vec3 cross(const Vec3& p, const Vec3& p1) {
-		Vec3 crosspoint;
+		Vec3 crosspoint=v3::zerov;
 		crosspoint.x = p.y * p1.z - p.z * p1.y;
 		crosspoint.y = p.z * p1.x - p.x * p1.z;
 		crosspoint.z = p.x * p1.y - p.y * p1.x;

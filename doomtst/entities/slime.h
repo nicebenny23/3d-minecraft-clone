@@ -239,8 +239,13 @@ namespace slimes {
 		}
 	};
 	struct slime_loot_table :items::LootTable {
-		items::LootDrops drops_for(items::ItemTypes& types) {
+		items::LootDrops drops_for(items::ItemTypes& types,ecs::obj dropping) const {
 			return items::LootDrops({ items::loot_element(types.from_name("moss_pack"),1,types,4/30.0f) ,items::loot_element(types.from_name("moss"),1,types) });
+		}
+	};
+	struct blue_slime_loot_table :items::LootTable {
+		items::LootDrops drops_for(items::ItemTypes& types,ecs::obj dropping) const {
+			return items::LootDrops({ items::loot_element(types.from_name("moss_pack"),1,types,6 / 30.0f) ,items::loot_element(types.from_name("moss"),2,types) });
 		}
 	};
 	struct SlimeRecipe {
@@ -249,16 +254,17 @@ namespace slimes {
 			slime.add_component<core::LocalTransform>(pos).transform.scale = v3::unit_scale / 1.3f;
 			slime.spawn_child_emplaced<core::TransformRecipe>(pos);
 
-			slime.apply_recipe(items::loot_table_recipe<slime_loot_table>);
 			double speed = 15;
 			if (random::random()>.9f) {
 
+				slime.apply_recipe(items::loot_table_recipe<blue_slime_loot_table>);
 				slime.apply_recipe(renderer::ModelRecipe{ .path{.mesh = MeshPath("meshes\\cubetest.obj"),.texture{"images\\slimetexblue.png"}} });
 				slime.apply_recipe(Health::HealthSpawner(20));
 				speed = 20;
 			}
 			else {
 
+				slime.apply_recipe(items::loot_table_recipe<slime_loot_table>);
 				slime.apply_recipe(renderer::ModelRecipe{ .path{.mesh = MeshPath("meshes\\cubetest.obj"),.texture{"images\\slimetex.png"}} });
 				slime.apply_recipe(Health::HealthSpawner(10));
 			}

@@ -21,16 +21,22 @@ namespace blocks {
 			block* blk_ptr;
 			using block_type= decltype(stn::make_constructor<block>(type.mesh_traits_for(), mesh.recreate_mesh, loc, id, direction, block_face, registry));
 			block_type block_constructor = block_type(type.mesh_traits_for(), mesh.recreate_mesh, loc, id, direction, block_face, registry);
+			ecs::entity ent_id;
+
 			if (!type.is_solid()) {
-				blk_ptr=&world.spawn_with(std::move(block_constructor)).get<block&>();
+				auto idk = world.spawn_with(std::move(block_constructor));
+				ent_id = idk.get<ecs::entity>();
+				blk_ptr = &idk.get<block&>();
 			}
 			else {
-				blk_ptr=&world.spawn_with(std::move(block_constructor),stn::make_constructor<aabb::Collider>(false)).get<block&>();
+
+				auto idk = world.spawn_with(std::move(block_constructor), stn::make_constructor<aabb::Collider>(false));
+				ent_id = idk.get<ecs::entity>();
+
+				blk_ptr=&idk.get<block&>();
 			}
 			block& blk = *blk_ptr;
-			
-			ecs::obj object = blk.owner();
-			ecs::entity ent_id = object.inner();
+			ecs::obj object{ ent_id,world };
 			if (type.emmited_light()!= 0) {
 				world.add_component_unchecked<block_emmision>(ent_id,type.emmited_light());
 			}

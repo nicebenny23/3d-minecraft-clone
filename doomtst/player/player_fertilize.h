@@ -1,6 +1,7 @@
 #include "../game/ecs/filtered_object.h"
 #include "../block/soil.h"
 #include "../player/player_look.h"
+#include "../items/item_type.h"
 #pragma once
 namespace player {
 	struct PlayerFertilizeParticleSpawner :renderer::ParticleSpawner {
@@ -42,7 +43,7 @@ namespace player {
 				blocks::Seedability& lt = hit.owner().get_component<blocks::Seedability>();
 				
 				size_t fertile = inventory.selected().map(&items::item_stack::traits).member(&items::item_traits::fertilizer).unwrap_or(0);
-				if (fertile) {
+				if (fertile&&(lt.seedable==0)) {
 					items::item_stack& stack = inventory.selected().unwrap();
 					if (stack.can_remove(1)) {
 						fertilizer.emitter.get_component<core::LocalTransform>().transform.position = look.hit.unwrap().intersection();

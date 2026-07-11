@@ -16,8 +16,8 @@ namespace items {
 			);
 		}
 	};
-	struct stone_loot_table :items::LootTable {
-		items::LootDrops drops_for(items::ItemTypes& types) {
+	struct StoneLootTable :items::LootTable {
+		items::LootDrops drops_for(items::ItemTypes& types,ecs::obj dropping) const {
 			return items::LootDrops({ items::loot_element(types.insert<StoneItem>(),1,types) });
 		}
 	};
@@ -34,7 +34,7 @@ namespace items {
 		}
 	};
 	struct stone_brick_loot_table :items::LootTable {
-		items::LootDrops drops_for(items::ItemTypes& types) {
+		items::LootDrops drops_for(items::ItemTypes& types,ecs::obj dropping) const {
 			return items::LootDrops({ items::loot_element(types.insert<StoneBricksItem>(),1,types) });
 		}
 	};
@@ -59,7 +59,7 @@ namespace blocks {
 	struct StoneBlock :BlockType {
 		void apply(ecs::obj& block) const {
 			if (!catched_loot_id) {
-				catched_loot_id = block.world().get_resource<items::loot_tables>().insert<items::stone_loot_table>();
+				catched_loot_id = block.world().get_resource<items::loot_tables>().insert<items::StoneLootTable>();
 			}
 			block.add_component_unchecked<items::loot_dropper>(catched_loot_id.unwrap());
 		}

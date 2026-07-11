@@ -17,28 +17,14 @@ namespace renderer{
 		}
 	
 	};
-	struct material_component:ecs::component {
-		material_handle mat_id;
-		material_component(material_handle mat) :mat_id(mat) {
-		}
-		void start() {
-		}
-	};
-	struct color_component :ecs::component {
-		colors::Color mesh_color;
-		color_component(colors::Color color) :mesh_color(color){
-		}
-
-	};
-	struct renderable_overides : ecs::component {
+	struct MaterialComponent:ecs::component {
+		MaterialHandle mat_id;
 		stn::array< renderer::uniform> overides;
-		renderable_overides() :overides() {
-
+		MaterialComponent(MaterialHandle mat) :mat_id(mat) {
 		}
-
+		
 		void set(const renderer::uniform& value) {
-			size_t check=
-			owner().get_component<material_component>().mat_id->Shader->uniformlocation(value.name.c_str());
+			size_t check =mat_id->shader->uniformlocation(value.name.c_str());
 			for (auto& val : overides) {
 				if (val.name == value.name) {
 					if (val.value.index() != value.value.index()) {
@@ -53,11 +39,17 @@ namespace renderer{
 		stn::span<renderer::uniform> view() {
 			return overides.span();
 		}
+	};
+	struct color_component :ecs::component {
+		colors::Color mesh_color;
+		color_component(colors::Color color) :mesh_color(color){
+		}
 
 	};
+	
 	struct ColorSetter:ecs::System{
 		void run(ecs::Ecs& world) override{
-			ecs::View<color_component, renderable_overides> renderable_iter(world);
+			ecs::View<color_component, MaterialComponent> renderable_iter(world);
 			for (auto&& [color, overrides] : renderable_iter) {
 				overrides.set(uniform(color.mesh_color.glm(), "color"));
 			}
@@ -69,8 +61,7 @@ namespace renderer{
 		}
 		mesh_component() :msh() {
 		}
-		void start() {
-		}
+	
 	};
 	struct is_enabled : ecs::component {
 		bool enabled;
@@ -86,21 +77,20 @@ namespace renderer{
 	
 
 	struct renderable_recipe {
-		material_handle material;
-		renderable_recipe(material_handle mat):material(mat){
+		MaterialHandle material;
+		renderable_recipe(MaterialHandle mat):material(mat){
 
 		};
 		void apply(ecs::obj& object) const{
 			object.add_component<is_enabled>();
 			object.add_component<order_key>(0);
-			object.add_component<material_component>(material);
-			object.add_component<renderable_overides>();
+			object.add_component<MaterialComponent>(material);
 			object.add_component<mesh_component>();
 		}
 
 	};
 	//todo remove
-	using  renderable = ecs::Constrained<is_enabled, order_key, renderable_overides,mesh_component, material_component>;
+	using  renderable = ecs::Constrained<is_enabled, order_key,mesh_component, MaterialComponent>;
 	
 
 }

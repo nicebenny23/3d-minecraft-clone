@@ -5,9 +5,7 @@ namespace geo {
 	struct ray {
 		v3::Point3 start;
 		v3::Point3 end;
-		ray(const v3::Point3& startray, const v3::Point3& endray) {
-			start = startray;
-			end = endray;
+		ray(const v3::Point3& start_ray, const v3::Point3& end_ray):start(start_ray),end(end_ray){
 		}
 
 		bool degenerate() const {

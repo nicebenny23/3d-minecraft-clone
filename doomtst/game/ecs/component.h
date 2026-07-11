@@ -22,17 +22,11 @@ namespace ecs {
 
 
 	struct component {
-		obj owner() const;
 		component() :ecs(nullptr) {
 		}
-		component(const component& other) :ecs(other.ecs), ent() {
-
-		}
 		virtual ~component() = default;
-
-		virtual void start() {
-		}
-		virtual void update() {
+		//next on the chopping block :)
+		virtual void start(ecs::entity ent) {
 		}
 		virtual void destroy_hook() {
 		};
@@ -42,12 +36,8 @@ namespace ecs {
 		const Ecs& world() const {
 			return *ecs;
 		}
-		entity owning_entity() const {
-			return ent;
-		}
 	private:
 		Ecs* ecs;
-		entity ent;
 		template<typename T>
 		friend struct component_storage;
 		friend struct component_type;

@@ -61,9 +61,8 @@ namespace ecs {
 		stn::insertion<T&> emplace(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
 			return storage_unchecked<T>().emplace(ent.id(), std::forward<Args>(args)...)
 				.on_insert([&](T& comp) {
-				comp.ent = ent;
 				comp.ecs = ecs_instance;
-				comp.start();
+				comp.start(ent);
 				});
 		}
 
@@ -71,18 +70,16 @@ namespace ecs {
 		template<ComponentType T, typename...Args>
 		T& emplace_unchecked(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
 			T& comp=storage_unchecked<T>().emplace_unchecked(ent.id(), std::forward<Args>(args)...);
-			comp.ent = ent;
 			comp.ecs = ecs_instance;
-			comp.start();
+			comp.start(ent);
 			return comp;
 		}
 		// replaces if exists
 		template<ComponentType T, typename...Args>
 		stn::insertion<T&> set_emplace(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
 			stn::insertion<T&> element=storage_unchecked<T>().set_at(ent.id(), std::forward<Args>(args)...);
-			element.value.ent = ent;
 			element.value.ecs = ecs_instance;
-			element.value.start();
+			element.value.start(ent);
 			return element;
 		}
 

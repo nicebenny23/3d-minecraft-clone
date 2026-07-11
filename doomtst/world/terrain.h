@@ -9,6 +9,12 @@ namespace world {
 		redland
 
 	};
+
+	enum class BorderState {
+		solid,
+		on,
+		empty
+	};
 	inline biometype get_biome(double biome) {
 		if (math::bounds(-1, -.97).contains(biome)) {
 			return redland;  
@@ -17,13 +23,13 @@ namespace world {
 
 	}
 
-	inline blocks::block_id get_default_block(biometype biome, double dist, const BlockRegistry& registry) {
+	inline blocks::block_id get_default_block(biometype biome, BorderState state, const BlockRegistry& registry) {
 		
 		if (biome == normalbiome) {
 			return registry.get_id<blocks::StoneBlock>();
 		}
 		if (biome == redland) {
-			if (dist == 0) {
+			if (state == BorderState::on) {
 				return registry.get_id<blocks::SoilBlock>();
 
 			}
@@ -34,11 +40,11 @@ namespace world {
 	inline blocks::block_id get_secondary_block(biometype biome, const BlockRegistry& registry) {
 		return registry.get_id<blocks::CrystalBlock>();
 	}
-	inline stn::Option< blocks::block_id> chaotic_overide(double chaotic, double dist, biometype biome, const BlockRegistry& registry) {
+	inline stn::Option< blocks::block_id> chaotic_overide(double chaotic, BorderState dist, biometype biome, const BlockRegistry& registry) {
 		double per_pick = 5;
 		double per_use = per_pick / (5 * 256) / 2;
 
-		if (dist != 0) {
+		if (dist==BorderState::solid) {
 			per_use = 0;
 		}
 
@@ -48,7 +54,7 @@ namespace world {
 		return stn::None;
 	}
 
-	inline blocks::block_id non_cave_id(double biome, double chaotic, double dist, const BlockRegistry& registry) {
+	inline blocks::block_id non_cave_id(double biome, double chaotic, BorderState dist, const BlockRegistry& registry) {
 
 		biometype biome_type = get_biome(biome);
 		blocks::block_id main_block = get_default_block(biome_type, dist, registry);
@@ -61,7 +67,6 @@ namespace world {
 
 		return neid;
 	}
-
 	struct DefaultTerrainGenerator :world::TerrainGenerator {
 		math::NoiseMap normal;
 		math::NoiseMap crazy;
@@ -107,15 +112,15 @@ namespace world {
 			return bounds.signed_distance_to(big_carver_2) * bit_carver_size;
 
 		}
-		block_id generate(v3::Coord position) const {
+		BorderState get_state(v3::Coord position) const {
 			v3::Vec3 pos = position;
 			double noise = 0;
 			math::bounds big_carver_bounds = caveness(pos);
 			double global_dist_1 = global_dist_one(pos, big_carver_bounds);
 			double signed_distance = global_dist_1;
 			double global_dist_2 = 0;
-			if (signed_distance <12) 				{
-				global_dist_2=global_dist_two(pos, big_carver_bounds);
+			if (signed_distance < 12) {
+				global_dist_2 = global_dist_two(pos, big_carver_bounds);
 			}
 			stn::set_max(signed_distance, global_dist_2);
 			if (math::bounds(0, 12).contains_exact(signed_distance)) {
@@ -132,20 +137,27 @@ namespace world {
 						stn::set_max(signed_distance, global_dist_two(neighbor_pos, big_carver_bounds));
 					}
 					if (signed_distance == 0) {
-						break;
+						return BorderState::on;
 					}
 				}
 			}
 
 			if (signed_distance < 0) {
-
-				return registry.get_id<blocks::AirBlock>();
+				return BorderState::empty;
 			}
-			double biome = smooth(pos / 20, 10);
-			double random_n = crazy(pos, 2);
+			return BorderState::solid;
+		}
+		block_id generate(v3::Coord position) const {
+			BorderState state = get_state(position);
+			v3::Vec3 pos = position;
+				if (state==BorderState::empty) {
 
-			return non_cave_id(biome, random_n, signed_distance, registry);
+					return registry.get_id<blocks::AirBlock>();
+				}
+			double biome = smooth(pos/ 20, 10);
+			double random_n = crazy(position, 2);
 
+			return non_cave_id(biome, random_n, state, registry);
 
 		}
 	};

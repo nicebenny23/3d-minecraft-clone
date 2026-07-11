@@ -36,7 +36,7 @@ namespace renderer {
 		}
 		
 		void set_uniform(const renderer::uniform& value) {
-				id.get<renderable_overides>().set(value);
+				id.get<MaterialComponent>().set(value);
 		}		
 
 		void enable_if(bool should_enable) {
@@ -86,12 +86,12 @@ namespace renderer {
 
 	struct Renderer : ecs::resource {
 
-		void bind_material(material_handle material) {
+		void bind_material(MaterialHandle material) {
 			gl_util::poll_errors();
 
 			if (current_material != material) {
 				Material& mat = *material;
-				context.bind(*mat.Shader);			
+				context.bind(*mat.shader);			
 
 				for (auto& elem : mat.handles) {
 					context.apply_uniform(uniform_manager.get(elem), std::string_view(elem.shader_alias));
@@ -117,13 +117,13 @@ namespace renderer {
 
 		RenderableHandle gen_renderable(std::string material) {
 			
-			material_handle handle = world.from_name<Material>(material).expect("material should exist");
+			MaterialHandle handle = world.from_name<Material>(material).expect("material should exist");
 			return RenderableHandle((ecs::spawn_emplaced<renderable_recipe>(world, handle)));
 		}
 
 		void render(renderer::renderable& ren) {
-			bind_material(ren.get<material_component>().mat_id);
-			for (auto& uniform : ren.get<renderable_overides>().view()) {
+			bind_material(ren.get<MaterialComponent>().mat_id);
+			for (auto& uniform : ren.get<MaterialComponent>().view()) {
 				context.apply_uniform(uniform.value, uniform.name);
 			}
 			gl_util::poll_errors();
@@ -131,6 +131,10 @@ namespace renderer {
 			mesh_component& mesh_comp=ren.get<mesh_component>();
 			if (!mesh_comp.msh) {
 				return;
+			}
+			if (mesh_comp.msh.unwrap()->vao.id==10) {
+				shader_id id = ren.get<MaterialComponent>().mat_id->shader;
+				int l = 3;
 			}
 			context.draw(*mesh_comp.msh.unwrap());
 
@@ -155,7 +159,7 @@ namespace renderer {
 		}
 	
 	private:
-		stn::Option<material_handle> current_material;
+		stn::Option<MaterialHandle> current_material;
 		ecs::Ecs& world;
 
 
@@ -201,6 +205,10 @@ namespace renderer {
 			ren.set_uniform("far_plane", float(cam.viewport.max()));
 			for (CpuMesh& mesh : world.read_commands<CpuMesh>()) {
 
+				if (mesh.mesh->vao.id == 10) {
+					int l = 23;
+
+				}
 				ren.fill_mesh(mesh);
 			}
 			std::unordered_map<phase_handle, render_pass> pass_map;
@@ -209,7 +217,7 @@ namespace renderer {
 			ecs::View<renderable> renderable_iter(world);
 			for (auto&& [object] : renderable_iter) {
 				if (object.get<renderer::is_enabled>().enabled) {
-					phase_handle pass = object.get<renderer::material_component>().mat_id->pass;
+					phase_handle pass = object.get<renderer::MaterialComponent>().mat_id->pass;
 					pass_map.try_emplace(pass, render_pass(pass)).first->second.phase_elements.push(object);
 					cnt++;
 				}

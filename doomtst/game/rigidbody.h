@@ -104,7 +104,7 @@ namespace physics {
 							stn::Option<math::Direction3d> collision_dir_mabye = hit.hit_direction();
 							double move_time = hit_toi * hit.hit.length() / dir_ray.ray.length();
 							if (!collision_dir_mabye) {
-								v3::Vec3 offset = geo::collide_box(dir_ray.start_box().expanded(.001f), hit.collider.get<aabb::Collider>().global_box()).unwrap();
+								v3::Vec3 offset = geo::collide_box(dir_ray.start_box().expanded(.001f), global_box(hit.collider)).unwrap();
 								pos.transform.position += offset;
 								break;
 							}
@@ -138,8 +138,9 @@ namespace physics {
 
 						}
 					}
-					Point3 boxcenter = collider.global_box().in_direction(math::down_3d);
-					geo::Box checkbox = geo::Box(boxcenter, collider.global_box().scale.with_y(.005) * .96f);
+
+					Point3 boxcenter = pos.transform.unrotated_box().in_direction(math::down_3d);
+					geo::Box checkbox = geo::Box(boxcenter, pos.transform.unrotated_box().scale.with_y(.005) * .96f);
 					body.isonground = collision::boxcast(checkbox, collision::HitQuery(object));
 				}
 				else {

@@ -119,7 +119,7 @@ namespace renderer {
 
 					math::Transform result_transform = transform.transform;
 					if (decal_tag.is_some()) {
-						result_transform.position += result_transform.normal_dir() * .01f;
+ 						result_transform.position += result_transform.normal_dir() * .01f;
 					}
 					model.handle.set_uniform(uniform(result_transform.as_matrix(), "model"));
 				}

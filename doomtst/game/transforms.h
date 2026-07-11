@@ -7,7 +7,7 @@
 namespace core {
 
 	struct LocalTransform:ecs::component {
-		LocalTransform(v3::Point3 point):transform(point,math::Look3(), v3::Scale3()) {
+		LocalTransform(v3::Point3 point):transform(point,math::Look3(), v3::Scale3(v3::unit_scale)) {
 		
 		}
 		math::Transform transform;

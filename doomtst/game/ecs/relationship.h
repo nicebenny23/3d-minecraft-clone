@@ -39,7 +39,10 @@ namespace ecs {
 		}
 		explicit Target(entity parent)
 			: parent_entity(parent) {
-			int l = 3;
+		}
+		
+		void start(ecs::entity entity) {
+			self = entity;
 		}
 
 		using parent_type = Relationship<T, Tag>;
@@ -47,6 +50,7 @@ namespace ecs {
 
 		friend struct Relationship<T, Tag>;
 		inline void destroy_hook();
+		entity self;
 		entity parent_entity;
 	};
 	template<RelationshipAccessor T, typename Tag>
@@ -85,37 +89,39 @@ namespace ecs {
 			}
 			return false;
 		}
-
+		
 		explicit Relationship() {
 		}
-		void start() {
+		ecs::entity self;
+		void start(ecs::entity entity) {
 			if constexpr(std::constructible_from<T,Ecs&>) {
 				children_list=T(world());
 			}
+			self = entity;
 		}
 		void swap_children(Relationship& other) requires std::swappable<T> {
 			for (ecs::entity child : children_list) {
-				world().get_component<child_type>(child).parent_entity = other.owning_entity();
+				world().get_component<child_type>(child).parent_entity = self;
 			}
 			for (ecs::entity child : other.children_list) {
-				world().get_component<child_type>(child).parent_entity = owning_entity();
+				world().get_component<child_type>(child).parent_entity = self;
 			}
 			std::swap(children_list, other.children_list);
 
 		}
 
 		void add_child(ecs::entity child) {
-			if (child == owning_entity()) {
+			if (child == self) {
 				throw std::logic_error("An object cannot be its own parent.");
 			}
 			stn::Option<child_type&> child_component = world().get_component_opt<child_type>(child);
 			if (child_component) {
 				ecs::entity& child_parent = child_component.unwrap().parent_entity;
 				world().get_component<Relationship<T, Tag>>(child_parent).remove_child(child);
-				child_parent = owning_entity();
+				child_parent = self;
 			}
 			else {
-				world().add_component<child_type>(child, owning_entity());
+				world().add_component<child_type>(child, self);
 			}
 			children_list.add(child);
 		}
@@ -139,7 +145,7 @@ namespace ecs {
 	template<RelationshipAccessor T, typename Tag>
 
 	void Target<T, Tag>::destroy_hook() {
-		world().get_component<parent_type>(parent_entity).remove_child(owning_entity());
+		world().get_component<parent_type>(parent_entity).remove_child(self);
 	}
 
 }

@@ -24,22 +24,22 @@ namespace items {
 			if (world.get_resource<ui::MenuState>().no_menu_open()) {
 				return;
 			}
-			ecs::Constrained<ElementSlot> cursor_slot = world.get_resource<cursor_container>().primary_slot();
+			ecs::Constrained<ElementSlot> cursor_object = world.get_resource<cursor_container>().primary_slot();
+			ElementSlot& cursor_slot = cursor_object.get<ElementSlot>();
 			for (auto&& [interaction_state, container_slot,decl] : ecs::View<ui::InteractionState,items::RefrencedSlot, items::ItemSlotDecal>(world)) {
 				if (!interaction_state.left_clicked) {
 					continue;
 				}
-				if (container_slot.displayed().get<ElementSlot>().empty() && cursor_slot.get<ElementSlot>().element().is_none()) {
+				ElementSlot& cont_slot = container_slot.displayed().get<ElementSlot>();
+				if (cont_slot.empty() && cursor_slot.element().is_none()) {
 					continue;
 				}
 				//hack because idk how to make items durbility work
-				if (!container_slot.displayed().get<ElementSlot>().empty()&&items::apply_plan(TransferSlotsRequest{ .from_slot = cursor_slot,.to_slot = container_slot.displayed(), .count = items::max_transfer })) {
+				if (!cont_slot.empty()&&items::apply_plan(TransferSlotsRequest{ .from_slot = cursor_object,.to_slot = container_slot.displayed(), .count = items::max_transfer })) {
 
 				}
 				else {
-					ecs::Constrained < ElementSlot > slot = container_slot.displayed();
-					ElementSlot& sk = cursor_slot.get<ElementSlot>();
-					swap_slot_plans(cursor_slot, container_slot.displayed());
+					swap_slot_plans(cursor_object, container_slot.displayed());
 				}
 				return;
 			}
@@ -77,9 +77,10 @@ namespace items {
 	};
 	struct cursor_highlighter :ecs::System {
 		void run(ecs::Ecs& world) {
-			world.get_resource<cursor_container>().display.get_component<ui::UiEnabled>().enable();
-			ecs::Constrained<ElementSlot> cursor_obj = world.get_resource<cursor_container>().primary_slot();
-			ui::ComputedStyle & style = ecs::parent(world.get_resource<cursor_container>().display)
+			cursor_container& cont = world.get_resource<cursor_container>();
+			cont.display.get_component<ui::UiEnabled>().enable();
+			ecs::Constrained<ElementSlot> cursor_obj = cont.primary_slot();
+			ui::ComputedStyle & style = ecs::parent(cont.display)
 			.unwrap()
 			.get_component<ui::ComputedStyle>();
 
@@ -97,8 +98,7 @@ namespace items {
 
 
 
-	struct CursorContainerPlugin {
-		void operator()(core::App& app) {
+	inline void cursor_container_plugin(core::App& app) {
 			ecs::obj cursor_entity = ecs::spawn(app.Ecs, items::ItemSlotSpawner());
 			ecs::obj cursor_display = ecs::spawn(app.Ecs, items::ClearItemSlotSpawner(ecs::Constrained<items::ElementSlot>(cursor_entity)));
 				
@@ -106,7 +106,6 @@ namespace items {
 			app.emplace_system<cursor_spreader>();
 			app.emplace_system<cursor_highlighter>();
 			app.emplace_resource<cursor_container>(cursor_entity, cursor_display);
-		}
 	};
 
 };

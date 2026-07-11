@@ -150,11 +150,12 @@ namespace blockrender {
 
 
 	// Render a chunk mesh
-	void render_chunk(grid::Grid& world, chunks::ChunkMesh& mesh) {
+	inline void render_chunk(grid::Grid& world, ecs::Constrained<chunks::ChunkMesh> mesh_object) {
+		chunks::ChunkMesh& mesh = mesh_object.get<chunks::ChunkMesh>();
 		double distance = v3::dist(mesh.world().get_resource<CameraResource>().center(), mesh.center());
 		mesh.solid.set_order_key(distance);
 		mesh.sort_faces();
-		grid::FocusedGridAcessor accesor(mesh.owner(),world);
+		grid::FocusedGridAcessor accesor(mesh_object.object(),world);
 		renderer::MeshBuilder mesh_data = mesh.transparent.insert_builder_for(renderer::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
 		for (int i = 0; i < mesh.faces.length(); i++) {
 
@@ -170,7 +171,17 @@ namespace blockrender {
 		}
 
 		void run(ecs::Ecs& ecs) {
-
+			auto& renderer = ecs.get_resource<renderer::Renderer>();
+			BlockTextureRegistry& registry = ecs.insert_resource<blocks::BlockRegistry>().textures;
+			if (registry.need_sync()) {
+				array<std::string> texlist = array<std::string>();
+				for (auto&& value : registry.name_to_texture) {
+					texlist.reach(value.second) = value.first;
+				}
+				renderer::TextureArrayId texarray = ecs.load_asset_emplaced<renderer::TextureArrayPath>(texlist, "BlockTextures").unwrap();
+				renderer.set_uniform("bind_block_texture", texarray);
+				registry.last_saved = texarray->length;
+			}
 			grid::Grid& world_grid = ecs.get_resource<grid::Grid>();
 			ecs.get_resource<renderer::Renderer>().set_uniform("render_dist", int(world_grid.rad));
 			std::mutex fill_mutex;
@@ -207,7 +218,7 @@ namespace blockrender {
 		void run(ecs::Ecs& ecs) {
 			size_t total_render_count = 0;
 			Grid& grid = ecs.get_resource<grid::Grid>();
-			ecs::View< chunks::ChunkMesh,chunks::Chunk> meshes(ecs);
+			ecs::View< ecs::Constrained<chunks::ChunkMesh>,chunks::Chunk> meshes(ecs);
 			for (auto&& [mesh,Chunk] : meshes) {
 				if (chunk_viewable(Chunk)) {
 					total_render_count++;
@@ -226,9 +237,9 @@ namespace blockrender {
 			engine.emplace_system<grid::GridLighter>();
 			engine.emplace_system<ChunkPreMesher>();
 			engine.emplace_system<ChunkRenderer>();
-			initblockrendering(engine.Ecs);
+			add_block_renderer(engine.Ecs);
 		}
-		void initblockrendering(ecs::Ecs& ecs) {
+		void add_block_renderer(ecs::Ecs& ecs) {
 
 			auto& renderer = ecs.get_resource<renderer::Renderer>();
 			renderer::shader_id block_shader = ecs.load_asset_emplaced<renderer::shader_descriptor>("BlockShader", "shaders\\vert1.vs", "shaders\\frag1.vs").unwrap();
@@ -249,51 +260,7 @@ namespace blockrender {
 				renderer::UniformRefrence("bind_block_texture", "tex")
 				});
 
-			BlockTextureRegistry& registry= ecs.insert_resource<blocks::BlockRegistry>().textures;
-			if (registry.need_sync()) {
-				array<std::string> texlist = array<std::string>();
-				for (auto&& value:registry.name_to_texture) {
-					texlist.reach(value.second)=value.first;
-				}
-				renderer::TextureArrayId texarray = ecs.load_asset_emplaced<renderer::TextureArrayPath>(texlist, "BlockTextures").unwrap();
-				renderer.set_uniform("bind_block_texture", texarray);
-				registry.last_saved = texarray->length;
-			}
-			/*
-			texlist.reach(treestonetex) = "images\\treestone.png";
-			texlist.reach(stonetex) = "images\\stone.png";
-			texlist.reach(altartex) = "images\\crystalaltarside.png";
-			texlist.reach(glasstex) = "images\\glass.png";
-			texlist.reach(watertex) = "images\\water.png";
-			texlist.reach(chest_top) = "images\\chest_top.png";
-			texlist.reach(chest_front) = "images\\chest.png";
-			texlist.reach(chest_sides) = "images\\chest_sides.png";
-			texlist.reach(mosstex) = "images\\moss  .png";
-			texlist.reach(ropetex) = "images\\rope.png";
-			texlist.reach(lavatex) = "images\\lava.png";
-			texlist.reach(obsidiantex) = "images\\obb.png";
-			texlist.reach(moss_one) = "images\\moss_one.png";
-			texlist.reach(moss_two) = "images\\moss_two.png";
-			texlist.reach(moss_three) = "images\\moss_three.png";
-			texlist.reach(stone_brick_tex) = "images\\stone_brick.png";
-			texlist.reach(crafting_table_bottom) = "images\\craftingtable.png";
-			texlist.reach(crafting_table_top) = "images\\craftingtabletop.png";
-			texlist.reach(crafting_table_side) = "images\\craftingtableside.png";
-			texlist.reach(furnacefront) = "images\\furnacetop.png";
-			texlist.reach(moss_inactive_tex) = "images\\furnace.png";
-			texlist.reach(ironoretex) = "images\\ironore.png";
-			texlist.reach(furnacesideon) = "images\\furnaceon.png";
-			texlist.reach(log_side) = "images\\treestone.png";
-			texlist.reach(logtoppng) = "images\\log.png";
-			texlist.reach(ultraaltarpngultrapng) = "images\\ultraaltar.png";
-			texlist.reach(planktex) = "images\\treestoneblock.png";
-			texlist.reach(soiltex) = "images\\dirt.png";
-			texlist.reach(sandtex) = "images\\sand.png";
-			texlist.reach(torchtex) = "images\\baked_torch.png";
-			texlist.reach(torchtoptex) = "images\\torchtop.png";
-			texlist.reach(crystaloretex) = "images\\crystalore.png";
-		
-			*/
+			
 		}
 	};
 }

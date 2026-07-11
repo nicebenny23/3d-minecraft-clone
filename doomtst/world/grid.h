@@ -184,7 +184,7 @@ namespace grid {
 		FocusedGridAcessor(ChunkObject::ObjectType chunk_object, grid::Grid& grid) :world(grid), Chunk(chunk_object.get<chunks::Chunk>()) {
 
 		}
-		FocusedGridAcessor(ChunkObject::ObjectType chunk_object) :world(Chunk.world().get_resource<grid::Grid>()), Chunk(chunk_object.get<chunks::Chunk>()) {
+		FocusedGridAcessor(ChunkObject::ObjectType chunk_object) :world(chunk_object.world().get_resource<grid::Grid>()), Chunk(chunk_object.get<chunks::Chunk>()) {
 
 		}
 		Coord get_voxel(v3::Point3 point) {

@@ -16,11 +16,11 @@ namespace renderer {
 		phase_handle pass;
 		RenderProperties prop;
 		array<renderer::UniformRefrence> handles;
-		assets::AssetHandle<Shader> Shader;
+		assets::AssetHandle<Shader> shader;
 		bool operator==(const Material& other) const = default;
 		
 		Material(const std::string& name, phase_handle phase_handle, shader_id shade_handle, const RenderProperties& props, const stn::array<renderer::UniformRefrence>& renderer) :
-			pass(phase_handle), Shader(shade_handle), name(name), prop(props), handles(renderer)
+			pass(phase_handle), shader(shade_handle), name(name), prop(props), handles(renderer)
 		{
 		}
 	};
@@ -55,7 +55,7 @@ namespace std {
 
 namespace renderer {
 	
-	using material_handle = assets::AssetHandle<Material>;
+	using MaterialHandle = assets::AssetHandle<Material>;
 	struct MaterialManager {
 		using load_descriptor = MaterialDescriptor;
 	public:

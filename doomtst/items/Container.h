@@ -14,9 +14,7 @@ namespace items {
 		container_id id;
 		container(ui::TableBounds size, container_id cont_id) :size(size),id(cont_id){
 		}
-		void start() {
-
-		}
+		
 		container_element& operator[](v2::UVec2 ind) {
 			return slots[size.index(ind)];
 		}

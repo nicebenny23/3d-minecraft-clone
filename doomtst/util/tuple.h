@@ -102,7 +102,7 @@ namespace stn {
 			}, t);
 	}
 	template<typename... Ts>
-	Tuple(Ts&&...) -> Tuple<Ts&&...>;
+	Tuple(Ts&&...) -> Tuple<std::decay_t<Ts>...>;
 
 	template<typename... Ts>
 	constexpr auto make_tuple(Ts&&... args) {
@@ -163,12 +163,9 @@ namespace stn {
 	template<typename ... Types> requires stn::AllUnique<Types...>
 	struct TupleSet {
 	
-		TupleSet(Types&&... vals) :values(std::forward<Types>(vals)...) {
-		}
-		
 		using TupleTypeFor = Tuple<Types...>;
-		template<typename Arg> requires std::constructible_from<TupleTypeFor,Arg>
-		TupleSet(Arg&& arg) :values(std::forward<Arg>(arg)) {
+		template<typename ...Args> requires (std::constructible_from<TupleTypeFor,Args&&...>)
+		TupleSet(Args&&... args) :values(std::forward<Args>(args)...) {
 		}
 		static constexpr size_t size= sizeof...(Types);
 		template<size_t index> requires (index < size)
@@ -199,7 +196,7 @@ namespace stn {
 			TupleTypeFor values;
 	};
 	template<typename... Ts>
-	TupleSet(Ts&&...) -> TupleSet<Ts&&...>;
+	TupleSet(Ts&&...) -> TupleSet<std::decay_t<Ts>...>;
 	template<size_t N, TupleSetType T>
 	auto get(T&& Tuple) -> forward_as_member_t<T&&, typename std::remove_cvref_t<T>::template type_at<N>> {
 		return std::forward<T>(Tuple). template get<N>();
@@ -208,7 +205,7 @@ namespace stn {
 	auto get(T&& Tuple)->forward_as_member_t<T&&, Element>{
 		return std::forward<T>(Tuple). template get<Element>();
 	}
-	template<typename... Ts>
+	template<typename... Ts> 
 	TupleSet<Ts&...>  ref_set(Ts&... args) {
 		return TupleSet<Ts&...>(args...);
 	}

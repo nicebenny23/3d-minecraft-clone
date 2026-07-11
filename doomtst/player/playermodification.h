@@ -49,7 +49,7 @@ namespace player {
 		ecs::obj break_decal;
 		stn::Option< PlayerBreaker> breaker;
 		
-		void start() override {
+		void start(ecs::entity entity) override {
 			break_decal = ecs::spawn_emplaced<DecalRecipe>(world(),TexturePath("images\\block_break_2.png"));
 			//	CtxName::ctx.Ren->Textures.LoadTexture("images\\menutex.png");
 		}
@@ -129,58 +129,62 @@ namespace player {
 
 		void try_modify(player::PlayerCursor& cursor,stn::Option<ecs::Constrained<items::item_stack>> pick) {
 			
-
-			if (ensure_engage(cursor,pick)) {
-				
-				PlayerBreaker& player_break = breaker.unwrap();
-				blocks::SolidBlockTraits mining_traits = player_break.current_block().type().mining_traits();
-				double power =1.0/ mining_traits.time_to_mine;
-				if (mining_traits.pick_speedup) {
-					power*= curr_mining_power(pick);
-				}
-				player_break.amount_done+=power*world().ensure_resource<timing::WorldClock>().dt;
-				// Show progress decal
-				
-				if (player_break.current_block().bounds().scale == blockscale) {
-					spawn_decal(player_break.decal_value(), cursor);
-				}
-				if (1<=player_break.amount_done) {
-						on_break(player_break.current_mining, pick);
-				}
-			}
-			else {
-				disengage_block();
-			}
-		}
+	}
 
 		void on_break(ecs::Constrained<block> broken, stn::Option<ecs::Constrained<items::item_stack>> pickaxe) {
 
 			// Break when timer completes
-			if (pickaxe.is_some_and(&ecs::Constrained<items::item_stack>::has_component<items::item_durability>)) {
-				items::item_durability& duribility = pickaxe.unwrap().get_component<items::item_durability>();
-				duribility.use();
-			}
-			block& broken_block = broken.get_component<block>();
-			if (broken.has_component<items::loot_dropper>()) {
-			broken.get_component<items::loot_dropper>().set(owner());
-			}
-			if (broken_block.is<blocks::LogBlock>()) {
-				grid::set_block(world(), broken_block.pos, broken_block.registry->get_id<blocks::SeedBlock>());
-
-			}
-			else {
-				grid::set_block(world(), broken_block.pos, broken_block.registry->get_id<AirBlock>());
-
-			}
-			disengage_block();
+			
 		}
 
 	};
 
 	struct PlayerUpdateSystem : ecs::System {
 		void run(ecs::Ecs& ecs) override {
-			for (auto [pb, look,inventory] : ecs::View< playerbreak, player::PlayerCursor, player::inventory>(ecs)) {
-				pb.try_modify(look,inventory.selected_object());
+			for (auto [pb, cursor,inventory,object] : ecs::View< playerbreak, player::PlayerCursor, player::inventory,ecs::Owner>(ecs)) {
+				stn::Option<ecs::Constrained<items::item_stack>> pickaxe = inventory.selected_object();
+				if (pb.ensure_engage(cursor, pickaxe)) {
+
+					PlayerBreaker& player_break = pb.breaker.unwrap();
+					blocks::SolidBlockTraits mining_traits = player_break.current_block().type().mining_traits();
+					double power = 1.0 / mining_traits.time_to_mine;
+					if (mining_traits.pick_speedup) {
+						power *= pb.curr_mining_power(pickaxe);
+					}
+					player_break.amount_done += power * ecs.ensure_resource<timing::WorldClock>().dt;
+					// Show progress decal
+
+					if (player_break.current_block().bounds().scale == blockscale) {
+						pb.spawn_decal(player_break.decal_value(), cursor);
+					}
+					if (1 <= player_break.amount_done) {
+						pb.try_modify(cursor, inventory.selected_object());
+
+						if (pickaxe.is_some_and(&ecs::Constrained<items::item_stack>::has_component<items::item_durability>)) {
+							items::item_durability& duribility = pickaxe.unwrap().get_component<items::item_durability>();
+							duribility.use();
+						}
+						ecs::obj broken= player_break.current_mining.object();
+						block& broken_block = player_break.current_block();
+						if (broken.has_component<items::loot_dropper>()) {
+							broken.get_component<items::loot_dropper>().set(object);
+						}
+						if (broken_block.is<blocks::LogBlock>()) {
+							grid::set_block(ecs, broken_block.pos, broken_block.registry->get_id<blocks::SeedBlock>());
+
+						}
+						else {
+							grid::set_block(ecs, broken_block.pos, broken_block.registry->get_id<AirBlock>());
+
+						}
+						pb.disengage_block();
+					}
+				}
+				else {
+					pb.disengage_block();
+				}
+
+			
 			};
 		}
 	};

@@ -10,6 +10,7 @@ uniform vec4 color;
 void main()
 {
  
+
     vec4 col = color*texture(tex,vec2(ourcoord.x,1-ourcoord.y));
      if(col.a<.1f){
      discard;

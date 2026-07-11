@@ -2,7 +2,6 @@
 #include "../game/navigation.h"
 #include "../game/collision.h"
 #include "../game/rigidbody.h"
-#include "../renderer/model.h"
 /*
 
 #include "../player/player.h"

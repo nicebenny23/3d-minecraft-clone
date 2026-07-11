@@ -11,8 +11,8 @@ namespace collision {
 		ecs::Ecs& world;
 		explicit HitQuery(const ecs::obj& orgin_obj) : orgin(orgin_obj), world(orgin.unwrap().world()) {
 		}
-		bool matches(aabb::Collider& collider) {
-			return collider.owner() == orgin;
+		bool matches(const ecs::Constrained<aabb::Collider>& collider) {
+			return collider.object() == orgin;
 		}
 	};
 
@@ -23,10 +23,10 @@ namespace collision {
 			if (collider.effector) {
 				continue;
 			}
-			if (query.matches(collider)) {
+			if (query.matches(object)) {
 				continue;
 			}
-				geo::RayCollision blkinter = geo::intersection(collider.global_box(), search_ray);
+				geo::RayCollision blkinter = geo::intersection(aabb::global_box(object), search_ray);
 				stn::Option<double> test_dist = blkinter.map_member(&geo::RayHit::length);
 				stn::Option<double> current_dist = closest.map_member(&voxtra::RayWorldHit::dist);
 				if (test_dist.unwrap_or(std::numeric_limits<double>().infinity()) < current_dist.unwrap_or(std::numeric_limits<double>().infinity())) {
@@ -44,10 +44,10 @@ namespace collision {
 				continue;
 			}
 			static_assert(std::same_as<aabb::Collider&, decltype(collider)>);
-			if (query.matches(collider)) {
+			if (query.matches(object)) {
 				continue;
 			}
-			geo::RayCollision blkinter = geo::intersection(search_ray,collider.global_box());
+			geo::RayCollision blkinter = geo::intersection(search_ray,aabb::global_box(object));
 			stn::Option<double> test_dist = blkinter.map_member(&geo::RayHit::length);
 			stn::Option<double> current_dist = closest.map_member(&voxtra::RayWorldHit::dist);
 			if (test_dist.unwrap_or(std::numeric_limits<double>().infinity()) < current_dist.unwrap_or(std::numeric_limits<double>().infinity())) {
@@ -56,15 +56,15 @@ namespace collision {
 		}
 		return closest;
 	}
-	inline voxtra::RayWorldCollision ray_box_cast(geo::RayBox ray_box, HitQuery query, voxtra::GridTraverseMode travmode = voxtra::GridTraverseMode::countnormal) {
+	inline voxtra::RayWorldCollision ray_box_cast(geo::RayBox ray_box, HitQuery query) {
 		voxtra::RayWorldCollision closest_on_grid = voxtra::grid_ray_box_cast(ray_box, query.world.get_resource<grid::Grid>());
 		voxtra::RayWorldCollision closest_entity = raybox_cast_dynamic(ray_box, query);
 		return stn::min_some_on_map(closest_entity, closest_on_grid,
 			[&](const voxtra::RayWorldHit& col) {return col.dist(); });
 	}
 
-	inline voxtra::RayWorldCollision raycast(geo::ray nray, HitQuery query, voxtra::GridTraverseMode travmode=voxtra::GridTraverseMode::countnormal) {
-		voxtra::RayWorldCollision closest_on_grid = voxtra::grid_cast(nray, travmode,query.world.get_resource<grid::Grid>());
+	inline voxtra::RayWorldCollision raycast(geo::ray nray, HitQuery query) {
+		voxtra::RayWorldCollision closest_on_grid = voxtra::grid_cast(nray, query.world.get_resource<grid::Grid>());
 		voxtra::RayWorldCollision closest_entity = raycast_dynamic(nray, query);
 		return stn::min_some_on_map(closest_entity, closest_on_grid,
 		[&](const voxtra::RayWorldHit& col) {return col.dist(); });

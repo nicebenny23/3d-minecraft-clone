@@ -4,7 +4,7 @@
 namespace blocks {
 
 	struct plank_loot_table :items::LootTable {
-		items::LootDrops drops_for(items::ItemTypes& types) {
+		items::LootDrops drops_for(items::ItemTypes& types,ecs::obj dropping) const {
 			return items::LootDrops({ items::loot_element("plank",1,types) });
 		};
 	};
@@ -25,7 +25,7 @@ namespace blocks {
 		}
 	};
 	struct log_loot_table :items::LootTable {
-		items::LootDrops drops_for(items::ItemTypes& types) {
+		items::LootDrops drops_for(items::ItemTypes& types,ecs::obj dropping) const {
 			return items::LootDrops({ items::loot_element("plank",4,types)});
 		};
 	};

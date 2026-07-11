@@ -42,7 +42,7 @@ namespace random {
 		size_t ushort_amt = (1 + std::numeric_limits<unsigned short>().max());
 		for (int u = 0; u < ushort_amt; u++) {
 
-			v3::Vec3 point_on_circle;
+			v3::Vec3 point_on_circle=v3::zerov;
 			do {
 
 				for (int ind = 0; ind < 3; ind++) {

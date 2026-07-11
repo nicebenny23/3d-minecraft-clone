@@ -23,8 +23,7 @@ namespace items {
 
 		}
 
-		void start() {
-		}
+		
 		RecipeBinder binder;
 		stn::Option<ItemRecipe> wanted;
 		void set_state() {
@@ -38,9 +37,7 @@ namespace items {
 		crafting_slot_displayer(ecs::Constrained <crafter > craft, ecs::Constrained <ui::InteractionState, ItemIcon, ItemCountDisplay> display_item) :crafter_comp(craft), display(display_item) {
 
 		}
-		void destroy_hook() override {
-			int l = 4;
-		}
+		
 	};
 	struct CraftingSlotDisplaySpawner {
 		v2::Coord2 pos;
@@ -70,7 +67,7 @@ namespace items {
 				
 				if (crafting_slot_display.display.get_component<ui::InteractionState>().left_clicked) {
 					crafter& crafter_comp = crafting_slot_display.crafter_comp.get_component<crafter>();
-					auto auto_val = build_recipe_from_booklet(crafter_comp.binder.list, crafter_comp.binder.input, cursor_slot.owner());
+					auto auto_val = build_recipe_from_booklet(crafter_comp.binder.list, crafter_comp.binder.input, cursor_obj);
 					if (auto_val) {
 						auto_val.unwrap().apply(world);
 					}

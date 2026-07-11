@@ -62,20 +62,13 @@ namespace blocks {
 					moss.prime();
 				}
 
-				block_texture side_tex = general_tex;
 				stn::List<block_texture, 4> tex_array{ general_tex,textures.get_texture("images\\moss_one.png"),textures.get_texture("images\\moss_two.png"),textures.get_texture("images\\moss_three.png") };
 				if (!stop) {
 					size_t tex_index = std::floor(math::bounds(0, moss_lifetime).unlerp_clamped(moss_lifetime - moss.clock.remaining_or_default()) * 3.999f);
-					side_tex = tex_array[tex_index];
+					general_tex = tex_array[tex_index];
 				}
 				for (math::Direction3d dir : math::Directions3d) {
-					if (dir.axis() == math::AxisIndex3d::Up) {
-
 						mblock.mesh.set_face_texture(dir, general_tex);
-					}
-					else {
-						mblock.mesh.set_face_texture(dir, side_tex);
-					}
 				}
 
 
@@ -88,7 +81,7 @@ namespace blocks {
 	};
 
 	struct seed_loot_table :items::LootTable {
-		items::LootDrops drops_for(items::ItemTypes& types) {
+		items::LootDrops drops_for(items::ItemTypes& types,ecs::obj dropping) const {
 			return items::LootDrops({ items::loot_element(types.insert<items::SeedItem>(),1,types) });
 		}
 	};

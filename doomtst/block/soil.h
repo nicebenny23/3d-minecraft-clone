@@ -15,10 +15,18 @@ namespace items {
 		}
 
 	};
+	struct MulchItem :item_type {
 
+		std::string name() const {
+			return "mulch";
+		}
+		item_traits traits(const ecs::Ecs& world) const {
+			return item_traits{.image_path=renderer::TexturePath("images\\mulch.png"),.fertilizer=1};
+		}
 
+	};
 	struct soil_loot_table :items::LootTable {
-		items::LootDrops drops_for(items::ItemTypes& types) {
+		items::LootDrops drops_for(items::ItemTypes& types,ecs::obj dropping) const {
 			return items::LootDrops({ items::loot_element(types.insert<DirtItem>(),1,types) });
 		}
 	};
@@ -31,6 +39,20 @@ namespace blocks {
 
 		}
 		size_t seedable;
+	};
+	struct FertileTexturer:ecs::System {
+		void run(ecs::Ecs& world) {
+			BlockTextureRegistry& textures = world.get_resource<BlockRegistry>().textures;
+			for (auto[fertile,block]:ecs::View<Seedability,block>(world)) {
+				block_texture texture = textures.get_texture("images\\dirt.png");
+				if (fertile.seedable==0) {
+					texture = textures.get_texture("images\\silt.png");
+				}
+				for (math::Direction3d dir:math::Directions3d ) {
+					block.mesh.set_face_texture(dir, texture);
+				}
+			}
+		}
 	};
 	struct SoilBlock :BlockType {
 		void apply(ecs::obj& block) const {
@@ -57,4 +79,8 @@ namespace blocks {
 			stn::file_serializer<double>().write(seedable, handle);
 		}
 	};
+	inline void soil_plugin(core::App& app) {
+		app.emplace_system<FertileTexturer>();
+	}
+	
 }

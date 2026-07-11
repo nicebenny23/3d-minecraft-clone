@@ -25,11 +25,9 @@ namespace math {
 	}
 
 	struct Transform {
-		Transform() :look(), scale(v3::unit_scale) {
+		Transform() :look(), scale(v3::unit_scale),position(v3::zerov){
 		}
-		Transform(v3::Point3 pos, Look3 look_dir, v3::Scale3 scl):look(look_dir){
-			position = pos;
-			scale = scl;	
+		Transform(v3::Point3 pos, Look3 look_dir, v3::Scale3 scl):look(look_dir),scale(scl),position(pos){
 		}
 		v3::Point3 position;
 		math::Look3 look;

@@ -12,14 +12,12 @@ struct playermovement : ecs::component
 {
     double lastGroundedTime;
     double jumpBufferTime;
-    bool slamUsed;                  // track whether slam was already done this airtime
+    bool slamUsed=false;                  // track whether slam was already done this airtime
     bool has_jumped = false;
-    void start()
+    void start(ecs::entity entity)
     {
-        has_jumped = false;
         lastGroundedTime = world().ensure_resource<timing::WorldClock>().now();
         jumpBufferTime = world().ensure_resource<timing::WorldClock>().now() - 1.0f;
-        slamUsed = false;
     }
 };
 
@@ -56,9 +54,7 @@ struct PlayerMovementSys : ecs::System
 
             if (body.isonground)
             {
-				if (!body.owner().has_component<playerclimb>()) {
 				
-				}
                 movement.slamUsed = false;
                 movement.lastGroundedTime = now;
                 movement.has_jumped = false;

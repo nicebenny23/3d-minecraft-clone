@@ -48,7 +48,7 @@ namespace blocks {
 		}
 	};
 	struct chest_loot_table :items::LootTable {
-		items::LootDrops drops_for(items::ItemTypes& types) {
+		items::LootDrops drops_for(items::ItemTypes& types,ecs::obj dropping) const {
 			return items::LootDrops({ items::loot_element(types.insert<items::ChestItem>(),1,types)});
 		}
 	};
