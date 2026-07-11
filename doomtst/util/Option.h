@@ -6,7 +6,6 @@
 #include <concepts>
 #include "concepts.h"
 #include "exception.h"
-#include "erased.h"
 #include "traits.h"
 namespace stn {
 

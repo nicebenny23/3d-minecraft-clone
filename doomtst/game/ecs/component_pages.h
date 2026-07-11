@@ -160,11 +160,11 @@ namespace ecs {
 				return pages.reach(index >> chunk_exp).insert_at_unchecked(index, std::forward<Args>(args)...);
 		}
 		template<typename ...Args>
-		stn::insertion<T&> insert_at(size_t index, Args&&... args) {
+		stn::Insertion<T&> insert_at(size_t index, Args&&... args) {
 			if (element_filter.reaching_insertion_enable(index)) {
-				return stn::insertion(pages.reach(index >> chunk_exp).insert_at_unchecked(index, std::forward<Args>(args)...),true);
+				return stn::Insertion(pages.reach(index >> chunk_exp).insert_at_unchecked(index, std::forward<Args>(args)...),true);
 			}
-			return stn::insertion<T&>(pages.unchecked_at(index >> chunk_exp)[index],false);
+			return stn::Insertion<T&>(pages.unchecked_at(index >> chunk_exp)[index],false);
 		}
 		//replace_at_unchecked assumes the element exists and  will not modify the adress of an element 
 		template<typename ...Args>

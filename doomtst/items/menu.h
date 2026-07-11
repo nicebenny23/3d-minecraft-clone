@@ -49,6 +49,10 @@ namespace ui {
 	inline bool is_open(ecs::Constrained<MenuComponent> menu) {
 		return menu.world().get_resource< MenuState>().top()==menu.object();
 	}
+	inline bool is_open(ecs::Ecs& world) {
+		return world.get_resource< MenuState>().top().is_some();
+	}
+
 	
 	struct MenuEnabler :ecs::System {
 		void run(ecs::Ecs& world) {

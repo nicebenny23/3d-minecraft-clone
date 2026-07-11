@@ -12,7 +12,7 @@ namespace handle {
 		} -> std::convertible_to<std::size_t>;
 	}
 	&& std::equality_comparable<T>;
-	template <typename Handle,typename T,typename HandleID=stn::Id>
+	template <typename Handle,typename T,typename HandleID>
 	struct HandleMap {
 		//maps the string to the internal id
 		robin_hood::unordered_flat_map<Handle, uint32_t> handle_to_index;
@@ -57,12 +57,12 @@ namespace handle {
 		}
 
 		HandleID reserve(const Handle& handle) {
-			stn::insertion<uint32_t> insertion = insert_handle_index(handle);
-			if (insertion.is_new) {
+			stn::Insertion<uint32_t> Insertion = insert_handle_index(handle);
+			if (Insertion.is_new) {
 
-				elems.reach(insertion.value) = stn::None;
+				elems.reach(Insertion.value) = stn::None;
 			}
-			return HandleID(insertion.value);
+			return HandleID(Insertion.value);
 		}
 		HandleID insert(const Handle& handle,const T& value) {
 			uint32_t id = insert_handle_index(handle).value;
@@ -73,19 +73,19 @@ namespace handle {
 			requires std::invocable<Func, const Handle&, const HandleID&>&&
 		std::same_as<std::invoke_result_t<Func, const Handle&, const HandleID&>, stn::Option<T>>
 			stn::Option<HandleID> get_or_try(const Handle& handle, Func&& func) {
-			stn::insertion<uint32_t> insertion = insert_handle_index(handle);
-			if (insertion.is_new || elems[insertion.value].is_none()) {
-				elems.reach(insertion.value) = func(handle, HandleID(insertion.value));
+			stn::Insertion<uint32_t> Insertion = insert_handle_index(handle);
+			if (Insertion.is_new || elems[Insertion.value].is_none()) {
+				elems.reach(Insertion.value) = func(handle, HandleID(Insertion.value));
 			}
-			return stn::Option<HandleID>(insertion.value).filter([this](HandleID id) {return elems[id.id].is_some(); });
+			return stn::Option<HandleID>(Insertion.value).filter([this](HandleID id) {return elems[id.id].is_some(); });
 		}
 
 		HandleID get_or(const Handle& handle, const T& value) {
-			stn::insertion<uint32_t> insertion = insert_handle_index(handle);
-			if (insertion.is_new || elems[insertion.value].is_none()) {
-				elems.reach(insertion.value) = value;
+			stn::Insertion<uint32_t> Insertion = insert_handle_index(handle);
+			if (Insertion.is_new || elems[Insertion.value].is_none()) {
+				elems.reach(Insertion.value) = value;
 			}
-			return HandleID(insertion.value);
+			return HandleID(Insertion.value);
 		}
 
 		//gets the handle of a generated element 
@@ -139,15 +139,15 @@ namespace handle {
 			free_ids.clear();
 		}
 		private:
-			stn::insertion<uint32_t> insert_handle_index(const Handle& handle) {
+			stn::Insertion<uint32_t> insert_handle_index(const Handle& handle) {
 				auto it = handle_to_index.find(handle);
 				if (it == handle_to_index.end()) {
 					uint32_t index = next_index();
 					handle_to_index[handle] = index;
 					index_to_handle.emplace(index, handle);
-					return stn::insertion<uint32_t>(index, true);
+					return stn::Insertion<uint32_t>(index, true);
 				}
-				return stn::insertion<uint32_t>(it->second, false);
+				return stn::Insertion<uint32_t>(it->second, false);
 			}
 			uint32_t next_index() {
 				if (free_ids.non_empty()) {

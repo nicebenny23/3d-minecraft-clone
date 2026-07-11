@@ -28,16 +28,14 @@ namespace stn {
 		stn::Option < stn::Stateless< void(void*, void*)>> move_construct;
 		stn::Option<stn::Stateless<void(void*)>> default_construct;
 		stn::Option<stn::Stateless<void(void*)>> destroy;
-		stn::memory::layout layout;
-
+		
 		std::string name;
 
 		template<typename T>
 		static type_id_chart make() {
 			type_id_chart c;
 			c.name = std::string(typeid(T).name());
-				c.layout = stn::memory::layout_of<T>;
-				if constexpr (requires { std::hash<T>{}(std::declval<T>()); }) {
+			if constexpr (requires { std::hash<T>{}(std::declval<T>()); }) {
 					c.hash = [](const void* a) -> std::size_t {
 						return std::hash<T>{}(*static_cast<const T*>(a));
 						};
@@ -115,10 +113,6 @@ namespace stn {
 			return global_type_charts().unchecked_at(id);
 		}
 
-		stn::memory::layout layout() const {
-			return functions().layout;
-		}
-
 		stn::Option<stn::Stateless<bool(const void*, const void*)>> equals() const {
 			return functions().equals;
 		}
@@ -174,7 +168,7 @@ namespace stn {
 	}
 	// Retrieve a unique ID for type 
 
-	template<typename id_type = stn::Id>
+	template<typename id_type>
 	struct type_indexer {
 		uint32_t next_index = 0;
 		static constexpr uint32_t invalid = std::numeric_limits< uint32_t>::max();
@@ -187,14 +181,14 @@ namespace stn {
 		}
 
 		template<typename T>
-		stn::insertion<id_type> insert() {
+		stn::Insertion<id_type> insert() {
 
 			uint32_t& dense_id = sparse_map.reach(typeIndex<T>, invalid);
 			if (dense_id == invalid) {
 				dense_id = next_index++;
-				return stn::insertion(id_type(dense_id), true);
+				return stn::Insertion(id_type(dense_id), true);
 			}
-			return  stn::insertion(id_type(dense_id), false);
+			return  stn::Insertion(id_type(dense_id), false);
 
 		}
 		template<typename T>
@@ -249,7 +243,7 @@ namespace stn {
 		}
 
 		template <typename... Types>
-		stn::array<stn::insertion<id_type>> insert_ids() {
+		stn::array<stn::Insertion<id_type>> insert_ids() {
 			return stn::array({ insert<Types>()... });
 		}
 		template <typename... Types>
@@ -272,7 +266,6 @@ namespace stn {
 			clear();
 		}
 	};
-	type_indexer() -> type_indexer<stn::Id>;
 
 	template<typename T>
 	struct type_map {

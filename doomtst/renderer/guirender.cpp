@@ -16,7 +16,6 @@ namespace guirender {
 
         ImGui_ImplGlfw_InitForOpenGL(core::game.Ecs.get_resource<renderer::Window>().window.get_ptr(), true);
         ImGui_ImplOpenGL3_Init("#version 330");
-     
     }
     void destroygui()
     {

@@ -115,7 +115,7 @@ namespace ecs {
 			return pages.insert_at_unchecked(ent.id, std::forward<Args>(args)...);
 		}
 		template<typename...Args>
-		stn::insertion<T&> emplace(entity_id ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
+		stn::Insertion<T&> emplace(entity_id ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
 			return pages.insert_at(ent.id, std::forward<Args>(args)...);
 		}
 
@@ -124,13 +124,13 @@ namespace ecs {
 			pages.remove_at_unchecked(ent.id);
 		}
 		template<typename...Args>
-		stn::insertion<T&> set_at(entity_id ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
+		stn::Insertion<T&> set_at(entity_id ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
 
 			if (has(ent)) {
 				static_cast<component&>(pages[ent.id]).destroy_hook();
-				return stn::insertion<T&>(pages.replace_at_unchecked(ent.id, std::forward<Args>(args)...), false);
+				return stn::Insertion<T&>(pages.replace_at_unchecked(ent.id, std::forward<Args>(args)...), false);
 			}
-			return stn::insertion<T&>(emplace_unchecked(ent, std::forward<Args>(args)...), true);
+			return stn::Insertion<T&>(emplace_unchecked(ent, std::forward<Args>(args)...), true);
 		}
 	private:
 		

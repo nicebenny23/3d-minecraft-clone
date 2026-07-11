@@ -40,12 +40,12 @@ namespace ecs {
 	};
 	
 	struct TrivialEntityAllocator {
-		stn::insertion<ecs::entity_id> allocate() {
+		stn::Insertion<ecs::entity_id> allocate() {
 			if (free_ids.empty()) {
 
-				return stn::insertion(ecs::entity_id(count++),true);
+				return stn::Insertion(ecs::entity_id(count++),true);
 			}
-			return stn::insertion(free_ids.pop(),false);
+			return stn::Insertion(free_ids.pop(),false);
 		}
 		void free(entity_id id) {
 			free_ids.push(id);
@@ -101,7 +101,7 @@ namespace ecs {
 		}
 		template<typename A= default_allocator>
 		entity allocate_entity() {
-			stn::insertion<entity_id> id= free_ids.allocate();
+			stn::Insertion<entity_id> id= free_ids.allocate();
 			if (id.is_new) {
 				//expands to the index
 				entity_list.geometric_expand_with(max_sharing_page(id.value).id + 1,

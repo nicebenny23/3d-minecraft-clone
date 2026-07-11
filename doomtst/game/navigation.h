@@ -8,63 +8,54 @@
 #include "ecs/component.h"
 namespace navigation {
 
-	template<typename Node>
-	concept NodeLike = std::equality_comparable<Node> &&
-		requires(Node & node) {
-			{
-				Node::apx_distance(node, node)
-			}->std::convertible_to<double>;
-	};
-	template<typename Edge, typename Node>
-	concept EdgeLike = NodeLike<Node> &&
-		requires(const Edge & edge, const Node & node) {
-			{
-				edge.cost()
-			}->std::convertible_to<double>;
-			{
-				edge.apply(node)
-			}->std::same_as<Node>;
-
-	};
-
-
-
 	template<typename NodeContext>
-	concept NodeContextLike =
+	concept NetworkLike =
 		requires{
-
 		typename NodeContext::edge;
 		typename NodeContext::node;
 	}
-
-	&& EdgeLike< typename NodeContext::edge, typename NodeContext::node>&&
-		requires(NodeContext& context, typename NodeContext::node& node) {
+	&& 
+		requires(NodeContext& context, typename NodeContext::node& node, NodeContext::edge& edge) {
 			{
 				context.moves(node)
 			}->std::same_as<stn::array<typename NodeContext::edge>>;
+			{
+				edge.apply(node)
+			}->std::same_as< typename NodeContext::node>;
 	};
 
-	template<NodeContextLike NodeContext>
-	using ContextNodeType = typename NodeContext::node;
+	template<NetworkLike Context>
+	using NodeType = typename Context::node;
+	template<NetworkLike Context>
+	using EdgeType = typename Context::edge;
+	template<typename T>
+	concept AStarNetwork = NetworkLike<T> &&
 
-	template<NodeContextLike NodeContext>
-	using ContextEdgeType = typename NodeContext::edge;
+		requires(const NodeType<T>&node, const EdgeType<T>&edge) {
+			{
+				NodeType<T>::apx_distance(node, node)
+			}->std::convertible_to<double>;
+			{
+				edge.cost()
+			}->std::convertible_to<double>;
 
-	template<NodeLike Node, typename Edge> requires EdgeLike<Edge, Node>
+	};
+
+	template<AStarNetwork Network> 
 	struct NodeResult {
-		Node current;
-		Edge move;
-		Node result() const {
+		NodeType<Network> current;
+		EdgeType<Network> move;
+		NodeType<Network> result() const {
 			return move.apply(current);
 		}
 	};
 
-	template<NodeContextLike T>
-	using ContextResultType = NodeResult< ContextNodeType<T>, ContextEdgeType<T>>;
-	template<NodeContextLike T>
+	template<AStarNetwork T>
+	using ContextResultType = NodeResult<T>;
+	template<AStarNetwork T>
 	struct MarkedNode {
-		using node = ContextNodeType<T>;
-		using edge = ContextEdgeType<T>;
+		using node = NodeType<T>;
+		using edge = EdgeType<T>;
 		node value;
 		double f_cost() const {
 			return g_cost + h_cost;
@@ -78,11 +69,11 @@ namespace navigation {
 		double h_cost;
 	};
 	
-	template<NodeContextLike Context>
-	stn::Option<stn::array<ContextResultType<Context>>> a_star(ContextNodeType<Context> start, ContextNodeType<Context> end, Context ctx) {
-		using NodeType = ContextNodeType<Context>;
+	template<AStarNetwork Context>
+	stn::Option<stn::array<ContextResultType<Context>>> a_star(NodeType<Context> start, NodeType<Context> end, Context ctx) {
+		using NodeType = NodeType<Context>;
 		
-		using EdgeType = ContextEdgeType<Context>;
+		using EdgeType = EdgeType<Context>;
 		using MarkedNodeType = MarkedNode<Context>;
 
 		stn::array<size_t> open;
@@ -117,7 +108,7 @@ namespace navigation {
 				return stn::None;
 			}
 			if (current.value == end||iter==maxiter) {
-				using ResultType = NodeResult<NodeType, EdgeType>;
+				using ResultType = NodeResult<Context>;
 				stn::array<ResultType> return_nodes;
 				MarkedNodeType top = current;
 				while (top.value!=start) {

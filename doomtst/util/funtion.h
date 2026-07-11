@@ -50,4 +50,15 @@ namespace stn {
 		}
 		ptr_type fn;
 	}; 
+	template <typename ...Ty>
+		struct visitor :Ty...{
+		using Ty::operator()...;
+		explicit visitor(Ty&&... fns) :Ty(std::forward<Ty>(fns))... {}
+	};
+	template<typename... Ts>
+	constexpr auto make_visitor(Ts&&... ts) {
+		return visitor<std::decay_t<Ts>...>(std::forward<Ts>(ts)...);
+	}
+	template <typename... Ts>
+	visitor(Ts&&...) -> visitor<std::decay_t<Ts>...>;
 }

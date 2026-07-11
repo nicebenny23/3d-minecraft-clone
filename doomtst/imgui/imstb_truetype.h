@@ -2989,7 +2989,7 @@ static void stbtt__rasterize_sorted_edges(stbtt__bitmap *result, stbtt__edge *e,
             if (e->y1 > scan_y) {
                stbtt__active_edge *z = stbtt__new_active(&hh, e, off_x, scan_y, userdata);
                if (z != NULL) {
-                  // find insertion point
+                  // find Insertion point
                   if (active == NULL)
                      active = z;
                   else if (z->x < active->x) {
@@ -3424,7 +3424,7 @@ static void stbtt__sort_edges_ins_sort(stbtt__edge *p, int n)
 
 static void stbtt__sort_edges_quicksort(stbtt__edge *p, int n)
 {
-   /* threshold for transitioning to insertion sort */
+   /* threshold for transitioning to Insertion sort */
    while (n > 12) {
       stbtt__edge t;
       int c01,c12,c,m,i,j;

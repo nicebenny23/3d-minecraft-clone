@@ -99,17 +99,17 @@ namespace ecs {
 
 
 		template<typename A>
-		stn::insertion<entity_id> allocate() {
+		stn::Insertion<entity_id> allocate() {
 			return allocate(insert_allocator<A>());
 		}
-		stn::insertion<entity_id> allocate(allocator_id allocator) {
+		stn::Insertion<entity_id> allocate(allocator_id allocator) {
 			bool needed_expanding = false;
 			AllocatorPages& alloc_pages = allocator_from_id(allocator);
 			if (alloc_pages.out_of_ids()) {
 				needed_expanding = true;
 				gen_page_for(allocator);
 			}
-			return stn::insertion(alloc_pages.pop(), needed_expanding);
+			return stn::Insertion(alloc_pages.pop(), needed_expanding);
 		}
 	};
 

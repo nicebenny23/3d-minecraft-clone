@@ -567,7 +567,6 @@
     <ClInclude Include="util\robinHood.h" />
     <ClInclude Include="util\sharedptr.h" />
     <ClInclude Include="util\Span.h" />
-    <ClInclude Include="util\SparseSet.h" />
     <ClInclude Include="util\stack.h" />
     <ClInclude Include="math\stats.h" />
     <ClInclude Include="util\stbiload.h" />

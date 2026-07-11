@@ -7,17 +7,6 @@ namespace stn {
 	static constexpr uint32_t none_id = std::numeric_limits<uint32_t>::max();
 
 	
-	struct Id {
-		uint32_t id;
-		explicit constexpr Id():id(none_id){
-
-		}
-		constexpr explicit Id(uint32_t val) : id(val) {}
-		constexpr bool valid() const noexcept{ return id != none_id; }
-		constexpr bool operator==(const Id& other) const { return id == other.id; }
-		constexpr bool operator!=(const Id& other) const { return id != other.id; }
-		constexpr explicit operator bool() const { return valid(); }
-	};
 
 	template<typename T,typename Backing=std::uint32_t>
 	struct typed_id {

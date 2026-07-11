@@ -4,6 +4,7 @@
 #include "slot_transactions.h"
 #include "menu.h"
 #include "container_ui.h"
+#include "../game/close.h"
 #pragma once
 namespace items {
 
@@ -78,7 +79,11 @@ namespace items {
 	struct cursor_highlighter :ecs::System {
 		void run(ecs::Ecs& world) {
 			cursor_container& cont = world.get_resource<cursor_container>();
-			cont.display.get_component<ui::UiEnabled>().enable();
+			bool idk = ui::is_open(world);
+			cont.display.get_component<ui::UiEnabled>().set_enabled(idk);
+			if (!idk) {
+				return;
+			}
 			ecs::Constrained<ElementSlot> cursor_obj = cont.primary_slot();
 			ui::ComputedStyle & style = ecs::parent(cont.display)
 			.unwrap()
@@ -86,7 +91,7 @@ namespace items {
 
 			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
 			for (auto [item_decal, interaction_state] : ecs::View< ItemSlotDecal, ui::InteractionState>(world)) {
-				if (interaction_state.hovered&&world.get_resource<ui::MenuState>().menu_open()) {
+				if (interaction_state.hovered) {
 						item_decal.set_decal(renderer::TexturePath("images\\importantblockholder.png"));
 				}
 				else {

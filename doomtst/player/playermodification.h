@@ -26,14 +26,6 @@ inline math::Direction3d closest_face(v3::Point3 pos, blocks::block& blk) {
 	return best;
 }
 
-// Returns two orthogonal axes on the block BlockFace plane
-inline stn::pair<v3::Vec3, v3::Vec3> get_flat_frame(math::Direction3d dir) {
-	switch (dir.axis()) {
-	case math::AxisIndex3d::Right: return { v3::Vec3(0,0,1), v3::Vec3(0,1,0) };
-	case math::AxisIndex3d::Up: return { v3::Vec3(1,0,0), v3::Vec3(0,0,1) };
-	case math::AxisIndex3d::Front: return { v3::Vec3(1,0,0), v3::Vec3(0,1,0)};
-	}
-}
 namespace player {
 	struct PlayerBreaker {
 		ecs::Constrained<block> current_mining;

@@ -1,7 +1,6 @@
 #include "texture.h"
 #include "shader.h"
 #include "Uniform.h"
-#include "../../util/variant.h"
 #include "mesh.h"
 #include "Fbo.h"
 #include "vertex.h"

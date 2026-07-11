@@ -18,10 +18,10 @@ namespace ecs {
 		stn::array<stn::box<resource>> resource_list;
 		template<ResourceType T, typename ...Args>
 		T& insert(Args&&... args) requires std::constructible_from<T, Args&&...> {
-			stn::insertion<ecs::resource_id> insertion = indexer.insert<T>();
-			if (insertion.is_not_new()) {
+			stn::Insertion<ecs::resource_id> Insertion = indexer.insert<T>();
+			if (Insertion.is_not_new()) {
 				//potential
-				T* resource_for_t = resource_list.unchecked_at(insertion.value.id).get_as_unchecked<T>();
+				T* resource_for_t = resource_list.unchecked_at(Insertion.value.id).get_as_unchecked<T>();
 				if (resource_for_t) {
 					return *resource_for_t;
 				}
@@ -67,9 +67,9 @@ namespace ecs {
 
 		template<ResourceType T>
 		void remove() {
-			stn::Option<resource_id> insertion = indexer.get_opt<T>();
-			if (insertion) {
-				resource_list[insertion.unwrap().value].clear();
+			stn::Option<resource_id> Insertion = indexer.get_opt<T>();
+			if (Insertion) {
+				resource_list[Insertion.unwrap().value].clear();
 			}
 		}
 		void clear() {

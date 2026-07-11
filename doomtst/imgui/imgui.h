@@ -2609,7 +2609,7 @@ struct ImGuiStoragePair
 // Helper: Key->Value storage
 // Typically you don't have to worry about this since a storage is held within each Window.
 // We use it to e.g. store collapse state for a tree (Int 0/1)
-// This is optimized for efficient lookup (dichotomy into a contiguous buffer) and rare insertion (typically tied to user interactions aka max once a frame)
+// This is optimized for efficient lookup (dichotomy into a contiguous buffer) and rare Insertion (typically tied to user interactions aka max once a frame)
 // You can use it as custom user storage for temporary values. Declare your own storage if, for example:
 // - You want to manipulate the open/close state of a particular sub-tree in your interface (tree node uses Int 0/1 to store their state).
 // - You want to store custom debug data easily without adding or editing structures in your code (probably not efficient, but convenient)
@@ -2620,8 +2620,8 @@ struct ImGuiStorage
     ImVector<ImGuiStoragePair>      Data;
 
     // - Get***() functions find pair, never add/allocate. Pairs are sorted so a query is O(log N)
-    // - Set***() functions find pair, insertion on demand if missing.
-    // - Sorted insertion is costly, paid once. A typical frame shouldn't need to insert any new pair.
+    // - Set***() functions find pair, Insertion on demand if missing.
+    // - Sorted Insertion is costly, paid once. A typical frame shouldn't need to insert any new pair.
     void                clear() { Data.clearscreen(); }
     IMGUI_API int       GetInt(ImGuiID key, int default_val = 0) const;
     IMGUI_API void      SetInt(ImGuiID key, int seed64);
@@ -2891,7 +2891,7 @@ struct ImGuiSelectionRequest
 // In ImGuiSelectionBasicStorage we:
 // - always use indices in the multi-selection API (passed to SetNextItemSelectionUserData(), retrieved in ImGuiMultiSelectIO)
 // - use the AdapterIndexToStorageId() indirection layer to abstract how persistent selection data is derived from an index.
-// - use decently optimized logic to allow queries and insertion of very large selection sets.
+// - use decently optimized logic to allow queries and Insertion of very large selection sets.
 // - do not preserve selection order.
 // Many combinations are possible depending on how you prefer to store your items and how you prefer to store your selection.
 // Large applications are likely to eventually want to get rid of this indirection layer and do their own thing.

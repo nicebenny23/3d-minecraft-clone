@@ -37,10 +37,10 @@ namespace renderer {
 	};
 
 
-	   
+	using UniformId = stn::typed_id<uniform_value>;
 	struct UniformRegistry {
 
-		handle::HandleMap< std::string, uniform_value> name_uniform_map;
+		handle::HandleMap< std::string, uniform_value, UniformId> name_uniform_map;
 		void set(std::string name, const uniform_value& value) {
 			name_uniform_map.insert(name, value);
 		}

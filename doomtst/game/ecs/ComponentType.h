@@ -58,7 +58,7 @@ namespace ecs {
 			return storage_unchecked<T>().unchecked_at(entity);
 		}
 		template<ComponentType T, typename...Args>
-		stn::insertion<T&> emplace(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
+		stn::Insertion<T&> emplace(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
 			return storage_unchecked<T>().emplace(ent.id(), std::forward<Args>(args)...)
 				.on_insert([&](T& comp) {
 				comp.ecs = ecs_instance;
@@ -76,8 +76,8 @@ namespace ecs {
 		}
 		// replaces if exists
 		template<ComponentType T, typename...Args>
-		stn::insertion<T&> set_emplace(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
-			stn::insertion<T&> element=storage_unchecked<T>().set_at(ent.id(), std::forward<Args>(args)...);
+		stn::Insertion<T&> set_emplace(entity ent, Args&&... args)  requires std::constructible_from<T, Args&&...> {
+			stn::Insertion<T&> element=storage_unchecked<T>().set_at(ent.id(), std::forward<Args>(args)...);
 			element.value.ecs = ecs_instance;
 			element.value.start(ent);
 			return element;
@@ -128,7 +128,7 @@ namespace ecs {
 		}
 		template<ComponentType T>
 		inline component_id insert_id() {
-			stn::insertion< component_id> inserted_id = component_indexer.insert<T>();
+			stn::Insertion< component_id> inserted_id = component_indexer.insert<T>();
 			if (inserted_id.is_new) {
 				component_list.emplace(inserted_id.value, std::type_identity<T>()).inject_ecs_instance(ecs_instance);
 			}
@@ -158,12 +158,12 @@ namespace ecs {
 			return component_list.unchecked_at(id.id);
 		}
 		template<ComponentType T, typename ...Args>
-		stn::insertion<T&> emplace(entity_id id, Args&&... args) requires std::constructible_from<T, Args&&...> {
+		stn::Insertion<T&> emplace(entity_id id, Args&&... args) requires std::constructible_from<T, Args&&...> {
 			component_id comp_id = insert_id<T>();
 			return unchecked_at(comp_id).emplace<T>(id, std::forward<Args>(args)...);
 		}
 		template<ComponentType T, typename ...Args>
-		stn::insertion<T&> set(entity id, Args&&... args) requires std::constructible_from<T, Args&&...> {
+		stn::Insertion<T&> set(entity id, Args&&... args) requires std::constructible_from<T, Args&&...> {
 			component_id comp_id = insert_id<T>();
 			return unchecked_at(comp_id).set_emplace<T>(id, std::forward<Args>(args)...);
 		}

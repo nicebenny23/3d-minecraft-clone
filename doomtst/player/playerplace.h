@@ -29,7 +29,7 @@ namespace player {
 				if (!stack.can_remove(1)) {
 					continue;
 				}
-				block_id spawn_id = stack.types().from_id(stack.contained_id()).traits(ecs).blk_id.unwrap();
+				block_id spawn_id = stack.traits().blk_id.unwrap();
 
 				grid::Grid& grid = ecs.get_resource<grid::Grid>();
 				voxtra::RayWorldHit hit = look.hit.unwrap();
@@ -47,6 +47,7 @@ namespace player {
 				if (!mabye_block_at) {
 					continue;
 				}
+				BlockRegistry& blocks = ecs.get_resource<BlockRegistry>();
 				block& block_at = mabye_block_at.unwrap();
 				math::Direction3d attach_direction = math::greatest_aligned_direction( block_hit_at.center()- block_at.center());
 				v3::Scale3 mesh_scale = block_at.registry->get_block(spawn_id).mesh_traits_for().size;
@@ -58,7 +59,12 @@ namespace player {
 				if (collision::boxcast(new_block_box,collision::HitQuery(ecs))) {
 					continue;
 				}
-			
+				if (blocks.name_for(spawn_id)=="seed") {
+					stn::Option<ecs::Constrained<block>&> below = grid.get_object(block_at.pos - Coord(0, 1, 0));
+					if (!(below&&below.unwrap().has_component<Seedability>())) {
+						continue;
+					}
+				}
    					grid::set_block(ecs, block_at.pos, spawn_id,attach_direction);
 					stack.remove(1);
 			}

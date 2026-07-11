@@ -8193,14 +8193,14 @@ void ImGuiSelectionBasicStorage::ApplyRequests(ImGuiMultiSelectIO* ms_io)
             //ImGuiContext& g = *GImGui; IMGUI_DEBUG_LOG_SELECTION("Req %d/%d: set %d to %d\n", ms_io->Requests.index_from_ptr(&req), ms_io->Requests.Size, selection_changes, req.Selected);
             if (selection_changes == 1 || (selection_changes < Size / 100))
             {
-                // Multiple sorted insertion + copy likely to be faster.
+                // Multiple sorted Insertion + copy likely to be faster.
                 // Technically we could do a single copy with a little more work (sort sequential SetRange requests)
                 for (int idx = (int)req.RangeFirstItem; idx <= (int)req.RangeLastItem; idx++)
                     SetItemSelected(GetStorageIdFromIndex(idx), req.Selected);
             }
             else
             {
-                // Append insertion + single sort likely be faster.
+                // Append Insertion + single sort likely be faster.
                 // Use req.RangeDirection to set order field so that shift+clicking from 1 to 5 is different than shift+clicking from 5 to 1
                 const int size_before_amends = _Storage.Data.Size;
                 int selection_order = _SelectionOrder + ((req.RangeDirection < 0) ? selection_changes - 1 : 0);

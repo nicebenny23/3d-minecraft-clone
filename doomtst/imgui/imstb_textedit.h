@@ -13,7 +13,7 @@
 //
 // This C header file implements the guts of a multi-line text-editing
 // widget; you implement display, word-wrapping, and low-level string
-// insertion/deletion, and stb_textedit will map user inputs into
+// Insertion/deletion, and stb_textedit will map user inputs into
 // insertions & deletions, plus updates to the cursor position,
 // selection state, and undo state.
 //

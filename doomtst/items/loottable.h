@@ -43,7 +43,7 @@ namespace items {
 		stn::type_indexer<loot_table_id> tables;
 		template<LootTableType Type>
 		loot_table_id insert() {
-			stn::insertion<loot_table_id> id = tables.insert<Type>();
+			stn::Insertion<loot_table_id> id = tables.insert<Type>();
 			if (id.is_new) {
 				drops.emplace(stn::construct_derived<Type>());
 			}
@@ -71,6 +71,10 @@ namespace items {
 		loot_table_id table;
 		loot_tables& tables() {
 			return world().get_resource<loot_tables>();
+		}
+
+		void start(ecs::entity entity) {
+			self =ecs::obj( entity,world());
 		}
 		void destroy_hook() {
 			if (drop_to) {
@@ -100,7 +104,7 @@ namespace items {
 	};
 	template<LootTableType T>
 	void loot_table_recipe(ecs::obj& entity) {
-		entity.add_component<loot_dropper>(entity.world().get_resource<loot_tables>().insert<T>()).self= entity;
+		entity.add_component<loot_dropper>(entity.world().get_resource<loot_tables>().insert<T>());
 	}
 
 

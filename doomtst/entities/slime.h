@@ -131,7 +131,7 @@ namespace slimes {
 					continue;
 				}
 				if (path.last_detection.is_inactive_set(.1)) {
-					double min_dist = .1f;
+					double min_dist = .08f;
 					//if their is no last position or we move to much we reset fix otherwise fix eventually becomes innactive
 					if (!path.last_position || v3::dist(path.last_position.unwrap(), transform.transform.position) >= min_dist) {
 						path.reset_fix();
@@ -151,7 +151,7 @@ namespace slimes {
 					}
 					else {
 
-						if (v3::dist(transform.transform.position, goto_pos) < .25f) {
+						if (v3::dist(transform.transform.position, goto_pos) < .2f) {
 							path.path.remove_at(0);
 							if (path.path.empty()) {
 								path.force_repath();

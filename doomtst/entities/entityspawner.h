@@ -10,11 +10,11 @@
 namespace game {
 	inline bool should_despawn(v3::Point3 pos, v3::Point3 player,grid::Grid& world) {
 		//todo improve
-		return !world.bounds().contains_point(pos)||v3::manhattan_distance(world.bounds().half_size(),v3::zerov)<v3::manhattan_distance(pos, player);
+		return !world.bounds().contains_point(pos);
 
 	}
 	inline bool spawnable_dist(v3::Point3 pos, v3::Point3 player, grid::Grid& world) {
-		return !should_despawn(pos, player,world) && 24 < v3::dist(pos, player);
+		return !should_despawn(pos, player,world) && 28 < v3::dist(pos, player);
 
 	}
 
@@ -86,7 +86,7 @@ namespace game {
 		void run(ecs::Ecs& ecs) {
 			SpawnTimer& spawn_timer= ecs.insert_resource<SpawnTimer>(ecs.get_resource<timing::WorldClock>());
 			timing::Duration& duration= spawn_timer.next_spawn;
-			double spawn_frequency=.2f;
+			double spawn_frequency=.25f;
 			size_t total_alive = 0;
 			ecs::View< slimes::Mob, core::LocalTransform,ecs::Owner> slimes(ecs);
 			for (auto [slime, transform,object] : slimes) {

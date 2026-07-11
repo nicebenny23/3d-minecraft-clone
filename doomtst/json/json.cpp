@@ -1,5 +1,4 @@
 #include "json.h"
-#include "../util/variant.h"
 #pragma once
 namespace json {
 
