@@ -254,7 +254,7 @@ namespace v3 {
 		Coord() : x(0), y(0), z(0) {
 		}
 		static Coord from_vec3(const Vec3& vec) {
-			return Coord((int)vec.x, (int)vec.y, (int)vec.z);
+			return Coord(std::floor(vec.x), std::floor(vec.y), std::floor(vec.z));
 		}
 
 		inline bool operator==(const Coord& p1) const = default;

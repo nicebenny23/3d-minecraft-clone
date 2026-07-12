@@ -8,7 +8,30 @@
 namespace math {
 
 	
+	struct WorleyNoise {
 
+		double sample(size_t i) const {
+
+			v3::Point3 sample_point = v3::Point3(0, 0, 0) + random::spherical(1, 1, 1, i) * 100;
+			return this->operator()(sample_point, i);
+		}
+		double operator()(v3::Vec3 point, size_t seed) const {
+			double min_dist = std::numeric_limits<double>().infinity();
+			for (int x = -1; x<=int(1); x++) {
+				for (int y = -1; y<=int(1); y++) {
+					for (int z = -1; z <=int(1); z++) {
+						v3::Coord sample =v3::Coord::from_vec3(v3::Vec3(x,y,z)+point);
+						v3::Point3 pos = v3::Point3(sample)+ random::cubical(sample.x, sample.y, sample.z, seed);
+						stn::set_min(min_dist, v3::dist(point,pos));
+					}
+				}
+			}
+			return min_dist;
+		}
+		math::bounds range() const {
+			return math::bounds(0, 1);
+		}
+	};
 	inline double dot_grid_gradient(int x, int y, int z, double xd, double yd, double zd,size_t seed) {
 		v3::Vec3 pos = random::spherical(seed,x, y, z);
 		return xd * pos.x + yd * pos.y + zd * pos.z;
@@ -87,9 +110,9 @@ namespace math {
 			return result;
 		}
 	};
-	struct NoiseParameters {
+	struct PerlinNoise {
 
-		NoiseParameters(const OctaveSeries& series) {
+		PerlinNoise(const OctaveSeries& series) {
 			octaves = series.generate();
 		}
 		stn::array<Octave> octaves;
@@ -125,7 +148,8 @@ namespace math {
 	};
 
 
-	
 
-	using NoiseMap=statistics::HistogramEqualizer<NoiseParameters>;
+
+	using WorleyNoiseMap = statistics::HistogramEqualizer<WorleyNoise>;
+	using NoiseMap=statistics::HistogramEqualizer<PerlinNoise>;
 }

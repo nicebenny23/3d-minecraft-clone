@@ -14,10 +14,10 @@ struct playermovement : ecs::component
     double jumpBufferTime;
     bool slamUsed=false;                  // track whether slam was already done this airtime
     bool has_jumped = false;
-    void start(ecs::entity entity)
+	playermovement(timing::WorldClock& clock)
     {
-        lastGroundedTime = world().ensure_resource<timing::WorldClock>().now();
-        jumpBufferTime = world().ensure_resource<timing::WorldClock>().now() - 1.0f;
+        lastGroundedTime = clock.now();
+        jumpBufferTime = clock.now() - 1.0f;
     }
 };
 

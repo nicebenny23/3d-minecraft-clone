@@ -1,0 +1,1 @@
+//wisp will spawn in lava caves and 

@@ -38,13 +38,14 @@ void player::initplayer(ecs::obj& player) {
 	core::game.emplace_system<player::PlayerEater>();
 	core::game.emplace_system<CameraFollowerSystem>();
 	core::game.emplace_system<player::FertilizationSystem>();
+	timing::WorldClock& clock = player.world().get_resource<timing::WorldClock>();
 	ecs::obj fertilizer=ecs::spawn(player.world(), renderer::ParticleEmmitterRecipe<PlayerFertilizeParticleSpawner>{.max_lifetime = 2.0f});
 	player.add_component<PlayerFertilizer>(fertilizer);
 		player.add_component<player::CloseMenuComponent>(ecs::spawn(player.world(),player::make_close_menu));
 	aabb::DynamicColliderRecipe().apply(player);
 	player.apply_recipe(physics::Spawner{.restitution=.6});
 	ecs::obj eater = ecs::spawn(player.world(),ui::ImageSpawner(geo::Box2d::origin_centered(v2::Vec2(.4f, .4f)),1));
-	player.add_component<player::player_eat_behavior>(player.world().get_resource<timing::WorldClock>(),eater);
+	player.add_component<player::player_eat_behavior>(clock,eater);
 	player.apply_recipe(player::player_health_spawner);  
 
 	player.add_component<playertpcomp>();
@@ -54,10 +55,10 @@ void player::initplayer(ecs::obj& player) {
 	player.add_component< player_place>();
 	ecs::obj spawned = ecs::spawn(player.world(),wireframe_recipe);
 	player.add_component<PlayerCursor>(spawned);
-	player.add_component<PlayerAttack>(ecs::spawn(player.world(), renderer::ParticleEmmitterRecipe<PlayerAttackParticleSpawner>{.max_lifetime=2.0f}),player.world().get_resource<timing::WorldClock>());
+	player.add_component<PlayerAttack>(ecs::spawn(player.world(), renderer::ParticleEmmitterRecipe<PlayerAttackParticleSpawner>{.max_lifetime=2.0f}), clock);
 	player.add_component<playerdaggercomp>();
 	player.add_component<renderer::CameraComponent>();
 	ecs::spawn(player.world(), CameraSpawner()).add_component<renderer::CameraDirectFollower>(player);
-	player.add_component<playermovement>();
+	player.add_component<playermovement>(clock);
 	player.add_component<CameraController>();
 }

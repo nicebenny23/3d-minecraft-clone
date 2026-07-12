@@ -316,7 +316,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="block\liquid.cpp" />
     <ClCompile Include="debugger\console.cpp" />
     <ClCompile Include="debugger\debug.cpp" />
     <ClCompile Include="entities\slime.cpp" />
@@ -351,7 +350,6 @@
     <ClInclude Include="assets\Descriptor.h" />
     <ClInclude Include="assets\Loader.h" />
     <ClInclude Include="block\air.h" />
-    <ClInclude Include="block\altar.h" />
     <ClInclude Include="block\blockinit.h" />
     <ClInclude Include="block\block_mesh.h" />
     <ClInclude Include="block\block_registry.h" />
@@ -362,17 +360,14 @@
     <ClInclude Include="block\glass.h" />
     <ClInclude Include="block\plank.h" />
     <ClInclude Include="block\moss.h" />
-    <ClInclude Include="block\liquid.h" />
     <ClInclude Include="block\stone.h" />
     <ClInclude Include="block\torch.h" />
     <ClInclude Include="debugger\console.h" />
     <ClInclude Include="debugger\debug.h" />
-    <ClInclude Include="entities\antifreezeboss.h" />
     <ClInclude Include="entities\crystaldaggers.h" />
     <ClInclude Include="entities\onhit.h" />
     <ClInclude Include="entities\entityinit.h" />
     <ClInclude Include="entities\entityspawner.h" />
-    <ClInclude Include="entities\rotatetovelocity.h" />
     <ClInclude Include="entities\slime.h" />
     <ClInclude Include="entities\wisp.h" />
     <ClInclude Include="game\brain.h" />

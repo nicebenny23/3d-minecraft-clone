@@ -91,7 +91,7 @@ namespace world {
 			double world_caveness = normal(pos / 60.0, 9);
 			world_caveness = (world_caveness + 1) / 2;
 			world_caveness = math::ease_in_out_power(math::ease_in_power(world_caveness, 2.5), 2.5);
-			double big_carver_bound_size = math::bounds(.09, .16).lerp(world_caveness);
+			double big_carver_bound_size = math::bounds(.09, .175).lerp(world_caveness);
 			
 			math::bounds big_carver_bounds = math::bounds::from_center_radius(0, big_carver_bound_size);
 			return big_carver_bounds;
@@ -112,8 +112,11 @@ namespace world {
 			return bounds.signed_distance_to(big_carver_2) * bit_carver_size;
 
 		}
+		
 		BorderState get_state(v3::Coord position) const {
+		
 			v3::Vec3 pos = position;
+			
 			double noise = 0;
 			math::bounds big_carver_bounds = caveness(pos);
 			double global_dist_1 = global_dist_one(pos, big_carver_bounds);

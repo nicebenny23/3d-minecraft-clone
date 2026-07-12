@@ -31,14 +31,14 @@ namespace random {
 
 		return random() * max;
 	}
-	stn::array<v3::Vec3> seeded_directions;
-
+	stn::array<v3::Vec3> seeded_directions_sphere;
+	stn::array<v3::Vec3> seeded_directions_cube;
 	void init_random_direction_cache() {
 		
 		const int iters = 10;
 		unsigned int noiseval = 1;
 
-		seeded_directions = stn::array<v3::Vec3>();
+		seeded_directions_sphere = stn::array<v3::Vec3>();
 		size_t ushort_amt = (1 + std::numeric_limits<unsigned short>().max());
 		for (int u = 0; u < ushort_amt; u++) {
 
@@ -51,17 +51,20 @@ namespace random {
 						randomize_uint(noiseval);
 					}
 					point_on_circle[ind] = (noiseval/ static_cast<double>(MAXUINT32))*2-1;
+				
 				}
-
+				if(seeded_directions_cube.length() < ushort_amt) {
+					seeded_directions_cube.push((point_on_circle+v3::unitv)/2);
+				}
 			} while (mag2(point_on_circle) > 1);
-			seeded_directions.push(normal(point_on_circle));
+			seeded_directions_sphere.push(normal(point_on_circle));
 		}
 	}
 	
 
 	v3::Vec3 spherical() {
 		randomize_64(seed64);
-		return seeded_directions.unchecked_at(seed64&std::numeric_limits<unsigned short>().max());
+		return seeded_directions_sphere.unchecked_at(seed64&std::numeric_limits<unsigned short>().max());
 	}
 
 	void initilize_random() {

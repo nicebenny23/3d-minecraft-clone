@@ -41,11 +41,6 @@ namespace player {
 		ecs::obj break_decal;
 		stn::Option< PlayerBreaker> breaker;
 		
-		void start(ecs::entity entity) override {
-			break_decal = ecs::spawn_emplaced<DecalRecipe>(world(),TexturePath("images\\block_break_2.png"));
-			//	CtxName::ctx.Ren->Textures.LoadTexture("images\\menutex.png");
-		}
-
 		void spawn_decal(size_t phase,PlayerCursor& look) {
 			if (phase == 0) return;
 
