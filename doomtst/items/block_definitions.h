@@ -12,6 +12,7 @@
 #include "../block/glass.h"
 #include "../game/Core.h"
 
+#include "../block/water.h"
 #pragma once
 namespace items {
 	
@@ -137,7 +138,7 @@ namespace items {
 		registry.insert<ChestBlock>();
 
 		registry.insert<SoilBlock>();
-
+		registry.insert<WaterBlock>();
 		item_register.insert<DirtItem>();
 		registry.insert<CraftingTableBlock>();
 		item_register.insert<ChestItem>();

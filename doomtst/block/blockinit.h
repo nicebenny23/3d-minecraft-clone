@@ -23,7 +23,7 @@ namespace blocks {
 			block_type block_constructor = block_type(type.mesh_traits_for(), mesh.recreate_mesh, loc, id, direction, block_face, registry);
 			ecs::entity ent_id;
 
-			if (!type.is_solid()) {
+			if (!type.solid_traits_for().is_some()) {
 				auto idk = world.spawn_with(std::move(block_constructor));
 				ent_id = idk.get<ecs::entity>();
 				blk_ptr = &idk.get<block&>();

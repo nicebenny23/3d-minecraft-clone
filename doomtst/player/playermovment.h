@@ -8,118 +8,80 @@
 #include "playerclimb.h"
 #include "../game/close.h"
 
-struct playermovement : ecs::component
-{
-    double lastGroundedTime;
-    double jumpBufferTime;
-    bool slamUsed=false;                  // track whether slam was already done this airtime
-    bool has_jumped = false;
-	playermovement(timing::WorldClock& clock)
-    {
-        lastGroundedTime = clock.now();
-        jumpBufferTime = clock.now() - 1.0f;
-    }
+struct playermovement : ecs::component {
+	timing::Duration last_grounded;
+	timing::Duration jump_buffer;
+	timing::Duration held;
+	playermovement(timing::WorldClock& clock):jump_buffer(clock),last_grounded(clock),held(clock){
+		
+	}
 };
 
-struct PlayerMovementSys : ecs::System
-{
-    const float coyoteDuration = 0.15f;
-    const float bufferDuration = 0.10f;
-    const float jumpStrength = 150.0f * 12.0f / 200.0f;
-    const float slamStrength = -30.0f;  
-    
-    virtual void run(ecs::Ecs& ecs)
-    {
+struct PlayerMovementSys : ecs::System {
+	const float coyote_duration = 0.15f;
+	const float buffer_duration = 0.10f;
+	const float jump_strength = 150.0f * 12.0f / 200.0f;
+	double hold_dur = .175f;
+	virtual void run(ecs::Ecs& ecs) {
 		if (!player::in_game(ecs)) {
 			return;
 		}
 
-        auto view = ecs::View<physics::RigidBody,playermovement,playerclimb,core::LocalTransform>(ecs);
+		auto view = ecs::View<physics::RigidBody, playermovement, playerclimb, core::LocalTransform, physics::Buoyancy>(ecs);
 
-        for (auto [body, movement, climb,transform] : view)
-        {
-			userinput::InputManager& man=ecs.get_resource<userinput::InputManager>();
-            float dt = ecs.ensure_resource<timing::WorldClock>().dt;
-            double now = ecs.ensure_resource<timing::WorldClock>().now();
-            // — horizontal movement unchanged —
-            float slowdown = 2.0f;
-            float speed = 16.0f;
-            float effSpeed = dt * speed * slowdown; 
-            Vec3 forward = transform.transform.normal_dir().with_y(0).normal();
+		for (auto [body, movement, climb, transform, buoyancy] : view) {
+			userinput::InputManager& man = ecs.get_resource<userinput::InputManager>();
+			float dt = ecs.ensure_resource<timing::WorldClock>().dt;
+			double now = ecs.ensure_resource<timing::WorldClock>().now();
+			float speed =32;
+			float effSpeed = dt * speed;
+			Vec3 forward = transform.transform.normal_dir().with_y(0).normal();
 			Vec3 right = transform.transform.right_dir().with_y(0).normal();
-            if (man.key('w').held) body.velocity += forward * effSpeed;
-            if (man.key('s').held) body.velocity -= forward * effSpeed;
-            if (man.key('d').held) body.velocity += right * effSpeed;
-            if (man.key('a').held) body.velocity -= right * effSpeed;
+			
+			if (man.key('w').held) body.velocity += forward * effSpeed;
+			if (man.key('s').held) body.velocity -= forward * effSpeed;
+			if (man.key('d').held) body.velocity += right * effSpeed;
+			if (man.key('a').held) body.velocity -= right * effSpeed;
 
-            if (body.isonground)
-            {
+			if (body.on_ground) {
+
+				movement.last_grounded.set(coyote_duration);
+			}
+
+			if (man.key(' ').pressed) {
+
+				if (movement.jump_buffer.remaining_or_default()<=.1f) {
+
+					movement.jump_buffer.set(buffer_duration);
+				}
+			}
+			if (movement.held.is_active()&& !man.key(' ').held) {
+				body.add_force(physics::Force(v3::Vec3(0, -7/hold_dur, 0) * body.mass));
+			}
+			if (buoyancy.in_water) {
+				double float_amt = 35;
+				if (man.key(' ').held) {
+					body.velocity.y += float_amt * dt;
+				}
+			}
+			else {
 				
-                movement.slamUsed = false;
-                movement.lastGroundedTime = now;
-                movement.has_jumped = false;
-            }
-
-            // — stamp jumpBufferTime on press —
-            if (man.key(' ').pressed)
-                movement.jumpBufferTime = now;
-
-            // — liquid / rope vertical smoothing (unchanged) —
-            bool normalState = true;
-
-            if (climb.onrope)
-            {
-                normalState = false;
-                float targetY = man.key(userinput::shift_key).held ? -5.0f
-                    : man.key(' ').held ? 5.0f
-                    : 0.0f;
-                body.velocity.y = stn::lerp(body.velocity.y, targetY, 0.1f);
-            }
-
-            // — jumping, slam, and sneak-down —
-            if (normalState)
-            {
-                double sinceGround = (now - movement.lastGroundedTime);
-                float sinceBuffer = (now - movement.jumpBufferTime);
-
-                // slam: one-timing hard downward thrust in mid-air
-                if (!body.isonground
-                    && man.key(userinput::shift_key).pressed
-                    && !movement.slamUsed)
-                {
-                    body.velocity.y = slamStrength;
-                    movement.slamUsed = true;
-                }
-                // buffered coyote jump
-                else if (sinceGround < coyoteDuration
-                    && sinceBuffer < bufferDuration&&!movement.has_jumped)
-                {
-                    movement.has_jumped=true;
-                    body.velocity.y = jumpStrength;
-                    movement.jumpBufferTime = now - (bufferDuration + 1.0f); // expire buffer
-                }
-                // sneak-down on ground
-                else if (body.isonground
-                    && man.key(userinput::shift_key).held)
-                {
-                    body.velocity.y -= effSpeed;
-                }
-				if (ecs.get_resource<grid::Grid>().chunks_loaded()==343) {
-					//body.owner().get_component<core::LocalTransform>().transform.position += Vec3(32, 0, 0);
-
+				if (movement.jump_buffer.is_active() && movement.last_grounded.is_active()) {
+					body.velocity.y = jump_strength;
+					movement.last_grounded.set(0.0);
+					movement.held.set(hold_dur);
 				}
-				if (man.key('z').held) {
-					transform.transform.position.y = 4;
+
+
+				if (man.key('f').held) {
+					transform.transform.position += transform.transform.normal_dir() * 50 * dt;
 				}
-					if (man.key('f').held) {
-					transform.transform.position += transform.transform.normal_dir()*4;
+				if (man.key('h').held) {
+					transform.transform.position += transform.transform.normal_dir() * 10 * dt;
 				}
-					if (man.key('h').held) {
-						transform.transform.position += transform.transform.normal_dir() * 10*dt;
-					}
-					
-                
-            }
-        }
-    }
+
+
+			}
+		}
+	}
 };

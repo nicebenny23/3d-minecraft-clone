@@ -7,7 +7,6 @@
 #include "../player/player.h"
 #include "../items/item.h"
 #include "../items/loottable.h"
-#include "rotatetovelocity.h"
 #pragma once 
 inline ecs::obj spawndagger(v3::Point3 pos,v3::Vec3 velocity,float gravscale=.4f) {
 

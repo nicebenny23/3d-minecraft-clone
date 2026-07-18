@@ -15,66 +15,58 @@ namespace world {
 		on,
 		empty
 	};
-	inline biometype get_biome(double biome) {
-		if (math::bounds(-1, -.97).contains(biome)) {
-			return redland;  
-		}
-		return normalbiome;
+	
+	struct DefaultTerrainGenerator :world::TerrainGenerator {
+	
+		inline biometype get_biome(double biome) const {
+			double min = -1;
+			if (math::bounds(-1, -.97).contains(biome)) {
+				return redland;
+			}
+			return normalbiome;
 
-	}
-
-	inline blocks::block_id get_default_block(biometype biome, BorderState state, const BlockRegistry& registry) {
-		
-		if (biome == normalbiome) {
-			return registry.get_id<blocks::StoneBlock>();
 		}
-		if (biome == redland) {
-			if (state == BorderState::on) {
+		inline blocks::block_id get_redland(BorderState state) const {
+
+				if (state == BorderState::on) {
+					return registry.get_id<blocks::SoilBlock>();
+
+				}
 				return registry.get_id<blocks::SoilBlock>();
 
+		}
+		inline blocks::block_id get_stone(double chaotic, BorderState dist) const {
+			double per_pick = 5;
+			double per_use = per_pick / (5 * 256) / 2;
+
+			if (dist == BorderState::solid) {
+				per_use = 0;
+			}
+
+			if (math::bounds(-per_use, per_use).contains(chaotic)) {
+				return registry.get_id<blocks::CrystalBlock>();
 			}
 			return registry.get_id<blocks::StoneBlock>();
+
+
 		}
+		
 
-	}
-	inline blocks::block_id get_secondary_block(biometype biome, const BlockRegistry& registry) {
-		return registry.get_id<blocks::CrystalBlock>();
-	}
-	inline stn::Option< blocks::block_id> chaotic_overide(double chaotic, BorderState dist, biometype biome, const BlockRegistry& registry) {
-		double per_pick = 5;
-		double per_use = per_pick / (5 * 256) / 2;
+		inline blocks::block_id non_cave_id(double biome, double chaotic, BorderState dist) const {
 
-		if (dist==BorderState::solid) {
-			per_use = 0;
-		}
-
-		if (math::bounds(-per_use, per_use).contains(chaotic)) {
-			return get_secondary_block(biome, registry);
-		}
-		return stn::None;
-	}
-
-	inline blocks::block_id non_cave_id(double biome, double chaotic, BorderState dist, const BlockRegistry& registry) {
-
-		biometype biome_type = get_biome(biome);
-		blocks::block_id main_block = get_default_block(biome_type, dist, registry);
-
-		stn::Option< blocks::block_id> overload = chaotic_overide(chaotic, dist, biome_type, registry);
-		if (overload) {
-			main_block = overload.unwrap();
-		}
-		blocks::block_id neid = main_block;
-
-		return neid;
-	}
-	struct DefaultTerrainGenerator :world::TerrainGenerator {
-		math::NoiseMap normal;
+			biometype biome_type = get_biome(biome);
+			if (biome_type==biometype::redland) {
+				return get_redland(dist);
+			}
+			return get_stone(chaotic, dist);
+		}	math::NoiseMap normal;
 		math::NoiseMap crazy;
 		math::NoiseMap axis;
-
+		math::WorleyNoiseMap water_map;
 		math::NoiseMap smooth;
 		BlockRegistry& registry;
 		DefaultTerrainGenerator(BlockRegistry& blk_registry) :
+			water_map(math::WorleyNoise{ .hemisphere = true },2000),
 			smooth(math::OctaveSeries{ .starting_period = 1.0f }, 200000),
 			normal(math::OctaveSeries{ .octaves = 3,.starting_period = 1,.period_factor = .5f,.amplification_factor = .5f }, 200000),
 			crazy(math::OctaveSeries{ .starting_period = 3 }, 20000),
@@ -112,7 +104,13 @@ namespace world {
 			return bounds.signed_distance_to(big_carver_2) * bit_carver_size;
 
 		}
-		
+		bool water(v3::Vec3 pos) const {
+
+			double bit_carver_size = 80;
+			math::bounds water_bounds = math::bounds(0,.1);
+			double flt = water_map(pos / bit_carver_size, 15);
+				return water_bounds.contains(flt);
+		}
 		BorderState get_state(v3::Coord position) const {
 		
 			v3::Vec3 pos = position;
@@ -150,18 +148,31 @@ namespace world {
 			}
 			return BorderState::solid;
 		}
+
 		block_id generate(v3::Coord position) const {
 			BorderState state = get_state(position);
 			v3::Vec3 pos = position;
-				if (state==BorderState::empty) {
-
-					return registry.get_id<blocks::AirBlock>();
+			if (state == BorderState::empty) {
+				if (water(position)) {
+					return registry.get_id<WaterBlock>();
 				}
+
+				for (math::Direction3d dir : math::Directions3d) {
+					if (dir != math::down_3d) {
+
+						if (water(position + dir.coord())) {
+							return registry.get_id<blocks::StoneBlock>();
+						}
+					}
+				}
+				return registry.get_id<blocks::AirBlock>();
+			}
+			
+	
 			double biome = smooth(pos/ 20, 10);
 			double random_n = crazy(position, 2);
 
-			return non_cave_id(biome, random_n, state, registry);
-
+			return non_cave_id(biome, random_n, state);
 		}
 	};
 

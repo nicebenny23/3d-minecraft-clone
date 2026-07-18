@@ -31,7 +31,7 @@ namespace items {
 namespace blocks {
 
 	struct ChestMenuRecipe {
-		ecs::Constrained<items::container> chest_slots;
+		ecs::Constrained<items::Container> chest_slots;
 
 
 		void apply(ecs::obj& ent) const {
@@ -42,8 +42,8 @@ namespace blocks {
 		}
 	};
 	struct stored_container:ecs::component {
-		ecs::Constrained<items::container> stored;
-		stored_container(ecs::Constrained<items::container> stored_item) :stored(stored_item) {
+		ecs::Constrained<items::Container> stored;
+		stored_container(ecs::Constrained<items::Container> stored_item) :stored(stored_item) {
 
 		}
 	};
@@ -60,22 +60,22 @@ namespace blocks {
 			return 				BlockMeshTraits(v3::unit_scale, false, chest_side, chest_side, chest_top, chest_top, chest_front, chest_side);
 		}
 		void apply(ecs::obj& block) const override {
-			ecs::Constrained<items::container> chest_slots(ecs::spawn(block.world(), items::container_recipe(ui::TableBounds(6,2))));
+			ecs::Constrained<items::Container> chest_slots(ecs::spawn(block.world(), items::container_recipe(ui::TableBounds(6,2))));
 			block.add_component<stored_container>(chest_slots);
-			ecs::Constrained<items::container> player_main_slots(player::player_for(block.world()).get_component<player::inventory>().slots);
+			ecs::Constrained<items::Container> player_main_slots(player::player_for(block.world()).get_component<player::inventory>().slots);
 			block.apply_recipe(ChestMenuRecipe{ .chest_slots = chest_slots });
 			block.apply_recipe(items::loot_table_recipe<chest_loot_table>);
 		}
 		void read_from_bytes(ecs::obj block,stn::file_handle& handle)const  override {
 			items::container_id id = stn::file_serializer<items::container_id>().read(handle);
-			ecs::Constrained<items::container> player_main_slots(player::player_for(block.world()).get_component<player::inventory>().slots);
-			ecs::Constrained<items::container> container_slot(block.world().get_resource<items::WorldContainers>()[id]);
+			ecs::Constrained<items::Container> player_main_slots(player::player_for(block.world()).get_component<player::inventory>().slots);
+			ecs::Constrained<items::Container> container_slot(block.world().get_resource<items::WorldContainers>()[id]);
 			block.add_component<stored_container>(container_slot);
 			block.apply_recipe(ChestMenuRecipe{.chest_slots = container_slot });
 			block.apply_recipe(items::loot_table_recipe<chest_loot_table>);
 		}
 		void write_to_bytes(ecs::obj block,stn::file_handle& handle) const override {
-			items::container_id id = block.get_component<stored_container>().stored.get<items::container>().id;
+			items::container_id id = block.get_component<stored_container>().stored.get<items::Container>().id;
 			stn::file_serializer<items::container_id>().write(id,handle);
 			int l = 3;
 		}

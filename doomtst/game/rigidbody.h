@@ -11,6 +11,7 @@
 #include "ecs/query.h"
 #include "../game/transforms.h"
 #include "collision.h"
+#include "../block/water.h"
 
 using namespace v3;
 #pragma once 
@@ -46,12 +47,15 @@ namespace physics {
 		}
 		double density;
 	};
+	struct Buoyancy:ecs::component {
+		bool in_water;
+	};
 	struct RigidBody : ecs::component {
 		Vec3 velocity;
 		Vec3 acceleration;
 		double mass;
 
-		bool isonground;
+		bool on_ground;
 		void add_force(const Force& force) {
 			acceleration += force.force / mass;
 		}
@@ -60,7 +64,7 @@ namespace physics {
 		}
 		// Constructor
 		RigidBody() :mass(1), velocity(zerov), acceleration(zerov) {
-			isonground = true;
+			on_ground = true;
 		}
 		~RigidBody() = default;
 	};
@@ -68,23 +72,39 @@ namespace physics {
 	struct RigidbodySystem :ecs::System {
 
 		void run(ecs::Ecs& ecs) override {
+			grid::Grid& grid = ecs.get_resource<grid::Grid>();
 			double deltaTime = ecs.ensure_resource<timing::WorldClock>().dt;
 			ecs::View< RigidBody,Density,core::LocalTransform> densities(ecs);
 			for (auto [body, density,transform] : densities) {
 				body.mass=transform.transform.scale.volume()*density.density;
 			}
 
-			ecs::View< Gravity,  RigidBody> fallers(ecs);
-			for (auto [grav, body] : fallers) {
-				body.add_force(grav.strength);
+			ecs::View< Gravity,  RigidBody,Buoyancy> fallers(ecs);
+			for (auto [grav, body,buouancy] : fallers) {
+			
+					body.add_force(grav.strength);
 			}
-			ecs::View< FrictionDamping, RigidBody> friction_query(ecs);
-			for (auto [friction, body] : friction_query) {
-				body.add_force(Force{ .force = -body.velocity * friction.strength * v3::Scale3(1.0f,0.f,1.0f) });
+			ecs::View< FrictionDamping, RigidBody,Buoyancy> friction_query(ecs);
+			for (auto [friction, body,buoyancy] : friction_query) {
+				double effective_strength = friction.strength;
+				v3::Vec3 vector = v3::Scale3(1.0f, 0.f, 1.0f);
+				if (buoyancy.in_water) {
+					
+					effective_strength *= 1.7;
+					vector.y = 1/1.7;
+				}
+				body.add_force(Force{ .force = -body.velocity * effective_strength*vector });
 			}
 
-			ecs::View<core::LocalTransform,RigidBody,PhycicsMaterial,ecs::Mabye<aabb::Collider>, ecs::Owner> rigids(ecs);
-			for (auto [pos, body, material, collider_mabye, object] : rigids) {
+			ecs::View<core::LocalTransform,RigidBody,PhycicsMaterial,ecs::Mabye<aabb::Collider>,Buoyancy, ecs::Owner> rigids(ecs);
+			for (auto [pos, body, material, collider_mabye,buoyancy,object] : rigids) {
+				buoyancy.in_water = false;
+				for (chunks::block_object& object:grid.voxel_in_range(pos.transform.unrotated_box())) {
+					
+					if (object.get<block>().is<WaterBlock>()) {
+						buoyancy.in_water = true;
+					}
+				}
 				if (collider_mabye.is_some_and([&](aabb::Collider& collider){return !collider.effector;})) {
 				
 
@@ -141,7 +161,7 @@ namespace physics {
 
 					Point3 boxcenter = pos.transform.unrotated_box().in_direction(math::down_3d);
 					geo::Box checkbox = geo::Box(boxcenter, pos.transform.unrotated_box().scale.with_y(.005) * .96f);
-					body.isonground = collision::boxcast(checkbox, collision::HitQuery(object));
+					body.on_ground = collision::boxcast(checkbox, collision::HitQuery(object));
 				}
 				else {
 					pos.transform.position += body.velocity * deltaTime;
@@ -173,6 +193,7 @@ namespace physics {
 			object.add_component<FrictionDamping>(friction);
 			object.add_component<PhycicsMaterial>(restitution);
 			object.add_component<Gravity>(gravity);
+			object.add_component<Buoyancy>();
 		}
 	};
 }

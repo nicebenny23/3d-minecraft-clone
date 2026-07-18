@@ -23,6 +23,7 @@ namespace player {
 	inline void make_close_menu(ecs::obj& object) {
 		ui::MenuRecipe().apply(object);
 		object.spawn_child(make_close_button);
+
 	}
 	struct CloseGameOnCloseButton :ecs::System {
 		CloseGameOnCloseButton(ecs::Ecs& world):reader(world.make_reader<ui::NoMenus>()) {
@@ -43,8 +44,8 @@ namespace player {
 		}
 	};
 	inline bool in_game(const ecs::Ecs& world) {
-		return !world.get_resource<ui::MenuState>().top()
-		.is_some_and(&ecs::obj::has_component<CloseMenuComponent>);
+		return !world.get_resource<ui::MenuState>().top().is_some();
+		//.is_some_and(&ecs::obj::has_component<CloseMenuComponent>);
 	}
 	inline void CloseMenuPlugin(core::App& app) {
 		app.emplace_system<CloseGameOnCloseButton>();

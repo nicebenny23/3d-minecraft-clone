@@ -9,7 +9,7 @@ namespace math {
 
 	
 	struct WorleyNoise {
-
+		bool hemisphere=false;
 		double sample(size_t i) const {
 
 			v3::Point3 sample_point = v3::Point3(0, 0, 0) + random::spherical(1, 1, 1, i) * 100;
@@ -21,8 +21,12 @@ namespace math {
 				for (int y = -1; y<=int(1); y++) {
 					for (int z = -1; z <=int(1); z++) {
 						v3::Coord sample =v3::Coord::from_vec3(v3::Vec3(x,y,z)+point);
+						
 						v3::Point3 pos = v3::Point3(sample)+ random::cubical(sample.x, sample.y, sample.z, seed);
-						stn::set_min(min_dist, v3::dist(point,pos));
+						if (!hemisphere||pos.y>=point.y) {
+
+							stn::set_min(min_dist, v3::dist(point, pos));
+						}
 					}
 				}
 			}

@@ -87,10 +87,10 @@ namespace items {
 					if (random::random()<element.drop_probability) {
 						player::inventory& inv = world().get_component< player::inventory>(drop_to.unwrap());
 						stn::array<ecs::Constrained<items::ElementSlot>> slots;
-						for (items::container_element& elem: inv.hotbar.get<items::container>()) {
+						for (items::container_element& elem: inv.hotbar.get<items::Container>()) {
 							slots.push(elem);
 						}
-						for (items::container_element& elem : inv.slots.get<items::container>()) {
+						for (items::container_element& elem : inv.slots.get<items::Container>()) {
 							slots.push(elem);
 						}
 						stn::Option<items::AddContainerPlans>  give_action= items::give_container_entry(element.entry, slots);

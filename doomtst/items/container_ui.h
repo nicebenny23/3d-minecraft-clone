@@ -5,16 +5,16 @@
 namespace items{
 	using slot_type = ecs::Constrained<ItemSlotDecal, RefrencedSlot>;
 	struct ContainerDisplay:ecs::component {
-		ContainerDisplay(ecs::Constrained<items::container> object) :container_object(object), slots(){
+		ContainerDisplay(ecs::Constrained<items::Container> object) :container_object(object), slots(){
 		}
-		ecs::Constrained<items::container> container_object;
+		ecs::Constrained<items::Container> container_object;
 		stn::array<slot_type> slots;
 		
-		const container& displayed_container() const {
-			return container_object.get_component<container>();
+		const Container& displayed_container() const {
+			return container_object.get_component<Container>();
 		}
-		container& displayed_container(){
-			return container_object.get_component<container>();
+		Container& displayed_container(){
+			return container_object.get_component<Container>();
 		}
 
 		ui::TableBounds size() const {
@@ -32,11 +32,11 @@ namespace items{
 	};
 
 	struct ContainerDisplayedRecipe {
-		ecs::Constrained<items::container> container_object;
+		ecs::Constrained<items::Container> container_object;
 		v2::Coord2 offset;
 		void apply(ecs::obj& object) const {
 			v2::UVec2 index = object.get_component<ui::TableEntry>().entry;
-			ecs::Constrained< ElementSlot> slot_object(container_object.get<items::container>()[index].object());
+			ecs::Constrained< ElementSlot> slot_object(container_object.get<items::Container>()[index].object());
 			object.apply_recipe(ItemSlotDisplaySpawner(slot_object, offset + v2::Coord2(index.x, index.y)));
 			ecs::obj parent = ecs::parent(object).unwrap();
 			parent.get_component<items::ContainerDisplay>().slots.push(slot_type(object));
@@ -44,8 +44,8 @@ namespace items{
 	};
 	struct ContainerDisplayRecipe {
 		v2::Coord2 offset;
-		ecs::Constrained<items::container> container_object;
-		ContainerDisplayRecipe(v2::Coord2 position, ecs::Constrained<items::container> object):offset(position),container_object(object){
+		ecs::Constrained<items::Container> container_object;
+		ContainerDisplayRecipe(v2::Coord2 position, ecs::Constrained<items::Container> object):offset(position),container_object(object){
 			object.validate();
 		}
 		void apply(ecs::obj& object) const {

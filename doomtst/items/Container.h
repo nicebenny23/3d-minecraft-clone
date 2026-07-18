@@ -8,11 +8,11 @@ namespace items {
 	};
 	using container_id =stn::typed_id<container_id_tag >;
 	using container_element = ecs::ConstrainedHandle<ElementSlot>;
-	struct container :ecs::component {
+	struct Container :ecs::component {
 		stn::array <container_element> slots;
 		ui::TableBounds size;
 		container_id id;
-		container(ui::TableBounds size, container_id cont_id) :size(size),id(cont_id){
+		Container(ui::TableBounds size, container_id cont_id) :size(size),id(cont_id){
 		}
 		
 		container_element& operator[](v2::UVec2 ind) {
@@ -45,11 +45,11 @@ namespace items {
 	};
 	//because i cannot get serilization to work
 	struct WorldContainers :ecs::resource {
-		stn::array<ecs::Constrained<container>> containers;
+		stn::array<ecs::Constrained<Container>> containers;
 		container_id gen_next() const{
 			return container_id(containers.length());
 		}
-		ecs::Constrained<container>& operator[](container_id index) {
+		ecs::Constrained<Container>& operator[](container_id index) {
 			return containers[index.id];
 		}
 	};
@@ -62,11 +62,11 @@ namespace items {
 		void apply(ecs::obj& ent) const{
 			WorldContainers& containers=ent.world().ensure_resource<WorldContainers>();
 			container_id id = containers.gen_next();
-			container& cont = ent.add_component<container>(offset, id);
+			Container& cont = ent.add_component<Container>(offset, id);
 			containers.containers.emplace(ent);
 			for (size_t i = 0; i < offset.entries();i++) {
 					cont.slots.emplace<items::container_element>(ecs::spawn(ent.world(), ItemSlotSpawner()));
-					ent.add_child(cont.slots.last().object());
+				
 			}
 		}
 	};

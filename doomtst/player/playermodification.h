@@ -49,6 +49,10 @@ namespace player {
 				"images\\block_break_3.png","images\\block_break_4.png",
 				"images\\block_break_5.png","images\\block_break_6.png" };
 			std::string path = tex[phase];
+			if (!break_decal.exists()) {
+				break_decal = world().spawn_empty();
+				break_decal.apply_recipe(renderer::DecalRecipe(renderer::TexturePath("images\\block_break_2.png")));
+			}
 			break_decal.get_component<renderer::Model>().texture= world().load_asset(renderer::TexturePath(path));
 			math::Transform& transform= break_decal.get_component<core::LocalTransform>().transform;
 
@@ -87,7 +91,10 @@ namespace player {
 		}
 		void disengage_block() {
 			breaker = stn::None;
-			break_decal.get_component<renderer::Model>().enabled=false;
+			if (break_decal.exists()) {
+
+				break_decal.get_component<renderer::Model>().enabled = false;
+			}
 		}
 		bool engaged() {
 			return breaker.is_some();
@@ -105,8 +112,8 @@ namespace player {
 			if (!world().ensure_resource<userinput::InputManager>().left_mouse().held) {
 				return false;
 			}
-
-			if (curr_mining_power(pick)<hit.owner().get_component<blocks::block>().type().mining_traits().power_level ) {
+			SolidBlockTraits traits = hit.owner().get_component<blocks::block>().type().solid_traits_for().unwrap();
+			if (curr_mining_power(pick)<traits.power_level ) {
 				return false;
 			}
 			engage_block(hit.owner());
@@ -133,9 +140,9 @@ namespace player {
 				if (pb.ensure_engage(cursor, pickaxe)) {
 
 					PlayerBreaker& player_break = pb.breaker.unwrap();
-					blocks::SolidBlockTraits mining_traits = player_break.current_block().type().mining_traits();
-					double power = 1.0 / mining_traits.time_to_mine;
-					if (mining_traits.pick_speedup) {
+					blocks::SolidBlockTraits solid_traits_for = player_break.current_block().type().solid_traits_for().unwrap();
+					double power = 1.0 / solid_traits_for.time_to_mine;
+					if (solid_traits_for.pick_speedup) {
 						power *= pb.curr_mining_power(pickaxe);
 					}
 					player_break.amount_done += power * ecs.ensure_resource<timing::WorldClock>().dt;

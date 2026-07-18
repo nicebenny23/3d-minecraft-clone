@@ -172,13 +172,13 @@ namespace grid {
 		}
 		return max / 15.0f;
 	}
-	inline bool lights_loaded_at(const Grid& world,v3::Coord pos) {
+	inline bool lights_loaded_at(Grid& world,v3::Coord pos) {
 		chunks::ChunkLocation location= world.chunk_from_block_pos(pos);
 		for (int x= -1; x<=1; x++) {
 			for (int y = -1; y <= 1; y++) {
 				for (int z = -1; z<= 1; z++) {
 					chunks::ChunkLocation next{ location.position + v3::Coord(x,y,z) };
-					if (!world.contains_chunk_location(next)) {
+					if (!world.contains_chunk(next)) {
 						return false;
 					}
 				}

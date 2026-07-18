@@ -60,9 +60,9 @@ namespace player {
 	};
 	struct inventory_menu_recipe {
 
-		ecs::Constrained<items::container> input;
-		ecs::Constrained<items::container> main_slots;
-		inventory_menu_recipe(ecs::Constrained<items::container> slots, ecs::Constrained<items::container> input_slots) :main_slots(slots),input(input_slots) {
+		ecs::Constrained<items::Container> input;
+		ecs::Constrained<items::Container> main_slots;
+		inventory_menu_recipe(ecs::Constrained<items::Container> slots, ecs::Constrained<items::Container> input_slots) :main_slots(slots),input(input_slots) {
 
 		}
 		void apply(ecs::obj& ent) const{
@@ -82,10 +82,10 @@ ecs::Constrained<items::crafter> crafter = ent
 
 	struct PlayerInventoryRecipe {
 		void apply(ecs::obj& object) const{
-			ecs::Constrained<items::container>  slots = object.spawn_child_emplaced<items::container_recipe>(ui::TableBounds(6, 2));
-			ecs::Constrained<items::container> hotbar = ecs::spawn(object.world(), items::container_recipe(ui::TableBounds(6, 1)));
+			ecs::Constrained<items::Container>  slots = object.spawn_child_emplaced<items::container_recipe>(ui::TableBounds(6, 2));
+			ecs::Constrained<items::Container> hotbar = ecs::spawn(object.world(), items::container_recipe(ui::TableBounds(6, 1)));
 			ecs::Constrained<items::ContainerDisplay>	hotbar_display = ecs::spawn(object.world(), items::ContainerDisplayRecipe(v2::Coord2(0, -7), hotbar));
-			stn::array<std::string> items({ "plank"});
+			stn::array<std::string> items({ "plank","glass"});
 			object.add_component<inventory>(slots, hotbar, hotbar_display).
 				givestartitems(items);
 			ecs::obj input_slots = ecs::spawn(object.world(),items::container_recipe(ui::TableBounds(2, 2)));

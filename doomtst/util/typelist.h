@@ -3,7 +3,7 @@
 #include <type_traits>
 namespace TypeList {
 
-	// --- TypeList container ---
+	// --- TypeList Container ---
 	template<typename... Types>
 	struct TypeList {
 		//length utility on the typelist to reduce verbosity

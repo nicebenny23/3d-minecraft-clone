@@ -27,7 +27,7 @@ namespace blocks {
 		std::string name() const override {
 			return std::string("crystal");
 		}
-		SolidBlockTraits mining_traits() const override {
+		stn::Option<SolidBlockTraits> solid_traits_for() const override {
 			return SolidBlockTraits(4,2);
 		}
 		BlockMeshTraits traits(BlockTextureRegistry& registry)const {

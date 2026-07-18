@@ -16,7 +16,7 @@ namespace blocks {
 		std::string name() const{
 			return std::string("plank");
 		}
-		SolidBlockTraits mining_traits() const override {
+		stn::Option<SolidBlockTraits> solid_traits_for() const override {
 			return SolidBlockTraits(3, 0);
 		}
 		BlockMeshTraits traits(BlockTextureRegistry& registry) const {
@@ -36,7 +36,7 @@ namespace blocks {
 		std::string name() const {
 			return std::string("log");
 		}
-		SolidBlockTraits mining_traits() const override {
+		stn::Option<SolidBlockTraits> solid_traits_for() const override {
 			return SolidBlockTraits(3,0);
 		}
 		BlockMeshTraits traits(BlockTextureRegistry& textures) const {

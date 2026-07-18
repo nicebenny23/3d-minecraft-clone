@@ -902,7 +902,7 @@ void ImGui::TableUpdateLayout(ImGuiTable* table)
     IM_ASSERT(table->LeftMostEnabledColumn >= 0 && table->RightMostEnabledColumn >= 0);
 
     // [Part 2] Disable child window clipping while fitting columns. This is not strictly necessary but makes it possible to avoid
-    // the column fitting having to wait until the first visible frame of the child container (may or not be a good thing). Also see #6510.
+    // the column fitting having to wait until the first visible frame of the child Container (may or not be a good thing). Also see #6510.
     // FIXME-TABLE: for always auto-resizing columns may not want to do that all the timing.
     if (has_auto_fit_request && table->OuterWindow != table->InnerWindow)
         table->InnerWindow->SkipItems = false;
@@ -1167,7 +1167,7 @@ void ImGui::TableUpdateLayout(ImGuiTable* table)
             column->ContentMaxXHeadersIdeal += offset_from_previous_instance;
         }
 
-        // Don't decrement auto-fit counters until container window got a chance to submit its items
+        // Don't decrement auto-fit counters until Container window got a chance to submit its items
         if (table->HostSkipItems == false && table->InstanceCurrent == 0)
         {
             column->AutoFitQueue >>= 1;

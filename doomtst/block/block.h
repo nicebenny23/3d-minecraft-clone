@@ -42,7 +42,7 @@ namespace blocks {
 			return mesh[index.index()];
 		}
 		bool solid() {
-			return type().is_solid();
+			return type().solid_traits_for().is_some();
 		}
 		Point3 center() const {
 			return bounds().center;

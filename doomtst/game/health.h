@@ -20,7 +20,7 @@ namespace Health {
 		size_t damage;
 		ecs::Constrained<EntityHealth> target;
 	};
-	
+	constexpr double damage_delay = .7f;
 	struct EntityKiller :ecs::System {
 		void run(ecs::Ecs& world) {
 			if (!player::in_game(world)) {
@@ -28,7 +28,7 @@ namespace Health {
 			}
 			for (DamageCommand& cmd : world.read_commands<DamageCommand>()) {
 				EntityHealth& current_entity_health = cmd.target.get<EntityHealth>();
-				if (current_entity_health.damage_delay_timer.is_inactive_set(.5)) {
+				if (current_entity_health.damage_delay_timer.is_inactive_set(damage_delay)) {
 					current_entity_health.current_health -= stn::min(current_entity_health.current_health, cmd.damage);
 				}
 			}
@@ -75,7 +75,7 @@ namespace Health {
 
 					if (mag2(forceval)!=0) {
 						forceval = forceval.with_y(0).with_magnitude(power);
-						if (body.isonground) {
+						if (body.on_ground) {
 							forceval.y = 1.0f;
 						}
 					}

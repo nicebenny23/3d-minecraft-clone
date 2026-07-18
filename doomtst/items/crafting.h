@@ -91,7 +91,7 @@ namespace items {
 		}
 		void apply(ecs::obj& entity) const {
 			ItemRecipes recipes;
-			recipes.size = input_container.get_component<container>().size;
+			recipes.size = input_container.get_component<Container>().size;
 			for (const std::filesystem::path& path : paths) {
 				json::Value booklet = json::parse_for_file(path);
 				recipes.recipe_list.append(recipe_booklet_from_path(recipes.size, booklet, entity.world()).recipe_list);

@@ -100,7 +100,7 @@ namespace grid {
 		chunks::ChunkLocation get_chunk_pos(Point3 pos) {
 			return chunk_from_block_pos(get_voxel(pos));
 		}
-		bool contains_chunk_location(chunks::ChunkLocation loc) const {
+		bool contains_chunk_location_when_loaded(chunks::ChunkLocation loc) const {
 			loc.position -= grid_pos.position;
 			return (abs(loc.position.x) <= rad && abs(loc.position.y) <= rad && abs(loc.position.z) <= rad);
 		}
@@ -135,6 +135,9 @@ namespace grid {
 		}
 		stn::Option<ChunkObject&> get_chunk_object(v3::Coord pos) {
 			return get_chunk_object(chunk_from_block_pos(pos));
+		}
+		bool contains_chunk(chunks::ChunkLocation pos) {
+			return get_chunk(pos).is_some();
 		}
 		Option<ecs::Constrained<block>&> get_object(v3::Coord pos) {
 			return get_chunk(pos).map([&](chunks::Chunk& chnk)->ecs::Constrained<block>& {return chnk.unchecked_at_pos(pos); });

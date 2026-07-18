@@ -180,7 +180,7 @@ namespace slimes {
 		void run(ecs::Ecs& world) {
 			ecs::View < SlimePathFinder, ai::Brain, Health::EntityHealth > slimes(world);
 				for (auto&& [path, brain, health] : slimes) {
-					if (.3f < health.damage_delay_timer.remaining().unwrap_or(0)) {
+					if (Health::damage_delay-.2f < health.damage_delay_timer.remaining().unwrap_or(0)) {
 						brain.set<Idler>(1);
 					}
 				}
@@ -204,7 +204,7 @@ namespace slimes {
 					if (headed) {
 						result_type head = headed.unwrap();
 						if (head.move.jump_height != stn::None) {
-							if (body.isonground) {
+							if (body.on_ground) {
 								physics::Implulse jump(v3::Vec3(0, 3.5+head.move.jump_height.unwrap(), 0));
 								body.add_impluse(jump);
 								headed.unwrap().current.pos.y += headed.unwrap().move.jump_height.unwrap();
@@ -274,7 +274,7 @@ namespace slimes {
 			slime.add_component<Health::FlashOnHit>();
 			slime.add_component<Mob>();
 			slime.add_component<ai::Brain>();
-			slime.add_component<Health::DamageOnHit>(player::player_for(slime.world()), 2, 3);
+			slime.add_component<Health::DamageOnHit>(player::player_for(slime.world()), 2, 5);
 			slime.apply_recipe(physics::Spawner{ .restitution = .8 });
 		}
 

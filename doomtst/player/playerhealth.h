@@ -67,7 +67,7 @@ namespace player {
 		player.add_component<PlayerHealth>(spawn);
 		ui::UiSpawner ui(geo::Box2d(v2::Vec2(.1f, -.35f)/2, v2::Vec2(.1f, .015f)), 12);
 		ui::TableBounds bounds(player.get_component<Health::EntityHealth>().max_health, 1);
-		player.apply_recipe(ui::UiTableRecipe< HealthDisplayedRecipe >(ui, HealthDisplayedRecipe(), bounds, ui::UiSpawner(geo::Box2d::origin_centered(v2::unitv*.7f), 1)));
+		player.apply_recipe(ui::UiTableRecipe< HealthDisplayedRecipe >(ui, HealthDisplayedRecipe(), bounds, ui::UiSpawner(geo::Box2d::origin_centered(v2::Vec2(1.2f,1) *.7f), 1)));
 	}
 	inline void player_health_plugin(core::App& app) {
 		app.emplace_system<PlayerHealthUi>();

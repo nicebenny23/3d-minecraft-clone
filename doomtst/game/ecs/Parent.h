@@ -3,35 +3,35 @@
 namespace ecs {
 
 	struct ParentArrayAdapter {
-		stn::array<ecs::entity> container;
+		stn::array<ecs::entity> Container;
 
 		using iterator = stn::array<ecs::entity>::iterator;
 		using const_iterator = stn::array<ecs::entity>::const_iterator;
 
 		void add(ecs::entity v) {
-			container.push(v);
+			Container.push(v);
 		}
 
 		void remove(ecs::entity value) {
-			for (size_t i = 0; i < container.length(); ++i) {
-				if (container[i] == value) {
-					container.swap_drop_unchecked(i);
+			for (size_t i = 0; i < Container.length(); ++i) {
+				if (Container[i] == value) {
+					Container.swap_drop_unchecked(i);
 					return;
 				}
 			}
 		}
 
 		iterator begin() {
-			return container.begin();
+			return Container.begin();
 		}
 		iterator end() {
-			return container.end();
+			return Container.end();
 		}
 		const_iterator begin() const {
-			return container.begin();
+			return Container.begin();
 		}
 		const_iterator end()   const {
-			return container.end();
+			return Container.end();
 		}
 	};
 

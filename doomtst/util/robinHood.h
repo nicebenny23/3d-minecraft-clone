@@ -2374,7 +2374,7 @@ namespace robin_hood {
                     while (info == mInfo[idx]) {
                         if (WKeyEqual::operator()(key, mKeyVals[idx].getFirst())) {
                             // key already exists, do NOT insert.
-                            // see http://en.cppreference.com/w/cpp/container/unordered_map/insert
+                            // see http://en.cppreference.com/w/cpp/Container/unordered_map/insert
                             return std::make_pair(idx, InsertionState::key_found);
                         }
                         next(&info, &idx);

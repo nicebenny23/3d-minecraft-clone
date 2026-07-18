@@ -75,7 +75,7 @@ namespace blocks {
 
 		};
 		virtual std::string name() const = 0;
-		virtual SolidBlockTraits mining_traits() const {
+		virtual stn::Option<SolidBlockTraits> solid_traits_for() const {
 			return SolidBlockTraits();
 		}
 		//we catch the traits to speed up;
@@ -88,9 +88,7 @@ namespace blocks {
 		virtual size_t emmited_light() const {
 			return 0;
 		}
-		virtual bool is_solid() const {
-			return true;
-		}
+	
 		virtual BlockMeshTraits traits(BlockTextureRegistry& textures) const = 0;
 		virtual void apply(ecs::obj& blk) const {
 
@@ -121,8 +119,8 @@ namespace blocks {
 		BlockMeshTraits& mesh_traits_for(block_id id) {
 			return blocks[id.id]->mesh_traits_for();
 		}
-		SolidBlockTraits solid_traits_for(block_id id) {
-			return blocks[id.id]->mining_traits();
+		stn::Option<SolidBlockTraits> solid_traits_for(block_id id) {
+			return blocks[id.id]->solid_traits_for();
 		}
 		std::string name_for(block_id id) {
 			return blocks[id.id]->name();

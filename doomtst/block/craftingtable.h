@@ -37,7 +37,7 @@ namespace items {
 namespace blocks {
 
 	struct CraftingTableMenuRecipe {
-		ecs::Constrained<items::container> input_slots;
+		ecs::Constrained<items::Container> input_slots;
 
 		
 		void apply(ecs::obj& ent) const {
@@ -56,7 +56,7 @@ namespace blocks {
 
 	struct CraftingTableBlock:BlockType {
 		void apply(ecs::obj& block) const override {
-			ecs::Constrained<items::container> input_slots(ecs::spawn(block.world(), items::container_recipe(ui::TableBounds(3,3))));
+			ecs::Constrained<items::Container> input_slots(ecs::spawn(block.world(), items::container_recipe(ui::TableBounds(3,3))));
 			block.add_component<stored_container>(input_slots);
 			block.apply_recipe(CraftingTableMenuRecipe{ .input_slots = input_slots});
 			block.apply_recipe<>(items::loot_table_recipe<items::crafting_table_loot_table>);
@@ -70,18 +70,18 @@ namespace blocks {
 			block_texture crafting_table_side = registry.get_texture("images\\craftingtableside.png");	
 			return BlockMeshTraits(v3::unit_scale, false, crafting_table_side, crafting_table_side, crafting_table_top, crafting_table_bottom, crafting_table_side, crafting_table_side);
 		}
-		SolidBlockTraits mining_traits() const override {
+		stn::Option<SolidBlockTraits> solid_traits_for() const override {
 			return SolidBlockTraits(3, 0);
 		}
 		void read_from_bytes(ecs::obj block, stn::file_handle& handle)const  override {
 			items::container_id id = stn::file_serializer<items::container_id>().read(handle);
-			ecs::Constrained<items::container> container_slot(block.world().get_resource<items::WorldContainers>()[id]);
+			ecs::Constrained<items::Container> container_slot(block.world().get_resource<items::WorldContainers>()[id]);
 			block.add_component<stored_container>(container_slot);
 			block.apply_recipe(CraftingTableMenuRecipe{ .input_slots= container_slot });
 			block.apply_recipe(items::loot_table_recipe<items::crafting_table_loot_table>);
 		}
 		void write_to_bytes(ecs::obj block, stn::file_handle& handle) const override {
-			items::container_id id = block.get_component<stored_container>().stored.get<items::container>().id;
+			items::container_id id = block.get_component<stored_container>().stored.get<items::Container>().id;
 			stn::file_serializer<items::container_id>().write(id, handle);
 
 		}

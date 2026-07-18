@@ -4,16 +4,16 @@
 namespace items {
 	struct craft_recipe {
 
-		craft_recipe(const ItemRecipe& item_recipe, ecs::Constrained <container> input_container, ecs::Constrained <ElementSlot> output_slot) :input(input_container), output(output_slot), recipe(item_recipe) {
+		craft_recipe(const ItemRecipe& item_recipe, ecs::Constrained <Container> input_container, ecs::Constrained <ElementSlot> output_slot) :input(input_container), output(output_slot), recipe(item_recipe) {
 
 		}
 		ItemRecipe recipe;
-		ecs::Constrained<container> input;
+		ecs::Constrained<Container> input;
 		ecs::Constrained<ElementSlot> output;
 
 		void apply(ecs::Ecs& world) {
 			AddToSlotPlan::build(AddToSlotRequest{ .entry = recipe.output,.slot = output}).unwrap().apply();
-			container& cont = input.get_component<container>();
+			Container& cont = input.get_component<Container>();
 			for (size_t i = 0; i < cont.slots.length(); i++) {
 				if (recipe.item_list[i]) {
 					RemoveFromSlotRequest{.slot= cont.slots[i].object(),.count = recipe.item_list[i].unwrap().count}.build().unwrap().apply();
@@ -27,8 +27,8 @@ namespace items {
 
 
 
-	inline	bool can_build(const ItemRecipe& item_recipe, ecs::Constrained <container> input_container, stn::Option<items::item_entry> output_slot) {
-		container& input = input_container.get<container>();
+	inline	bool can_build(const ItemRecipe& item_recipe, ecs::Constrained <Container> input_container, stn::Option<items::item_entry> output_slot) {
+		Container& input = input_container.get<Container>();
 		if (input.size != item_recipe.size) {
 			stn::throw_logic_error("recipe size {} must match container size {}", item_recipe.size, input.size);
 		}
@@ -56,7 +56,7 @@ namespace items {
 		return true;
 	}
 
-	inline stn::Option<ItemRecipe> best_booklet_recipe(ItemRecipes recipes, const ecs::Constrained <container>& input, stn::Option<item_entry> output) {
+	inline stn::Option<ItemRecipe> best_booklet_recipe(ItemRecipes recipes, const ecs::Constrained <Container>& input, stn::Option<item_entry> output) {
 		const ItemTypes& types = input.world().get_resource<ItemTypes>();
 		for (const ItemRecipe& recipe : recipes) {
 			if (can_build(recipe, input, output)) {
@@ -66,7 +66,7 @@ namespace items {
 		return stn::None;
 	}
 
-	inline stn::Option<craft_recipe> build_recipe_from_booklet(ItemRecipes recipes, ecs::Constrained < container> input, ecs::Constrained <ElementSlot> output) {
+	inline stn::Option<craft_recipe> build_recipe_from_booklet(ItemRecipes recipes, ecs::Constrained < Container> input, ecs::Constrained <ElementSlot> output) {
 
 		stn::Option<ItemRecipe> recipe = best_booklet_recipe(recipes, input, output.get<ElementSlot>().entry());
 		if (!recipe) {

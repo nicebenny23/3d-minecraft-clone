@@ -73,7 +73,7 @@ namespace blocks {
 
 
 				if (moss.clock.is_inactive()) {
-					grid.get_object(mblock.pos - v3::Coord(0, 1, 0)).unwrap().get_component<Seedability>().seedable-=1;
+					grid.get_object(mblock.pos - v3::Coord(0, 1, 0)).unwrap().get_component<Seedability>().set_sd(0);
 					grid::set_block(world, mblock.pos, world.get_resource<BlockRegistry>().get_id<LogBlock>());
 				}
 			}
@@ -105,7 +105,7 @@ namespace blocks {
 		BlockMeshTraits traits(BlockTextureRegistry& textures) const {
 			return BlockMeshTraits(v3::unit_scale, false, textures.get_texture("images\\moss.png"));
 		}
-		blocks::SolidBlockTraits mining_traits() const {
+		stn::Option<blocks::SolidBlockTraits> solid_traits_for() const {
 			return blocks::SolidBlockTraits(2, 0, false);
 		}
 	};

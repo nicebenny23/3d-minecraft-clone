@@ -4,14 +4,12 @@
 #include "inventory_ui.h"
 #include "playerattack.h"
 #include "playerplace.h"
-#include "playerclimb.h"
 #include "cameracomp.h"
 #include "playermovment.h"
 #include "playermodification.h"
 #include "playereat.h"
 #include "playercamcontrols.h"
-#include "daggerthrow.h"
-#include "playertpsword.h"
+
 #include "crosshair.h"
 #include "player_fertilize.h"
 #include "../renderer/ModelMesh.h"
@@ -48,15 +46,11 @@ void player::initplayer(ecs::obj& player) {
 	player.add_component<player::player_eat_behavior>(clock,eater);
 	player.apply_recipe(player::player_health_spawner);  
 
-	player.add_component<playertpcomp>();
-	player.add_component<playerclimb>();
-
 	player.add_component< playerbreak>();
 	player.add_component< player_place>();
 	ecs::obj spawned = ecs::spawn(player.world(),wireframe_recipe);
 	player.add_component<PlayerCursor>(spawned);
 	player.add_component<PlayerAttack>(ecs::spawn(player.world(), renderer::ParticleEmmitterRecipe<PlayerAttackParticleSpawner>{.max_lifetime=2.0f}), clock);
-	player.add_component<playerdaggercomp>();
 	player.add_component<renderer::CameraComponent>();
 	ecs::spawn(player.world(), CameraSpawner()).add_component<renderer::CameraDirectFollower>(player);
 	player.add_component<playermovement>(clock);

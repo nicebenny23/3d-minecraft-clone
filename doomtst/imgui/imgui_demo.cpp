@@ -1831,7 +1831,7 @@ static void ShowDemoWindowWidgets(ImGuiDemoWindowData* demo_data)
                 }
             };
 
-            // For this demo we are using ImVector as a string container.
+            // For this demo we are using ImVector as a string Container.
             // Note that because we need to store a terminating zero character, our size/capacity are 1 more
             // than usually reported by a typical string class.
             static ImVector<char> my_str;
@@ -5851,7 +5851,7 @@ static void ShowDemoWindowTables()
         ImGui::CheckboxFlags("ImGuiTableFlags_ScrollY", &flags, ImGuiTableFlags_ScrollY);
         PopStyleCompact();
 
-        // When using ScrollX or ScrollY we need to specify a size for our table container!
+        // When using ScrollX or ScrollY we need to specify a size for our table Container!
         // Otherwise by default the table will fit all available space, like a BeginChild() call.
         ImVec2 outer_size = ImVec2(0.0f, TEXT_BASE_HEIGHT * 8);
         if (ImGui::BeginTable("table_scrolly", 3, flags, outer_size))
@@ -5907,7 +5907,7 @@ static void ShowDemoWindowTables()
         ImGui::DragInt("freeze_rows", &freeze_rows, 0.2f, 0, 9, NULL, ImGuiSliderFlags_NoInput);
         PopStyleCompact();
 
-        // When using ScrollX or ScrollY we need to specify a size for our table container!
+        // When using ScrollX or ScrollY we need to specify a size for our table Container!
         // Otherwise by default the table will fit all available space, like a BeginChild() call.
         ImVec2 outer_size = ImVec2(0.0f, TEXT_BASE_HEIGHT * 8);
         if (ImGui::BeginTable("table_scrollx", 7, flags, outer_size))

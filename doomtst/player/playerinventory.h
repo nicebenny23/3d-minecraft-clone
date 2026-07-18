@@ -13,20 +13,20 @@ namespace player {
 			for (const std::string& item : items) {
 				items::item_id id = world().get_resource<items::ItemTypes>().from_name(item);
 				items::item_entry entry = items::item_entry::try_max(id, 15, world().insert_resource<items::ItemTypes>());
-				stn::Option<items::AddContainerPlans> plan = items::give_container_entry(entry, hotbar.get < items::container>());
+				stn::Option<items::AddContainerPlans> plan = items::give_container_entry(entry, hotbar.get < items::Container>());
 				if (plan) {
 					plan.unwrap().apply();
 				}
 			}
 		}
-		inventory(ecs::Constrained<items::container> slots_, ecs::Constrained<items::container> hotbar_, ecs::Constrained<items::ContainerDisplay> hotbar_display_)
+		inventory(ecs::Constrained<items::Container> slots_, ecs::Constrained<items::Container> hotbar_, ecs::Constrained<items::ContainerDisplay> hotbar_display_)
 			:slots(slots_), hotbar_display(hotbar_display_), hotbar(hotbar_) {
 
 
 		};
-		ecs::Constrained<items::container> slots;
+		ecs::Constrained<items::Container> slots;
 		ecs::Constrained<items::ContainerDisplay> hotbar_display;
-		ecs::Constrained<items::container> hotbar;
+		ecs::Constrained<items::Container> hotbar;
 		stn::Option<v2::UVec2> selected_ind;
 		stn::Option<items::item_stack&> selected() {
 			return selected_object().map([](ecs::Constrained<items::item_stack> stack)->items::item_stack&{return stack.get<items::item_stack>(); });
@@ -35,7 +35,7 @@ namespace player {
 			if (selected_ind == stn::None) {
 				return stn::None;
 			}
-			return hotbar.get_component<items::container>()[selected_ind.unwrap()]
+			return hotbar.get_component<items::Container>()[selected_ind.unwrap()]
 				.get_component<items::ElementSlot>()
 				.element();
 		}

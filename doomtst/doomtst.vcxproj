@@ -362,6 +362,7 @@
     <ClInclude Include="block\moss.h" />
     <ClInclude Include="block\stone.h" />
     <ClInclude Include="block\torch.h" />
+    <ClInclude Include="block\water.h" />
     <ClInclude Include="debugger\console.h" />
     <ClInclude Include="debugger\debug.h" />
     <ClInclude Include="entities\crystaldaggers.h" />
@@ -491,13 +492,10 @@
     <ClInclude Include="renderer\HandleMap.h" />
     <ClInclude Include="renderer\renderer\Mesh.h" />
     <ClInclude Include="player\cameracomp.h" />
-    <ClInclude Include="player\daggerthrow.h" />
     <ClInclude Include="player\playerattack.h" />
     <ClInclude Include="player\playercamcontrols.h" />
-    <ClInclude Include="player\playerclimb.h" />
     <ClInclude Include="player\playereat.h" />
     <ClInclude Include="player\playerplace.h" />
-    <ClInclude Include="player\playertpsword.h" />
     <ClInclude Include="renderer\guirender.h" />
     <ClInclude Include="renderer\renderer\meshStorage.h" />
     <ClInclude Include="renderer\ModelMesh.h" />

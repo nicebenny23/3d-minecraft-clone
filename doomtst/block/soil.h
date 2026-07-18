@@ -39,18 +39,30 @@ namespace blocks {
 
 		}
 		size_t seedable;
+		bool need_reset= true;
+		void set_sd(size_t amt) {
+			seedable = amt;
+			need_reset = true;
+		}
 	};
 	struct FertileTexturer:ecs::System {
 		void run(ecs::Ecs& world) {
 			BlockTextureRegistry& textures = world.get_resource<BlockRegistry>().textures;
 			for (auto[fertile,block]:ecs::View<Seedability,block>(world)) {
-				block_texture texture = textures.get_texture("images\\dirt.png");
-				if (fertile.seedable==0) {
-					texture = textures.get_texture("images\\silt.png");
+				block_texture texture;
+				if (fertile.need_reset) {
+					if (fertile.seedable == 0) {
+						texture = textures.get_texture("images\\silt.png");
+					}
+					else {
+						texture = textures.get_texture("images\\dirt.png");
+					}
+					for (math::Direction3d dir : math::Directions3d) {
+						block.mesh.set_face_texture(dir, texture);
+					}
+					fertile.need_reset = false;
 				}
-				for (math::Direction3d dir:math::Directions3d ) {
-					block.mesh.set_face_texture(dir, texture);
-				}
+				
 			}
 		}
 	};
@@ -63,7 +75,7 @@ namespace blocks {
 		std::string name() const override {
 			return std::string("soil");
 		}
-		SolidBlockTraits mining_traits() const override {
+		stn::Option<SolidBlockTraits> solid_traits_for() const override {
 			return SolidBlockTraits(1,0,false);
 		}
 		BlockMeshTraits traits(BlockTextureRegistry& textures)const {
@@ -76,7 +88,7 @@ namespace blocks {
 		void write_to_bytes(ecs::obj block, stn::file_handle& handle)const  override {
 
 			size_t seedable=block.get_component<Seedability>().seedable;
-			stn::file_serializer<double>().write(seedable, handle);
+			stn::file_serializer<size_t>().write(seedable, handle);
 		}
 	};
 	inline void soil_plugin(core::App& app) {
