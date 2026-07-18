@@ -22,7 +22,9 @@ namespace renderer {
 		Window(stn::non_null<GLFWwindow> window, stn::non_null<GLFWmonitor> monitor,v2::Coord2 scrn) :window(window), monitor(monitor),screen(scrn) {
 
 		}
-
+		~Window() {
+			glfwTerminate();
+		}
 		void set_icon(const char* image) {
 			icon.pixels = gl_util::texture_for(&icon.width, &icon.height, image); // Expects RGBA data.
 			glfwSetWindowIcon(window.get_ptr(), 1, &icon);
@@ -33,8 +35,9 @@ namespace renderer {
 		void fullscreen() {
 			glfwMaximizeWindow(window.get_ptr());
 		}
-		void swap_buffers() {
+		void reset_buffer() {
 			glfwSwapBuffers(window.get_ptr());
+
 		}
 
 		void set_cursor_callback(GLFWcursorposfun CursorCallback) {
@@ -107,7 +110,8 @@ namespace renderer {
 		}
 		Window& game_window= app.emplace_resource<Window>(*window, *monitor, screen); 
 		game_window.set_frame_buffer_callback(frame_buffer_callback);
-		game_window.set_error_callback(error_callback);
+		game_window.set_error_callback(error_callback);		
+		glfwSwapInterval(0);
 	}
 
 

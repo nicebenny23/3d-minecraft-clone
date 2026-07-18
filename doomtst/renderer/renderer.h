@@ -18,12 +18,11 @@
 #include "Window.h"
 #include <string>
 using namespace renderer;
-//Fix
 
 namespace renderer {
 
 	struct Renderer;
-	
+
 	struct remove_render_object {
 		ecs::obj object;
 	};
@@ -34,19 +33,19 @@ namespace renderer {
 		void set_color(colors::Color color) {
 			id.object().set_emplace_component<color_component>(color);
 		}
-		
+
 		void set_uniform(const renderer::uniform& value) {
-				id.get<MaterialComponent>().set(value);
-		}		
+			id.get<MaterialComponent>().set(value);
+		}
 
 		void enable_if(bool should_enable) {
-			id.get<is_enabled>().enabled=should_enable;
+			id.get<is_enabled>().enabled = should_enable;
 		}
 		void enable() {
 			id.get<is_enabled>().enable();
 		}
 		void disable() {
-				id.get<is_enabled>().disable();
+			id.get<is_enabled>().disable();
 		}
 		void set_order_key(float key) {
 			id.object().set_emplace_component<order_key>(key);
@@ -62,7 +61,7 @@ namespace renderer {
 
 		stn::Option<MeshId> mesh() const {
 			return id.get<mesh_component>().msh;
-		} 
+		}
 		bool has_mesh() const {
 			return mesh().is_some();
 		}
@@ -74,12 +73,12 @@ namespace renderer {
 			give_owned_mesh();
 			return MeshBuilder(id.get<mesh_component>().msh.unwrap(), vertex, auto_ind);
 		}
-	
+
 	private:
 		renderable id;
 
 	};
-	inline void fill(MeshBuilder&& new_mesh,ecs::Ecs& world) {
+	inline void fill(MeshBuilder&& new_mesh, ecs::Ecs& world) {
 		world.write_command(std::move(new_mesh).built_mesh());
 	}
 
@@ -91,20 +90,20 @@ namespace renderer {
 
 			if (current_material != material) {
 				Material& mat = *material;
-				context.bind(*mat.shader);			
+				context.bind(*mat.shader);
 
 				for (auto& elem : mat.handles) {
 					context.apply_uniform(uniform_manager.get(elem), std::string_view(elem.shader_alias));
 				}
 				context.bind_properties(mat.prop);
-				current_material = material;			
+				current_material = material;
 
 			}
 		}
 		renderer::Context context;
 		//stored the currently bound uniforms
 		renderer::UniformRegistry uniform_manager;
-		template<typename val_type> requires stn::OneOf<val_type, GLint,float,GLuint,v2::Vec2,v3::Vec3,glm::vec4,glm::mat3,glm::mat4,assets::AssetHandle<Texture2D>,assets::AssetHandle<TextureArray>>
+		template<typename val_type> requires stn::OneOf<val_type, GLint, float, GLuint, v2::Vec2, v3::Vec3, glm::vec4, glm::mat3, glm::mat4, assets::AssetHandle<Texture2D>, assets::AssetHandle<TextureArray>>
 		void set_uniform(const char* name, const val_type& val) {
 			renderer::uniform_value value(val);
 			uniform_manager.set(std::string(name), value);
@@ -116,7 +115,7 @@ namespace renderer {
 		}
 
 		RenderableHandle gen_renderable(std::string material) {
-			
+
 			MaterialHandle handle = world.from_name<Material>(material).expect("material should exist");
 			return RenderableHandle((ecs::spawn_emplaced<renderable_recipe>(world, handle)));
 		}
@@ -128,11 +127,11 @@ namespace renderer {
 			}
 			gl_util::poll_errors();
 
-			mesh_component& mesh_comp=ren.get<mesh_component>();
+			mesh_component& mesh_comp = ren.get<mesh_component>();
 			if (!mesh_comp.msh) {
 				return;
 			}
-			if (mesh_comp.msh.unwrap()->vao.id==10) {
+			if (mesh_comp.msh.unwrap()->vao.id == 10) {
 				shader_id id = ren.get<MaterialComponent>().mat_id->shader;
 				int l = 3;
 			}
@@ -148,16 +147,16 @@ namespace renderer {
 		MeshRegistry meshes;
 
 		Renderer(ecs::Ecs& spawn_world) :world(spawn_world), uniform_manager(), meshes(context) {
-			
+
 
 		}
-		MeshBuilder make_mesh_with_builder(renderer::vertex& vertex,renderer::indice_mode auto_ind=renderer::indice_mode::manual_generate) {
+		MeshBuilder make_mesh_with_builder(renderer::vertex& vertex, renderer::indice_mode auto_ind = renderer::indice_mode::manual_generate) {
 			return MeshBuilder(meshes.create_mesh_data(), vertex, auto_ind);
 		}
 		MeshId make_mesh() {
 			return meshes.create_mesh_data();
 		}
-	
+
 	private:
 		stn::Option<MaterialHandle> current_material;
 		ecs::Ecs& world;
@@ -189,26 +188,23 @@ namespace renderer {
 	};
 	struct RenderAll :ecs::System {
 		void run(ecs::Ecs& world) {
-			ecs::Constrained<CameraComponent,core::LocalTransform> camera_object = world.get_resource<renderer::CameraResource>().camera;
+			ecs::Constrained<CameraComponent, core::LocalTransform> camera_object = world.get_resource<renderer::CameraResource>().camera;
 			CameraComponent& cam = camera_object.get<CameraComponent>();
 			Renderer& ren = world.get_resource<Renderer>();
 			renderer::Window& window = world.get_resource<renderer::Window>();
+			window.reset_buffer();
+			ren.clear();
 			ren.set_uniform("aspect_ratio", float(window.aspect_ratio()));
 			ren.set_uniform("fov", float(cam.fov.radians()));
 			ren.set_uniform("view_matrix", LookAt(camera_object.get<core::LocalTransform>().transform));
 			ren.set_uniform("camera_pos", v3::Vec3(camera_object.get<core::LocalTransform>().transform.position.glm()));
-		
+
 			ren.set_uniform(
 				"proj_matrix", glm::perspective(float(cam.fov.radians()), float(window.aspect_ratio()), float(cam.viewport.min()), float(cam.viewport.max())
 				));
 			ren.set_uniform("near_plane", float(cam.viewport.min()));
 			ren.set_uniform("far_plane", float(cam.viewport.max()));
 			for (CpuMesh& mesh : world.read_commands<CpuMesh>()) {
-
-				if (mesh.mesh->vao.id == 10) {
-					int l = 23;
-
-				}
 				ren.fill_mesh(mesh);
 			}
 			std::unordered_map<phase_handle, render_pass> pass_map;
@@ -243,26 +239,22 @@ namespace renderer {
 			}
 		}
 	};
-	struct RendererPlugin {
-		void operator()(core::App& game) {
-			game.insert_plugin(renderer::window_plugin);
-			ecs::Ecs& world = game.Ecs;
-			Renderer& renderer = world.insert_resource<Renderer>();
-			world.emplace_asset_loader<renderer::TextureLoader>(renderer.context);
-			world.emplace_asset_loader<renderer::TextureArrayLoader>(renderer.context);
+	inline void renderer_plugin(core::App& game) {
+		game.insert_plugin(renderer::window_plugin);
+		ecs::Ecs& world = game.Ecs;
+		Renderer& renderer = world.insert_resource<Renderer>();
+		world.emplace_asset_loader<renderer::TextureLoader>(renderer.context);
+		world.emplace_asset_loader<renderer::TextureArrayLoader>(renderer.context);
 
-			world.emplace_asset_loader<ShaderLoader>(renderer.context);
-			world.emplace_asset_loader<assets::SelfDescriptorLoader<renderer::RenderPhase>>();
-			world.load_asset(RenderPhase(2, true, "ui_phase"));
-			world.load_asset(RenderPhase(0, false, "solid_phase"));
-			world.load_asset(RenderPhase(1, true, "transparent_phase"));
+		world.emplace_asset_loader<ShaderLoader>(renderer.context);
+		world.emplace_asset_loader<assets::SelfDescriptorLoader<renderer::RenderPhase>>();
+		world.load_asset(RenderPhase(2, true, "ui_phase"));
+		world.load_asset(RenderPhase(0, false, "solid_phase"));
+		world.load_asset(RenderPhase(1, true, "transparent_phase"));
+		world.emplace_asset_loader<MaterialManager>();
+		world.emplace_system<ColorSetter>();
+		world.emplace_system<renderer::RenderAll>();
+	}
 
-			world.emplace_asset_loader<MaterialManager>();
-			world.emplace_system<ColorSetter>();
-			world.emplace_system<renderer::RenderAll>();
-
-		}
-
-	};
 
 }

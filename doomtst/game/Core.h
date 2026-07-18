@@ -27,7 +27,13 @@ namespace core {
 	struct CloseGameCommand {
 
 	};
-	
+
+	struct GameState :ecs::resource {
+		GameState() :should_close(false) {
+
+		}
+		bool should_close;
+	};
 
     struct App
     {
@@ -55,7 +61,11 @@ namespace core {
 
 		}
         ecs::Ecs Ecs;
-		
+		void run() {
+			while (!Ecs.get_resource<core::GameState>().should_close) {
+				Ecs.run_systems();
+			}
+		}
     };
 	template<ecs::SystemType T>
 	struct AddSystemPlugin{
@@ -65,12 +75,6 @@ namespace core {
 
 	};
     extern App game;
-	struct GameState :ecs::resource {
-		GameState() :should_close(false) {
-
-		}
-		bool should_close;
-	};
 	struct GameCloser :ecs::System {
 		void run(ecs::Ecs& world) {
 			for (CloseGameCommand cmd : world.read_commands<CloseGameCommand>()) {

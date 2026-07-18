@@ -24,7 +24,7 @@ namespace player {
 				}
 				if (input.key('2').pressed) {
 
-					player_inv.selected_ind =v2::UVec2(1, 0);
+					player_inv.selected_ind = v2::UVec2(1, 0);
 				}
 				if (input.key('3').pressed) {
 
@@ -54,7 +54,7 @@ namespace player {
 
 
 	struct inventory_slots_pannel_recipe {
-		void apply(ecs::obj& ent) const{
+		void apply(ecs::obj& ent) const {
 			ent.spawn_child_emplaced<items::ContainerDisplayRecipe>(v2::Coord2(0, -1), player_for(ent.world()).get_component<inventory>().slots);
 		}
 	};
@@ -62,17 +62,17 @@ namespace player {
 
 		ecs::Constrained<items::Container> input;
 		ecs::Constrained<items::Container> main_slots;
-		inventory_menu_recipe(ecs::Constrained<items::Container> slots, ecs::Constrained<items::Container> input_slots) :main_slots(slots),input(input_slots) {
+		inventory_menu_recipe(ecs::Constrained<items::Container> slots, ecs::Constrained<items::Container> input_slots) :main_slots(slots), input(input_slots) {
 
 		}
-		void apply(ecs::obj& ent) const{
+		void apply(ecs::obj& ent) const {
 			ui::MenuRecipe().apply(ent);
 			inventory_slots_pannel_recipe().apply(ent);
-			ecs::obj bg = ent.spawn_child_emplaced<ui::ImageSpawner>(renderer::TexturePath("images\\menutex.png"), geo::Box2d(v2::Vec2(.24f, .15f)/2.0, v2::Vec2(.33f, .25f)), 0);
-			
+			ecs::obj bg = ent.spawn_child_emplaced<ui::ImageSpawner>(renderer::TexturePath("images\\menutex.png"), geo::Box2d(v2::Vec2(.24f, .15f) / 2.0, v2::Vec2(.33f, .25f)), 0);
+
 			ent.spawn_child_emplaced<items::ContainerDisplayRecipe>(v2::Coord2(4, 3), input);
-ecs::Constrained<items::crafter> crafter = ent
-				.spawn_child_emplaced< items::CrafterRecipe>(input.object(), stn::array({std::filesystem::path("crafting\\2x2craft.txt")}));			
+			ecs::Constrained<items::crafter> crafter = ent
+				.spawn_child_emplaced< items::CrafterRecipe>(input.object(), stn::array({ std::filesystem::path("crafting\\2x2craft.txt") }));
 			ent.spawn_child_emplaced<items::CraftingSlotDisplaySpawner>(v2::Coord2(7, 3), crafter);
 			ent.get_component<ui::UiEnabled>().disable();
 		}
@@ -81,15 +81,15 @@ ecs::Constrained<items::crafter> crafter = ent
 
 
 	struct PlayerInventoryRecipe {
-		void apply(ecs::obj& object) const{
+		void apply(ecs::obj& object) const {
 			ecs::Constrained<items::Container>  slots = object.spawn_child_emplaced<items::container_recipe>(ui::TableBounds(6, 2));
 			ecs::Constrained<items::Container> hotbar = ecs::spawn(object.world(), items::container_recipe(ui::TableBounds(6, 1)));
 			ecs::Constrained<items::ContainerDisplay>	hotbar_display = ecs::spawn(object.world(), items::ContainerDisplayRecipe(v2::Coord2(0, -7), hotbar));
-			stn::array<std::string> items({ "plank","glass"});
+			stn::array<std::string> items({ "plank","glass" });
 			object.add_component<inventory>(slots, hotbar, hotbar_display).
 				givestartitems(items);
-			ecs::obj input_slots = ecs::spawn(object.world(),items::container_recipe(ui::TableBounds(2, 2)));
-			ecs::Constrained<ui::MenuComponent> inventory_menu = ecs::spawn(object.world(), inventory_menu_recipe(slots,input_slots));
+			ecs::obj input_slots = ecs::spawn(object.world(), items::container_recipe(ui::TableBounds(2, 2)));
+			ecs::Constrained<ui::MenuComponent> inventory_menu = ecs::spawn(object.world(), inventory_menu_recipe(slots, input_slots));
 			object.add_component<inventory_ui>(inventory_menu);
 		}
 	};
@@ -113,15 +113,13 @@ ecs::Constrained<items::crafter> crafter = ent
 		}
 	};
 
-	struct PlayerInventoryPlugin {
-		void operator()(core::App& world) {
-			player::player_for(world.Ecs).apply_recipe(PlayerInventoryRecipe());
-			world.emplace_system< InventoryUiSystem>();
-			world.emplace_system<player::LoadHotbarSlots>();
-			world.emplace_system< items::ItemClear>();
-			world.emplace_system< items::run_crafts>();
-			world.emplace_system< items::cursor_crafter>();
-			world.emplace_system<items::SyncDisplayIcon>();
-		}
-	};
+	inline void player_inventory_plugin(core::App& world) {
+		player::player_for(world.Ecs).apply_recipe(PlayerInventoryRecipe());
+		world.emplace_system< InventoryUiSystem>();
+		world.emplace_system<player::LoadHotbarSlots>();
+		world.emplace_system< items::ItemClear>();
+		world.emplace_system< items::run_crafts>();
+		world.emplace_system< items::cursor_crafter>();
+		world.emplace_system<items::SyncDisplayIcon>();
+	}
 }

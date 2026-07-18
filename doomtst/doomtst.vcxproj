@@ -318,7 +318,6 @@
   <ItemGroup>
     <ClCompile Include="debugger\console.cpp" />
     <ClCompile Include="debugger\debug.cpp" />
-    <ClCompile Include="entities\slime.cpp" />
     <ClCompile Include="game\Core.cpp" />
     <ClCompile Include="game\ecs\component.cpp" />
     <ClCompile Include="game\ecs\ecs.cpp" />
@@ -332,11 +331,9 @@
     <ClCompile Include="items\loottable.cpp" />
     <ClCompile Include="items\slot_transactions.cpp" />
     <ClCompile Include="json\json.cpp" />
-    <ClCompile Include="player\playermodification.cpp" />
     <ClCompile Include="renderer\guirender.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="player\player.cpp" />
-    <ClCompile Include="player\playerinventory.cpp" />
     <ClCompile Include="block\block.cpp" />
     <ClCompile Include="math\intersection.cpp" />
     <ClCompile Include="json\json_value.cpp" />
@@ -365,7 +362,6 @@
     <ClInclude Include="block\water.h" />
     <ClInclude Include="debugger\console.h" />
     <ClInclude Include="debugger\debug.h" />
-    <ClInclude Include="entities\crystaldaggers.h" />
     <ClInclude Include="entities\onhit.h" />
     <ClInclude Include="entities\entityinit.h" />
     <ClInclude Include="entities\entityspawner.h" />
@@ -411,7 +407,6 @@
     <ClInclude Include="math\box.h" />
     <ClInclude Include="math\cube_vertex.h" />
     <ClInclude Include="math\transform.h" />
-    <ClInclude Include="game\wormobj.h" />
     <ClInclude Include="imgui\imconfig.h" />
     <ClInclude Include="imgui\imgui.h" />
     <ClInclude Include="imgui\imgui_impl_glfw.h" />
@@ -597,7 +592,6 @@
     <ClInclude Include="world\WorldCoverer.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="cpp.hint" />
     <None Include="items\metalrod.h" />
     <None Include="resources\shaders\modelvertex.vs" />
     <None Include="shaders\wireframe_vert.vs" />

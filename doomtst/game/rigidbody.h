@@ -174,14 +174,12 @@ namespace physics {
 
 	};
 
-	struct PhysicsPlugin {
-		void operator()(core::App& world) {
-
-			world.insert_plugin(timing::TimePlugin());
-			world.emplace_system< RigidbodySystem>();
-		}
-	};
-
+	inline void phycics_plugin(core::App& world) {
+		world.insert_plugin(collision::CollsionPlugin());
+		world.insert_plugin(timing::TimePlugin());
+		world.emplace_system< RigidbodySystem>();
+	}
+	
 	struct Spawner {
 		double restitution = .1f;
 		double density = 1.0f;

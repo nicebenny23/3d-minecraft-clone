@@ -5,7 +5,6 @@
 #include "../game/time.h"
 #include "../game/rigidbody.h"
 #include "../world/voxeltraversal.h"
-#include "playerclimb.h"
 #include "../game/close.h"
 
 struct playermovement : ecs::component {
@@ -27,9 +26,9 @@ struct PlayerMovementSys : ecs::System {
 			return;
 		}
 
-		auto view = ecs::View<physics::RigidBody, playermovement, playerclimb, core::LocalTransform, physics::Buoyancy>(ecs);
+		auto view = ecs::View<physics::RigidBody, playermovement, core::LocalTransform, physics::Buoyancy>(ecs);
 
-		for (auto [body, movement, climb, transform, buoyancy] : view) {
+		for (auto [body, movement, transform, buoyancy] : view) {
 			userinput::InputManager& man = ecs.get_resource<userinput::InputManager>();
 			float dt = ecs.ensure_resource<timing::WorldClock>().dt;
 			double now = ecs.ensure_resource<timing::WorldClock>().now();

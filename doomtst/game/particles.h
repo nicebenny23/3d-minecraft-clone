@@ -54,10 +54,9 @@ namespace renderer {
 			}
 		}
 	};
-	struct ParticlePlugin {
-		void operator()(core::App& app) {
-			app.emplace_system<ParticleEmmisionSystem>();
-		}
+
+	inline void particle_plugin(core::App& app) {
+		app.emplace_system<ParticleEmmisionSystem>();
 	};
 	template<std::derived_from<ParticleSpawner> T>
 	struct ParticleEmmitterRecipe {

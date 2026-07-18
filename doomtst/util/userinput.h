@@ -117,7 +117,6 @@ namespace userinput {
 
 	inline void user_input_plugin(core::App& app) {
 		app.insert_plugin(renderer::window_plugin);
-
 		renderer::Window& window=app.Ecs.get_resource<renderer::Window>();
 		app.emplace_system< InputPollingSystem>();
 		app.emplace_resource< InputManager>();

@@ -39,13 +39,13 @@
 #include <string>
 #include <utility>
 #pragma once 
-namespace blockrender {
+namespace blocks {
 	using namespace grid;
 
 
 
 	inline bool chunk_viewable(chunks::Chunk& chk) {
-		geo::Frustum view= renderer::world_camera_frustum(chk.world());
+		geo::Frustum view = renderer::world_camera_frustum(chk.world());
 		return geo::frustum_box_intersection(view, chk.bounds());
 
 	}
@@ -91,7 +91,7 @@ namespace blockrender {
 				int unique_ind = uniqueInds[j];
 				v3::Coord cube_ind = math::cube_mesh[unique_ind];
 				v3::Point3 offset_from_center = (v3::Point3(cube_ind) - unitv / 2) * scale * 2;
-				Point3 offset = position+offset_from_center;
+				Point3 offset = position + offset_from_center;
 
 				v2::Vec2 uv_coords = face_to_uv_coords(mesh_face.mesh(), mesh_face.direction().index(), j);
 
@@ -117,13 +117,13 @@ namespace blockrender {
 
 			cnk_mesh.faces.clear();
 			renderer::MeshBuilder mesh(cnk_mesh.solid.mesh().unwrap(), renderer::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
-			for (chunks::block_object& obj: cnk) {
+			for (chunks::block_object& obj : cnk) {
 				BlockMesh& mesh_at = (obj.get_unchecked<block>().mesh);//g
 
 				if (mesh_at.invisible()) {
 					continue;
 				}
-				
+
 				compute_mesh_cover(mesh_at, chunk_getter);
 				if (!mesh_at.is_transparent()) {
 					for (math::Direction3d dir : math::Directions3d) {
@@ -155,14 +155,14 @@ namespace blockrender {
 		double distance = v3::dist(mesh.world().get_resource<CameraResource>().center(), mesh.center());
 		mesh.solid.set_order_key(distance);
 		mesh.sort_faces();
-		grid::FocusedGridAcessor accesor(mesh_object.object(),world);
+		grid::FocusedGridAcessor accesor(mesh_object.object(), world);
 		renderer::MeshBuilder mesh_data = mesh.transparent.insert_builder_for(renderer::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
 		for (int i = 0; i < mesh.faces.length(); i++) {
 
 			emit_face(accesor, mesh.faces[i], mesh_data);
 		}
 		mesh.transparent.set_order_key(-distance);
-		renderer::fill(std::move(mesh_data),mesh.world());
+		renderer::fill(std::move(mesh_data), mesh.world());
 	}
 
 	struct ChunkPreMesher :ecs::System {
@@ -218,49 +218,41 @@ namespace blockrender {
 		void run(ecs::Ecs& ecs) {
 			size_t total_render_count = 0;
 			Grid& grid = ecs.get_resource<grid::Grid>();
-			ecs::View< ecs::Constrained<chunks::ChunkMesh>,chunks::Chunk> meshes(ecs);
-			for (auto&& [mesh,Chunk] : meshes) {
+			ecs::View< ecs::Constrained<chunks::ChunkMesh>, chunks::Chunk> meshes(ecs);
+			for (auto&& [mesh, Chunk] : meshes) {
 				if (chunk_viewable(Chunk)) {
 					total_render_count++;
 					render_chunk(grid, mesh);
 				}
 			}
-			int l = 2;
+
 		}
 	};
-	struct BlockRenderPlugin {
+	inline void block_render_plugin(core::App& engine) {
+		engine.emplace_system<grid::GridManager>();
+		engine.emplace_system<grid::GridCoverer>();
+		engine.emplace_system<grid::LightRemover>();
+		engine.emplace_system<grid::GridLighter>();
+		engine.emplace_system<ChunkPreMesher>();
+		engine.emplace_system<ChunkRenderer>();
+		ecs::Ecs& ecs = engine.Ecs;
+		auto& renderer = ecs.get_resource<renderer::Renderer>();
+		renderer::shader_id block_shader = ecs.load_asset_emplaced<renderer::shader_descriptor>("BlockShader", "shaders\\vert1.vs", "shaders\\frag1.vs").unwrap();
+		ecs.load_asset_emplaced<renderer::MaterialDescriptor>("SolidBlock", "solid_phase", "BlockShader", renderer::RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+			stn::array{
+			renderer::UniformRefrence("proj_matrix", "projection"),
+			renderer::UniformRefrence("view_matrix", "view"),
+			renderer::UniformRefrence("camera_pos", "camera_pos"),
+			renderer::UniformRefrence("render_dist", "render_distance"),
+			renderer::UniformRefrence("view_matrix", "view"),
+			renderer::UniformRefrence("bind_block_texture", "tex")
+			});
 
-		void operator()(core::App& engine) {
-			engine.emplace_system<grid::GridManager>();
-			engine.emplace_system<grid::GridCoverer>();
-			engine.emplace_system<grid::LightRemover>();
-			engine.emplace_system<grid::GridLighter>();
-			engine.emplace_system<ChunkPreMesher>();
-			engine.emplace_system<ChunkRenderer>();
-			add_block_renderer(engine.Ecs);
-		}
-		void add_block_renderer(ecs::Ecs& ecs) {
-
-			auto& renderer = ecs.get_resource<renderer::Renderer>();
-			renderer::shader_id block_shader = ecs.load_asset_emplaced<renderer::shader_descriptor>("BlockShader", "shaders\\vert1.vs", "shaders\\frag1.vs").unwrap();
-			ecs.load_asset_emplaced<renderer::MaterialDescriptor>("SolidBlock", "solid_phase", "BlockShader", renderer::RenderProperties(true, true, false, false, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-				stn::array{
-				renderer::UniformRefrence("proj_matrix", "projection"),
-				renderer::UniformRefrence("view_matrix", "view"),
-				renderer::UniformRefrence("camera_pos", "camera_pos"),
-				renderer::UniformRefrence("render_dist", "render_distance"),
-				renderer::UniformRefrence("view_matrix", "view"),
-				renderer::UniformRefrence("bind_block_texture", "tex")
-				});
-
-			ecs.load_asset_emplaced<renderer::MaterialDescriptor>("TransparentBlock", "transparent_phase", "BlockShader", renderer::RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
-				stn::array{ 
-				renderer::UniformRefrence("proj_matrix", "projection"),
-				renderer::UniformRefrence("view_matrix", "view"),
-				renderer::UniformRefrence("bind_block_texture", "tex")
-				});
-
-			
-		}
-	};
+		ecs.load_asset_emplaced<renderer::MaterialDescriptor>("TransparentBlock", "transparent_phase", "BlockShader", renderer::RenderProperties(true, false, false, true, GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+			stn::array{
+			renderer::UniformRefrence("proj_matrix", "projection"),
+			renderer::UniformRefrence("view_matrix", "view"),
+			renderer::UniformRefrence("bind_block_texture", "tex")
+			});
+	}
 }

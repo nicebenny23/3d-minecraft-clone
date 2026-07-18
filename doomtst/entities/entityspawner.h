@@ -119,9 +119,9 @@ namespace game {
 
 	void MobSpawnerPlugin(core::App& app) {
 
+		app.insert_plugin(Health::EntityHealthPlugin());
 		app.insert_plugin(slimes::SlimeAiPlugin());
 		app.emplace_system< spawn_mobs>();
-
 		app.emplace_system<Health::HitProccesor>();
 	}
 	// !entityspawner_HPP
