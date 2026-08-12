@@ -6,11 +6,10 @@
 #include "../imgui/imgui_impl_glfw.h"
 #include "../game/ecs/ecs.h"
 #include "../game/Core.h"
+#include "Window.h"
 namespace guirender{
-
-	void initgui();
 	void destroygui();
-	struct GuiSystem :ecs::System {   // Start a new ImGui frame
+	struct GuiSystem :ecs::System {   
 		GuiSystem() {
 
 
@@ -25,11 +24,14 @@ namespace guirender{
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		}
 	};
-	struct ConsolePlugin {
-		void operator()(core::App& app) {
-			initgui();
-			app.emplace_system<GuiSystem>();
-		}
+	inline void console_plugin(core::App& app){
+		IMGUI_CHECKVERSION();
+		ImGui::CreateContext();
+		ImGuiIO& io = ImGui::GetIO();
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+		ImGui_ImplGlfw_InitForOpenGL(app.Ecs.get_resource<renderer::Window>().window.get_ptr(), true);
+		ImGui_ImplOpenGL3_Init("#version 330"); 
+		app.emplace_system<GuiSystem>();
 	};
 }
 

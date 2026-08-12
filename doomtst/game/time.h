@@ -25,7 +25,6 @@ namespace timing {
 			return 1 / smooth_dt;
 		}
 
-
 		void calculate_fps() {
 
 			double current_time = glfwGetTime();
@@ -36,8 +35,7 @@ namespace timing {
 			}
 			if (std::floor(elapsed_time / update_speed) != std::floor(current_time / update_speed)) {
 				smooth_dt = dt;
-			}
-			elapsed_time = current_time;
+			}elapsed_time = current_time;
 
 		}
 		Duration make_duration();

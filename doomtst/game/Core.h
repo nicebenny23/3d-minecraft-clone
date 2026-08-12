@@ -6,9 +6,9 @@
 namespace core {
 	struct App;
 	template<typename T>
-	concept PluginType = std::constructible_from<stn::Stateless<void(App&)>,T&&>;
-	
-	using plugin_ty=stn::Stateless<void(App&)>;
+	concept PluginType = std::constructible_from<stn::Stateless<void(App&)>, T&&>;
+
+	using plugin_ty = stn::Stateless<void(App&)>;
 	struct Plugins {
 		stn::array<plugin_ty> plugin_list;
 
@@ -19,11 +19,12 @@ namespace core {
 				plugin(*engine);
 			}
 		}
-		Plugins(App& app) :engine(app) {}
+		Plugins(App& app) :engine(app) {
+		}
 	private:
 		stn::non_null<App> engine;
 	};
-	
+
 	struct CloseGameCommand {
 
 	};
@@ -35,46 +36,45 @@ namespace core {
 		bool should_close;
 	};
 
-    struct App
-    {
+	struct App {
 
-        Plugins plugin_list;
+		Plugins plugin_list;
 		template<PluginType T>
 		void insert_plugin(T&& plugin) {
 			plugin_list.insert(plugin);
 		}
 
-		template<ecs::ResourceType T,typename ...Args>
-		T& emplace_resource(Args&&... args) requires std::constructible_from<T,Args...>{
+		template<ecs::ResourceType T, typename ...Args>
+		T& emplace_resource(Args&&... args) requires std::constructible_from<T, Args...> {
 			return Ecs.insert_resource<T>(std::forward<Args>(args)...);
 		}
 		template<ecs::ResourceType T>
 		T& ensure_resource() {
-		return Ecs.insert_resource<T>();
+			return Ecs.insert_resource<T>();
 		}
 		template<ecs::SystemType T, typename ...Args>
-		void emplace_system(Args&&... args) requires std::constructible_from<T, Args&&...>||(std::constructible_from<T, ecs::Ecs&>) {
+		void emplace_system(Args&&... args) requires std::constructible_from<T, Args&&...> || (std::constructible_from<T, ecs::Ecs&>) {
 			Ecs.emplace_system<T>(std::forward<Args>(args)...);
 		}
 
-		App():Ecs(),plugin_list(*this) {
+		App() :Ecs(), plugin_list(*this) {
 
 		}
-        ecs::Ecs Ecs;
+		ecs::Ecs Ecs;
 		void run() {
 			while (!Ecs.get_resource<core::GameState>().should_close) {
 				Ecs.run_systems();
 			}
 		}
-    };
+	};
 	template<ecs::SystemType T>
-	struct AddSystemPlugin{
+	struct AddSystemPlugin {
 		void build(App& engine) {
 			engine.emplace_system<T>();
 		};
 
 	};
-    extern App game;
+	extern App game;
 	struct GameCloser :ecs::System {
 		void run(ecs::Ecs& world) {
 			for (CloseGameCommand cmd : world.read_commands<CloseGameCommand>()) {
@@ -83,12 +83,11 @@ namespace core {
 		}
 
 	};
-	struct GamePlugin {
-		void operator()(App& app) {
-			app.ensure_resource <GameState>();
-			app.emplace_system<GameCloser>();
-		}
-	};
+	
+	inline void game_plugin(App& app) {
+		app.ensure_resource <GameState>();
+		app.emplace_system<GameCloser>();
+	}
 }
 
 

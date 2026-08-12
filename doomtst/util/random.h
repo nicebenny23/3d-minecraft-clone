@@ -40,6 +40,6 @@ namespace random {
   		return seeded_directions_cube[hash_coord(seed, x, y, z)];
 
 	}
-	void initilize_random();
+	void init_random();
 
 }

@@ -91,11 +91,9 @@ namespace ui {
 		}
 	};
 
-	struct MenuPlugin {
-		void operator()(core::App& app) {
+		inline void menu_plugin(core::App& app) {
 			app.ensure_resource< MenuState>();
 			app.emplace_system<MenuEnabler>();
 		}
-	};
 
 }

@@ -4,69 +4,78 @@
 #include "../world/voxeltraversal.h"
 namespace collision {
 
-	struct HitQuery {
-		stn::Option<ecs::obj> orgin;
-		explicit HitQuery(ecs::Ecs& ecs) :orgin(stn::None), world(ecs) {
-		}
-		ecs::Ecs& world;
-		explicit HitQuery(const ecs::obj& orgin_obj) : orgin(orgin_obj), world(orgin.unwrap().world()) {
-		}
-		bool matches(const ecs::Constrained<aabb::Collider>& collider) {
-			return collider.object() == orgin;
-		}
-	};
-
-	inline voxtra::RayWorldCollision raycast_dynamic(geo::ray search_ray, HitQuery query) {
-		ecs::View< aabb::Collider,aabb::DynamicCollider,ecs::Owner> colliders(query.world);
-		voxtra::RayWorldCollision closest = stn::None;
+	template<collision::ObjectPredicate U=HitQuery>
+	inline collision::RayWorldCollision raycast_dynamic(geo::ray search_ray, ecs::Ecs& world, U query= U()) {
+		ecs::View< collision::Collider,collision::DynamicCollider,ecs::Owner> colliders(world);
+		collision::RayWorldCollision closest = stn::None;
 		for (auto [collider, dynamic_tag,object] : colliders) {
 			if (collider.effector) {
 				continue;
 			}
-			if (query.matches(object)) {
+			if (!query(object)) {
 				continue;
 			}
-				geo::RayCollision blkinter = geo::intersection(aabb::global_box(object), search_ray);
+				geo::RayCollision blkinter = geo::intersection(collision::global_box(object), search_ray);
 				stn::Option<double> test_dist = blkinter.map_member(&geo::RayHit::length);
-				stn::Option<double> current_dist = closest.map_member(&voxtra::RayWorldHit::dist);
+				stn::Option<double> current_dist = closest.map_member(&collision::RayWorldHit::dist);
 				if (test_dist.unwrap_or(std::numeric_limits<double>().infinity()) < current_dist.unwrap_or(std::numeric_limits<double>().infinity())) {
-						closest = voxtra::RayWorldHit(blkinter.unwrap(), object);
+						closest = collision::RayWorldHit(blkinter.unwrap(), object);
 				}
 			}
 		return closest;
 	}
 
-	inline voxtra::RayWorldCollision raybox_cast_dynamic(geo::RayBox search_ray, HitQuery query) {
-		ecs::View< aabb::Collider,  aabb::DynamicCollider,ecs::Owner> colliders(query.world);
-		voxtra::RayWorldCollision closest = stn::None;
+	template<collision::ObjectPredicate U = HitQuery>
+	inline collision::RayWorldCollision raybox_cast_dynamic(geo::RayBox search_ray,ecs::Ecs& world, U query = U()) {
+		ecs::View< collision::Collider,  collision::DynamicCollider,ecs::Owner> colliders(world);
+		collision::RayWorldCollision closest = stn::None;
 		for (auto [collider, dynamic_tag,object] : colliders) {
 			if (collider.effector) {
 				continue;
 			}
-			static_assert(std::same_as<aabb::Collider&, decltype(collider)>);
-			if (query.matches(object)) {
+			static_assert(std::same_as<collision::Collider&, decltype(collider)>);
+			if (!query(object)) {
 				continue;
 			}
-			geo::RayCollision blkinter = geo::intersection(search_ray,aabb::global_box(object));
+			geo::RayCollision blkinter = geo::intersection(search_ray,collision::global_box(object));
 			stn::Option<double> test_dist = blkinter.map_member(&geo::RayHit::length);
-			stn::Option<double> current_dist = closest.map_member(&voxtra::RayWorldHit::dist);
+			stn::Option<double> current_dist = closest.map_member(&collision::RayWorldHit::dist);
 			if (test_dist.unwrap_or(std::numeric_limits<double>().infinity()) < current_dist.unwrap_or(std::numeric_limits<double>().infinity())) {
-					closest = voxtra::RayWorldHit(blkinter.unwrap(), object);
+					closest = collision::RayWorldHit(blkinter.unwrap(), object);
 			}
 		}
 		return closest;
 	}
-	inline voxtra::RayWorldCollision ray_box_cast(geo::RayBox ray_box, HitQuery query) {
-		voxtra::RayWorldCollision closest_on_grid = voxtra::grid_ray_box_cast(ray_box, query.world.get_resource<grid::Grid>());
-		voxtra::RayWorldCollision closest_entity = raybox_cast_dynamic(ray_box, query);
+
+	template<collision::ObjectPredicate U = HitQuery>
+	inline collision::RayWorldCollision ray_box_cast(geo::RayBox ray_box, ecs::Ecs& world, U query=U()) {
+		collision::RayWorldCollision closest_on_grid = voxtra::grid_ray_box_cast(ray_box, world.get_resource<grid::Grid>(),query);
+		collision::RayWorldCollision closest_entity = raybox_cast_dynamic(ray_box, world,query);
 		return stn::min_some_on_map(closest_entity, closest_on_grid,
-			[&](const voxtra::RayWorldHit& col) {return col.dist(); });
+			[&](const collision::RayWorldHit& col) {return col.dist(); });
+	}
+	template<collision::ObjectPredicate U = HitQuery>
+	inline collision::RayWorldCollision raycast(geo::ray nray, ecs::Ecs& world, U query=U()) {
+		collision::RayWorldCollision closest_on_grid = voxtra::grid_cast(nray, world.get_resource<grid::Grid>(), query);
+		collision::RayWorldCollision closest_entity = raycast_dynamic(nray, world,query);
+		return stn::min_some_on_map(closest_entity, closest_on_grid,
+		[&](const collision::RayWorldHit& col) {return col.dist(); });
 	}
 
-	inline voxtra::RayWorldCollision raycast(geo::ray nray, HitQuery query) {
-		voxtra::RayWorldCollision closest_on_grid = voxtra::grid_cast(nray, query.world.get_resource<grid::Grid>());
-		voxtra::RayWorldCollision closest_entity = raycast_dynamic(nray, query);
-		return stn::min_some_on_map(closest_entity, closest_on_grid,
-		[&](const voxtra::RayWorldHit& col) {return col.dist(); });
+	template<collision::ObjectPredicate U = HitQuery>
+	inline bool boxcast_dynamic(geo::Box blk, ecs::Ecs& world, U query) {
+		ecs::View< ecs::Constrained<Collider>, DynamicCollider> colliders(world);
+		for (auto [collider, dynamic_tag] : colliders) {
+			if (box_intersects_aabb(blk, collider)) {
+				if (query(collider)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	template<collision::ObjectPredicate U = HitQuery>
+	inline bool boxcast(geo::Box box, ecs::Ecs& world, U query) {
+		return voxtra::boxcast_grid(box, world.get_resource<grid::Grid>(), query) || boxcast_dynamic(box, world, query);
 	}
 }

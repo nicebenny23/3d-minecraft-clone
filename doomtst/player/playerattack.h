@@ -15,8 +15,8 @@ namespace player {
 			transform.look_towards(random::spherical());
 			transform.scale = v3::Scale3::from_scale(1 / 3.0f);
 			entity.apply_recipe(DynamicColliderRecipe(true));
-			entity.apply_recipe(physics::Spawner{ .gravity = physics::Force{.force = v3::Vec3(0.0f,-.4f,0)} });
-			entity.get_component<physics::RigidBody>().add_impluse(physics::Implulse(v3::Vec3(0, .4, 0) + random::spherical().with_y(0) * 15.0f));
+			entity.apply_recipe(physics::Spawner{ .gravity = v3::Vec3(0.0f,-9.8f,0)});
+			entity.get_component<physics::RigidBody>().add_impluse(v3::Vec3(0, .4, 0) + random::spherical().with_y(0) * 15.0f);
 			entity.get_component<physics::FrictionDamping>().strength = .2f;
 
 			//entity.add_component<Health::DestroyOnHit>();
@@ -33,7 +33,7 @@ namespace player {
 		timing::Duration last_attack_click;
 		timing::Duration last_time_seen;
 
-		voxtra::RayWorldCollision last_seen_entity;
+		collision::RayWorldCollision last_seen_entity;
 		ecs::Constrained<renderer::ParticleEmmitter> emmiter;
 	};
 
@@ -51,7 +51,7 @@ namespace player {
 				}
 
 				if (cursor.hit) {
-					voxtra::RayWorldHit closest = cursor.hit.unwrap();
+					collision::RayWorldHit closest = cursor.hit.unwrap();
 					ecs::obj object = closest.collider.object();
 					if (object.has_components<Health::EntityHealth, physics::RigidBody>()) {
 						if (object.get_component<Health::EntityHealth>().damage_delay_timer.is_inactive()) {
@@ -79,7 +79,7 @@ namespace player {
 					}
 					geo::ray ray = attack.last_seen_entity.unwrap().ray();
 					attack.emmiter.get_component<core::LocalTransform>().transform.position = ray.end;
-					world.write_command(Health::AttackCommand{ .knockback_multiplier = 5,.damage = dmg,.center = ray.start,.body = object });
+					world.write_command(Health::AttackCommand{ .knockback_multiplier = 4,.damage = dmg,.center = ray.start,.body = object });
 					double attack_cooldown = .9;
 					attack.last_attack.set(attack_cooldown);
 					//no need to set the other ones

@@ -12,7 +12,6 @@ namespace grid {
 			std::filesystem::path base = getWindowsHomeDir() / "benny_render_3d" / "worlds";
 			world_path = createUniqueNamedFolder(base, "grid");
 			createFolder(world_path,"Chunks");
-			int l = 1;
 		}
 		std::filesystem::path get_path() {
 			return std::filesystem::path(world_path);

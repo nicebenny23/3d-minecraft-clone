@@ -32,7 +32,7 @@ namespace player {
 				block_id spawn_id = stack.traits().blk_id.unwrap();
 
 				grid::Grid& grid = ecs.get_resource<grid::Grid>();
-				voxtra::RayWorldHit hit = look.hit.unwrap();
+				collision::RayWorldHit hit = look.hit.unwrap();
 				if (!hit.owner().has_component<block>()) {
 					continue;
 				}
@@ -56,7 +56,7 @@ namespace player {
 
 				double block_push_margin = .2f;
 				new_block_box.scale.shink(block_push_margin);
-				if (collision::boxcast(new_block_box,collision::HitQuery(ecs))) {
+				if (collision::boxcast(new_block_box,ecs,collision::HitQuery(ecs))) {
 					continue;
 				}
 				if (blocks.name_for(spawn_id)=="seed") {

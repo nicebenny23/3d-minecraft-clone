@@ -30,7 +30,7 @@ namespace blocks {
 			}
 			else {
 
-				auto idk = world.spawn_with(std::move(block_constructor), stn::make_constructor<aabb::Collider>(false));
+				auto idk = world.spawn_with(std::move(block_constructor), stn::make_constructor<collision::Collider>(false));
 				ent_id = idk.get<ecs::entity>();
 
 				blk_ptr=&idk.get<block&>();

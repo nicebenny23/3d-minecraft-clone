@@ -75,10 +75,8 @@ namespace grid {
 							}
 							else {
 								if (shade.light) {
-
 									darkening_queue.push(shade_at(next_block, next_block.light_passing_through));
 									next_block.light_passing_through = 0;
-
 								}
 							}
 						}
@@ -90,9 +88,7 @@ namespace grid {
 		}
 	};
 
-	struct lighten_block_command_accept {
-		v3::Coord location;
-	};
+	
 	struct GridLighter :ecs::System {
 		ecs::EventReader<world::ChunkLoaded> chunk_loads;
 		GridLighter(ecs::Ecs& world) :chunk_loads(world.make_reader<world::ChunkLoaded>()) {

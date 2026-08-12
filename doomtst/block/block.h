@@ -41,7 +41,7 @@ namespace blocks {
 		MeshFace operator[](math::Direction3d index) {
 			return mesh[index.index()];
 		}
-		bool solid() {
+		bool solid() const {
 			return type().solid_traits_for().is_some();
 		}
 		Point3 center() const {

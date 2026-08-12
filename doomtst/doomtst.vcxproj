@@ -363,7 +363,6 @@
     <ClInclude Include="debugger\console.h" />
     <ClInclude Include="debugger\debug.h" />
     <ClInclude Include="entities\onhit.h" />
-    <ClInclude Include="entities\entityinit.h" />
     <ClInclude Include="entities\entityspawner.h" />
     <ClInclude Include="entities\slime.h" />
     <ClInclude Include="entities\wisp.h" />
@@ -402,6 +401,8 @@
     <ClInclude Include="game\ecs\relationship.h" />
     <ClInclude Include="game\serialization.h" />
     <ClInclude Include="game\Settings.h" />
+    <ClInclude Include="game\ticking.h" />
+    <ClInclude Include="items\bottle.h" />
     <ClInclude Include="items\container_ui.h" />
     <ClInclude Include="items\FakeItem.h" />
     <ClInclude Include="math\box.h" />
@@ -457,7 +458,6 @@
     <ClInclude Include="items\SlotUi.h" />
     <ClInclude Include="items\slot_transactions.h" />
     <ClInclude Include="items\tpsword.h" />
-    <ClInclude Include="items\transaction.h" />
     <ClInclude Include="items\transmute.h" />
     <ClInclude Include="items\treestoneitem.h" />
     <ClInclude Include="items\itemslot.h" />
@@ -479,7 +479,6 @@
     <ClInclude Include="player\crosshair.h" />
     <ClInclude Include="player\inventory_ui.h" />
     <ClInclude Include="player\playermovment.h" />
-    <ClInclude Include="player\player_fertilize.h" />
     <ClInclude Include="player\player_look.h" />
     <ClInclude Include="renderer\color.h" />
     <ClInclude Include="renderer\renderer\Fbo.h" />

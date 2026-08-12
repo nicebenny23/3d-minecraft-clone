@@ -16,18 +16,13 @@
 using namespace v3;
 #pragma once 
 namespace physics {
-	struct Implulse {
-		Vec3 impulse;
-	};
-	struct Force {
-		Vec3 force;
-	};
+	
 	struct Gravity :ecs::component {
-		Gravity(Force gravity_strength) :strength{ gravity_strength } {
+		Gravity(Vec3 gravity_strength) :strength{ gravity_strength } {
 
 		}
 
-		Force strength;
+		Vec3 strength;
 	};
 	struct FrictionDamping :ecs::component {
 		double strength = 4.f;
@@ -56,11 +51,14 @@ namespace physics {
 		double mass;
 
 		bool on_ground;
-		void add_force(const Force& force) {
-			acceleration += force.force / mass;
+		void add_acceleration(const Vec3& accel) {
+			acceleration += accel;
 		}
-		void add_impluse(const Implulse& impulse) {
-			velocity += impulse.impulse / mass;
+		void add_force(const Vec3& force) {
+			acceleration += force/ mass;
+		}
+		void add_impluse(const Vec3& impulse) {
+			velocity += impulse/ mass;
 		}
 		// Constructor
 		RigidBody() :mass(1), velocity(zerov), acceleration(zerov) {
@@ -68,7 +66,13 @@ namespace physics {
 		}
 		~RigidBody() = default;
 	};
+	struct BlockQuery {
+		
 
+		bool operator()(const ecs::Constrained<collision::Collider>& collider) {
+			return collider.has_component<block>()&&!collider.get<collision::Collider>().effector;
+		}
+	};
 	struct RigidbodySystem :ecs::System {
 
 		void run(ecs::Ecs& ecs) override {
@@ -82,7 +86,8 @@ namespace physics {
 			ecs::View< Gravity,  RigidBody,Buoyancy> fallers(ecs);
 			for (auto [grav, body,buouancy] : fallers) {
 			
-					body.add_force(grav.strength);
+					
+					body.add_acceleration(grav.strength);
 			}
 			ecs::View< FrictionDamping, RigidBody,Buoyancy> friction_query(ecs);
 			for (auto [friction, body,buoyancy] : friction_query) {
@@ -93,10 +98,10 @@ namespace physics {
 					effective_strength *= 1.7;
 					vector.y = 1/1.7;
 				}
-				body.add_force(Force{ .force = -body.velocity * effective_strength*vector });
+				body.add_force(-body.velocity * effective_strength*vector);
 			}
 
-			ecs::View<core::LocalTransform,RigidBody,PhycicsMaterial,ecs::Mabye<aabb::Collider>,Buoyancy, ecs::Owner> rigids(ecs);
+			ecs::View<core::LocalTransform,RigidBody,PhycicsMaterial,ecs::Mabye<collision::Collider>,Buoyancy, ecs::Owner> rigids(ecs);
 			for (auto [pos, body, material, collider_mabye,buoyancy,object] : rigids) {
 				buoyancy.in_water = false;
 				for (chunks::block_object& object:grid.voxel_in_range(pos.transform.unrotated_box())) {
@@ -105,22 +110,22 @@ namespace physics {
 						buoyancy.in_water = true;
 					}
 				}
-				if (collider_mabye.is_some_and([&](aabb::Collider& collider){return !collider.effector;})) {
+				if (collider_mabye.is_some_and([&](collision::Collider& collider){return !collider.effector;})) {
 				
 
-					aabb::Collider& collider = collider_mabye.unwrap();
+					collision::Collider& collider = collider_mabye.unwrap();
 					double hit_toi = ecs.ensure_resource<timing::WorldClock>().dt;
 					while (hit_toi > 0) {
 						v3::Point3 curr_pos = pos.transform.position;
 						v3::Point3 new_pos = curr_pos + body.velocity * hit_toi;
 						geo::RayBox dir_ray(geo::ray(curr_pos, new_pos), pos.transform.scale);
-						voxtra::RayWorldCollision coll = collision::ray_box_cast(dir_ray, collision::HitQuery(object));
+						collision::RayWorldCollision coll = collision::ray_box_cast(dir_ray,ecs,collision::HitQuery(object));
 						if (!coll) {
 							pos.transform.position = curr_pos + body.velocity * hit_toi * .99f;
 							hit_toi = 0;
 						}
 						else {
-							voxtra::RayWorldHit hit = coll.unwrap();
+							collision::RayWorldHit hit = coll.unwrap();
 							stn::Option<math::Direction3d> collision_dir_mabye = hit.hit_direction();
 							double move_time = hit_toi * hit.hit.length() / dir_ray.ray.length();
 							if (!collision_dir_mabye) {
@@ -137,23 +142,27 @@ namespace physics {
 							
 
 							//phycics materials
-							v3::Vec3 vel_normal = collision_normal * v3::dot(body.velocity, collision_normal);
+							v3::Vec3 rel_vel = body.velocity;
+							stn::Option<RigidBody&> other_body = hit.owner().get_component_opt<RigidBody>();
+
 							double restitution = 0;
 							double our_mass = body.mass;
 							double their_mass = std::numeric_limits<double>().infinity();
-							stn::Option<RigidBody&> other_body = hit.owner().get_component_opt<RigidBody>();
 							if (other_body) {
+								rel_vel -= other_body.unwrap().velocity;
 								their_mass = other_body.unwrap().mass;
 							}
+							v3::Vec3 vel_normal = collision_normal * v3::dot(rel_vel, collision_normal);
+
 							stn::Option<PhycicsMaterial&> other_material = hit.owner().get_component_opt<PhycicsMaterial>();
 							if (other_material) {
 								restitution= (material.resitution+ other_material.unwrap().resitution)/2;
 								
 							}
 							Vec3 impulse = vel_normal * -(restitution+ 1) / (1 / our_mass + 1 / their_mass);
-							body.add_impluse(Implulse(impulse));
+							body.add_impluse(impulse);
 							if (other_body) {
-								other_body.unwrap().add_impluse(Implulse(-impulse));
+								other_body.unwrap().add_impluse(-impulse);
 							}
 
 						}
@@ -161,7 +170,7 @@ namespace physics {
 
 					Point3 boxcenter = pos.transform.unrotated_box().in_direction(math::down_3d);
 					geo::Box checkbox = geo::Box(boxcenter, pos.transform.unrotated_box().scale.with_y(.005) * .96f);
-					body.on_ground = collision::boxcast(checkbox, collision::HitQuery(object));
+					body.on_ground = collision::boxcast(checkbox, ecs,collision::HitQuery(object));
 				}
 				else {
 					pos.transform.position += body.velocity * deltaTime;
@@ -183,7 +192,7 @@ namespace physics {
 	struct Spawner {
 		double restitution = .1f;
 		double density = 1.0f;
-		Force gravity = Force(Vec3(0, -9.8, 0));
+		Vec3 gravity = Vec3(0, -9.8, 0);
 		double friction = 4.0f;
 		void apply(ecs::obj& object) const {
 			object.add_component<Density>(density);

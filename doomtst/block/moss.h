@@ -46,9 +46,8 @@ namespace blocks {
 				}
 				stn::Option<ecs::Constrained<block>&> blk_below = grid.get_object(mblock.pos - v3::Coord(0, 1, 0));
 				if (blk_below) {
-					int seed = blk_below.unwrap().get_component_opt<Seedability>().member(&Seedability::seedable).unwrap_or(0);
-					if (seed<1) {
-
+					double seed = blk_below.unwrap().get_component_opt<Seedability>().member(&Seedability::seedable).unwrap_or(0);
+					if (seed<.9f) {
 						stop = true;
 					}
 				}

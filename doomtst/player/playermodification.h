@@ -104,7 +104,7 @@ namespace player {
 			if (!cursor.hit) {
 				return false;
 			}
-			voxtra::RayWorldHit& hit = cursor.hit.unwrap();
+			collision::RayWorldHit& hit = cursor.hit.unwrap();
 			if (!hit.owner().has_component<blocks::block>()) {
 				return false;
 			}

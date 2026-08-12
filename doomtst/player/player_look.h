@@ -26,7 +26,7 @@ namespace player {
 		}
 		
 		ecs::WeakConstrained<block> backpedal;
-		voxtra::RayWorldCollision hit;
+		collision::RayWorldCollision hit;
 		math::bounds look_range= math::bounds(0,3);
 	};
 
@@ -44,9 +44,9 @@ namespace player {
 				math::Transform& transform= view.get<core::LocalTransform&>().transform;
 				geo::ray look_ray=transform.forward_ray().dialate_from_start(cursor.look_range.max());
 				
-				cursor.hit = collision::raycast(look_ray, collision::HitQuery(view.get<ecs::obj>()));
+				cursor.hit = collision::raycast(look_ray,world,collision::HitQuery(view.get<ecs::obj>()));
 				if (cursor.hit) {
-					voxtra::RayWorldHit hit = cursor.hit.unwrap();
+					collision::RayWorldHit hit = cursor.hit.unwrap();
 					
 					world.write_event(CursorHit{.hit=hit.owner() });
 					if (hit.owner().has_component<block>()) {
@@ -62,7 +62,7 @@ namespace player {
 						}
 						cursor.frame.get<WireFrame>().color = colors::Color::monotone(light);
 						cursor.frame.get<WireFrame>().enabled = true;
-						cursor.frame.get<core::LocalTransform>().transform.from_box_unrotated(aabb::global_box(hit.collider));
+						cursor.frame.get<core::LocalTransform>().transform.from_box_unrotated(collision::global_box(hit.collider));
 					}
 				}
 				else {

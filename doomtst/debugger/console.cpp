@@ -30,9 +30,9 @@ namespace console {
 				ImGui::Text(std::format("look: {}", goblin.get_component<core::LocalTransform>().transform.look).c_str());
 				ImGui::Text(std::format("Chunk: {}", grid.chunk_from_block_pos(Coord::from_vec3(pos)).position).c_str());
 				std::string text_for_look = goblin.get_component<player::PlayerCursor>().hit
-					.filter([&](const voxtra::RayWorldHit& blk) {return blk.owner().exists(); })
-					.filter([](const voxtra::RayWorldHit& blk) {return blk.owner().has_component<block>(); })
-					.map([&](const voxtra::RayWorldHit& blk) {
+					.filter([&](const collision::RayWorldHit& blk) {return blk.owner().exists(); })
+					.filter([](const collision::RayWorldHit& blk) {return blk.owner().has_component<block>(); })
+					.map([&](const collision::RayWorldHit& blk) {
 					block& blck = blk.owner().get_component<block>();
 
 					return std::format("looking at block with center {},name {}", blck.center(), blck.type().name()); })

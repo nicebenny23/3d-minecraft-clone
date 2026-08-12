@@ -2,7 +2,7 @@
 #include "random.h"
 
 
-uint64_t seed64 = 0;
+uint64_t seed64 = 1;
 namespace random {
 	inline void randomize_64(uint64_t& seed_64) {
 
@@ -33,7 +33,7 @@ namespace random {
 	}
 	stn::array<v3::Vec3> seeded_directions_sphere;
 	stn::array<v3::Vec3> seeded_directions_cube;
-	void init_random_direction_cache() {
+	void init_random() {
 		
 		const int iters = 10;
 		unsigned int noiseval = 1;
@@ -67,8 +67,4 @@ namespace random {
 		return seeded_directions_sphere.unchecked_at(seed64&std::numeric_limits<unsigned short>().max());
 	}
 
-	void initilize_random() {
-		init_random_direction_cache();
-		seed64 = 1;
-	}
 }

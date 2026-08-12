@@ -1,6 +1,5 @@
 #include "ItemUi.h"
 #include "Item.h"
-#include "transaction.h"
 #include "../game/ecs/weak_object.h"
 #pragma once
 namespace items {

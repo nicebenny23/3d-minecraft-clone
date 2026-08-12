@@ -70,16 +70,18 @@ namespace Health {
 					physics::RigidBody& body= kb.body.get<physics::RigidBody>();
 					double power = kb.knockback_multiplier;
 					Vec3 forceval = kb.body.get<core::LocalTransform>().transform.position - kb.center;
-					
-					body.velocity -= v3::project(forceval, body.velocity)/2;
+				
+						body.velocity -= v3::project(forceval, body.velocity) / 2;
 
-					if (mag2(forceval)!=0) {
-						forceval = forceval.with_y(0).with_magnitude(power);
-						if (body.on_ground) {
-							forceval.y = 1.0f;
+						if (mag2(forceval) != 0) {
+							forceval = forceval.with_y(0).with_magnitude(power);
+							if (body.on_ground) {
+								//equal power component
+								forceval.y = power/3;
+							}
 						}
-					}
-					body.add_impluse(physics::Implulse{ forceval });
+						body.add_impluse(forceval);
+
 					world.write_command(DamageCommand{ .damage = kb.damage,.target = kb.body.reduce() });
 				}
 
@@ -89,6 +91,40 @@ namespace Health {
 	struct FlashOnHit:ecs::component{
 		colors::Color flash_color = colors::Color(1,.5f,.5f,1);
 		bool on;
+	};
+	struct Drownable:ecs::component{
+		//bars are lost every second
+		Drownable(size_t max) :max_bars(max) {
+			bars = max_bars;
+		}
+		size_t max_bars;
+		size_t bars;
+	};
+	struct DrownSystem:ecs::System {
+
+		void run(ecs::Ecs& world) {
+			if (!world.get_resource<timing::Ticks>().tick_frame) {
+				return;
+			}
+			grid::Grid& grid = world.get_resource<grid::Grid>();
+			for (auto [drown,pos,health,object] : ecs::View<Drownable, core::LocalTransform,Health::EntityHealth,ecs::Owner>(world)) {
+
+				
+				if (in_water(grid.get_voxel(pos.transform.unrotated_box().in_direction(math::up_3d)),grid)) {
+					if (drown.bars == 0) {
+						world.write_command(DamageCommand{ .damage = 1,.target = object });
+					}
+					else {
+						drown.bars--;
+					}
+				}
+				else {
+					if (drown.bars<drown.max_bars) {
+						drown.bars++;
+					}
+				}
+			}
+		}
 	};
 	struct DamageDisplaySystem :ecs::System {
 		void run(ecs::Ecs& world) {
@@ -116,6 +152,8 @@ namespace Health {
 		void operator()(core::App& app) {
 			app.emplace_system<KbSystem>();
 			app.emplace_system<EntityKiller>();
+
+			app.emplace_system<DrownSystem>();
 			app.emplace_system<DamageDisplaySystem>();
 		}
 	};

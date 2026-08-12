@@ -32,15 +32,39 @@ namespace slimes {
 			stn::List<v3::Coord, 4> points = { v3::Coord(1,0,0),v3::Coord(-1,0,0),v3::Coord(0,0,1),v3::Coord(0,0,-1) };
 			array<SlimeEdge> neighbors;
 			stn::Option<block&> block_below_mabye = world.get_block(current.pos - v3::Coord(0, 1, 0));
+			stn::Option<chunks::block_object&> mabye_at = world.get_object(current.pos);
 
-			if (!block_below_mabye) {
+			if (!block_below_mabye|| !mabye_at) {
 				return neighbors;
 			}
 			block& block_below = block_below_mabye.unwrap();
-			if (!block_below.solid()) {
+			chunks::block_object& block_at = mabye_at.unwrap();
+			bool liquid = block_at.has_component<Liquid>();
+			//gas
+			bool water_float = block_below.is<WaterBlock>() && !liquid;
+			if (!block_below.solid()&&!block_below.is<WaterBlock>() && !liquid) {
 				neighbors.push(SlimeEdge{ .offset = v3::Coord(0, -1, 0) });
 				return neighbors;
 			}
+			//liquid
+			if (liquid) {
+				for (math::Direction3d offset : math::Directions3d) {
+					if (water_float&&offset==math::up_3d) {
+						continue;
+					}
+					v3::Coord next_pos = offset.coord() + current.pos;
+					geo::ray ray = geo::ray(current.pos, next_pos).translate(v3::unitv / 2);
+					geo::RayBox movment(ray, v3::Scale3::from_scale(1 / 1.2f));
+					if (voxtra::grid_ray_box_cast<SolidPredicate>(movment, world).is_some()) {
+						continue;
+
+					}
+
+					neighbors.push(SlimeEdge{ .jump_height=stn::None,.offset=offset.coord() });
+				}
+				return neighbors;	
+			}
+			//solid
 			bool can_walk = true;
 			if (block_below.bounds().scale != blockscale) {
 				can_walk = false;
@@ -52,7 +76,6 @@ namespace slimes {
 						continue;
 					}
 					v3::Coord next_pos = xy_offset + current.pos + v3::Coord(0, i, 0);
-
 					geo::ray ray = geo::ray(current.pos, next_pos).translate(v3::unitv / 2);
 					geo::RayBox movment(ray, v3::Scale3::from_scale(1 / 1.2f));
 
@@ -60,12 +83,12 @@ namespace slimes {
 						//the jump is like an L
 						geo::ray jump = geo::ray(current.pos, current.pos + v3::Coord(0, i, 0)).translate(v3::unitv / 2);
 						geo::RayBox jump_movment(jump, v3::Scale3::from_scale(1 / 1.2f));
-						if (voxtra::grid_ray_box_cast(jump_movment, world).is_some()) {
+						if (voxtra::grid_ray_box_cast<SolidPredicate>(jump_movment, world).is_some()) {
 							continue;
 						}
 						movment.ray.start.y += i;
 					}
-					if (voxtra::grid_ray_box_cast(movment, world).is_some()) {
+					if (voxtra::grid_ray_box_cast<SolidPredicate>(movment, world).is_some()) {
 						continue;
 					}
 					stn::Option<size_t> jump_height = stn::None;
@@ -86,7 +109,10 @@ namespace slimes {
 	using result_type = navigation::ContextResultType<SlimeNavigator>;
 
 	struct Mob :ecs::component {
+		math::bounds pursue_range=math::bounds(0,26);
+		double look_distance=15;
 	};
+
 	struct SlimePathFinder :ecs::component {
 
 		using result_type = navigation::ContextResultType<SlimeNavigator>;
@@ -122,14 +148,17 @@ namespace slimes {
 			
 			ecs::View<SlimePathFinder, core::LocalTransform, Mob, ecs::Owner, ai::Brain> slimes(world);
 			for (auto&& [path, transform, mob, object, brain] : slimes) {
-
-				double max_follow_distance = 26;
-				if (v3::dist(transform.transform.position, slime_target(object)) >= max_follow_distance) {
+				double dist = v3::dist(transform.transform.position, slime_target(object));
+				if (!mob.pursue_range.contains(dist)) {
 					brain.set<Idler>(1);
+				}
+				if (dist<mob.look_distance) {
+					brain.set<SlimeNavigator>(0);
 				}
 				if (!brain.active<SlimeNavigator>()) {
 					continue;
 				}
+				brain.set<SlimeNavigator>(0);
 				if (path.last_detection.is_inactive_set(.1)) {
 					double min_dist = .08f;
 					//if their is no last position or we move to much we reset fix otherwise fix eventually becomes innactive
@@ -194,9 +223,8 @@ namespace slimes {
 			if (!player::in_game(world)) {
 				return;
 			}
-			ecs::View<SlimePathFinder, core::LocalTransform, physics::RigidBody,ecs::Owner,Health::EntityHealth,ai::Brain> slimes(world);
-			for (auto&& [path, transform, body,object,health,brain] : slimes) {
-				brain.set<SlimeNavigator>(0);
+			ecs::View<SlimePathFinder, core::LocalTransform, physics::RigidBody,ecs::Owner,Health::EntityHealth,ai::Brain, physics::Buoyancy> slimes(world);
+			for (auto&& [path, transform, body,object,health,brain,buoyancy] : slimes) {
 				if (!brain.active<SlimeNavigator>()) {
 					continue;
 				}
@@ -205,8 +233,7 @@ namespace slimes {
 						result_type head = headed.unwrap();
 						if (head.move.jump_height != stn::None) {
 							if (body.on_ground) {
-								physics::Implulse jump(v3::Vec3(0, 3.5+head.move.jump_height.unwrap(), 0));
-								body.add_impluse(jump);
+								body.velocity+=v3::Vec3(0,7+2.2*head.move.jump_height.unwrap(),0);
 								headed.unwrap().current.pos.y += headed.unwrap().move.jump_height.unwrap();
 								headed.unwrap().move.jump_height = stn::None;
 							}
@@ -217,19 +244,27 @@ namespace slimes {
 
 
  							v3::Vec3 d = goto_pos - transform.transform.position;
-							d.y = 0;
+							if (!buoyancy.in_water) {
+								d.y = 0;
+							}
 							double dist = (d.length());
-						
-							v3::Point3 head(goto_pos.x, transform.transform.position.y, goto_pos.z);
+							v3::Point3 headed(goto_pos.x, transform.transform.position.y, goto_pos.z);
 							if (dist > 0.1f) {
 								double speed = path.speed;
 								v3::Vec3 v = (d.with_length_less_than(1)) * speed;
 								v3::Vec3 force = v - body.velocity;
-								force.y = 0;
+								if (!buoyancy.in_water) {
+									force.y = 0;
+								}
 								force = force.with_length_less_than(1);
+								if (buoyancy.in_water&&head.move.offset.y==0&&d.y>0) {
+									//for now
+									double vel = body.velocity.y;
+									body.add_acceleration(v3::Vec3(0, 25.53*math::sign_rounding_up(d.y), 0));
+								}
 								double turn_speed = speed;
-								body.add_force(physics::Force(force * turn_speed));
-								v3::Vec3 look = v3::lerp(transform.transform.normal_dir(), (head - transform.transform.position), world.get_resource<timing::WorldClock>().dt * 10);
+								body.add_force(force * turn_speed);
+								v3::Vec3 look = v3::lerp(transform.transform.normal_dir(), (headed - transform.transform.position), world.get_resource<timing::WorldClock>().dt * 10);
 								transform.transform.look_towards(look);
 							}
 
@@ -254,13 +289,13 @@ namespace slimes {
 			slime.add_component<core::LocalTransform>(pos).transform.scale = v3::unit_scale / 1.3f;
 			slime.spawn_child_emplaced<core::TransformRecipe>(pos);
 
-			double speed = 15;
+			double speed = 12;
 			if (random::random()>.9f) {
 
 				slime.apply_recipe(items::loot_table_recipe<blue_slime_loot_table>);
 				slime.apply_recipe(renderer::ModelRecipe{ .path{.mesh = MeshPath("meshes\\cubetest.obj"),.texture{"images\\slimetexblue.png"}} });
 				slime.apply_recipe(Health::HealthSpawner(20));
-				speed = 20;
+				speed =15;
 			}
 			else {
 
@@ -268,16 +303,16 @@ namespace slimes {
 				slime.apply_recipe(renderer::ModelRecipe{ .path{.mesh = MeshPath("meshes\\cubetest.obj"),.texture{"images\\slimetex.png"}} });
 				slime.apply_recipe(Health::HealthSpawner(10));
 			}
-			aabb::DynamicColliderRecipe().apply(slime);
+			collision::DynamicColliderRecipe().apply(slime);
 			float dmg = 3; 
 			slime.add_component<SlimePathFinder>(slime.world().get_resource<timing::WorldClock>().make_duration(), player::player_for(slime.world()),speed);
 			slime.add_component<Health::FlashOnHit>();
 			slime.add_component<Mob>();
 			slime.add_component<ai::Brain>();
-			slime.add_component<Health::DamageOnHit>(player::player_for(slime.world()), 2, 5);
-			slime.apply_recipe(physics::Spawner{ .restitution = .8 });
+			slime.add_component<Health::DamageOnHit>(player::player_for(slime.world()), 2,2);
+			slime.apply_recipe(physics::Spawner{ .restitution =1.0,.density = 1.0,.gravity=v3::Vec3(0,-25.53,0)});
 		}
-
+  
 	};
 	struct SlimeAiPlugin {
 		void operator()(core::App& app) {

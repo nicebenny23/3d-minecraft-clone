@@ -8,7 +8,8 @@
 #include "ecs/component.h"
 
 #include "../game/transforms.h"
-namespace aabb {
+#include "../math/intersection.h"
+namespace collision {
 
 
 
@@ -58,10 +59,66 @@ namespace aabb {
 
 	}
 
+
+	struct RayWorldHit {
+		ecs::Constrained<Collider> collider;
+		geo::RayHit hit;
+
+		RayWorldHit(geo::RayHit rayHit, ecs::Constrained<Collider> WorldCollider) :hit(rayHit), collider(WorldCollider) {
+		}
+		Point3 intersection() const {
+			return ray().end;
+		}
+
+		ecs::obj owner() const {
+			return collider.object();
+		}
+
+		double dist() const {
+			return ray().length();
+		}
+		stn::Option<math::Direction3d> hit_direction() const {
+			return hit.hit_normal;
+		}
+
+		geo::ray ray() const {
+			return hit.ray;
+		}
+	};
+	using RayWorldCollision = stn::Option<RayWorldHit>;
+
+
+
+	struct HitQuery {
+		stn::Option<ecs::obj> orgin;
+		explicit HitQuery(ecs::Ecs& ecs) :orgin(stn::None) {
+		}
+		explicit HitQuery(const ecs::obj& orgin_obj) : orgin(orgin_obj) {
+		}
+
+		bool operator()(const ecs::Constrained<collision::Collider>& collider) const {
+			return collider.object() != orgin && !collider.get<collision::Collider>().effector;
+		}
+	};
+
+
+	struct SolidPredicate {
+		inline bool operator()(const ecs::Constrained<Collider>& block) const {
+			if (block.get_component<Collider>().effector) {
+				return false;
+			}
+			return true;
+		}
+	};
+
+	template<typename T>
+	concept ObjectPredicate = std::predicate<T, const ecs::Constrained<Collider>& >;
+	//casting
+
 }
 namespace ecs {
 	template<>
-	inline constexpr ComponentInfo ComponentTraits<aabb::Collider> = {
+	inline constexpr ComponentInfo ComponentTraits<collision::Collider> = {
 		.updates = false
 	};
 }

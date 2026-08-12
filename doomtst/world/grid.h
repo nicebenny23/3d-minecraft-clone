@@ -27,64 +27,7 @@ namespace grid {
 			chunklist = stn::array<stn::Option<ChunkObject>>(totalChunks);
 			//hack
 		}
-		//order of storage for chunks
-		//z
-		//7,8,9   
-		//4,5,6
-		//1,2,3-x
-		//pattern repeats in the y direction
-		void load(ecs::Ecs& world) {
-			stn::array<stn::Option<ChunkObject>> newchunklist(totalChunks);
-			bool has_unloaded_chunk = false;
-			for (size_t ind = 0; ind < totalChunks; ind++) {
-				chunklist[ind].then([&](ChunkObject& chnk) {
-					chunks::Chunk& Chunk = chnk.get<chunks::Chunk>();
-					stn::Option<size_t> new_index = chunk_index(Chunk.location);
-					if (new_index) {
-						newchunklist[new_index.unwrap_unchecked()] = std::move(chnk);
-					}
-					else {
-						if (!has_unloaded_chunk) {
-							need_to_deload.push(std::move(chnk));
-						}
-					}
-					});
-			}
-			if (need_to_deload.non_empty()) {
-				need_to_deload.pop().destroy();
-			}
-			stn::Option <chunks::ChunkLocation> closest_unloaded_chunk;
-			int r = static_cast<int>(rad);
-			for (int k = -r; k <= r; k++) {
-				for (int j = -r; j <= r; j++) {
-					for (int i = -r; i <= r; i++) {
-						chunks::ChunkLocation spawn_pos(v3::Coord(i, j, k) + grid_pos.position);
-						if (!get_chunk(spawn_pos)) {
-
-							if (!closest_unloaded_chunk || grid_pos.distance_to(spawn_pos) < grid_pos.distance_to(closest_unloaded_chunk.unwrap())) {
-								closest_unloaded_chunk = spawn_pos;
-							}
-						}
-					}
-				}
-			}
-			if (closest_unloaded_chunk) {
-				chunks::ChunkLocation spawn_location = closest_unloaded_chunk.unwrap();
-				struct chunk_tag {
-
-				};
-				ecs::obj chunk_object(world.spawn_empty());
-				chunk_object.apply_recipe(world::CreateChunk(world::ChunkLoadInfo{ .location = spawn_location,.generator = *generator }));
-				newchunklist[chunk_index(spawn_location).unwrap_unchecked()] = ChunkObject(chunk_object);
-			}
-
-			chunklist = std::move(newchunklist);
-		}
-
-		void updateborders() {
-			Point3 pos = center.get_component<core::LocalTransform>().transform.position;
-			grid_pos = get_chunk_pos(pos);
-		}
+		
 
 
 		Point3 to_block_pos(Point3 point) {

@@ -71,8 +71,6 @@ namespace ui {
 		}
 		v2::UVec2 entry;
 	};
-
-
 	template<ecs::RecipeType T>
 	struct UiTableRecipe {
 		UiTableRecipe(UiSpawner ui_spawner,T recipe, TableBounds size, UiSpawner element_spawner):size(size),recipe(recipe), element_spawner(element_spawner), ui_spawner(ui_spawner){

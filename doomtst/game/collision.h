@@ -1,11 +1,10 @@
-#include "aabb.h"
 
 #include "../world/grid.h"
 #include "../world/voxeltraversal.h"
 #include "../util/Option.h"
 #include "casts.h"
 #include "Core.h"
-using namespace aabb;
+using namespace collision;
 #pragma once 
 namespace collision {
 	struct collision_event {
@@ -33,7 +32,7 @@ namespace collision {
 						if (collider_2.effector&&collider_1.effector) {
 							continue;
 						}
-						Option<v3::Vec3> force = aabb::collide_aabb(obj_1,obj_2);
+						Option<v3::Vec3> force = collision::collide_aabb(obj_1,obj_2);
 						if (force.is_none()) {
 							continue;
 						}
@@ -54,11 +53,11 @@ namespace collision {
 				geo::Box entity_box = global_box(collider).expanded(v3::unit_scale/ 100.0f);
 				array<chunks::block_object> blocks = collider.world().get_resource<grid::Grid>().voxel_in_range(entity_box);
 				for (chunks::block_object& block : blocks) {
-					stn::Option<Collider&> aabb = block.get_component_opt<Collider>();
-					if (!aabb) {
+					stn::Option<Collider&> collision = block.get_component_opt<Collider>();
+					if (!collision) {
 						continue;
 					}
-					Option<Vec3> force = aabb::collide_aabb(block.object(), collider);
+					Option<Vec3> force = collision::collide_aabb(block.object(), collider);
 					if (!force) {
 						collision::write_collision_event(block.object(), object);
 					}
@@ -75,24 +74,5 @@ namespace collision {
 		}
 	};
 
-
-
-	//casting
-	inline bool boxcast_dynamic(geo::Box blk, HitQuery query) {
-		ecs::View< ecs::Constrained<Collider>,DynamicCollider> colliders(query.world);
-		for (auto [collider, dynamic_tag] : colliders) {
-			if (query.matches(collider)) {
-				continue;
-			}
-			if (box_intersects_aabb(blk, collider)) {
-				return true;
-			}
-
-		}
-		return false;
-	}
-	inline bool boxcast(geo::Box box, HitQuery query) {
-		return voxtra::boxcast_grid(box, query.world.get_resource<grid::Grid>()) || boxcast_dynamic(box, query);
-	}
 
 }

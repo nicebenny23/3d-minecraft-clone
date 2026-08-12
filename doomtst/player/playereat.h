@@ -25,7 +25,7 @@ namespace player {
 					stn::ScopeGuard guard([&]() {eater.duration.set(.5f);	});
 
 					eater.food.get_component<ui::UiEnabled>().disable();
-					if (!world.get_resource<userinput::InputManager>().left_mouse().held) {
+					if (!world.get_resource<userinput::InputManager>().right_mouse().held) {
 						continue;
 					}
 					stn::Option<items::item_stack&> stack = inventory.selected();

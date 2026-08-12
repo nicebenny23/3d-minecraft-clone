@@ -55,7 +55,7 @@ struct PlayerMovementSys : ecs::System {
 				}
 			}
 			if (movement.held.is_active()&& !man.key(' ').held) {
-				body.add_force(physics::Force(v3::Vec3(0, -7/hold_dur, 0) * body.mass));
+				body.add_acceleration(v3::Vec3(0, -7/hold_dur, 0));
 			}
 			if (buoyancy.in_water) {
 				double float_amt = 35;
