@@ -21,7 +21,7 @@ namespace items {
 			return "moss_pack";
 		}
 		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits{ .image_path{"images\\moss_pack.png" },.food = 3 };
+			return item_traits{.image_path{"images\\moss_pack.png" },.capacity = 1,.food = 3 };
 		}
 	};
 
@@ -30,7 +30,7 @@ namespace items {
 			return "moss";
 		}
 		item_traits traits(const ecs::Ecs& world) const {
-			return item_traits{ .image_path=renderer::TexturePath("images\\mossitem.png"),.fertilizer = 1};
+			return item_traits{ .image_path=renderer::TexturePath("images\\mossitem.png")};
 		}
 	};
 

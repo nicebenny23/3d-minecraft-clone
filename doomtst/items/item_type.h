@@ -21,7 +21,6 @@ namespace items {
 		renderer::TexturePath image_path;
 		size_t capacity = 16;
 		size_t food=0;
-		size_t fertilizer = 0;
 		stn::Option <blocks::block_id> blk_id = stn::None;
 		bool operator==(const item_traits& other) const = default;
 

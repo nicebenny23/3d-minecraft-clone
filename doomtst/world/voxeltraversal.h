@@ -147,31 +147,37 @@ namespace voxtra {
 		}
 		return box;
 	}
+	inline stn::Option<geo::Box> find_ground_at(geo::Box test_box, grid::Grid& world) {
+	
+		geo::RayBox box_ray = geo::RayBox(geo::ray::from_offset(test_box.center, v3::Vec3(0, -100, 0)), test_box.scale);
+		collision::RayWorldCollision col = grid_ray_box_cast(box_ray, world, collision::SolidPredicate());
+		if (!col) {
+			return stn::None;
+		}
+		geo::Box hit_box = test_box.with_center(col.unwrap().hit.ray.end);
+		bool all_loaded = true;
+		if (boxcast_grid(hit_box.expanded(-1 / 20.0f), world, collision::SolidPredicate())) {
+			return stn::None;
+		}
+		for (math::cube_index index : math::cube_indices) {
+			if (!world.get_chunk(world.get_voxel(hit_box.point_at_vertex(index)))) {
+				all_loaded = false;
+			}
+		}
+		if (all_loaded) {
+			return hit_box;
+		}
+		return stn::None;
+	}
 	inline stn::Option<geo::Box> find_ground(v3::Scale3 scale, grid::Grid& world,size_t max_ground_checks=200,size_t max_box_trials=200) {
 		for (size_t i = 0; i < max_ground_checks; i++) {
 
 			stn::Option<geo::Box> test_box_opt = find_empty_space(scale, world,max_box_trials);
-			if (!test_box_opt) {
-				continue;
-			}
-			geo::Box test_box = test_box_opt.unwrap();
-			geo::RayBox box_ray = geo::RayBox(geo::ray::from_offset(test_box.center, v3::Vec3(0, -100, 0)), scale);
-			collision::RayWorldCollision col = grid_ray_box_cast(box_ray, world, collision::SolidPredicate());
-			if (!col) {
-				continue;
-			}
-			geo::Box hit_box = test_box.with_center(col.unwrap().hit.ray.end);
-			bool all_loaded = true;
-			if (boxcast_grid(hit_box.expanded(-1/2.0f), world, collision::SolidPredicate())) {
-				int l = 3;
-			}
-			for (math::cube_index index: math::cube_indices) {
-				if (!world.get_chunk(world.get_voxel(hit_box.point_at_vertex(index)))) {
-					all_loaded = false;
+			if (test_box_opt) {
+				stn::Option<geo::Box> at = find_ground_at(test_box_opt.unwrap(), world);
+				if (at.is_some()) {
+					return at.unwrap();
 				}
-			}
-			if (all_loaded) {
- 				return hit_box;
 			}
 		}
 		return stn::None;

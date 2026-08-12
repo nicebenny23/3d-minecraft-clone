@@ -109,7 +109,7 @@ namespace slimes {
 	using result_type = navigation::ContextResultType<SlimeNavigator>;
 
 	struct Mob :ecs::component {
-		math::bounds pursue_range=math::bounds(0,26);
+		math::bounds pursue_range=math::bounds(0,25);
 		double look_distance=15;
 	};
 
@@ -128,6 +128,7 @@ namespace slimes {
 		timing::Duration last_detection;
 		stn::Option<v3::Vec3> last_position;
 		ecs::Constrained<core::LocalTransform> following;
+		stn::Option<v3::Vec3> random_walk_position;
 		void reset_fix() {
 			last_fix.set(.5f);
 		}
@@ -135,30 +136,46 @@ namespace slimes {
 			last_fix.disable();
 		}
 	};
-	inline v3::Point3 slime_target(ecs::Constrained<SlimePathFinder, core::LocalTransform> finder) {
+
+	struct Idler {
+	};
+	struct Wandering {
+
+	};
+
+	inline v3::Point3 slime_target(ecs::Constrained<SlimePathFinder, core::LocalTransform,ai::Brain> finder) {
 		SlimePathFinder& path = finder.get<SlimePathFinder>();
+		if (finder.get<ai::Brain>().active<Wandering>()) {
+			math::Transform us = finder.get<core::LocalTransform>().transform;
+			if (path.random_walk_position&&v3::dist(us.position, path.random_walk_position.unwrap())<=1) {
+				path.random_walk_position = stn::None;
+			}
+			while(!path.random_walk_position) {
+				v3::Vec3 random = random::spherical();
+				random *= 4;
+				path.random_walk_position=voxtra::find_ground_at(us.unrotated_box().translated(random), finder.world().get_resource<grid::Grid>()).member(&geo::Box::center);
+			}
+			return path.random_walk_position.unwrap();
+		}
 		v3::Point3 pnt = path.following.get_component<core::LocalTransform>().transform.position;
 		return pnt;
 	}
-	struct Idler{
-	};
 
 	struct SlimeNavigation :ecs::System {
 		void run(ecs::Ecs& world) {
 			
 			ecs::View<SlimePathFinder, core::LocalTransform, Mob, ecs::Owner, ai::Brain> slimes(world);
 			for (auto&& [path, transform, mob, object, brain] : slimes) {
-				double dist = v3::dist(transform.transform.position, slime_target(object));
+				double dist = v3::dist(transform.transform.position, path.following.get_component<core::LocalTransform>().transform.position);
 				if (!mob.pursue_range.contains(dist)) {
-					brain.set<Idler>(1);
+					brain.set<Wandering>(1);
 				}
-				if (dist<mob.look_distance) {
+				if (dist<mob.look_distance|| brain.active<SlimeNavigator>()) {
 					brain.set<SlimeNavigator>(0);
 				}
-				if (!brain.active<SlimeNavigator>()) {
+				if (!brain.active<SlimeNavigator>()&&!brain.active<Wandering>()) {
 					continue;
 				}
-				brain.set<SlimeNavigator>(0);
 				if (path.last_detection.is_inactive_set(.1)) {
 					double min_dist = .08f;
 					//if their is no last position or we move to much we reset fix otherwise fix eventually becomes innactive
@@ -167,7 +184,7 @@ namespace slimes {
 					}
 					path.last_position = transform.transform.position;
 				}
-				v3::Vec3 off = transform.transform.position - path.following.get<core::LocalTransform>().transform.position;
+
 				if (path.path.non_empty()) {
 					result_type current_node=path.path.first();
 					v3::Point3 goto_pos = v3::Point3(current_node.result().pos) + v3::Scale3::from_scale(1 / 2.0f).with_y(transform.transform.scale.y / 2);
@@ -225,7 +242,7 @@ namespace slimes {
 			}
 			ecs::View<SlimePathFinder, core::LocalTransform, physics::RigidBody,ecs::Owner,Health::EntityHealth,ai::Brain, physics::Buoyancy> slimes(world);
 			for (auto&& [path, transform, body,object,health,brain,buoyancy] : slimes) {
-				if (!brain.active<SlimeNavigator>()) {
+				if (!brain.active<SlimeNavigator>()&&!brain.active< Wandering>()) {
 					continue;
 				}
 				stn::Option<result_type& > headed = path.path.first_opt();
@@ -260,7 +277,7 @@ namespace slimes {
 								if (buoyancy.in_water&&head.move.offset.y==0&&d.y>0) {
 									//for now
 									double vel = body.velocity.y;
-									body.add_acceleration(v3::Vec3(0, 25.53*math::sign_rounding_up(d.y), 0));
+									body.add_acceleration(v3::Vec3(0, 29.53*math::sign_rounding_up(d.y), 0));
 								}
 								double turn_speed = speed;
 								body.add_force(force * turn_speed);

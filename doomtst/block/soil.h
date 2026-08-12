@@ -38,6 +38,8 @@ namespace blocks {
 	};
 	struct FertilitySystem:ecs::System {
 		void run(ecs::Ecs& world) {
+			return;
+			//use neibor upda
 			if (!world.get_resource<timing::Ticks>().tick_frame) {
 				return;
 			}
@@ -47,7 +49,7 @@ namespace blocks {
 				v3::Coord list[4] = { v3::LeftCoord,v3::RightCoord,v3::BackCoord,v3::FrontCoord };
 				bool watered = false;
 				//improve system eventually
-				if (!fertile.seedable) {
+				if (fertile.seedable<=.9) {
 					//speed up through tick system
 					for (v3::Coord crd : list) {
 						v3::Coord pos = crd + block.pos;
@@ -64,12 +66,13 @@ namespace blocks {
 							double max_get = std::min(l.amt, 1 - fertile.seedable);
 							fertile.need_reset=true;
 							fertile.seedable+=max_get;
+							l.amt -= max_get;
 							break;
 					}
 				}
 				block_texture texture;
 				if (fertile.need_reset) {
-					if (fertile.seedable == 0) {
+					if (fertile.seedable<=.9) {
 						texture = textures.get_texture("images\\silt.png");
 					}
 					else {
