@@ -12,19 +12,9 @@ namespace items {
 		stn::Option<AddToSlotPlan> build();
 	};
 
-	inline void swap_slot_plans(ecs::Constrained<ElementSlot> from, ecs::Constrained<ElementSlot> to) {
-		stn::Option<ecs::Constrained<item_stack>> to_child = to.get <ElementSlot>().element();
-		stn::Option<ecs::Constrained<item_stack>> from_child = from.get<ElementSlot>().element();
-
-		to.get<ElementSlot>().reset_element();
-		from.get<ElementSlot>().reset_element();
-
-		if (to_child) {
-			from.get<ElementSlot>().set_element(to_child.unwrap().object());
-		}
-		if (from_child) {
-			to.get<ElementSlot>().set_element(from_child.unwrap().object());
-		}
+	inline void swap_slot(ecs::Constrained<ElementSlot> from, ecs::Constrained<ElementSlot> to) {
+		std::swap(from.get<ElementSlot>().current_item, to.get<ElementSlot>().current_item);
+		
 	}
 	struct AddToSlotPlan {
 		ecs::Constrained<ElementSlot> slot;

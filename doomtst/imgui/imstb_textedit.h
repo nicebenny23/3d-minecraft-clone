@@ -22,7 +22,7 @@
 // requirements (this library is not recommended for use for editing large
 // texts, as its performance does not scale and it has limited undo).
 //
-// Non-trivial behaviors are modelled after Windows text controls.
+// Non-trivial priorities are modelled after Windows text controls.
 //
 //
 // LICENSE

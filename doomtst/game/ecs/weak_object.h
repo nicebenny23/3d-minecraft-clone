@@ -15,7 +15,7 @@ namespace ecs {
 		auto constrained(this auto&& self) -> stn::Option<stn::apply_const_like_t<decltype(self), ConstrainedType>&>
 		{
 			if (self.alive()) {
-				return self.element;
+				return self.element.as_ref();
 			}
 			return stn::None;
 
@@ -35,7 +35,7 @@ namespace ecs {
 
 		}
 		bool alive() const {
-			element.retain(element.is_some()&&element.unwrap().is_valid());
+			element=element.retain(element.is_some()&&element.unwrap().is_valid());
 			return element.is_some();
 		}
 		explicit operator bool() const {
@@ -45,37 +45,12 @@ namespace ecs {
 		void set(const T& object) {
 			element = object;
 		}
+		void reset() {
+			element = stn::None;
+		}
 
 	private:
 		mutable stn::Option<ConstrainedType> element;
 	};
-	struct WeakObject {
-		WeakObject(ecs::obj object) :element(object) {
-
-		}
-
-		stn::Option<ecs::obj> get() const{
-			if (element.exists()) {
-				return element;
-
-			}
-			return stn::None;
-		}
-		bool alive() const {
-			return element.exists();
-
-		}
-		explicit operator bool() const {
-			return alive();
-		}
-		void set(ecs::obj object) {
-			element = object;
-		}
-
-	private:
-		ecs::obj element;
-
-	};
-
 
 }

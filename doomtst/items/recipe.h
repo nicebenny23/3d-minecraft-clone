@@ -93,9 +93,9 @@ struct ItemRecipes {
 };
 
 struct RecipeBinder {
-	ecs::obj input;
+	ecs::Constrained<items::Container> input;
 	ItemRecipes list;
-	RecipeBinder(ecs::obj in, ItemRecipes list) :input(in), list(list) {
+	RecipeBinder(ecs::Constrained<items::Container> in, ItemRecipes list) :input(in), list(list) {
 
 	}
 };

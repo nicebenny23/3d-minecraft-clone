@@ -31,7 +31,7 @@ namespace player {
 		ecs::EventReader<ui::NoMenus> reader;
 		void run(ecs::Ecs& world) {
 			if (reader.read().nonempty()) {
-				world.write_command(ui::menu_stack(player::player_for(world).get_component<CloseMenuComponent>().button));
+				world.write_command(ui::AddMenu(player::player_for(world).get_component<CloseMenuComponent>().button));
 			}
 			ecs::View<ui::InteractionState, ecs::Has<CloseButton>> view(world);
 			for (auto [interaction] : view) {

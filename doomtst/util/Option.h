@@ -292,7 +292,7 @@ namespace stn {
 			}
 			return stn::None;
 		}
-
+	
 		template<typename U>
 		T& fallback(U&& value) requires std::constructible_from<T, U&&> {
 			if (!has_value) {

@@ -114,7 +114,7 @@ namespace slimes {
 
 		}
 		math::bounds pursue_range=math::bounds(0,35);
-		double look_distance=20;
+		double look_distance=18;
 		timing::Duration last_fix;
 		//tick for path check
 		timing::Duration last_detection;
@@ -183,12 +183,12 @@ namespace slimes {
 				double dist = v3::dist(transform.transform.position, path.following.get_component<core::LocalTransform>().transform.position);
 				double home_dist = v3::dist(path.spawn, path.following.get_component<core::LocalTransform>().transform.position);
 				double self_home_dist = v3::dist(path.spawn, transform.transform.position);
-				brain.set<Wandering>(-1.0f);
-				if (brain.becoming_inactive<SlimeNavigator>()|| brain.becoming_inactive<Wandering>()) {
+				brain.allow<Wandering>();
+				if (brain.becoming_active<SlimeNavigator>()|| brain.becoming_active<Wandering>()) {
 					mob.force_repath();
 				}
 				if (mob.pursue_range.contains(home_dist)&&(brain.active<SlimeNavigator>()|| dist < mob.look_distance)) {
-					brain.set<SlimeNavigator>(0);
+					brain.allow<SlimeNavigator>();
 				}
 				
 				if (!brain.active<SlimeNavigator>()&&!brain.active<Wandering>()) {
@@ -248,7 +248,7 @@ namespace slimes {
 			ecs::View < SlimePathFinder, ai::Brain, Health::EntityHealth > slimes(world);
 				for (auto&& [path, brain, health] : slimes) {
 					if (Health::damage_delay-.2f < health.damage_delay_timer.remaining().unwrap_or(0)) {
-						brain.set<Idler>(1);
+						brain.allow<Idler>();
 					}
 				}
 		}
@@ -295,18 +295,20 @@ namespace slimes {
 									force.y = 0;
 								}
 								force = force.with_length_less_than(1);
-								if (buoyancy.in_water&&head.move.offset.y==0&&d.y>0) {
+								if (buoyancy.in_water) {
 									//for now
+									//cheat for now
+									body.add_acceleration(v3::Vec3(0, 25.53 * math::sign_rounding_up(d.y), 0));
 									double vel = body.velocity.y;
-									body.add_acceleration(v3::Vec3(0, 29.53*math::sign_rounding_up(d.y), 0));
 								}
+
 								double turn_speed = speed;
 								body.add_force(force * turn_speed);
 								v3::Vec3 look = head.move.offset;
 								look.y = 0;
 								if (look.mag2()>=.5f) {
 
-									transform.transform.look=math::rotate_twords(transform.transform.look,look.look(), world.get_resource<timing::GameClock>().game_clock.dt * glm::two_pi<double>());
+									transform.transform.look=math::rotate_twords(transform.transform.look,look.look(), world.get_resource<timing::GameClock>().game_clock.dt * glm::two_pi<double>()*2);
 								}
 							}
 
@@ -331,13 +333,13 @@ namespace slimes {
 			slime.add_component<core::LocalTransform>(pos).transform.scale = v3::unit_scale / 1.3f;
 			slime.spawn_child_emplaced<core::TransformRecipe>(pos);
 
-			double speed = 12;
+			double speed = 14;
 			if (random::random()>.9f) {
 
 				slime.apply_recipe(items::loot_table_recipe<blue_slime_loot_table>);
 				slime.apply_recipe(renderer::ModelRecipe{ .path{.mesh = MeshPath("meshes\\cubetest.obj"),.texture{"images\\slimetexblue.png"}} });
 				slime.apply_recipe(Health::HealthSpawner(20));
-				speed =15;
+				speed =18;
 			}
 			else {
 
@@ -350,7 +352,10 @@ namespace slimes {
 			slime.add_component<SlimePathFinder>(player::player_for(slime.world()),speed,pos);
 			slime.add_component<Health::FlashOnHit>();
 			slime.add_component<Enemy>(slime.world().get_resource<timing::GameClock>().game_clock);
-			slime.add_component<ai::Brain>();
+			ai::Brain& brain=slime.add_component<ai::Brain>();
+			brain.add_behavior<Wandering>(-1);
+			brain.add_behavior<SlimeNavigator>(0);
+			brain.add_behavior<Idler>(1);
 			slime.add_component<Health::DamageOnHit>(player::player_for(slime.world()), 2,2);
 			slime.apply_recipe(physics::Spawner{ .restitution =1.0,.density = 1.0,.gravity=v3::Vec3(0,-25.53,0)});
 		}

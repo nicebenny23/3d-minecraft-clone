@@ -12,37 +12,34 @@ namespace player {
 
 		ecs::Constrained<ui::MenuComponent> menu;
 	};
+	
 	struct InventoryUiSystem : ecs::System {
 		void run(ecs::Ecs& world) {
 
 			userinput::InputManager& input = world.get_resource<userinput::InputManager>();
 			auto view = ecs::View< inventory, inventory_ui>(world);
 			for (auto [player_inv, ui_menu] : view) {
-				if (input.key('1').pressed) {
+				stn::Option<v2::UVec2> selected_index = stn::None;
+					for (size_t i = 0; i < 6; i++) {
+						if (input.key('1' + i).pressed) {
+							selected_index = v2::UVec2(i, 0);
+						}
+					}
+					if (selected_index) {
 
-					player_inv.selected_ind = v2::UVec2(0, 0);
-				}
-				if (input.key('2').pressed) {
-
-					player_inv.selected_ind = v2::UVec2(1, 0);
-				}
-				if (input.key('3').pressed) {
-
-					player_inv.selected_ind = v2::UVec2(2, 0);
-				}if (input.key('4').pressed) {
-
-					player_inv.selected_ind = v2::UVec2(3, 0);
-				}
-				if (input.key('5').pressed) {
-
-					player_inv.selected_ind = v2::UVec2(4, 0);
-				}
-				if (input.key('6').pressed) {
-					player_inv.selected_ind = v2::UVec2(5, 0);
-
-				}
+						if (in_game(world)) {
+							player_inv.selected_ind = selected_index.unwrap();
+						}
+						else {
+							for (auto [item_decal, interaction_state,slot] : ecs::View<items::ItemSlotDecal, ui::InteractionState,items::RefrencedSlot>(world)) {
+								if (interaction_state.hovered) {
+									items::swap_slot(slot.displayed(),player_inv.hotbar.get<items::Container>()[selected_index.unwrap()].object());
+								}
+							}
+						}
+					}
 				if (input.key('e').pressed) {
-					world.write_command(ui::menu_stack(ui_menu.menu));
+					world.write_command(ui::AddMenu(ui_menu.menu));
 				}
 			}
 
@@ -71,7 +68,7 @@ namespace player {
 			ecs::obj bg = ent.spawn_child_emplaced<ui::ImageSpawner>(renderer::TexturePath("images\\menutex.png"), geo::Box2d(v2::Vec2(.24f, .15f) / 2.0, v2::Vec2(.33f, .25f)), 0);
 
 			ent.spawn_child_emplaced<items::ContainerDisplayRecipe>(v2::Coord2(4, 3), input);
-			ecs::Constrained<items::crafter> crafter = ent
+			ecs::Constrained<items::Crafter> crafter = ent
 				.spawn_child_emplaced< items::CrafterRecipe>(input.object(), stn::array({ std::filesystem::path("crafting\\2x2craft.txt") }));
 			ent.spawn_child_emplaced<items::CraftingSlotDisplaySpawner>(v2::Coord2(7, 3), crafter);
 			ent.get_component<ui::UiEnabled>().disable();
@@ -118,8 +115,7 @@ namespace player {
 		world.emplace_system< InventoryUiSystem>();
 		world.emplace_system<player::LoadHotbarSlots>();
 		world.emplace_system< items::ItemClear>();
-		world.emplace_system< items::run_crafts>();
-		world.emplace_system< items::cursor_crafter>();
+		world.emplace_system< items::RunCrafts>();
 		world.emplace_system<items::SyncDisplayIcon>();
 	}
 }

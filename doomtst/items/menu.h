@@ -13,8 +13,8 @@ namespace ui {
 	struct NoMenus {
 
 	};
-	struct menu_stack {
-		menu_stack(ecs::Constrained<MenuComponent> menu_comp) :menu_ent(menu_comp) {
+	struct AddMenu {
+		AddMenu(ecs::Constrained<MenuComponent> menu_comp) :menu_ent(menu_comp) {
 
 		}
 		ecs::Constrained<MenuComponent> menu_ent;
@@ -36,7 +36,7 @@ namespace ui {
 		bool no_menu_open() const {
 			return !menu_open();
 		}
-		stn::Option<ecs::obj> top() const{
+		stn::Option<ecs::Constrained<ui::MenuComponent>> top() const{
 			if (menu_open()) {
 				return menu_stack.peek();
 			}
@@ -44,7 +44,7 @@ namespace ui {
 
 		}
 		MenuState() = default;
-		mutable stn::stack<ecs::obj> menu_stack;
+		mutable stn::stack<ecs::Constrained<ui::MenuComponent>> menu_stack;
 	};
 	inline bool is_open(ecs::Constrained<MenuComponent> menu) {
 		return menu.world().get_resource< MenuState>().top()==menu.object();
@@ -64,7 +64,7 @@ namespace ui {
 			//on expire
 		
 
-			for (menu_stack menu : world.read_commands<menu_stack>()) {
+			for (AddMenu menu : world.read_commands<AddMenu>()) {
 				if (state.top() != menu.menu_ent.object()) {
 	
 					if (state.menu_open()) {

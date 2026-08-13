@@ -32,7 +32,7 @@ namespace world {
 					return registry.get_id<blocks::SoilBlock>();
 
 				}
-				return registry.get_id<blocks::SoilBlock>();
+				return registry.get_id<blocks::StoneBlock>();
 
 		}
 		inline blocks::block_id get_stone(double chaotic, BorderState dist) const {
@@ -122,15 +122,15 @@ namespace world {
 			double global_dist_2 = 0;
 			if (signed_distance < 12) {
 				global_dist_2 = global_dist_two(pos, big_carver_bounds);
+				stn::set_max(signed_distance, global_dist_2);
 			}
-			stn::set_max(signed_distance, global_dist_2);
 			if (math::bounds(0, 12).contains_exact(signed_distance)) {
 				for (math::Direction3d dir : math::Directions3d) {
 					v3::Vec3 neighbor_pos = position + dir.vec();
 					math::bounds big_carver_bounds = caveness(neighbor_pos);
 					signed_distance = 0;
 					//would rarely fail if global_dist_1 is negitive but switches to positive thats why we limit based on a second double
-					double min_check_offset = -5;
+					double min_check_offset =-12;
 					if (global_dist_1 > min_check_offset) {
 						stn::set_max(signed_distance, global_dist_one(neighbor_pos, big_carver_bounds));
 					}

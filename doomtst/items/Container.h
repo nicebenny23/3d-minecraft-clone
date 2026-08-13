@@ -65,6 +65,7 @@ namespace items {
 			Container& cont = ent.add_component<Container>(offset, id);
 			containers.containers.emplace(ent);
 			for (size_t i = 0; i < offset.entries();i++) {
+
 					cont.slots.emplace<items::container_element>(ecs::spawn(ent.world(), ItemSlotSpawner()));
 				
 			}

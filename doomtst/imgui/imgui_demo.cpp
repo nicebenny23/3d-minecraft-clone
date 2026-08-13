@@ -5931,7 +5931,7 @@ static void ShowDemoWindowTables()
                     // - A) all our columns are contributing the same to row height
                     // - B) column 0 is always visible,
                     // We only always submit this one column and can skip others.
-                    // More advanced per-column clipping behaviors may benefit from polling the status flags via TableGetColumnFlags().
+                    // More advanced per-column clipping priorities may benefit from polling the status flags via TableGetColumnFlags().
                     if (!ImGui::TableSetColumnIndex(column) && column > 0)
                         continue;
                     if (column == 0)
@@ -6233,7 +6233,7 @@ static void ShowDemoWindowTables()
     if (ImGui::TreeNode("Outer size"))
     {
         // Showcasing use of ImGuiTableFlags_NoHostExtendX and ImGuiTableFlags_NoHostExtendY
-        // Important to that note how the two flags have slightly different behaviors!
+        // Important to that note how the two flags have slightly different priorities!
         ImGui::Text("Using NoHostExtendX and NoHostExtendY:");
         PushStyleCompact();
         static ImGuiTableFlags flags = ImGuiTableFlags_Borders | ImGuiTableFlags_Resizable | ImGuiTableFlags_ContextMenuInBody | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_NoHostExtendX;

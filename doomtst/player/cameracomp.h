@@ -29,16 +29,15 @@ namespace renderer {
 		CameraDirectFollower(ecs::obj follow) :follow(follow) {
 
 		}
-		ecs::WeakObject follow;
+		ecs::WeakConstrained<core::LocalTransform> follow;
 	
 	};
 	struct CameraFollowerSystem:ecs::System{
 		void run(ecs::Ecs& world) {
 			ecs::View < CameraDirectFollower, core::LocalTransform> cameras(world);
 			for (auto&& [direct_camera,transform]:cameras ) {
-				stn::Option<ecs::obj> follow = direct_camera.follow.get();
-				if (follow) {
-					transform.transform = follow.unwrap().get_component<core::LocalTransform>().transform;
+				if (direct_camera.follow) {
+					transform.transform = direct_camera.follow.get<core::LocalTransform>().unwrap().transform;
 				}
 			}
 		}

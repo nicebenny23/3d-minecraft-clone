@@ -62,9 +62,10 @@ namespace blocks {
 							continue;
 						}
 							Liquid& l = block_at_mabye.unwrap().get_component<Liquid>();
-							double max_get = std::min(l.amt, 1 - fertile.seedable);
+							double fill_for = 4;
+							double max_get = std::min(l.amt, fill_for *(1 - fertile.seedable));
 							fertile.need_reset=true;
-							fertile.seedable+=max_get;
+							fertile.seedable+=max_get/ fill_for;
 							l.amt -= max_get;
 							break;
 					}
