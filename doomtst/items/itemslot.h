@@ -5,9 +5,9 @@
 namespace items {
 
 	struct ElementSlot :ecs::component {
-		stn::Option<ecs::WeakObject> current_item;
+		ecs::WeakConstrained<item_stack> current_item;
 		bool occupied() const{
-			return current_item.is_some_and(&ecs::WeakObject::alive);
+			return current_item.alive();
 		}
 		bool empty() const{
 			return !occupied();
@@ -22,25 +22,23 @@ namespace items {
 			return false;
 		}
 		void set_element(ecs::obj elem) {
-			current_item = ecs::WeakObject(elem);
+			current_item = ecs::WeakConstrained<item_stack>(elem);
 		}
 		void reset_element() {
-			current_item = stn::None;
+			current_item.reset();
 		}
 		void clear() {
 			if (occupied()) {
 				element().unwrap().destroy();
 			}
-			current_item = stn::None;
+			reset_element();
 		}
 		void destroy_hook() {
-			if (element()) {
-				element().unwrap().destroy();
-			}
+			clear();
 		}
 		Option<ecs::Constrained<item_stack>> element() const{
 			if (occupied()) {
-				return ecs::Constrained<item_stack>(current_item.unwrap().get().unwrap());
+				return current_item.constrained().copied();
 			}
 			return stn::None;
 		}
