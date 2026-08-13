@@ -51,7 +51,7 @@ namespace renderer {
 			id.object().set_emplace_component<order_key>(key);
 		}
 		void destroy() {
-			world().write_command(remove_render_object(id.object()));
+			id.destroy();
 		}
 		bool operator==(const RenderableHandle& other) const = default;
 		Renderer& renderer();
@@ -130,10 +130,6 @@ namespace renderer {
 			mesh_component& mesh_comp = ren.get<mesh_component>();
 			if (!mesh_comp.msh) {
 				return;
-			}
-			if (mesh_comp.msh.unwrap()->vao.id == 10) {
-				shader_id id = ren.get<MaterialComponent>().mat_id->shader;
-				int l = 3;
 			}
 			context.draw(*mesh_comp.msh.unwrap());
 
@@ -234,9 +230,6 @@ namespace renderer {
 				}
 			}
 			ren.meshes.remove_empty();
-			for (remove_render_object to_remove : world.read_commands<remove_render_object>()) {
-				to_remove.object.destroy();
-			}
 		}
 	};
 	inline void renderer_plugin(core::App& game) {

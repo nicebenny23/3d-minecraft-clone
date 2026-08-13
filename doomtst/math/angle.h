@@ -7,7 +7,7 @@
 #pragma once
 namespace math {
 	struct Angle {
-		Angle() :rad(0) {
+		constexpr Angle() :rad(0) {
 
 		}
 		double cos() const {
@@ -19,6 +19,7 @@ namespace math {
 		Angle operator+(const Angle& other) const{
 			return Angle(rad + other.rad);
 		}
+		
 		Angle& operator+=(const Angle& other) {
 			*this = *this + other;
 			return *this;
@@ -53,7 +54,9 @@ namespace math {
 		}
 		double radians_signed() const {
 			double r = rad;
-			if (r > glm::pi<double>()) r -= 2.0 * glm::pi<double>();
+			if (r > glm::pi<double>()) {
+				r -= 2.0 * glm::pi<double>();
+			}
 			return r;
 		}
 
@@ -64,15 +67,17 @@ namespace math {
 		}
 	private:
 
-		Angle(double radians) {
+		constexpr Angle(double radians) {
 				rad = std::fmod(radians, 2.0 * glm::pi<double>());
-				if (rad < 0) rad += 2.0 * glm::pi<double>();
+				if (rad < 0) {
+					rad += 2.0 * glm::pi<double>();
+				}
 		}
 		double rad;
 	};
 
 	struct Look3{
-		Look3(Angle yaw, Angle pitch):yaw(yaw),pitch(pitch) {
+		constexpr Look3(Angle yaw, Angle pitch):yaw(yaw),pitch(pitch) {
 
 		}
 		static Look3 from_degrees(double yaw, double pitch){
@@ -81,6 +86,10 @@ namespace math {
 		static Look3 from_radians(double yaw, double pitch) {
 			return Look3(Angle::from_radians(yaw), Angle::from_radians(pitch));
 		}
+		Look3 then(const Look3& next) const {
+			return Look3(yaw + next.yaw, pitch + next.pitch);
+		}
+
 		Look3() :Look3(Angle::from_degrees(90), Angle()) {
 
 		}
@@ -91,6 +100,40 @@ namespace math {
 		Angle pitch;
 
 	};
+	inline double distance(const Angle& start, const Angle& end) {
+		return (start-end).radians();
+	}
+	inline Angle rotate_twords(const Angle& start, const Angle& end, double max_radians) {
+		double r1 = start.radians();
+		double r2 = end.radians();
+		double dist = distance(start, end);
+		double direction = stn::min(max_radians,dist);
+		if (r2<r1) {
+			direction *= -1;
+		}
+		if (abs(r1 - r2) > glm::pi<double>()) {
+			direction *= -1;
+		}
+		//go backwards which will eventually wrap
+		return Angle::from_radians(r1+direction);
+	}
+	inline Look3 rotate_twords(const Look3& start, const Look3& end, double max_radians) {
+		return Look3(rotate_twords(start.yaw, end.yaw, max_radians), rotate_twords(start.pitch, end.pitch, max_radians));
+	}
+
+	inline Angle lerp(const Angle& start, const Angle& end,double t) {
+		double r1 = start.radians();
+		double r2 = end.radians();
+		int direction = 1;
+		if (abs(r1 - r2) > glm::pi<double>()) {
+			direction = -1;
+		}
+		//go backwards which will eventually wrap
+		return Angle::from_radians(stn::lerp(r1,r2, t*direction));
+	}
+	inline Look3 lerp(const Look3& start, const Look3& end,double t) {
+		return Look3(lerp(start.yaw, end.yaw, t), lerp(start.pitch, end.pitch, t));
+	}
 }
 namespace std {
 	template <>

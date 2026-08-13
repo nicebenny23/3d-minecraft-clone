@@ -30,5 +30,9 @@ namespace renderer {
 	struct vbo_tag {
 	};
 	using Vbo = stn::typed_id<vbo_tag>;
+	struct vao_tag {
+	};
+
+	using Vao = stn::typed_id<vao_tag>;
 }
 

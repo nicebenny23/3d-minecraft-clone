@@ -34,7 +34,7 @@ void player::initplayer(ecs::obj& player) {
 	core::game.emplace_system<player::PlayerEater>();
 	core::game.emplace_system<CameraFollowerSystem>();
 	
-	timing::WorldClock& clock = player.world().get_resource<timing::WorldClock>();
+	timing::Clock& clock = player.world().get_resource<timing::GameClock>().game_clock;
 		player.add_component<player::CloseMenuComponent>(ecs::spawn(player.world(),player::make_close_menu));
 	collision::DynamicColliderRecipe().apply(player);
 	player.apply_recipe(physics::Spawner{.restitution=.6,.gravity=v3::Vec3(0,-18,0)});
@@ -50,6 +50,6 @@ void player::initplayer(ecs::obj& player) {
 	player.add_component<PlayerAttack>(ecs::spawn(player.world(), renderer::ParticleEmmitterRecipe<PlayerAttackParticleSpawner>{.max_lifetime=2.0f}), clock);
 	player.add_component<renderer::CameraComponent>();
 	ecs::spawn(player.world(), CameraSpawner()).add_component<renderer::CameraDirectFollower>(player);
-	player.add_component<playermovement>(clock);
+	player.add_component<PlayerMovment>(clock);
 	player.add_component<CameraController>();
 }

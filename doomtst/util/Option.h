@@ -191,12 +191,11 @@ namespace stn {
 		bool operator!=(const Option& other) const requires std::equality_comparable<T> {
 			return !(*this == other);
 		}
-		template<typename U>
-			requires std::equality_comparable_with<T, U>
+		template<typename U> requires !std::same_as<U, Option<T>>&&std::equality_comparable_with<T, U>
 		bool operator==(const U& other) const {
 			return has_value && unwrap_unchecked() == other;
 		}
-		template<typename U>
+		template<typename U> requires !std::same_as<U, Option<T>>&&std::equality_comparable_with<T, U>
 		bool operator!=(const U& other) const {
 			return !(*this == other);
 		}

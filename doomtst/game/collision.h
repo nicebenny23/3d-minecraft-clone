@@ -26,19 +26,11 @@ namespace collision {
 		void run(ecs::Ecs& world) {
 
 			ecs::View< DynamicCollider,Collider, ecs::Owner> colliders(world);
-			for (auto&& [dynamic_tag_1, collider_1, obj_1] : colliders) {
-				for (auto&& [dynamic_tag_2, collider_2, obj_2] : colliders) {
+			for (auto [dynamic_tag_1, collider_1, obj_1] : colliders) {
+				for (auto [dynamic_tag_2, collider_2, obj_2] : colliders) {
 					if (obj_1 != obj_2) {
-						if (collider_2.effector&&collider_1.effector) {
-							continue;
-						}
-						Option<v3::Vec3> force = collision::collide_aabb(obj_1,obj_2);
-						if (force.is_none()) {
-							continue;
-						}
-						write_collision_event(obj_1, obj_2);
-						if (collider_1.effector || collider_2.effector) {
-							continue;
+						if (collision::intersect_aabb(obj_1, obj_2)) {
+							write_collision_event(obj_1, obj_2);
 						}
 					}
 				}
@@ -48,18 +40,22 @@ namespace collision {
 	struct StaticCollsionSystem :ecs::System {
 
 		void run(ecs::Ecs& world) {
+			grid::Grid& grid = world.get_resource<grid::Grid>();
 			ecs::View<DynamicCollider,ecs::Constrained<Collider>,ecs::Owner> colliders(world);
+			
 			for (auto&& [dynamic_tag, collider, object] : colliders) {
 				geo::Box entity_box = global_box(collider).expanded(v3::unit_scale/ 100.0f);
-				array<chunks::block_object> blocks = collider.world().get_resource<grid::Grid>().voxel_in_range(entity_box);
-				for (chunks::block_object& block : blocks) {
-					stn::Option<Collider&> collision = block.get_component_opt<Collider>();
+				for(v3::Coord crd:geo::IntBox3d(grid.get_voxel(entity_box.min()), grid.get_voxel(entity_box.max()))){
+					stn::Option<chunks::block_object&> blk = grid.get_object(crd);
+					if (!blk) {
+						continue;
+					}
+					stn::Option<Collider&> collision = blk.unwrap().get_component_opt<Collider>();
 					if (!collision) {
 						continue;
 					}
-					Option<Vec3> force = collision::collide_aabb(block.object(), collider);
-					if (!force) {
-						collision::write_collision_event(block.object(), object);
+					if (collision::intersect_aabb(blk.unwrap().object(), collider)) {
+						collision::write_collision_event(blk.unwrap().object(), object);
 					}
 				}
 			}

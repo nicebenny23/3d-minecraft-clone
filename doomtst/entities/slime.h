@@ -21,7 +21,7 @@ namespace slimes {
 			return 1.0 + jump_height.unwrap();
 		}
 		double cost() const {
-			return 1.0 + jump_height.unwrap_or(0) * 2+random::random()-.5f;
+			return 1.0 + jump_height.unwrap_or(0) * 2+random::random()/4.0f;
 		}
 	};
 	struct SlimeNavigator {
@@ -108,33 +108,40 @@ namespace slimes {
 
 	using result_type = navigation::ContextResultType<SlimeNavigator>;
 
-	struct Mob :ecs::component {
-		math::bounds pursue_range=math::bounds(0,25);
-		double look_distance=15;
-	};
+	//enemies all pathfind
+	struct Enemy :ecs::component {
+		Enemy(timing::Clock& clock):last_fix(clock),last_detection(clock),build_time(clock){
 
-	struct SlimePathFinder :ecs::component {
-
-		using result_type = navigation::ContextResultType<SlimeNavigator>;
-		stn::array<result_type> path;
-		SlimePathFinder(timing::Duration time, ecs::Constrained<core::LocalTransform> follow,double speed) :last_fix(time), build_time(time), following(follow), speed(speed),last_detection(time.clock()){
 		}
-		double speed;
-		//stops path stales
-		timing::Duration build_time;
-		//last time noticble progress was made in the path
+		math::bounds pursue_range=math::bounds(0,35);
+		double look_distance=20;
 		timing::Duration last_fix;
 		//tick for path check
 		timing::Duration last_detection;
 		stn::Option<v3::Vec3> last_position;
-		ecs::Constrained<core::LocalTransform> following;
-		stn::Option<v3::Vec3> random_walk_position;
+
+		//stops path stales
+		timing::Duration build_time;
 		void reset_fix() {
 			last_fix.set(.5f);
 		}
 		void force_repath() {
 			last_fix.disable();
 		}
+	};
+
+	struct SlimePathFinder :ecs::component {
+
+		using result_type = navigation::ContextResultType<SlimeNavigator>;
+		stn::array<result_type> path;
+		SlimePathFinder(ecs::Constrained<core::LocalTransform> follow,double speed,v3::Vec3 spawn_coords) :following(follow), speed(speed), spawn(spawn_coords){
+		}
+		double speed;
+		v3::Vec3 spawn;
+		//last time noticble progress was made in the path
+		ecs::Constrained<core::LocalTransform> following;
+		stn::Option<v3::Vec3> random_walk_position;
+		
 	};
 
 	struct Idler {
@@ -145,44 +152,55 @@ namespace slimes {
 
 	inline v3::Point3 slime_target(ecs::Constrained<SlimePathFinder, core::LocalTransform,ai::Brain> finder) {
 		SlimePathFinder& path = finder.get<SlimePathFinder>();
+		v3::Point3 pnt = path.following.get_component<core::LocalTransform>().transform.position;
+
 		if (finder.get<ai::Brain>().active<Wandering>()) {
 			math::Transform us = finder.get<core::LocalTransform>().transform;
 			if (path.random_walk_position&&v3::dist(us.position, path.random_walk_position.unwrap())<=1) {
 				path.random_walk_position = stn::None;
 			}
-			while(!path.random_walk_position) {
-				v3::Vec3 random = random::spherical();
-				random *= 4;
-				path.random_walk_position=voxtra::find_ground_at(us.unrotated_box().translated(random), finder.world().get_resource<grid::Grid>()).member(&geo::Box::center);
+
+			if (!finder.world().get_resource<grid::Grid>().contains_chunk(chunks::ChunkLocation::from_block_pos(v3::Coord::from_vec3(path.spawn)))) {
+				path.random_walk_position= us.position;
+				path.spawn = us.position;
 			}
+			while(!path.random_walk_position) {	
+				v3::Vec3 random = random::spherical();
+				random *= 15* random::random();
+				path.random_walk_position=voxtra::find_ground_at(us.unrotated_box().with_center(path.spawn).translated(random), finder.world().get_resource<grid::Grid>()).member(&geo::Box::center);
+			}
+
 			return path.random_walk_position.unwrap();
 		}
-		v3::Point3 pnt = path.following.get_component<core::LocalTransform>().transform.position;
 		return pnt;
 	}
 
 	struct SlimeNavigation :ecs::System {
 		void run(ecs::Ecs& world) {
 			
-			ecs::View<SlimePathFinder, core::LocalTransform, Mob, ecs::Owner, ai::Brain> slimes(world);
-			for (auto&& [path, transform, mob, object, brain] : slimes) {
+			ecs::View<SlimePathFinder, core::LocalTransform, Enemy, ecs::Owner, ai::Brain> slimes(world);
+			for (auto [path, transform, mob, object, brain] : slimes) {
 				double dist = v3::dist(transform.transform.position, path.following.get_component<core::LocalTransform>().transform.position);
-				if (!mob.pursue_range.contains(dist)) {
-					brain.set<Wandering>(1);
+				double home_dist = v3::dist(path.spawn, path.following.get_component<core::LocalTransform>().transform.position);
+				double self_home_dist = v3::dist(path.spawn, transform.transform.position);
+				brain.set<Wandering>(-1.0f);
+				if (brain.becoming_inactive<SlimeNavigator>()|| brain.becoming_inactive<Wandering>()) {
+					mob.force_repath();
 				}
-				if (dist<mob.look_distance|| brain.active<SlimeNavigator>()) {
+				if (mob.pursue_range.contains(home_dist)&&(brain.active<SlimeNavigator>()|| dist < mob.look_distance)) {
 					brain.set<SlimeNavigator>(0);
 				}
+				
 				if (!brain.active<SlimeNavigator>()&&!brain.active<Wandering>()) {
 					continue;
 				}
-				if (path.last_detection.is_inactive_set(.1)) {
+				if (mob.last_detection.is_inactive_set(.1)) {
 					double min_dist = .08f;
 					//if their is no last position or we move to much we reset fix otherwise fix eventually becomes innactive
-					if (!path.last_position || v3::dist(path.last_position.unwrap(), transform.transform.position) >= min_dist) {
-						path.reset_fix();
+					if (!mob.last_position || v3::dist(mob.last_position.unwrap(), transform.transform.position) >= min_dist) {
+						mob.reset_fix();
 					}
-					path.last_position = transform.transform.position;
+					mob.last_position = transform.transform.position;
 				}
 
 				if (path.path.non_empty()) {
@@ -193,14 +211,14 @@ namespace slimes {
 					double apx_real_dist = navigation::GridCoord::apx_distance(current_node.result(), real_endpoint);
 					double apx_fake_dist = navigation::GridCoord::apx_distance(real_endpoint, endpoint);
 					if (apx_real_dist + 1 <= apx_fake_dist) {
-						path.force_repath();
+						mob.force_repath();
 					}
 					else {
 
 						if (v3::dist(transform.transform.position, goto_pos) < .2f) {
 							path.path.remove_at(0);
 							if (path.path.empty()) {
-								path.force_repath();
+								mob.force_repath();
 							}
 						}
 
@@ -210,12 +228,15 @@ namespace slimes {
 
 				SlimeNavigator navigator{ .world = grid };
 
-				if (path.last_fix.is_inactive() || path.build_time.is_inactive()) {
+				if (mob.last_fix.is_inactive() || mob.build_time.is_inactive()) {
 					navigation::GridCoord to(grid.get_voxel(slime_target(object)));
 					navigation::GridCoord current(grid.get_voxel(transform.transform.position));
-					path.path = navigation::a_star(current, to, navigator).unwrap_or_default();
-					path.build_time.set(navigation::GridCoord::apx_distance(to, current) + 2);
-					path.reset_fix();
+					path.path = navigation::a_star(current, to, navigator,1000).unwrap_or_default();
+					mob.build_time.set(navigation::GridCoord::apx_distance(to, current) + 2);
+					mob.reset_fix();
+					if (path.path.empty()) {
+						path.random_walk_position = stn::None;
+					}
 				}
 			}
 
@@ -281,8 +302,12 @@ namespace slimes {
 								}
 								double turn_speed = speed;
 								body.add_force(force * turn_speed);
-								v3::Vec3 look = v3::lerp(transform.transform.normal_dir(), (headed - transform.transform.position), world.get_resource<timing::WorldClock>().dt * 10);
-								transform.transform.look_towards(look);
+								v3::Vec3 look = head.move.offset;
+								look.y = 0;
+								if (look.mag2()>=.5f) {
+
+									transform.transform.look=math::rotate_twords(transform.transform.look,look.look(), world.get_resource<timing::GameClock>().game_clock.dt * glm::two_pi<double>());
+								}
 							}
 
 						}
@@ -322,9 +347,9 @@ namespace slimes {
 			}
 			collision::DynamicColliderRecipe().apply(slime);
 			float dmg = 3; 
-			slime.add_component<SlimePathFinder>(slime.world().get_resource<timing::WorldClock>().make_duration(), player::player_for(slime.world()),speed);
+			slime.add_component<SlimePathFinder>(player::player_for(slime.world()),speed,pos);
 			slime.add_component<Health::FlashOnHit>();
-			slime.add_component<Mob>();
+			slime.add_component<Enemy>(slime.world().get_resource<timing::GameClock>().game_clock);
 			slime.add_component<ai::Brain>();
 			slime.add_component<Health::DamageOnHit>(player::player_for(slime.world()), 2,2);
 			slime.apply_recipe(physics::Spawner{ .restitution =1.0,.density = 1.0,.gravity=v3::Vec3(0,-25.53,0)});
@@ -335,8 +360,8 @@ namespace slimes {
 		void operator()(core::App& app) {
 			app.insert_plugin(ai::BrainPlugin());
 			app.emplace_system< SlimeStunner>();
-			app.emplace_system<SlimePathFollower>();
 			app.emplace_system<SlimeNavigation>();
+			app.emplace_system<SlimePathFollower>();
 		}
 	};
 }

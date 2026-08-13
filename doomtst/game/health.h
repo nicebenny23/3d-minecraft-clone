@@ -48,7 +48,7 @@ namespace Health {
 
 		}
 		void apply(ecs::obj& object) const {
-			object.add_component<EntityHealth>(spawn_health, spawn_health, object.world().get_resource<timing::WorldClock>().make_duration());
+			object.add_component<EntityHealth>(spawn_health, spawn_health, timing::Duration(object.world().get_resource<timing::GameClock>().game_clock));
 		}
 	};
 
@@ -103,7 +103,7 @@ namespace Health {
 	struct DrownSystem:ecs::System {
 
 		void run(ecs::Ecs& world) {
-			if (!world.get_resource<timing::Ticks>().tick_frame) {
+			if (!world.get_resource<timing::GameClock>().tick_frame) {
 				return;
 			}
 			grid::Grid& grid = world.get_resource<grid::Grid>();

@@ -60,10 +60,14 @@ namespace renderer {
 			if (mesh.vao.id == 0) {
 				throw std::logic_error("mesh unitilized");
 			}
-			glBindVertexArray(mesh.vao.id);
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo.id);
-			glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo.id);
-			bound_mesh = mesh;
+			if (bound_mesh!=mesh) {
+				glBindVertexArray(mesh.vao.id);
+				glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mesh.ebo.id);
+				glBindBuffer(GL_ARRAY_BUFFER, mesh.vbo.id);
+				bound_mesh = mesh;
+
+			}
+			
 
 		}
 		void bind(const Texture2D& Tex) {
@@ -174,6 +178,9 @@ namespace renderer {
 		}
 
 		void destroy(GpuMesh& msh) {
+			if (bound_mesh==msh) {
+				bound_mesh = stn::None;
+			}
 			glDeleteBuffers(1, &msh.ebo.id);
 			glDeleteBuffers(1, &msh.vbo.id);
 			glDeleteVertexArrays(1, &msh.vao.id);

@@ -20,13 +20,13 @@ namespace blocks {
 		}
 		void apply(ecs::obj& block) const override {
 			block.add_component<Liquid>(1);
+			block.add_component<Collider>(true);
 		}
 		stn::Option<SolidBlockTraits> solid_traits_for() const override {
 			return stn::None;
 		}
 		void read_from_bytes(ecs::obj blk, stn::file_handle& handle) const {
 			apply(blk);
-
 			blk.add_component<Liquid>(stn::file_serializer<double>().read(handle));
 		};
 		void write_to_bytes(ecs::obj blk, stn::file_handle& handle) const {
@@ -43,7 +43,7 @@ namespace blocks {
 	struct LiquidateSystem :ecs::System {
 		void run(ecs::Ecs& ecs) {
 
-			if (!ecs.get_resource<timing::Ticks>().tick_frame) {
+			if (!ecs.get_resource<timing::GameClock>().tick_frame) {
 				return;
 			}
 			BlockRegistry& registry = ecs.get_resource<BlockRegistry>();

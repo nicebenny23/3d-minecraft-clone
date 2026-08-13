@@ -8,18 +8,34 @@
 #pragma once
 namespace timing {
 	using time_delay = double;
-
+	struct Clock {
+		double dt=1/60.0;
+		double elapsed_time=0;
+		void add(double delta) {
+			dt = delta;
+			elapsed_time += dt;
+		}
+		
+		double fps() const{
+			return 1 / dt;
+		}
+	};
 	struct Duration;
-	struct WorldClock :ecs::resource {
+	struct GlobalClock:ecs::resource {
 
-		double dt;
-		double elapsed_time;
+		Clock clock;
 		double smooth_dt;
-		WorldClock() {
-			dt = 1 / 60.f;
+		double elapsed_time() const {
+			return clock.elapsed_time;
+		}
+		double dt() const {
+			return clock.dt;
+		}
+		GlobalClock() {
+			clock.dt = 1 / 60.f;
 
 			smooth_dt = 1 / 60.0f;
-			elapsed_time = glfwGetTime();
+			clock.elapsed_time= glfwGetTime();
 		}
 		double fps() const {
 			return 1 / smooth_dt;
@@ -28,20 +44,20 @@ namespace timing {
 		void calculate_fps() {
 
 			double current_time = glfwGetTime();
-			dt = stn::min(current_time - elapsed_time, 1.0f / min_frames);
+			clock.dt = stn::min(current_time - clock.elapsed_time, 1.0f / min_frames);
 			double update_speed = .2f;
-			if (.05<dt) {
+			if (.05< clock.dt) {
 				int l = 3;
 			}
-			if (std::floor(elapsed_time / update_speed) != std::floor(current_time / update_speed)) {
-				smooth_dt = dt;
-			}elapsed_time = current_time;
+			if (std::floor(clock.elapsed_time / update_speed) != std::floor(current_time / update_speed)) {
+				smooth_dt = clock.dt;
+			}
+			clock.elapsed_time= current_time;
 
 		}
-		Duration make_duration();
 
 		double now() const {
-			return elapsed_time;
+			return clock.elapsed_time;
 		}
 
 	private:
@@ -50,29 +66,36 @@ namespace timing {
 	struct FpsTimer :ecs::System {
 
 		void run(ecs::Ecs& world) {
-			world.ensure_resource<WorldClock>().calculate_fps();
+			world.ensure_resource<GlobalClock>().calculate_fps();
 		}
 
 	};
 	struct TimePlugin {
 		void operator()(core::App& app) {
-			app.emplace_resource<timing::WorldClock>();
+			app.emplace_resource<timing::GlobalClock>();
 			app.emplace_system<FpsTimer>();
 		}
 	};
 	struct Duration {
 
-		Duration(double waiting_time, WorldClock& tman) :tm(tman) {
+		Duration(double waiting_time, GlobalClock& tman) :tm(tman.clock) {
 			set(waiting_time);
 		}
 
-		Duration(WorldClock& clock) :tm(clock) {
+		Duration(GlobalClock& clock) :tm(clock.clock) {
 
+		}
+		Duration(Clock& clock) :tm(clock) {
+
+		}
+
+		Duration(double waiting_time,Clock& tman) :tm(tman) {
+			set(waiting_time);
 		}
 		stn::Option<time_delay> remaining() {
 			check_if_dead();
 			if (end) {
-				return end.unwrap() - tm->now();
+				return end.unwrap() - tm->elapsed_time;
 			}
 			return stn::None;
 		}
@@ -80,10 +103,10 @@ namespace timing {
 		double remaining_or_default() {
 			return remaining().unwrap_or_default();
 		}
-		WorldClock& clock() {
+		Clock& clock() {
 			return *tm;
 		}
-		const WorldClock& clock() const {
+		const Clock& clock() const {
 			return *tm;
 		}
 		void disable() {
@@ -94,7 +117,7 @@ namespace timing {
 				disable();
 			}
 			else {
-				end = tm->now() + dur;
+				end = tm->elapsed_time + dur;
 			}
 		}
 		//checks for inactivity then sets;
@@ -119,12 +142,12 @@ namespace timing {
 
 		void check_if_dead() const {
 			if (end.is_some_and([&](double end) {
-				return end < tm->now(); })) {
+				return end < tm->elapsed_time; })) {
 				end = stn::None;
 			}
 		}
 		mutable stn::Option<double> end;
-		stn::non_null<WorldClock> tm;
+		stn::non_null <Clock> tm;
 	};
 	
 	struct TimeProfiler {

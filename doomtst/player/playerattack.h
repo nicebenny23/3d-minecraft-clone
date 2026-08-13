@@ -26,7 +26,7 @@ namespace player {
 	};
 	struct PlayerAttack
 		: ecs::component {
-		PlayerAttack(ecs::Constrained<renderer::ParticleEmmitter> emit, timing::WorldClock& clock) :emmiter(emit), last_attack(clock), last_attack_click(clock), last_time_seen(clock) {
+		PlayerAttack(ecs::Constrained<renderer::ParticleEmmitter> emit, timing::Clock& clock) :emmiter(emit), last_attack(clock), last_attack_click(clock), last_time_seen(clock) {
 
 		};
 		timing::Duration last_attack;

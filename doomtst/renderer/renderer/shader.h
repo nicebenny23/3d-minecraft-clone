@@ -12,14 +12,7 @@ namespace renderer {
 	struct Shader :assets::Asset {
 
 		GLint id;
-		Shader() {
-			id = 0;
-		}
 		GLint uniformlocation(const char* name) const {
-			if (id == 0) {
-				throw std::logic_error("invalid block_id");
-			}
-			
 			GLint location = glGetUniformLocation(id, name);
 			if (location == -1) {
 				std::string msg = "Uniform '" + std::string(name) + "' not found or not active in shader";

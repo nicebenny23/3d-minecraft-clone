@@ -7,6 +7,7 @@
 #include "../player/playerinventory.h"
 #include "../util/pair.h"
 #include "../game/time.h"
+#include "../game/ticking.h"
 #pragma once 
 namespace items {
 	struct loot_element {
@@ -65,7 +66,7 @@ namespace items {
 		}
 		void set(ecs::Constrained<player::inventory> object) {
 			drop_to = object.object().inner();
-			last_interaction_time = world().get_resource<timing::WorldClock>().elapsed_time;
+			last_interaction_time = world().get_resource<timing::GameClock>().game_clock.elapsed_time;
 		}
 		double last_interaction_time;
 		loot_table_id table;
@@ -78,7 +79,7 @@ namespace items {
 		}
 		void destroy_hook() {
 			if (drop_to) {
-				double time_diff = world().get_resource<timing::WorldClock>().elapsed_time-last_interaction_time;
+				double time_diff = world().get_resource<timing::GameClock>().game_clock.elapsed_time-last_interaction_time;
 				double get_diff_time = 1.0;
 				if (get_diff_time<time_diff) {
 					return;

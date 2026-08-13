@@ -70,7 +70,7 @@ namespace navigation {
 	};
 	
 	template<AStarNetwork Context>
-	stn::Option<stn::array<ContextResultType<Context>>> a_star(NodeType<Context> start, NodeType<Context> end, Context ctx) {
+	stn::Option<stn::array<ContextResultType<Context>>> a_star(NodeType<Context> start, NodeType<Context> end, Context ctx,size_t max_iter=600) {
 		using NodeType = NodeType<Context>;
 		
 		using EdgeType = EdgeType<Context>;
@@ -82,7 +82,6 @@ namespace navigation {
 		open.push(0);
 		nodes.push(MarkedNodeType{ .value = start,.g_cost = 0,.h_cost = NodeType::apx_distance(start,end) });
 
-		const int maxiter = 600;
 		int iter = 0;
 		while (open.non_empty()) {
 			iter += 1;
@@ -103,11 +102,11 @@ namespace navigation {
 			size_t current_index = open[open_list_index];
 			MarkedNodeType current = nodes[current_index];
 			open.swap_drop(open_list_index);
-			if (iter == maxiter) {
+			if (iter == max_iter) {
 				//try it 
 				return stn::None;
 			}
-			if (current.value == end||iter==maxiter) {
+			if (current.value == end) {
 				using ResultType = NodeResult<Context>;
 				stn::array<ResultType> return_nodes;
 				MarkedNodeType top = current;

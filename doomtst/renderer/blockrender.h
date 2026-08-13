@@ -44,12 +44,7 @@ namespace blocks {
 
 
 
-	inline bool chunk_viewable(chunks::Chunk& chk) {
-		geo::Frustum view = renderer::world_camera_frustum(chk.world());
-		return geo::frustum_box_intersection(view, chk.bounds());
-
-	}
-
+	
 	// Calculate UV coordinates for a BlockFace centered at the mesh
 	v2::Vec2 face_to_uv_coords(const BlockMesh& mesh, const size_t index, size_t uv_index) {
 		const v3::Scale3& meshscale = mesh.bounds().half_size();
@@ -155,10 +150,10 @@ namespace blocks {
 		double distance = v3::dist(mesh.world().get_resource<CameraResource>().center(), mesh.center());
 		mesh.solid.set_order_key(distance);
 		mesh.sort_faces();
+
 		grid::FocusedGridAcessor accesor(mesh_object.object(), world);
 		renderer::MeshBuilder mesh_data = mesh.transparent.insert_builder_for(renderer::vertex().push<float, 3>().push<float, 3>().push<float, 1>());
 		for (int i = 0; i < mesh.faces.length(); i++) {
-
 			emit_face(accesor, mesh.faces[i], mesh_data);
 		}
 		mesh.transparent.set_order_key(-distance);
@@ -192,9 +187,11 @@ namespace blocks {
 			stn::array<grid::ChunkObject::ObjectType> reloads;
 			ecs::View< chunks::ChunkMesh, ecs::Owner> meshes(ecs);
 			size_t max_recomputes = 4;
+			geo::Frustum view = renderer::world_camera_frustum(ecs);
+			
 			for (auto&& [mesh, object] : meshes) {
 				if (mesh.recreate_mesh.is_dirty()) {
-					if (chunk_viewable(object.get_component<chunks::Chunk>())) {
+					if (geo::frustum_box_intersection(view, object.get_component<chunks::Chunk>().bounds())) {
 						reloads.push(object);
 					}
 				}
@@ -219,8 +216,11 @@ namespace blocks {
 			size_t total_render_count = 0;
 			Grid& grid = ecs.get_resource<grid::Grid>();
 			ecs::View< ecs::Constrained<chunks::ChunkMesh>, chunks::Chunk> meshes(ecs);
-			for (auto&& [mesh, Chunk] : meshes) {
-				if (chunk_viewable(Chunk)) {
+
+			geo::Frustum view = renderer::world_camera_frustum(ecs);
+
+			for (auto&& [mesh, chunk] : meshes) {
+				if (geo::frustum_box_intersection(view, chunk.bounds())) {
 					total_render_count++;
 					render_chunk(grid, mesh);
 				}

@@ -23,9 +23,6 @@ namespace stn {
 		}
 	};
 
-	struct nothing {
-
-	};
 	template<typename T>
 	struct Insertion {
 		T value;

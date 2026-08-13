@@ -8,13 +8,13 @@
 #include "../player/player.h"
 #pragma once 
 namespace game {
-	inline bool should_despawn(v3::Point3 pos, v3::Point3 player,grid::Grid& world) {
+	inline bool should_despawn(v3::Point3 pos,grid::Grid& world) {
 		//todo improve
-		return !world.bounds().contains_point(pos);
+		return !voxtra::active_region(geo::Box(pos,unitv),world);
 
 	}
 	inline bool spawnable_dist(v3::Point3 pos, v3::Point3 player, grid::Grid& world) {
-		return !should_despawn(pos, player,world) && 28 < v3::dist(pos, player);
+		return !should_despawn(pos,world) && 28 < v3::dist(pos, player);
 
 	}
 
@@ -39,7 +39,7 @@ namespace game {
 		bool try_spawn_once(ecs::Ecs& world) {
 			grid::Grid& grid = world.get_resource<grid::Grid>();
 			v3::Scale3 scale = unit_scale.with_x(count);
-			stn::Option<geo::Box> spawn_loc = voxtra::find_ground(unit_scale, grid, 50, 50);
+			stn::Option<geo::Box> spawn_loc = voxtra::find_ground(scale, grid, 50, 50);
 			if (!spawn_loc) {
 				return false;
 			}
@@ -51,7 +51,7 @@ namespace game {
 				return false;
 			}
 			double charge = 0;
-			ecs::View< slimes::Mob, core::LocalTransform> slimes(world);
+			ecs::View< slimes::Enemy, core::LocalTransform> slimes(world);
 			for (auto [slime, transform] : slimes) {
 				double dist = v3::dist(transform.transform.position, pos);
 				if (dist<32) {
@@ -74,7 +74,7 @@ namespace game {
 		}
 	};
 	struct SpawnTimer :ecs::resource {
-		SpawnTimer(timing::WorldClock& clock) :next_spawn(clock) {
+		SpawnTimer(timing::Clock& clock) :next_spawn(clock) {
 
 		}
 		EntitySpawn next;
@@ -84,19 +84,19 @@ namespace game {
 		
 		
 		void run(ecs::Ecs& ecs) {
-			SpawnTimer& spawn_timer= ecs.insert_resource<SpawnTimer>(ecs.get_resource<timing::WorldClock>());
+			SpawnTimer& spawn_timer= ecs.insert_resource<SpawnTimer>(ecs.get_resource<timing::GameClock>().game_clock);
 			timing::Duration& duration= spawn_timer.next_spawn;
 			double spawn_frequency=.25f;
 			size_t total_alive = 0;
-			ecs::View< slimes::Mob, core::LocalTransform,ecs::Owner> slimes(ecs);
+			ecs::View< slimes::Enemy, core::LocalTransform,ecs::Owner> slimes(ecs);
 			for (auto [slime, transform,object] : slimes) {
 
-				if (should_despawn(transform.transform.position, player::player_for(ecs).get_component<core::LocalTransform>().transform.position,ecs.get_resource<grid::Grid>())) {
+				if (should_despawn(transform.transform.position,ecs.get_resource<grid::Grid>())) {
 					object.destroy();
 				}
 				total_alive++;
 			}
-			const size_t max_alive =80;
+			const size_t max_alive =800;
 			if (max_alive <= total_alive) {
 				return;
 			}
@@ -120,8 +120,8 @@ namespace game {
 	void MobSpawnerPlugin(core::App& app) {
 
 		app.insert_plugin(Health::EntityHealthPlugin());
-		app.insert_plugin(slimes::SlimeAiPlugin());
 		app.emplace_system< spawn_mobs>();
+		app.insert_plugin(slimes::SlimeAiPlugin());
 		app.emplace_system<Health::HitProccesor>();
 	}
 	// !entityspawner_HPP

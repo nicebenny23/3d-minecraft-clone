@@ -39,9 +39,8 @@ namespace math {
 		geo::Box unrotated_box() const{
 			return geo::Box(position, scale);
 		}
-		void rotate(math::Look3 offset) {
-			look.pitch+= offset.pitch;
-			look.yaw += offset.yaw;
+		void rotate(const math::Look3& rotate) {
+			look = look.then(rotate);
 
 		}
 		static double distance(const Transform& t1, const Transform& t2) {
@@ -51,18 +50,16 @@ namespace math {
 			return v3::yaw_pitch(look);
 		}
 		v3::Vec3 right_dir() const {
-			return v3::zero_fixed_normal(v3::cross(normal_dir(), v3::up));
+			return v3::cross(normal_dir(), v3::up).zero_fixed_normal();
 		}
 		geo::ray forward_ray() const {
 			return geo::ray::from_offset(position, normal_dir());
 		}
 		v3::Vec3 up_dir() const{
-			return v3::cross(right_dir(), normal_dir());
+			return v3::cross(right_dir(), normal_dir()).zero_fixed_normal();
 		}
 		void look_towards(v3::Vec3 direction) {
-			direction = v3::zero_fixed_normal(direction);
-			look.pitch = Angle::from_radians(std::asin(direction.y));
-			look.yaw = Angle::from_radians(std::atan2(direction.z, direction.x));
+			look = direction.look();
 		}
 		void look_at(v3::Point3 LookTowards) {
 			look_towards(LookTowards - position);

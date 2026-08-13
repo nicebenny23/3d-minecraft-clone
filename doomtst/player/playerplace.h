@@ -56,7 +56,7 @@ namespace player {
 
 				double block_push_margin = .2f;
 				new_block_box.scale.shink(block_push_margin);
-				if (collision::boxcast(new_block_box,ecs,collision::HitQuery(ecs))) {
+				if (collision::boxcast(new_block_box,ecs,collision::SolidPredicate())) {
 					continue;
 				}
 				if (blocks.name_for(spawn_id)=="seed") {

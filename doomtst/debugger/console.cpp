@@ -22,8 +22,8 @@ namespace console {
 				ImGui::BeginChild("Debug Info", ImVec2(0, 150), true);
 				ImGui::Text("Debug:");
 				ecs::obj goblin = player::player_for(world);
-				ImGui::Text(std::format("Fps: {:.3f}", world.ensure_resource<timing::WorldClock>().fps()).c_str());
-				ImGui::Text(std::format("Elapsed Time: {:.0f}", world.ensure_resource<timing::WorldClock>().elapsed_time).c_str());
+				ImGui::Text(std::format("Fps: {:.3f}", world.ensure_resource<timing::GlobalClock>().fps()).c_str());
+				ImGui::Text(std::format("Elapsed Time: {:.0f}", world.ensure_resource<timing::GlobalClock>().elapsed_time()).c_str());
 				Point3 pos = player::player_for(world).get_component<core::LocalTransform>().transform.position;
 				ImGui::Text(std::format("position: {}", pos).c_str());
 				grid::Grid& grid = world.get_resource<grid::Grid>();

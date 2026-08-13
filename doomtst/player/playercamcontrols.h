@@ -41,7 +41,7 @@ struct CameraControlSystem:ecs::System{
 
 			transform.transform.rotate(math::Look3::from_degrees(xoffset, yoffset));
 
-			transform.transform.look.pitch = math::Angle::from_degrees(math::bounds(-89.99,89.99).clamp(transform.transform.look.pitch.degrees_signed()));
+			transform.transform.look.pitch = math::Angle::from_degrees(math::bounds::from_center_radius(0,89.99).clamp(transform.transform.look.pitch.degrees_signed()));
 
 		}
 	}

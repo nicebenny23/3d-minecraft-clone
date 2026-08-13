@@ -32,7 +32,11 @@ namespace renderer {
 			: uniform_name(uniform), shader_alias(alias) {
 		}
 		UniformRefrence(const char* uniform, const char* alias)
-			: uniform_name(std::move(uniform)), shader_alias(std::move(alias)) {
+			: uniform_name(uniform), shader_alias(alias) {
+		}
+
+		UniformRefrence(const char* uniform)
+			: uniform_name(uniform), shader_alias(uniform) {
 		}
 	};
 

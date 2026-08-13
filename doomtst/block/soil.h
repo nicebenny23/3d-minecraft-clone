@@ -38,9 +38,8 @@ namespace blocks {
 	};
 	struct FertilitySystem:ecs::System {
 		void run(ecs::Ecs& world) {
-			return;
 			//use neibor upda
-			if (!world.get_resource<timing::Ticks>().tick_frame) {
+			if (!world.get_resource<timing::GameClock>().tick_frame) {
 				return;
 			}
 			BlockRegistry& registry = world.get_resource<BlockRegistry>();

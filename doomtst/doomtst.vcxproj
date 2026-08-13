@@ -338,7 +338,6 @@
     <ClCompile Include="math\intersection.cpp" />
     <ClCompile Include="json\json_value.cpp" />
     <ClCompile Include="util\random.cpp" />
-    <ClCompile Include="game\time.cpp" />
     <ClCompile Include="util\stbiload.cpp" />
     <ClCompile Include="external\glad.c" />
   </ItemGroup>
@@ -539,7 +538,6 @@
     <ClInclude Include="util\List.h" />
     <ClInclude Include="math\mathutil.h" />
     <ClInclude Include="util\memorypool.h" />
-    <ClInclude Include="renderer\renderer\Vao.h" />
     <ClInclude Include="json\json.h" />
     <ClInclude Include="util\mutex.h" />
     <ClInclude Include="util\Name.h" />

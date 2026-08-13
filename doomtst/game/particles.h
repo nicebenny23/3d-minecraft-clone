@@ -35,12 +35,12 @@ namespace renderer {
 	};
 	struct ParticleEmmisionSystem :ecs::System {
 		void run(ecs::Ecs& world) {
-			timing::WorldClock& time = world.get_resource<timing::WorldClock>();
+			timing::Clock& time = world.get_resource<timing::GameClock>().game_clock;
 			ecs::View<ParticleEmmitter, core::LocalTransform> emmisions(world);
 			for (auto&& [emmitter,transform] :emmisions) {
 					for (size_t i = 0; i < emmitter.spawn_counter; i++) {
 						ecs::obj next = world.spawn_empty();
-						next.add_component < EventualDestroy>(time.make_duration()).destroy_time.set(emmitter.particle_max_lifetime);
+						next.add_component < EventualDestroy>(timing::Duration(time)).destroy_time.set(emmitter.particle_max_lifetime);
 						emmitter.spawner->apply(next, transform.transform.position);
 					}
 					emmitter.spawn_counter=0;
@@ -63,7 +63,7 @@ namespace renderer {
 		double max_lifetime;
 		void apply(ecs::obj& object) const {
 			object.apply_recipe<core::TransformRecipe>(v3::Point3(0, 0, 0));
-			timing::Duration dur = object.world().get_resource<timing::WorldClock>().make_duration();
+			timing::Duration dur{ object.world().get_resource<timing::GameClock>().game_clock };
 			object.add_component<ParticleEmmitter>(stn::box<ParticleSpawner>(stn::construct_derived<T>()), max_lifetime);
 		}
 	};

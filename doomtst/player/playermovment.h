@@ -7,11 +7,11 @@
 #include "../world/voxeltraversal.h"
 #include "../game/close.h"
 
-struct playermovement : ecs::component {
+struct PlayerMovment : ecs::component {
 	timing::Duration last_grounded;
 	timing::Duration jump_buffer;
 	timing::Duration held;
-	playermovement(timing::WorldClock& clock):jump_buffer(clock),last_grounded(clock),held(clock){
+	PlayerMovment(timing::Clock& clock):jump_buffer(clock),last_grounded(clock),held(clock){
 		
 	}
 };
@@ -26,12 +26,12 @@ struct PlayerMovementSys : ecs::System {
 			return;
 		}
 
-		auto view = ecs::View<physics::RigidBody, playermovement, core::LocalTransform, physics::Buoyancy>(ecs);
+		auto view = ecs::View<physics::RigidBody, PlayerMovment, core::LocalTransform, physics::Buoyancy>(ecs);
 
 		for (auto [body, movement, transform, buoyancy] : view) {
 			userinput::InputManager& man = ecs.get_resource<userinput::InputManager>();
-			float dt = ecs.ensure_resource<timing::WorldClock>().dt;
-			double now = ecs.ensure_resource<timing::WorldClock>().now();
+			timing::Clock clock = ecs.ensure_resource<timing::GameClock>().game_clock;
+			float dt = clock.dt;
 			float speed =32;
 			float effSpeed = dt * speed;
 			Vec3 forward = transform.transform.normal_dir().with_y(0).normal();

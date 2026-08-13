@@ -79,4 +79,47 @@ namespace geo {
 			return Box(center+other_transform.center * scale, other_transform.scale * scale);
 		}
 	};
+
+	struct IntBox3d {
+		v3::Coord min;
+		v3::Coord max;
+		struct iterator {
+			const IntBox3d& owner;
+			v3::Coord pnt;
+			iterator& operator++() {
+				pnt.x++;
+				for (size_t i = 0; i < 3; i++) {
+					if (pnt[i]>owner.max[i]) {
+						if (i != 2) {
+							pnt[i + 1]++;
+							pnt[i] = owner.min[i];
+						}
+					}
+				}
+				return *this;
+			}
+			v3::Coord operator*() const {
+				return pnt;
+			}
+			bool operator==(const iterator& other) const {
+				return other.pnt == pnt;
+			}
+			bool operator!=(const iterator& other) const {
+				return other.pnt != pnt;
+			};
+		};
+		IntBox3d(v3::Coord min, v3::Coord max) :min(min), max(max) {
+			for (size_t i = 0; i < 3; i++) {
+				if (min[i] > max[i]) {
+					std::swap(min[i], max[i]);
+				}
+			}
+		}
+		iterator begin() const {
+			return iterator{ .owner = *this,.pnt = min };
+		}
+		iterator end() const {
+			return iterator{ .owner = *this,.pnt = v3::Coord(min.x,min.y,max.z+1)};
+		}
+	};
 }

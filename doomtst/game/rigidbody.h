@@ -73,11 +73,19 @@ namespace physics {
 			return collider.has_component<block>()&&!collider.get<collision::Collider>().effector;
 		}
 	};
+	struct WaterQuery {
+
+		bool operator()(const ecs::Constrained<collision::Collider>& collider) {
+			return collider.has_component<block>() && collider.get_component<block>().is<WaterBlock>();
+		}
+
+
+	};
 	struct RigidbodySystem :ecs::System {
 
 		void run(ecs::Ecs& ecs) override {
 			grid::Grid& grid = ecs.get_resource<grid::Grid>();
-			double deltaTime = ecs.ensure_resource<timing::WorldClock>().dt;
+			double deltaTime = ecs.ensure_resource<timing::GameClock>().game_clock.dt;
 			ecs::View< RigidBody,Density,core::LocalTransform> densities(ecs);
 			for (auto [body, density,transform] : densities) {
 				body.mass=transform.transform.scale.volume()*density.density;
@@ -103,18 +111,12 @@ namespace physics {
 
 			ecs::View<core::LocalTransform,RigidBody,PhycicsMaterial,ecs::Mabye<collision::Collider>,Buoyancy, ecs::Owner> rigids(ecs);
 			for (auto [pos, body, material, collider_mabye,buoyancy,object] : rigids) {
-				buoyancy.in_water = false;
-				for (chunks::block_object& object:grid.voxel_in_range(pos.transform.unrotated_box())) {
-					
-					if (object.get<block>().is<WaterBlock>()) {
-						buoyancy.in_water = true;
-					}
-				}
+				buoyancy.in_water = boxcast(pos.transform.unrotated_box(), ecs, WaterQuery());
 				if (collider_mabye.is_some_and([&](collision::Collider& collider){return !collider.effector;})) {
 				
 
 					collision::Collider& collider = collider_mabye.unwrap();
-					double hit_toi = ecs.ensure_resource<timing::WorldClock>().dt;
+					double hit_toi = ecs.ensure_resource<timing::GameClock>().game_clock.dt;
 					while (hit_toi > 0) {
 						v3::Point3 curr_pos = pos.transform.position;
 						v3::Point3 new_pos = curr_pos + body.velocity * hit_toi;

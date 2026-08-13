@@ -162,7 +162,10 @@ namespace v3 {
 			return v2::Vec2(y, z);
 		}
 	
-
+		constexpr math::Look3 look() const{
+			v3::Vec3 direction = zero_fixed_normal();
+			return math::Look3::from_radians(std::atan2(direction.z, direction.x),std::asin(direction.y));
+		}
 		constexpr glm::vec3 glm() {
 			return glm::vec3(x, y, z);
 		}
@@ -191,6 +194,7 @@ namespace v3 {
 			return (*this)*(max_length/mag);
 
 		}
+		v3::Vec3 zero_fixed_normal() const;
 		constexpr inline Vec3 with_magnitude(double mag) const {
 			return normal() * mag;
 		}
@@ -217,20 +221,12 @@ namespace v3 {
 	inline constexpr Vec3 back{ 0.0, 0.0, -1.0 };
 
 
-
-	inline Vec3 zero_fixed_normal(const Vec3& p) {
-		double mt = p.length();
-		if (mt == 0) {
-			return zerov;
-		}
-		return (p / mt);
-	}
 	// free functions that use Vec3 only:
 	inline double dot(const Vec3& p, const Vec3& p1) {
 		return (p.x * p1.x + p.y * p1.y + p.z * p1.z);
 	}
 	inline Vec3 project(const Vec3& p, const Vec3& p1) {
-		return p*v3::dot(zero_fixed_normal(p), p1);
+		return p*v3::dot(p.zero_fixed_normal(), p1);
 	}
 	inline double mag2(const Vec3& p) {
 		return ((p.x * p.x + p.y * p.y + p.z * p.z));
@@ -242,7 +238,13 @@ namespace v3 {
 		}
 		return (p / mt);
 	}
-
+	inline v3::Vec3 Vec3::zero_fixed_normal() const{
+		double mt = length();
+		if (mt == 0) {
+			return zerov;
+		}
+		return (*this / mt);
+	}
 
 
 	using Point3 = Vec3;
@@ -326,6 +328,7 @@ namespace v3 {
 
 	inline constexpr v3::Vec3::Vec3(Coord scale):x(scale.x),y(scale.y),z(scale.z) {
 	}
+	
 	inline double dist2(const Point3& p, const Point3& p1) {
 		return mag2(p1 - p);
 	}

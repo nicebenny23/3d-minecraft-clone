@@ -145,7 +145,7 @@ namespace player {
 					if (solid_traits_for.pick_speedup) {
 						power *= pb.curr_mining_power(pickaxe);
 					}
-					player_break.amount_done += power * ecs.ensure_resource<timing::WorldClock>().dt;
+					player_break.amount_done += power * ecs.ensure_resource<timing::GameClock>().game_clock.dt;
 					// Show progress decal
 
 					if (player_break.current_block().bounds().scale == blockscale) {

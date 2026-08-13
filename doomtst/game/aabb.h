@@ -18,7 +18,6 @@ namespace collision {
 		//local box
 	
 		Collider(bool iseffector = false) : effector(iseffector) {
-
 		}
 	};
 	inline geo::Box global_box(ecs::Constrained<Collider> collider) {
@@ -53,9 +52,9 @@ namespace collision {
 	}
 
 	//cannot consify until global box is const
-	inline Option<v3::Vec3> collide_aabb(ecs::Constrained<Collider> p1, ecs::Constrained<Collider> p2) {
+	inline bool intersect_aabb(ecs::Constrained<Collider> p1, ecs::Constrained<Collider> p2) {
 		//this is until i can get the effectors on the movment
-		return geo::collide_box(global_box(p1).expanded(1/ 100.f), global_box(p2));
+		return geo::boxes_intersect(global_box(p1).expanded(1/ 100.f), global_box(p2));
 
 	}
 
@@ -90,9 +89,7 @@ namespace collision {
 
 
 	struct HitQuery {
-		stn::Option<ecs::obj> orgin;
-		explicit HitQuery(ecs::Ecs& ecs) :orgin(stn::None) {
-		}
+		ecs::obj orgin;
 		explicit HitQuery(const ecs::obj& orgin_obj) : orgin(orgin_obj) {
 		}
 

@@ -24,7 +24,7 @@ namespace blocks {
 		void prime() {
 			clock.set(moss_lifetime);
 		}
-		SeedLifetime(timing::WorldClock& world_clock, double lifetime) :clock(world_clock) {
+		SeedLifetime(timing::Clock& world_clock, double lifetime) :clock(world_clock) {
 			clock.set(lifetime);
 		}
 	};
@@ -86,7 +86,7 @@ namespace blocks {
 	};
 	struct SeedBlock :BlockType {
 		void apply(ecs::obj& block) const override {
-			block.add_component<SeedLifetime>(block.world().get_resource<timing::WorldClock>(), moss_lifetime);
+			block.add_component<SeedLifetime>(block.world().get_resource<timing::GameClock>().game_clock, moss_lifetime);
 			block.apply_recipe(items::loot_table_recipe< seed_loot_table>);
 		}
 		std::string name() const {
@@ -94,7 +94,7 @@ namespace blocks {
 		}
 		void read_from_bytes(ecs::obj block, stn::file_handle& handle)const  override {
 			block.apply_recipe(items::loot_table_recipe< seed_loot_table>);
-			timing::WorldClock& clock = block.world().get_resource<timing::WorldClock>();
+			timing::Clock& clock = block.world().get_resource<timing::GameClock>().game_clock;
 			block.add_component<SeedLifetime>(clock, stn::file_serializer<double>().read(handle) - clock.elapsed_time);
 		}
 		void write_to_bytes(ecs::obj block, stn::file_handle& handle)const  override {

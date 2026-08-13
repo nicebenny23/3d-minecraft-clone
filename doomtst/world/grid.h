@@ -79,7 +79,8 @@ namespace grid {
 		stn::Option<ChunkObject&> get_chunk_object(v3::Coord pos) {
 			return get_chunk_object(chunk_from_block_pos(pos));
 		}
-		bool contains_chunk(chunks::ChunkLocation pos) {
+		//returns if it actually contains the chunk
+		bool contains_chunk(const chunks::ChunkLocation& pos) {
 			return get_chunk(pos).is_some();
 		}
 		Option<ecs::Constrained<block>&> get_object(v3::Coord pos) {
@@ -89,23 +90,7 @@ namespace grid {
 			return get_object(pos)
 				.map([](chunks::block_object& block_object)->block& {return block_object.get_unchecked<block>(); });
 		}
-		array<chunks::block_object > voxel_in_range(geo::Box span) {
-			array<chunks::block_object > blocks;
-			v3::Coord lowest = get_voxel(span.min());
-			v3::Coord highest = get_voxel(span.max());
-			for (int x = lowest.x; x <= highest.x; x++) {
-				for (int y = lowest.y; y <= highest.y; y++) {
-					for (int z = lowest.z; z <= highest.z; z++) {
-						stn::Option<chunks::block_object&> blk = get_object(Coord(x, y, z));
-						if (blk) {
-							blocks.push(blk.unwrap());
-						}
-					}
-				}
-			}
-			return blocks;
-		}
-
+	
 		size_t chunks_loaded() {
 			return chunklist.pipe().count([](const stn::Option<ChunkObject>& object) {return object.is_some(); });
 		}

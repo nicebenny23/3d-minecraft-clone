@@ -30,7 +30,7 @@ inline void minecraft_plugin(core::App& app) {
 	app.insert_plugin(renderer::particle_plugin);
 	app.insert_plugin(physics::phycics_plugin);
 
-	app.emplace_resource<timing::Ticks>(app.Ecs.get_resource<timing::WorldClock>());
+	app.emplace_resource<timing::GameClock>();
 	ecs::obj player = ecs::spawn(app.Ecs, player::initplayer);
 	blocks::BlockRegistry& registry = app.Ecs.get_resource<blocks::BlockRegistry>();
 	grid::Grid& world = app.emplace_resource<grid::Grid>(3, player, stn::box<world::TerrainGenerator>(stn::construct_derived<world::DefaultTerrainGenerator>(), registry));

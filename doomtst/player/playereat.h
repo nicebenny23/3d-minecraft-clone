@@ -8,7 +8,7 @@
 #pragma once 
 namespace player {
 	struct player_eat_behavior : ecs::component {
-		player_eat_behavior(timing::WorldClock& clock, ecs::Constrained<ui::Image> img) :duration(clock),food(img){
+		player_eat_behavior(timing::Clock& clock, ecs::Constrained<ui::Image> img) :duration(clock),food(img){
 
 		}
 		ecs::Constrained<ui::Image> food;
