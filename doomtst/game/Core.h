@@ -74,7 +74,6 @@ namespace core {
 		};
 
 	};
-	extern App game;
 	struct GameCloser :ecs::System {
 		void run(ecs::Ecs& world) {
 			for (CloseGameCommand cmd : world.read_commands<CloseGameCommand>()) {

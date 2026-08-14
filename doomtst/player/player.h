@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../game/Core.h"
 #include "../game/ecs/filtered_object.h"
 // settings
 
@@ -21,5 +22,5 @@ namespace player {
 	inline ecs::obj player_for(ecs::Ecs& world) {
 		return world.get_resource<PlayerResource>().get();
 	}
-	void initplayer(ecs::obj& player);
+	void player_plugin(core::App& app);
 }

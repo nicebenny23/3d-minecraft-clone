@@ -29,9 +29,10 @@ inline void minecraft_plugin(core::App& app) {
 	app.emplace_system<timing::TickingSystem>();
 	app.insert_plugin(renderer::particle_plugin);
 	app.insert_plugin(physics::phycics_plugin);
-
 	app.emplace_resource<timing::GameClock>();
-	ecs::obj player = ecs::spawn(app.Ecs, player::initplayer);
+	app.insert_plugin(renderer::model_plugin);
+	app.insert_plugin(player::player_plugin);
+	ecs::obj player = player::player_for(app.Ecs);
 	blocks::BlockRegistry& registry = app.Ecs.get_resource<blocks::BlockRegistry>();
 	grid::Grid& world = app.emplace_resource<grid::Grid>(3, player, stn::box<world::TerrainGenerator>(stn::construct_derived<world::DefaultTerrainGenerator>(), registry));
 	math::Transform& transform = player.get_component<core::LocalTransform>().transform;
@@ -40,12 +41,15 @@ inline void minecraft_plugin(core::App& app) {
 	app.insert_plugin(blocks::block_render_plugin);
 	app.insert_plugin(player::player_inventory_plugin);
 	app.insert_plugin(guirender::console_plugin);
-	app.insert_plugin(renderer::model_plugin);
 }
 void rungame() {
-	core::game.insert_plugin(minecraft_plugin);
-	core::game.run();
-	guirender::destroygui();
-
+	core::App app{};
+	app.insert_plugin(minecraft_plugin);
+	app.run();
+	/*
+	core::App app2{};
+	app2.insert_plugin(minecraft_plugin);
+	app2.run();
+	*/
 }
 

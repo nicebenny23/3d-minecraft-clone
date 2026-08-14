@@ -47,7 +47,8 @@ namespace player {
 		return !world.get_resource<ui::MenuState>().top().is_some();
 		//.is_some_and(&ecs::obj::has_component<CloseMenuComponent>);
 	}
-	inline void CloseMenuPlugin(core::App& app) {
+	inline void close_menu_plugin(core::App& app) {
+		app.insert_plugin(ui::menu_plugin);
 		app.emplace_system<CloseGameOnCloseButton>();
 	}
 }

@@ -2,9 +2,6 @@
 #include "recipe_transactions.h"
 namespace ui {
 	struct CloseMenu {
-		CloseMenu() {
-
-		};
 	};
 	struct MenuComponent :ecs::component {
 
@@ -61,9 +58,6 @@ namespace ui {
 			if (world.get_resource<userinput::InputManager>().key(userinput::escape_key).pressed) {
 				world.write_command<CloseMenu>(CloseMenu());
 			}
-			//on expire
-		
-
 			for (AddMenu menu : world.read_commands<AddMenu>()) {
 				if (state.top() != menu.menu_ent.object()) {
 	
@@ -84,7 +78,6 @@ namespace ui {
 					return;
 				}
 				else {
-
 					world.emplace_event<NoMenus>();
 				}
 			}

@@ -241,7 +241,7 @@ namespace items {
 		void run(ecs::Ecs& world) {
 			ecs::View< item_stack, ecs::Owner> stack_query(world);
 			for (auto [slot,owner] : stack_query) {
-				if (slot.count() == 0) {
+				if (slot.empty()) {
 					owner.destroy();
 				}
 			}

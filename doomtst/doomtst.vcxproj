@@ -318,7 +318,6 @@
   <ItemGroup>
     <ClCompile Include="debugger\console.cpp" />
     <ClCompile Include="debugger\debug.cpp" />
-    <ClCompile Include="game\Core.cpp" />
     <ClCompile Include="game\ecs\component.cpp" />
     <ClCompile Include="game\ecs\ecs.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
@@ -331,7 +330,6 @@
     <ClCompile Include="items\loottable.cpp" />
     <ClCompile Include="items\slot_transactions.cpp" />
     <ClCompile Include="json\json.cpp" />
-    <ClCompile Include="renderer\guirender.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="player\player.cpp" />
     <ClCompile Include="block\block.cpp" />

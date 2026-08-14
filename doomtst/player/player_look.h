@@ -13,9 +13,9 @@ namespace player {
 	struct CursorHit {
 		ecs::obj hit;
 	};
-	struct PlayerCursor:ecs::component {
+	struct PlayerCursor :ecs::component {
 		ecs::Constrained<WireFrame, core::LocalTransform> frame;
-		PlayerCursor(ecs::Constrained<WireFrame,core::LocalTransform> wireframe) :frame(wireframe) {
+		PlayerCursor(ecs::Constrained<WireFrame, core::LocalTransform> wireframe) :frame(wireframe) {
 
 		}
 		bool hit_entity() const {
@@ -24,31 +24,31 @@ namespace player {
 		bool hit_block() const {
 			return hit && hit.unwrap().collider.has_component<block>();
 		}
-		
+
 		ecs::WeakConstrained<block> backpedal;
 		collision::RayWorldCollision hit;
-		math::bounds look_range= math::bounds(0,3);
+		math::bounds look_range = math::bounds(0, 3);
 	};
 
-	struct PlayerCursorCaster:ecs::System{
+	struct PlayerCursorCaster :ecs::System {
 		void run(ecs::Ecs& world) {
 			grid::Grid& grid = world.get_resource<grid::Grid>();
-			ecs::View< core::LocalTransform,PlayerCursor,ecs::Owner>look_view(world);
-			for (stn::TupleSet<core::LocalTransform&,PlayerCursor&,ecs::obj> view: look_view) {
-				
-				PlayerCursor& cursor=view.get<PlayerCursor&>();
+			ecs::View< core::LocalTransform, PlayerCursor, ecs::Owner>look_view(world);
+			for (stn::TupleSet<core::LocalTransform&, PlayerCursor&, ecs::obj> view : look_view) {
+
+				PlayerCursor& cursor = view.get<PlayerCursor&>();
 				if (world.get_resource<ui::MenuState>().menu_open()) {
 					cursor.hit = stn::None;
 					continue;
 				}
-				math::Transform& transform= view.get<core::LocalTransform&>().transform;
-				geo::ray look_ray=transform.forward_ray().dialate_from_start(cursor.look_range.max());
-				
-				cursor.hit = collision::raycast(look_ray,world,collision::HitQuery(view.get<ecs::obj>()));
+				math::Transform& transform = view.get<core::LocalTransform&>().transform;
+				geo::ray look_ray = transform.forward_ray().dialate_from_start(cursor.look_range.max());
+
+				cursor.hit = collision::raycast(look_ray, world, collision::HitQuery(view.get<ecs::obj>()));
 				if (cursor.hit) {
 					collision::RayWorldHit hit = cursor.hit.unwrap();
-					
-					world.write_event(CursorHit{.hit=hit.owner() });
+
+					world.write_event(CursorHit{ .hit = hit.owner() });
 					if (hit.owner().has_component<block>()) {
 
 						double light = .5f;
@@ -96,11 +96,9 @@ namespace player {
 	private:
 		ecs::EventReader<player::CursorHit> hits;
 	};
-	struct PlayerClickablePlugin {
-		void operator()(core::App& world) {
-			world.insert_plugin(renderer::wireframe_plugin);
-			world.emplace_system<MenuClickSystem>();
-			world.emplace_system<PlayerCursorCaster>();
-		}
-	};
+	inline void player_click_plugin(core::App& world) {
+		world.insert_plugin(renderer::wireframe_plugin);
+		world.emplace_system<MenuClickSystem>();
+		world.emplace_system<PlayerCursorCaster>();
+	}
 }

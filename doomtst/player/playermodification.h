@@ -182,12 +182,8 @@ namespace player {
 			};
 		}
 	};
-	struct PlayerModificationPlugin {
-		void operator()(core::App& world) {
-			world.insert_plugin(player::PlayerClickablePlugin());
+	inline void player_modification_plugin(core::App& world) {
+			world.insert_plugin(player::player_click_plugin);
 			world.emplace_system<PlayerUpdateSystem>();
-
-		}
-
-	};
+	}
 }

@@ -31,10 +31,10 @@ namespace items {
 
 		}
 	};
-	struct crafting_slot_displayer :ecs::component {
+	struct CraftingSlotDisplayer :ecs::component {
 		ecs::Constrained<Crafter> crafter_comp;
 		ecs::Constrained<ui::InteractionState, ItemIcon, ItemCountDisplay> display;
-		crafting_slot_displayer(ecs::Constrained <Crafter > craft, ecs::Constrained <ui::InteractionState, ItemIcon, ItemCountDisplay> display_item) :crafter_comp(craft), display(display_item) {
+		CraftingSlotDisplayer(ecs::Constrained <Crafter > craft, ecs::Constrained <ui::InteractionState, ItemIcon, ItemCountDisplay> display_item) :crafter_comp(craft), display(display_item) {
 
 		}
 		
@@ -45,7 +45,7 @@ namespace items {
 		void apply(ecs::obj& entity) const {
 			entity.apply_recipe(ui::UiSpawner(geo::unit_box_2d, 1));
 			ecs::Constrained<ui::InteractionState, ItemIcon, ItemCountDisplay> display = entity.spawn_child_emplaced<FakeItemSlotDispaySpawner>(pos);
-			entity.add_component <crafting_slot_displayer>(crafter, display);
+			entity.add_component <CraftingSlotDisplayer>(crafter, display);
 		}
 
 	};
@@ -62,12 +62,12 @@ namespace items {
 			ecs::Constrained<ElementSlot> cursor_obj = world.get_resource<items::cursor_container>().primary_slot();
 			ElementSlot& cursor_slot = cursor_obj.get_component<ElementSlot>();
 			//		cursor_obj.get_component<ui::UiBounds>().local.center = world.ensure_resource<userinput::InputManager>().mouse_position;
-			for (auto&& [crafting_slot_display] : ecs::View< items::crafting_slot_displayer>(world)) {
+			for (auto&& [crafting_slot_display] : ecs::View< items::CraftingSlotDisplayer>(world)) {
 				stn::Option<item_entry> entry = crafting_slot_display.crafter_comp.get_component<Crafter>().wanted.member(&ItemRecipe::output);
 				crafting_slot_display.display.get<ItemCountDisplay>().count = entry.member(&item_entry::count);
 				crafting_slot_display.display.get<ItemIcon>().displayed_id = entry.member(&item_entry::id);
 			}
-			for (auto&& [crafting_slot_display] : ecs::View< items::crafting_slot_displayer>(world)) {
+			for (auto&& [crafting_slot_display] : ecs::View< items::CraftingSlotDisplayer>(world)) {
 
 				if (crafting_slot_display.display.get_component<ui::InteractionState>().left_clicked) {
 					Crafter& crafter_comp = crafting_slot_display.crafter_comp.get_component<Crafter>();

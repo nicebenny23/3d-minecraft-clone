@@ -97,32 +97,30 @@ namespace userinput {
 			glfwPollEvents();
 		}
 	};
-
-	inline void key_callback(GLFWwindow* /*window*/, int key, int /*scancode*/, int action, int /*mods*/) {
-		core::game.Ecs.get_resource<userinput::InputManager>().update_key(key, action);
-	}
-
-	inline void mouse_button_callback(GLFWwindow* /*window*/, int button, int action, int /*mods*/) {
-		if (button < 2) {
-			core::game.Ecs.get_resource<userinput::InputManager>().update_key(GLFW_KEY_LAST + button, action);
-		}
-	}
-
-	inline void cursor_position_callback(GLFWwindow* /*window*/, double xpos, double ypos) {
-		v2::Vec2 new_mouse_position(core::game.Ecs.get_resource<renderer::Window>().fit_to_aspect_ratio(v2::Vec2(xpos, ypos)));
-		userinput::InputManager& manager = core::game.ensure_resource<userinput::InputManager>();
-		manager.adjusted_mouse_position_dt = new_mouse_position - manager.mouse_position;
-		manager.mouse_position = new_mouse_position;
-	}
-
 	inline void user_input_plugin(core::App& app) {
 		app.insert_plugin(renderer::window_plugin);
 		renderer::Window& window=app.Ecs.get_resource<renderer::Window>();
 		app.emplace_system< InputPollingSystem>();
 		app.emplace_resource< InputManager>();
-		window.set_cursor_callback(cursor_position_callback);
-		window.set_key_callback(key_callback);
-		window.set_mouse_callback(mouse_button_callback);
+		ecs::Ecs& ecs = app.Ecs;
+		window.set_key_callback(
+			[&ecs](int key, int, int action, int) {
+				ecs.get_resource<InputManager>().update_key(key, action);
+			});
+
+		window.set_mouse_callback(
+			[&ecs](int button, int action, int) {
+				ecs.get_resource<InputManager>().update_key(GLFW_KEY_LAST + button, action);
+			});
+
+		window.set_cursor_callback(
+			[&ecs](double xpos, double ypos) {
+				auto& input = ecs.get_resource<InputManager>();
+				auto& window = ecs.get_resource<renderer::Window>();
+				auto position = window.fit_to_aspect_ratio(v2::Vec2(xpos, ypos));
+				input.adjusted_mouse_position_dt =position - input.mouse_position;
+				input.mouse_position = position;
+			});
 	}
 }
 

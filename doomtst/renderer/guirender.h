@@ -14,6 +14,11 @@ namespace guirender{
 
 
 		}
+		~GuiSystem() {
+			ImGui_ImplOpenGL3_Shutdown();
+			ImGui_ImplGlfw_Shutdown();
+			ImGui::DestroyContext();
+		}
 		void run(ecs::Ecs& ecs) {
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();

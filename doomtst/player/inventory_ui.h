@@ -5,8 +5,8 @@
 #pragma once
 namespace player {
 
-	struct inventory_ui :ecs::component {
-		inventory_ui(ecs::Constrained<ui::MenuComponent> inventory_menu) :menu(inventory_menu) {
+	struct InventoryUi :ecs::component {
+		InventoryUi(ecs::Constrained<ui::MenuComponent> inventory_menu) :menu(inventory_menu) {
 
 		}
 
@@ -17,7 +17,7 @@ namespace player {
 		void run(ecs::Ecs& world) {
 
 			userinput::InputManager& input = world.get_resource<userinput::InputManager>();
-			auto view = ecs::View< inventory, inventory_ui>(world);
+			auto view = ecs::View< inventory, InventoryUi>(world);
 			for (auto [player_inv, ui_menu] : view) {
 				stn::Option<v2::UVec2> selected_index = stn::None;
 					for (size_t i = 0; i < 6; i++) {
@@ -87,7 +87,7 @@ namespace player {
 				givestartitems(items);
 			ecs::obj input_slots = ecs::spawn(object.world(), items::container_recipe(ui::TableBounds(2, 2)));
 			ecs::Constrained<ui::MenuComponent> inventory_menu = ecs::spawn(object.world(), inventory_menu_recipe(slots, input_slots));
-			object.add_component<inventory_ui>(inventory_menu);
+			object.add_component<InventoryUi>(inventory_menu);
 		}
 	};
 
