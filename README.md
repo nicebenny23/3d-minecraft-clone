@@ -13,5 +13,7 @@ A **C++ game engine**, based on a small ECS core, built from scratch.
 ![Engine Architecture](docs/image.png)
 
 ## Gameplay video
-https://github.com/user-attachments/assets/ef81756e-43ed-4849-8cde-4ff22a356fdf
+
+https://github.com/user-attachments/assets/1ad13605-a927-4ca8-91e9-dda546150a81
+
 
